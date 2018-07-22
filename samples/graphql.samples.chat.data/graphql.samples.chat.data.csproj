@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>fugu.graphql.samples.chat.data</AssemblyName>
+    <RootNamespace>fugu.graphql.samples.chat.data</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="schema.graphql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="idl\schema.graphql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\graphql.type.idl\graphql.type.idl.csproj" />
+    <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
+  </ItemGroup>
+
+</Project>

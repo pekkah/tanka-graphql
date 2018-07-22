@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>fugu.graphql.type.idl</AssemblyName>
+    <RootNamespace>fugu.graphql.type.idl</RootNamespace>
+    <Copyright>Pekka Heikura</Copyright>
+    <PackageProjectUrl>https://github.com/pekkah/fugu-graphql</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pekkah/fugu-graphql</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GraphQL-Parser" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\graphql\graphql.csproj" />
+  </ItemGroup>
+
+</Project>
