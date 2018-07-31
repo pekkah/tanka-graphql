@@ -347,9 +347,9 @@ namespace fugu.graphql.type.idl
             return new NamedTypeReference(typeName);
         }
 
-        private static Fields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions, Context context)
+        private static InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions, Context context)
         {
-            var fields = new Fields();
+            var fields = new InputFields();
 
             foreach (var definition in definitions)
             {
@@ -365,7 +365,48 @@ namespace fugu.graphql.type.idl
                     defaultValue = null;
                 }
 
-                fields[definition.Name.Value] = new Field(type, defaultValue: defaultValue);
+                if (!Validations.IsInputType(type))
+                {
+                    throw new GraphQLError($"Type of input value definition is not valid input value type. " +
+                                           $"Definition: '{definition.Name.Value}' Type: {definition.Type.Kind}",
+                        definition);
+                }
+
+                var directives = Directives(definition.Directives, context);
+
+                switch (type)
+                {
+                    case ScalarType scalarType:
+                        fields[definition.Name.Value] = new InputObjectField(
+                            scalarType,
+                            new Meta(directives: directives),
+                            defaultValue: defaultValue);
+                        break;
+                    case EnumType enumType:
+                        fields[definition.Name.Value] = new InputObjectField(
+                            enumType, 
+                            new Meta(directives: directives),
+                            defaultValue: defaultValue);
+                        break;
+                    case InputObjectType inputObjectType:
+                        fields[definition.Name.Value] = new InputObjectField(
+                            inputObjectType, 
+                            new Meta(directives: directives),
+                            defaultValue: defaultValue);
+                        break;
+                    case NonNull nonNull:
+                        fields[definition.Name.Value] = new InputObjectField(
+                            nonNull,
+                            new Meta(directives: directives),
+                            defaultValue: defaultValue);
+                        break;
+                    case List list:
+                        fields[definition.Name.Value] = new InputObjectField(
+                            list,
+                            new Meta(directives: directives),
+                            defaultValue: defaultValue);
+                        break;
+                }
             }
 
             return fields;

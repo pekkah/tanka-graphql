@@ -22,7 +22,7 @@ namespace fugu.graphql.tests.data
 
             var expectedJsonObject = JObject.Parse(expectedJson); 
             Assert.True(JToken.DeepEquals(expectedJsonObject, actualJson), 
-                $"Expected:\r\n{expectedJsonObject}\r\n\r\nActual:\r\n{actualJson}\r\n");
+                $"Diff: {TestHelpers.Diff(actualJson.ToString(), expectedJson)}");
         }
     }
 }

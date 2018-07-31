@@ -53,9 +53,9 @@ namespace fugu.graphql.tests.data.starwars
 
             var HumanInput = new InputObjectType(
                 "HumanInput",
-                new Fields
+                new InputFields()
                 {
-                    ["name"] = new Field(ScalarType.NonNullString)
+                    ["name"] = new InputObjectField(ScalarType.NonNullString)
                 });
 
             var Mutation = new ObjectType(

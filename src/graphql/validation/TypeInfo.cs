@@ -120,10 +120,9 @@ namespace fugu.graphql.validation
                 var objectType = GetInputType().Unwrap();
                 IGraphQLType fieldType = null;
 
-                if (objectType is InputObjectType)
+                if (objectType is InputObjectType inputObjectType)
                 {
-                    var complexType = objectType as ComplexType;
-                    var inputField = complexType.GetField(objectField.Name.Value);
+                    var inputField = inputObjectType.GetField(objectField.Name.Value);
                     fieldType = inputField?.Type;
                 }
 

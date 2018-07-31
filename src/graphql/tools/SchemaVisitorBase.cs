@@ -119,7 +119,7 @@ namespace fugu.graphql.tools
         }
 
         protected virtual Task VisitInputObjectFieldAsync(InputObjectType inputObjectType,
-            KeyValuePair<string, IField> inputObjectField)
+            KeyValuePair<string, InputObjectField> inputObjectField)
         {
             return Task.CompletedTask;
         }

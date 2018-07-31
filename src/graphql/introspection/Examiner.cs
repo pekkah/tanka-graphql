@@ -136,7 +136,7 @@ namespace fugu.graphql.introspection
         }
 
         private static __InputValue ExamineInputField(
-            KeyValuePair<string, IField> field,
+            KeyValuePair<string, InputObjectField> field,
             ISchema schema)
         {
             return new __InputValue

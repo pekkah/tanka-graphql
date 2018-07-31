@@ -1,12 +1,47 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using fugu.graphql.execution;
 
 namespace fugu.graphql.type
 {
-    public class InputObjectType : ComplexType, IGraphQLType
+    public class InputObjectType : IGraphQLType
     {
-        public InputObjectType(string name, Fields fields, Meta meta = null)
+        private readonly InputFields _fields = new InputFields();
+
+        public IEnumerable<KeyValuePair<string, InputObjectField>> Fields => _fields;
+
+        public InputObjectField GetField(string name)
+        {
+            if (!_fields.ContainsKey(name))
+                return null;
+
+            return _fields[name];
+        }
+
+        public bool HasField(string name)
+        {
+            return _fields.ContainsKey(name);
+        }
+
+        protected void AddField(string name, InputObjectField field)
+        {
+            if (HasField(name))
+            {
+                throw new InvalidOperationException(
+                    $"Cannot add field to type. Field {name} already exists.");
+            }
+
+            _fields[name] = field;
+        }
+
+        public string GetFieldName(InputObjectField field)
+        {
+            var foundField = _fields.Single(f => f.Value == field).Key;
+            return foundField;
+        }
+
+        public InputObjectType(string name, InputFields fields, Meta meta = null)
         {
             Name = name;
             Meta = meta ?? new Meta(null);
@@ -14,10 +49,6 @@ namespace fugu.graphql.type
             foreach (var field in fields)
             {
                 var fieldType = field.Value.Type;
-                var hasArguments = field.Value.Arguments.Any();
-                if (hasArguments)
-                    throw new InvalidOperationException(
-                        $"Input type {name} cannot contain field {field.Key} with arguments");
 
                 if (!Validations.IsInputType(fieldType))
                     throw new InvalidOperationException(
@@ -29,7 +60,7 @@ namespace fugu.graphql.type
 
         public Meta Meta { get; }
 
-        public override string Name { get; }
+        public string Name { get; }
 
         public override string ToString()
         {
