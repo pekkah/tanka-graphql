@@ -1,11 +1,13 @@
 using System.Linq;
+using fugu.graphql.sdl;
+using fugu.graphql.type;
 using fugu.graphql.type.converters;
 using GraphQLParser.AST;
 using Xunit;
 
-namespace fugu.graphql.type.idl.tests
+namespace fugu.graphql.tests.sdl
 {
-    public class IdlFacts
+    public class SdlFacts
     {
         [Fact]
         public void Parse_Document()
@@ -18,10 +20,10 @@ type User {
 }
 ";
             var document = Parser.ParseDocument(idl);
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Document(document, context).OfType<ObjectType>().SingleOrDefault();
+            var actual = Sdl.Document(document, context).OfType<ObjectType>().SingleOrDefault();
 
             /* Then */
             Assert.NotNull(actual);
@@ -55,7 +57,7 @@ schema {
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var actual = Idl.Schema(document);
+            var actual = Sdl.Schema(document);
 
             /* Then */
             Assert.NotNull(actual);
@@ -80,10 +82,10 @@ type Role {
 }
 ";
             var document = Parser.ParseDocument(idl);
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Document(document, context).ToList();
+            var actual = Sdl.Document(document, context).ToList();
 
             /* Then */
             Assert.Contains(actual, user => user.Name == "User");
@@ -130,10 +132,10 @@ input JediPowerInput {
 ";
             var jediPowerLevel = new ScalarType("JediPowerLevel", new LongConverter());
             var document = Parser.ParseDocument(idl);
-            var context = new Context(document, new []{ jediPowerLevel, new ScalarType("JediTrickLevel", new DoubleConverter())});
+            var context = new SdlParserContext(document, new []{ jediPowerLevel, new ScalarType("JediTrickLevel", new DoubleConverter())});
 
             /* When */
-            var actual = Idl.Document(document, context).ToList();
+            var actual = Sdl.Document(document, context).ToList();
 
             /* Then */
             Assert.Contains(actual, type => type.Name == "Episode" && type is EnumType);
@@ -163,10 +165,10 @@ enum Episode {
 ";
             var document = Parser.ParseDocument(idl);
             var typeDefinition = document.Definitions.OfType<GraphQLEnumTypeDefinition>().SingleOrDefault();
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Enum(typeDefinition, context);
+            var actual = Sdl.Enum(typeDefinition, context);
 
             /* Then */
             Assert.Equal("Episode", actual.Name);
@@ -188,10 +190,10 @@ type Human implements Character {
 }
 ";
             var document = Parser.ParseDocument(idl);
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Document(document, context).ToList();
+            var actual = Sdl.Document(document, context).ToList();
 
             /* Then */
             var character = actual.OfType<InterfaceType>().SingleOrDefault();
@@ -214,10 +216,10 @@ interface Character {
 }
 ";
             var document = Parser.ParseDocument(idl);
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Document(document, context);
+            var actual = Sdl.Document(document, context);
 
             /* Then */
             var character = actual.OfType<InterfaceType>().SingleOrDefault();
@@ -243,10 +245,10 @@ type Human implements Character {
 }
 ";
             var document = Parser.ParseDocument(idl);
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Document(document, context);
+            var actual = Sdl.Document(document, context);
 
             /* Then */
             var human = actual.OfType<ObjectType>().SingleOrDefault();
@@ -270,10 +272,10 @@ type Human {
 }
 ";
             var document = Parser.ParseDocument(idl);
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Document(document, context);
+            var actual = Sdl.Document(document, context);
 
             /* Then */
             var human = actual.OfType<ObjectType>().SingleOrDefault();
@@ -298,10 +300,10 @@ type Human implements Character {
 }
 ";
             var document = Parser.ParseDocument(idl);
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Document(document, context).ToList();
+            var actual = Sdl.Document(document, context).ToList();
 
             /* Then */
             var character = actual.OfType<InterfaceType>().SingleOrDefault();
@@ -324,10 +326,10 @@ type Human implements Character {
 }
 ";
             var document = Parser.ParseDocument(idl);
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Document(document, context);
+            var actual = Sdl.Document(document, context);
 
             /* Then */
             var human = actual.OfType<ObjectType>().SingleOrDefault();
@@ -350,10 +352,10 @@ interface Person {
 ";
             var document = Parser.ParseDocument(idl);
             var typeDefinition = document.Definitions.OfType<GraphQLInterfaceTypeDefinition>().SingleOrDefault();
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Interface(typeDefinition, context);
+            var actual = Sdl.Interface(typeDefinition, context);
 
             /* Then */
             Assert.Equal("Person", actual.Name);
@@ -372,10 +374,10 @@ type User {
 ";
             var document = Parser.ParseDocument(idl);
             var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Object(objectTypeDefinition, context);
+            var actual = Sdl.Object(objectTypeDefinition, context);
 
             /* Then */
             Assert.Equal("User", actual.Name);
@@ -394,13 +396,13 @@ scalar Url
             var urlScalar = new ScalarType("Url", new StringConverter());
             var document = Parser.ParseDocument(idl);
             var typeDefinition = document.Definitions.OfType<GraphQLScalarTypeDefinition>().SingleOrDefault();
-            var context = new Context(document, new IGraphQLType[]
+            var context = new SdlParserContext(document, new IGraphQLType[]
             {
                 urlScalar
             });
 
             /* When */
-            var actual = Idl.Scalar(typeDefinition, context);
+            var actual = Sdl.Scalar(typeDefinition, context);
 
             /* Then */
             Assert.Equal("Url", actual.Name);
@@ -419,10 +421,10 @@ type User {
 ";
             var document = Parser.ParseDocument(idl);
             var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Object(objectTypeDefinition, context);
+            var actual = Sdl.Object(objectTypeDefinition, context);
 
             /* Then */
             Assert.Equal("User", actual.Name);
@@ -443,10 +445,10 @@ type User {
 ";
             var document = Parser.ParseDocument(idl);
             var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Object(objectTypeDefinition, context);
+            var actual = Sdl.Object(objectTypeDefinition, context);
 
             /* Then */
             Assert.Equal("User", actual.Name);
@@ -465,10 +467,10 @@ type User {
 ";
             var document = Parser.ParseDocument(idl);
             var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
-            var context = new Context(document);
+            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Idl.Object(objectTypeDefinition, context);
+            var actual = Sdl.Object(objectTypeDefinition, context);
 
             /* Then */
             Assert.Equal("User", actual.Name);

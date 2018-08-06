@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using fugu.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.type.idl
+namespace fugu.graphql.sdl
 {
-    public class Context
+    public class SdlParserContext
     {
         private readonly Stack<GraphQLObjectTypeDefinition> _objectDefinitions =
             new Stack<GraphQLObjectTypeDefinition>();
@@ -14,7 +15,7 @@ namespace fugu.graphql.type.idl
 
         public List<IGraphQLType> KnownTypes = new List<IGraphQLType>();
 
-        public Context(GraphQLDocument document, IEnumerable<IGraphQLType> knownTypes = null)
+        public SdlParserContext(GraphQLDocument document, IEnumerable<IGraphQLType> knownTypes = null)
         {
             Document = document;
 

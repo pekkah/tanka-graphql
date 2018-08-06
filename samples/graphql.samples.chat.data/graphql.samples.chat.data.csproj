@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\graphql.type.idl\graphql.type.idl.csproj" />
     <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
   </ItemGroup>
 

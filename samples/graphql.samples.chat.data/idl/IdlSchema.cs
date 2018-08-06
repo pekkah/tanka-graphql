@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using fugu.graphql.sdl;
 using fugu.graphql.type;
 using static fugu.graphql.Parser;
 
@@ -13,7 +14,7 @@ namespace fugu.graphql.samples.chat.data.idl
         public static async Task<ISchema> CreateAsync()
         {
             var idl = await LoadIdlFromResourcesAsync();
-            var schema = type.idl.Idl.Schema(ParseDocument(idl));
+            var schema = Sdl.Schema(ParseDocument(idl));
 
             // this will initialize schema by scanning the type graph
             await schema.InitializeAsync();

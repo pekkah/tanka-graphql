@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using fugu.graphql.sdl;
 using fugu.graphql.tools;
 using fugu.graphql.type;
-using fugu.graphql.type.idl;
 using Xunit;
 
 namespace fugu.graphql.tests.resolvers
@@ -52,7 +52,7 @@ namespace fugu.graphql.tests.resolvers
                         DefaultValue = "No longer supported"
                     }
                 });
-            _schema = Idl.Schema(Parser.ParseDocument(@"
+            _schema = Sdl.Schema(Parser.ParseDocument(@"
 type Query {
     deprecated: String @deprecated
     deprecatedWithReason: String @deprecated(reason: ""Reason"")

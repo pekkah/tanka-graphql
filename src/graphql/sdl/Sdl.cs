@@ -4,13 +4,14 @@ using System.Linq;
 using fugu.graphql.error;
 using fugu.graphql.execution;
 using fugu.graphql.tools;
+using fugu.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.type.idl
+namespace fugu.graphql.sdl
 {
-    public static class Idl
+    public static class Sdl
     {
-        public static ObjectType Object(GraphQLObjectTypeDefinition definition, Context context)
+        public static ObjectType Object(GraphQLObjectTypeDefinition definition, SdlParserContext context)
         {
             context.PushObject(definition);
 
@@ -26,7 +27,7 @@ namespace fugu.graphql.type.idl
             return result;
         }
 
-        public static IField Field(GraphQLFieldDefinition definition, Context context)
+        public static IField Field(GraphQLFieldDefinition definition, SdlParserContext context)
         {
             var args = Args(definition.Arguments, context);
             return new Field(
@@ -35,7 +36,7 @@ namespace fugu.graphql.type.idl
                 new Meta(directives: Directives(definition.Directives, context)));
         }
 
-        public static IEnumerable<IGraphQLType> Document(GraphQLDocument document, Context context)
+        public static IEnumerable<IGraphQLType> Document(GraphQLDocument document, SdlParserContext context)
         {
             foreach (var definition in document.Definitions.OfType<GraphQLScalarTypeDefinition>())
                 Scalar(definition, context);
@@ -62,7 +63,7 @@ namespace fugu.graphql.type.idl
             return context.KnownTypes;
         }
 
-        public static InputObjectType InputObject(GraphQLInputObjectTypeDefinition definition, Context context)
+        public static InputObjectType InputObject(GraphQLInputObjectTypeDefinition definition, SdlParserContext context)
         {
             var fields = InputValues(definition.Fields, context);
 
@@ -74,7 +75,7 @@ namespace fugu.graphql.type.idl
             return result;
         }
 
-        public static InterfaceType Interface(GraphQLInterfaceTypeDefinition definition, Context context)
+        public static InterfaceType Interface(GraphQLInterfaceTypeDefinition definition, SdlParserContext context)
         {
             context.PushInterface(definition);
 
@@ -90,7 +91,7 @@ namespace fugu.graphql.type.idl
             return result;
         }
 
-        public static EnumType Enum(GraphQLEnumTypeDefinition definition, Context context)
+        public static EnumType Enum(GraphQLEnumTypeDefinition definition, SdlParserContext context)
         {
             var values = new EnumValues();
 
@@ -120,7 +121,7 @@ namespace fugu.graphql.type.idl
             if (directives != null)
                 knownTypes.AddRange(directives);
 
-            var context = new Context(document, knownTypes);
+            var context = new SdlParserContext(document, knownTypes);
 
             var schemaDefinition = document.Definitions.OfType<GraphQLSchemaDefinition>().SingleOrDefault();
 
@@ -150,7 +151,7 @@ namespace fugu.graphql.type.idl
             return new Schema(queryType, mutationType, subscriptionType);
         }
 
-        public static ScalarType Scalar(GraphQLScalarTypeDefinition definition, Context context)
+        public static ScalarType Scalar(GraphQLScalarTypeDefinition definition, SdlParserContext context)
         {
             var scalar = context.GetKnownType(definition.Name.Value) as ScalarType;
 
@@ -162,7 +163,7 @@ namespace fugu.graphql.type.idl
             return scalar;
         }
 
-        private static DirectiveType DirectiveType(GraphQLDirectiveDefinition definition, Context context)
+        private static DirectiveType DirectiveType(GraphQLDirectiveDefinition definition, SdlParserContext context)
         {
             var directiveType = context.GetKnownType(definition.Name.Value) as DirectiveType;
 
@@ -175,14 +176,14 @@ namespace fugu.graphql.type.idl
         }
 
         private static IEnumerable<DirectiveInstance> Directives(IEnumerable<GraphQLDirective> directiveDefinitions,
-            Context context)
+            SdlParserContext context)
         {
             foreach (var directiveDefinition in directiveDefinitions)
             foreach (var directiveInstance in DirectiveInstance(context, directiveDefinition))
                 yield return directiveInstance;
         }
 
-        private static IEnumerable<DirectiveInstance> DirectiveInstance(Context context,
+        private static IEnumerable<DirectiveInstance> DirectiveInstance(SdlParserContext context,
             GraphQLDirective directiveDefinition)
         {
             var name = directiveDefinition.Name.Value;
@@ -238,7 +239,7 @@ namespace fugu.graphql.type.idl
             yield return new DirectiveInstance(directiveType, arguments);
         }
 
-        private static IGraphQLType Extend(GraphQLTypeExtensionDefinition definition, Context context)
+        private static IGraphQLType Extend(GraphQLTypeExtensionDefinition definition, SdlParserContext context)
         {
             var originalType = context.GetKnownType(definition.Definition.Name.Value);
 
@@ -263,7 +264,7 @@ namespace fugu.graphql.type.idl
             return null;
         }
 
-        private static IEnumerable<InterfaceType> Interfaces(IEnumerable<GraphQLNamedType> definitions, Context context)
+        private static IEnumerable<InterfaceType> Interfaces(IEnumerable<GraphQLNamedType> definitions, SdlParserContext context)
         {
             var interfaces = new List<InterfaceType>();
 
@@ -280,7 +281,7 @@ namespace fugu.graphql.type.idl
             return interfaces;
         }
 
-        private static Fields Fields(IEnumerable<GraphQLFieldDefinition> definitions, Context context)
+        private static Fields Fields(IEnumerable<GraphQLFieldDefinition> definitions, SdlParserContext context)
         {
             var fields = new Fields();
             foreach (var definition in definitions)
@@ -289,7 +290,7 @@ namespace fugu.graphql.type.idl
             return fields;
         }
 
-        private static Args Args(IEnumerable<GraphQLInputValueDefinition> definitions, Context context)
+        private static Args Args(IEnumerable<GraphQLInputValueDefinition> definitions, SdlParserContext context)
         {
             var args = new Args();
 
@@ -317,7 +318,7 @@ namespace fugu.graphql.type.idl
             return args;
         }
 
-        private static IGraphQLType Type(GraphQLType typeDefinition, Context context)
+        private static IGraphQLType Type(GraphQLType typeDefinition, SdlParserContext context)
         {
             if (typeDefinition.Kind == ASTNodeKind.NonNullType)
             {
@@ -347,7 +348,7 @@ namespace fugu.graphql.type.idl
             return new NamedTypeReference(typeName);
         }
 
-        private static InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions, Context context)
+        private static InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions, SdlParserContext context)
         {
             var fields = new InputFields();
 
