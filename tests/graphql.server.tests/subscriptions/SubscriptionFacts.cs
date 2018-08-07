@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.resolvers;
 using fugu.graphql.server.subscriptions;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -19,7 +17,7 @@ namespace fugu.graphql.server.tests.subscriptions
         }
 
         private readonly ITargetBlock<OperationMessage> _writer;
-        private TestableSubscriptionTransport _transport;
+        private readonly TestableSubscriptionTransport _transport;
 
         [Fact]
         public async Task On_data_from_stream()
@@ -43,6 +41,10 @@ namespace fugu.graphql.server.tests.subscriptions
             source.Complete();
             await source.Completion;
             await sut.Completion;
+
+            // wait writer to finish
+            _writer.Complete();
+            await _writer.Completion;
 
             /* Then */
             Assert.Single(_transport.WrittenMessages,
@@ -79,6 +81,29 @@ namespace fugu.graphql.server.tests.subscriptions
         }
 
         [Fact]
+        public async Task Subscribe_to_completed_stream_should_not_throw()
+        {
+            /* Given */
+            var id = "1";
+            var payload = new OperationMessagePayload();
+            var source = new BufferBlock<ExecutionResult>();
+            source.Complete();
+            await source.Completion;
+
+            var result = new SubscriptionResult(
+                source,
+                () =>
+                {
+                    source.Complete();
+                    return source.Completion;
+                });
+
+            /* When */
+            /* Then */
+            var sut = new Subscription(id, _writer, result, new NullLogger<Subscription>());
+        }
+
+        [Fact]
         public async Task Subscribe_to_stream()
         {
             /* Given */
@@ -100,29 +125,6 @@ namespace fugu.graphql.server.tests.subscriptions
 
             /* Then */
             //todo:??
-        }
-
-        [Fact]
-        public async Task Subscribe_to_completed_stream_should_not_throw()
-        {
-            /* Given */
-            var id = "1";
-            var payload = new OperationMessagePayload();
-            var source = new BufferBlock<ExecutionResult>();
-            source.Complete();
-            await source.Completion;
-
-            var result = new SubscriptionResult(
-                source,
-                () =>
-                {
-                    source.Complete();
-                    return source.Completion;
-                });
-
-            /* When */
-            /* Then */
-            var sut = new Subscription(id, _writer, result, new NullLogger<Subscription>());
         }
 
         [Fact]
@@ -169,6 +171,8 @@ namespace fugu.graphql.server.tests.subscriptions
 
             /* When */
             await sut.UnsubscribeAsync();
+            _writer.Complete();
+            await _writer.Completion;
 
 
             /* Then */
