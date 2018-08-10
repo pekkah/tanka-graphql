@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using fugu.graphql.resolvers;
 using fugu.graphql.type;
 
@@ -6,6 +6,6 @@ namespace fugu.graphql
 {
     public interface ISubscriberMap
     {
-        Task<Subscriber> GetSubscriberAsync(ResolverContext resolverContext);
+        Subscriber GetSubscriber(ComplexType type, KeyValuePair<string, IField> field);
     }
 }

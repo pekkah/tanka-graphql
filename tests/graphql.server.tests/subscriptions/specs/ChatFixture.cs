@@ -2,6 +2,7 @@
 using fugu.graphql.samples.chat.data;
 using fugu.graphql.samples.chat.data.domain;
 using fugu.graphql.samples.chat.data.idl;
+using fugu.graphql.type;
 
 namespace fugu.graphql.server.tests.subscriptions.specs
 {
@@ -14,12 +15,12 @@ namespace fugu.graphql.server.tests.subscriptions.specs
             Chat = new Chat();
         }
 
-        public async Task<ExecutableSchema> GetSchemaAsync()
+        public async Task<ISchema> GetSchemaAsync()
         {
             var schema = await IdlSchema.CreateAsync();
             var resolvers = new ChatResolvers(Chat);
 
-            return await ExecutableSchema.MakeExecutableSchemaWithIntrospection(
+            return await SchemaTools.MakeExecutableSchemaWithIntrospection(
                 schema,
                 resolvers,
                 resolvers);

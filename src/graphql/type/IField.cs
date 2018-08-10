@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using fugu.graphql.resolvers;
 
 namespace fugu.graphql.type
 {
@@ -8,6 +9,10 @@ namespace fugu.graphql.type
 
         IEnumerable<KeyValuePair<string, Argument>> Arguments { get; }
 
-        Meta Meta { get; set; }
+        Meta Meta { get; set; } 
+
+        Resolver Resolve { get; set; }
+
+        Subscriber Subscribe {get; set; }
     }
 }

@@ -17,7 +17,7 @@ namespace fugu.graphql.samples.chat.web.GraphQL
             //var schema = ModelSchema.CreateAsync().Result;
 
             var resolvers = new ChatResolvers(chat);
-            Chat = ExecutableSchema.MakeExecutableSchemaWithIntrospection(
+            Chat = SchemaTools.MakeExecutableSchemaWithIntrospection(
                 schema,
                 resolvers).Result;
         }
@@ -32,7 +32,7 @@ namespace fugu.graphql.samples.chat.web.GraphQL
             return ModelSchema.CreateAsync();
         }
 
-        public ExecutableSchema Chat { get; set; }
+        public ISchema Chat { get; set; }
 
         private IEnumerable<KeyValuePair<string, IField>> ResolveFieldConflict(ComplexType left,
             ComplexType right, KeyValuePair<string, IField> conflict)

@@ -8,7 +8,7 @@ namespace fugu.graphql.execution
 {
     public interface IExecutionContext
     {
-        ExecutableSchema Schema { get; }
+        ISchema Schema { get; }
 
         GraphQLDocument Document { get; }
 

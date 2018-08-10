@@ -17,7 +17,7 @@ namespace fugu.graphql.tests
 
         private readonly StarwarsFixture _fixture;
 
-        [Fact(Skip = "Ordering is flawed")]
+        [Fact]
         public async Task Introspect()
         {
             /* Given */

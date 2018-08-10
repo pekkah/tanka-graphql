@@ -94,18 +94,19 @@ namespace fugu.graphql.introspection
       }
     }";
 
-        public static async Task<ExecutableSchema> ExamineAsync(ISchema schema)
+        public static async Task<ISchema> ExamineAsync(ISchema schema)
         {
             if (!schema.IsInitialized)
                 await schema.InitializeAsync();
 
             var data = Examiner.Examine(schema);
-            var introspectionSchema = new IntrospectionSchema();
+            var introspectionSchemaBuilder = new IntrospectionSchemaBuilder();
             var resolvers = new IntrospectionResolvers(
                 data,
                 schema);
 
-            return await ExecutableSchema.MakeExecutableSchemaAsync(
+            var introspectionSchema = introspectionSchemaBuilder.Build();
+            return await SchemaTools.MakeExecutableSchemaAsync(
                 introspectionSchema,
                 resolvers,
                 resolvers);

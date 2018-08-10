@@ -5,7 +5,7 @@ using static fugu.graphql.type.ScalarType;
 
 namespace fugu.graphql.introspection
 {
-    public class IntrospectionSchema : Schema
+    public class IntrospectionSchemaBuilder
     {
         public const string TypeKindName = "__TypeKind";
         public const string TypeName = "__Type";
@@ -14,7 +14,7 @@ namespace fugu.graphql.introspection
         public const string EnumValueName = "__EnumValue";
         public const string SchemaName = "__Schema";
 
-        public IntrospectionSchema()
+        public ISchema Build()
         {
             var typeKind = new NonNull(new EnumType(
                 TypeKindName,
@@ -132,7 +132,7 @@ namespace fugu.graphql.introspection
                     ["directives"] = new Field(new List(directive))
                 });
 
-            Query = new ObjectType(
+            var query = new ObjectType(
                 "Query",
                 new Fields
                 {
@@ -143,7 +143,9 @@ namespace fugu.graphql.introspection
                     })
                 });
 
-            AdditionalTypes.Add(type);
+            return new Schema(
+                query,
+                typesReferencedByNameOnly: new [] { type });
         }
     }
 }

@@ -9,7 +9,7 @@ namespace fugu.graphql.execution
 {
     public class SerialExecutionContext : ExecutionContextBase
     {
-        public SerialExecutionContext(ExecutableSchema schema, GraphQLDocument document) 
+        public SerialExecutionContext(ISchema schema, GraphQLDocument document) 
             : base(schema, document)
         {
         }

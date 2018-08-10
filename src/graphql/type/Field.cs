@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using fugu.graphql.resolvers;
 
 namespace fugu.graphql.type
 {
@@ -24,6 +25,10 @@ namespace fugu.graphql.type
         public object DefaultValue { get; set; }
 
         public Meta Meta { get; set; }
+
+        public Resolver Resolve { get; set; }
+
+        public Subscriber Subscribe { get; set; }
 
         public IGraphQLType Type { get; }
 

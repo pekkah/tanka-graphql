@@ -97,13 +97,13 @@ namespace fugu.graphql.tests
             };
 
             // make executable
-            _executable = ExecutableSchema.MakeExecutableSchemaAsync(
+            _executable = SchemaTools.MakeExecutableSchemaAsync(
                 schema,
                 resolvers,
                 resolvers).Result;
         }
 
-        private readonly ExecutableSchema _executable;
+        private readonly ISchema _executable;
         private readonly BufferBlock<Message> _messagesChannel;
 
         [Fact]

@@ -11,13 +11,13 @@ namespace fugu.graphql.execution
 {
     public abstract class ExecutionContextBase : IExecutionContext
     {
-        protected ExecutionContextBase(ExecutableSchema schema, GraphQLDocument document)
+        protected ExecutionContextBase(ISchema schema, GraphQLDocument document)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             Document = document ?? throw new ArgumentNullException(nameof(document));
         }
 
-        public ExecutableSchema Schema { get; }
+        public ISchema Schema { get; }
 
         public GraphQLDocument Document { get; }
 
@@ -27,34 +27,6 @@ namespace fugu.graphql.execution
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
             Dictionary<string, object> coercedVariableValues);
-
-        protected async Task<object> ExecuteFieldGroupAsync(
-            ObjectType objectType,
-            object objectValue,
-            Dictionary<string, object> coercedVariableValues,
-            KeyValuePair<string, List<GraphQLFieldSelection>> fieldGroup)
-        {
-            if (objectType == null) throw new ArgumentNullException(nameof(objectType));
-
-            var fields = fieldGroup.Value;
-            var fieldName = fields.First().Name.Value;
-            var fieldType = objectType
-                .GetField(fieldName)?
-                .Type;
-
-            if (fieldType == null)
-                throw new GraphQLError(
-                    $"Object '{objectType.Name}' does not have field '{fieldName}'");
-
-            object responseValue = null;
-            responseValue = await ExecuteFieldAsync(
-                objectType,
-                objectValue,
-                fields,
-                fieldType,
-                coercedVariableValues).ConfigureAwait(false);
-            return responseValue;
-        }
 
         public async Task<object> ExecuteFieldAsync(
             ObjectType objectType,
@@ -82,13 +54,13 @@ namespace fugu.graphql.execution
             {
                 var resolverContext =
                     new ResolverContext(
-                        objectType, 
-                        objectValue, 
-                        field, 
+                        objectType,
+                        objectValue,
+                        field,
                         fieldSelection,
                         argumentValues);
 
-                var resolver = await Schema.GetResolverAsync(resolverContext).ConfigureAwait(false);
+                var resolver = field.Resolve;
 
                 if (resolver == null)
                     throw new GraphQLError(
@@ -116,7 +88,35 @@ namespace fugu.graphql.execution
                     fieldSelection,
                     completedValue,
                     e);
-            }       
+            }
+        }
+
+        protected async Task<object> ExecuteFieldGroupAsync(
+            ObjectType objectType,
+            object objectValue,
+            Dictionary<string, object> coercedVariableValues,
+            KeyValuePair<string, List<GraphQLFieldSelection>> fieldGroup)
+        {
+            if (objectType == null) throw new ArgumentNullException(nameof(objectType));
+
+            var fields = fieldGroup.Value;
+            var fieldName = fields.First().Name.Value;
+            var fieldType = objectType
+                .GetField(fieldName)?
+                .Type;
+
+            if (fieldType == null)
+                throw new GraphQLError(
+                    $"Object '{objectType.Name}' does not have field '{fieldName}'");
+
+            object responseValue = null;
+            responseValue = await ExecuteFieldAsync(
+                objectType,
+                objectValue,
+                fields,
+                fieldType,
+                coercedVariableValues).ConfigureAwait(false);
+            return responseValue;
         }
     }
 }

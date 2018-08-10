@@ -254,7 +254,7 @@ namespace fugu.graphql.introspection
             return new __InputValue
             {
                 Name = arg.Key,
-                Description = arg.Value.Meta.Description,
+                Description = arg.Value.Meta?.Description,
                 Type = BuildTypeRef(arg.Value.Type),
                 DefaultValue = arg.Value.DefaultValue?.ToString() //todo: coerce value
             };

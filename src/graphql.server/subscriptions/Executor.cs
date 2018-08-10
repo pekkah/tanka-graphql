@@ -1,15 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using fugu.graphql.type;
 using GraphQLParser.AST;
 
 namespace fugu.graphql.server.subscriptions
 {
     public class SchemaExecutor : IExecutor
     {
-        private readonly ExecutableSchema _schema;
+        private readonly ISchema _schema;
 
-        public SchemaExecutor(ExecutableSchema schema)
+        public SchemaExecutor(ISchema schema)
         {
             _schema = schema;
         }

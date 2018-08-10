@@ -13,7 +13,7 @@ namespace fugu.graphql.tools
 
     public static class MergeTool
     {
-        public static ISchema Merge(
+        public static ISchema MergeSchemas(
             ISchema left,
             ISchema right,
             FieldConflictResolver fieldConflict)

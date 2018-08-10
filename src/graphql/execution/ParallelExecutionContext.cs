@@ -8,7 +8,7 @@ namespace fugu.graphql.execution
 {
     public class ParallelExecutionContext : ExecutionContextBase
     {
-        public ParallelExecutionContext(ExecutableSchema schema, GraphQLDocument document)
+        public ParallelExecutionContext(ISchema schema, GraphQLDocument document)
             : base(schema, document)
         {
         }

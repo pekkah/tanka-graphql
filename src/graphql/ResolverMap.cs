@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using fugu.graphql.resolvers;
 using fugu.graphql.type;
 
@@ -8,56 +7,36 @@ namespace fugu.graphql
 {
     public class ResolverMap : Dictionary<string, FieldResolverMap>, IResolverMap, ISubscriberMap
     {
-        public Task<Resolver> GetResolverAsync(ResolverContext resolverContext)
+        public Resolver GetResolver(ComplexType type, KeyValuePair<string, IField> field)
         {
-            var objectType = resolverContext.ObjectType;
-            var field = resolverContext.Field;
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
 
-            if (objectType == null)
-                throw new ArgumentNullException(nameof(resolverContext.ObjectType));
+            if (field.Value == null)
+                throw new ArgumentNullException(nameof(field));
 
-            if (field == null)
-                throw new ArgumentNullException(nameof(resolverContext.Field));
+            var fieldName = field.Key;
 
-            var fieldName = objectType.GetFieldName(field);
-
-            if (string.IsNullOrEmpty(fieldName))
-                throw new InvalidOperationException(
-                    $"Object {objectType.Name} does not contain a field of type {field.Type.Name}");
-
-            if (!TryGetValue(objectType.Name, out var objectNode))
-            {
-                return Task.FromResult((Resolver)null);
-            }
+            if (!TryGetValue(type.Name, out var objectNode)) return null;
 
             var resolver = objectNode.GetResolver(fieldName);
-            return Task.FromResult(resolver);
+            return resolver;
         }
 
-        public Task<Subscriber> GetSubscriberAsync(ResolverContext resolverContext)
+        public Subscriber GetSubscriber(ComplexType type, KeyValuePair<string, IField> field)
         {
-            var objectType = resolverContext.ObjectType;
-            var field = resolverContext.Field;
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
 
-            if (objectType == null)
-                throw new ArgumentNullException(nameof(resolverContext.ObjectType));
+            if (field.Value == null)
+                throw new ArgumentNullException(nameof(field));
 
-            if (field == null)
-                throw new ArgumentNullException(nameof(resolverContext.Field));
+            var fieldName = field.Key;
 
-            var fieldName = objectType.GetFieldName(field);
-
-            if (string.IsNullOrEmpty(fieldName))
-                throw new InvalidOperationException(
-                    $"Object {objectType.Name} does not contain a field of type {field.Type.Name}");
-
-            if (!TryGetValue(objectType.Name, out var objectNode))
-            {
-                return Task.FromResult((Subscriber)null);
-            }
+            if (!TryGetValue(type.Name, out var objectNode)) return null;
 
             var resolver = objectNode.GetSubscriber(fieldName);
-            return Task.FromResult(resolver);
+            return resolver;
         }
     }
 }

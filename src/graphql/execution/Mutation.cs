@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using fugu.graphql.error;
+using fugu.graphql.type;
 using GraphQLParser.AST;
 
 namespace fugu.graphql.execution
@@ -12,7 +13,7 @@ namespace fugu.graphql.execution
             IErrorTransformer errorTransformer,
             GraphQLDocument document,
             GraphQLOperationDefinition mutation,
-            ExecutableSchema schema,
+            ISchema schema,
             Dictionary<string, object> coercedVariableValues,
             object initialValue)
         {

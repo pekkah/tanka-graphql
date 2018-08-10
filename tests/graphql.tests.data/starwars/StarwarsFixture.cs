@@ -8,10 +8,10 @@ namespace fugu.graphql.tests.data.starwars
     {
         public Schema Schema { get; } = StarwarsSchema.BuildSchema();
 
-        public async Task<ExecutableSchema> MakeExecutableAsync(Starwars starwars)
+        public async Task<ISchema> MakeExecutableAsync(Starwars starwars)
         {
             var resolvers = StarwarsResolvers.BuildResolvers(starwars, Schema);
-            var executable = await ExecutableSchema.MakeExecutableSchemaAsync(Schema, resolvers).ConfigureAwait(false);
+            var executable = await SchemaTools.MakeExecutableSchemaAsync(Schema, resolvers).ConfigureAwait(false);
             return executable;
         }
 

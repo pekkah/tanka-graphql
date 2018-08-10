@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using fugu.graphql.tests.data.validation;
+using fugu.graphql.type;
 using Xunit;
 using static fugu.graphql.Parser;
 using static fugu.graphql.validation.Validator;
@@ -10,11 +11,11 @@ namespace fugu.graphql.tests.validation
     {
         public ValidatorFacts()
         {
-            _schema = new WeirdSchema();
+            _schema = WeirdSchemaBuilder.Build();
             _schema.InitializeAsync().Wait();
         }
 
-        private readonly WeirdSchema _schema;
+        private readonly ISchema _schema;
 
         [Fact]
         public async Task Document_IsExecutable()

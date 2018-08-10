@@ -78,7 +78,7 @@ schema {
             }
 
             /* When */
-            var executable = await ExecutableSchema.MakeExecutableSchemaAsync(
+            var executable = await SchemaTools.MakeExecutableSchemaAsync(
                 _schema,
                 new ResolverMap(),
                 null,

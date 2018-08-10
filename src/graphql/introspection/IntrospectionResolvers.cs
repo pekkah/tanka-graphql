@@ -13,7 +13,7 @@ namespace fugu.graphql.introspection
                 {"__type", context => SyncWrap.Sync(translator.GetTypes(data))}
             };
 
-            this[IntrospectionSchema.SchemaName] = new FieldResolverMap()
+            this[IntrospectionSchemaBuilder.SchemaName] = new FieldResolverMap()
             {
                 {"types", context => SyncWrap.Sync(translator.GetTypes(data))},
                 {"queryType", context => SyncWrap.Sync(translator.GetType("Query", data))},
@@ -22,7 +22,7 @@ namespace fugu.graphql.introspection
                 {"directives", context => SyncWrap.Sync(translator.GetDirectives(data))}
             };
 
-            this[IntrospectionSchema.TypeName] = new FieldResolverMap()
+            this[IntrospectionSchemaBuilder.TypeName] = new FieldResolverMap()
             {
                 {"kind", Resolve.PropertyOf<__Type>(t => t.Kind)},
                 {"name", Resolve.PropertyOf<__Type>(t => t.Name)},
@@ -45,7 +45,7 @@ namespace fugu.graphql.introspection
                 {"ofType", Resolve.PropertyOf<__Type>(t => t.OfType)},
             };
 
-            this[IntrospectionSchema.FieldName] = new FieldResolverMap()
+            this[IntrospectionSchemaBuilder.FieldName] = new FieldResolverMap()
             {
                 {"name", Resolve.PropertyOf<__Field>(f => f.Name)},
                 {"description", Resolve.PropertyOf<__Field>(f => f.Description)},
@@ -55,7 +55,7 @@ namespace fugu.graphql.introspection
                 {"deprecationReason", Resolve.PropertyOf<__Field>(f => f.DeprecationReason)},
             };
 
-            this[IntrospectionSchema.InputValueName] = new FieldResolverMap()
+            this[IntrospectionSchemaBuilder.InputValueName] = new FieldResolverMap()
             {
                 {"name", Resolve.PropertyOf<__InputValue>(f => f.Name)},
                 {"description", Resolve.PropertyOf<__InputValue>(f => f.Description)},
@@ -63,7 +63,7 @@ namespace fugu.graphql.introspection
                 {"defaultValue", Resolve.PropertyOf<__InputValue>(f => f.DefaultValue)}
             };
 
-            this[IntrospectionSchema.EnumValueName] = new FieldResolverMap()
+            this[IntrospectionSchemaBuilder.EnumValueName] = new FieldResolverMap()
             {
                 {"name", Resolve.PropertyOf<__EnumValue>(f => f.Name)},
                 {"description", Resolve.PropertyOf<__EnumValue>(f => f.Description)},

@@ -7,40 +7,26 @@ namespace fugu.graphql.type
 {
     public class Schema : ISchema
     {
+        private List<IGraphQLType> _types = new List<IGraphQLType>();
+
         public Schema(
             ObjectType query,
             ObjectType mutation = null,
             ObjectType subscription = null,
-            IEnumerable<IGraphQLType> types = null,
+            IEnumerable<IGraphQLType> typesReferencedByNameOnly = null,
             IEnumerable<DirectiveType> directives = null)
         {
-            Query = query;
+            // Query is required
+            Query = query ?? throw new ArgumentNullException(nameof(query));
+
+            // Mutation and subscription are optional
             Mutation = mutation;
             Subscription = subscription;
 
-            if (types != null)
-                AdditionalTypes.AddRange(types);
-
-            if (directives != null)
-                Directives.AddRange(directives);
-
             IsInitialized = false;
         }
 
-        public Schema()
-        {
-            IsInitialized = false;
-        }
-
-        public IEnumerable<IGraphQLType> Types { get; protected set; }
-
-        protected List<IGraphQLType> AdditionalTypes { get; } = new List<IGraphQLType>(ScalarType.Standard);
-
-        public List<DirectiveType> Directives { get; } = new List<DirectiveType>
-        {
-            DirectiveType.Skip,
-            DirectiveType.Include
-        };
+        public List<DirectiveType> Directives { get; } = new List<DirectiveType>();
 
         public bool IsInitialized { get; protected set; }
 
@@ -60,9 +46,6 @@ namespace fugu.graphql.type
                 new TypeScanner(Query).ScanAsync()
             };
 
-            foreach (var additionalType in AdditionalTypes)
-                scanningTasks.Add(new TypeScanner(additionalType).ScanAsync());
-
             if (Mutation != null)
                 scanningTasks.Add(new TypeScanner(Mutation).ScanAsync());
 
@@ -72,17 +55,23 @@ namespace fugu.graphql.type
 
             await Task.WhenAll(scanningTasks).ConfigureAwait(false);
 
+            // combine
             var foundTypes = scanningTasks.SelectMany(r => r.Result)
+                //.Concat(ScalarType.Standard) // disabled for now
                 .Distinct(new GraphQLTypeComparer())
                 .ToList();
 
-            Types = foundTypes;
+            // add default directives
+            Directives.Add(DirectiveType.Include);
+            Directives.Add(DirectiveType.Skip);
+
+            _types = foundTypes;
             IsInitialized = true;
         }
 
         public IGraphQLType GetNamedType(string name)
         {
-            return Types.SingleOrDefault(t => t.Name == name);
+            return _types.SingleOrDefault(t => t.Name == name);
         }
 
         public T GetNamedType<T>(string name) where T : IGraphQLType
@@ -95,9 +84,9 @@ namespace fugu.graphql.type
         public IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IGraphQLType
         {
             if (filter == null)
-                return Types.OfType<T>().AsQueryable();
+                return _types.OfType<T>().AsQueryable();
 
-            return Types.OfType<T>().Where(t => filter(t)).AsQueryable();
+            return _types.OfType<T>().Where(t => filter(t)).AsQueryable();
         }
 
         public virtual DirectiveType GetDirective(string name)

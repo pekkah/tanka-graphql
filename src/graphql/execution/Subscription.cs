@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.error;
 using fugu.graphql.resolvers;
+using fugu.graphql.type;
 using GraphQLParser.AST;
 
 namespace fugu.graphql.execution
@@ -15,7 +16,7 @@ namespace fugu.graphql.execution
             IErrorTransformer errorTransformer,
             GraphQLDocument document,
             GraphQLOperationDefinition subscription,
-            ExecutableSchema schema,
+            ISchema schema,
             Dictionary<string, object> coercedVariableValues,
             object initialValue)
         {
@@ -133,8 +134,7 @@ namespace fugu.graphql.execution
                 fieldSelection,
                 coercedArgumentValues);
 
-            var subscriber = await schema.GetSubscriberAsync(resolveContext)
-                .ConfigureAwait(false);
+            var subscriber = field.Subscribe;
 
             if (subscriber == null)
                 throw new GraphQLError(

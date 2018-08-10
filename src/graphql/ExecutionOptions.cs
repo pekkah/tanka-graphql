@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using fugu.graphql.error;
+using fugu.graphql.type;
 using GraphQLParser.AST;
 
 namespace fugu.graphql
 {
     public class ExecutionOptions
     {
-        public ExecutableSchema Schema { get; set; }
+        public ISchema Schema { get; set; }
 
         public GraphQLDocument Document { get; set; }
 

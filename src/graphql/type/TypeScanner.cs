@@ -28,7 +28,7 @@ namespace fugu.graphql.type
             if (type == null)
                 return;
 
-            if (foundTypes.Contains(type))
+            if (foundTypes.Contains(type, new GraphQLTypeComparer()))
                 return;
 
             if (type is NamedTypeReference)

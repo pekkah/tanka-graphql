@@ -4,9 +4,9 @@ using static fugu.graphql.type.ScalarType;
 
 namespace fugu.graphql.tests.data.validation
 {
-    public class WeirdSchema : Schema
+    public class WeirdSchemaBuilder
     {
-        public WeirdSchema()
+        static WeirdSchemaBuilder()
         {
             Pet = new InterfaceType(
                 "Pet",
@@ -102,8 +102,11 @@ namespace fugu.graphql.tests.data.validation
             HumanOrAlien = new UnionType(
                 "HumanOrAlien",
                 new[] {Human, Alien});
+        }
 
-            Query = new ObjectType(
+        public static ISchema Build()
+        {
+            var query = new ObjectType(
                 "Query",
                 new Fields
                 {
@@ -111,34 +114,36 @@ namespace fugu.graphql.tests.data.validation
                     ["catOrDog"] = new Field(CatOrDog),
                 });
 
-            Mutation = new ObjectType(
+            var mutation = new ObjectType(
                 "Mutation",
                 new Fields()
                 {
                     ["mutateDog"] = new Field(Dog)
                 });
+
+            return new Schema(query, mutation);
         }
 
-        public UnionType HumanOrAlien { get; }
+        public static UnionType HumanOrAlien { get; }
 
-        public UnionType DogOrHuman { get; }
+        public static UnionType DogOrHuman { get; }
 
-        public UnionType CatOrDog { get; }
+        public static UnionType CatOrDog { get; }
 
-        public ObjectType Cat { get; }
+        public static ObjectType Cat { get; }
 
-        public EnumType CatCommand { get; }
+        public static EnumType CatCommand { get; }
 
-        public ObjectType Alien { get; }
+        public static ObjectType Alien { get; }
 
-        public ObjectType Dog { get; }
+        public static ObjectType Dog { get; }
 
-        public InterfaceType Sentient { get; }
+        public static InterfaceType Sentient { get; }
 
-        public ObjectType Human { get; }
+        public static ObjectType Human { get; }
 
-        public InterfaceType Pet { get; }
+        public static InterfaceType Pet { get; }
 
-        public EnumType DogCommand { get; }
+        public static EnumType DogCommand { get; }
     }
 }

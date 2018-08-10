@@ -57,14 +57,14 @@ namespace fugu.graphql.tests
                 }
             };
 
-            _executable = ExecutableSchema.MakeExecutableSchemaAsync(
+            _executable = SchemaTools.MakeExecutableSchemaAsync(
                 _schema,
                 _resolvers).Result;
         }
 
         private readonly Schema _schema;
         private readonly IResolverMap _resolvers;
-        private readonly ExecutableSchema _executable;
+        private readonly ISchema _executable;
 
 
         [Fact]

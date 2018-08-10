@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using fugu.graphql.resolvers;
+using fugu.graphql.type;
 
 namespace fugu.graphql.tools
 {
@@ -14,11 +14,11 @@ namespace fugu.graphql.tools
             _resolversMaps = resolverMaps.ToList();
         }
 
-        public async Task<Resolver> GetResolverAsync(ResolverContext resolverContext)
+        public Resolver GetResolver(ComplexType type, KeyValuePair<string, IField> field)
         {
             foreach (var resolverMap in _resolversMaps)
             {
-                var resolver = await resolverMap.GetResolverAsync(resolverContext);
+                var resolver = resolverMap.GetResolver(type, field);
 
                 if (resolver == null)
                     continue;

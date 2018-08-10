@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using fugu.graphql.samples.chat.web.GraphQL;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,9 @@ namespace fugu.graphql.samples.chat.web.Controllers
                 Schema = _schemas.Chat,
                 OperationName = request.OperationName
             });
+
+            if (result.Errors != null && result.Errors.Any())
+                return BadRequest(result);
 
             return Ok(result);
         }
