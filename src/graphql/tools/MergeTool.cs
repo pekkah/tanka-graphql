@@ -5,10 +5,25 @@ using fugu.graphql.type;
 
 namespace fugu.graphql.tools
 {
-    public delegate IEnumerable<KeyValuePair<string, IField>> FieldConflictResolver(
-        ComplexType left,
-        ComplexType right,
-        KeyValuePair<string, IField> conflict);
+    public class ConflictingField
+    {
+        public ConflictingField(ISchema schema, ComplexType type, string fieldName, IField field)
+        {
+            Schema = schema;
+            Type = type;
+            FieldName = fieldName;
+            Field = field;
+        }
+
+        public ISchema Schema { get; }
+        public ComplexType Type { get; }
+        public string FieldName { get; }
+        public IField Field { get; }
+    }
+
+    public delegate IField FieldConflictResolver(
+        ConflictingField left,
+        ConflictingField right);
 
 
     public static class MergeTool
@@ -18,53 +33,60 @@ namespace fugu.graphql.tools
             ISchema right,
             FieldConflictResolver fieldConflict)
         {
-            var types = new Dictionary<string, IGraphQLType>();
+            if (!left.IsInitialized || !right.IsInitialized)
+                throw new InvalidOperationException($"Schemas must be initialized before merging");
+
+            var types = new List<IGraphQLType>();
+
             foreach (var leftType in left.QueryTypes<IGraphQLType>())
             {
-                // this shouldn't be true but leaving for now
-                if (string.IsNullOrEmpty(leftType.Name))
-                    continue;
+                var rightType = right.GetNamedType(leftType.Name);
 
-                types.Add(leftType.Name, leftType);
+                // type does not exists in right
+                if (rightType == null)
+                {
+                    types.Add(leftType);
+                    continue;
+                }
+
+                // requires merging
+
+                // invalid types?
+                if (leftType.GetType() != rightType.GetType())
+                    throw new InvalidOperationException($"Cannot merge {rightType} to {leftType}. Types do not match.");
+
+                // merge types
+                if (leftType is InterfaceType leftInterface && rightType is InterfaceType rightInterface)
+                {
+                    var mergedType = Merge(leftInterface, rightInterface, fieldConflict);
+                    types.Add(mergedType);
+                }
+                else if (leftType is ObjectType leftObject && rightType is ObjectType rightObject)
+                {
+                    var mergedType = Merge(leftObject, rightObject, fieldConflict);
+                    types.Add(mergedType);
+                }
+                else
+                {
+                    if (leftType is ScalarType)
+                        types.Add(leftType);
+                }
             }
 
             foreach (var rightType in right.QueryTypes<IGraphQLType>())
             {
-                // this shouldn't be true but leaving for now
-                if (string.IsNullOrEmpty(rightType.Name))
+                if (types.Any(t => t.Name == rightType.Name))
                     continue;
 
-                // conflict
-                if (types.ContainsKey(rightType.Name))
-                {
-                    var leftType = types[rightType.Name];
-
-                    if (leftType is ObjectType leftObject && rightType is ObjectType rightObject)
-                        types[rightType.Name] = Merge(leftObject, rightObject, fieldConflict);
-                    else if (leftType is InterfaceType leftInterface && rightType is InterfaceType rightInterface)
-                        types[rightType.Name] = Merge(leftInterface, rightInterface, fieldConflict);
-                    else if (leftType is ScalarType)
-                        continue;
-                    else
-                        throw new NotImplementedException();
-
-                    continue;
-                }
-
-                types[rightType.Name] = rightType;
+                types.Add(rightType);
             }
 
-            var queryType = types.SingleOrDefault(t => t.Key == left.Query.Name).Value as ObjectType;
-            ObjectType mutationType = null;
-            ObjectType subscriptionType = null;
-
-            if (left.Mutation != null)
-                mutationType = types.SingleOrDefault(t => t.Key == left.Mutation.Name).Value as ObjectType;
-
-            if (left.Subscription != null)
-                subscriptionType = types.SingleOrDefault(t => t.Key == left.Subscription.Name).Value as ObjectType;
-
-            return new Schema(queryType, mutationType, subscriptionType, types.Values, left.QueryDirectives());
+            return new Schema(
+                types.Single(t => t.Name == left.Query.Name) as ObjectType,
+                left.Mutation != null ? types.SingleOrDefault(t => t.Name == left.Mutation.Name) as ObjectType : null,
+                left.Subscription != null
+                    ? types.SingleOrDefault(t => t.Name == left.Subscription.Name) as ObjectType
+                    : null);
         }
 
         public static InterfaceType Merge(InterfaceType left, InterfaceType right,
@@ -102,15 +124,19 @@ namespace fugu.graphql.tools
         private static Fields MergeFields(ComplexType left, ComplexType right, FieldConflictResolver conflictResolver)
         {
             var fields = new Fields();
-            foreach (var field in left.Fields) fields[field.Key] = field.Value;
+            foreach (var field in left.Fields)
+                fields[field.Key] = field.Value;
 
             foreach (var field in right.Fields)
             {
                 // conflict?
-                if (fields.ContainsKey(field.Key))
+                if (fields.TryGetValue(field.Key, out var leftField))
                 {
-                    var resolvedFields = conflictResolver(left, right, field);
-                    foreach (var resolvedField in resolvedFields) fields[resolvedField.Key] = resolvedField.Value;
+                    var resolvedField = conflictResolver(
+                        new ConflictingField(null, left, field.Key, leftField),
+                        new ConflictingField(null, right, field.Key, field.Value));
+
+                    fields[field.Key] = resolvedField;
 
                     continue;
                 }

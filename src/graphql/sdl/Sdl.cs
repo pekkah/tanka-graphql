@@ -252,8 +252,10 @@ namespace fugu.graphql.sdl
             if (originalType is ObjectType originalObjectType)
             {
                 var extendedType =
-                    MergeTool.Merge(originalObjectType, extensionType,
-                        (left, right, conflict) => new[] {conflict}); //todo: this needs fixing
+                    MergeTool.Merge(
+                        originalObjectType, 
+                        extensionType,
+                        (l, r) => r.Field); //todo: this needs fixing
 
                 context.KnownTypes.Remove(originalType);
                 context.KnownTypes.Add(extendedType);

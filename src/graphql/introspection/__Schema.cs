@@ -11,6 +11,7 @@ namespace fugu.graphql.introspection
         {
             var types = schema.QueryTypes<IGraphQLType>()
                 .Distinct(new GraphQLTypeComparer());
+
             return types.Select(t => Examiner.Examine(t, schema));
         }
 
@@ -73,12 +74,6 @@ namespace fugu.graphql.introspection
             try
             {
                 var __type = Examiner.Examine(type, schema);
-
-                if (__type == null)
-                {
-
-                }
-
                 return __type;
             }
             catch (Exception e)

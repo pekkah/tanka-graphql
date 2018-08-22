@@ -16,12 +16,12 @@ type Member {
 
 type Channel {
     name: String!
-    members: [Member!]!
-    messages: [Message!]!
+    members: [Member]!
+    messages: [Message]!
 }
 
 type Query {
-    channels: [Channel!]!
+    channels: [Channel]!
 }
 
 type Mutation {

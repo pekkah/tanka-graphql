@@ -17,9 +17,16 @@ namespace fugu.graphql
 
             var fieldName = field.Key;
 
-            if (!TryGetValue(type.Name, out var objectNode)) return null;
+            if (!TryGetValue(type.Name, out var objectNode)) 
+                return null;
 
             var resolver = objectNode.GetResolver(fieldName);
+
+            if (resolver == null)
+            {
+                return null;
+            }
+
             return resolver;
         }
 

@@ -1,4 +1,5 @@
-﻿using fugu.graphql.resolvers;
+﻿using System.Collections.Generic;
+using fugu.graphql.resolvers;
 using fugu.graphql.type;
 
 namespace fugu.graphql.introspection

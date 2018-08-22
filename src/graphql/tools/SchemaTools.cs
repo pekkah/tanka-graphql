@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using fugu.graphql.introspection;
-using fugu.graphql.tools;
 using fugu.graphql.type;
 
-namespace fugu.graphql
+namespace fugu.graphql.tools
 {
     public static class SchemaTools
     {
@@ -41,7 +41,7 @@ namespace fugu.graphql
             var introspection = await Introspection.ExamineAsync(schema);
             var executable = await MakeExecutableSchemaAsync(schema, resolvers, subscribers);
 
-            var withIntrospection = MergeTool.MergeSchemas(executable, introspection, FieldConflictResolver);
+            var withIntrospection = MergeTool.MergeSchemas(executable, introspection, (l, r) => r.Field);
 
             if (visitors != null)
                 foreach (var visitorFactory in visitors)
@@ -62,15 +62,14 @@ namespace fugu.graphql
             {
                 field.Value.Resolve = field.Value.Resolve ?? resolvers.GetResolver(type, field);
 
+                if (field.Value.Resolve == null)
+                {
+                    throw new InvalidOperationException($"Cannot add resolver to {type.Name}:{field.Key}. Resolver not found.");
+                }
+
                 if (subscribers != null)
                     field.Value.Subscribe = field.Value.Subscribe ?? subscribers.GetSubscriber(type, field);
             }
-        }
-
-        private static IEnumerable<KeyValuePair<string, IField>> FieldConflictResolver(ComplexType left,
-            ComplexType right, KeyValuePair<string, IField> conflict)
-        {
-            return new[] {conflict};
         }
     }
 }

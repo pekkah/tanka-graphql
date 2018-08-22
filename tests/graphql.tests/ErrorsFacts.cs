@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using fugu.graphql.type;
 using fugu.graphql.tests.data;
+using fugu.graphql.tools;
 using Xunit;
 using static fugu.graphql.Executor;
 using static fugu.graphql.Parser;

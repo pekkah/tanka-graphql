@@ -101,6 +101,12 @@ namespace fugu.graphql.introspection
                 return type;
             }
 
+            if (type is EnumType)
+                return type;
+
+            if (type is ScalarType)
+                return type;
+
             if (string.IsNullOrEmpty(type.Name))
                 throw new InvalidOperationException(
                     $"Cannot build named type reference from {type} as it doesn't have name");
@@ -256,7 +262,7 @@ namespace fugu.graphql.introspection
                 Name = arg.Key,
                 Description = arg.Value.Meta?.Description,
                 Type = BuildTypeRef(arg.Value.Type),
-                DefaultValue = arg.Value.DefaultValue?.ToString() //todo: coerce value
+                DefaultValue = null //todo: default value
             };
         }
     }

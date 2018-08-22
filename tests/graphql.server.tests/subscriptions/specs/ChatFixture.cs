@@ -2,6 +2,7 @@
 using fugu.graphql.samples.chat.data;
 using fugu.graphql.samples.chat.data.domain;
 using fugu.graphql.samples.chat.data.idl;
+using fugu.graphql.tools;
 using fugu.graphql.type;
 
 namespace fugu.graphql.server.tests.subscriptions.specs

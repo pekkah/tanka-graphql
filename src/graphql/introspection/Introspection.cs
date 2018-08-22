@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using fugu.graphql.tools;
 using fugu.graphql.type;
 
 namespace fugu.graphql.introspection

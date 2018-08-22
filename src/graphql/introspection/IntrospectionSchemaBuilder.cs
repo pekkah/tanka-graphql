@@ -34,7 +34,7 @@ namespace fugu.graphql.introspection
             var nonNullTypeReference = new NonNull(typeReference);
             var typeList = new List(new NonNull(typeReference));
 
-            var arg = new ObjectType(
+            var inputValue = new ObjectType(
                 InputValueName,
                 new Fields
                 {
@@ -42,11 +42,9 @@ namespace fugu.graphql.introspection
                     ["description"] = new Field(ScalarType.String),
                     ["type"] = new Field(nonNullTypeReference),
                     ["defaultValue"] = new Field(ScalarType.String),
-                    ["isDeprecated"] = new Field(NonNullBoolean),
-                    ["deprecationReason"] = new Field(ScalarType.String)
                 });
 
-            var argsList = new NonNull(new List(new NonNull(arg)));
+            var argsList = new NonNull(new List(new NonNull(inputValue)));
 
             var field = new ObjectType(
                 FieldName,
@@ -73,16 +71,6 @@ namespace fugu.graphql.introspection
                 });
 
             var enumValueList = new List(new NonNull(enumValue));
-
-            var inputValue = new ObjectType(
-                InputValueName,
-                new Fields()
-                {
-                    ["name"] = new Field(NonNullString),
-                    ["description"] = new Field(ScalarType.String),
-                    ["type"] = new Field(nonNullTypeReference),
-                    ["defaultValue"] = new Field(ScalarType.String)
-                });
 
             var inputValueList = new List(new NonNull(inputValue));
 

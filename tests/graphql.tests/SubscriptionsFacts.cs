@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.resolvers;
 using fugu.graphql.tests.data;
+using fugu.graphql.tools;
 using fugu.graphql.type;
 using Xunit;
 using static fugu.graphql.Executor;
