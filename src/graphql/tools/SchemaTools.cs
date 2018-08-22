@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using fugu.graphql.introspection;
 using fugu.graphql.type;
@@ -64,7 +65,7 @@ namespace fugu.graphql.tools
 
                 if (field.Value.Resolve == null)
                 {
-                    throw new InvalidOperationException($"Cannot add resolver to {type.Name}:{field.Key}. Resolver not found.");
+                    Debug.WriteLine($"Could not find resolver for {type.Name}:{field.Key}");
                 }
 
                 if (subscribers != null)

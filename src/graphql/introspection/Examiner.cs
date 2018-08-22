@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using fugu.graphql.type;
+using Newtonsoft.Json;
 
 // ReSharper disable InconsistentNaming
 
@@ -150,7 +151,7 @@ namespace fugu.graphql.introspection
                 Name = field.Key,
                 Description = field.Value.Meta.Description,
                 Type = BuildTypeRef(field.Value.Type),
-                DefaultValue = null // field.Value.DefaultValue?.ToString() //todo: coerce value
+                DefaultValue = field.Value.DefaultValue != null ? JsonConvert.SerializeObject(field.Value.DefaultValue):null
             };
         }
 
@@ -262,7 +263,7 @@ namespace fugu.graphql.introspection
                 Name = arg.Key,
                 Description = arg.Value.Meta?.Description,
                 Type = BuildTypeRef(arg.Value.Type),
-                DefaultValue = null //todo: default value
+                DefaultValue = arg.Value.DefaultValue != null ? JsonConvert.SerializeObject(arg.Value.DefaultValue):null
             };
         }
     }
