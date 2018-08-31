@@ -7,6 +7,7 @@ namespace fugu.graphql.type
 {
     public class Schema : ISchema
     {
+        private readonly IEnumerable<IGraphQLType> _typesReferencedByNameOnly;
         private List<IGraphQLType> _types = new List<IGraphQLType>();
 
         public Schema(
@@ -16,6 +17,7 @@ namespace fugu.graphql.type
             IEnumerable<IGraphQLType> typesReferencedByNameOnly = null,
             IEnumerable<DirectiveType> directives = null)
         {
+            _typesReferencedByNameOnly = typesReferencedByNameOnly;
             // Query is required
             Query = query ?? throw new ArgumentNullException(nameof(query));
 
@@ -58,6 +60,7 @@ namespace fugu.graphql.type
             // combine
             var foundTypes = scanningTasks.SelectMany(r => r.Result)
                 //.Concat(ScalarType.Standard) // disabled for now
+                .Concat(_typesReferencedByNameOnly ?? Enumerable.Empty<IGraphQLType>())
                 .Distinct(new GraphQLTypeComparer())
                 .ToList();
 
@@ -66,6 +69,10 @@ namespace fugu.graphql.type
             Directives.Add(DirectiveType.Skip);
 
             _types = foundTypes;
+
+            var heal = new SchemaHealer(this);
+            await heal.VisitAsync();
+
             IsInitialized = true;
         }
 

@@ -5,9 +5,9 @@ namespace fugu.graphql.type
 {
     public interface IField : IDirectives
     {
-        IGraphQLType Type { get; }
+        IGraphQLType Type { get; set; }
 
-        IEnumerable<KeyValuePair<string, Argument>> Arguments { get; }
+        IEnumerable<KeyValuePair<string, Argument>> Arguments { get; set; }
 
         Meta Meta { get; set; } 
 

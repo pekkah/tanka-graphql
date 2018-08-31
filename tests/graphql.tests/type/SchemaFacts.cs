@@ -200,5 +200,30 @@ namespace fugu.graphql.tests.type
             Assert.Single(directives, DirectiveType.Skip);
             Assert.Single(directives, DirectiveType.Include);
         }
+
+        [Fact]
+        public async Task Initialize_heal_schema()
+        {
+            /* Given */
+            var type = new ObjectType("fieldType", new Fields());
+            var typeReference = new NamedTypeReference("fieldType");
+            var field = new Field(typeReference);
+            var queryType = new ObjectType(
+                "Q",
+                new Fields()
+                {
+                    ["field"] = field,
+                });
+
+            var sut = new Schema(queryType, typesReferencedByNameOnly: new []{ type });
+
+            /* When */
+            await sut.InitializeAsync();
+
+            /* Then */
+            var actual = sut.Query.GetField("field");
+            Assert.Equal(type, actual.Type);
+
+        }
     }
 }

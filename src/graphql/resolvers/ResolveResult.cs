@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using fugu.graphql.error;
@@ -83,7 +84,10 @@ namespace fugu.graphql.resolvers
 
             if (fieldType is NamedTypeReference typeReference)
             {
-                var actualTypeName = typeReference.TypeName;
+                throw new InvalidOperationException(
+                    $"NamedTypeReferences are not supported during execution. Please heal schema before execution.");
+
+                /*var actualTypeName = typeReference.TypeName;
                 var innerType = executionContext.Schema.GetNamedType(actualTypeName);
 
                 if (innerType == null)
@@ -100,7 +104,7 @@ namespace fugu.graphql.resolvers
                     selection,
                     fields,
                     value,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues).ConfigureAwait(false);*/
             }
 
             if (fieldType is Lazy lazy)

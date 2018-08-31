@@ -30,9 +30,23 @@ namespace fugu.graphql.type
 
         public Subscriber Subscribe { get; set; }
 
-        public IGraphQLType Type { get; }
+        public IGraphQLType Type { get; set; }
 
-        public IEnumerable<KeyValuePair<string, Argument>> Arguments => _arguments;
+        public IEnumerable<KeyValuePair<string, Argument>> Arguments
+        {
+            get => _arguments;
+            set
+            {
+                if (value == null)
+                {
+                    _arguments.Clear();
+                    return;
+                }
+
+                foreach (var argument in value)
+                    _arguments[argument.Key] = argument.Value;
+            }
+        }
 
         public IEnumerable<DirectiveInstance> Directives => Meta.Directives;
 

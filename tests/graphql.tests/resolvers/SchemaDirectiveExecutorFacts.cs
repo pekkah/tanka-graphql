@@ -9,9 +9,14 @@ namespace fugu.graphql.tests.resolvers
 {
     public abstract class DirectiveVisitorBase : SchemaVisitorBase
     {
+        public IResolverMap ResolverMap { get; }
+        public ISubscriberMap SubscriberMap { get; }
+
         protected DirectiveVisitorBase(ISchema schema, IResolverMap resolverMap, ISubscriberMap subscriberMap) : base(
-            schema, resolverMap, subscriberMap)
+            schema)
         {
+            ResolverMap = resolverMap;
+            SubscriberMap = subscriberMap;
         }
     }
 

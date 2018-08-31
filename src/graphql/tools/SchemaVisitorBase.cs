@@ -6,18 +6,12 @@ namespace fugu.graphql.tools
 {
     public abstract class SchemaVisitorBase
     {
-        protected IResolverMap ResolverMap { get; }
         protected ISchema Schema { get; }
-        protected ISubscriberMap SubscriberMap { get; }
 
         protected SchemaVisitorBase(
-            ISchema schema,
-            IResolverMap resolverMap,
-            ISubscriberMap subscriberMap)
+            ISchema schema)
         {
             Schema = schema;
-            ResolverMap = resolverMap;
-            SubscriberMap = subscriberMap;
         }
 
         public virtual async Task VisitAsync()
