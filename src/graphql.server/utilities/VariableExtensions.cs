@@ -14,7 +14,7 @@ namespace fugu.graphql.server.utilities
             return propertyValuePairs;
         }
 
-        public static object[] ToArray(this JArray array)
+        private static object[] ToArray(this JArray array)
         {
             return array.ToObject<object[]>().Select(ProcessArrayEntry).ToArray();
         }

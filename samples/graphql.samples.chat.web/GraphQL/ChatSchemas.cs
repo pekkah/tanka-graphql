@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using fugu.graphql.samples.chat.data;
 using fugu.graphql.samples.chat.data.domain;
 using fugu.graphql.samples.chat.data.idl;
-using fugu.graphql.samples.chat.data.schema;
 using fugu.graphql.tools;
 using fugu.graphql.type;
 
@@ -28,20 +27,6 @@ namespace fugu.graphql.samples.chat.web.GraphQL
             return IdlSchema.CreateAsync();
         }
 
-        public Task<ISchema> FromModelAsync()
-        {
-            return ModelSchema.CreateAsync();
-        }
-
         public ISchema Chat { get; set; }
-
-        private IEnumerable<KeyValuePair<string, IField>> ResolveFieldConflict(ComplexType left,
-            ComplexType right, KeyValuePair<string, IField> conflict)
-        {
-            return new[]
-            {
-                conflict
-            };
-        }
     }
 }
