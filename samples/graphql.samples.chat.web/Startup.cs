@@ -1,3 +1,4 @@
+using fugu.graphql.samples.chat.data;
 using fugu.graphql.samples.chat.data.domain;
 using fugu.graphql.samples.chat.web.GraphQL;
 using GraphQL.Server.Ui.Playground;
@@ -25,7 +26,8 @@ namespace fugu.graphql.samples.chat.web
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // graphql
-            services.AddSingleton<Chat>();
+            services.AddSingleton<IChat, Chat>();
+            services.AddSingleton<IMessageResolverService, MessageResolverService>();
             services.AddSingleton<ChatSchemas>();
         }
 

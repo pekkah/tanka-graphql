@@ -1,39 +1,28 @@
-﻿type Message {
-    content: string
-    sentAt: string!
-    from: Member!
-}
-
-input InputMessage {
-    content: string
-    fromId: string!
-}
-
-type Member {
-    id: String!
-    displayName: String!
-}
-
-type Channel {
+﻿type From {
+    userId: ID!
     name: String!
-    members: [Member]!
-    messages: [Message]!
+}
+
+type Message {
+    id: ID!
+    from: From!
+    content: String!
+    timestamp: String
 }
 
 type Query {
-    channels: [Channel]!
+    messages: [Message]
+}
+
+input InputMessage {
+    content: String!
 }
 
 type Mutation {
     addMessage(message: InputMessage!): Message!
 }
 
-type Subscription {
-    messageAdded: Message!
-}
-
 schema {
     query: Query
     mutation: Mutation
-    subscription: Subscription
 }

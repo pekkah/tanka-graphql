@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using fugu.graphql.samples.chat.web.GraphQL;
+using fugu.graphql.server.utilities;
 using Microsoft.AspNetCore.Mvc;
 using static fugu.graphql.Executor;
 using static fugu.graphql.Parser;
@@ -24,7 +25,8 @@ namespace fugu.graphql.samples.chat.web.Controllers
             {
                 Document = ParseDocument(request.Query),
                 Schema = _schemas.Chat,
-                OperationName = request.OperationName
+                OperationName = request.OperationName,
+                VariableValues = request.Variables?.ToVariableDictionary()
             });
 
             if (result.Errors != null && result.Errors.Any())

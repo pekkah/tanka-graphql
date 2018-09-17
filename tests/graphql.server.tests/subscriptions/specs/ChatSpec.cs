@@ -104,7 +104,7 @@ namespace fugu.graphql.server.tests.subscriptions.specs
         public async Task Query_messages()
         {
             /* Given */
-            Chat.AddMessage(new Message
+            Chat.AddMessageAsync(new Message
             {
                 Content = "test",
                 From = new Member()
@@ -198,7 +198,7 @@ namespace fugu.graphql.server.tests.subscriptions.specs
             /* When */
             var serverTask = _server.OnConnect();
             // post message
-            Chat.AddMessage(new Message
+            Chat.AddMessageAsync(new Message
             {
                 From = new Member()
                 {
