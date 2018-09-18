@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.server.subscriptions;
-using fugu.graphql.server.tests.subscriptions.specs;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -11,12 +10,6 @@ namespace fugu.graphql.server.tests.subscriptions
 {
     public class ProtocolHandlerFacts
     {
-        private TestableSubscriptionTransport _transport;
-        private SubscriptionManager _subscriptionManager;
-        private SubscriptionServer _server;
-        private ApolloProtocol _sut;
-        private IExecutor _executor;
-
         public ProtocolHandlerFacts()
         {
             _transport = new TestableSubscriptionTransport();
@@ -26,9 +19,15 @@ namespace fugu.graphql.server.tests.subscriptions
             _server = new SubscriptionServer(
                 _transport,
                 _subscriptionManager,
-                new[] { _sut },
+                new[] {_sut},
                 new NullLogger<SubscriptionServer>());
         }
+
+        private readonly TestableSubscriptionTransport _transport;
+        private readonly SubscriptionManager _subscriptionManager;
+        private readonly SubscriptionServer _server;
+        private readonly ApolloProtocol _sut;
+        private readonly IExecutor _executor;
 
         [Fact]
         public async Task Receive_init()
@@ -124,7 +123,8 @@ namespace fugu.graphql.server.tests.subscriptions
         {
             /* Given */
             var source = new BufferBlock<ExecutionResult>();
-            _executor.ExecuteAsync(null, null, null).ReturnsForAnyArgs(new SubscriptionResult(source, ()=> Task.CompletedTask));
+            _executor.ExecuteAsync(null, null, null)
+                .ReturnsForAnyArgs(new SubscriptionResult(source, () => Task.CompletedTask));
             var expected = new OperationMessage
             {
                 Type = MessageType.GQL_START,

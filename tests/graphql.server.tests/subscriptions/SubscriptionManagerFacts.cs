@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.server.subscriptions;
-using fugu.graphql.server.tests.subscriptions.specs;
-using GraphQLParser.AST;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit;
@@ -42,9 +38,9 @@ namespace fugu.graphql.server.tests.subscriptions
             var context = new MessageHandlingContext(_server, null);
 
             _executer.ExecuteAsync(null, null, null).ReturnsForAnyArgs(
-                new SubscriptionResult()
+                new SubscriptionResult
                 {
-                    Errors = new []
+                    Errors = new[]
                     {
                         new Error("error")
                     }
@@ -62,7 +58,7 @@ namespace fugu.graphql.server.tests.subscriptions
         {
             /* Given */
             var id = "1";
-            var payload = new OperationMessagePayload();  
+            var payload = new OperationMessagePayload();
             var context = new MessageHandlingContext(_server, null);
 
             _executer.ExecuteAsync(null, null, null).ReturnsForAnyArgs(
@@ -87,9 +83,9 @@ namespace fugu.graphql.server.tests.subscriptions
             var context = new MessageHandlingContext(_server, null);
 
             _executer.ExecuteAsync(null, null, null).ReturnsForAnyArgs(
-                new SubscriptionResult()
+                new SubscriptionResult
                 {
-                    Errors = new []
+                    Errors = new[]
                     {
                         new Error("error")
                     }
@@ -111,7 +107,7 @@ namespace fugu.graphql.server.tests.subscriptions
             /* Given */
             var source = new BufferBlock<ExecutionResult>();
             _executer.ExecuteAsync(null, null, null).ReturnsForAnyArgs(
-                    new SubscriptionResult(source, ()=>Task.CompletedTask));
+                new SubscriptionResult(source, () => Task.CompletedTask));
 
             var id = "1";
             var payload = new OperationMessagePayload();
