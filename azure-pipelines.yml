@@ -1,0 +1,36 @@
+# ASP.NET Core
+# Build and test ASP.NET Core web applications targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/vsts/pipelines/languages/dotnet-core
+
+name: 'graphql'
+
+pool:
+  vmImage: 'Ubuntu 16.04'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: DotNetCoreInstaller@0
+  inputs:
+    version: '2.1.402' # replace this value with the version that you need for your project
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    configuration: 'release'
+    packagesToPack: 'src/graphql/graphql.csproj'
+    packDirectory: '$(build.artifactStagingDirectory)'
+    #nobuild: false # Optional
+    #versioningScheme: 'off' # Options: off, byPrereleaseNumber, byEnvVar, byBuildNumber
+    #majorVersion: '1' # Required when versioningScheme == byPrereleaseNumber
+    #minorVersion: '0' # Required when versioningScheme == byPrereleaseNumber
+    #patchVersion: '0' # Required when versioningScheme == byPrereleaseNumber
+    #buildProperties: # Optional
+    #verbosityPack: 'detailed' # Options: quiet, minimal, normal, detailed, diagnostic
