@@ -1,7 +1,7 @@
 Fugu GraphQL library
 =====================================
 
-[![Build Status](https://heikura.visualstudio.com/_apis/public/build/definitions/fb46fc0e-8935-46da-ab29-9113d8cf64f8/3/badge)](https://heikura.visualstudio.com/fugu/_build/index?definitionId=3)
+[![Build Status](https://dev.azure.com/fugu-projects/graphql/_apis/build/status/pekkah.fugu-graphql)](https://dev.azure.com/fugu-projects/graphql/_build/latest?definitionId=1)
 
 
 ## Features
