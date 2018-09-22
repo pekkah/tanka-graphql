@@ -38,7 +38,7 @@ steps:
 # Publish Build Artifacts
 # Publish build artifacts to Azure Artifacts/TFS or a file share
 - task: PublishBuildArtifacts@1
-    inputs:
+  inputs:
     pathtoPublish: '$(build.artifactStagingDirectory)' 
     artifactName: 'packages' 
     #publishLocation: 'Container' # Options: container, filePath
