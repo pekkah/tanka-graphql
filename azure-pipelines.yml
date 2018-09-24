@@ -12,18 +12,19 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-#- task: DotNetCoreInstaller@0
-#  inputs:
-#    version: '2.1.402' # replace this value with the version that you need for your project
+- task: DotNetCoreInstaller@0
+  inputs:
+    version: '2.1.402' # replace this value with the version that you need for your project
 
 - task: DotNetCoreCLI@2
+  displayName: Install cake.tool
   inputs:
     command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
     custom: 'tool'
-    arguments: 'install -g Cake.Tool'
+    arguments: 'install --tool-path dotnet-tools Cake.Tool'
 
-- task: DotNetCoreCLI@2
+- task: CmdLine@1
+  displayName: Build.cake
   inputs:
-    command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
-    custom: 'cake'
+    filename: 'dotnet-tools\dotnet-cake.exe'
     arguments: 'build.cake'
