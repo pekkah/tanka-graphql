@@ -98,7 +98,7 @@ Task("SetVersion")
         
         version = result.SemVer;
         Information($"Version: {version}, FullSemVer: {result.FullSemVer}");
-        Information($"##vso[task.setvariable variable=testvar;]{version}");
+        Information($"##vso[build.updatebuildnumber]{version}");
     });
 
 Task("Test")
