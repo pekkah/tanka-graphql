@@ -21,3 +21,9 @@ steps:
     command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
     custom: 'tool'
     arguments: 'install -g Cake.Tool'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
+    custom: 'cake'
+    arguments: 'build.cake'
