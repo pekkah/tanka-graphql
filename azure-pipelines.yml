@@ -18,30 +18,6 @@ steps:
 
 - task: DotNetCoreCLI@2
   inputs:
-    command: 'build'
-    projects: '**/*.csproj'
-
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'pack'
-    configuration: 'release'
-    packagesToPack: 'src/graphql/graphql.csproj'
-    packDirectory: '$(build.artifactStagingDirectory)'
-    #nobuild: false # Optional
-    #versioningScheme: 'off' # Options: off, byPrereleaseNumber, byEnvVar, byBuildNumber
-    #majorVersion: '1' # Required when versioningScheme == byPrereleaseNumber
-    #minorVersion: '0' # Required when versioningScheme == byPrereleaseNumber
-    #patchVersion: '0' # Required when versioningScheme == byPrereleaseNumber
-    #buildProperties: # Optional
-    #verbosityPack: 'detailed' # Options: quiet, minimal, normal, detailed, diagnostic
-
-# Publish Build Artifacts
-# Publish build artifacts to Azure Artifacts/TFS or a file share
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: '$(build.artifactStagingDirectory)' 
-    artifactName: 'packages' 
-    #publishLocation: 'Container' # Options: container, filePath
-    #targetPath: # Required when publishLocation == FilePath
-    #parallel: false # Optional
-    #parallelCount: # Optional
+    command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
+    custom: 'tool install'
+    arguments: '-g Cake.Tool'
