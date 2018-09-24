@@ -36,7 +36,7 @@ Task("Publish")
 
 Task("Pack")
   .IsDependentOn("Build")
-  .IsDependentOn("Test")
+  //.IsDependentOn("Test")
   .Does(()=>
   {
       var buildSettings = new DotNetCoreMSBuildSettings();
