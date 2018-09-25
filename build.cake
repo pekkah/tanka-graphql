@@ -4,10 +4,11 @@ var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
 var artifactsDir = Directory(Argument<string>("artifactsDir", "./artifacts"));
 var publishDir = Directory(Argument<string>("publishDir", "./publish"));
-var netstandard20 = "netstandard2.0";
-var netcoreapp21 = "netcoreapp2.1";
 var runtime = Argument<string>("runtime", "win-x64");
 var sln = Argument<string>("sln", "./fugu-graphql.sln");
+
+var netstandard20 = "netstandard2.0";
+var netcoreapp21 = "netcoreapp2.1";
 var projectFiles = GetFiles("./src/**/*.csproj").Select(f => f.FullPath);
 
 var version = "0.0.0-dev";
