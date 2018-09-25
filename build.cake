@@ -40,7 +40,7 @@ Task("Pack")
   //.IsDependentOn("Test")
   .Does(()=>
   {
-      Information($"Pack to: {artifactsDir}")
+      Information($"Pack to: {artifactsDir}");
       var buildSettings = new DotNetCoreMSBuildSettings();
       buildSettings.SetVersion(version);
       var settings = new DotNetCorePackSettings
