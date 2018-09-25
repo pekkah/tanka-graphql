@@ -36,7 +36,7 @@ steps:
 # Publish Build Artifacts
 - task: PublishBuildArtifacts@1
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)\nugets\*.nupkg' 
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)\nugets\' 
     artifactName: 'nugets' 
     #publishLocation: 'Container' # Options: container, filePath
     #targetPath: # Required when publishLocation == FilePath
