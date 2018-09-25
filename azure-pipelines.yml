@@ -8,7 +8,7 @@ name: 'graphql'
 pool:
   vmImage: 'vs2017-win2016'
 
-env:
+variables:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
 variables:
