@@ -37,7 +37,7 @@ Task("Publish")
 
 Task("Pack")
   .IsDependentOn("Build")
-  //.IsDependentOn("Test")
+  .IsDependentOn("Test")
   .Does(()=>
   {
       Information($"Pack to: {artifactsDir}");
