@@ -5,7 +5,7 @@ namespace fugu.graphql.samples.chat.data
 {
     public class ChatResolvers : ResolverMap
     {
-        public ChatResolvers(IMessageResolverService resolverService)
+        public ChatResolvers(IChatResolverService resolverService)
         {
             this["Query"] = new FieldResolverMap
             {

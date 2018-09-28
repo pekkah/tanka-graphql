@@ -27,7 +27,7 @@ namespace fugu.graphql.samples.chat.web
 
             // graphql
             services.AddSingleton<IChat, Chat>();
-            services.AddSingleton<IMessageResolverService, MessageResolverService>();
+            services.AddSingleton<IChatResolverService, ChatResolverService>();
             services.AddSingleton<ChatSchemas>();
         }
 

@@ -8,7 +8,7 @@ namespace fugu.graphql.samples.chat.web.GraphQL
 {
     public class ChatSchemas
     {
-        public ChatSchemas(IMessageResolverService resolverService)
+        public ChatSchemas(IChatResolverService resolverService)
         {
             var schema = FromIdlAsync().Result;        
             var resolvers = new ChatResolvers(resolverService);

@@ -5,7 +5,7 @@ using static fugu.graphql.resolvers.Resolve;
 
 namespace fugu.graphql.samples.chat.data
 {
-    public interface IMessageResolverService
+    public interface IChatResolverService
     {
         Task<IResolveResult> GetMessagesAsync(ResolverContext context);
 
@@ -14,11 +14,11 @@ namespace fugu.graphql.samples.chat.data
         Task<IResolveResult> EditMessageAsync(ResolverContext context);
     }
 
-    public class MessageResolverService : IMessageResolverService
+    public class ChatResolverService : IChatResolverService
     {
         private readonly IChat _chat;
 
-        public MessageResolverService(IChat chat)
+        public ChatResolverService(IChat chat)
         {
             _chat = chat;
         }
