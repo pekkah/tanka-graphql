@@ -94,9 +94,7 @@ Task("Restore")
 
 Task("SetVersion")
     .Does(()=> {
-        var result = GitVersion(new GitVersionSettings
-        {
-        });
+        var result = GitVersion();
         
         version = result.SemVer;
         Information($"Version: {version}, FullSemVer: {result.FullSemVer}");

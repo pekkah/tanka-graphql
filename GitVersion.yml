@@ -1,0 +1,6 @@
+mode: ContinuousDelivery
+branches:
+  develop:
+    tag: beta
+ignore:
+  sha: []
