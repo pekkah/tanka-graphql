@@ -13,6 +13,8 @@ namespace fugu.graphql.samples.chat.data
         Task<Message> AddMessageAsync(
             string fromId,
             string content);
+
+        Task<Message> EditMessageAsync(string id, string content);
     }
 
     public class Chat : IChat
@@ -48,6 +50,19 @@ namespace fugu.graphql.samples.chat.data
             _messages.Enqueue(message);
 
             return message;
+        }
+
+        public async Task<Message> EditMessageAsync(string id, string content)
+        {
+            await Task.Delay(0);
+            var originalMessage = _messages.SingleOrDefault(m => m.Id == id);
+
+            if (originalMessage == null)
+                return null;
+
+            originalMessage.Content = content;
+
+            return originalMessage;
         }
 
         private async Task<From> GetFromAsync(string fromId)

@@ -7,9 +7,11 @@ namespace fugu.graphql.samples.chat.data
 {
     public interface IMessageResolverService
     {
-        Task<IResolveResult> GetMessagesAsync();
+        Task<IResolveResult> GetMessagesAsync(ResolverContext context);
 
         Task<IResolveResult> AddMessageAsync(ResolverContext context);
+
+        Task<IResolveResult> EditMessageAsync(ResolverContext context);
     }
 
     public class MessageResolverService : IMessageResolverService
@@ -21,7 +23,7 @@ namespace fugu.graphql.samples.chat.data
             _chat = chat;
         }
 
-        public async Task<IResolveResult> GetMessagesAsync()
+        public async Task<IResolveResult> GetMessagesAsync(ResolverContext context)
         {
             var messages = await _chat.GetMessagesAsync(100);
             return As(messages);
@@ -32,6 +34,18 @@ namespace fugu.graphql.samples.chat.data
             var input = context.GetArgument<InputMessage>("message");
             var message = await _chat.AddMessageAsync(
                 "1",
+                input.Content);
+
+            return As(message);
+        }
+
+        public async Task<IResolveResult> EditMessageAsync(ResolverContext context)
+        {
+            var id = context.GetArgument<string>("id");
+            var input = context.GetArgument<InputMessage>("message");
+
+            var message = await _chat.EditMessageAsync(
+                id,
                 input.Content);
 
             return As(message);

@@ -41,6 +41,10 @@ namespace fugu.graphql.resolvers
                 return default(T);
 
             var arg = Arguments[name];
+
+            if (arg is T argAsType)
+                return argAsType;
+
             var obj = JObject.FromObject(arg);
 
             return obj.ToObject<T>();

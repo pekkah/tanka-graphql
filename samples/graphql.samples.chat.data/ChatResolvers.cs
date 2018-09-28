@@ -9,12 +9,13 @@ namespace fugu.graphql.samples.chat.data
         {
             this["Query"] = new FieldResolverMap
             {
-                {"messages", context => resolverService.GetMessagesAsync()}
+                {"messages", resolverService.GetMessagesAsync}
             };
 
             this["Mutation"] = new FieldResolverMap()
             {
-                {"addMessage", resolverService.AddMessageAsync}
+                {"addMessage", resolverService.AddMessageAsync},
+                {"editMessage", resolverService.EditMessageAsync}
             };
 
             this["Message"] = new FieldResolverMap()
