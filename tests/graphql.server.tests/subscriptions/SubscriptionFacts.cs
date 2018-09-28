@@ -73,6 +73,8 @@ namespace fugu.graphql.server.tests.subscriptions
             source.Complete();
             await source.Completion;
             await sut.Completion;
+            _writer.Complete();
+            await _writer.Completion;
 
 
             /* Then */
