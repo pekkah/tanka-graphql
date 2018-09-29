@@ -1,0 +1,26 @@
+{
+  "name": "graphql.server.apollo-link",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -cw",
+    "test": "jest"
+  },
+  "author": "Pekka Heikura <pekkah@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^23.3.2",
+    "jest": "^23.6.0",
+    "rollup": "^0.66.2",
+    "rollup-plugin-typescript2": "^0.17.0",
+    "ts-jest": "^23.10.2",
+    "typescript": "^3.1.1"
+  }
+}

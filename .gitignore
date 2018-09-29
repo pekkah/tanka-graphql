@@ -262,3 +262,7 @@ __pycache__/
 
 # cake Tools
 tools/
+
+.rpt2_cache/
+dist/
+coverage/
