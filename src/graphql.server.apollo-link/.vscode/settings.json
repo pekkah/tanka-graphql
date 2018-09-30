@@ -1,5 +1,6 @@
 {
-    "jest.pathToJest": "npm test --",
+    "jest.pathToJest": "npm run test --",
     "jest.pathToConfig": "jest.config.js",
-    "jest.rootPath": "src"
+    "jest.rootPath": "src",
+    "typescript.tsdk": "./node_modules/typescript/lib"
 }

@@ -1,7 +1,11 @@
-import { greet } from '../index';
+import { Client, SignalrLink} from '../index';
 
-describe('This is a simple test', () => {
-  test('heck the greet function', () => {
-    expect(greet()).toEqual('Hello, World!');
+describe('exports', () => {
+  test('Client', () => {
+    expect(Client).toBeDefined();
+  });
+
+  test('SignalrLink', () => {
+    expect(SignalrLink).toBeDefined();
   });
 });

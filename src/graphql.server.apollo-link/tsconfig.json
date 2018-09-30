@@ -1,15 +1,18 @@
 {
   "compilerOptions": {
+    "target": "es6",
+    "moduleResolution": "node",
     "declaration": true,
     "declarationDir": "./dist",
-    "module": "es6",
+    "module": "es2015",
     "noImplicitAny": true,
     "outDir": "./dist",
-    "target": "es5",
     "esModuleInterop": true
   },
   "include": [
     "src/**/*"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
