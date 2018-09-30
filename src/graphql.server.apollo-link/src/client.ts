@@ -1,21 +1,22 @@
-import { ApolloLink, Operation, FetchResult, Observable } from 'apollo-link';
-
-export class InitializationResult {
-    
-}
+import {
+  ApolloLink,
+  FetchResult,
+  NextLink,
+  Observable,
+  Operation
+} from "apollo-link";
 
 export class Client {
-    constructor(private url: string) {
-    }
+  private application: Observable<FetchResult>;
 
-    public async Initialize() : Promise<InitializationResult> {
-        
-        return Promise.resolve(new InitializationResult());
-    }
-}
+  constructor(private url: string) {}
 
-export class SignalrLink extends ApolloLink {
-    constructor(private client: Client) {
-        super()
-    }
+  public request(operation: Operation): Observable<FetchResult> {
+    this.executeOperation(operation);
+    return this.application;
+  }
+
+  private executeOperation(operation: Operation): any {
+    throw new Error("Method not implemented.");
+  }
 }

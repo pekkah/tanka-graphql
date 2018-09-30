@@ -1,11 +1,11 @@
-import { Client, SignalrLink} from '../index';
+import { Client, SignalrLink } from "../.";
 
-describe('exports', () => {
-  test('Client', () => {
+describe("exports", () => {
+  test("Client", () => {
     expect(Client).toBeDefined();
   });
 
-  test('SignalrLink', () => {
+  test("SignalrLink", () => {
     expect(SignalrLink).toBeDefined();
   });
 });

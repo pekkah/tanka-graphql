@@ -1,3 +1,4 @@
-import { Client, SignalrLink } from './client';
+import { Client } from "./client";
+import { SignalrLink } from "./link";
 
 export { Client, SignalrLink };
