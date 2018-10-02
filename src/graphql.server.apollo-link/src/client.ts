@@ -27,7 +27,9 @@ export class Client {
   private hub: HubConnection;
 
   constructor(private url: string) {
-    this.hub = new HubConnectionBuilder().withUrl(url).build();
+    this.hub = new HubConnectionBuilder()
+      .withUrl(this.url)
+      .build();
   }
 
   public request(operation: Operation): Observable<FetchResult> {
@@ -64,7 +66,7 @@ class Subscription implements IStreamSubscriber<FetchResult> {
 
   constructor(private stream: IStreamResult<FetchResult>) {
     [this.observable, this.sink] = createSubject();
-    this.streamSubscription = stream.subscribe(this);
+    this.streamSubscription = this.stream.subscribe(this);
   }
 
 
