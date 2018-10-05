@@ -10,79 +10,69 @@ import {
   HubConnection,
   HubConnectionBuilder,
   IStreamResult,
-  IStreamSubscriber,
-  ISubscription
-} from "@aspnet/signalr"
+  IStreamSubscriber
+} from "@aspnet/signalr";
 
-import {
-  createSubject,
-} from "light-observable/observable"
+import PushStream from "zen-push";
+import { OperationMessage } from "./message";
+import { Request } from "./request";
 
-import {
-  Observable as InputObservable,
-  SubscriptionObserver as InputObserver
-} from 'light-observable'
-
-export class Client {
+export class Client implements IStreamSubscriber<FetchResult> {
+  public closed?: boolean;
   private hub: HubConnection;
+  private stream: IStreamResult<OperationMessage>;
+  private subject: PushStream<any>;
+  private nextOperationId: number;
 
   constructor(private url: string) {
-    this.hub = new HubConnectionBuilder()
-      .withUrl(this.url)
-      .build();
+    this.hub = new HubConnectionBuilder().withUrl(this.url).build();
+    this.stream = this.connect();
+    this.subject = new PushStream<OperationMessage>();
+
+    // connect stream to subject
+    this.stream.subscribe(this);
   }
 
   public request(operation: Operation): Observable<FetchResult> {
-    var stream = this.execute(operation);
-    var subscription = new Subscription(stream);
-    return subscription.getObservable();
-  }
-
-  private execute(operation: Operation): IStreamResult<FetchResult> {
-    return this.hub.stream<FetchResult>("subscribe", operation);
-  }
-}
-
-class Subscription implements IStreamSubscriber<FetchResult> {
-  closed?: boolean;
-
-  next(value: FetchResult): void {
-    this.sink.next(value);
-  }
-
-  error(err: any): void {
-    this.sink.error(err);
-    this.closed = true;
-  }
-
-  complete(): void {
-    this.sink.complete();
-    this.closed = true;
-  }
-
-  private observable: InputObservable<FetchResult>;
-  private sink: InputObserver<FetchResult>;
-  private streamSubscription: ISubscription<FetchResult>
-
-  constructor(private stream: IStreamResult<FetchResult>) {
-    [this.observable, this.sink] = createSubject();
-    this.streamSubscription = this.stream.subscribe(this);
-  }
-
-
-
-  public getObservable(): Observable<FetchResult> {
     return new Observable<FetchResult>(subscriber => {
-      var sub = this.observable.subscribe(
-        next => subscriber.next(next),
-        err => subscriber.error(err),
-        () => subscriber.complete()
-      )
+      const opId = this.execute(operation);
+      const sub = this.subject.observable
+        .filter(fr => fr.id === opId)
+        .subscribe(
+          next => subscriber.next(next.payload),
+          error => subscriber.error(error),
+          () => subscriber.complete()
+        );
 
       return () => {
         sub.unsubscribe();
-        this.streamSubscription.dispose();
-      }
-    })
+      };
+    });
+  }
+
+  public next(value: OperationMessage): void {
+    this.subject.next(value);
+  }
+
+  public error(err: any): void {
+    this.subject.error(err);
+  }
+
+  public complete(): void {
+    this.subject.complete();
+  }
+
+  private connect(): IStreamResult<OperationMessage> {
+    return this.hub.stream<OperationMessage>("Connect");
+  }
+
+  private execute(operation: Operation): string {
+    const id = this.nextId();
+    this.hub.invoke("execute", new Request(id, operation));
+    return id;
+  }
+
+  private nextId(): string {
+    return String(++this.nextOperationId);
   }
 }

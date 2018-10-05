@@ -1,6 +1,6 @@
 {
-  "name": "graphql.server.apollo-link",
-  "version": "1.0.0",
+  "name": "fugu-graphql-server-apollo-link",
+  "version": "0.1.0",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -28,10 +28,11 @@
   },
   "dependencies": {
     "@aspnet/signalr": "^1.0.3",
+    "@types/zen-push": "^0.1.0",
     "apollo-boost": "^0.1.16",
     "apollo-link": "^1.2.3",
     "graphql": "^14.0.2",
-    "light-observable": "^2.13.0",
-    "react-apollo": "^2.2.2"
+    "react-apollo": "^2.2.2",
+    "zen-push": "^0.2.1"
   }
 }

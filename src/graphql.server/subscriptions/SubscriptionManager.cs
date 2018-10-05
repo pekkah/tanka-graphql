@@ -65,10 +65,7 @@ namespace fugu.graphql.server.subscriptions
 
         public async Task UnsubscribeAllAsync()
         {
-            foreach (var subscription in _subscriptions)
-            {
-                await subscription.Value.UnsubscribeAsync();
-            }
+            foreach (var subscription in _subscriptions) await subscription.Value.UnsubscribeAsync();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -86,18 +83,68 @@ namespace fugu.graphql.server.subscriptions
                 payload.OperationName,
                 payload.Query);
 
-            var result = await _executor.ExecuteAsync(
-                payload.Query,
-                payload.OperationName,
-                payload.Variables
-            );
-
-            if (result.Errors != null && result.Errors.Any())
+            try
             {
-                _logger.LogError("Execution errors: {errors}", ResultHelper.GetErrorString(result));
+                var result = await _executor.ExecuteAsync(
+                    payload.Query,
+                    payload.OperationName,
+                    payload.Variables
+                );
+
+                if (result.Errors != null && result.Errors.Any())
+                {
+                    _logger.LogError("Execution errors: {errors}", ResultHelper.GetErrorString(result));
+                    await writer.SendAsync(new OperationMessage
+                    {
+                        Type = MessageType.GQL_ERROR,
+                        Id = id,
+                        Payload = JObject.FromObject(result)
+                    });
+
+                    await writer.SendAsync(new OperationMessage
+                    {
+                        Type = MessageType.GQL_COMPLETE,
+                        Id = id,
+                        Payload = null
+                    });
+
+                    return null;
+                }
+
+                if (result is SubscriptionResult subscriptionResult)
+                {
+                    if (subscriptionResult.Source == null)
+                    {
+                        _logger.LogError("Cannot subscribe as no result stream available");
+                        await writer.SendAsync(new OperationMessage
+                        {
+                            Type = MessageType.GQL_ERROR,
+                            Id = id,
+                            Payload = JObject.FromObject(subscriptionResult)
+                        });
+
+                        return null;
+                    }
+
+                    _logger.LogInformation("Creating subscription");
+                    var subscription = new Subscription(
+                        id,
+                        writer,
+                        subscriptionResult,
+                        _loggerFactory.CreateLogger<Subscription>());
+
+                    // when subscription is completed remove from internal list
+#pragma warning disable 4014
+                    subscription.Completion.ContinueWith(e => _subscriptions.TryRemove(id, out _));
+#pragma warning restore 4014
+
+                    return subscription;
+                }
+
+                // must be mutation or query
                 await writer.SendAsync(new OperationMessage
                 {
-                    Type = MessageType.GQL_ERROR,
+                    Type = MessageType.GQL_DATA,
                     Id = id,
                     Payload = JObject.FromObject(result)
                 });
@@ -105,56 +152,12 @@ namespace fugu.graphql.server.subscriptions
                 await writer.SendAsync(new OperationMessage
                 {
                     Type = MessageType.GQL_COMPLETE,
-                    Id = id,
-                    Payload = null
+                    Id = id
                 });
-
-                return null;
             }
-
-            if (result is SubscriptionResult subscriptionResult)
+            catch (Exception e)
             {
-                if (subscriptionResult.Source == null)
-                {
-                    _logger.LogError("Cannot subscribe as no result stream available");
-                    await writer.SendAsync(new OperationMessage
-                    {
-                        Type = MessageType.GQL_ERROR,
-                        Id = id,
-                        Payload = JObject.FromObject(subscriptionResult)
-                    });
-
-                    return null;
-                }
-
-                _logger.LogInformation("Creating subscription");
-                var subscription = new Subscription(
-                    id,
-                    writer,
-                    subscriptionResult,
-                    _loggerFactory.CreateLogger<Subscription>());
-
-                // when subscription is completed remove from internal list
-#pragma warning disable 4014
-                subscription.Completion.ContinueWith(e => _subscriptions.TryRemove(id, out _));
-#pragma warning restore 4014
-
-                return subscription;
             }
-
-            // must be mutation or query
-            await writer.SendAsync(new OperationMessage
-            {
-                Type = MessageType.GQL_DATA,
-                Id = id,
-                Payload = JObject.FromObject(result)
-            });
-
-            await writer.SendAsync(new OperationMessage
-            {
-                Type = MessageType.GQL_COMPLETE,
-                Id = id
-            });
 
             return null;
         }

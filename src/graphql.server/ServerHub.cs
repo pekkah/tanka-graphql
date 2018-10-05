@@ -8,24 +8,57 @@ using fugu.graphql.server.subscriptions;
 using fugu.graphql.type;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace fugu.graphql.server
 {
     public class ServerHub : Hub<IServerClient>
     {
+        private readonly SubscriptionServerManager _servers;
+
+        public ServerHub(SubscriptionServerManager servers)
+        {
+            _servers = servers;
+        }
+
+        public override Task OnConnectedAsync()
+        {
+            _servers.OnConnected(Context.ConnectionId);
+            return base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            await _servers.OnDisconnected(Context.ConnectionId);
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        public ChannelReader<OperationMessage> Connect()
+        {
+            return _servers.GetReader(Context.ConnectionId);
+        }
+
+        public Task Execute(Request request)
+        {
+            return _servers.Execute(Context.ConnectionId, request);
+        }
+    }
+
+    public class SubscriptionServerManager
+    {
         private readonly ILoggerFactory _loggerFactory;
         private readonly ISchema _schema;
 
-        public ServerHub(ISchema schema, ILoggerFactory loggerFactory)
+        public SubscriptionServerManager(ISchema schema, ILoggerFactory loggerFactory)
         {
             _schema = schema;
             _loggerFactory = loggerFactory;
             Servers = new ConcurrentDictionary<string, SubscriptionServer>();
         }
 
-        public ConcurrentDictionary<string, SubscriptionServer> Servers { get; }
+        public ConcurrentDictionary<string, SubscriptionServer> Servers { get; set; }
 
-        public override Task OnConnectedAsync()
+        public void OnConnected(string connectionId)
         {
             var transport = new HubClientTransport();
             var server = new SubscriptionServer(
@@ -42,34 +75,48 @@ namespace fugu.graphql.server
             );
 
             Task.Factory.StartNew(async () => await server.OnConnect());
-
-            Servers[Context.ConnectionId] = server;
-            return base.OnConnectedAsync();
+            Servers[connectionId] = server;
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public async Task OnDisconnected(string connectionId)
         {
-            var server = Servers[Context.ConnectionId];
+            Servers.Remove(connectionId, out var server);
+
             server.Transport.Complete();
             await server.Transport.Completion;
-            await base.OnDisconnectedAsync(exception);
         }
 
-        public ChannelReader<OperationMessage> Connect()
+        public ChannelReader<OperationMessage> GetReader(string connectionId)
         {
-            var server = Servers[Context.ConnectionId];
+            var server = Servers[connectionId];
             var hubClientTransport = (HubClientTransport) server.Transport;
-
             return hubClientTransport.MessageChannel.Reader;
         }
 
-        public Task Request(OperationMessage operation)
+        public Task Execute(string connectionId, Request request)
         {
-            var server = Servers[Context.ConnectionId];
+            var server = Servers[connectionId];
             var hubClientTransport = (HubClientTransport) server.Transport;
 
-            return hubClientTransport.ConsumeMessage(operation);
+            return hubClientTransport.ConsumeMessage(new OperationMessage
+            {
+                Id = request.Id,
+                Type = MessageType.GQL_START,
+                Payload = JObject.FromObject(new OperationMessagePayload
+                {
+                    OperationName = request.Operation.OperationName,
+                    Query = request.Operation.Query,
+                    Variables = request.Operation.Variables
+                })
+            });
         }
+    }
+
+    public class Request
+    {
+        public string Id { get; set; }
+
+        public Operation Operation { get; set; }
     }
 
     public class HubClientTransport : IMessageTransport
