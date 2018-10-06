@@ -46,6 +46,7 @@ export class Client implements IStreamSubscriber<FetchResult> {
 
       return () => {
         sub.unsubscribe();
+        // todo: unsub from server
       };
     });
   }

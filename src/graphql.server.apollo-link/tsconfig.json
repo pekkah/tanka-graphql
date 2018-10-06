@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
     "moduleResolution": "node",
     "declaration": true,
     "declarationDir": "./dist",
-    "module": "es2015",
+    "module": "es6",
     "noImplicitAny": true,
     "outDir": "./dist",
     "esModuleInterop": true
