@@ -10,27 +10,35 @@ import {
   HubConnection,
   HubConnectionBuilder,
   IStreamResult,
-  IStreamSubscriber
+  IStreamSubscriber,
+  LogLevel
 } from "@aspnet/signalr";
 
 import PushStream from "zen-push";
 import { OperationMessage } from "./message";
 import { Request } from "./request";
 
-export class Client implements IStreamSubscriber<FetchResult> {
+export class Client implements IStreamSubscriber<OperationMessage> {
   public closed?: boolean;
   private hub: HubConnection;
   private stream: IStreamResult<OperationMessage>;
-  private subject: PushStream<any>;
+  private subject: PushStream<OperationMessage>;
   private nextOperationId: number;
 
   constructor(private url: string) {
-    this.hub = new HubConnectionBuilder().withUrl(this.url).build();
-    this.stream = this.connect();
-    this.subject = new PushStream<OperationMessage>();
+    this.hub = new HubConnectionBuilder()
+      .withUrl(url)
+      .configureLogging(LogLevel.Information)
+      .build();
+    this.hub.start()
+      .then(() => {
+        this.stream = this.connect();
+        this.subject = new PushStream<OperationMessage>();
 
-    // connect stream to subject
-    this.stream.subscribe(this);
+        // connect stream to subject
+        this.stream.subscribe(this);
+      })
+      .catch(err => console.error(err.toString()));
   }
 
   public request(operation: Operation): Observable<FetchResult> {

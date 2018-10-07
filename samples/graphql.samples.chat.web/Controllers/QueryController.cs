@@ -8,7 +8,7 @@ using static fugu.graphql.Parser;
 
 namespace fugu.graphql.samples.chat.web.Controllers
 {
-    [Route("api/graphql")]
+    [Route("graphql")]
     public class QueryController : Controller
     {
         private readonly ChatSchemas _schemas;

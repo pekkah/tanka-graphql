@@ -12,12 +12,18 @@
   <ItemGroup>
     <PackageReference Include="GraphQL.Server.Ui.Playground" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="2.1.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\graphql.server\graphql.server.csproj" />
     <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
     <ProjectReference Include="..\graphql.samples.chat.data\graphql.samples.chat.data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Frontend\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>
