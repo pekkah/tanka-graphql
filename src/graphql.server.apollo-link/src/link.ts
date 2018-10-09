@@ -16,6 +16,7 @@ export class SignalrLink extends ApolloLink {
     operation: Operation,
     forward?: NextLink
   ): Observable<FetchResult> | null {
+    console.log(`Link: ${operation}`);
     return this.client.request(operation);
   }
 }

@@ -23,31 +23,40 @@ export class Client implements IStreamSubscriber<OperationMessage> {
   private hub: HubConnection;
   private stream: IStreamResult<OperationMessage>;
   private subject: PushStream<OperationMessage>;
-  private nextOperationId: number;
+  private nextOperationId: number = 0;
+  private target: PushStream<Request>;
 
   constructor(private url: string) {
     this.hub = new HubConnectionBuilder()
       .withUrl(url)
       .configureLogging(LogLevel.Information)
       .build();
-    this.hub.start()
-      .then(() => {
-        this.stream = this.connect();
-        this.subject = new PushStream<OperationMessage>();
 
-        // connect stream to subject
-        this.stream.subscribe(this);
-      })
-      .catch(err => console.error(err.toString()));
+    this.subject = new PushStream<OperationMessage>();
+    this.target = new PushStream<Request>();
+    this.connect();
   }
 
   public request(operation: Operation): Observable<FetchResult> {
+    console.log(`Client: ${operation}`);
     return new Observable<FetchResult>(subscriber => {
       const opId = this.execute(operation);
       const sub = this.subject.observable
         .filter(fr => fr.id === opId)
         .subscribe(
-          next => subscriber.next(next.payload),
+          next => {
+            if (next.payload == null) {
+              console.log("Next payload is null", next);
+              return;
+            }
+
+            var data = {
+              data: next.payload.Data,
+              errors: next.payload.Errors,
+              extensions: next.payload.Extension
+            };
+            subscriber.next(data);
+          },
           error => subscriber.error(error),
           () => subscriber.complete()
         );
@@ -71,13 +80,25 @@ export class Client implements IStreamSubscriber<OperationMessage> {
     this.subject.complete();
   }
 
-  private connect(): IStreamResult<OperationMessage> {
-    return this.hub.stream<OperationMessage>("Connect");
+  private async connect(): Promise<boolean> {
+    await this.hub.start()
+      .catch(err => console.error(err.toString()));
+
+    this.stream = this.hub.stream<OperationMessage>("Connect");
+
+    // connect stream to subject
+    this.stream.subscribe(this);
+    this.target.observable.subscribe(next => {
+      console.log("Request:", next);
+      this.hub.invoke("Execute", next);
+    });
+    return true;
   }
 
   private execute(operation: Operation): string {
     const id = this.nextId();
-    this.hub.invoke("execute", new Request(id, operation));
+    console.log("Id", id);
+    this.target.next(new Request(id, operation))
     return id;
   }
 
