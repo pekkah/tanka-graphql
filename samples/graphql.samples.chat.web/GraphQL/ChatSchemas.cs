@@ -15,6 +15,7 @@ namespace fugu.graphql.samples.chat.web.GraphQL
 
             Chat = SchemaTools.MakeExecutableSchemaWithIntrospection(
                 schema,
+                resolvers,
                 resolvers).Result;
         }
 

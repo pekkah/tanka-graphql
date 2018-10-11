@@ -2,29 +2,37 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using fugu.graphql.samples.chat.data.domain;
 
 namespace fugu.graphql.samples.chat.data
 {
     public interface IChat
     {
-        Task<IEnumerable<Message>> GetMessagesAsync(int latest);
+        ISourceBlock<Message> MessageStream { get; }
+
+        Task<IEnumerable<Message>> GetMessagesAsync(
+            int latest);
 
         Task<Message> AddMessageAsync(
             string fromId,
             string content);
 
-        Task<Message> EditMessageAsync(string id, string content);
+        Task<Message> EditMessageAsync(
+            string id,
+            string content);
     }
 
     public class Chat : IChat
     {
         private readonly Queue<Message> _messages = new Queue<Message>();
+        private readonly BufferBlock<Message> _messageStream;
 
-        private int lastId = 0;
+        private int _lastId;
 
         public Chat()
         {
+            _messageStream = new BufferBlock<Message>();
         }
 
         public async Task<IEnumerable<Message>> GetMessagesAsync(int latest)
@@ -41,14 +49,14 @@ namespace fugu.graphql.samples.chat.data
             var from = await GetFromAsync(fromId);
             var message = new Message
             {
-                Id = $"{++lastId}",
+                Id = $"{++_lastId}",
                 Content = content,
                 Timestamp = DateTimeOffset.UtcNow,
                 From = from
             };
 
             _messages.Enqueue(message);
-
+            await _messageStream.SendAsync(message);
             return message;
         }
 
@@ -61,9 +69,10 @@ namespace fugu.graphql.samples.chat.data
                 return null;
 
             originalMessage.Content = content;
-
             return originalMessage;
         }
+
+        public ISourceBlock<Message> MessageStream => _messageStream;
 
         private async Task<From> GetFromAsync(string fromId)
         {

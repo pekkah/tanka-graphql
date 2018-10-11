@@ -18,6 +18,11 @@ namespace fugu.graphql.samples.chat.data
                 {"editMessage", resolverService.EditMessageAsync}
             };
 
+            this["Subscription"] = new FieldResolverMap
+            {
+                {"messages", resolverService.StreamMessagesAsync, resolverService.ResolveMessageAsync}
+            };
+
             this["Message"] = new FieldResolverMap()
             {
                 {"id", PropertyOf<Message>(m => m.Id)},

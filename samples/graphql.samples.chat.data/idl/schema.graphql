@@ -10,12 +10,12 @@ type Message {
     timestamp: String
 }
 
-type Query {
-    messages: [Message]
-}
-
 input InputMessage {
     content: String!
+}
+
+type Query {
+    messages: [Message]
 }
 
 type Mutation {
@@ -23,7 +23,12 @@ type Mutation {
     editMessage(id: ID!, message: InputMessage!): Message!
 }
 
+type Subscription {
+    messages: Message
+}
+
 schema {
     query: Query
     mutation: Mutation
+    subscription: Subscription
 }

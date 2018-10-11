@@ -133,8 +133,10 @@ namespace fugu.graphql.sdl
 
             var queryTypeName = schemaDefinition.OperationTypes.Single(o => o.Operation == OperationType.Query).Type
                 .Name.Value;
+
             var mutationTypeName = schemaDefinition.OperationTypes
                 .SingleOrDefault(o => o.Operation == OperationType.Mutation)?.Type.Name.Value;
+
             var subscriptionTypeName = schemaDefinition.OperationTypes
                 .SingleOrDefault(o => o.Operation == OperationType.Subscription)?.Type.Name.Value;
 
