@@ -40,22 +40,25 @@ export class Client implements IStreamSubscriber<OperationMessage> {
   public request(operation: Operation): Observable<FetchResult> {
     console.log(`Client: ${operation}`);
     return new Observable<FetchResult>(subscriber => {
-      const opId = this.execute(operation);
+      const opId = this.start(operation);
       const sub = this.subject.observable
         .filter(fr => fr.id === opId)
         .subscribe(
           next => {
-            if (next.payload == null) {
-              console.log("Next payload is null", next);
-              return;
+            switch(next.type) {
+              case "complete":
+                this.execute(opId, "stop");
+                subscriber.complete();
+                break;
+              case "data":
+                var data = {
+                  data: next.payload.Data,
+                  errors: next.payload.Errors,
+                  extensions: next.payload.Extension
+                };
+                subscriber.next(data);
+                break;
             }
-
-            var data = {
-              data: next.payload.Data,
-              errors: next.payload.Errors,
-              extensions: next.payload.Extension
-            };
-            subscriber.next(data);
           },
           error => subscriber.error(error),
           () => subscriber.complete()
@@ -95,10 +98,14 @@ export class Client implements IStreamSubscriber<OperationMessage> {
     return true;
   }
 
-  private execute(operation: Operation): string {
+  private start(operation: Operation): string {
     const id = this.nextId();
-    console.log("Id", id);
-    this.target.next(new Request(id, operation))
+    this.target.next(new Request(id, "start", operation));
+    return id;
+  }
+
+  private execute(id: string, type: string): string {
+    this.target.next(new Request(id, type, null));
     return id;
   }
 

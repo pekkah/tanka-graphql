@@ -3,7 +3,7 @@
 namespace fugu.graphql.server.subscriptions
 {
     /// <summary>
-    ///     Operation message listener
+    ///     QueryOperation message listener
     /// </summary>
     public interface IOperationMessageListener
     {

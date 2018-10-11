@@ -53,7 +53,7 @@ namespace fugu.graphql.server.tests
             await _hubConnection.InvokeAsync("Execute", new Request()
             {
                 Id = "1",
-                Operation = new Operation()
+                Operation = new QueryOperation()
                 {
                     Query = "{ hello }"
                 }
@@ -90,7 +90,7 @@ namespace fugu.graphql.server.tests
             await _hubConnection.InvokeAsync("Execute", new Request()
             {
                 Id = "1",
-                Operation = new Operation()
+                Operation = new QueryOperation()
                 {
                     Query = @"
 subscription { 

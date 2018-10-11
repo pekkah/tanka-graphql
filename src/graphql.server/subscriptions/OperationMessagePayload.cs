@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using fugu.graphql.server.utilities;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
 namespace fugu.graphql.server.subscriptions
@@ -24,26 +23,30 @@ namespace fugu.graphql.server.subscriptions
         public Dictionary<string, object> Variables { get; set; }
 
         /// <summary>
-        ///     Operation name
+        ///     QueryOperation name
         /// </summary>
         public string OperationName { get; set; }
+
+        [JsonConverter(typeof(VariableConverter))]
+        public Dictionary<string, object> Extensions { get; set; }
     }
 
     internal class VariableConverter : JsonConverter
     {
+        public override bool CanWrite => false;
+
         public override bool CanConvert(Type objectType)
         {
             return true;
         }
-
-        public override bool CanWrite => false;
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+            JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
                 return new Dictionary<string, object>();

@@ -42,6 +42,7 @@ namespace fugu.graphql.server
         {
             return _servers.Execute(Context.ConnectionId, request);
         }
+
     }
 
     public class SubscriptionServerManager
@@ -98,16 +99,19 @@ namespace fugu.graphql.server
             var server = Servers[connectionId];
             var hubClientTransport = (HubClientTransport) server.Transport;
 
+            var payload = request.Operation != null ? JObject.FromObject(new OperationMessagePayload
+            {
+                OperationName = request.Operation.OperationName,
+                Query = request.Operation.Query,
+                Variables = request.Operation.Variables,
+                Extensions = request.Operation.Extensions
+            }): null;
+
             return hubClientTransport.ConsumeMessage(new OperationMessage
             {
                 Id = request.Id,
-                Type = MessageType.GQL_START,
-                Payload = JObject.FromObject(new OperationMessagePayload
-                {
-                    OperationName = request.Operation.OperationName,
-                    Query = request.Operation.Query,
-                    Variables = request.Operation.Variables
-                })
+                Type = request.Type,
+                Payload = payload
             });
         }
     }
@@ -116,7 +120,9 @@ namespace fugu.graphql.server
     {
         public string Id { get; set; }
 
-        public Operation Operation { get; set; }
+        public string Type { get; set; }
+
+        public QueryOperation Operation { get; set; }
     }
 
     public class HubClientTransport : IMessageTransport
@@ -156,7 +162,7 @@ namespace fugu.graphql.server
     {
     }
 
-    public class Operation
+    public class QueryOperation
     {
         public string Query { get; set; }
 

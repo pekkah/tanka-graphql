@@ -5,7 +5,6 @@
   "dependencies": {
     "@types/graphql": "^14.0.1",
     "@types/react-redux": "^6.0.9",
-    "fugu-graphql-server-apollo-link": "file:../../src/graphql.server.apollo-link",
     "graphql": "^14.0.2",
     "graphql-playground-react": "^1.7.4",
     "react": "^16.5.2",

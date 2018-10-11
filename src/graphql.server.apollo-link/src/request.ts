@@ -3,8 +3,11 @@ import { print } from "graphql/language/printer";
 
 export class Request {
   public operation: RequestOperation;
-  constructor(public id: string, operation: Operation) {
-    this.operation = new RequestOperation(operation);
+  constructor(public id: string, public type: string, operation: Operation) {
+    if (operation != null)
+      this.operation = new RequestOperation(operation);
+    else
+      this.operation = null;
   }
 }
 
