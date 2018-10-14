@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using fugu.graphql.server.subscriptions;
 using graphql.server.tests.host;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -30,41 +29,42 @@ namespace fugu.graphql.server.tests
         private readonly TestServer _server;
         private HttpClient _client;
         private SubscriptionServerManager _manager;
-        private EventManager _eventManager;
+        private readonly EventManager _eventManager;
 
         [Fact]
         public async Task Query()
         {
             /* Given */
-            var cts = new TaskCompletionSource<string>();
+            var cts = new TaskCompletionSource<OperationMessage>();
+
+            _hubConnection.On<OperationMessage>("Data", m => { cts.SetResult(m); });
 
             await _hubConnection.StartAsync();
             _hubConnection.Closed += exception =>
             {
                 if (exception != null)
                     cts.SetException(exception);
-                
+
                 return Task.CompletedTask;
             };
 
-            var stream = await _hubConnection.StreamAsChannelAsync<OperationMessage>("Connect");
-
             /* When */
-            await _hubConnection.InvokeAsync("Execute", new Request()
+            await _hubConnection.InvokeAsync("Start", new Request
             {
                 Id = "1",
-                Operation = new QueryOperation()
+                Operation = new QueryOperation
                 {
                     Query = "{ hello }"
                 }
             });
 
-            var message = await stream.ReadAsync();
-
             /* Then */
+            await Task.WhenAny(cts.Task, Task.Delay(TimeSpan.FromSeconds(15)));
+
+            var message = cts.Task.Result;
             var result = message.Payload.ToObject<ExecutionResult>();
             Assert.Equal(MessageType.GQL_DATA, message.Type);
-            Assert.Contains(result.Data, kv => kv.Key =="hello" && kv.Value.ToString() == "world");
+            Assert.Contains(result.Data, kv => kv.Key == "hello" && kv.Value.ToString() == "world");
 
             await _hubConnection.StopAsync();
         }
@@ -73,24 +73,24 @@ namespace fugu.graphql.server.tests
         public async Task Subscribe()
         {
             /* Given */
-            var cts = new TaskCompletionSource<string>();
+            var cts = new TaskCompletionSource<OperationMessage>();
+
+            _hubConnection.On<OperationMessage>("Data", m => { cts.SetResult(m); });
 
             await _hubConnection.StartAsync();
             _hubConnection.Closed += exception =>
             {
                 if (exception != null)
                     cts.SetException(exception);
-                
+
                 return Task.CompletedTask;
             };
 
-            var stream = await _hubConnection.StreamAsChannelAsync<OperationMessage>("Connect");
-
             /* When */
-            await _hubConnection.InvokeAsync("Execute", new Request()
+            await _hubConnection.InvokeAsync("Start", new Request
             {
                 Id = "1",
-                Operation = new QueryOperation()
+                Operation = new QueryOperation
                 {
                     Query = @"
 subscription { 
@@ -100,11 +100,12 @@ subscription {
             });
 
             await _eventManager.Hello("world");
-            var message = await stream.ReadAsync();
 
             /* Then */
+            await Task.WhenAny(cts.Task, Task.Delay(TimeSpan.FromSeconds(15)));
+            var message = cts.Task.Result;
+
             Assert.Equal(MessageType.GQL_DATA, message.Type);
-            
             var result = message.Payload.ToObject<ExecutionResult>();
             Assert.Contains(result.Data, kv => kv.Key == "helloEvents" && kv.Value.ToString() == "world");
 

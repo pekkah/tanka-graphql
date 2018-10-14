@@ -28,6 +28,7 @@ namespace fugu.graphql.server
 
         public Task Start(Request request)
         {
+            request.Type = MessageType.GQL_START;
             return _servers.Execute(Context.ConnectionId, request);
         }
 
