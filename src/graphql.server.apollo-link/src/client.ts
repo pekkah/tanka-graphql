@@ -11,7 +11,8 @@ import {
   HubConnectionBuilder,
   IStreamResult,
   IStreamSubscriber,
-  LogLevel
+  LogLevel,
+  MessageType
 } from "@aspnet/signalr";
 
 import PushStream from "zen-push";
@@ -21,7 +22,6 @@ import { Request } from "./request";
 export class Client implements IStreamSubscriber<OperationMessage> {
   public closed?: boolean;
   private hub: HubConnection;
-  private stream: IStreamResult<OperationMessage>;
   private subject: PushStream<OperationMessage>;
   private nextOperationId: number = 0;
   private target: PushStream<Request>;
@@ -38,7 +38,7 @@ export class Client implements IStreamSubscriber<OperationMessage> {
   }
 
   public request(operation: Operation): Observable<FetchResult> {
-    console.log(`Client: ${operation}`);
+    console.log(`Request: ${operation}`);
     return new Observable<FetchResult>(subscriber => {
       const opId = this.start(operation);
       const sub = this.subject.observable
@@ -47,7 +47,7 @@ export class Client implements IStreamSubscriber<OperationMessage> {
           next => {
             switch(next.type) {
               case "complete":
-                this.execute(opId, "stop");
+                this.stop(opId);
                 subscriber.complete();
                 break;
               case "data":
@@ -65,8 +65,9 @@ export class Client implements IStreamSubscriber<OperationMessage> {
         );
 
       return () => {
+        console.log(`Unsubscribe: ${opId}`);
         sub.unsubscribe();
-        // todo: unsub from server
+        this.stop(opId);
       };
     });
   }
@@ -84,16 +85,20 @@ export class Client implements IStreamSubscriber<OperationMessage> {
   }
 
   private async connect(): Promise<boolean> {
+    this.hub.on("Data", data => this.subject.next(data))
+
     await this.hub.start()
-      .catch(err => console.error(err.toString()));
+    .catch(err => console.error(err.toString()));
 
-    this.stream = this.hub.stream<OperationMessage>("Connect");
-
-    // connect stream to subject
-    this.stream.subscribe(this);
     this.target.observable.subscribe(next => {
-      console.log("Request:", next);
-      this.hub.invoke("Execute", next);
+      console.log("Message:", next);
+
+      switch (next.type) {
+        case "start": this.hub.invoke("Start", next);
+          break;
+        case "stop": this.hub.invoke("Stop", next.id);
+          break;
+      }      
     });
     return true;
   }
@@ -104,8 +109,8 @@ export class Client implements IStreamSubscriber<OperationMessage> {
     return id;
   }
 
-  private execute(id: string, type: string): string {
-    this.target.next(new Request(id, type, null));
+  private stop(id: string): string {
+    this.target.next(new Request(id, "stop", null));
     return id;
   }
 

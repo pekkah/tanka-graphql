@@ -9,7 +9,6 @@ var link = new SignalrLink(client);
 
 class App extends React.Component {
   createLink = (session: Session) => {
-    console.log("Link", link)
     return {
       link: link
     };

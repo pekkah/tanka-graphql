@@ -28,15 +28,12 @@
   },
   "dependencies": {
     "@aspnet/signalr": "^1.0.3",
-    "@types/graphql": "^14.0.1",
+    "@types/graphql": "^14.0.2",
     "@types/zen-push": "^0.1.0",
     "apollo-boost": "^0.1.16",
     "apollo-link": "^1.2.3",
     "graphql": "^14.0.2",
     "react-apollo": "^2.2.2",
     "zen-push": "^0.2.1"
-  },
-  "resolutions": {
-    "graphql": "^14.0.2"
   }
 }

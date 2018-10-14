@@ -59,7 +59,7 @@ namespace fugu.graphql.server.subscriptions
             if (_subscriptions.TryRemove(id, out var removed))
                 return removed.UnsubscribeAsync();
 
-            _logger.LogInformation("Subscription: {subcriptionId} unsubscribed", id);
+            _logger.LogInformation("Subscription: {subscriptionId} unsubscribed", id);
             return Task.CompletedTask;
         }
 
@@ -138,6 +138,7 @@ namespace fugu.graphql.server.subscriptions
                     subscription.Completion.ContinueWith(e => _subscriptions.TryRemove(id, out _));
 #pragma warning restore 4014
 
+                    _logger.LogInformation("Subscription: {subscriptionId} created", id);
                     return subscription;
                 }
 

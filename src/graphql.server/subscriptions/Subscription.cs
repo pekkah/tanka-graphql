@@ -65,6 +65,7 @@ namespace fugu.graphql.server.subscriptions
 
             _writer.Post(message);
             _completionSource.SetResult(null);
+            _logger.LogDebug("Subscription: {subscriptionId} completed", Id);
         }
 
         public Task Completion => _completionSource.Task;
@@ -73,6 +74,7 @@ namespace fugu.graphql.server.subscriptions
         {
             await _subscriptionResult.UnsubscribeAsync();
             await Completion;
+            _logger.LogDebug("Subscription: {subscriptionId} unsubscribed", Id);
         }
 
         protected Task<OperationMessage> ProcessResultAsync(ExecutionResult er)

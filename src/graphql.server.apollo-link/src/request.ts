@@ -1,5 +1,5 @@
 import { Operation } from "apollo-link";
-import { print } from "graphql/language/printer";
+import { print } from "graphql";
 
 export class Request {
   public operation: RequestOperation;
