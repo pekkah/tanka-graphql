@@ -1,7 +1,7 @@
 Fugu GraphQL library
 =====================================
 
-[![Build Status](https://dev.azure.com/fugu-projects/graphql/_apis/build/status/pekkah.fugu-graphql)](https://dev.azure.com/fugu-projects/graphql/_build/latest?definitionId=1)
+[![Build Status](https://dev.azure.com/fugu-fw/graphql/_apis/build/status/pekkah.fugu-graphql)](https://dev.azure.com/fugu-fw/graphql/_build/latest?definitionId=1)
 
 
 ## Features
