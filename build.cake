@@ -1,4 +1,5 @@
 #tool "nuget:?package=GitVersion.CommandLine&version=4.0.0-beta0014&prerelease"
+#addin "Cake.Npm"
 
 var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
@@ -10,6 +11,8 @@ var sln = Argument<string>("sln", "./fugu-graphql.sln");
 var netstandard20 = "netstandard2.0";
 var netcoreapp21 = "netcoreapp2.1";
 var projectFiles = GetFiles("./src/**/*.csproj").Select(f => f.FullPath);
+var packageFolders = GetFiles("./src/*/package.json")
+                .Select(f => f.GetDirectory().FullPath);
 
 var version = "0.0.0-dev";
 
@@ -72,6 +75,17 @@ Task("Build")
       {
         DotNetCoreBuild(projectFile, settings);
       }
+
+      foreach(var packageFolder in packageFolders)
+      {
+        var npmSettings = new NpmRunScriptSettings();
+        npmSettings.ScriptName = "build";
+        npmSettings.LogLevel = NpmLogLevel.Info;
+        npmSettings.WorkingDirectory = packageFolder;
+
+        Information($"NPM run build: {packageFolder}");
+        NpmRunScript(npmSettings);
+      }
   });
 
 Task("Clean")
@@ -89,6 +103,17 @@ Task("Restore")
       foreach(var projectFile in projectFiles)
       {
         DotNetCoreRestore(projectFile);
+      }
+
+      foreach(var packageFolder in packageFolders)
+      {
+        var settings = new NpmInstallSettings();
+        settings.LogLevel = NpmLogLevel.Info;
+        settings.WorkingDirectory = packageFolder;
+        settings.Production = false;
+
+        Information($"NPM install: {packageFolder}");
+        NpmInstall(settings);
       }
   });
 

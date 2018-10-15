@@ -1,2 +1,10 @@
 /node_modules
 /coverage
+/src
+/.rpt2_cache
+/.vscodo
+jest.config.js
+rollup.config.js
+tsconfig.json
+tslint.json
+yarn.lock

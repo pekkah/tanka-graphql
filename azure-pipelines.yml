@@ -28,22 +28,27 @@ steps:
 - task: CmdLine@1
   displayName: Build.cake
   inputs:
-    filename: 'dotnet-tools\dotnet-cake.exe'
-    arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory)\nugets -configuration=$(buildConfiguration)'
+    filename: 'dotnet-tools/dotnet-cake.exe'
+    arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory)/nugets -configuration=$(buildConfiguration)'
 
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: VSTest
-    searchFolder: '$(Build.ArtifactStagingDirectory)\nugets'
+    searchFolder: '$(Build.ArtifactStagingDirectory)/nugets'
     testResultsFiles: '**/*.trx' 
     mergeTestResults: false
 
 # Publish Build Artifacts
 - task: PublishBuildArtifacts@1
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)\nugets' 
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)/nugets' 
     artifactName: 'artifacts' 
     #publishLocation: 'Container' # Options: container, filePath
     #targetPath: # Required when publishLocation == FilePath
     #parallel: false # Optional
     #parallelCount: # Optional
+    
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: 'src/graphql.server-apollo-link' 
+    artifactName: 'apollo-link' 
