@@ -34,9 +34,9 @@ steps:
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: VSTest
-    searchFolder: $(Build.ArtifactStagingDirectory)\nugets
+    searchFolder: '$(Build.ArtifactStagingDirectory)\nugets'
     testResultsFiles: '**/*.trx' 
-    mergeTestResults: true
+    mergeTestResults: false
 
 # Publish Build Artifacts
 - task: PublishBuildArtifacts@1
