@@ -50,5 +50,5 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    pathtoPublish: 'src\graphql.server-apollo-link' 
+    pathtoPublish: 'src\graphql.server.apollo-link' 
     artifactName: 'apollo-link' 
