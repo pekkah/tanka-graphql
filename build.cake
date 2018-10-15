@@ -102,11 +102,18 @@ Task("SetVersion")
     });
 
 Task("Test")
+  .IsDependentOn("Build")
   .Does(()=> {
       var projectFiles = GetFiles("./tests/**/*Tests.csproj");
+      var settings = new DotNetCoreTestSettings()
+      {
+         ResultsDirectory = new DirectoryPath(artifactsDir),
+         Logger = "trx"
+      };
+
       foreach(var file in projectFiles)
       {
-          DotNetCoreTest(file.FullPath);
+          DotNetCoreTest(file.FullPath, settings);
       }
     });
 

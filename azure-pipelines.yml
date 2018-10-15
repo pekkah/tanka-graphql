@@ -31,10 +31,16 @@ steps:
     filename: 'dotnet-tools\dotnet-cake.exe'
     arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory)\nugets'
 
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: VSTest
+    searchFolder: $(Build.ArtifactStagingDirectory)\nugets
+    mergeTestResults: true
+
 # Publish Build Artifacts
 - task: PublishBuildArtifacts@1
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)\nugets\' 
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)\nugets\*.nupkg' 
     artifactName: 'nugets' 
     #publishLocation: 'Container' # Options: container, filePath
     #targetPath: # Required when publishLocation == FilePath
