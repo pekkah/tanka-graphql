@@ -29,7 +29,7 @@ steps:
   displayName: Build.cake
   inputs:
     filename: 'dotnet-tools\dotnet-cake.exe'
-    arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory)\nugets'
+    arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory)\nugets -configuration=$(buildConfiguration)'
 
 - task: PublishTestResults@2
   inputs:
