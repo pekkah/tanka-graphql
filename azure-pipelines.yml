@@ -35,6 +35,7 @@ steps:
   inputs:
     testResultsFormat: VSTest
     searchFolder: $(Build.ArtifactStagingDirectory)\nugets
+    testResultsFiles: '**/*.trx' 
     mergeTestResults: true
 
 # Publish Build Artifacts
