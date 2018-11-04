@@ -1,46 +1,67 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using fugu.graphql.server.subscriptions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace fugu.graphql.server
 {
-    public class ServerHub : Hub<IServerClient>
+    public class ServerHub : Hub
     {
-        private readonly SubscriptionServerManager _servers;
+        private readonly ConcurrentDictionary<string, QueryManager> _clients = new ConcurrentDictionary<string, QueryManager>();
 
-        public ServerHub(SubscriptionServerManager servers)
+        public ServerHub()
         {
-            _servers = servers;
         }
 
         public override Task OnConnectedAsync()
         {
-            _servers.OnConnected(Context.ConnectionId, Clients.Caller);
-            return base.OnConnectedAsync();
+            _clients[Context.ConnectionId] = new QueryManager();
+            return Task.CompletedTask;
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            await _servers.OnDisconnected(Context.ConnectionId);
-            await base.OnDisconnectedAsync(exception);
+            if (_clients.TryGetValue(Context.ConnectionId, out var queryManager))
+            {
+                await queryManager.CloseAllAsync();
+            }
         }
 
-        public Task Start(Request request)
+        [HubMethodName("query")]
+        public async Task<ChannelReader<ExecutionResult>> QueryAsync(QueryRequest query, CancellationToken cancellationToken)
         {
-            request.Type = MessageType.GQL_START;
-            return _servers.Execute(Context.ConnectionId, request);
-        }
+            if (!_clients.TryGetValue(Context.ConnectionId, out var queryManager))
+            {
+                throw new InvalidOperationException($"No QueryManager for connection '{Context.ConnectionId}'");
+            }
 
-        public Task Stop(string id)
-        {
-            return _servers.Stop(Context.ConnectionId, id);
+            var queryResult = await queryManager.QueryAsync(query, cancellationToken);
+            var channel = queryResult.Channel;
+            return channel.Reader;
         }
-
     }
 
-    public interface IServerClient
+    public class QueryRequest
     {
-        Task Data(OperationMessage message);
+    }
+
+    public class QueryManager
+    {
+        public async Task CloseAllAsync()
+        {
+            
+        }
+
+        public async Task<QueryResult> QueryAsync(QueryRequest query, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class QueryResult
+    {
+        public Channel<ExecutionResult> Channel { get; }
     }
 }

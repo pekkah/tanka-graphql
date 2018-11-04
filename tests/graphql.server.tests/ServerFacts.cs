@@ -17,7 +17,6 @@ namespace fugu.graphql.server.tests
         {
             _client = factory.CreateClient();
             _server = factory.Server;
-            _manager = factory.Server.Host.Services.GetRequiredService<SubscriptionServerManager>();
             _eventManager = factory.Server.Host.Services.GetRequiredService<EventManager>();
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(new Uri(_server.BaseAddress, "graphql"),
@@ -28,7 +27,6 @@ namespace fugu.graphql.server.tests
         private readonly HubConnection _hubConnection;
         private readonly TestServer _server;
         private HttpClient _client;
-        private SubscriptionServerManager _manager;
         private readonly EventManager _eventManager;
 
         [Fact]

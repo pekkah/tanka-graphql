@@ -55,7 +55,6 @@ namespace graphql.server.tests.host
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
 
-            services.AddSingleton<SubscriptionServerManager>();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; });
         }
 
