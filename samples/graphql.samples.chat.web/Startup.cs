@@ -33,7 +33,6 @@ namespace fugu.graphql.samples.chat.web
             services.AddSingleton<ChatSchemas>();
             services.AddSingleton<ISchema>(provider => provider.GetRequiredService<ChatSchemas>().Chat);
 
-            services.AddSingleton<SubscriptionServerManager>();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; });
             services.AddCors(options =>
             {

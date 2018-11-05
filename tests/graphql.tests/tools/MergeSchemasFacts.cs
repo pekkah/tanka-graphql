@@ -55,7 +55,7 @@ namespace fugu.graphql.tests.tools
             await mergedSchema.InitializeAsync();
 
             /* Then */
-            Assert.Single(mergedSchema.Query.Fields, pair => pair.Key == "left" && pair.Value.Type == ScalarType.String);
+            Assert.Single(mergedSchema.Query.Fields, pair => pair.Key == "left" && (ScalarType) pair.Value.Type == ScalarType.String);
         }
     }
 }

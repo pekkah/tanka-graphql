@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using fugu.graphql.type;
+// ReSharper disable InconsistentNaming
 
 namespace fugu.graphql.introspection
 {
@@ -71,15 +72,8 @@ namespace fugu.graphql.introspection
         /// <returns></returns>
         public __Type GetType(IGraphQLType type, ISchema schema)
         {
-            try
-            {
-                var __type = Examiner.Examine(type, schema);
-                return __type;
-            }
-            catch (Exception e)
-            {
-                throw;
-            }         
+            var __type = Examiner.Examine(type, schema);
+            return __type;
         }
 
         public IEnumerable<__Directive> GetDirectives(ISchema data)

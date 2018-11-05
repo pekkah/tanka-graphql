@@ -365,7 +365,7 @@ namespace fugu.graphql.sdl
                 {
                     defaultValue = Values.CoerceValue(definition.DefaultValue, type);
                 }
-                catch (NullValueForNonNullTypeException e)
+                catch (NullValueForNonNullTypeException)
                 {
                     defaultValue = null;
                 }
