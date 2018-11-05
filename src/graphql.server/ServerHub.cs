@@ -160,7 +160,10 @@ namespace fugu.graphql.server
                 InitialValue = null
             });
 
-            cancellationToken.Register(async () => await result.UnsubscribeAsync());
+            cancellationToken.Register(async () =>
+            {
+                await result.UnsubscribeAsync();
+            });
 
             var channel = Channel.CreateUnbounded<ExecutionResult>();
             var writer = new ActionBlock<ExecutionResult>(
