@@ -54,6 +54,7 @@ namespace graphql.server.tests.host
                 .MakeExecutableSchemaWithIntrospection(new Schema(query, null, sub), resolvers, resolvers).Result;
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
+            services.AddSingleton<ServerClients>();
 
             services.AddSignalR(options => { options.EnableDetailedErrors = true; });
         }
