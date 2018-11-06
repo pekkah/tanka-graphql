@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using fugu.graphql.server.utilities;
 using fugu.graphql.type;
 using GraphQLParser.AST;
 
@@ -16,10 +18,6 @@ namespace fugu.graphql.server
         public QueryManager(ISchema schema)
         {
             _schema = schema;
-        }
-
-        public async Task CloseAllAsync()
-        {
         }
 
         public async Task<QueryStream> QueryAsync(QueryRequest query, CancellationToken cancellationToken)
@@ -83,12 +81,18 @@ namespace fugu.graphql.server
                 InitialValue = null
             });
 
-            cancellationToken.Register(async () =>
+            var channel = Channel.CreateUnbounded<ExecutionResult>();
+
+#pragma warning disable 4014
+            // ReSharper disable once MethodSupportsCancellation
+            Task.Run(async () =>
+#pragma warning restore 4014
             {
+                await cancellationToken.WhenCancelled();
                 await result.UnsubscribeAsync();
+                channel.Writer.TryComplete();
             });
 
-            var channel = Channel.CreateUnbounded<ExecutionResult>();
             var writer = new ActionBlock<ExecutionResult>(
                 executionResult => channel.Writer.WriteAsync(executionResult, cancellationToken),
                 new ExecutionDataflowBlockOptions
@@ -101,7 +105,8 @@ namespace fugu.graphql.server
                 PropagateCompletion = true
             });
 
-            return new QueryStream(channel);
+            var stream = new QueryStream(channel);
+            return stream;
         }
     }
 }

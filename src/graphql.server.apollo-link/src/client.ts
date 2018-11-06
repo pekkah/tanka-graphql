@@ -3,7 +3,8 @@ import {
   FetchResult,
   NextLink,
   Observable,
-  Operation
+  Operation,
+  fromPromise
 } from "apollo-link";
 
 import {
@@ -21,7 +22,7 @@ import { Request } from "./request";
 
 export class Client {
   private hub: HubConnection;
-  private connected: boolean
+  private connected: boolean;
 
   constructor(private url: string) {
     this.connected = false;
@@ -31,38 +32,42 @@ export class Client {
       .build();
   }
 
-  public request(operation: Operation): Observable<FetchResult> {
-    console.log(`Request: ${operation}`);
+  public request(operation: Operation) : Observable<FetchResult> {
     return new Observable<FetchResult>(subscriber => {
-      this.connect().then(() => {
-        const stream = this.hub.stream("query", new Request(operation));
-        const sub = new Subscription(stream);
+      const sub = this.query(operation);
+      sub.source.observable.subscribe(
+        next => {
+          subscriber.next({
+            data: next.data,
+            errors: next.errors
+          });
+        },
+        err => {
+          console.log(`Error: ${err}`);
+          subscriber.error(err);
+        },
+        () => {
+          console.log("Completed");
+          subscriber.complete();
+        }
+      );
 
-        sub.source.observable.subscribe(
-          next => {
-            subscriber.next({
-              data: next.data,
-              errors: next.errors
-            });
-          },
-          err => {
-            console.log(`Error: ${err}`);
-            subscriber.error(err);
-          },
-          () => {
-            console.log("Completed");
-            subscriber.complete();
-          }
-        );
-
-        return () => {
-          sub.dispose();
-        };
-      });
+      return ()=> sub.dispose();
     });
   }
 
-  private async connect(): Promise<boolean> {
+  public query(operation: Operation) : Subscription {
+    const sub = new Subscription();
+
+    this.connect().then(()=> {
+      const stream = this.hub.stream("query", new Request(operation));
+      sub.subscribe(stream);
+    });
+
+    return sub;
+  }
+
+  public async connect(): Promise<boolean> {
     if (this.connected) {
       return true;
     }
@@ -86,8 +91,11 @@ class Subscription implements IStreamSubscriber<ExecutionResult> {
 
   private sub: ISubscription<ExecutionResult>;
 
-  constructor(private stream: IStreamResult<ExecutionResult>) {
+  constructor() {
     this.source = new PushStream<ExecutionResult>();
+  }
+
+  public subscribe(stream: IStreamResult<ExecutionResult>) {
     this.sub = stream.subscribe(this);
   }
 
@@ -104,6 +112,7 @@ class Subscription implements IStreamSubscriber<ExecutionResult> {
   }
 
   public dispose() {
+    console.log(`Disposing ${this}`);
     this.sub.dispose();
   }
 }

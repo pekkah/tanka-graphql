@@ -27,8 +27,7 @@ namespace fugu.graphql.server
 
         public Task OnDisconnectedAsync(HubCallerContext context, Exception exception)
         {
-            if (_clients.TryGetValue(context.ConnectionId, out var queryManager)) return queryManager.CloseAllAsync();
-
+            _clients.TryRemove(context.ConnectionId, out _);
             return Task.CompletedTask;
         }
 

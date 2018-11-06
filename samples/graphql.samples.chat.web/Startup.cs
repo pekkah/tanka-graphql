@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using fugu.graphql.samples.chat.data;
 using fugu.graphql.samples.chat.data.domain;
 using fugu.graphql.samples.chat.web.GraphQL;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace fugu.graphql.samples.chat.web
 {
@@ -33,7 +35,10 @@ namespace fugu.graphql.samples.chat.web
             services.AddSingleton<ChatSchemas>();
             services.AddSingleton<ISchema>(provider => provider.GetRequiredService<ChatSchemas>().Chat);
             services.AddSingleton<ServerClients>();
-            services.AddSignalR(options => { options.EnableDetailedErrors = true; });
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true; 
+            });
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
