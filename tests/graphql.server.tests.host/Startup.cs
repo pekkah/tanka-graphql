@@ -41,9 +41,17 @@ namespace graphql.server.tests.host
                     sub.Name, new FieldResolverMap
                     {
                         {
-                            "helloEvents", context => Task.FromResult(Resolve.Stream(
-                                eventManager.HelloEvents,
-                                () => Task.CompletedTask)),
+                            "helloEvents", context =>
+                            {
+                                var events = eventManager.Subscribe();
+                                return Task.FromResult(Resolve.Stream(
+                                    events,
+                                    () =>
+                                    {
+                                        events.Complete();
+                                        return events.Completion;
+                                    }));
+                            },
                             context => Task.FromResult(Resolve.As(context.ObjectValue))
                         }
                     }
@@ -54,8 +62,8 @@ namespace graphql.server.tests.host
                 .MakeExecutableSchemaWithIntrospection(new Schema(query, null, sub), resolvers, resolvers).Result;
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
+            services.AddSingleton<ServerClients>();
 
-            services.AddSingleton<SubscriptionServerManager>();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; });
         }
 
@@ -77,11 +85,18 @@ namespace graphql.server.tests.host
             _buffer = new BufferBlock<string>();
         }
 
-        public ISourceBlock<string> HelloEvents => _buffer;
-
         public Task Hello(string message)
         {
             return _buffer.SendAsync(message);
+        }
+
+        public ISourceBlock<string> Subscribe()
+        {
+            var targetBlock = new BufferBlock<string>();
+
+            _buffer.LinkTo(targetBlock);
+
+            return targetBlock;
         }
     }
 }

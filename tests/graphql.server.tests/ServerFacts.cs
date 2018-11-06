@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
-using fugu.graphql.server.subscriptions;
 using graphql.server.tests.host;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -17,99 +17,117 @@ namespace fugu.graphql.server.tests
         {
             _client = factory.CreateClient();
             _server = factory.Server;
-            _manager = factory.Server.Host.Services.GetRequiredService<SubscriptionServerManager>();
             _eventManager = factory.Server.Host.Services.GetRequiredService<EventManager>();
-            _hubConnection = new HubConnectionBuilder()
+        }
+
+        private readonly TestServer _server;
+        private readonly HttpClient _client;
+        private readonly EventManager _eventManager;
+
+        private HubConnection Connect()
+        {
+            var connection = new HubConnectionBuilder()
                 .WithUrl(new Uri(_server.BaseAddress, "graphql"),
                     o => { o.HttpMessageHandlerFactory = _ => _server.CreateHandler(); })
                 .Build();
-        }
 
-        private readonly HubConnection _hubConnection;
-        private readonly TestServer _server;
-        private HttpClient _client;
-        private SubscriptionServerManager _manager;
-        private readonly EventManager _eventManager;
+            connection.Closed += exception =>
+            {
+                Assert.Null(exception);
+                return Task.CompletedTask;
+            };
+
+            return connection;
+        }
 
         [Fact]
         public async Task Query()
         {
             /* Given */
-            var cts = new TaskCompletionSource<OperationMessage>();
-
-            _hubConnection.On<OperationMessage>("Data", m => { cts.SetResult(m); });
-
-            await _hubConnection.StartAsync();
-            _hubConnection.Closed += exception =>
-            {
-                if (exception != null)
-                    cts.SetException(exception);
-
-                return Task.CompletedTask;
-            };
+            var cts = new CancellationTokenSource();
+            var hubConnection = Connect();
+            await hubConnection.StartAsync();
 
             /* When */
-            await _hubConnection.InvokeAsync("Start", new Request
+            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
             {
-                Id = "1",
-                Operation = new QueryOperation
-                {
                     Query = "{ hello }"
-                }
-            });
+            }, cancellationToken: cts.Token);
 
             /* Then */
-            await Task.WhenAny(cts.Task, Task.Delay(TimeSpan.FromSeconds(15)));
+            var result = await reader.ReadAsync(cts.Token);
 
-            var message = cts.Task.Result;
-            var result = message.Payload.ToObject<ExecutionResult>();
-            Assert.Equal(MessageType.GQL_DATA, message.Type);
-            Assert.Contains(result.Data, kv => kv.Key == "hello" && kv.Value.ToString() == "world");
+            Assert.Contains(result.Data, kv =>
+            {
+                var (key, value) = kv;
+                return key == "hello" && value.ToString() == "world";
+            });
 
-            await _hubConnection.StopAsync();
+            await hubConnection.StopAsync();
         }
 
         [Fact]
         public async Task Subscribe()
         {
             /* Given */
-            var cts = new TaskCompletionSource<OperationMessage>();
-
-            _hubConnection.On<OperationMessage>("Data", m => { cts.SetResult(m); });
-
-            await _hubConnection.StartAsync();
-            _hubConnection.Closed += exception =>
-            {
-                if (exception != null)
-                    cts.SetException(exception);
-
-                return Task.CompletedTask;
-            };
+            var cts = new CancellationTokenSource();
+            var hubConnection = Connect();
+            await hubConnection.StartAsync();
 
             /* When */
-            await _hubConnection.InvokeAsync("Start", new Request
+            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
             {
-                Id = "1",
-                Operation = new QueryOperation
-                {
                     Query = @"
 subscription { 
     helloEvents 
 }"
-                }
-            });
+            }, cancellationToken: cts.Token);
 
             await _eventManager.Hello("world");
 
             /* Then */
-            await Task.WhenAny(cts.Task, Task.Delay(TimeSpan.FromSeconds(15)));
-            var message = cts.Task.Result;
+            var result = await reader.ReadAsync(cts.Token);
 
-            Assert.Equal(MessageType.GQL_DATA, message.Type);
-            var result = message.Payload.ToObject<ExecutionResult>();
-            Assert.Contains(result.Data, kv => kv.Key == "helloEvents" && kv.Value.ToString() == "world");
+            Assert.Contains(result.Data, kv =>
+            {
+                var (key, value) = kv;
+                return key == "helloEvents" && value.ToString() == "world";
+            });
 
-            await _hubConnection.StopAsync();
+            await hubConnection.StopAsync();
+        }
+
+        [Fact]
+        public async Task Subscribe_with_unsubscribe()
+        {
+            /* Given */
+            var cts = new CancellationTokenSource();
+            var hubConnection = Connect();
+            await hubConnection.StartAsync();
+
+            /* When */
+            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
+            {
+                Query = @"
+subscription { 
+    helloEvents 
+}"
+            }, cancellationToken: cts.Token);
+
+            await _eventManager.Hello("world");
+
+            /* Then */
+            var result = await reader.ReadAsync(cts.Token);
+
+            Assert.Contains(result.Data, kv =>
+            {
+                var (key, value) = kv;
+                return key == "helloEvents" && value.ToString() == "world";
+            });
+
+            cts.Cancel();
+
+            await hubConnection.StopAsync();
         }
     }
 }

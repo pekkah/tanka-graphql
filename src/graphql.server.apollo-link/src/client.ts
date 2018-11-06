@@ -3,7 +3,8 @@ import {
   FetchResult,
   NextLink,
   Observable,
-  Operation
+  Operation,
+  fromPromise
 } from "apollo-link";
 
 import {
@@ -11,110 +12,107 @@ import {
   HubConnectionBuilder,
   IStreamResult,
   IStreamSubscriber,
-  LogLevel,
-  MessageType
+  ISubscription,
+  LogLevel
 } from "@aspnet/signalr";
 
 import PushStream from "zen-push";
-import { OperationMessage } from "./message";
+import { ExecutionResult } from "./message";
 import { Request } from "./request";
 
-export class Client implements IStreamSubscriber<OperationMessage> {
-  public closed?: boolean;
+export class Client {
   private hub: HubConnection;
-  private subject: PushStream<OperationMessage>;
-  private nextOperationId: number = 0;
-  private target: PushStream<Request>;
+  private connected: boolean;
 
   constructor(private url: string) {
+    this.connected = false;
     this.hub = new HubConnectionBuilder()
       .withUrl(url)
-      .configureLogging(LogLevel.Information)
+      .configureLogging(LogLevel.Debug)
       .build();
-
-    this.subject = new PushStream<OperationMessage>();
-    this.target = new PushStream<Request>();
-    this.connect();
   }
 
-  public request(operation: Operation): Observable<FetchResult> {
-    console.log(`Request: ${operation}`);
+  public request(operation: Operation) : Observable<FetchResult> {
     return new Observable<FetchResult>(subscriber => {
-      const opId = this.start(operation);
-      const sub = this.subject.observable
-        .filter(fr => fr.id === opId)
-        .subscribe(
-          next => {
-            switch(next.type) {
-              case "complete":
-                this.stop(opId);
-                subscriber.complete();
-                break;
-              case "data":
-                var data = {
-                  data: next.payload.Data,
-                  errors: next.payload.Errors,
-                  extensions: next.payload.Extension
-                };
-                subscriber.next(data);
-                break;
-            }
-          },
-          error => subscriber.error(error),
-          () => subscriber.complete()
-        );
+      const sub = this.query(operation);
+      sub.source.observable.subscribe(
+        next => {
+          subscriber.next({
+            data: next.data,
+            errors: next.errors
+          });
+        },
+        err => {
+          console.log(`Error: ${err}`);
+          subscriber.error(err);
+        },
+        () => {
+          console.log("Completed");
+          subscriber.complete();
+        }
+      );
 
-      return () => {
-        console.log(`Unsubscribe: ${opId}`);
-        sub.unsubscribe();
-        this.stop(opId);
-      };
+      return ()=> sub.dispose();
     });
   }
 
-  public next(value: OperationMessage): void {
-    this.subject.next(value);
-  }
+  public query(operation: Operation) : Subscription {
+    const sub = new Subscription();
 
-  public error(err: any): void {
-    this.subject.error(err);
-  }
-
-  public complete(): void {
-    this.subject.complete();
-  }
-
-  private async connect(): Promise<boolean> {
-    this.hub.on("Data", data => this.subject.next(data))
-
-    await this.hub.start()
-    .catch(err => console.error(err.toString()));
-
-    this.target.observable.subscribe(next => {
-      console.log("Message:", next);
-
-      switch (next.type) {
-        case "start": this.hub.invoke("Start", next);
-          break;
-        case "stop": this.hub.invoke("Stop", next.id);
-          break;
-      }      
+    this.connect().then(()=> {
+      const stream = this.hub.stream("query", new Request(operation));
+      sub.subscribe(stream);
     });
+
+    return sub;
+  }
+
+  public async connect(): Promise<boolean> {
+    if (this.connected) {
+      return true;
+    }
+
+    this.connected = true;
+    console.log("Starting hub");
+    await this.hub.start().catch(err => {
+      console.error(err.toString());
+      this.connected = false;
+    });
+
+    console.log("Hub started");
+    this.connected = true;
     return true;
   }
+}
 
-  private start(operation: Operation): string {
-    const id = this.nextId();
-    this.target.next(new Request(id, "start", operation));
-    return id;
+class Subscription implements IStreamSubscriber<ExecutionResult> {
+  public closed?: boolean;
+  public source: PushStream<ExecutionResult>;
+
+  private sub: ISubscription<ExecutionResult>;
+
+  constructor() {
+    this.source = new PushStream<ExecutionResult>();
   }
 
-  private stop(id: string): string {
-    this.target.next(new Request(id, "stop", null));
-    return id;
+  public subscribe(stream: IStreamResult<ExecutionResult>) {
+    this.sub = stream.subscribe(this);
   }
 
-  private nextId(): string {
-    return String(++this.nextOperationId);
+  public next(value: ExecutionResult): void {
+    this.source.next(value);
+  }
+  public error(err: any): void {
+    this.source.error(err);
+    this.closed = true;
+  }
+  public complete(): void {
+    this.source.complete();
+    this.closed = true;
+  }
+
+  public dispose() {
+    console.log(`Disposing ${this}`);
+    this.sub.dispose();
   }
 }

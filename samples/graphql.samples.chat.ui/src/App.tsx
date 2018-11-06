@@ -4,7 +4,7 @@ import { store, Playground } from 'graphql-playground-react'
 import { Session } from 'graphql-playground-react/lib/state/sessions/reducers';
 import { Client, SignalrLink } from 'fugu-graphql-server-apollo-link';
 
-var client = new Client("http://localhost:56794/graphql-ws");
+var client = new Client("https://localhost:5000/graphql-ws");
 var link = new SignalrLink(client);
 
 class App extends React.Component {
@@ -17,8 +17,7 @@ class App extends React.Component {
   public render() {
     return (
       <Provider store={store}>
-        <Playground endpoint="http://localhost:56794/graphql"
-          subscriptionEndpoint="http://localhost:56794/graphql-ws"
+        <Playground
           createApolloLink={this.createLink}
         />
       </Provider>

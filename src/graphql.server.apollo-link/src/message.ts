@@ -1,7 +1,10 @@
-import { FetchResult } from "apollo-link";
+import { GraphQLError } from "graphql";
 
-export class OperationMessage {
-  public id: string;
-  public type: string;
-  public payload: any;
+export class ExecutionResult {
+  public errors?: ReadonlyArray<GraphQLError>;
+  public data?: Record<string, any>;
+}
+
+export class QueryError {
+  public message: string;
 }

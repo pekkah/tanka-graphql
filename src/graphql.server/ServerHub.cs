@@ -1,46 +1,38 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using fugu.graphql.server.subscriptions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace fugu.graphql.server
 {
-    public class ServerHub : Hub<IServerClient>
+    public class ServerHub : Hub
     {
-        private readonly SubscriptionServerManager _servers;
+        private readonly ServerClients _clients;
 
-        public ServerHub(SubscriptionServerManager servers)
+        public ServerHub(ServerClients clients)
         {
-            _servers = servers;
+            _clients = clients;
         }
 
         public override Task OnConnectedAsync()
         {
-            _servers.OnConnected(Context.ConnectionId, Clients.Caller);
-            return base.OnConnectedAsync();
+            return _clients.OnConnectedAsync(Context);
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override Task OnDisconnectedAsync(Exception exception)
         {
-            await _servers.OnDisconnected(Context.ConnectionId);
-            await base.OnDisconnectedAsync(exception);
+            return _clients.OnDisconnectedAsync(Context, exception);
         }
 
-        public Task Start(Request request)
+        [HubMethodName("query")]
+        public async Task<ChannelReader<ExecutionResult>> QueryAsync(
+            QueryRequest query,
+            CancellationToken cancellationToken)
         {
-            request.Type = MessageType.GQL_START;
-            return _servers.Execute(Context.ConnectionId, request);
+            var queryResult = await _clients.QueryAsync(Context, query, cancellationToken);
+            var channel = queryResult.Channel;
+            return channel.Reader;
         }
-
-        public Task Stop(string id)
-        {
-            return _servers.Stop(Context.ConnectionId, id);
-        }
-
-    }
-
-    public interface IServerClient
-    {
-        Task Data(OperationMessage message);
     }
 }

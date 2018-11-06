@@ -16,7 +16,7 @@ steps:
 - task: DotNetCoreInstaller@0
   displayName: Install SDK
   inputs:
-    version: '2.1.402' # replace this value with the version that you need for your project
+    version: '2.2.100-preview3-009430' # replace this value with the version that you need for your project
 
 - task: DotNetCoreCLI@2
   displayName: Install cake.tool
