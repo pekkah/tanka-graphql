@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using fugu.graphql.server.subscriptions;
 using graphql.server.tests.host;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -22,7 +21,7 @@ namespace fugu.graphql.server.tests
         }
 
         private readonly TestServer _server;
-        private HttpClient _client;
+        private readonly HttpClient _client;
         private readonly EventManager _eventManager;
 
         private HubConnection Connect()

@@ -1,36 +1,10 @@
 using System;
 using System.Collections.Generic;
-using fugu.graphql.server.utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace fugu.graphql.server.subscriptions
+namespace fugu.graphql.server.utilities
 {
-    /// <summary>
-    ///     Payload of start message
-    /// </summary>
-    public class OperationMessagePayload
-    {
-        /// <summary>
-        ///     Query, mutation or subsciption query
-        /// </summary>
-        public string Query { get; set; }
-
-        /// <summary>
-        ///     Variables
-        /// </summary>
-        [JsonConverter(typeof(VariableConverter))]
-        public Dictionary<string, object> Variables { get; set; }
-
-        /// <summary>
-        ///     QueryOperation name
-        /// </summary>
-        public string OperationName { get; set; }
-
-        [JsonConverter(typeof(VariableConverter))]
-        public Dictionary<string, object> Extensions { get; set; }
-    }
-
     internal class VariableConverter : JsonConverter
     {
         public override bool CanWrite => false;

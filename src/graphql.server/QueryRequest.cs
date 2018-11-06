@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using fugu.graphql.server.subscriptions;
+using fugu.graphql.server.utilities;
 using Newtonsoft.Json;
 
 namespace fugu.graphql.server

@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="subscriptions\**" />
+    <EmbeddedResource Remove="subscriptions\**" />
+    <None Remove="subscriptions\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0-preview3-35497" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0-preview3-35497" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
@@ -14,10 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\graphql\graphql.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="subscriptions\" />
   </ItemGroup>
 
 </Project>
