@@ -25,14 +25,14 @@ namespace fugu.graphql.samples.chat.web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // graphql
             services.AddSingleton<IChat, Chat>();
             services.AddSingleton<IChatResolverService, ChatResolverService>();
             services.AddSingleton<ChatSchemas>();
             services.AddSingleton<ISchema>(provider => provider.GetRequiredService<ChatSchemas>().Chat);
-
+            services.AddSingleton<ServerClients>();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; });
             services.AddCors(options =>
             {
@@ -40,6 +40,7 @@ namespace fugu.graphql.samples.chat.web
                 {
                     policy.WithOrigins("http://localhost:3000");
                     policy.AllowAnyHeader();
+                    policy.WithHeaders("X-Requested-With");
                     policy.AllowAnyMethod();
                     policy.AllowCredentials();
                 });

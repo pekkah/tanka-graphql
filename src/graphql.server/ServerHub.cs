@@ -6,9 +6,11 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using fugu.graphql.server.subscriptions;
 using fugu.graphql.type;
 using GraphQLParser.AST;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 
 namespace fugu.graphql.server
 {
@@ -80,10 +82,12 @@ namespace fugu.graphql.server
     {
         public string Query { get; set; }
 
+        [JsonConverter(typeof(VariableConverter))]
         public Dictionary<string, object> Variables { get; set; }
 
         public string OperationName { get; set; }
 
+        [JsonConverter(typeof(VariableConverter))]
         public Dictionary<string, object> Extensions { get; set; }
     }
 
@@ -141,6 +145,7 @@ namespace fugu.graphql.server
 
             var channel = Channel.CreateBounded<ExecutionResult>(1);
             await channel.Writer.WriteAsync(result, cancellationToken);
+            channel.Writer.TryComplete();
 
             return new QueryStream(channel);
         }
