@@ -1,5 +1,5 @@
 {
-  "name": "@fugu-fw/fugu-server-link",
+  "name": "@fugu-fw/fugu-graphql-server-link",
   "version": "0.0.0-dev",
   "description": "",
   "main": "dist/index.js",
