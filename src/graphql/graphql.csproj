@@ -7,6 +7,7 @@
     <Copyright>Pekka Heikura</Copyright>
     <PackageProjectUrl>https://github.com/pekkah/fugu-graphql</PackageProjectUrl>
     <RepositoryUrl>https://github.com/pekkah/fugu-graphql</RepositoryUrl>
+    <Description>GraphQL Query, Mutation and Subscription library</Description>
   </PropertyGroup>
 
   <ItemGroup>

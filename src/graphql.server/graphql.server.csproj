@@ -4,13 +4,11 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyName>fugu.graphql.server</AssemblyName>
     <RootNamespace>fugu.graphql.server</RootNamespace>
+    <Copyright>Pekka Heikura</Copyright>
+    <PackageProjectUrl>https://github.com/pekkah/fugu-graphql</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pekkah/fugu-graphql</RepositoryUrl>
+    <Description>GraphQL server using SignalR</Description>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="subscriptions\**" />
-    <EmbeddedResource Remove="subscriptions\**" />
-    <None Remove="subscriptions\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0-preview3-35497" />

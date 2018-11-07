@@ -1,7 +1,7 @@
 {
   "name": "@fugu-fw/fugu-graphql-server-link",
   "version": "0.0.0-dev",
-  "description": "",
+  "description": "ApolloLink implementation for Fugu GraphQL server",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "files": [
@@ -15,6 +15,7 @@
   },
   "author": "Pekka Heikura <pekkah@gmail.com>",
   "license": "MIT",
+  "repository": "https://github.com/pekkah/fugu-graphql",
   "devDependencies": {
     "@types/jest": "^23.3.2",
     "jest": "^23.6.0",
