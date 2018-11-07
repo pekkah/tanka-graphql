@@ -58,6 +58,31 @@ Task("Pack")
       {
         DotNetCorePack(projectFile, settings);
       }
+
+      foreach(var packageFolder in packageFolders)
+      {
+        Information($"NPM version {packageFolder}");
+        var args = ProcessArgumentBuilder.FromString($"-Command npm --no-git-tag-version --allow-same-version version {version}");
+        var exitCode = StartProcess(
+          "pwsh",
+          new ProcessSettings() {
+            Arguments = args,
+            WorkingDirectory = packageFolder
+          }
+        );
+
+        if (exitCode != 0)
+        {
+          throw new Exception($"NPM version failed for {packageFolder} with version {version}");
+        }
+
+        Information($"NPM pack {packageFolder}");
+        var npmSettings = new NpmPackSettings();
+        npmSettings.LogLevel = NpmLogLevel.Info;
+        npmSettings.Source = packageFolder;
+        npmSettings.WorkingDirectory = artifactsDir;
+        NpmPack(npmSettings);
+      }
   });
 
 Task("Build")
