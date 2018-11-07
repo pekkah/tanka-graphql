@@ -64,7 +64,7 @@ Task("Pack")
         Information($"NPM version {packageFolder}");
         var args = ProcessArgumentBuilder.FromString($"-Command npm --no-git-tag-version --allow-same-version version {version}");
         var exitCode = StartProcess(
-          "pwsh",
+          "powershell",
           new ProcessSettings() {
             Arguments = args,
             WorkingDirectory = packageFolder
