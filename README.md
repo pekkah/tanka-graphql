@@ -6,23 +6,22 @@ Fugu GraphQL library
 
 ## Features
 
-* Execute queries and mutations
+* Execute queries, mutations and subscriptions
 * Validation (Dirty port from graphql-dotnet)
-* Subscribe to streams (todo)
-
-
-## Extensions
-
-* WebSockets transport (todo)
-* SignalR transport (todo)
+* SignalR hub for streaming queries, mutations and subscriptions
+* ApolloLink for the provided SignalR hub
 
 
 ## Getting started
 
-### NuGet feeds
+### Feeds
 
-- Previews: https://www.myget.org/F/fugu-projects/api/v3/index.json
-- Releases: (todo)
+Previews: 
+NuGet: https://www.myget.org/F/fugu-fw/api/v3/index.json
+NPM: https://www.myget.org/F/fugu-fw/npm/
+
+Releases:
+(todo)
 
 ### Install 
 
@@ -33,7 +32,7 @@ dotnet add fugu.graphql.server
 
 ### Usage
 
-See the included sample application.
+(todo) but for now see the samples in the repo
 
 #### Define schema
 ```
