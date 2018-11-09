@@ -30,6 +30,16 @@ dotnet add fugu.graphql
 dotnet add fugu.graphql.server
 ```
 
+## Sample
+
+The included sample does not have '@fugu-fw/fugu-graphql-server-link' as dependency.
+
+To get the sample running use:
+```
+src/graphql.server.apollo-link$ yarn link
+samples/graphql.samples.chat.ui$ yarn link "@fugu-fw/fugu-graphql-server-link"
+```
+
 ### Usage
 
 (todo) but for now see the samples in the repo
