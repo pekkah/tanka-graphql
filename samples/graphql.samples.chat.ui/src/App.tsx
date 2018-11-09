@@ -1,10 +1,17 @@
-import * as React from 'react';
-import { Provider } from 'react-redux'
-import { store, Playground } from 'graphql-playground-react'
-import { Session } from 'graphql-playground-react/lib/state/sessions/reducers';
-import { Client, SignalrLink } from 'fugu-graphql-server-apollo-link';
+import * as React from "react";
+import { Provider } from "react-redux";
+import { store, Playground } from "graphql-playground-react";
+import { Session } from "graphql-playground-react/lib/state/sessions/reducers";
+import { Client, SignalrLink } from "@fugu-fw/fugu-graphql-server-link";
+import { IHttpConnectionOptions, LogLevel } from "@aspnet/signalr";
 
-var client = new Client("https://localhost:5000/graphql-ws");
+var options: IHttpConnectionOptions = {
+  accessTokenFactory: () => "123123",
+  logMessageContent: true,
+  logger: LogLevel.Trace
+};
+
+var client = new Client("https://localhost:5000/graphql-ws", options);
 var link = new SignalrLink(client);
 
 class App extends React.Component {
@@ -17,9 +24,7 @@ class App extends React.Component {
   public render() {
     return (
       <Provider store={store}>
-        <Playground
-          createApolloLink={this.createLink}
-        />
+        <Playground createApolloLink={this.createLink} />
       </Provider>
     );
   }

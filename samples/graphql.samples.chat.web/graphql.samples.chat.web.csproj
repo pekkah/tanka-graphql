@@ -10,6 +10,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Frontend\**" />
+    <Compile Remove="wwwroot\**" />
+    <Content Remove="Frontend\**" />
+    <Content Remove="wwwroot\**" />
+    <EmbeddedResource Remove="Frontend\**" />
+    <EmbeddedResource Remove="wwwroot\**" />
+    <None Remove="Frontend\**" />
+    <None Remove="wwwroot\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="2.2.0-preview3-35497" />
   </ItemGroup>
@@ -18,11 +29,6 @@
     <ProjectReference Include="..\..\src\graphql.server\graphql.server.csproj" />
     <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
     <ProjectReference Include="..\graphql.samples.chat.data\graphql.samples.chat.data.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Frontend\" />
-    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

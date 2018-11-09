@@ -17,16 +17,16 @@
   "license": "MIT",
   "repository": "https://github.com/pekkah/fugu-graphql",
   "devDependencies": {
-    "@types/jest": "^23.3.2",
+    "@types/jest": "^23.3.9",
     "jest": "^23.6.0",
-    "prettier": "^1.14.3",
-    "rollup": "^0.66.2",
-    "rollup-plugin-typescript2": "^0.17.0",
-    "ts-jest": "^23.10.2",
+    "prettier": "^1.15.1",
+    "rollup": "^0.67.0",
+    "rollup-plugin-typescript2": "^0.17.2",
+    "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
-    "typescript": "^3.1.1",
-    "@types/graphql": "^14.0.2",
+    "typescript": "^3.1.6",
+    "@types/graphql": "^14.0.3",
     "@types/zen-push": "^0.1.0"
   },
   "dependencies": {

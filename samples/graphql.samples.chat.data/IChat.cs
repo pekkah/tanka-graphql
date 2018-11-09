@@ -9,8 +9,6 @@ namespace fugu.graphql.samples.chat.data
 {
     public interface IChat
     {
-        ISourceBlock<Message> MessageStream { get; }
-
         Task<IEnumerable<Message>> GetMessagesAsync(
             int latest);
 
@@ -21,18 +19,20 @@ namespace fugu.graphql.samples.chat.data
         Task<Message> EditMessageAsync(
             string id,
             string content);
+
+        Task<IDisposable> JoinAsync(ITargetBlock<Message> target);
     }
 
     public class Chat : IChat
     {
         private readonly Queue<Message> _messages = new Queue<Message>();
-        private readonly BufferBlock<Message> _messageStream;
+        private readonly BroadcastBlock<Message> _messageStream;
 
         private int _lastId;
 
         public Chat()
         {
-            _messageStream = new BufferBlock<Message>();
+            _messageStream = new BroadcastBlock<Message>(original => original);
         }
 
         public async Task<IEnumerable<Message>> GetMessagesAsync(int latest)
@@ -72,7 +72,15 @@ namespace fugu.graphql.samples.chat.data
             return originalMessage;
         }
 
-        public ISourceBlock<Message> MessageStream => _messageStream;
+        public Task<IDisposable> JoinAsync(ITargetBlock<Message> target)
+        {
+            var sub = _messageStream.LinkTo(target, new DataflowLinkOptions()
+            {
+                PropagateCompletion = true
+            });
+
+            return Task.FromResult(sub);
+        }
 
         private async Task<From> GetFromAsync(string fromId)
         {

@@ -4,6 +4,7 @@ using fugu.graphql.server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,7 @@ namespace fugu.graphql.samples.chat.web
             services.AddSingleton<ChatSchemas>();
             services.AddSingleton(provider => provider.GetRequiredService<ChatSchemas>().Chat);
             services.AddSingleton<ServerClients>();
+
             services.AddSignalR(options => { options.EnableDetailedErrors = true; });
             services.AddCors(options =>
             {
@@ -37,9 +39,9 @@ namespace fugu.graphql.samples.chat.web
                 {
                     policy.WithOrigins("http://localhost:3000");
                     policy.AllowAnyHeader();
-                    policy.WithHeaders("X-Requested-With");
                     policy.AllowAnyMethod();
                     policy.AllowCredentials();
+                    policy.WithHeaders("X-Requested-With", "authorization");
                 });
             });
         }
@@ -60,8 +62,11 @@ namespace fugu.graphql.samples.chat.web
             app.UseCors();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-            app.UseSignalR(routes => { routes.MapHub<ServerHub>(new PathString("/graphql-ws")); });
+            app.UseWebSockets();
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ServerHub>(new PathString("/graphql-ws"));
+            });
         }
     }
 }
