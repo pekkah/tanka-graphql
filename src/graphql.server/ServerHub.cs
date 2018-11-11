@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
@@ -8,21 +7,11 @@ namespace fugu.graphql.server
 {
     public class ServerHub : Hub
     {
-        private readonly ServerClients _clients;
+        private readonly QueryStreamService _queryStreamService;
 
-        public ServerHub(ServerClients clients)
+        public ServerHub(QueryStreamService queryStreamService)
         {
-            _clients = clients;
-        }
-
-        public override Task OnConnectedAsync()
-        {
-            return _clients.OnConnectedAsync(Context);
-        }
-
-        public override Task OnDisconnectedAsync(Exception exception)
-        {
-            return _clients.OnDisconnectedAsync(Context, exception);
+            _queryStreamService = queryStreamService;
         }
 
         [HubMethodName("query")]
@@ -30,7 +19,7 @@ namespace fugu.graphql.server
             QueryRequest query,
             CancellationToken cancellationToken)
         {
-            var queryResult = await _clients.QueryAsync(Context, query, cancellationToken);
+            var queryResult = await _queryStreamService.QueryAsync(query, cancellationToken);
             var channel = queryResult.Channel;
             return channel.Reader;
         }

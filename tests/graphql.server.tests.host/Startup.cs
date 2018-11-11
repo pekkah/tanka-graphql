@@ -62,7 +62,7 @@ namespace graphql.server.tests.host
                 .MakeExecutableSchemaWithIntrospection(new Schema(query, null, sub), resolvers, resolvers).Result;
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
-            services.AddSingleton<ServerClients>();
+            services.AddSingleton<QueryStreamService>();
 
             services.AddSignalR(options => { options.EnableDetailedErrors = true; });
         }

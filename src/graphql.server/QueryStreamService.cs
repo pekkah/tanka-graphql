@@ -11,11 +11,11 @@ using GraphQLParser.AST;
 
 namespace fugu.graphql.server
 {
-    public class QueryManager
+    public class QueryStreamService
     {
         private readonly ISchema _schema;
 
-        public QueryManager(ISchema schema)
+        public QueryStreamService(ISchema schema)
         {
             _schema = schema;
         }
