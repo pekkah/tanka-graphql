@@ -24,6 +24,13 @@ export class Client {
     }
 
     this.hub = builder.build();
+    this.starting = new Promise<void>(resolve => {
+      console.log("Starting...");
+      this.hub.start().then(() => {
+        console.log("Started");
+        resolve();
+      });
+    });
   }
 
   public request(operation: Operation): Observable<FetchResult> {
@@ -51,29 +58,11 @@ export class Client {
   public query(operation: Operation): Subscription {
     const sub = new Subscription();
 
-    this.connect().then(() => {
+    this.starting.then(() => {
       const stream = this.hub.stream("query", new Request(operation));
       sub.subscribe(stream);
     });
 
     return sub;
-  }
-
-  public async connect(): Promise<void> {
-    console.log("Connect...");
-
-    if (this.hub.state === HubConnectionState.Connected) {
-      console.log("Already started");
-      return Promise.resolve();
-    }
-
-    if (this.starting !== undefined) {
-      console.log("Already starting...");
-      return this.starting;
-    }
-
-    this.starting = this.hub.start();
-    console.log("Starting..");
-    await this.starting;
   }
 }
