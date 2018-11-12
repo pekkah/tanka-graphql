@@ -23,7 +23,7 @@ namespace fugu.graphql.validation.rules
                     if (type != null)
                     {
                         var field = context.TypeInfo.GetFieldDef();
-                        if (field == null)
+                        if (field == null && node.Name.Value != "__typename")
                         {
                             // This Fields doesn't exist, lets look for suggestions.
                             var fieldName = node.Name.Value;

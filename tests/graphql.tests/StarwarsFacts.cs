@@ -548,6 +548,53 @@ namespace fugu.graphql.tests
         }
 
         [Fact]
+        public async Task Query_typename_of_character_luke()
+        {
+            /* Given */
+            var starwars = new Starwars();
+
+            var id = "\"humans/luke\"";
+            var query = $@"{{
+    character(id: {id}) {{
+        __typename
+        id
+        name
+        appearsIn
+    }}
+}}";
+
+            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var options = new ExecutionOptions
+            {
+                Schema = executableSchema,
+                Document = ParseDocument(query),
+                OperationName = null,
+                InitialValue = null,
+                VariableValues = null
+            };
+
+            /* When */
+            var actual = await ExecuteAsync(options).ConfigureAwait(false);
+
+            /* Then */
+            actual.ShouldMatchJson(
+                @"{""errors"": null,
+                   ""data"": {
+                    ""character"": {
+                      ""__typename"":""Human"",
+                      ""id"": ""humans/luke"",
+                      ""name"": ""Luke"",
+                      ""appearsIn"": [
+                        ""JEDI"",
+                        ""EMPIRE"",
+                        ""NEWHOPE""
+                        ]
+                     }
+                    }
+                 }");
+        }
+
+        [Fact]
         public async Task Query_character_luke_skip_appearsIn()
         {
             /* Given */

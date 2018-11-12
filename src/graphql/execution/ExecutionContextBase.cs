@@ -101,6 +101,13 @@ namespace fugu.graphql.execution
 
             var fields = fieldGroup.Value;
             var fieldName = fields.First().Name.Value;
+
+            // __typename hack
+            if (fieldName == "__typename")
+            {
+                return objectType.Unwrap().Name;
+            }
+
             var fieldType = objectType
                 .GetField(fieldName)?
                 .Type;
