@@ -11,10 +11,9 @@ import { Subscription } from "./subscription";
 
 export class Client {
   private hub: HubConnection;
-  private connected: boolean;
+  private starting: Promise<void> = undefined;
 
   constructor(private url: string, private options?: IHttpConnectionOptions) {
-    this.connected = false;
     const builder = new HubConnectionBuilder();
 
     if (options) {
@@ -59,17 +58,17 @@ export class Client {
     return sub;
   }
 
-  public async connect(): Promise<boolean> {
-    if (this.connected) {
-      return true;
+  public async connect(): Promise<void> {
+    if (this.starting != undefined) {
+      return this.starting;
     }
 
-    this.connected = true;
-    await this.hub.start().catch(err => {
-      this.connected = false;
-    });
+    this.starting = this.hub.start()
+      .catch(err => {
+        console.log("Error starting hub", err);
+        throw err;
+      });
 
-    this.connected = true;
-    return true;
+    return this.starting;
   }
 }
