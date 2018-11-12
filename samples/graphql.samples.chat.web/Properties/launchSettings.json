@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "graphql.samples.chat.web": {
+      "commandName": "Project",
+      "launchUrl": "index.html",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:5000/"
+    }
+  }
+}
