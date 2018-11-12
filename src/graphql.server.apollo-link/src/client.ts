@@ -3,6 +3,7 @@ import { FetchResult, Observable, Operation } from "apollo-link";
 import {
   HubConnection,
   HubConnectionBuilder,
+  HubConnectionState,
   IHttpConnectionOptions
 } from "@aspnet/signalr";
 
@@ -59,16 +60,20 @@ export class Client {
   }
 
   public async connect(): Promise<void> {
-    if (this.starting != undefined) {
+    console.log("Connect...");
+
+    if (this.hub.state === HubConnectionState.Connected) {
+      console.log("Already started");
+      return Promise.resolve();
+    }
+
+    if (this.starting !== undefined) {
+      console.log("Already starting...");
       return this.starting;
     }
 
-    this.starting = this.hub.start()
-      .catch(err => {
-        console.log("Error starting hub", err);
-        throw err;
-      });
-
-    return this.starting;
+    this.starting = this.hub.start();
+    console.log("Starting..");
+    await this.starting;
   }
 }
