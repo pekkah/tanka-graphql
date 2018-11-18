@@ -8,16 +8,19 @@ using System.Threading.Tasks.Dataflow;
 using fugu.graphql.server.utilities;
 using fugu.graphql.type;
 using GraphQLParser.AST;
+using Microsoft.Extensions.Logging;
 
 namespace fugu.graphql.server
 {
     public class QueryStreamService
     {
         private readonly ISchema _schema;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public QueryStreamService(ISchema schema)
+        public QueryStreamService(ISchema schema, ILoggerFactory loggerFactory)
         {
             _schema = schema;
+            _loggerFactory = loggerFactory;
         }
 
         public async Task<QueryStream> QueryAsync(QueryRequest query, CancellationToken cancellationToken)
@@ -56,7 +59,8 @@ namespace fugu.graphql.server
                 Document = document,
                 OperationName = operationName,
                 VariableValues = variables,
-                InitialValue = null
+                InitialValue = null,
+                LoggerFactory = _loggerFactory
             });
 
             var channel = Channel.CreateBounded<ExecutionResult>(1);
@@ -78,7 +82,8 @@ namespace fugu.graphql.server
                 Document = document,
                 OperationName = operationName,
                 VariableValues = variables,
-                InitialValue = null
+                InitialValue = null,
+                LoggerFactory = _loggerFactory
             });
 
             var channel = Channel.CreateUnbounded<ExecutionResult>();

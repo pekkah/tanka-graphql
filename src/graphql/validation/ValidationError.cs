@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using GraphQLParser.AST;
 
 namespace fugu.graphql.validation
@@ -16,5 +18,24 @@ namespace fugu.graphql.validation
         public string Message { get; set; }
 
         public IEnumerable<ASTNode> Nodes => _nodes;
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append(Message);
+
+            if (Nodes.Any())
+            {
+                builder.Append(" at ");
+
+                foreach (var node in Nodes)
+                {
+                    builder.Append($"{node.Kind}@{node.Location.Start}:{node.Location.End}");
+                    builder.Append(", ");
+                }
+            }
+
+            return builder.ToString().TrimEnd(',');
+        }
     }
 }

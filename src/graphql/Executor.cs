@@ -12,98 +12,117 @@ namespace fugu.graphql
     {
         public static async Task<ExecutionResult> ExecuteAsync(ExecutionOptions options)
         {
-            if (!options.Schema.IsInitialized)
-                await options.Schema.InitializeAsync().ConfigureAwait(false);
+            var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
-            var operation = Operations.GetOperation(options.Document, options.OperationName);
-
-            var coercedVariableValues = Variables.CoerceVariableValues(
-                options.Schema,
-                operation,
-                options.VariableValues);
-
-            if (options.Validate)
+            using (logger.Begin(options.OperationName ?? "(unknown)"))
             {
-                var result = await Validator.ValidateAsync(
-                    options.Schema,
-                    options.Document,
-                    coercedVariableValues).ConfigureAwait(false);
-
-                if (!result.IsValid)
+                if (!options.Schema.IsInitialized)
                 {
-                    return new ExecutionResult()
-                    {
-                        Data = null,
-                        Errors = result.Errors.Select(e => new Error(e.Message)).ToList()
-                    };
+                    logger.SchemaNotInitialized();
+                    await options.Schema.InitializeAsync().ConfigureAwait(false);
                 }
-            }
 
-            switch (operation.Operation)
-            {
-                case OperationType.Query:
-                    return await Query.ExecuteQueryAsync(
-                        options.ErrorTransformer,
-                        options.Document,
-                        operation,
+                var operation = Operations.GetOperation(options.Document, options.OperationName);
+                logger.Operation(operation);
+
+                var coercedVariableValues = Variables.CoerceVariableValues(
+                    options.Schema,
+                    operation,
+                    options.VariableValues);
+
+                logger.Validate(options.Validate);
+                if (options.Validate)
+                {
+                    var result = await Validator.ValidateAsync(
                         options.Schema,
-                        coercedVariableValues,
-                        options.InitialValue).ConfigureAwait(false);
-                case OperationType.Mutation:
-                    return await Mutation.ExecuteMutationAsync(
-                        options.ErrorTransformer,
                         options.Document,
-                        operation,
-                        options.Schema,
-                        coercedVariableValues,
-                        options.InitialValue).ConfigureAwait(false);
-                case OperationType.Subscription:
-                    throw new InvalidOperationException($"Use {nameof(SubscribeAsync)}");
-                default:
-                    throw new InvalidOperationException($"Operation type {operation.Operation} not supported.");
+                        coercedVariableValues).ConfigureAwait(false);
+
+                    logger.ValidationResult(result);
+                    if (!result.IsValid)
+                        return new ExecutionResult
+                        {
+                            Data = null,
+                            Errors = result.Errors.Select(e => new Error(e.Message)).ToList()
+                        };
+                }
+
+                switch (operation.Operation)
+                {
+                    case OperationType.Query:
+                        return await Query.ExecuteQueryAsync(
+                            options.ErrorTransformer,
+                            options.Document,
+                            operation,
+                            options.Schema,
+                            coercedVariableValues,
+                            options.InitialValue).ConfigureAwait(false);
+                    case OperationType.Mutation:
+                        return await Mutation.ExecuteMutationAsync(
+                            options.ErrorTransformer,
+                            options.Document,
+                            operation,
+                            options.Schema,
+                            coercedVariableValues,
+                            options.InitialValue).ConfigureAwait(false);
+                    case OperationType.Subscription:
+                        throw new InvalidOperationException($"Use {nameof(SubscribeAsync)}");
+                    default:
+                        throw new InvalidOperationException($"Operation type {operation.Operation} not supported.");
+                }
             }
         }
 
         public static async Task<SubscriptionResult> SubscribeAsync(ExecutionOptions options)
         {
-            if (!options.Schema.IsInitialized) throw new InvalidOperationException();
+            var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
-            var operation = Operations.GetOperation(options.Document, options.OperationName);
-
-            var coercedVariableValues = Variables.CoerceVariableValues(
-                options.Schema,
-                operation,
-                options.VariableValues);
-
-            if (options.Validate)
+            using (logger.Begin(options.OperationName ?? "(unknown)"))
             {
-                var result = await Validator.ValidateAsync(
-                    options.Schema,
-                    options.Document,
-                    coercedVariableValues).ConfigureAwait(false);
-
-                if (!result.IsValid)
+                if (!options.Schema.IsInitialized)
                 {
-                    return new SubscriptionResult()
-                    {
-                        Errors = result.Errors.Select(e => new Error(e.Message)).ToList()
-                    };
+                    logger.SchemaNotInitialized();
+                    await options.Schema.InitializeAsync().ConfigureAwait(false);
                 }
-            }
 
-            switch (operation.Operation)
-            {
-                case OperationType.Subscription:
-                    return await Subscription.SubscribeAsync(
-                        options.ErrorTransformer,
-                        options.Document,
-                        operation,
+                var operation = Operations.GetOperation(options.Document, options.OperationName);
+                logger.Operation(operation);
+
+                var coercedVariableValues = Variables.CoerceVariableValues(
+                    options.Schema,
+                    operation,
+                    options.VariableValues);
+
+                logger.Validate(options.Validate);
+                if (options.Validate)
+                {
+                    var result = await Validator.ValidateAsync(
                         options.Schema,
-                        coercedVariableValues,
-                        options.InitialValue).ConfigureAwait(false);
-                default:
-                    throw new InvalidOperationException(
-                        $"Operation type {operation.Operation} not supported. Did you mean to use {nameof(ExecuteAsync)}?");
+                        options.Document,
+                        coercedVariableValues).ConfigureAwait(false);
+
+                    logger.ValidationResult(result);
+                    if (!result.IsValid)
+                        return new SubscriptionResult
+                        {
+                            Errors = result.Errors.Select(e => new Error(e.Message)).ToList()
+                        };
+                }
+
+                switch (operation.Operation)
+                {
+                    case OperationType.Subscription:
+                        return await Subscription.SubscribeAsync(
+                            options.ErrorTransformer,
+                            options.Document,
+                            operation,
+                            options.Schema,
+                            coercedVariableValues,
+                            options.InitialValue).ConfigureAwait(false);
+                    default:
+                        throw new InvalidOperationException(
+                            $"Operation type {operation.Operation} not supported. Did you mean to use {nameof(ExecuteAsync)}?");
+                }
             }
         }
     }
