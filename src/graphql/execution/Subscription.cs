@@ -30,20 +30,21 @@ namespace fugu.graphql.execution
                 throw new GraphQLError(
                     $"Schema does not support subscriptions. Subscription type is null");
 
-            var context = new ParallelExecutionContext(
-                schema,
-                document);
+            var executionContext = new ExecutorContext(
+                schema, 
+                document,
+                new ParallelExecutionStrategy());
 
             try
             {
                 var sourceStream = await CreateSourceEventStreamAsync(
-                    context,
+                    executionContext,
                     subscription,
                     coercedVariableValues,
                     initialValue).ConfigureAwait(false);
 
                 var responseStream = MapSourceToResponseEventAsync(
-                    context,
+                    executionContext,
                     sourceStream,
                     subscription,
                     coercedVariableValues,
@@ -53,17 +54,17 @@ namespace fugu.graphql.execution
             }
             catch (Exception e)
             {
-                context.FieldErrors.Add(e);
+                executionContext.FieldErrors.Add(e);
             }
 
             return new SubscriptionResult(null, null)
             {
-                Errors = context.FieldErrors.SelectMany(errorTransformer.Transfrom).ToList(),
+                Errors = executionContext.FieldErrors.SelectMany(errorTransformer.Transfrom).ToList(),
             };
         }
 
         public static SubscriptionResult MapSourceToResponseEventAsync(
-            IExecutionContext context,
+            IExecutorContext context,
             ISubscribeResult subscribeResult,
             GraphQLOperationDefinition subscription,
             Dictionary<string, object> coercedVariableValues,
@@ -98,7 +99,7 @@ namespace fugu.graphql.execution
         }
 
         public static async Task<ISubscribeResult> CreateSourceEventStreamAsync(
-            IExecutionContext context,
+            IExecutorContext context,
             GraphQLOperationDefinition subscription,
             Dictionary<string, object> coercedVariableValues,
             object initialValue)
@@ -147,7 +148,7 @@ namespace fugu.graphql.execution
         }
 
         private static async Task<ExecutionResult> ExecuteSubscriptionEventAsync(
-            IExecutionContext context,
+            IExecutorContext context,
             GraphQLOperationDefinition subscription,
             Dictionary<string, object> coercedVariableValues,
             object evnt,

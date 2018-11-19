@@ -13,7 +13,7 @@ namespace fugu.graphql.resolvers
         ObjectType ActualType { get; }
 
         Task<object> CompleteValueAsync(
-            IExecutionContext executionContext,
+            IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
             IGraphQLType fieldType,

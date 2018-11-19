@@ -6,14 +6,10 @@ using GraphQLParser.AST;
 
 namespace fugu.graphql.execution
 {
-    public class ParallelExecutionContext : ExecutionContextBase
+    public class ParallelExecutionStrategy : ExecutionStrategyBase
     {
-        public ParallelExecutionContext(ISchema schema, GraphQLDocument document)
-            : base(schema, document)
-        {
-        }
-
         public override async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
+            IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
             Dictionary<string, object> coercedVariableValues)
@@ -26,6 +22,7 @@ namespace fugu.graphql.execution
                 {
                     var responseKey = fieldGroup.Key;
                     var result = await ExecuteFieldGroupAsync(
+                        context,
                         objectType,
                         objectValue,
                         coercedVariableValues,

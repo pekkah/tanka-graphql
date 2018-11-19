@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using fugu.graphql.type;
 using GraphQLParser.AST;
 
 namespace fugu.graphql.execution
 {
-    public class SerialExecutionContext : ExecutionContextBase
+    public class SerialExecutionStrategy : ExecutionStrategyBase
     {
-        public SerialExecutionContext(ISchema schema, GraphQLDocument document) 
-            : base(schema, document)
-        {
-        }
-
-        public override async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet, ObjectType objectType, object objectValue,
+        public override async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
+            IExecutorContext context,
+            Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
+            ObjectType objectType, object objectValue,
             Dictionary<string, object> coercedVariableValues)
         {
             var responseMap = new Dictionary<string, object>();
@@ -26,6 +23,7 @@ namespace fugu.graphql.execution
                 try
                 {
                     var result = await ExecuteFieldGroupAsync(
+                        context,
                         objectType,
                         objectValue,
                         coercedVariableValues,
@@ -36,7 +34,7 @@ namespace fugu.graphql.execution
                 catch (Exception e)
                 {
                     responseMap[responseKey] = null;
-                    FieldErrors.Add(e);
+                    context.FieldErrors.Add(e);
                 }
             }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using fugu.graphql.error;
 using fugu.graphql.type;
@@ -17,7 +18,10 @@ namespace fugu.graphql.execution
             Dictionary<string, object> coercedVariableValues,
             object initialValue)
         {
-            var executionContext = new SerialExecutionContext(schema, document);
+            var executionContext = new ExecutorContext(
+                schema, 
+                document,
+                new SerialExecutionStrategy());
 
             var mutationType = schema.Mutation;
             if (mutationType == null)

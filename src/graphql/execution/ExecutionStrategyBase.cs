@@ -9,26 +9,16 @@ using GraphQLParser.AST;
 
 namespace fugu.graphql.execution
 {
-    public abstract class ExecutionContextBase : IExecutionContext
+    public abstract class ExecutionStrategyBase : IExecutionStrategy
     {
-        protected ExecutionContextBase(ISchema schema, GraphQLDocument document)
-        {
-            Schema = schema ?? throw new ArgumentNullException(nameof(schema));
-            Document = document ?? throw new ArgumentNullException(nameof(document));
-        }
-
-        public ISchema Schema { get; }
-
-        public GraphQLDocument Document { get; }
-
-        public List<Exception> FieldErrors { get; } = new List<Exception>();
-
         public abstract Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
+            IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
             Dictionary<string, object> coercedVariableValues);
 
         public async Task<object> ExecuteFieldAsync(
+            IExecutorContext context,
             ObjectType objectType,
             object objectValue,
             List<GraphQLFieldSelection> fields,
@@ -68,7 +58,7 @@ namespace fugu.graphql.execution
 
                 var result = await resolver(resolverContext).ConfigureAwait(false);
                 completedValue = await result.CompleteValueAsync(
-                    this,
+                    context,
                     objectType,
                     field,
                     fieldType,
@@ -81,7 +71,7 @@ namespace fugu.graphql.execution
             catch (Exception e)
             {
                 return Errors.HandleFieldError(
-                    FieldErrors,
+                    context.FieldErrors,
                     objectType,
                     fieldName,
                     fieldType,
@@ -92,6 +82,7 @@ namespace fugu.graphql.execution
         }
 
         protected async Task<object> ExecuteFieldGroupAsync(
+            IExecutorContext context, 
             ObjectType objectType,
             object objectValue,
             Dictionary<string, object> coercedVariableValues,
@@ -118,6 +109,7 @@ namespace fugu.graphql.execution
 
             object responseValue = null;
             responseValue = await ExecuteFieldAsync(
+                context,
                 objectType,
                 objectValue,
                 fields,

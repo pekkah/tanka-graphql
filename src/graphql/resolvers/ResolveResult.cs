@@ -37,7 +37,7 @@ namespace fugu.graphql.resolvers
         public ObjectType ActualType { get; set; }
 
         public virtual async Task<object> CompleteValueAsync(
-            IExecutionContext executionContext,
+            IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
             IGraphQLType fieldType,
@@ -48,7 +48,7 @@ namespace fugu.graphql.resolvers
             object completedValue = null;
 
             completedValue = await CompleteValueAsync(
-                executionContext,
+                executorContext,
                 objectType,
                 field,
                 fieldType,
@@ -62,7 +62,7 @@ namespace fugu.graphql.resolvers
         }
 
         public async Task<object> CompleteValueAsync(
-            IExecutionContext executionContext,
+            IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
             IGraphQLType fieldType,
@@ -74,7 +74,7 @@ namespace fugu.graphql.resolvers
         {
             if (value is IResolveResult resolveResult)
                 return await resolveResult.CompleteValueAsync(
-                    executionContext,
+                    executorContext,
                     objectType,
                     field,
                     fieldType,
@@ -88,7 +88,7 @@ namespace fugu.graphql.resolvers
                     $"NamedTypeReferences are not supported during execution. Please heal schema before execution.");
 
                 /*var actualTypeName = typeReference.TypeName;
-                var innerType = executionContext.Schema.GetNamedType(actualTypeName);
+                var innerType = executorContext.Schema.GetNamedType(actualTypeName);
 
                 if (innerType == null)
                     throw new GraphQLError(
@@ -96,7 +96,7 @@ namespace fugu.graphql.resolvers
                         $"Could not get named type '{actualTypeName}' from schema.");
 
                 return await CompleteValueAsync(
-                    executionContext,
+                    executorContext,
                     objectType,
                     field,
                     innerType,
@@ -109,7 +109,7 @@ namespace fugu.graphql.resolvers
 
             if (fieldType is Lazy lazy)
                 return await CompleteValueAsync(
-                    executionContext,
+                    executorContext,
                     objectType,
                     field,
                     lazy.WrappedType,
@@ -123,7 +123,7 @@ namespace fugu.graphql.resolvers
             {
                 var innerType = nonNull.WrappedType;
                 var completedResult = await CompleteValueAsync(
-                    executionContext,
+                    executorContext,
                     objectType,
                     field,
                     innerType,
@@ -157,7 +157,7 @@ namespace fugu.graphql.resolvers
                 foreach (var resultItem in values)
                 {
                     var completedResultItem = await CompleteValueAsync(
-                        executionContext,
+                        executorContext,
                         objectType,
                         field,
                         innerType,
@@ -181,7 +181,7 @@ namespace fugu.graphql.resolvers
             {
                 var subSelectionSet = SelectionSets.MergeSelectioSets(fields);
                 var data = await SelectionSets.ExecuteSelectionSetAsync(
-                    executionContext,
+                    executorContext,
                     subSelectionSet,
                     fieldObjectType,
                     value,
@@ -205,7 +205,7 @@ namespace fugu.graphql.resolvers
 
                 var subSelectionSet = SelectionSets.MergeSelectioSets(fields);
                 var data = await SelectionSets.ExecuteSelectionSetAsync(
-                    executionContext,
+                    executorContext,
                     subSelectionSet,
                     actualType,
                     value,
@@ -223,7 +223,7 @@ namespace fugu.graphql.resolvers
 
                 var subSelectionSet = SelectionSets.MergeSelectioSets(fields);
                 var data = await SelectionSets.ExecuteSelectionSetAsync(
-                    executionContext,
+                    executorContext,
                     subSelectionSet,
                     actualType,
                     value,

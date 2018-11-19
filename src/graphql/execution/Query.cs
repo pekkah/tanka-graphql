@@ -25,7 +25,10 @@ namespace fugu.graphql.execution
                     $"Schema does not support queries. Query type is null.");
 
             var selectionSet = query.SelectionSet;
-            var executionContext = new ParallelExecutionContext(schema, document);
+            var executionContext = new ExecutorContext(
+                schema, 
+                document,
+                new ParallelExecutionStrategy());
 
             IDictionary<string, object> data = null;
 
