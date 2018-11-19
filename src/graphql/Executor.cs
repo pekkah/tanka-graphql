@@ -14,7 +14,7 @@ namespace fugu.graphql
         {
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
-            using (logger.Begin(options.OperationName ?? "(unknown)"))
+            using (logger.Begin(options.OperationName))
             {
                 if (!options.Schema.IsInitialized)
                 {

@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -14,17 +13,20 @@ namespace fugu.graphql.server
 {
     public class QueryStreamService
     {
-        private readonly ISchema _schema;
+        private readonly ILogger<QueryStreamService> _logger;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly ISchema _schema;
 
         public QueryStreamService(ISchema schema, ILoggerFactory loggerFactory)
         {
             _schema = schema;
             _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<QueryStreamService>();
         }
 
         public async Task<QueryStream> QueryAsync(QueryRequest query, CancellationToken cancellationToken)
         {
+            _logger.Query(query);
             var document = Parser.ParseDocument(query.Query);
 
             // is subscription
@@ -67,6 +69,7 @@ namespace fugu.graphql.server
             await channel.Writer.WriteAsync(result, cancellationToken);
             channel.Writer.TryComplete();
 
+            _logger.Executed(operationName, variables, extensions);
             return new QueryStream(channel);
         }
 
@@ -96,6 +99,7 @@ namespace fugu.graphql.server
                 await cancellationToken.WhenCancelled();
                 await result.UnsubscribeAsync();
                 channel.Writer.TryComplete();
+                _logger.Unsubscribed(operationName, variables, extensions);
             });
 
             var writer = new ActionBlock<ExecutionResult>(
@@ -110,6 +114,7 @@ namespace fugu.graphql.server
                 PropagateCompletion = true
             });
 
+            _logger.Subscribed(operationName, variables, extensions);
             var stream = new QueryStream(channel);
             return stream;
         }
