@@ -17,8 +17,9 @@ Fugu GraphQL library
 ### Feeds
 
 Previews: 
-NuGet: https://www.myget.org/F/fugu-fw/api/v3/index.json
-NPM: https://www.myget.org/F/fugu-fw/npm/
+
+* NuGet: https://www.myget.org/F/fugu-fw/api/v3/index.json
+* NPM: https://www.myget.org/F/fugu-fw/npm/
 
 Releases:
 (todo)
@@ -32,17 +33,12 @@ dotnet add fugu.graphql.server
 
 ## Sample
 
-The included sample does not have '@fugu-fw/fugu-graphql-server-link' as dependency.
+See [Sample](https://github.com/pekkah/fugu-graphql-samples)
 
-To get the sample running use:
-```
-src/graphql.server.apollo-link$ yarn link
-samples/graphql.samples.chat.ui$ yarn link "@fugu-fw/fugu-graphql-server-link"
-```
 
 ### Usage
 
-(todo) but for now see the samples in the repo
+Look above or below
 
 #### Define schema
 ```
