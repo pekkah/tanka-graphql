@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using fugu.graphql.type;
 using GraphQLParser.AST;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace fugu.graphql.resolvers
