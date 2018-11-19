@@ -37,7 +37,7 @@ namespace fugu.graphql.execution
         }
 
 
-        public static GraphQLSelectionSet MergeSelectioSets(List<GraphQLFieldSelection> fields)
+        public static GraphQLSelectionSet MergeSelectionSets(List<GraphQLFieldSelection> fields)
         {
             var selectionSet = new List<ASTNode>();
             foreach (var field in fields)

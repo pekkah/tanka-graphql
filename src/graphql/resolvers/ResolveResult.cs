@@ -179,7 +179,7 @@ namespace fugu.graphql.resolvers
 
             if (fieldType is ObjectType fieldObjectType)
             {
-                var subSelectionSet = SelectionSets.MergeSelectioSets(fields);
+                var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
                 var data = await SelectionSets.ExecuteSelectionSetAsync(
                     executorContext,
                     subSelectionSet,
@@ -203,7 +203,7 @@ namespace fugu.graphql.resolvers
                         $"Cannot complete value as interface. " +
                         $"Actual type {actualType.Name} does not implement {interfaceType.Name}");
 
-                var subSelectionSet = SelectionSets.MergeSelectioSets(fields);
+                var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
                 var data = await SelectionSets.ExecuteSelectionSetAsync(
                     executorContext,
                     subSelectionSet,
@@ -221,7 +221,7 @@ namespace fugu.graphql.resolvers
                         $"Cannot complete value as union. " +
                         $"Actual type {actualType.Name} is not possible for {unionType.Name}");
 
-                var subSelectionSet = SelectionSets.MergeSelectioSets(fields);
+                var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
                 var data = await SelectionSets.ExecuteSelectionSetAsync(
                     executorContext,
                     subSelectionSet,
