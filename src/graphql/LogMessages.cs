@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using fugu.graphql.validation;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
@@ -7,44 +8,45 @@ namespace fugu.graphql
 {
     public static class ExecutorLogger
     {
-        public static readonly EventId EventsOperation = new EventId(2);
-        public static readonly EventId EventsSchemaNotInitialized = new EventId(1);
-
-        public static readonly EventId EventsValidate = new EventId(3);
-
         private static readonly Func<ILogger, string, IDisposable> BeginAction = LoggerMessage
             .DefineScope<string>("Executing '{OperationName}'");
 
         private static readonly Action<ILogger, string, string, Exception> OperationAction = LoggerMessage
             .Define<string, string>(
-                LogLevel.Debug,
-                EventsOperation,
-                "Operation '{OperationType} {Name}'"
+                LogLevel.Information,
+                default(EventId),
+                "Executing operation '{OperationType} {Name}'"
             );
 
         private static readonly Action<ILogger, Exception> SchemaNotInitializedAction = LoggerMessage
             .Define(
                 LogLevel.Warning,
-                EventsSchemaNotInitialized,
+                default(EventId),
                 "Initializing schema. It's recommended that you initialize the schema before execution.");
 
         private static readonly Action<ILogger, bool, Exception> ValidateAction = LoggerMessage
             .Define<bool>(
                 LogLevel.Information,
-                EventsValidate,
+                default(EventId),
                 "Validation requested: '{Validate}'");
 
         private static readonly Action<ILogger, bool, Exception> ValidationResultAction =
             LoggerMessage.Define<bool>(
                 LogLevel.Information,
-                new EventId(),
+                default(EventId),
                 "Validation IsValid: '{IsValid}'");
 
         private static readonly Action<ILogger, ValidationResult, Exception> ValidationResultDebugAction =
             LoggerMessage.Define<ValidationResult>(
                 LogLevel.Debug,
-                new EventId(),
+                default(EventId),
                 "Validation result: '{ValidationResult}'");
+
+        private static readonly Action<ILogger, bool, Exception> ExecutionResultAction =
+            LoggerMessage.Define<bool>(
+                LogLevel.Information,
+                default(EventId),
+                "Execution complete. HasErrors: {HasErrors}");
 
         internal static IDisposable Begin(this ILogger logger, string operationName)
         {
@@ -75,7 +77,14 @@ namespace fugu.graphql
         internal static void ValidationResult(this ILogger logger, ValidationResult result)
         {
             ValidationResultAction(logger, result.IsValid, null);
-            ValidationResultDebugAction(logger, result, null);
+
+            if (!result.IsValid)
+                ValidationResultDebugAction(logger, result, null);
+        }
+
+        internal static void ExecutionResult(this ILogger logger, ExecutionResult result)
+        {
+            ExecutionResultAction(logger, result.Errors != null, null);
         }
     }
 }

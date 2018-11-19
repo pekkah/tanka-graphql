@@ -11,7 +11,7 @@ var options: IHttpConnectionOptions = {
   logger: LogLevel.Trace
 };
 
-var client = new Client("https://localhost:5000/graphql-ws", options);
+var client = new Client("https://localhost:5000/graphql", options);
 var link = new SignalrLink(client);
 
 class App extends React.Component {

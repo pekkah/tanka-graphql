@@ -33,43 +33,49 @@ namespace fugu.graphql
                 logger.Validate(options.Validate);
                 if (options.Validate)
                 {
-                    var result = await Validator.ValidateAsync(
+                    var validationResult = await Validator.ValidateAsync(
                         options.Schema,
                         options.Document,
                         coercedVariableValues).ConfigureAwait(false);
 
-                    logger.ValidationResult(result);
-                    if (!result.IsValid)
+                    logger.ValidationResult(validationResult);
+                    if (!validationResult.IsValid)
                         return new ExecutionResult
                         {
                             Data = null,
-                            Errors = result.Errors.Select(e => new Error(e.Message)).ToList()
+                            Errors = validationResult.Errors.Select(e => new Error(e.Message)).ToList()
                         };
                 }
 
+                ExecutionResult executionResult;
                 switch (operation.Operation)
                 {
                     case OperationType.Query:
-                        return await Query.ExecuteQueryAsync(
+                        executionResult = await Query.ExecuteQueryAsync(
                             options.ErrorTransformer,
                             options.Document,
                             operation,
                             options.Schema,
                             coercedVariableValues,
                             options.InitialValue).ConfigureAwait(false);
+                        break;
                     case OperationType.Mutation:
-                        return await Mutation.ExecuteMutationAsync(
+                        executionResult = await Mutation.ExecuteMutationAsync(
                             options.ErrorTransformer,
                             options.Document,
                             operation,
                             options.Schema,
                             coercedVariableValues,
                             options.InitialValue).ConfigureAwait(false);
+                        break;
                     case OperationType.Subscription:
                         throw new InvalidOperationException($"Use {nameof(SubscribeAsync)}");
                     default:
                         throw new InvalidOperationException($"Operation type {operation.Operation} not supported.");
                 }
+
+                logger.ExecutionResult(executionResult);
+                return executionResult;
             }
         }
 

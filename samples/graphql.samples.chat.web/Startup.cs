@@ -65,7 +65,7 @@ namespace fugu.graphql.samples.chat.web
             app.UseWebSockets();
             app.UseSignalR(routes =>
             {
-                routes.MapHub<ServerHub>(new PathString("/graphql-ws"));
+                routes.MapHub<ServerHub>(new PathString("/graphql"));
             });
         }
     }
