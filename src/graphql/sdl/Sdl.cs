@@ -218,8 +218,10 @@ namespace fugu.graphql.sdl
 
                 if (type is NonNull
                     && (!hasValue || value == null))
-                    throw new NullValueForNonNullTypeException(
-                        $"Argument {argument.Key} type is non-nullable but value is null or not set", directiveType);
+                    throw new ValueCoercionException(
+                        $"Argument {argument.Key} type is non-nullable but value is null or not set", 
+                        value,
+                        directiveType);
 
                 if (hasValue)
                 {
@@ -365,7 +367,7 @@ namespace fugu.graphql.sdl
                 {
                     defaultValue = Values.CoerceValue(definition.DefaultValue, type);
                 }
-                catch (NullValueForNonNullTypeException)
+                catch (ValueCoercionException)
                 {
                     defaultValue = null;
                 }

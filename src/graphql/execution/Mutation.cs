@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace fugu.graphql.execution
     public static class Mutation
     {
         public static async Task<ExecutionResult> ExecuteMutationAsync(
-            IErrorTransformer errorTransformer,
+            Func<GraphQLError, Error> formatError,
             GraphQLDocument document,
             GraphQLOperationDefinition mutation,
             ISchema schema,
@@ -39,7 +40,7 @@ namespace fugu.graphql.execution
 
             return new ExecutionResult
             {
-                Errors = executionContext.FieldErrors.SelectMany(errorTransformer.Transfrom).ToList(),
+                Errors = executionContext.FieldErrors.Select(formatError).ToList(),
                 Data = data
             };
         }

@@ -5,10 +5,26 @@ using System.Threading.Tasks;
 using fugu.graphql.error;
 using fugu.graphql.execution;
 using fugu.graphql.type;
+using GraphQLParser;
 using GraphQLParser.AST;
 
 namespace fugu.graphql.resolvers
 {
+    public class CompleteValueException : GraphQLError
+    {
+        public CompleteValueException(string message) : base(message)
+        {
+        }
+
+        public CompleteValueException(string message, params ASTNode[] nodes) : base(message, nodes)
+        {
+        }
+
+        public CompleteValueException(string message, IEnumerable<ASTNode> nodes, ISource source = null, IEnumerable<GraphQLLocation> locations = null, NodePath path = null, Dictionary<string, object> extensions = null, Exception originalError = null) : base(message, nodes, source, locations, path, extensions, originalError)
+        {
+        }
+    }
+
     public class ResolveResult : IResolveResult
     {
         public ResolveResult(object value)
@@ -83,29 +99,11 @@ namespace fugu.graphql.resolvers
                     coercedVariableValues).ConfigureAwait(false);
 
             if (fieldType is NamedTypeReference typeReference)
-            {
-                throw new InvalidOperationException(
-                    $"NamedTypeReferences are not supported during execution. Please heal schema before execution.");
-
-                /*var actualTypeName = typeReference.TypeName;
-                var innerType = executorContext.Schema.GetNamedType(actualTypeName);
-
-                if (innerType == null)
-                    throw new GraphQLError(
-                        $"Cannot complete value of '{selection.Name.Value}':'{nameof(NamedTypeReference)}' field. " +
-                        $"Could not get named type '{actualTypeName}' from schema.");
-
-                return await CompleteValueAsync(
-                    executorContext,
-                    objectType,
-                    field,
-                    innerType,
-                    actualType,
-                    selection,
-                    fields,
-                    value,
-                    coercedVariableValues).ConfigureAwait(false);*/
-            }
+                throw new CompleteValueException(
+                    "NamedTypeReferences are not supported during execution. " +
+                    "Please heal schema before execution. Found TypeReference to " +
+                    $"'{typeReference.TypeName}.",
+                    selection);
 
             if (fieldType is Lazy lazy)
                 return await CompleteValueAsync(
@@ -134,9 +132,9 @@ namespace fugu.graphql.resolvers
                     coercedVariableValues).ConfigureAwait(false);
 
                 if (completedResult == null)
-                    throw new NullValueForNonNullTypeException(
-                        $"Cannot complete value on non-null field '{selection.Name.Value}':'{fieldType.Name}'. " +
-                        $"Value is null", fieldType);
+                    throw new CompleteValueException(
+                        $"Cannot complete value on non-null field '{selection.Name.Value}:{nonNull}'. " +
+                        "Completed value is null.");
 
                 return completedResult;
             }
@@ -148,8 +146,8 @@ namespace fugu.graphql.resolvers
             if (fieldType is List listType)
             {
                 if (!(value is IEnumerable values))
-                    throw new GraphQLError(
-                        $"Cannot complete value for list field '{selection.Name.Value}':'{fieldType.Name}'. " +
+                    throw new CompleteValueException(
+                        $"Cannot complete value for list field '{selection.Name.Value}':'{fieldType}'. " +
                         "Resolved value is not a collection");
 
                 var innerType = listType.WrappedType;
@@ -192,15 +190,15 @@ namespace fugu.graphql.resolvers
 
             // interfaces and unions require ActualType
             if (actualType == null)
-                throw new GraphQLError(
-                    $"Cannot complete value as interface or union. " +
+                throw new CompleteValueException(
+                    "Cannot complete value as interface or union. " +
                     $"Actual type not given from resolver. Use {nameof(Resolve.As)} with type parameter");
 
             if (fieldType is InterfaceType interfaceType)
             {
                 if (!actualType.Implements(interfaceType))
-                    throw new GraphQLError(
-                        $"Cannot complete value as interface. " +
+                    throw new CompleteValueException(
+                        "Cannot complete value as interface. " +
                         $"Actual type {actualType.Name} does not implement {interfaceType.Name}");
 
                 var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
@@ -217,8 +215,8 @@ namespace fugu.graphql.resolvers
             if (fieldType is UnionType unionType)
             {
                 if (!unionType.IsPossible(actualType))
-                    throw new GraphQLError(
-                        $"Cannot complete value as union. " +
+                    throw new CompleteValueException(
+                        "Cannot complete value as union. " +
                         $"Actual type {actualType.Name} is not possible for {unionType.Name}");
 
                 var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
@@ -232,7 +230,7 @@ namespace fugu.graphql.resolvers
                 return data;
             }
 
-            throw new GraphQLError($"Cannot complete value for field {fieldType.Name}. No handling for the type.");
+            throw new CompleteValueException($"Cannot complete value for field {fieldType.Name}. No handling for the type.");
         }
     }
 }

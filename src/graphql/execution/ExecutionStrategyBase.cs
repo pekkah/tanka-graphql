@@ -68,10 +68,10 @@ namespace fugu.graphql.execution
 
                 return completedValue;
             }
-            catch (Exception e)
+            catch (GraphQLError e)
             {
                 return Errors.HandleFieldError(
-                    context.FieldErrors,
+                    context,
                     objectType,
                     fieldName,
                     fieldType,
@@ -115,6 +115,7 @@ namespace fugu.graphql.execution
                 fields,
                 fieldType,
                 coercedVariableValues).ConfigureAwait(false);
+
             return responseValue;
         }
     }

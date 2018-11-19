@@ -13,14 +13,14 @@ namespace fugu.graphql.execution
     public static class Subscription
     {
         public static async Task<SubscriptionResult> SubscribeAsync(
-            IErrorTransformer errorTransformer,
+            Func<GraphQLError, Error> formatError,
             GraphQLDocument document,
             GraphQLOperationDefinition subscription,
             ISchema schema,
             Dictionary<string, object> coercedVariableValues,
             object initialValue)
         {
-            if (errorTransformer == null) throw new ArgumentNullException(nameof(errorTransformer));
+            if (formatError == null) throw new ArgumentNullException(nameof(formatError));
             if (document == null) throw new ArgumentNullException(nameof(document));
             if (subscription == null) throw new ArgumentNullException(nameof(subscription));
             if (schema == null) throw new ArgumentNullException(nameof(schema));
@@ -48,18 +48,18 @@ namespace fugu.graphql.execution
                     sourceStream,
                     subscription,
                     coercedVariableValues,
-                    errorTransformer);
+                    formatError);
 
                 return responseStream;
             }
-            catch (Exception e)
+            catch (GraphQLError e)
             {
-                executionContext.FieldErrors.Add(e);
+                executionContext.AddError(e);
             }
 
             return new SubscriptionResult(null, null)
             {
-                Errors = executionContext.FieldErrors.SelectMany(errorTransformer.Transfrom).ToList(),
+                Errors = executionContext.FieldErrors.Select(formatError).ToList(),
             };
         }
 
@@ -68,20 +68,20 @@ namespace fugu.graphql.execution
             ISubscribeResult subscribeResult,
             GraphQLOperationDefinition subscription,
             Dictionary<string, object> coercedVariableValues,
-            IErrorTransformer errorTransformer)
+            Func<GraphQLError, Error> formatError)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (subscribeResult == null) throw new ArgumentNullException(nameof(subscribeResult));
             if (subscription == null) throw new ArgumentNullException(nameof(subscription));
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
-            if (errorTransformer == null) throw new ArgumentNullException(nameof(errorTransformer));
+            if (formatError == null) throw new ArgumentNullException(nameof(formatError));
 
             var executorEventBlock = new TransformBlock<object, ExecutionResult>(evnt => ExecuteSubscriptionEventAsync(
                 context,
                 subscription,
                 coercedVariableValues,
                 evnt,
-                errorTransformer));
+                formatError));
 
             var sourceStream = subscribeResult.Reader;
             sourceStream.LinkTo(executorEventBlock, new DataflowLinkOptions
@@ -152,7 +152,7 @@ namespace fugu.graphql.execution
             GraphQLOperationDefinition subscription,
             Dictionary<string, object> coercedVariableValues,
             object evnt,
-            IErrorTransformer errorTransformer)
+            Func<GraphQLError, Error> formatError)
         {
             var subscriptionType = context.Schema.Subscription;
             var selectionSet = subscription.SelectionSet;
@@ -165,7 +165,7 @@ namespace fugu.graphql.execution
 
             return new ExecutionResult
             {
-                Errors = context.FieldErrors.SelectMany(errorTransformer.Transfrom).ToList(),
+                Errors = context.FieldErrors.Select(formatError).ToList(),
                 Data = data
             };
         }

@@ -11,7 +11,7 @@ namespace fugu.graphql.execution
     public static class Query
     {
         public static async Task<ExecutionResult> ExecuteQueryAsync(
-            IErrorTransformer errorTransformer,
+            Func<GraphQLError, Error> errorTransformer,
             GraphQLDocument document,
             GraphQLOperationDefinition query,
             ISchema schema,
@@ -41,15 +41,15 @@ namespace fugu.graphql.execution
                     initialValue,
                     coercedVariableValues).ConfigureAwait(false);
             }
-            catch (Exception e)
+            catch (GraphQLError e)
             {
-                executionContext.FieldErrors.Add(e);
+                executionContext.AddError(e);
                 data = null;
             }
 
             return new ExecutionResult
             {
-                Errors = executionContext.FieldErrors.SelectMany(errorTransformer.Transfrom).ToList(),
+                Errors = executionContext.FieldErrors.Select(errorTransformer).ToList(),
                 Data = data
             };
         }

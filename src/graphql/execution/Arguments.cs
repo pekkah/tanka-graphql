@@ -47,8 +47,9 @@ namespace fugu.graphql.execution
                 if (!hasValue) coercedValues[argumentName] = defaultValue;
 
                 if (argumentType is NonNull && (!hasValue || value == null))
-                    throw new NullValueForNonNullTypeException(
+                    throw new ValueCoercionException(
                         $"Argument {argumentName} is non-null but no value could be coerced",
+                        null,
                         argumentType);
 
                 if (hasValue)

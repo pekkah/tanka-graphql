@@ -91,11 +91,23 @@ namespace fugu.graphql.tests
             result.ShouldMatchJson(@"
 {
   ""errors"": [
-    {
-      ""message"": ""'Query.nonNullNested: Nest!' is non-null field and cannot be set to null. ""
+     {
+      ""message"": ""Field 'Nest.nestedNonNull:String!' is non-null field and cannot be resolved as null. Cannot complete value on non-null field 'nestedNonNull:String!'. Completed value is null."",
+      ""locations"": [
+        {
+          ""end"": 50,
+          ""start"": 30
+        }
+      ]
     },
     {
-      ""message"": ""'Nest.nestedNonNull: String!' is non-null field and cannot be set to null. Type 'String!' cannot be null""
+      ""message"": ""Field 'Query.nonNullNested:Nest!' is non-null field and cannot be resolved as null. Field 'Nest.nestedNonNull:String!' is non-null field and cannot be resolved as null."",
+      ""locations"": [
+        {
+          ""end"": 52,
+          ""start"": 7
+        }
+      ]
     }
   ],
   ""data"": null
@@ -127,7 +139,13 @@ namespace fugu.graphql.tests
 {
   ""errors"": [
     {
-      ""message"": ""'Nest.nestedNonNull: String!' is non-null field and cannot be set to null. Type 'String!' cannot be null""
+      ""message"": ""Field 'Nest.nestedNonNull:String!' is non-null field and cannot be resolved as null. Cannot complete value on non-null field 'nestedNonNull:String!'. Completed value is null."",
+      ""locations"": [
+        {
+          ""end"": 64,
+          ""start"": 45
+        }
+      ]
     }
   ],
   ""data"": {
@@ -160,8 +178,14 @@ namespace fugu.graphql.tests
             result.ShouldMatchJson(@"
 {
   ""errors"": [
-    {
-      ""message"": ""'Nest.nestedNonNull: String!' is non-null field and cannot be set to null. Type 'String!' cannot be null""
+      {
+      ""message"": ""Field 'Nest.nestedNonNull:String!' is non-null field and cannot be resolved as null. Cannot complete value on non-null field 'nestedNonNull:String!'. Completed value is null."",
+      ""locations"": [
+        {
+          ""end"": 51,
+          ""start"": 31
+        }
+      ]
     }
   ],
   ""data"": {
@@ -192,7 +216,13 @@ namespace fugu.graphql.tests
 {
   ""errors"": [
     {
-      ""message"": ""'Query.nonNull: String!' is non-null field and cannot be set to null. Type 'String!' cannot be null""
+      ""message"": ""Field 'Query.nonNull:String!' is non-null field and cannot be resolved as null. Cannot complete value on non-null field 'nonNull:String!'. Completed value is null."",
+      ""locations"": [
+        {
+          ""end"": 16,
+          ""start"": 7
+        }
+      ]
     }
   ],
   ""data"": null

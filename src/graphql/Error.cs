@@ -1,4 +1,8 @@
-﻿namespace fugu.graphql
+﻿using System.Collections.Generic;
+using GraphQLParser.AST;
+using Newtonsoft.Json;
+
+namespace fugu.graphql
 {
     public class Error
     {
@@ -8,5 +12,14 @@
         }
 
         public string Message { get; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<GraphQLLocation> Locations { get; set;  }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<object> Path { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public Dictionary<string, object> Extensions { get; set; }
     }
 }

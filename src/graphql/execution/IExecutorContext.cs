@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using fugu.graphql.error;
 using fugu.graphql.type;
 using GraphQLParser.AST;
 
@@ -11,8 +11,10 @@ namespace fugu.graphql.execution
 
         GraphQLDocument Document { get; }
 
-        List<Exception> FieldErrors { get; }
-
         IExecutionStrategy Strategy { get; }
+
+        IEnumerable<GraphQLError> FieldErrors { get; }
+
+        void AddError(GraphQLError error);
     }
 }

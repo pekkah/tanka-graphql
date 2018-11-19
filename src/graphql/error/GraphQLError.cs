@@ -14,32 +14,32 @@ namespace fugu.graphql.error
 
         public GraphQLError(string message, params ASTNode[] nodes) : this(message)
         {
-            if (nodes != null)
-                Nodes.AddRange(nodes);
+            Nodes = nodes?.ToList();
         }
 
-        public GraphQLError(
-            string message,
+        public GraphQLError(string message,
             IEnumerable<ASTNode> nodes,
-            ISource source,
-            IEnumerable<int> positions,
-            IEnumerable<string> paths /*,
-            originalError?: ?Error,
-            extensions?: ?{ [key: string]: mixed },*/
-        ) : base(message)
+            ISource source = null,
+            IEnumerable<GraphQLLocation> locations = null,
+            NodePath path = null,
+            Dictionary<string,object> extensions = null,
+            Exception originalError = null) : base(message, originalError)
         {
             Nodes = nodes?.ToList();
             GQLSource = source;
-            Positions = positions?.ToList();
-            Paths = paths?.ToList();
+            Locations = locations?.ToList();
+            Path = path;
+            Extensions = extensions;
         }
 
-        public List<string> Paths { get; set; }
+        public Dictionary<string, object> Extensions { get; set; }
 
-        public List<int> Positions { get; set; }
+        public NodePath Path { get; set; }
+
+        public List<GraphQLLocation> Locations { get; set; }
 
         public ISource GQLSource { get; set; }
 
-        public List<ASTNode> Nodes { get; set; } = new List<ASTNode>();
+        public List<ASTNode> Nodes { get; set; }
     }
 }

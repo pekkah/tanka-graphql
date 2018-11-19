@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using fugu.graphql.error;
 using fugu.graphql.type;
 using GraphQLParser.AST;
 
@@ -31,10 +32,10 @@ namespace fugu.graphql.execution
 
                     responseMap[responseKey] = result;
                 }
-                catch (Exception e)
+                catch (GraphQLError e)
                 {
                     responseMap[responseKey] = null;
-                    context.FieldErrors.Add(e);
+                    context.AddError(e);
                 }
             }
 

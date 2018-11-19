@@ -52,7 +52,7 @@ namespace fugu.graphql
                 {
                     case OperationType.Query:
                         executionResult = await Query.ExecuteQueryAsync(
-                            options.ErrorTransformer,
+                            options.FormatError,
                             options.Document,
                             operation,
                             options.Schema,
@@ -61,7 +61,7 @@ namespace fugu.graphql
                         break;
                     case OperationType.Mutation:
                         executionResult = await Mutation.ExecuteMutationAsync(
-                            options.ErrorTransformer,
+                            options.FormatError,
                             options.Document,
                             operation,
                             options.Schema,
@@ -119,7 +119,7 @@ namespace fugu.graphql
                 {
                     case OperationType.Subscription:
                         return await Subscription.SubscribeAsync(
-                            options.ErrorTransformer,
+                            options.FormatError,
                             options.Document,
                             operation,
                             options.Schema,

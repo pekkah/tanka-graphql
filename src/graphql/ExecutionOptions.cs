@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using fugu.graphql.error;
 using fugu.graphql.type;
 using GraphQLParser.AST;
@@ -19,10 +20,27 @@ namespace fugu.graphql
 
         public object InitialValue { get; set; }
 
-        public IErrorTransformer ErrorTransformer { get; set; } = new DefaultErrorTransformer();
-
         public bool Validate { get; } = true;
 
         public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
+
+        public Func<GraphQLError, Error> FormatError = DefaultFormatError;
+
+        private static Error DefaultFormatError(GraphQLError error)
+        {
+            var message = error.Message;
+
+            if (error.InnerException != null)
+            {
+                message += $" {error.InnerException.Message}";
+            }
+
+            return new Error(message)
+            {
+                Extensions = error.Extensions,
+                Locations = error.Locations,
+                Path = error.Path
+            };
+        }
     }
 }

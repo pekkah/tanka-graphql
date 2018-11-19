@@ -84,7 +84,8 @@ namespace fugu.graphql.execution
         {
             var coercedValue = CoerceValue(value, nonNull.WrappedType);
             if (coercedValue == null)
-                throw new NullValueForNonNullTypeException("Coerced value is null", 
+                throw new ValueCoercionException("Coerced value is null", 
+                    value,
                     nonNull);
 
             return coercedValue;

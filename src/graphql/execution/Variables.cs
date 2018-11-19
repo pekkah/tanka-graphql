@@ -35,8 +35,9 @@ namespace fugu.graphql.execution
 
                 if (variableType is NonNull
                     && (!hasValue || value == null))
-                    throw new NullValueForNonNullTypeException(
+                    throw new ValueCoercionException(
                         $"Variable {variableName} type is non-nullable but value is null or not set",
+                        value,
                         variableType);
 
                 if (hasValue)

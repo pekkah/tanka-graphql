@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using fugu.graphql.error;
+﻿using fugu.graphql.error;
+using fugu.graphql.resolvers;
 using fugu.graphql.type;
 using GraphQLParser.AST;
 
@@ -9,24 +8,25 @@ namespace fugu.graphql.execution
     public static class Errors
     {
         public static object HandleFieldError(
-            ICollection<Exception> errors,
+            IExecutorContext context,
             ObjectType objectType,
             string fieldName,
             IGraphQLType fieldType,
             GraphQLFieldSelection fieldSelection,
             object completedValue,
-            Exception exception)
+            GraphQLError error)
         {
-            if (errors == null) throw new ArgumentNullException(nameof(errors));
-
-            var error = new FieldErrorException(
-                $"{objectType.Name}.{fieldName} has an error", objectType, fieldName, fieldType, fieldSelection,
-                completedValue, exception);
+            if (!(error is CompleteValueException))
+            {
+                context.AddError(error);
+            }
 
             if (fieldType is NonNull)
-                throw error;
+                throw new GraphQLError($"Field '{objectType}.{fieldName}:{fieldType}' is non-null field and cannot be resolved as null.",
+                    new[] {fieldSelection}, 
+                    locations: new []{ fieldSelection.Location},
+                    originalError: error);
 
-            errors.Add(exception);
             return completedValue;
         }
     }
