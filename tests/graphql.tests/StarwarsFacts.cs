@@ -36,7 +36,8 @@ namespace fugu.graphql.tests
                 }).ConfigureAwait(false);
 
             /* Then */
-            result.ShouldMatchJson(@"{""errors"": null,
+            result.ShouldMatchJson(@"
+{
   ""data"": {
     ""__schema"": {
       ""mutationType"": {
@@ -490,7 +491,6 @@ namespace fugu.graphql.tests
             /* Then */
             actual.ShouldMatchJson(
                 @"{
-              ""errors"": null,
               ""data"": {
                 ""addHuman"": {
                   ""id"": ""humans/leia"",
@@ -532,7 +532,7 @@ namespace fugu.graphql.tests
 
             /* Then */
             actual.ShouldMatchJson(
-                @"{""errors"": null,
+                @"{
                    ""data"": {
                     ""character"": {
                       ""id"": ""humans/luke"",
@@ -578,7 +578,7 @@ namespace fugu.graphql.tests
 
             /* Then */
             actual.ShouldMatchJson(
-                @"{""errors"": null,
+                @"{
                    ""data"": {
                     ""character"": {
                       ""__typename"":""Human"",
@@ -624,7 +624,7 @@ namespace fugu.graphql.tests
 
             /* Then */
             actual.ShouldMatchJson(
-                @"{""errors"": null,
+                @"{
                    ""data"": {
                     ""character"": {
                       ""id"": ""humans/luke"",
@@ -664,7 +664,7 @@ namespace fugu.graphql.tests
 
             /* Then */
             actual.ShouldMatchJson(
-                @"{""errors"": null,
+                @"{
                    ""data"": {
                     ""character"": {
                       ""id"": ""humans/luke"",
@@ -705,7 +705,7 @@ namespace fugu.graphql.tests
 
             /* Then */
             actual.ShouldMatchJson(
-                @"{""errors"": null,
+                @"{
                   ""data"": {
                     ""characters"": [
                       {
@@ -778,7 +778,6 @@ fragment friendsAndFriends on Human {{
             /* Then */
             actual.ShouldMatchJson(
                 @"{
-              ""errors"": null,
               ""data"": {
                 ""human"": {
                   ""id"": ""humans/luke"",

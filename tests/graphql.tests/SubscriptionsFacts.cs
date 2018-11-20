@@ -134,7 +134,6 @@ subscription MessageAdded {
             await result.UnsubscribeAsync().ConfigureAwait(false);
 
             actualResult.ShouldMatchJson(@"{
-    ""errors"": null,
     ""data"":{
         ""messageAdded"": {
             ""content"": ""hello""

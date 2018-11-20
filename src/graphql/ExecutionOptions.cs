@@ -14,11 +14,6 @@ namespace fugu.graphql
     {
         public Func<GraphQLError, Error> FormatError = DefaultFormatError;
 
-        public ExecutionOptions()
-        {
-            Extensions.Use(new TraceExtension());
-        }
-
         public ISchema Schema { get; set; }
 
         public GraphQLDocument Document { get; set; }
