@@ -14,7 +14,8 @@ namespace fugu.graphql.execution
             IGraphQLType fieldType,
             GraphQLFieldSelection fieldSelection,
             object completedValue,
-            GraphQLError error)
+            GraphQLError error,
+            NodePath path)
         {
             if (!(error is CompleteValueException))
             {
@@ -25,7 +26,8 @@ namespace fugu.graphql.execution
                 throw new GraphQLError($"Field '{objectType}.{fieldName}:{fieldType}' is non-null field and cannot be resolved as null.",
                     new[] {fieldSelection}, 
                     locations: new []{ fieldSelection.Location},
-                    originalError: error);
+                    originalError: error,
+                    path: path);
 
             return completedValue;
         }

@@ -52,14 +52,14 @@ namespace fugu.graphql.resolvers
 
         public ObjectType ActualType { get; set; }
 
-        public virtual async Task<object> CompleteValueAsync(
-            IExecutorContext executorContext,
+        public virtual async Task<object> CompleteValueAsync(IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
             IGraphQLType fieldType,
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
-            Dictionary<string, object> coercedVariableValues)
+            Dictionary<string, object> coercedVariableValues, 
+            NodePath path)
         {
             object completedValue = null;
 
@@ -72,13 +72,13 @@ namespace fugu.graphql.resolvers
                 selection,
                 fields,
                 Value,
-                coercedVariableValues).ConfigureAwait(false);
+                coercedVariableValues,
+                path).ConfigureAwait(false);
 
             return completedValue;
         }
 
-        public async Task<object> CompleteValueAsync(
-            IExecutorContext executorContext,
+        public async Task<object> CompleteValueAsync(IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
             IGraphQLType fieldType,
@@ -86,7 +86,8 @@ namespace fugu.graphql.resolvers
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
             object value,
-            Dictionary<string, object> coercedVariableValues)
+            Dictionary<string, object> coercedVariableValues, 
+            NodePath path)
         {
             if (value is IResolveResult resolveResult)
                 return await resolveResult.CompleteValueAsync(
@@ -96,7 +97,8 @@ namespace fugu.graphql.resolvers
                     fieldType,
                     selection,
                     fields,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues,
+                    path).ConfigureAwait(false);
 
             if (fieldType is NamedTypeReference typeReference)
                 throw new CompleteValueException(
@@ -115,7 +117,8 @@ namespace fugu.graphql.resolvers
                     selection,
                     fields,
                     value,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues,
+                    path).ConfigureAwait(false);
 
             if (fieldType is NonNull nonNull)
             {
@@ -129,7 +132,8 @@ namespace fugu.graphql.resolvers
                     selection,
                     fields,
                     value,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues,
+                    path).ConfigureAwait(false);
 
                 if (completedResult == null)
                     throw new CompleteValueException(
@@ -152,8 +156,10 @@ namespace fugu.graphql.resolvers
 
                 var innerType = listType.WrappedType;
                 var result = new List<object>();
+                int i = 0;
                 foreach (var resultItem in values)
                 {
+                    path.Append(i++);
                     var completedResultItem = await CompleteValueAsync(
                         executorContext,
                         objectType,
@@ -163,7 +169,8 @@ namespace fugu.graphql.resolvers
                         selection,
                         fields,
                         resultItem,
-                        coercedVariableValues).ConfigureAwait(false);
+                        coercedVariableValues,
+                        path).ConfigureAwait(false);
 
                     result.Add(completedResultItem);
                 }
@@ -183,7 +190,8 @@ namespace fugu.graphql.resolvers
                     subSelectionSet,
                     fieldObjectType,
                     value,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues,
+                    path).ConfigureAwait(false);
 
                 return data;
             }
@@ -207,7 +215,8 @@ namespace fugu.graphql.resolvers
                     subSelectionSet,
                     actualType,
                     value,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues,
+                    path).ConfigureAwait(false);
 
                 return data;
             }
@@ -225,7 +234,8 @@ namespace fugu.graphql.resolvers
                     subSelectionSet,
                     actualType,
                     value,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues,
+                    path).ConfigureAwait(false);
 
                 return data;
             }

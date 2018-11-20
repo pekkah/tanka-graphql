@@ -19,6 +19,7 @@ namespace fugu.graphql.resolvers
             IGraphQLType fieldType,
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
-            Dictionary<string, object> coercedVariableValues);
+            Dictionary<string, object> coercedVariableValues, 
+            NodePath path);
     }
 }

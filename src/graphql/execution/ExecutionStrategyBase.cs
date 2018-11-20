@@ -11,19 +11,17 @@ namespace fugu.graphql.execution
 {
     public abstract class ExecutionStrategyBase : IExecutionStrategy
     {
-        public abstract Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
-            IExecutorContext context,
+        public abstract Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
-            Dictionary<string, object> coercedVariableValues);
+            Dictionary<string, object> coercedVariableValues, NodePath path);
 
-        public async Task<object> ExecuteFieldAsync(
-            IExecutorContext context,
+        public async Task<object> ExecuteFieldAsync(IExecutorContext context,
             ObjectType objectType,
             object objectValue,
             List<GraphQLFieldSelection> fields,
             IGraphQLType fieldType,
-            Dictionary<string, object> coercedVariableValues)
+            Dictionary<string, object> coercedVariableValues, NodePath path)
         {
             if (objectType == null) throw new ArgumentNullException(nameof(objectType));
             if (fields == null) throw new ArgumentNullException(nameof(fields));
@@ -64,7 +62,8 @@ namespace fugu.graphql.execution
                     fieldType,
                     fieldSelection,
                     fields,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues,
+                    path).ConfigureAwait(false);
 
                 return completedValue;
             }
@@ -77,21 +76,23 @@ namespace fugu.graphql.execution
                     fieldType,
                     fieldSelection,
                     completedValue,
-                    e);
+                    e,
+                    path);
             }
         }
 
-        protected async Task<object> ExecuteFieldGroupAsync(
-            IExecutorContext context, 
+        protected async Task<object> ExecuteFieldGroupAsync(IExecutorContext context,
             ObjectType objectType,
             object objectValue,
             Dictionary<string, object> coercedVariableValues,
-            KeyValuePair<string, List<GraphQLFieldSelection>> fieldGroup)
+            KeyValuePair<string, List<GraphQLFieldSelection>> fieldGroup, 
+            NodePath path)
         {
             if (objectType == null) throw new ArgumentNullException(nameof(objectType));
 
             var fields = fieldGroup.Value;
             var fieldName = fields.First().Name.Value;
+            path.Append(fieldName);
 
             // __typename hack
             if (fieldName == "__typename")
@@ -114,7 +115,8 @@ namespace fugu.graphql.execution
                 objectValue,
                 fields,
                 fieldType,
-                coercedVariableValues).ConfigureAwait(false);
+                coercedVariableValues,
+                path).ConfigureAwait(false);
 
             return responseValue;
         }

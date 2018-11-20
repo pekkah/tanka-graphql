@@ -30,12 +30,14 @@ namespace fugu.graphql.execution
                     $"Schema does not support mutations. Mutation type is null.");
 
             var selectionSet = mutation.SelectionSet;
+            var path = new NodePath();
             var data = await SelectionSets.ExecuteSelectionSetAsync(
                 executionContext,
                 selectionSet,
                 mutationType,
                 initialValue,
-                coercedVariableValues).ConfigureAwait(false);
+                coercedVariableValues,
+                path).ConfigureAwait(false);
 
 
             return new ExecutionResult

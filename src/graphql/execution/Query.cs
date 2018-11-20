@@ -34,12 +34,14 @@ namespace fugu.graphql.execution
 
             try
             {
+                var path = new NodePath();
                 data = await SelectionSets.ExecuteSelectionSetAsync(
                     executionContext,
                     selectionSet,
                     queryType,
                     initialValue,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues,
+                    path).ConfigureAwait(false);
             }
             catch (GraphQLError e)
             {

@@ -11,13 +11,12 @@ namespace fugu.graphql.execution
 {
     public static class SelectionSets
     {
-        public static async Task<IDictionary<string, object>>
-            ExecuteSelectionSetAsync(
-                IExecutorContext executorContext,
-                GraphQLSelectionSet selectionSet,
-                ObjectType objectType,
-                object objectValue,
-                Dictionary<string, object> coercedVariableValues)
+        public static async Task<IDictionary<string, object>> ExecuteSelectionSetAsync(IExecutorContext executorContext,
+            GraphQLSelectionSet selectionSet,
+            ObjectType objectType,
+            object objectValue,
+            Dictionary<string, object> coercedVariableValues, 
+            NodePath path)
         {
             var groupedFieldSet = CollectFields(
                 executorContext.Schema,
@@ -31,7 +30,8 @@ namespace fugu.graphql.execution
                 groupedFieldSet,
                 objectType,
                 objectValue,
-                coercedVariableValues).ConfigureAwait(false);
+                coercedVariableValues,
+                path).ConfigureAwait(false);
 
             return resultMap;
         }

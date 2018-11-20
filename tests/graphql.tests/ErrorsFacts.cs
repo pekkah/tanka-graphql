@@ -98,6 +98,10 @@ namespace fugu.graphql.tests
           ""end"": 50,
           ""start"": 30
         }
+      ],
+      ""path"": [
+        ""nonNullNested"",
+        ""nestedNonNull""
       ]
     },
     {
@@ -107,6 +111,9 @@ namespace fugu.graphql.tests
           ""end"": 52,
           ""start"": 7
         }
+      ],
+      ""path"": [
+        ""nonNullNested""
       ]
     }
   ],
@@ -145,6 +152,10 @@ namespace fugu.graphql.tests
           ""end"": 64,
           ""start"": 45
         }
+      ],
+      ""path"": [
+        ""nullableNested"",
+        ""nestedNonNull""
       ]
     }
   ],
@@ -185,6 +196,10 @@ namespace fugu.graphql.tests
           ""end"": 51,
           ""start"": 31
         }
+      ],
+      ""path"": [
+        ""nullableNested"",
+        ""nestedNonNull""
       ]
     }
   ],
@@ -222,6 +237,9 @@ namespace fugu.graphql.tests
           ""end"": 16,
           ""start"": 7
         }
+      ],
+      ""path"": [
+        ""nonNull""
       ]
     }
   ],

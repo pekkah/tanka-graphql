@@ -12,7 +12,8 @@ namespace fugu.graphql.execution
             IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
-            Dictionary<string, object> coercedVariableValues)
+            Dictionary<string, object> coercedVariableValues, 
+            NodePath path)
         {
             var data = new ConcurrentDictionary<string, object>();
             var tasks = new ConcurrentBag<Task>();
@@ -26,7 +27,8 @@ namespace fugu.graphql.execution
                         objectType,
                         objectValue,
                         coercedVariableValues,
-                        fieldGroup).ConfigureAwait(false);
+                        fieldGroup,
+                        path.Fork()).ConfigureAwait(false);
 
                     data[responseKey] = result;
                 });

@@ -156,12 +156,14 @@ namespace fugu.graphql.execution
         {
             var subscriptionType = context.Schema.Subscription;
             var selectionSet = subscription.SelectionSet;
+            var path = new NodePath();
             var data = await SelectionSets.ExecuteSelectionSetAsync(
                 context,
                 selectionSet,
                 subscriptionType,
                 evnt,
-                coercedVariableValues).ConfigureAwait(false);
+                coercedVariableValues,
+                path).ConfigureAwait(false);
 
             return new ExecutionResult
             {
