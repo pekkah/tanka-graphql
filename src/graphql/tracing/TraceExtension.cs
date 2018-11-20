@@ -48,23 +48,31 @@ namespace fugu.graphql.tracing
         public override Task EndExecuteAsync(ExecutionResult executionResult)
         {
             _stopwatch.Stop();
+
+            // execution
             var endTime = _startTime.Add(_stopwatch.Elapsed);
-            var duration = ToNanoSeconds((endTime - _startTime).TotalMilliseconds);
+            var duration = endTime - _startTime;
+
+            // parsing
+            var parsingDuration = _parsingEnded - _parsingStarted;
+
+            //validation
+            var validationDuration = _validationEnded - _validationStarted;
 
             var record = new TraceExtensionRecord()
             {
-                Duration = duration,
+                Duration = duration.TotalNanoSeconds(),
                 StartTime = _startTime,
                 EndTime = endTime,
                 Parsing = new TraceExtensionRecord.OperationTrace()
                 {
-                    StartOffset = ToNanoSeconds((_parsingStarted).TotalMilliseconds),
-                    Duration = ToNanoSeconds((_parsingEnded - _parsingStarted).TotalMilliseconds)
+                    StartOffset = _parsingStarted.TotalNanoSeconds(),
+                    Duration = parsingDuration.TotalNanoSeconds()
                 },
                 Validation = new TraceExtensionRecord.OperationTrace()
                 {
-                    StartOffset = ToNanoSeconds((_validationStarted).TotalMilliseconds),
-                    Duration = ToNanoSeconds((_validationEnded - _validationStarted).TotalMilliseconds)
+                    StartOffset = _validationStarted.TotalNanoSeconds(),
+                    Duration = validationDuration.TotalNanoSeconds()
                 }
             };
 
@@ -83,8 +91,13 @@ namespace fugu.graphql.tracing
             _parsingEnded = _stopwatch.Elapsed;
             return Task.CompletedTask;
         }
+    }
 
-
-        protected static long ToNanoSeconds(double ms) => (long)(ms * 1000 * 1000);
+    internal static class TimeSpanExtensions
+    {
+        public static long TotalNanoSeconds(this TimeSpan timeSpan)
+        {
+            return (long)(timeSpan.TotalMilliseconds * 1000 * 1000);
+        }
     }
 }
