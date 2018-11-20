@@ -12,7 +12,7 @@ namespace fugu.graphql
     {
         public static async Task<ExecutionResult> ExecuteAsync(ExecutionOptions options)
         {
-            var extensions = options.Extensions;
+            var extensions = new Extensions(options.Extensions);
             await extensions.BeginExecuteAsync(options);
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 

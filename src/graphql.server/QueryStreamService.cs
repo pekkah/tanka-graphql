@@ -64,8 +64,11 @@ namespace fugu.graphql.server
                 VariableValues = variables,
                 InitialValue = null,
                 LoggerFactory = _loggerFactory,
+                Extensions =
+                {
+                    new TraceExtension()
+                }
             };
-            options.Extensions.Use(new TraceExtension());
             var result = await Executor.ExecuteAsync(options);
 
             var channel = Channel.CreateBounded<ExecutionResult>(1);
@@ -90,8 +93,11 @@ namespace fugu.graphql.server
                 VariableValues = variables,
                 InitialValue = null,
                 LoggerFactory = _loggerFactory,
+                Extensions =
+                {
+                    new TraceExtension()
+                }
             };
-            options.Extensions.Use(new TraceExtension());
             var result = await Executor.SubscribeAsync(options);
 
             var channel = Channel.CreateUnbounded<ExecutionResult>();

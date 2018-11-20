@@ -28,7 +28,7 @@ namespace fugu.graphql
 
         public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
-        public Extensions Extensions { get; } = new Extensions();
+        public ICollection<IExtension> Extensions { get; } = new List<IExtension>();
 
         private static Error DefaultFormatError(GraphQLError error)
         {

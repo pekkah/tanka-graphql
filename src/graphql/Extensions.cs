@@ -9,12 +9,7 @@ namespace fugu.graphql
     {
         private readonly List<IExtension> _extensions = new List<IExtension>();
 
-        public void Use(IExtension extension)
-        {
-            _extensions.Add(extension);
-        }
-
-        public void Use(IEnumerable<IExtension> extensions)
+        public Extensions(IEnumerable<IExtension> extensions)
         {
             _extensions.AddRange(extensions);
         }
