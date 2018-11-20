@@ -23,7 +23,7 @@ namespace fugu.graphql.samples.chat.web.Controllers
         {
             var result = await ExecuteAsync(new ExecutionOptions
             {
-                Document = ParseDocument(request.Query),
+                ParseDocumentAsync = ()=> ParseDocumentAsync(request.Query),
                 Schema = _schemas.Chat,
                 OperationName = request.OperationName,
                 VariableValues = request.Variables?.ToVariableDictionary()

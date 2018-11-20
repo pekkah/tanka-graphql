@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using fugu.graphql.validation;
+using GraphQLParser.AST;
 
 namespace fugu.graphql
 {
@@ -12,5 +13,9 @@ namespace fugu.graphql
         Task EndValidationAsync(ValidationResult validationResult);
 
         Task EndExecuteAsync(ExecutionResult executionResult);
+
+        Task BeginParseDocumentAsync();
+
+        Task EndParseDocumentAsync(GraphQLDocument document);
     }
 }

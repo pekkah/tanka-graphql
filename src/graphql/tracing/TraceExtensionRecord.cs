@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace fugu.graphql.performance
+namespace fugu.graphql.tracing
 {
     public class TraceExtensionRecord
     {

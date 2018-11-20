@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using fugu.graphql.validation;
+using GraphQLParser.AST;
 
 namespace fugu.graphql
 {
@@ -37,6 +38,19 @@ namespace fugu.graphql
             foreach (var extension in _extensions)
             {
                 await extension.EndExecuteAsync(executionResult);
+            }
+        }
+
+        public Task BeginParseDocumentAsync()
+        {
+            return Task.WhenAll(_extensions.Select(e => e.BeginParseDocumentAsync()));
+        }
+
+        public async Task EndParseDocumentAsync(GraphQLDocument document)
+        {
+            foreach (var extension in _extensions)
+            {
+                await extension.EndParseDocumentAsync(document);
             }
         }
     }

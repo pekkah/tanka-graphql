@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using fugu.graphql.error;
-using fugu.graphql.performance;
 using fugu.graphql.type;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
@@ -16,7 +16,7 @@ namespace fugu.graphql
 
         public ISchema Schema { get; set; }
 
-        public GraphQLDocument Document { get; set; }
+        public Func<Task<GraphQLDocument>> ParseDocumentAsync { get; set; }
 
         public string OperationName { get; set; }
 

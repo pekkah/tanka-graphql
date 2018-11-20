@@ -125,7 +125,7 @@ subscription MessageAdded {
             /* When */
             var result = await SubscribeAsync(new ExecutionOptions
             {
-                Document = ParseDocument(query),
+                ParseDocumentAsync = ()=> ParseDocumentAsync(query),
                 Schema = _executable
             }).ConfigureAwait(false);
 

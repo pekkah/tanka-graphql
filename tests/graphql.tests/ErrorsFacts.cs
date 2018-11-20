@@ -83,7 +83,7 @@ namespace fugu.graphql.tests
             var result = await ExecuteAsync(new ExecutionOptions
             {
                 Schema = _executable,
-                Document = ParseDocument(query)
+                ParseDocumentAsync = ()=> ParseDocumentAsync(query)
             }).ConfigureAwait(false);
 
 
@@ -137,7 +137,7 @@ namespace fugu.graphql.tests
             var result = await ExecuteAsync(new ExecutionOptions
             {
                 Schema = _executable,
-                Document = ParseDocument(query)
+                ParseDocumentAsync = ()=> ParseDocumentAsync(query)
             }).ConfigureAwait(false);
 
 
@@ -181,7 +181,7 @@ namespace fugu.graphql.tests
             var result = await ExecuteAsync(new ExecutionOptions
             {
                 Schema = _executable,
-                Document = ParseDocument(query)
+                ParseDocumentAsync = ()=> ParseDocumentAsync(query)
             }).ConfigureAwait(false);
 
 
@@ -222,7 +222,7 @@ namespace fugu.graphql.tests
             var result = await ExecuteAsync(new ExecutionOptions
             {
                 Schema = _executable,
-                Document = ParseDocument(query)
+                ParseDocumentAsync = ()=> ParseDocumentAsync(query)
             }).ConfigureAwait(false);
 
 

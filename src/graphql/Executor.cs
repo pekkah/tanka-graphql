@@ -24,7 +24,11 @@ namespace fugu.graphql
                     await options.Schema.InitializeAsync().ConfigureAwait(false);
                 }
 
-                var operation = Operations.GetOperation(options.Document, options.OperationName);
+                await extensions.BeginParseDocumentAsync();
+                var document = await options.ParseDocumentAsync();
+                await extensions.EndParseDocumentAsync(document);
+
+                var operation = Operations.GetOperation(document, options.OperationName);
                 logger.Operation(operation);
 
                 var coercedVariableValues = Variables.CoerceVariableValues(
@@ -38,7 +42,7 @@ namespace fugu.graphql
                     await extensions.BeginValidationAsync();
                     var validationResult = await Validator.ValidateAsync(
                         options.Schema,
-                        options.Document,
+                        document,
                         coercedVariableValues).ConfigureAwait(false);
 
                     logger.ValidationResult(validationResult);
@@ -58,7 +62,7 @@ namespace fugu.graphql
                     case OperationType.Query:
                         executionResult = await Query.ExecuteQueryAsync(
                             options.FormatError,
-                            options.Document,
+                            document,
                             operation,
                             options.Schema,
                             coercedVariableValues,
@@ -67,7 +71,7 @@ namespace fugu.graphql
                     case OperationType.Mutation:
                         executionResult = await Mutation.ExecuteMutationAsync(
                             options.FormatError,
-                            options.Document,
+                            document,
                             operation,
                             options.Schema,
                             coercedVariableValues,
@@ -87,9 +91,11 @@ namespace fugu.graphql
 
         public static async Task<SubscriptionResult> SubscribeAsync(ExecutionOptions options)
         {
+            var extensions = new Extensions(options.Extensions);
+            await extensions.BeginExecuteAsync(options);
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
-            using (logger.Begin(options.OperationName ?? "(unknown)"))
+            using (logger.Begin(options.OperationName))
             {
                 if (!options.Schema.IsInitialized)
                 {
@@ -97,7 +103,11 @@ namespace fugu.graphql
                     await options.Schema.InitializeAsync().ConfigureAwait(false);
                 }
 
-                var operation = Operations.GetOperation(options.Document, options.OperationName);
+                await extensions.BeginParseDocumentAsync();
+                var document = await options.ParseDocumentAsync();
+                await extensions.EndParseDocumentAsync(document);
+
+                var operation = Operations.GetOperation(document, options.OperationName);
                 logger.Operation(operation);
 
                 var coercedVariableValues = Variables.CoerceVariableValues(
@@ -108,25 +118,27 @@ namespace fugu.graphql
                 logger.Validate(options.Validate);
                 if (options.Validate)
                 {
-                    var result = await Validator.ValidateAsync(
+                    await extensions.BeginValidationAsync();
+                    var validationResult = await Validator.ValidateAsync(
                         options.Schema,
-                        options.Document,
+                        document,
                         coercedVariableValues).ConfigureAwait(false);
 
-                    logger.ValidationResult(result);
-                    if (!result.IsValid)
-                        return new SubscriptionResult
+                    logger.ValidationResult(validationResult);
+
+                    await extensions.EndValidationAsync(validationResult);
+                    if (!validationResult.IsValid)
+                        return new SubscriptionResult()
                         {
-                            Errors = result.Errors.Select(e => new Error(e.Message)).ToList()
+                            Errors = validationResult.Errors.Select(e => new Error(e.Message)).ToList()
                         };
                 }
-
                 switch (operation.Operation)
                 {
                     case OperationType.Subscription:
                         return await Subscription.SubscribeAsync(
                             options.FormatError,
-                            options.Document,
+                            document,
                             operation,
                             options.Schema,
                             coercedVariableValues,

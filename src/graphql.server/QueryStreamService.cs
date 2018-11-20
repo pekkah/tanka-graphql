@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.performance;
 using fugu.graphql.server.utilities;
+using fugu.graphql.tracing;
 using fugu.graphql.type;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
@@ -59,7 +59,7 @@ namespace fugu.graphql.server
             var options = new ExecutionOptions
             {
                 Schema = _schema,
-                Document = document,
+                ParseDocumentAsync = () => Task.FromResult(document),
                 OperationName = operationName,
                 VariableValues = variables,
                 InitialValue = null,
@@ -88,7 +88,7 @@ namespace fugu.graphql.server
             var options = new ExecutionOptions
             {
                 Schema = _schema,
-                Document = document,
+                ParseDocumentAsync = ()=> Task.FromResult(document),
                 OperationName = operationName,
                 VariableValues = variables,
                 InitialValue = null,
