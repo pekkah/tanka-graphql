@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using fugu.graphql.error;
 using fugu.graphql.type;
 using GraphQLParser.AST;
@@ -39,7 +40,7 @@ namespace fugu.graphql
             {
                 Extensions = error.Extensions,
                 Locations = error.Locations,
-                Path = error.Path
+                Path = error.Path?.Segments.ToList()
             };
         }
     }
