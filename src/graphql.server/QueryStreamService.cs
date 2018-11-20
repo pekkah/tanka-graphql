@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using fugu.graphql.performance;
 using fugu.graphql.server.utilities;
 using fugu.graphql.type;
 using GraphQLParser.AST;
@@ -55,15 +56,17 @@ namespace fugu.graphql.server
             Dictionary<string, object> extensions,
             CancellationToken cancellationToken)
         {
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            var options = new ExecutionOptions
             {
                 Schema = _schema,
                 Document = document,
                 OperationName = operationName,
                 VariableValues = variables,
                 InitialValue = null,
-                LoggerFactory = _loggerFactory
-            });
+                LoggerFactory = _loggerFactory,
+            };
+            options.Extensions.Use(new TraceExtension());
+            var result = await Executor.ExecuteAsync(options);
 
             var channel = Channel.CreateBounded<ExecutionResult>(1);
             await channel.Writer.WriteAsync(result, cancellationToken);
@@ -79,15 +82,17 @@ namespace fugu.graphql.server
             Dictionary<string, object> extensions,
             CancellationToken cancellationToken)
         {
-            var result = await Executor.SubscribeAsync(new ExecutionOptions
+            var options = new ExecutionOptions
             {
                 Schema = _schema,
                 Document = document,
                 OperationName = operationName,
                 VariableValues = variables,
                 InitialValue = null,
-                LoggerFactory = _loggerFactory
-            });
+                LoggerFactory = _loggerFactory,
+            };
+            options.Extensions.Use(new TraceExtension());
+            var result = await Executor.SubscribeAsync(options);
 
             var channel = Channel.CreateUnbounded<ExecutionResult>();
 
