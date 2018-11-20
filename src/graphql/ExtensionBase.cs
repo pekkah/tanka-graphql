@@ -1,0 +1,28 @@
+﻿using System.Threading.Tasks;
+using fugu.graphql.validation;
+
+namespace fugu.graphql
+{
+    public abstract class ExtensionBase : IExtension
+    {
+        public virtual Task BeginExecuteAsync(ExecutionOptions options)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task BeginValidationAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task EndValidationAsync(ValidationResult validationResult)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task EndExecuteAsync(ExecutionResult executionResult)
+        {
+            return Task.CompletedTask;
+        }
+    }
+}

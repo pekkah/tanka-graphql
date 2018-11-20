@@ -12,6 +12,8 @@ namespace fugu.graphql
     {
         public static async Task<ExecutionResult> ExecuteAsync(ExecutionOptions options)
         {
+            var extensions = options.Extensions;
+            await extensions.BeginExecuteAsync(options);
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
             using (logger.Begin(options.OperationName))
@@ -33,12 +35,15 @@ namespace fugu.graphql
                 logger.Validate(options.Validate);
                 if (options.Validate)
                 {
+                    await extensions.BeginValidationAsync();
                     var validationResult = await Validator.ValidateAsync(
                         options.Schema,
                         options.Document,
                         coercedVariableValues).ConfigureAwait(false);
 
                     logger.ValidationResult(validationResult);
+
+                    await extensions.EndValidationAsync(validationResult);
                     if (!validationResult.IsValid)
                         return new ExecutionResult
                         {
@@ -75,6 +80,7 @@ namespace fugu.graphql
                 }
 
                 logger.ExecutionResult(executionResult);
+                await extensions.EndExecuteAsync(executionResult);
                 return executionResult;
             }
         }

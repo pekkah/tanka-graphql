@@ -40,7 +40,8 @@ export class Client {
         next => {
           subscriber.next({
             data: next.data,
-            errors: next.errors
+            errors: next.errors,
+            extensions: next.extensions
           });
         },
         err => {
