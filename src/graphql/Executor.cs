@@ -61,21 +61,23 @@ namespace fugu.graphql
                 {
                     case OperationType.Query:
                         executionResult = await Query.ExecuteQueryAsync(
-                            options.FormatError,
-                            document,
-                            operation,
-                            options.Schema,
-                            coercedVariableValues,
-                            options.InitialValue).ConfigureAwait(false);
+                            new QueryContext(
+                                options.FormatError,
+                                document,
+                                operation,
+                                options.Schema,
+                                coercedVariableValues,
+                                options.InitialValue)).ConfigureAwait(false);
                         break;
                     case OperationType.Mutation:
                         executionResult = await Mutation.ExecuteMutationAsync(
-                            options.FormatError,
-                            document,
-                            operation,
-                            options.Schema,
-                            coercedVariableValues,
-                            options.InitialValue).ConfigureAwait(false);
+                            new QueryContext(
+                                options.FormatError,
+                                document,
+                                operation,
+                                options.Schema,
+                                coercedVariableValues,
+                                options.InitialValue)).ConfigureAwait(false);
                         break;
                     case OperationType.Subscription:
                         throw new InvalidOperationException($"Use {nameof(SubscribeAsync)}");
@@ -128,21 +130,23 @@ namespace fugu.graphql
 
                     await extensions.EndValidationAsync(validationResult);
                     if (!validationResult.IsValid)
-                        return new SubscriptionResult()
+                        return new SubscriptionResult
                         {
                             Errors = validationResult.Errors.Select(e => new Error(e.Message)).ToList()
                         };
                 }
+
                 switch (operation.Operation)
                 {
                     case OperationType.Subscription:
                         return await Subscription.SubscribeAsync(
-                            options.FormatError,
-                            document,
-                            operation,
-                            options.Schema,
-                            coercedVariableValues,
-                            options.InitialValue).ConfigureAwait(false);
+                            new QueryContext(
+                                options.FormatError,
+                                document,
+                                operation,
+                                options.Schema,
+                                coercedVariableValues,
+                                options.InitialValue)).ConfigureAwait(false);
                     default:
                         throw new InvalidOperationException(
                             $"Operation type {operation.Operation} not supported. Did you mean to use {nameof(ExecuteAsync)}?");

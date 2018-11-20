@@ -1,35 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using fugu.graphql.error;
-using fugu.graphql.type;
-using GraphQLParser.AST;
 
 namespace fugu.graphql.execution
 {
     public static class Mutation
     {
         public static async Task<ExecutionResult> ExecuteMutationAsync(
-            Func<GraphQLError, Error> formatError,
-            GraphQLDocument document,
-            GraphQLOperationDefinition mutation,
-            ISchema schema,
-            Dictionary<string, object> coercedVariableValues,
-            object initialValue)
+            QueryContext context)
         {
+            var (schema, document, operation, initialValue, coercedVariableValues) = context;
             var executionContext = new ExecutorContext(
-                schema, 
+                schema,
                 document,
                 new SerialExecutionStrategy());
 
             var mutationType = schema.Mutation;
             if (mutationType == null)
                 throw new GraphQLError(
-                    $"Schema does not support mutations. Mutation type is null.");
+                    "Schema does not support mutations. Mutation type is null.");
 
-            var selectionSet = mutation.SelectionSet;
+            var selectionSet = operation.SelectionSet;
             var path = new NodePath();
             var data = await SelectionSets.ExecuteSelectionSetAsync(
                 executionContext,
@@ -42,7 +33,9 @@ namespace fugu.graphql.execution
 
             return new ExecutionResult
             {
-                Errors = executionContext.FieldErrors.Select(formatError).ToList(),
+                Errors = executionContext
+                    .FieldErrors
+                    .Select(context.FormatError).ToList(),
                 Data = data
             };
         }

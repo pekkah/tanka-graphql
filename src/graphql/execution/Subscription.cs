@@ -13,18 +13,9 @@ namespace fugu.graphql.execution
     public static class Subscription
     {
         public static async Task<SubscriptionResult> SubscribeAsync(
-            Func<GraphQLError, Error> formatError,
-            GraphQLDocument document,
-            GraphQLOperationDefinition subscription,
-            ISchema schema,
-            Dictionary<string, object> coercedVariableValues,
-            object initialValue)
+            QueryContext context)
         {
-            if (formatError == null) throw new ArgumentNullException(nameof(formatError));
-            if (document == null) throw new ArgumentNullException(nameof(document));
-            if (subscription == null) throw new ArgumentNullException(nameof(subscription));
-            if (schema == null) throw new ArgumentNullException(nameof(schema));
-            if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
+            var (schema, document, operation, initialValue, coercedVariableValues) = context;
 
             if (schema.Subscription == null)
                 throw new GraphQLError(
@@ -39,16 +30,16 @@ namespace fugu.graphql.execution
             {
                 var sourceStream = await CreateSourceEventStreamAsync(
                     executionContext,
-                    subscription,
+                    operation,
                     coercedVariableValues,
                     initialValue).ConfigureAwait(false);
 
                 var responseStream = MapSourceToResponseEventAsync(
                     executionContext,
                     sourceStream,
-                    subscription,
+                    operation,
                     coercedVariableValues,
-                    formatError);
+                    context.FormatError);
 
                 return responseStream;
             }
@@ -59,7 +50,10 @@ namespace fugu.graphql.execution
 
             return new SubscriptionResult(null, null)
             {
-                Errors = executionContext.FieldErrors.Select(formatError).ToList(),
+                Errors = executionContext
+                    .FieldErrors
+                    .Select(context.FormatError)
+                    .ToList(),
             };
         }
 

@@ -1,32 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using fugu.graphql.error;
-using fugu.graphql.type;
-using GraphQLParser.AST;
 
 namespace fugu.graphql.execution
 {
     public static class Query
     {
         public static async Task<ExecutionResult> ExecuteQueryAsync(
-            Func<GraphQLError, Error> errorTransformer,
-            GraphQLDocument document,
-            GraphQLOperationDefinition query,
-            ISchema schema,
-            Dictionary<string, object> coercedVariableValues,
-            object initialValue)
+            QueryContext context)
         {
+            var (schema, document, operation, initialValue, coercedVariableValues) = context;
             var queryType = schema.Query;
 
             if (queryType == null)
                 throw new GraphQLError(
-                    $"Schema does not support queries. Query type is null.");
+                    "Schema does not support queries. Query type is null.");
 
-            var selectionSet = query.SelectionSet;
+            var selectionSet = operation.SelectionSet;
             var executionContext = new ExecutorContext(
-                schema, 
+                schema,
                 document,
                 new ParallelExecutionStrategy());
 
@@ -51,7 +44,10 @@ namespace fugu.graphql.execution
 
             return new ExecutionResult
             {
-                Errors = executionContext.FieldErrors.Select(errorTransformer).ToList(),
+                Errors = executionContext
+                    .FieldErrors
+                    .Select(context.FormatError)
+                    .ToList(),
                 Data = data
             };
         }
