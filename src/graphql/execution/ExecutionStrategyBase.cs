@@ -11,17 +11,21 @@ namespace fugu.graphql.execution
 {
     public abstract class ExecutionStrategyBase : IExecutionStrategy
     {
-        public abstract Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(IExecutorContext context,
+        public abstract Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
+            IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
-            Dictionary<string, object> coercedVariableValues, NodePath path);
+            Dictionary<string, object> coercedVariableValues, 
+            NodePath path);
 
-        public async Task<object> ExecuteFieldAsync(IExecutorContext context,
+        public async Task<object> ExecuteFieldAsync(
+            IExecutorContext context,
             ObjectType objectType,
             object objectValue,
             List<GraphQLFieldSelection> fields,
             IGraphQLType fieldType,
-            Dictionary<string, object> coercedVariableValues, NodePath path)
+            Dictionary<string, object> coercedVariableValues, 
+            NodePath path)
         {
             if (objectType == null) throw new ArgumentNullException(nameof(objectType));
             if (fields == null) throw new ArgumentNullException(nameof(fields));

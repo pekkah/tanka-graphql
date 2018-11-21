@@ -15,16 +15,13 @@ namespace fugu.graphql.execution
         public static async Task<SubscriptionResult> SubscribeAsync(
             QueryContext context)
         {
-            var (schema, document, operation, initialValue, coercedVariableValues) = context;
+            var (schema, _, operation, initialValue, coercedVariableValues) = context;
 
             if (schema.Subscription == null)
                 throw new GraphQLError(
                     $"Schema does not support subscriptions. Subscription type is null");
 
-            var executionContext = new ExecutorContext(
-                schema, 
-                document,
-                new ParallelExecutionStrategy());
+            var executionContext = context.BuildExecutorContext(new ParallelExecutionStrategy());
 
             try
             {

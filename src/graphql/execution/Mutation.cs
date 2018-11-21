@@ -9,11 +9,8 @@ namespace fugu.graphql.execution
         public static async Task<ExecutionResult> ExecuteMutationAsync(
             QueryContext context)
         {
-            var (schema, document, operation, initialValue, coercedVariableValues) = context;
-            var executionContext = new ExecutorContext(
-                schema,
-                document,
-                new SerialExecutionStrategy());
+            var (schema, _, operation, initialValue, coercedVariableValues) = context;
+            var executionContext = context.BuildExecutorContext(new SerialExecutionStrategy());
 
             var mutationType = schema.Mutation;
             if (mutationType == null)

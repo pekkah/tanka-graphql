@@ -105,7 +105,8 @@ namespace fugu.graphql
                 operation,
                 options.Schema,
                 coercedVariableValues,
-                options.InitialValue);
+                options.InitialValue,
+                extensions);
 
             logger.Validate(options.Validate);
             var validationResult = new ValidationResult();

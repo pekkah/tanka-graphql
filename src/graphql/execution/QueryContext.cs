@@ -8,13 +8,13 @@ namespace fugu.graphql.execution
 {
     public class QueryContext
     {
-        public QueryContext(
-            Func<GraphQLError, Error> formatError,
+        public QueryContext(Func<GraphQLError, Error> formatError,
             GraphQLDocument document,
             GraphQLOperationDefinition operation,
             ISchema schema,
             Dictionary<string, object> coercedVariableValues,
-            object initialValue)
+            object initialValue, 
+            Extensions extensions)
         {
             FormatError = formatError ?? throw new ArgumentNullException(nameof(formatError));
             Document = document ?? throw new ArgumentNullException(nameof(document));
@@ -22,6 +22,7 @@ namespace fugu.graphql.execution
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             CoercedVariableValues = coercedVariableValues ?? throw new ArgumentNullException(nameof(coercedVariableValues));
             InitialValue = initialValue;
+            Extensions = extensions;
         }
 
         public Func<GraphQLError, Error> FormatError { get; }
@@ -36,6 +37,8 @@ namespace fugu.graphql.execution
 
         public object InitialValue { get; }
 
+        public Extensions Extensions { get; }
+
         public void Deconstruct(out ISchema schema, out GraphQLDocument document, out GraphQLOperationDefinition operation, out object initialValue,
             out Dictionary<string, object> coercedVariableValues)
         {
@@ -44,6 +47,15 @@ namespace fugu.graphql.execution
             operation = OperationDefinition;
             initialValue = InitialValue;
             coercedVariableValues = CoercedVariableValues;
+        }
+
+        public IExecutorContext BuildExecutorContext(IExecutionStrategy executionStrategy)
+        {
+            return new ExecutorContext(
+                Schema,
+                Document,
+                Extensions,
+                executionStrategy);
         }
     }
 }

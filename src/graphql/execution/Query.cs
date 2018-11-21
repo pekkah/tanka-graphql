@@ -10,7 +10,7 @@ namespace fugu.graphql.execution
         public static async Task<ExecutionResult> ExecuteQueryAsync(
             QueryContext context)
         {
-            var (schema, document, operation, initialValue, coercedVariableValues) = context;
+            var (schema, _, operation, initialValue, coercedVariableValues) = context;
             var queryType = schema.Query;
 
             if (queryType == null)
@@ -18,10 +18,7 @@ namespace fugu.graphql.execution
                     "Schema does not support queries. Query type is null.");
 
             var selectionSet = operation.SelectionSet;
-            var executionContext = new ExecutorContext(
-                schema,
-                document,
-                new ParallelExecutionStrategy());
+            var executionContext = context.BuildExecutorContext(new ParallelExecutionStrategy());
 
             IDictionary<string, object> data = null;
 
