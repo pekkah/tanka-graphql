@@ -18,7 +18,7 @@ namespace fugu.graphql.execution
         {
             FormatError = formatError ?? throw new ArgumentNullException(nameof(formatError));
             Document = document ?? throw new ArgumentNullException(nameof(document));
-            Operation = operation ?? throw new ArgumentNullException(nameof(operation));
+            OperationDefinition = operation ?? throw new ArgumentNullException(nameof(operation));
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             CoercedVariableValues = coercedVariableValues ?? throw new ArgumentNullException(nameof(coercedVariableValues));
             InitialValue = initialValue;
@@ -28,7 +28,7 @@ namespace fugu.graphql.execution
 
         public GraphQLDocument Document { get; }
 
-        public GraphQLOperationDefinition Operation { get; }
+        public GraphQLOperationDefinition OperationDefinition { get; }
 
         public ISchema Schema { get; }
 
@@ -41,7 +41,7 @@ namespace fugu.graphql.execution
         {
             schema = Schema;
             document = Document;
-            operation = Operation;
+            operation = OperationDefinition;
             initialValue = InitialValue;
             coercedVariableValues = CoercedVariableValues;
         }
