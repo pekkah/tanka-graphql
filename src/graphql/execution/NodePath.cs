@@ -18,14 +18,16 @@ namespace fugu.graphql.execution
 
         public IEnumerable<object> Segments => _path;
 
-        public void Append(string fieldName)
+        public NodePath Append(string fieldName)
         {
             _path.Add(fieldName);
+            return this;
         }
 
-        public void Append(int index)
+        public NodePath Append(int index)
         {
             _path.Add(index);
+            return this;
         }
 
         public NodePath Fork()

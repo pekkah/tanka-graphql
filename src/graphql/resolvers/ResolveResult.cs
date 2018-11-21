@@ -1,30 +1,12 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using fugu.graphql.error;
 using fugu.graphql.execution;
 using fugu.graphql.type;
-using GraphQLParser;
 using GraphQLParser.AST;
 
 namespace fugu.graphql.resolvers
 {
-    public class CompleteValueException : GraphQLError
-    {
-        public CompleteValueException(string message) : base(message)
-        {
-        }
-
-        public CompleteValueException(string message, params ASTNode[] nodes) : base(message, nodes)
-        {
-        }
-
-        public CompleteValueException(string message, IEnumerable<ASTNode> nodes, ISource source = null, IEnumerable<GraphQLLocation> locations = null, NodePath path = null, Dictionary<string, object> extensions = null, Exception originalError = null) : base(message, nodes, source, locations, path, extensions, originalError)
-        {
-        }
-    }
-
     public class ResolveResult : IResolveResult
     {
         public ResolveResult(object value)
@@ -159,7 +141,7 @@ namespace fugu.graphql.resolvers
                 int i = 0;
                 foreach (var resultItem in values)
                 {
-                    path.Append(i++);
+                    var itemPath = path.Fork().Append(i++);
                     var completedResultItem = await CompleteValueAsync(
                         executorContext,
                         objectType,
@@ -170,7 +152,7 @@ namespace fugu.graphql.resolvers
                         fields,
                         resultItem,
                         coercedVariableValues,
-                        path).ConfigureAwait(false);
+                        itemPath).ConfigureAwait(false);
 
                     result.Add(completedResultItem);
                 }

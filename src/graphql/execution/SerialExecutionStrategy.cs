@@ -29,7 +29,7 @@ namespace fugu.graphql.execution
                         objectValue,
                         coercedVariableValues,
                         fieldGroup,
-                        path).ConfigureAwait(false);
+                        path.Fork()).ConfigureAwait(false);
 
                     responseMap[responseKey] = result;
                 }
