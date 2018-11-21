@@ -115,7 +115,7 @@ namespace fugu.graphql.tracing
                     ParentType = context.ObjectType.Name,
                     FieldName = context.FieldName,
                     Path = context.Path.Segments.ToList(),
-                    ReturnType = context.Field.Type.Name
+                    ReturnType = context.Field.Type.ToString()
                 });
 
                 return result;
