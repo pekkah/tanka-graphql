@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using fugu.graphql.resolvers;
 using fugu.graphql.validation;
 using GraphQLParser.AST;
 
@@ -34,6 +35,11 @@ namespace fugu.graphql
         public virtual Task EndParseDocumentAsync(GraphQLDocument document)
         {
             return Task.CompletedTask;
+        }
+
+        public virtual Resolver Resolver(Resolver next)
+        {
+            return next;
         }
     }
 }

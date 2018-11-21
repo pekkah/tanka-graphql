@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using fugu.graphql.execution;
 using fugu.graphql.resolvers;
 using fugu.graphql.type;
 using GraphQLParser.AST;
@@ -35,7 +36,7 @@ namespace fugu.graphql.tests.resolvers
                 {"double", 100.1D}
             };
 
-            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments);
+            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments, new NodePath());
 
             /* When */
             var value = sut.GetArgument<double>("double");
@@ -53,7 +54,7 @@ namespace fugu.graphql.tests.resolvers
                 {"float", 100.1F}
             };
 
-            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments);
+            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments, new NodePath());
 
             /* When */
             var value = sut.GetArgument<float>("float");
@@ -71,7 +72,7 @@ namespace fugu.graphql.tests.resolvers
                 {"int", 101}
             };
 
-            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments);
+            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments, new NodePath());
 
             /* When */
             var value = sut.GetArgument<int>("int");
@@ -89,7 +90,7 @@ namespace fugu.graphql.tests.resolvers
                 {"long", 100L}
             };
 
-            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments);
+            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments, new NodePath());
 
             /* When */
             var value = sut.GetArgument<long>("long");
@@ -112,7 +113,7 @@ namespace fugu.graphql.tests.resolvers
                 }
             };
 
-            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments);
+            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments, new NodePath());
 
             /* When */
             var value = sut.GetArgument<InputArg>("input");
@@ -130,7 +131,7 @@ namespace fugu.graphql.tests.resolvers
                 {"string", "101"}
             };
 
-            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments);
+            var sut = new ResolverContext(_objectType, _objectValue, _field, _selection, arguments, new NodePath());
 
             /* When */
             var value = sut.GetArgument<string>("string");

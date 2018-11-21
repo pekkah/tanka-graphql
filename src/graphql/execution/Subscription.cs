@@ -119,12 +119,14 @@ namespace fugu.graphql.execution
                 coercedVariableValues);
 
             var field = subscriptionType.GetField(fieldName);
+            var path = new NodePath();
             var resolveContext = new ResolverContext(
                 subscriptionType,
                 initialValue,
                 field,
                 fieldSelection,
-                coercedArgumentValues);
+                coercedArgumentValues,
+                path);
 
             var subscriber = field.Subscribe;
 

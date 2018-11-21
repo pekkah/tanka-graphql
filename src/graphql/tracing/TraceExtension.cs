@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using fugu.graphql.resolvers;
 using fugu.graphql.validation;
 using GraphQLParser.AST;
 
@@ -14,7 +17,8 @@ namespace fugu.graphql.tracing
         private TimeSpan _validationEnded;
         private TimeSpan _parsingStarted;
         private TimeSpan _parsingEnded;
-        private Func<DateTime> _utcNow;
+        private readonly Func<DateTime> _utcNow;
+        private readonly List<TraceExtensionRecord.ResolverTrace> _resolverTraces = new List<TraceExtensionRecord.ResolverTrace>();
 
         public TraceExtension()
         {
@@ -73,6 +77,10 @@ namespace fugu.graphql.tracing
                 {
                     StartOffset = _validationStarted.TotalNanoSeconds(),
                     Duration = validationDuration.TotalNanoSeconds()
+                },
+                Execution = new TraceExtensionRecord.ExecutionTrace()
+                {
+                    Resolvers = _resolverTraces
                 }
             };
 
@@ -90,6 +98,28 @@ namespace fugu.graphql.tracing
         {
             _parsingEnded = _stopwatch.Elapsed;
             return Task.CompletedTask;
+        }
+
+        public override Resolver Resolver(Resolver next)
+        {
+            return async context =>
+            {
+                var start = _stopwatch.Elapsed;
+                var result = await next(context);
+                var end = _stopwatch.Elapsed;
+
+                _resolverTraces.Add(new TraceExtensionRecord.ResolverTrace()
+                {
+                    StartOffset = start.TotalNanoSeconds(),
+                    Duration = (end -start).TotalNanoSeconds(),
+                    ParentType = context.ObjectType.Name,
+                    FieldName = context.FieldName,
+                    Path = context.Path.Segments.ToList(),
+                    ReturnType = context.Field.Type.Name
+                });
+
+                return result;
+            };
         }
     }
 

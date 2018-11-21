@@ -50,14 +50,15 @@ namespace fugu.graphql.execution
                         objectValue,
                         field,
                         fieldSelection,
-                        argumentValues);
+                        argumentValues,
+                        path);
 
                 var resolver = field.Resolve;
 
                 if (resolver == null)
-                    throw new GraphQLError(
-                        $"Could not get resolver for {objectType.Name}.{fieldName}");
+                    throw new GraphQLError($"Could not get resolver for {objectType.Name}.{fieldName}");
 
+                resolver = context.Extensions.Resolver(resolverContext, resolver);
                 var result = await resolver(resolverContext).ConfigureAwait(false);
                 completedValue = await result.CompleteValueAsync(
                     context,

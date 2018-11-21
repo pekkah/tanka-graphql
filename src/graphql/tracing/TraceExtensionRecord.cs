@@ -28,7 +28,7 @@ namespace fugu.graphql.tracing
 
         public class ExecutionTrace
         {
-            public List<ResolverTrace> Resolvers { get; } = new List<ResolverTrace>();
+            public List<ResolverTrace> Resolvers { get; set; } = new List<ResolverTrace>();
         }
 
         public class ResolverTrace : OperationTrace

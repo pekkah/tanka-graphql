@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using fugu.graphql.resolvers;
 using fugu.graphql.validation;
 using GraphQLParser.AST;
 
@@ -17,5 +18,7 @@ namespace fugu.graphql
         Task BeginParseDocumentAsync();
 
         Task EndParseDocumentAsync(GraphQLDocument document);
+
+        Resolver Resolver(Resolver next);
     }
 }

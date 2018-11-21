@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using fugu.graphql.execution;
 using fugu.graphql.type;
 using GraphQLParser.AST;
 using Newtonsoft.Json.Linq;
@@ -8,18 +9,19 @@ namespace fugu.graphql.resolvers
 {
     public class ResolverContext
     {
-        public ResolverContext(
-            ObjectType objectType,
+        public ResolverContext(ObjectType objectType,
             object objectValue,
             IField field,
             GraphQLFieldSelection selection,
-            Dictionary<string, object> arguments)
+            Dictionary<string, object> arguments, 
+            NodePath path)
         {
             ObjectType = objectType ?? throw new ArgumentNullException(nameof(objectType));
             ObjectValue = objectValue;
             Field = field ?? throw new ArgumentNullException(nameof(field));
             Selection = selection ?? throw new ArgumentNullException(nameof(selection));
-            Arguments = arguments;
+            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+            Path = path ?? throw new ArgumentNullException(nameof(path));
         }
 
         public ObjectType ObjectType { get; }
@@ -31,6 +33,7 @@ namespace fugu.graphql.resolvers
         public GraphQLFieldSelection Selection { get; }
 
         public Dictionary<string, object> Arguments { get; }
+        public NodePath Path { get; }
 
         public string FieldName => Selection.Name?.Value;
 

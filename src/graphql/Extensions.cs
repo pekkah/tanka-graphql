@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using fugu.graphql.resolvers;
 using fugu.graphql.validation;
 using GraphQLParser.AST;
 
@@ -52,6 +55,17 @@ namespace fugu.graphql
             {
                 await extension.EndParseDocumentAsync(document);
             }
+        }
+
+        public Resolver Resolver(ResolverContext resolverContext, Resolver fieldResolver)
+        {
+            Resolver result = fieldResolver;
+            foreach (var extension in _extensions)
+            {
+                result = extension.Resolver(result);
+            }
+
+            return result;
         }
     }
 }
