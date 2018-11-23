@@ -20,8 +20,7 @@ namespace fugu.graphql.server
             CancellationToken cancellationToken)
         {
             var queryResult = await _queryStreamService.QueryAsync(query, cancellationToken);
-            var channel = queryResult.Channel;
-            return channel.Reader;
+            return queryResult.Reader;
         }
     }
 }

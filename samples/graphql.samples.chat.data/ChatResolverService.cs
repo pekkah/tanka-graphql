@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using fugu.graphql.resolvers;
 using fugu.graphql.samples.chat.data.domain;
 
@@ -43,13 +42,11 @@ namespace fugu.graphql.samples.chat.data
             return Resolve.As(message);
         }
 
-        public async Task<ISubscribeResult> StreamMessagesAsync(ResolverContext context, CancellationToken cancellationToken)
+        public async Task<ISubscribeResult> StreamMessagesAsync(ResolverContext context,
+            CancellationToken cancellationToken)
         {
-            var target = new BufferBlock<Message>();
-            var subscription = await _chat.JoinAsync(target);
-            cancellationToken.Register(() => subscription.Dispose());
-
-            return Resolve.Stream(target);
+            var reader = await _chat.JoinAsync(cancellationToken);
+            return Resolve.Stream(reader);
         }
 
         public async Task<IResolveResult> ResolveMessageAsync(ResolverContext context)

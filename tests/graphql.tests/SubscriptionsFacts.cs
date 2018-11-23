@@ -51,7 +51,7 @@ namespace fugu.graphql.tests
 
             // data
             var messages = new List<Message>();
-            _messagesChannel = new BufferBlock<Message>();
+            var channels = new List<Channel<object>>();
 
             // resolvers
             Task<IResolveResult> GetMessagesAsync(ResolverContext context)
@@ -62,10 +62,17 @@ namespace fugu.graphql.tests
             async Task<ISubscribeResult> OnMessageAdded(ResolverContext context, CancellationToken cancellationToken)
             {
                 var channel = Channel.CreateUnbounded<object>();
-                cancellationToken.Register(() => channel.Writer.Complete());
+                channels.Add(channel);
+                cancellationToken.Register(() =>
+                {
+                    channel.Writer.Complete();
+                    channels.Remove(channel);
+                });
 
-                // noop
-                await Task.Delay(0).ConfigureAwait(false);
+                foreach (var message in messages)
+                {
+                    await channel.Writer.WriteAsync(message);
+                }
 
                 // return result
                 return Stream(channel.Reader);
@@ -97,10 +104,19 @@ namespace fugu.graphql.tests
                 schema,
                 resolvers,
                 resolvers).Result;
+
+            _postMessage = async (Message message) =>
+            {
+                messages.Add(message);
+                foreach (var channel in channels)
+                {
+                    await channel.Writer.WriteAsync(message);
+                }
+            };
         }
 
         private readonly ISchema _executable;
-        private readonly BufferBlock<Message> _messagesChannel;
+        private Func<Message, Task> _postMessage;
 
         [Fact]
         public async Task Should_stream_a_lot()
@@ -153,7 +169,7 @@ subscription MessageAdded {
             /* Given */
             var unsubscribe = new CancellationTokenSource();
             var expected = new Message {Content = "hello"};
-            await _messagesChannel.SendAsync(expected).ConfigureAwait(false);
+            await _postMessage(expected);
 
             var query = @"
 subscription MessageAdded {
@@ -171,7 +187,7 @@ subscription MessageAdded {
             }, unsubscribe.Token).ConfigureAwait(false);
 
             /* Then */
-            var actualResult = await result.Reader.ReceiveAsync().ConfigureAwait(false);
+            var actualResult = await result.Reader.ReadAsync().ConfigureAwait(false);
             unsubscribe.Cancel();
 
             actualResult.ShouldMatchJson(@"{

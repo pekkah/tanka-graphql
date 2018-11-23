@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using fugu.graphql.samples.chat.data.domain;
 
 namespace fugu.graphql.samples.chat.data
@@ -20,20 +21,15 @@ namespace fugu.graphql.samples.chat.data
             string id,
             string content);
 
-        Task<IDisposable> JoinAsync(ITargetBlock<Message> target);
+        Task<ChannelReader<object>> JoinAsync(CancellationToken unsubscribe);
     }
 
     public class Chat : IChat
     {
         private readonly Queue<Message> _messages = new Queue<Message>();
-        private readonly BroadcastBlock<Message> _messageStream;
+        private readonly List<Channel<object>> _channels = new List<Channel<object>>();
 
         private int _lastId;
-
-        public Chat()
-        {
-            _messageStream = new BroadcastBlock<Message>(original => original);
-        }
 
         public async Task<IEnumerable<Message>> GetMessagesAsync(int latest)
         {
@@ -56,7 +52,12 @@ namespace fugu.graphql.samples.chat.data
             };
 
             _messages.Enqueue(message);
-            await _messageStream.SendAsync(message);
+
+            foreach (var channel in _channels)
+            {
+                await channel.Writer.WriteAsync(message);
+            }
+
             return message;
         }
 
@@ -72,14 +73,19 @@ namespace fugu.graphql.samples.chat.data
             return originalMessage;
         }
 
-        public Task<IDisposable> JoinAsync(ITargetBlock<Message> target)
+        public Task<ChannelReader<object>> JoinAsync(CancellationToken unsubscribe)
         {
-            var sub = _messageStream.LinkTo(target, new DataflowLinkOptions()
-            {
-                PropagateCompletion = true
-            });
+            var channel = Channel.CreateUnbounded<object>();
+            _channels.Add(channel);
+            unsubscribe.Register(() => { Leave(channel); });
 
-            return Task.FromResult(sub);
+            return Task.FromResult(channel.Reader);
+        }
+
+        private void Leave(Channel<object> channel)
+        {
+            _channels.Remove(channel);
+            channel.Writer.Complete();
         }
 
         private async Task<From> GetFromAsync(string fromId)

@@ -92,19 +92,7 @@ namespace fugu.graphql.server
                 channel.Writer.TryComplete();
                 _logger.Unsubscribed(options.OperationName, options.VariableValues, null);
             });
-
-            var writer = new ActionBlock<ExecutionResult>(
-                executionResult => channel.Writer.WriteAsync(executionResult, cancellationToken),
-                new ExecutionDataflowBlockOptions
-                {
-                    EnsureOrdered = true
-                });
-
-            result.Reader.LinkTo(writer, new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            });
-
+            
             _logger.Subscribed(options.OperationName, options.VariableValues, null);
             var stream = new QueryStream(channel);
             return stream;
