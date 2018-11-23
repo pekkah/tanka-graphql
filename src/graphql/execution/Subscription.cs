@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.error;
 using fugu.graphql.resolvers;
-using fugu.graphql.type;
 using GraphQLParser.AST;
 
 namespace fugu.graphql.execution
@@ -13,13 +13,16 @@ namespace fugu.graphql.execution
     public static class Subscription
     {
         public static async Task<SubscriptionResult> SubscribeAsync(
-            QueryContext context)
+            QueryContext context,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var (schema, _, operation, initialValue, coercedVariableValues) = context;
 
             if (schema.Subscription == null)
                 throw new GraphQLError(
-                    $"Schema does not support subscriptions. Subscription type is null");
+                    "Schema does not support subscriptions. Subscription type is null");
 
             var executionContext = context.BuildExecutorContext(new ParallelExecutionStrategy());
 
@@ -29,14 +32,16 @@ namespace fugu.graphql.execution
                     executionContext,
                     operation,
                     coercedVariableValues,
-                    initialValue).ConfigureAwait(false);
+                    initialValue,
+                    cancellationToken).ConfigureAwait(false);
 
                 var responseStream = MapSourceToResponseEventAsync(
                     executionContext,
                     sourceStream,
                     operation,
                     coercedVariableValues,
-                    context.FormatError);
+                    context.FormatError,
+                    cancellationToken);
 
                 return responseStream;
             }
@@ -45,12 +50,12 @@ namespace fugu.graphql.execution
                 executionContext.AddError(e);
             }
 
-            return new SubscriptionResult(null, null)
+            return new SubscriptionResult(null)
             {
                 Errors = executionContext
                     .FieldErrors
                     .Select(context.FormatError)
-                    .ToList(),
+                    .ToList()
             };
         }
 
@@ -59,7 +64,7 @@ namespace fugu.graphql.execution
             ISubscribeResult subscribeResult,
             GraphQLOperationDefinition subscription,
             Dictionary<string, object> coercedVariableValues,
-            Func<GraphQLError, Error> formatError)
+            Func<GraphQLError, Error> formatError, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (subscribeResult == null) throw new ArgumentNullException(nameof(subscribeResult));
@@ -86,18 +91,21 @@ namespace fugu.graphql.execution
                 PropagateCompletion = true
             });
 
-            return new SubscriptionResult(responseStream, subscribeResult.UnsubscribeAsync);
+            return new SubscriptionResult(responseStream);
         }
 
         public static async Task<ISubscribeResult> CreateSourceEventStreamAsync(
             IExecutorContext context,
             GraphQLOperationDefinition subscription,
             Dictionary<string, object> coercedVariableValues,
-            object initialValue)
+            object initialValue, 
+            CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (subscription == null) throw new ArgumentNullException(nameof(subscription));
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             var schema = context.Schema;
             var subscriptionType = schema.Subscription;
@@ -134,7 +142,7 @@ namespace fugu.graphql.execution
                 throw new GraphQLError(
                     $"Could not subscribe. Field '{subscriptionType}:{fieldName}' does not have subscriber");
 
-            var subscribeResult = await subscriber(resolveContext)
+            var subscribeResult = await subscriber(resolveContext, cancellationToken)
                 .ConfigureAwait(false);
 
             return subscribeResult;

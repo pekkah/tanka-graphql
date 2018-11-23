@@ -49,9 +49,9 @@ namespace fugu.graphql.resolvers
             };
         }
 
-        public static ISubscribeResult Stream(ISourceBlock<object> reader, Func<Task> unsubscribeAsync)
+        public static ISubscribeResult Stream(ISourceBlock<object> reader)
         {
-            return new SubscribeResult(reader, unsubscribeAsync);
+            return new SubscribeResult(reader);
         }
     }
 }

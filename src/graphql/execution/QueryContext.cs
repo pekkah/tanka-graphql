@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using fugu.graphql.error;
 using fugu.graphql.type;
 using GraphQLParser.AST;
@@ -49,7 +50,8 @@ namespace fugu.graphql.execution
             coercedVariableValues = CoercedVariableValues;
         }
 
-        public IExecutorContext BuildExecutorContext(IExecutionStrategy executionStrategy)
+        public IExecutorContext BuildExecutorContext(
+            IExecutionStrategy executionStrategy)
         {
             return new ExecutorContext(
                 Schema,

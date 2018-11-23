@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.resolvers;
@@ -57,23 +58,21 @@ namespace fugu.graphql.tests
                 return Task.FromResult(As(messages));
             }
 
-            async Task<ISubscribeResult> OnMessageAdded(ResolverContext context)
+            async Task<ISubscribeResult> OnMessageAdded(ResolverContext context, CancellationToken cancellationToken)
             {
                 var reader = new BufferBlock<Message>();
-                _messagesChannel.LinkTo(reader, new DataflowLinkOptions()
+                var sub = _messagesChannel.LinkTo(reader, new DataflowLinkOptions()
                 {
                     PropagateCompletion = true
                 });
-                
+
+                cancellationToken.Register(() => sub.Dispose());
+
                 // noop
                 await Task.Delay(0).ConfigureAwait(false);
 
                 // return result
-                return Stream(reader, () =>
-                {
-                    reader.Complete();
-                    return reader.Completion;
-                });
+                return Stream(reader);
             }
 
             Task<IResolveResult> ResolveMessage(ResolverContext context)
@@ -111,6 +110,7 @@ namespace fugu.graphql.tests
         public async Task Should_subscribe()
         {
             /* Given */
+            var unsubscribe = new CancellationTokenSource();
             var expected = new Message {Content = "hello"};
             await _messagesChannel.SendAsync(expected).ConfigureAwait(false);
 
@@ -127,11 +127,11 @@ subscription MessageAdded {
             {
                 ParseDocumentAsync = ()=> ParseDocumentAsync(query),
                 Schema = _executable
-            }).ConfigureAwait(false);
+            }, unsubscribe.Token).ConfigureAwait(false);
 
             /* Then */
             var actualResult = await result.Source.ReceiveAsync().ConfigureAwait(false);
-            await result.UnsubscribeAsync().ConfigureAwait(false);
+            unsubscribe.Cancel();
 
             actualResult.ShouldMatchJson(@"{
     ""data"":{

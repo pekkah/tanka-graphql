@@ -14,6 +14,7 @@ namespace fugu.graphql.execution
         IExecutionStrategy Strategy { get; }
 
         IEnumerable<GraphQLError> FieldErrors { get; }
+
         Extensions Extensions { get; }
 
         void AddError(GraphQLError error);

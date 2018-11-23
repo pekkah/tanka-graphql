@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql;
 using fugu.graphql.resolvers;
@@ -41,16 +42,10 @@ namespace graphql.server.tests.host
                     sub.Name, new FieldResolverMap
                     {
                         {
-                            "helloEvents", context =>
+                            "helloEvents", (context,ct) =>
                             {
-                                var events = eventManager.Subscribe();
-                                return Task.FromResult(Resolve.Stream(
-                                    events,
-                                    () =>
-                                    {
-                                        events.Complete();
-                                        return events.Completion;
-                                    }));
+                                var events = eventManager.Subscribe(ct);
+                                return Task.FromResult(Resolve.Stream(events));
                             },
                             context => Task.FromResult(Resolve.As(context.ObjectValue))
                         }
@@ -90,11 +85,15 @@ namespace graphql.server.tests.host
             return _buffer.SendAsync(message);
         }
 
-        public ISourceBlock<string> Subscribe()
+        public ISourceBlock<string> Subscribe(CancellationToken cancellationToken)
         {
             var targetBlock = new BufferBlock<string>();
 
-            _buffer.LinkTo(targetBlock);
+            var sub = _buffer.LinkTo(targetBlock);
+            cancellationToken.Register(() =>
+            {
+                sub.Dispose();
+            });
 
             return targetBlock;
         }

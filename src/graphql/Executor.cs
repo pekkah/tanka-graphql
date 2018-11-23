@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using fugu.graphql.execution;
 using fugu.graphql.type;
@@ -11,15 +12,22 @@ namespace fugu.graphql
 {
     public static class Executor
     {
-        public static async Task<ExecutionResult> ExecuteAsync(ExecutionOptions options)
+        public static async Task<ExecutionResult> ExecuteAsync(
+            ExecutionOptions options, 
+            CancellationToken cancellationToken = default(CancellationToken))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var extensions = new Extensions(options.Extensions);
             await extensions.BeginExecuteAsync(options);
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
             using (logger.Begin(options.OperationName))
             {
-                var (queryContext, validationResult) = await BuildQueryContextAsync(options, extensions, logger);
+                var (queryContext, validationResult) = await BuildQueryContextAsync(
+                    options, 
+                    extensions, 
+                    logger,
+                    cancellationToken);
 
                 if (!validationResult.IsValid)
                     return new ExecutionResult
@@ -49,15 +57,23 @@ namespace fugu.graphql
             }
         }
 
-        public static async Task<SubscriptionResult> SubscribeAsync(ExecutionOptions options)
+        public static async Task<SubscriptionResult> SubscribeAsync(
+            ExecutionOptions options, 
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             var extensions = new Extensions(options.Extensions);
             await extensions.BeginExecuteAsync(options);
+            cancellationToken.ThrowIfCancellationRequested();
+
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
             using (logger.Begin(options.OperationName))
             {
-                var (queryContext, validationResult) = await BuildQueryContextAsync(options, extensions, logger);
+                var (queryContext, validationResult) = await BuildQueryContextAsync(
+                    options, 
+                    extensions, 
+                    logger,
+                    cancellationToken);
 
                 if (!validationResult.IsValid)
                     return new SubscriptionResult
@@ -68,7 +84,7 @@ namespace fugu.graphql
                 switch (queryContext.OperationDefinition.Operation)
                 {
                     case OperationType.Subscription:
-                        return await Subscription.SubscribeAsync(queryContext).ConfigureAwait(false);
+                        return await Subscription.SubscribeAsync(queryContext, cancellationToken).ConfigureAwait(false);
                     default:
                         throw new InvalidOperationException(
                             $"Operation type {queryContext.OperationDefinition.Operation} not supported. Did you mean to use {nameof(ExecuteAsync)}?");
@@ -76,11 +92,14 @@ namespace fugu.graphql
             }
         }
 
-        private static async Task<(QueryContext queryContext, ValidationResult validationResult)> BuildQueryContextAsync(
-            ExecutionOptions options, 
-            Extensions extensions, 
-            ILogger logger)
+        private static async Task<(QueryContext queryContext, ValidationResult validationResult)>
+            BuildQueryContextAsync(ExecutionOptions options,
+                Extensions extensions,
+                ILogger logger, 
+                CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (!options.Schema.IsInitialized)
             {
                 logger.SchemaNotInitialized();

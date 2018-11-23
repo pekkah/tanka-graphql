@@ -108,7 +108,7 @@ namespace fugu.graphql.server.tests
         public async Task Subscribe()
         {
             /* Given */
-            var cts = new CancellationTokenSource();
+            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
             var hubConnection = Connect();
             await hubConnection.StartAsync();
 
@@ -132,6 +132,7 @@ subscription {
                 return key == "helloEvents" && value.ToString() == "world";
             });
 
+            cts.Cancel();
             await hubConnection.StopAsync();
         }
 
@@ -139,7 +140,7 @@ subscription {
         public async Task Subscribe_with_unsubscribe()
         {
             /* Given */
-            var cts = new CancellationTokenSource();
+            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
             var hubConnection = Connect();
             await hubConnection.StartAsync();
 

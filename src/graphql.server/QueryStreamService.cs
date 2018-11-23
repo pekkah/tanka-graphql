@@ -98,7 +98,7 @@ namespace fugu.graphql.server
                     new TraceExtension()
                 }
             };
-            var result = await Executor.SubscribeAsync(options);
+            var result = await Executor.SubscribeAsync(options, cancellationToken);
 
             var channel = Channel.CreateUnbounded<ExecutionResult>();
 
@@ -108,7 +108,6 @@ namespace fugu.graphql.server
 #pragma warning restore 4014
             {
                 await cancellationToken.WhenCancelled();
-                await result.UnsubscribeAsync();
                 channel.Writer.TryComplete();
                 _logger.Unsubscribed(operationName, variables, extensions);
             });

@@ -10,7 +10,8 @@ namespace fugu.graphql.execution
     {
         private readonly List<GraphQLError> _errors;
 
-        public ExecutorContext(ISchema schema, GraphQLDocument document, Extensions extensions, IExecutionStrategy strategy)
+        public ExecutorContext(ISchema schema, GraphQLDocument document, Extensions extensions,
+            IExecutionStrategy strategy)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             Document = document ?? throw new ArgumentNullException(nameof(document));

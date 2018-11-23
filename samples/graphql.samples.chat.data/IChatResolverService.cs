@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using fugu.graphql.resolvers;
 
 namespace fugu.graphql.samples.chat.data
@@ -11,7 +12,7 @@ namespace fugu.graphql.samples.chat.data
 
         Task<IResolveResult> EditMessageAsync(ResolverContext context);
 
-        Task<ISubscribeResult> StreamMessagesAsync(ResolverContext context);
+        Task<ISubscribeResult> StreamMessagesAsync(ResolverContext context, CancellationToken cancellationToken);
 
         Task<IResolveResult> ResolveMessageAsync(ResolverContext context);
     }
