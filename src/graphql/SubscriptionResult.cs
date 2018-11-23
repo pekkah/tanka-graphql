@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks.Dataflow;
+using System.Threading.Channels;
 
 namespace fugu.graphql
 {
@@ -11,19 +11,16 @@ namespace fugu.graphql
     {
         private IEnumerable<Error> _errors;
 
-        public SubscriptionResult(ISourceBlock<ExecutionResult> source)
+        public SubscriptionResult(ChannelReader<ExecutionResult> reader)
         {
-            Source = source;
+            Reader = reader;
         }
 
         public SubscriptionResult()
         {
         }
 
-        /// <summary>
-        ///     Source stream of <see cref="ExecutionResult"/>
-        /// </summary>
-        public ISourceBlock<ExecutionResult> Source { get; }
+        public ChannelReader<ExecutionResult> Reader { get; }
 
         public IEnumerable<Error> Errors
         {

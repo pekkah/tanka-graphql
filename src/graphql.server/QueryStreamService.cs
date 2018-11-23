@@ -100,7 +100,7 @@ namespace fugu.graphql.server
                     EnsureOrdered = true
                 });
 
-            result.Source.LinkTo(writer, new DataflowLinkOptions
+            result.Reader.LinkTo(writer, new DataflowLinkOptions
             {
                 PropagateCompletion = true
             });

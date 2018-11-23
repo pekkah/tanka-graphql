@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Threading.Tasks.Dataflow;
+using System.Threading.Channels;
 
 namespace fugu.graphql.resolvers
 {
     public class SubscribeResult : ISubscribeResult
     {
-        public SubscribeResult(ISourceBlock<object> reader)
+        public SubscribeResult(ChannelReader<object> reader)
         {
             Reader = reader ?? throw new ArgumentNullException(nameof(reader));
         }
 
-        public ISourceBlock<object> Reader { get; set; }
+        public ChannelReader<object> Reader { get; set; }
     }
 }

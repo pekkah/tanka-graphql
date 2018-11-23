@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using fugu.graphql.type;
 
 namespace fugu.graphql.resolvers
@@ -49,7 +49,7 @@ namespace fugu.graphql.resolvers
             };
         }
 
-        public static ISubscribeResult Stream(ISourceBlock<object> reader)
+        public static ISubscribeResult Stream(ChannelReader<object> reader)
         {
             return new SubscribeResult(reader);
         }

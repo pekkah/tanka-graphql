@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using System.Threading.Channels;
 
 namespace fugu.graphql.resolvers
 {
     public interface ISubscribeResult
     {
-        ISourceBlock<object> Reader { get; }
+        ChannelReader<object> Reader { get; }
     }
 }

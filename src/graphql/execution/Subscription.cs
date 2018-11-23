@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.error;
@@ -64,7 +65,8 @@ namespace fugu.graphql.execution
             ISubscribeResult subscribeResult,
             GraphQLOperationDefinition subscription,
             Dictionary<string, object> coercedVariableValues,
-            Func<GraphQLError, Error> formatError, CancellationToken cancellationToken)
+            Func<GraphQLError, Error> formatError, 
+            CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (subscribeResult == null) throw new ArgumentNullException(nameof(subscribeResult));
@@ -72,24 +74,33 @@ namespace fugu.graphql.execution
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
             if (formatError == null) throw new ArgumentNullException(nameof(formatError));
 
-            var executorEventBlock = new TransformBlock<object, ExecutionResult>(evnt => ExecuteSubscriptionEventAsync(
-                context,
-                subscription,
-                coercedVariableValues,
-                evnt,
-                formatError));
-
-            var sourceStream = subscribeResult.Reader;
-            sourceStream.LinkTo(executorEventBlock, new DataflowLinkOptions
+            var responseStream = Channel.CreateUnbounded<ExecutionResult>();
+            _ = Task.Run(async () =>
             {
-                PropagateCompletion = true
-            });
+                var reader = subscribeResult.Reader;
+                while (await reader.WaitToReadAsync())
+                {
+                    if (reader.Completion.IsCompleted)
+                    {
+                        responseStream.Writer.TryComplete();
+                        break;
+                    }
 
-            var responseStream = new BufferBlock<ExecutionResult>();
-            executorEventBlock.LinkTo(responseStream, new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            });
+                    if (reader.TryRead(out var @event))
+                    {
+                        var executionResult = await ExecuteSubscriptionEventAsync(
+                            context,
+                            subscription,
+                            coercedVariableValues,
+                            @event,
+                            formatError
+                        );
+
+                        await responseStream.Writer.WriteAsync(executionResult);
+                    }
+                }
+
+            }).ConfigureAwait(false);
 
             return new SubscriptionResult(responseStream);
         }

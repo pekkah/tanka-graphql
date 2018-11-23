@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.resolvers;
@@ -60,19 +61,14 @@ namespace fugu.graphql.tests
 
             async Task<ISubscribeResult> OnMessageAdded(ResolverContext context, CancellationToken cancellationToken)
             {
-                var reader = new BufferBlock<Message>();
-                var sub = _messagesChannel.LinkTo(reader, new DataflowLinkOptions
-                {
-                    PropagateCompletion = true
-                });
-
-                cancellationToken.Register(() => sub.Dispose());
+                var channel = Channel.CreateUnbounded<object>();
+                cancellationToken.Register(() => channel.Writer.Complete());
 
                 // noop
                 await Task.Delay(0).ConfigureAwait(false);
 
                 // return result
-                return Stream(reader);
+                return Stream(channel.Reader);
             }
 
             Task<IResolveResult> ResolveMessage(ResolverContext context)
@@ -175,7 +171,7 @@ subscription MessageAdded {
             }, unsubscribe.Token).ConfigureAwait(false);
 
             /* Then */
-            var actualResult = await result.Source.ReceiveAsync().ConfigureAwait(false);
+            var actualResult = await result.Reader.ReceiveAsync().ConfigureAwait(false);
             unsubscribe.Cancel();
 
             actualResult.ShouldMatchJson(@"{
