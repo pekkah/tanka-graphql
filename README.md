@@ -41,7 +41,8 @@ See [Sample](https://github.com/pekkah/fugu-graphql-samples)
 Look above or below
 
 #### Define schema
-```
+
+```graphql
 type From {
     userId: ID!
     name: String!
@@ -74,7 +75,8 @@ schema {
 ```
 
 #### Implement resolvers
-```
+
+```csharp
 public class ChatResolvers : ResolverMap
 {
     public ChatResolvers(IChatResolverService resolverService)
@@ -108,7 +110,8 @@ public class ChatResolvers : ResolverMap
 ```
 
 #### Make executable schema
-```
+
+```csharp
 var schema = Sdl.Schema(...);
 var resolvers = new ChatResolvers(...);
 var executableSchema = SchemaTools.MakeExecutableSchemaWithIntrospection(
@@ -117,7 +120,8 @@ var executableSchema = SchemaTools.MakeExecutableSchemaWithIntrospection(
 ```
 
 #### Execute query, mutation
-```
+
+```csharp
 using static fugu.graphql.Executor;
 using static fugu.graphql.Parser;
 
@@ -141,9 +145,27 @@ public async Task<IActionResult> Get([FromBody] OperationRequest request)
 }
 ```
 
-#### Apollo link
+### Server
+
+### ServerHub
+
+```csharp
+// add services
+services.AddSingleton<QueryStreamService>();
+
+// Use hub
+app.UseSignalR(routes =>
+            {
+                routes.MapHub<ServerHub>(new PathString("/graphql"));
+            });
 
 ```
+
+
+
+#### Apollo link
+
+```js
 import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
