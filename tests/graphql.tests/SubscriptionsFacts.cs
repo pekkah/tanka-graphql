@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -10,7 +11,6 @@ using Xunit;
 using static fugu.graphql.Executor;
 using static fugu.graphql.Parser;
 using static fugu.graphql.resolvers.Resolve;
-using static fugu.graphql.type.ScalarType;
 
 namespace fugu.graphql.tests
 {
@@ -28,7 +28,7 @@ namespace fugu.graphql.tests
                 "Message",
                 new Fields
                 {
-                    ["content"] = new Field(String)
+                    ["content"] = new Field(ScalarType.String)
                 });
 
             var messageListType = new List(messageType);
@@ -61,7 +61,7 @@ namespace fugu.graphql.tests
             async Task<ISubscribeResult> OnMessageAdded(ResolverContext context, CancellationToken cancellationToken)
             {
                 var reader = new BufferBlock<Message>();
-                var sub = _messagesChannel.LinkTo(reader, new DataflowLinkOptions()
+                var sub = _messagesChannel.LinkTo(reader, new DataflowLinkOptions
                 {
                     PropagateCompletion = true
                 });
@@ -90,7 +90,7 @@ namespace fugu.graphql.tests
                 {
                     {"messageAdded", OnMessageAdded, ResolveMessage}
                 },
-                ["Message"] = new FieldResolverMap()
+                ["Message"] = new FieldResolverMap
                 {
                     {"content", PropertyOf<Message>(r => r.Content)}
                 }
@@ -105,6 +105,51 @@ namespace fugu.graphql.tests
 
         private readonly ISchema _executable;
         private readonly BufferBlock<Message> _messagesChannel;
+
+        [Fact]
+        public async Task Should_stream_a_lot()
+        {
+            /* Given */
+            const int count = 10_000;
+            var unsubscribe = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+
+            for (var i = 0; i < count; i++)
+            {
+                var expected = new Message {Content = i.ToString()};
+                await _messagesChannel.SendAsync(expected).ConfigureAwait(false);
+            }
+
+            var query = @"
+subscription MessageAdded {
+    messageAdded {
+        content
+    }
+}
+";
+
+            /* When */
+            var result = await SubscribeAsync(new ExecutionOptions
+            {
+                ParseDocumentAsync = () => ParseDocumentAsync(query),
+                Schema = _executable
+            }, unsubscribe.Token).ConfigureAwait(false);
+
+            /* Then */
+            for (var i = 0; i < count; i++)
+            {
+                var actualResult = await result.Source.ReceiveAsync(unsubscribe.Token).ConfigureAwait(false);
+
+                actualResult.ShouldMatchJson(@"{
+    ""data"":{
+        ""messageAdded"": {
+            ""content"": ""{counter}""
+        }
+    }
+}".Replace("{counter}", i.ToString()));
+            }
+
+            unsubscribe.Cancel();
+        }
 
         [Fact]
         public async Task Should_subscribe()
@@ -125,7 +170,7 @@ subscription MessageAdded {
             /* When */
             var result = await SubscribeAsync(new ExecutionOptions
             {
-                ParseDocumentAsync = ()=> ParseDocumentAsync(query),
+                ParseDocumentAsync = () => ParseDocumentAsync(query),
                 Schema = _executable
             }, unsubscribe.Token).ConfigureAwait(false);
 
