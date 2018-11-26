@@ -172,7 +172,7 @@ import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
 import { SignalrLink, Client } from '@fugu-fw/fugu-graphql-server-link';
 
-const fuguClient = new Client("/hubs/graphql");
+const fuguClient = new Client("/graphql");
 const fuguLink = new SignalrLink(fuguClient);
 
 const client = new ApolloClient({
