@@ -1,18 +1,21 @@
-import { FetchResult, Observable, Operation } from "apollo-link";
+import { 
+  FetchResult, 
+  Observable, 
+  Operation 
+} from "apollo-link";
 
 import {
   HubConnection,
   HubConnectionBuilder,
-  HubConnectionState,
   IHttpConnectionOptions
 } from "@aspnet/signalr";
 
 import { Request } from "./request";
 import { Subscription } from "./subscription";
 
-export class Client {
+export class FuguClient {
   private hub: HubConnection;
-  private starting: Promise<void> = undefined;
+  private started: Promise<void> = undefined;
 
   constructor(private url: string, private options?: IHttpConnectionOptions) {
     const builder = new HubConnectionBuilder();
@@ -24,10 +27,8 @@ export class Client {
     }
 
     this.hub = builder.build();
-    this.starting = new Promise<void>(resolve => {
-      console.log("Starting...");
+    this.started = new Promise<void>(resolve => {
       this.hub.start().then(() => {
-        console.log("Started");
         resolve();
       });
     });
@@ -59,7 +60,7 @@ export class Client {
   public query(operation: Operation): Subscription {
     const sub = new Subscription();
 
-    this.starting.then(() => {
+    this.started.then(() => {
       const stream = this.hub.stream("query", new Request(operation));
       sub.subscribe(stream);
     });

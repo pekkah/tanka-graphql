@@ -1,11 +1,11 @@
-import { Client, SignalrLink } from "../.";
+import { FuguClient, FuguLink } from "../.";
 
 describe("exports", () => {
   test("Client", () => {
-    expect(Client).toBeDefined();
+    expect(FuguClient).toBeDefined();
   });
 
   test("SignalrLink", () => {
-    expect(SignalrLink).toBeDefined();
+    expect(FuguLink).toBeDefined();
   });
 });

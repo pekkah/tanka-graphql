@@ -1,4 +1,4 @@
-import { Client } from "./client";
-import { SignalrLink } from "./link";
+import { FuguClient } from "./client";
+import { FuguLink } from "./link";
 
-export { Client, SignalrLink };
+export { FuguClient, FuguLink };
