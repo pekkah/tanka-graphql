@@ -116,7 +116,7 @@ namespace fugu.graphql.tests
         }
 
         private readonly ISchema _executable;
-        private Func<Message, Task> _postMessage;
+        private readonly Func<Message, Task> _postMessage;
 
         [Fact]
         public async Task Should_stream_a_lot()
@@ -128,7 +128,7 @@ namespace fugu.graphql.tests
             for (var i = 0; i < count; i++)
             {
                 var expected = new Message {Content = i.ToString()};
-                await _messagesChannel.SendAsync(expected).ConfigureAwait(false);
+                await _postMessage(expected);
             }
 
             var query = @"
@@ -149,7 +149,7 @@ subscription MessageAdded {
             /* Then */
             for (var i = 0; i < count; i++)
             {
-                var actualResult = await result.Source.ReceiveAsync(unsubscribe.Token).ConfigureAwait(false);
+                var actualResult = await result.Reader.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
 
                 actualResult.ShouldMatchJson(@"{
     ""data"":{
