@@ -6,26 +6,32 @@ using System.Threading.Tasks;
 using fugu.graphql.resolvers;
 using fugu.graphql.validation;
 using GraphQLParser.AST;
+using Microsoft.Extensions.Logging;
 
 namespace fugu.graphql.tracing
 {
     public class TraceExtension : ExtensionBase
     {
+        private readonly ILogger<TraceExtension> _logger;
+
+        private readonly List<TraceExtensionRecord.ResolverTrace> _resolverTraces =
+            new List<TraceExtensionRecord.ResolverTrace>();
+
+        private readonly Func<DateTime> _utcNow;
+        private TimeSpan _parsingEnded;
+        private TimeSpan _parsingStarted;
         private DateTime _startTime;
         private Stopwatch _stopwatch;
-        private TimeSpan _validationStarted;
         private TimeSpan _validationEnded;
-        private TimeSpan _parsingStarted;
-        private TimeSpan _parsingEnded;
-        private readonly Func<DateTime> _utcNow;
-        private readonly List<TraceExtensionRecord.ResolverTrace> _resolverTraces = new List<TraceExtensionRecord.ResolverTrace>();
+        private TimeSpan _validationStarted;
 
-        public TraceExtension()
+        public TraceExtension(ILogger<TraceExtension> logger)
         {
+            _logger = logger;
             _utcNow = () => DateTime.UtcNow;
         }
 
-        public TraceExtension(Func<DateTime> utcNow)
+        public TraceExtension(Func<DateTime> utcNow, ILogger<TraceExtension> logger) : this(logger)
         {
             _utcNow = utcNow ?? throw new ArgumentNullException(nameof(utcNow));
         }
@@ -63,28 +69,34 @@ namespace fugu.graphql.tracing
             //validation
             var validationDuration = _validationEnded - _validationStarted;
 
-            var record = new TraceExtensionRecord()
+            var record = new TraceExtensionRecord
             {
                 Duration = duration.TotalNanoSeconds(),
                 StartTime = _startTime,
                 EndTime = endTime,
-                Parsing = new TraceExtensionRecord.OperationTrace()
+                Parsing = new TraceExtensionRecord.OperationTrace
                 {
                     StartOffset = _parsingStarted.TotalNanoSeconds(),
                     Duration = parsingDuration.TotalNanoSeconds()
                 },
-                Validation = new TraceExtensionRecord.OperationTrace()
+                Validation = new TraceExtensionRecord.OperationTrace
                 {
                     StartOffset = _validationStarted.TotalNanoSeconds(),
                     Duration = validationDuration.TotalNanoSeconds()
                 },
-                Execution = new TraceExtensionRecord.ExecutionTrace()
+                Execution = new TraceExtensionRecord.ExecutionTrace
                 {
                     Resolvers = _resolverTraces
                 }
             };
 
             executionResult.AddExtension("tracing", record);
+            _logger.LogInformation(
+                "Total: {elapsedMs}ms, Parsing: {parsingMs}ms, Validation: {validationMs}ms", 
+                duration.TotalMilliseconds,
+                parsingDuration.TotalMilliseconds,
+                validationDuration.TotalMilliseconds);
+
             return Task.CompletedTask;
         }
 
@@ -108,10 +120,10 @@ namespace fugu.graphql.tracing
                 var result = await next(context);
                 var end = _stopwatch.Elapsed;
 
-                _resolverTraces.Add(new TraceExtensionRecord.ResolverTrace()
+                _resolverTraces.Add(new TraceExtensionRecord.ResolverTrace
                 {
                     StartOffset = start.TotalNanoSeconds(),
-                    Duration = (end -start).TotalNanoSeconds(),
+                    Duration = (end - start).TotalNanoSeconds(),
                     ParentType = context.ObjectType.Name,
                     FieldName = context.FieldName,
                     Path = context.Path.Segments.ToList(),
@@ -127,7 +139,7 @@ namespace fugu.graphql.tracing
     {
         public static long TotalNanoSeconds(this TimeSpan timeSpan)
         {
-            return (long)(timeSpan.TotalMilliseconds * 1000 * 1000);
+            return (long) (timeSpan.TotalMilliseconds * 1000 * 1000);
         }
     }
 }

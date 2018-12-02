@@ -7,11 +7,11 @@ import { IHttpConnectionOptions, LogLevel } from "@aspnet/signalr";
 
 var options: IHttpConnectionOptions = {
   accessTokenFactory: () => "123123",
-  logMessageContent: true,
-  logger: LogLevel.Trace
+  logMessageContent: false,
+  logger: LogLevel.Debug
 };
 
-var client = new FuguClient("http://localhost:5001/graphql", options);
+var client = new FuguClient("https://localhost:5000/graphql", options);
 var link = new FuguLink(client);
 
 class App extends React.Component {
