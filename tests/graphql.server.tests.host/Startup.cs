@@ -25,7 +25,10 @@ namespace graphql.server.tests.host
 
             var sub = new ObjectType("Subscription", new Fields
             {
-                {"helloEvents", new Field(ScalarType.String)}
+                {"helloEvents", new Field(ScalarType.String, new Args()
+                {
+                    {"id", Argument.Arg(ScalarType.NonNullString)}
+                })}
             });
 
             var resolvers = new ResolverMap
@@ -42,7 +45,8 @@ namespace graphql.server.tests.host
                         {
                             "helloEvents", async (context,ct) =>
                             {
-                                var events = await eventManager.Subscribe(ct);
+                                var id = context.GetArgument<string>("id");
+                                var events = await eventManager.Subscribe(id ,ct);
                                 return Resolve.Stream(events);
                             },
                             context => Task.FromResult(Resolve.As(context.ObjectValue))

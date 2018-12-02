@@ -80,12 +80,6 @@ namespace fugu.graphql.execution
                 var reader = subscribeResult.Reader;
                 while (await reader.WaitToReadAsync())
                 {
-                    if (reader.Completion.IsCompleted)
-                    {
-                        responseStream.Writer.TryComplete();
-                        break;
-                    }
-
                     if (reader.TryRead(out var @event))
                     {
                         var executionResult = await ExecuteSubscriptionEventAsync(

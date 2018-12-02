@@ -69,7 +69,7 @@ namespace fugu.graphql.server
             var result = await Executor.ExecuteAsync(options);
 
             var channel = Channel.CreateBounded<ExecutionResult>(1);
-            await channel.Writer.WriteAsync(result, cancellationToken);
+            await channel.Writer.WriteAsync(result);
             channel.Writer.TryComplete();
 
             _logger.Executed(options.OperationName, options.VariableValues, null);

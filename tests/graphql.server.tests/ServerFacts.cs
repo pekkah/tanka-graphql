@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -117,7 +118,7 @@ namespace fugu.graphql.server.tests
             {
                     Query = @"
 subscription { 
-    helloEvents 
+    helloEvents(id: ""001"")
 }"
             }, cancellationToken: cts.Token);
 
@@ -137,6 +138,49 @@ subscription {
         }
 
         [Fact]
+        public async Task Subscribe_to_lots_of_events()
+        {
+            /* Given */
+            _eventManager.Clear();
+            int count = 10_000;
+            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(4));
+            var hubConnection = Connect();
+            await hubConnection.StartAsync();
+
+            /* When */
+            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
+            {
+                Query = @"
+subscription { 
+    helloEvents(id:""003"")
+}"
+            }, cancellationToken: cts.Token);
+
+            for(int i = 0; i < count;i++)
+            {
+                await _eventManager.Hello(i.ToString());
+            }
+            
+
+            /* Then */
+            var results = new List<string>();
+            for (int i = 0; i < count; i++)
+            {
+                var result = await reader.ReadAsync(cts.Token);
+
+                results.Add(result.Data["helloEvents"].ToString());
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                Assert.Contains(i.ToString(), results);
+            }
+
+            cts.Cancel();
+            await hubConnection.StopAsync();
+        }
+
+        [Fact]
         public async Task Subscribe_with_unsubscribe()
         {
             /* Given */
@@ -149,7 +193,7 @@ subscription {
             {
                 Query = @"
 subscription { 
-    helloEvents 
+    helloEvents(id: ""002"")
 }"
             }, cancellationToken: cts.Token);
 

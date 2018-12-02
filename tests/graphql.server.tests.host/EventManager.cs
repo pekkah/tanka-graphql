@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -8,27 +10,34 @@ namespace graphql.server.tests.host
 {
     public class EventManager
     {
-        private List<Channel<object>> _channels = new List<Channel<object>>();
+        private readonly ConcurrentDictionary<string, Channel<object>> _channels = new ConcurrentDictionary<string, Channel<object>>();
 
-        private List<string> _messageBuffer = new List<string>();
+        private readonly List<string> _messageBuffer = new List<string>();
 
         public async Task Hello(string message)
         {
             _messageBuffer.Add(message);
-            foreach (var channel in _channels)
+            foreach (var kv in _channels)
             {
-                await channel.Writer.WriteAsync(message);
+                var channel = kv.Value;
+                if(!channel.Reader.Completion.IsCompleted)
+                    await channel.Writer.WriteAsync(message);
             }
         }
 
-        public async Task<ChannelReader<object>> Subscribe(CancellationToken cancellationToken)
+        public void Clear()
+        {
+            _messageBuffer.Clear();
+        }
+
+        public async Task<ChannelReader<object>> Subscribe(string id, CancellationToken cancellationToken)
         {
             var channel = Channel.CreateUnbounded<object>();
-            _channels.Add(channel);
+            _channels[id]= channel;
             cancellationToken.Register(() =>
             {
-                _channels.Remove(channel);
-                channel.Writer.Complete();
+                if (_channels.TryRemove(id, out var remove))
+                    remove.Writer.TryComplete();
             });
 
             foreach (var previousMessage in _messageBuffer)
