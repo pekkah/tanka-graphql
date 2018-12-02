@@ -75,27 +75,48 @@ namespace fugu.graphql.execution
             if (formatError == null) throw new ArgumentNullException(nameof(formatError));
 
             var responseStream = Channel.CreateUnbounded<ExecutionResult>();
-            _ = Task.Run(async () =>
+            var inputChannel = subscribeResult.Reader;
+            async Task RunChannel()
             {
-                var reader = subscribeResult.Reader;
-                while (await reader.WaitToReadAsync())
+                try
                 {
-                    if (reader.TryRead(out var @event))
+                    while (await inputChannel.WaitToReadAsync())
                     {
-                        var executionResult = await ExecuteSubscriptionEventAsync(
-                            context,
-                            subscription,
-                            coercedVariableValues,
-                            @event,
-                            formatError
-                        );
+                        while (inputChannel.TryRead(out var evnt))
+                        {
+                            var executionResult = await ExecuteSubscriptionEventAsync(
+                                context,
+                                subscription,
+                                coercedVariableValues,
+                                evnt,
+                                formatError);
 
-                        await responseStream.Writer.WriteAsync(executionResult);
+                            while (!responseStream.Writer.TryWrite(executionResult))
+                            {
+                                if (!await responseStream.Writer.WaitToWriteAsync())
+                                {
+                                    // Failed to write to the output channel because it was closed. Nothing really we can do but abort here.
+                                    return;
+                                }
+                            }
+                        }
                     }
+
+                    // Manifest any errors in the completion task
+                    await inputChannel.Completion;
                 }
+                catch (Exception ex)
+                {
+                    responseStream.Writer.TryComplete(ex);
+                }
+                finally
+                {
+                    // This will safely no-op if the catch block above ran.
+                    responseStream.Writer.TryComplete();
+                }
+            }
 
-            }).ConfigureAwait(false);
-
+            _ = RunChannel();
             return new SubscriptionResult(responseStream);
         }
 
