@@ -84,17 +84,10 @@ namespace fugu.graphql.server
                 throw new InvalidOperationException("Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
 
             var result = await Executor.SubscribeAsync(options, cancellationToken);
-            var channel = Channel.CreateUnbounded<ExecutionResult>();
-
-            var _ = Task.Run(async () =>
-            {
-                await cancellationToken.WhenCancelled();
-                channel.Writer.TryComplete();
-                _logger.Unsubscribed(options.OperationName, options.VariableValues, null);
-            });
-            
             _logger.Subscribed(options.OperationName, options.VariableValues, null);
-            var stream = new QueryStream(channel);
+
+            cancellationToken.Register(() => _logger.Unsubscribed(options.OperationName, options.VariableValues, null));
+            var stream = new QueryStream(result.Reader);
             return stream;
         }
     }
