@@ -31,7 +31,7 @@ namespace fugu.graphql.tests
             var result = await ExecuteAsync(
                 new ExecutionOptions()
                 {
-                    ParseDocumentAsync = ()=> ParseDocumentAsync(Introspection.Query),
+                    Document =  ParseDocument(Introspection.Query),
                     Schema = introspectionSchema
                 }).ConfigureAwait(false);
 
@@ -479,7 +479,7 @@ namespace fugu.graphql.tests
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
-                ParseDocumentAsync = ()=> ParseDocumentAsync(query),
+                Document =  ParseDocument(query),
                 OperationName = null,
                 InitialValue = null,
                 VariableValues = null
@@ -521,7 +521,7 @@ namespace fugu.graphql.tests
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
-                ParseDocumentAsync = ()=> ParseDocumentAsync(query),
+                Document =  ParseDocument(query),
                 OperationName = null,
                 InitialValue = null,
                 VariableValues = null
@@ -567,7 +567,7 @@ namespace fugu.graphql.tests
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
-                ParseDocumentAsync = ()=> ParseDocumentAsync(query),
+                Document =  ParseDocument(query),
                 OperationName = null,
                 InitialValue = null,
                 VariableValues = null
@@ -613,7 +613,7 @@ namespace fugu.graphql.tests
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
-                ParseDocumentAsync = ()=> ParseDocumentAsync(query),
+                Document =  ParseDocument(query),
                 OperationName = null,
                 InitialValue = null,
                 VariableValues = null
@@ -653,7 +653,7 @@ namespace fugu.graphql.tests
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
-                ParseDocumentAsync = ()=> ParseDocumentAsync(query),
+                Document =  ParseDocument(query),
                 OperationName = null,
                 InitialValue = null,
                 VariableValues = null
@@ -694,7 +694,7 @@ namespace fugu.graphql.tests
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
-                ParseDocumentAsync = ()=> ParseDocumentAsync(query),
+                Document =  ParseDocument(query),
                 OperationName = null,
                 InitialValue = null,
                 VariableValues = null
@@ -766,7 +766,7 @@ fragment friendsAndFriends on Human {{
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
-                ParseDocumentAsync = ()=> ParseDocumentAsync(query),
+                Document =  ParseDocument(query),
                 OperationName = null,
                 InitialValue = null,
                 VariableValues = null

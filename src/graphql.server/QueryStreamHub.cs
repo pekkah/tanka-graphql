@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace fugu.graphql.server
 {
-    public class ServerHub : Hub
+    public class QueryStreamHub : Hub
     {
         private readonly QueryStreamService _queryStreamService;
 
-        public ServerHub(QueryStreamService queryStreamService)
+        public QueryStreamHub(QueryStreamService queryStreamService)
         {
             _queryStreamService = queryStreamService;
         }

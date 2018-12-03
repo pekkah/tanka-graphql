@@ -40,7 +40,7 @@ See [Sample](https://github.com/pekkah/fugu-graphql-samples)
 
 Look above or below
 
-#### Define schema
+#### Define schema in file
 
 ```graphql
 type From {
@@ -112,14 +112,20 @@ public class ChatResolvers : ResolverMap
 #### Make executable schema
 
 ```csharp
-var schema = Sdl.Schema(...);
-var resolvers = new ChatResolvers(...);
+// load schema from SDL file
+var sdlString = LoadFromFile(..);
+var document = Parser.ParseDocument(sdlString);
+var schema = Sdl.Schema(document);
+
+var resolvers = new ChatResolvers(someResolverService);
+
+// connect resolvers into schema and add introspection
 var executableSchema = SchemaTools.MakeExecutableSchemaWithIntrospection(
                 schema,
                 resolvers);
 ```
 
-#### Execute query, mutation
+#### Execute query, mutation using ASP.NET Core controller
 
 ```csharp
 using static fugu.graphql.Executor;
@@ -130,16 +136,13 @@ public async Task<IActionResult> Get([FromBody] OperationRequest request)
 {
     var result = await ExecuteAsync(new ExecutionOptions
     {
-        Document = ParseDocument(request.Query),
+        ParseDocumentAsync = ()=> ParseDocumentAsync(request.Query),
         Schema = _schemas.Chat,
         OperationName = request.OperationName,
         VariableValues = request
                         .Variables
-                        .ToVariableDictionary()
+                        .ToVariableDictionary() // this correctly deserializes the nested dictionaries
     });
-
-    if (result.Errors != null && result.Errors.Any())
-        return BadRequest(result);
 
     return Ok(result);
 }
@@ -147,21 +150,25 @@ public async Task<IActionResult> Get([FromBody] OperationRequest request)
 
 ### Server
 
-### ServerHub
+Server is implemented as a SignalR Core Hub and it handles queries, mutations
+and subscriptions. This projects provides an Apollo Link implementation to be
+used with the provided hub.
+
+### GraphQL Query Streaming Hub
 
 ```csharp
-// add services
-services.AddSingleton<QueryStreamService>();
+// Configure Services
+services.AddSignalR(options => options.EnableDetailedErrors = true)
+    // add GraphQL query streaming hub
+    .AddQueryStreamHub();
 
-// Use hub
+// Configure App
 app.UseSignalR(routes =>
-            {
-                routes.MapHub<ServerHub>(new PathString("/graphql"));
-            });
+{
+    routes.MapHub<QueryStreamHub>(new PathString("/graphql"));
+});
 
 ```
-
-
 
 #### Apollo link
 
@@ -170,10 +177,10 @@ import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
-import { SignalrLink, Client } from '@fugu-fw/fugu-graphql-server-link';
+import { FuguLink, FuguClient } from '@fugu-fw/fugu-graphql-server-link';
 
-const fuguClient = new Client("/graphql");
-const fuguLink = new SignalrLink(fuguClient);
+const fuguClient = new FuguClient("/graphql");
+const fuguLink = new FuguLink(fuguClient);
 
 const client = new ApolloClient({
   connectToDevTools: true,

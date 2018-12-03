@@ -130,7 +130,7 @@ subscription MessageAdded {
             /* When */
             var result = await SubscribeAsync(new ExecutionOptions
             {
-                ParseDocumentAsync = () => ParseDocumentAsync(query),
+                Document = ParseDocument(query),
                 Schema = _executable
             }, unsubscribe.Token).ConfigureAwait(false);
 
@@ -170,7 +170,7 @@ subscription MessageAdded {
             /* When */
             var result = await SubscribeAsync(new ExecutionOptions
             {
-                ParseDocumentAsync = () => ParseDocumentAsync(query),
+                Document = ParseDocument(query),
                 Schema = _executable
             }, unsubscribe.Token).ConfigureAwait(false);
 

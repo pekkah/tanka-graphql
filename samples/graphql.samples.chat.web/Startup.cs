@@ -30,9 +30,12 @@ namespace fugu.graphql.samples.chat.web
             services.AddSingleton<IChatResolverService, ChatResolverService>();
             services.AddSingleton<ChatSchemas>();
             services.AddSingleton(provider => provider.GetRequiredService<ChatSchemas>().Chat);
-            services.AddSingleton<QueryStreamService>();
+            
+            services.AddSignalR(options => options.EnableDetailedErrors = true)
+                // add GraphQL query streaming hub
+                .AddQueryStreamHubWithTracing();
 
-            services.AddSignalR(options => { options.EnableDetailedErrors = true; });
+            // CORS is required for the graphql.samples.chat.ui React App
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
@@ -45,8 +48,7 @@ namespace fugu.graphql.samples.chat.web
                 });
             });
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -63,9 +65,11 @@ namespace fugu.graphql.samples.chat.web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseWebSockets();
+
+
             app.UseSignalR(routes =>
             {
-                routes.MapHub<ServerHub>(new PathString("/graphql"));
+                routes.MapHub<QueryStreamHub>(new PathString("/graphql"));
             });
         }
     }

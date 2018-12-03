@@ -98,7 +98,7 @@ namespace fugu.graphql.tests
             var result = await Executor.ExecuteAsync(new ExecutionOptions()
             {
                 Schema = await _schema,
-                ParseDocumentAsync = ()=> Parser.ParseDocumentAsync(query)
+                Document =  Parser.ParseDocument(query)
             });
 
             /* Then */
@@ -151,7 +151,7 @@ mutation Root {
             var result = await Executor.ExecuteAsync(new ExecutionOptions()
             {
                 Schema = await _schema,
-                ParseDocumentAsync = ()=> Parser.ParseDocumentAsync(query)
+                Document =  Parser.ParseDocument(query)
             });
 
             /* Then */

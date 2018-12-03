@@ -16,7 +16,7 @@ namespace fugu.graphql
 
         public ISchema Schema { get; set; }
 
-        public Func<Task<GraphQLDocument>> ParseDocumentAsync { get; set; }
+        public GraphQLDocument Document { get; set; }
 
         public string OperationName { get; set; }
 
@@ -28,7 +28,7 @@ namespace fugu.graphql
 
         public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
-        public ICollection<IExtension> Extensions { get; } = new List<IExtension>();
+        public ICollection<IExtension> Extensions { get; set; } = new List<IExtension>();
 
         private static Error DefaultFormatError(GraphQLError error)
         {

@@ -107,7 +107,7 @@ namespace fugu.graphql
             }
 
             await extensions.BeginParseDocumentAsync();
-            var document = await options.ParseDocumentAsync();
+            var document = options.Document;
             await extensions.EndParseDocumentAsync(document);
 
             var operation = Operations.GetOperation(document, options.OperationName);

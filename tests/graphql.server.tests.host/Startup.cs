@@ -57,9 +57,9 @@ namespace graphql.server.tests.host
                 .MakeExecutableSchemaWithIntrospection(new Schema(query, null, sub), resolvers, resolvers).Result;
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
-            services.AddSingleton<QueryStreamService>();
 
-            services.AddSignalR(options => { options.EnableDetailedErrors = true; });
+            services.AddSignalR(options => { options.EnableDetailedErrors = true; })
+                .AddQueryStreamHubWithTracing();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,7 +67,10 @@ namespace graphql.server.tests.host
         {
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
-            app.UseSignalR(routes => { routes.MapHub<ServerHub>(new PathString("/graphql")); });
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<QueryStreamHub>(new PathString("/graphql"));
+            });
         }
     }
 

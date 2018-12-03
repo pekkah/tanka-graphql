@@ -5,10 +5,9 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.server.utilities;
-using fugu.graphql.tracing;
-using fugu.graphql.type;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace fugu.graphql.server
 {
@@ -16,100 +15,78 @@ namespace fugu.graphql.server
     {
         private readonly ILogger<QueryStreamService> _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly ISchema _schema;
+        private readonly List<IExtension> _extensions;
+        private readonly IOptionsMonitor<QueryStreamHubOptions> _optionsMonitor;
 
-        public QueryStreamService(ISchema schema, ILoggerFactory loggerFactory)
+        public QueryStreamService(
+            IOptionsMonitor<QueryStreamHubOptions> optionsMonitor, 
+            ILoggerFactory loggerFactory,
+            IEnumerable<IExtension> extensions)
         {
-            _schema = schema;
+            _optionsMonitor = optionsMonitor;
             _loggerFactory = loggerFactory;
+            _extensions = extensions.ToList();
             _logger = loggerFactory.CreateLogger<QueryStreamService>();
         }
 
-        public async Task<QueryStream> QueryAsync(QueryRequest query, CancellationToken cancellationToken)
+        public async Task<QueryStream> QueryAsync(
+            QueryRequest query,
+            CancellationToken cancellationToken)
         {
             _logger.Query(query);
-            var document = Parser.ParseDocument(query.Query);
+            var serviceOptions = _optionsMonitor.CurrentValue;
+            var document = await Parser.ParseDocumentAsync(query.Query);
+            var executionOptions = new ExecutionOptions
+            {
+                Schema = serviceOptions.Schema,
+                Document = document,
+                OperationName = query.OperationName,
+                VariableValues = query.Variables,
+                InitialValue = null,
+                LoggerFactory = _loggerFactory,
+                Extensions = _extensions
+            };
 
             // is subscription
             if (document.Definitions.OfType<GraphQLOperationDefinition>()
                 .Any(op => op.Operation == OperationType.Subscription))
                 return await SubscribeAsync(
-                    document,
-                    query.OperationName,
-                    query.Variables,
-                    query.Extensions,
+                    executionOptions,
                     cancellationToken);
 
 
             // is query or mutation
             return await ExecuteAsync(
-                document,
-                query.OperationName,
-                query.Variables,
-                query.Extensions,
+                executionOptions,
                 cancellationToken);
         }
 
-        private async Task<QueryStream> ExecuteAsync(GraphQLDocument document,
-            string operationName,
-            Dictionary<string, object> variables,
-            Dictionary<string, object> extensions,
+        private async Task<QueryStream> ExecuteAsync(
+            ExecutionOptions options,
             CancellationToken cancellationToken)
         {
-            var options = new ExecutionOptions
-            {
-                Schema = _schema,
-                ParseDocumentAsync = () => Task.FromResult(document),
-                OperationName = operationName,
-                VariableValues = variables,
-                InitialValue = null,
-                LoggerFactory = _loggerFactory,
-                Extensions =
-                {
-                    new TraceExtension()
-                }
-            };
             var result = await Executor.ExecuteAsync(options);
 
             var channel = Channel.CreateBounded<ExecutionResult>(1);
             await channel.Writer.WriteAsync(result, cancellationToken);
             channel.Writer.TryComplete();
 
-            _logger.Executed(operationName, variables, extensions);
+            _logger.Executed(options.OperationName, options.VariableValues, null);
             return new QueryStream(channel);
         }
 
-        private async Task<QueryStream> SubscribeAsync(GraphQLDocument document,
-            string operationName,
-            Dictionary<string, object> variables,
-            Dictionary<string, object> extensions,
+        private async Task<QueryStream> SubscribeAsync(
+            ExecutionOptions options,
             CancellationToken cancellationToken)
         {
-            var options = new ExecutionOptions
-            {
-                Schema = _schema,
-                ParseDocumentAsync = ()=> Task.FromResult(document),
-                OperationName = operationName,
-                VariableValues = variables,
-                InitialValue = null,
-                LoggerFactory = _loggerFactory,
-                Extensions =
-                {
-                    new TraceExtension()
-                }
-            };
             var result = await Executor.SubscribeAsync(options, cancellationToken);
-
             var channel = Channel.CreateUnbounded<ExecutionResult>();
 
-#pragma warning disable 4014
-            // ReSharper disable once MethodSupportsCancellation
-            Task.Run(async () =>
-#pragma warning restore 4014
+            var _ = Task.Run(async () =>
             {
                 await cancellationToken.WhenCancelled();
                 channel.Writer.TryComplete();
-                _logger.Unsubscribed(operationName, variables, extensions);
+                _logger.Unsubscribed(options.OperationName, options.VariableValues, null);
             });
 
             var writer = new ActionBlock<ExecutionResult>(
@@ -124,7 +101,7 @@ namespace fugu.graphql.server
                 PropagateCompletion = true
             });
 
-            _logger.Subscribed(operationName, variables, extensions);
+            _logger.Subscribed(options.OperationName, options.VariableValues, null);
             var stream = new QueryStream(channel);
             return stream;
         }

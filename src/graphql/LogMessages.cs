@@ -1,15 +1,20 @@
 ﻿using System;
-using System.Linq;
 using fugu.graphql.validation;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 
 namespace fugu.graphql
 {
-    public static class ExecutorLogger
+    internal static class ExecutorLogger
     {
         private static readonly Func<ILogger, string, IDisposable> BeginAction = LoggerMessage
             .DefineScope<string>("Executing '{OperationName}'");
+
+        private static readonly Action<ILogger, bool, Exception> ExecutionResultAction =
+            LoggerMessage.Define<bool>(
+                LogLevel.Information,
+                default(EventId),
+                "Execution complete. HasErrors: {HasErrors}");
 
         private static readonly Action<ILogger, string, string, Exception> OperationAction = LoggerMessage
             .Define<string, string>(
@@ -41,12 +46,6 @@ namespace fugu.graphql
                 LogLevel.Debug,
                 default(EventId),
                 "Validation result: '{ValidationResult}'");
-
-        private static readonly Action<ILogger, bool, Exception> ExecutionResultAction =
-            LoggerMessage.Define<bool>(
-                LogLevel.Information,
-                default(EventId),
-                "Execution complete. HasErrors: {HasErrors}");
 
         internal static IDisposable Begin(this ILogger logger, string operationName)
         {

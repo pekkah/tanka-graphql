@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using fugu.graphql.samples.chat.web.GraphQL;
 using fugu.graphql.server.utilities;
@@ -8,7 +7,7 @@ using static fugu.graphql.Parser;
 
 namespace fugu.graphql.samples.chat.web.Controllers
 {
-    [Route("graphql")]
+    [Route("api/graphql")]
     public class QueryController : Controller
     {
         private readonly ChatSchemas _schemas;
@@ -19,18 +18,15 @@ namespace fugu.graphql.samples.chat.web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Get([FromBody] OperationRequest request)
+        public async Task<IActionResult> Post([FromBody] OperationRequest request)
         {
             var result = await ExecuteAsync(new ExecutionOptions
             {
-                ParseDocumentAsync = ()=> ParseDocumentAsync(request.Query),
+                Document =  ParseDocument(request.Query),
                 Schema = _schemas.Chat,
                 OperationName = request.OperationName,
                 VariableValues = request.Variables?.ToVariableDictionary()
             });
-
-            if (result.Errors != null && result.Errors.Any())
-                return BadRequest(result);
 
             return Ok(result);
         }

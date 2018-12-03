@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace fugu.graphql.server
 {
-    public static class LogMessages
+    internal static class LogMessages
     {
         private static readonly Action<ILogger, string, string, Exception> QueryAction =
             LoggerMessage.Define<string, string>(
