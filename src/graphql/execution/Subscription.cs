@@ -1,13 +1,12 @@
-﻿using System;
+﻿using fugu.graphql.error;
+using fugu.graphql.resolvers;
+using GraphQLParser.AST;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using fugu.graphql.error;
-using fugu.graphql.resolvers;
-using GraphQLParser.AST;
 
 namespace fugu.graphql.execution
 {
@@ -76,47 +75,13 @@ namespace fugu.graphql.execution
 
             var responseStream = Channel.CreateUnbounded<ExecutionResult>();
             var inputChannel = subscribeResult.Reader;
-            async Task RunChannel()
-            {
-                try
-                {
-                    while (await inputChannel.WaitToReadAsync())
-                    {
-                        while (inputChannel.TryRead(out var evnt))
-                        {
-                            var executionResult = await ExecuteSubscriptionEventAsync(
-                                context,
-                                subscription,
-                                coercedVariableValues,
-                                evnt,
-                                formatError);
+            _ = inputChannel.Transform(responseStream, inputEvent => ExecuteSubscriptionEventAsync(
+                context,
+                subscription,
+                coercedVariableValues,
+                inputEvent,
+                formatError));
 
-                            while (!responseStream.Writer.TryWrite(executionResult))
-                            {
-                                if (!await responseStream.Writer.WaitToWriteAsync())
-                                {
-                                    // Failed to write to the output channel because it was closed. Nothing really we can do but abort here.
-                                    return;
-                                }
-                            }
-                        }
-                    }
-
-                    // Manifest any errors in the completion task
-                    await inputChannel.Completion;
-                }
-                catch (Exception ex)
-                {
-                    responseStream.Writer.TryComplete(ex);
-                }
-                finally
-                {
-                    // This will safely no-op if the catch block above ran.
-                    responseStream.Writer.TryComplete();
-                }
-            }
-
-            _ = RunChannel();
             return new SubscriptionResult(responseStream);
         }
 
