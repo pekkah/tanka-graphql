@@ -8,6 +8,8 @@
     <PackageProjectUrl>https://github.com/pekkah/fugu-graphql</PackageProjectUrl>
     <RepositoryUrl>https://github.com/pekkah/fugu-graphql</RepositoryUrl>
     <Description>GraphQL Query, Mutation and Subscription library</Description>
+    <PackageLicenseUrl>https://github.com/pekkah/fugu-graphql/blob/develop/LICENSE</PackageLicenseUrl>
+    <PackageTags>graphql,fugu-fw</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
