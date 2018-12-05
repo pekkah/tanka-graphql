@@ -10,6 +10,7 @@
     <Description>GraphQL server using SignalR</Description>
     <PackageLicenseUrl>https://github.com/pekkah/fugu-graphql/blob/develop/LICENSE</PackageLicenseUrl>
     <PackageTags>graphql,fugu-fw,signalr</PackageTags>
+    <Authors>Pekka Heikura</Authors>
   </PropertyGroup>
 
   <ItemGroup>
