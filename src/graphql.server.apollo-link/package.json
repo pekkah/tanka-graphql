@@ -14,7 +14,7 @@
     "test": "jest"
   },
   "author": "Pekka Heikura <pekkah@gmail.com>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": "https://github.com/pekkah/fugu-graphql",
   "devDependencies": {
     "@types/jest": "^23.3.9",
