@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using fugu.graphql.introspection;
@@ -64,9 +63,7 @@ namespace fugu.graphql.tools
                 field.Value.Resolve = field.Value.Resolve ?? resolvers.GetResolver(type, field);
 
                 if (field.Value.Resolve == null)
-                {
                     Debug.WriteLine($"Could not find resolver for {type.Name}:{field.Key}");
-                }
 
                 if (subscribers != null)
                     field.Value.Subscribe = field.Value.Subscribe ?? subscribers.GetSubscriber(type, field);

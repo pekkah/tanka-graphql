@@ -266,3 +266,4 @@ tools/
 .rpt2_cache/
 dist/
 coverage/
+BenchmarkDotNet.Artifacts/

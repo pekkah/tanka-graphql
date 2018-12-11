@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using fugu.graphql.error;
 using fugu.graphql.type;
 using GraphQLParser.AST;
@@ -24,7 +23,7 @@ namespace fugu.graphql
 
         public object InitialValue { get; set; }
 
-        public bool Validate { get; } = true;
+        public bool Validate { get; set; } = true;
 
         public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
