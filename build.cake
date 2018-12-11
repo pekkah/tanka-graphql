@@ -177,8 +177,7 @@ Task("Benchmarks")
 			var exitCode = StartProcess(
 			  "dotnet",
 			  new ProcessSettings() {
-				Arguments = args,
-				WorkingDirectory = artifactsDir
+				Arguments = args
 			  }
 			);
 

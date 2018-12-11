@@ -35,7 +35,7 @@ steps:
   displayName: Benchmarks
   inputs:
     filename: 'dotnet-tools\dotnet-cake.exe'
-    arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration) -target=Benchmarks'
+    arguments: 'build.cake -target=Benchmarks'
 
 - task: PublishTestResults@2
   inputs:
@@ -43,6 +43,11 @@ steps:
     searchFolder: '$(Build.ArtifactStagingDirectory)'
     testResultsFiles: '**/*.trx' 
     mergeTestResults: false
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: 'BenchmarkDotNet.Artifacts' 
+    artifactName: 'benchmarks' 
 
 # Publish Build Artifacts
 - task: PublishBuildArtifacts@1
