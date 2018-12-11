@@ -13,13 +13,14 @@ namespace graphql.benchmarks
     {
         private static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<LibraryBenchmarks>();
+            BenchmarkRunner.Run<Benchmarks>();
         }
     }
 
     [CoreJob]
-    [ClrJob]
-    public class LibraryBenchmarks
+    //[ClrJob]
+    [MemoryDiagnoser]
+    public class Benchmarks
     {
         private GraphQLDocument _query;
         private ISchema _schema;
