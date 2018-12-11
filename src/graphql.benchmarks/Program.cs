@@ -18,7 +18,7 @@ namespace graphql.benchmarks
     }
 
     [CoreJob]
-    //[ClrJob]
+    [ClrJob]
     [MemoryDiagnoser]
     public class Benchmarks
     {

@@ -200,3 +200,11 @@ const client = new ApolloClient({
 });
 export default client;
 ```
+
+## Develop
+
+### Run benchmarks
+
+```bash
+src\graphql.benchmarks> dotnet run --configuration release --framework netcoreapp22
+```
