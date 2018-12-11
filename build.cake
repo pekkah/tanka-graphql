@@ -167,4 +167,26 @@ Task("Test")
       }
     });
 
+Task("Benchmarks")
+  .Does(()=> {
+	  var projectFiles = GetFiles("./src/**/*Benchmarks.csproj");
+
+	  foreach(var benchmark in projectFiles)
+	  {
+		  var args = ProcessArgumentBuilder.FromString($"run --project {benchmark} --configuration release --framework netcoreapp22");
+			var exitCode = StartProcess(
+			  "dotnet",
+			  new ProcessSettings() {
+				Arguments = args,
+				WorkingDirectory = artifactsDir
+			  }
+			);
+
+			if (exitCode != 0)
+			{
+			  throw new Exception($"Failed to run benchmarks");
+			}
+		}
+   });
+
 RunTarget(target);

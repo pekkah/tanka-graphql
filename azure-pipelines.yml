@@ -31,6 +31,12 @@ steps:
     filename: 'dotnet-tools\dotnet-cake.exe'
     arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration)'
 
+- task: CmdLine@1
+  displayName: Benchmarks
+  inputs:
+    filename: 'dotnet-tools\dotnet-cake.exe'
+    arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration) -target=Benchmarks'
+
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: VSTest

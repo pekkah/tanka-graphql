@@ -2,7 +2,12 @@
   "name": "@fugu-fw/fugu-graphql-server-link",
   "version": "0.0.0-dev",
   "description": "ApolloLink implementation for Fugu GraphQL server",
-  "keywords": ["graphql", "apollo", "signalr", "fugu-fw"],
+  "keywords": [
+    "graphql",
+    "apollo",
+    "signalr",
+    "fugu-fw"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "files": [
