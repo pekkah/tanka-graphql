@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading.Channels;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.resolvers;
 using fugu.graphql.tools;
@@ -45,7 +46,7 @@ namespace fugu.graphql.benchmarks
                     {
                         {
                             "simple", 
-                            (context, unsubscribe) => Task.FromResult(Resolve.Stream(SimpleValueBlock("value"))), 
+                            async (context, unsubscribe) => Resolve.Stream(await SimpleValueBlock("value")), 
                             context => Task.FromResult(Resolve.As(context.ObjectValue))}
                     }
                 }
@@ -61,10 +62,11 @@ namespace fugu.graphql.benchmarks
             return schema;
         }
 
-        private static ISourceBlock<object> SimpleValueBlock(string value)
+        private static async Task<ChannelReader<object>> SimpleValueBlock(string value)
         {
-            var target = new BufferBlock<string>();
-            target.Post(value);
+            var target = Channel.CreateUnbounded<object>();
+            await target.Writer.WriteAsync(value);
+            target.Writer.Complete();
             return target;
         }
 

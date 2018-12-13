@@ -114,7 +114,7 @@ namespace fugu.graphql.benchmarks
 
             AssertResult(result.Errors);
 
-            var value = result.Source.Receive();
+            var value = await result.Reader.ReadAsync();
             AssertResult(value.Errors);
         }
 
@@ -130,7 +130,7 @@ namespace fugu.graphql.benchmarks
 
             AssertResult(result.Errors);
 
-            var value = result.Source.Receive();
+            var value = await result.Reader.ReadAsync();
             AssertResult(value.Errors);
         }
 
