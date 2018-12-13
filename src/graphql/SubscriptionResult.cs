@@ -4,6 +4,9 @@ using System.Threading.Tasks.Dataflow;
 
 namespace fugu.graphql
 {
+    /// <summary>
+    ///     Result of executing a subscription
+    /// </summary>
     public class SubscriptionResult : IExecutionResult
     {
         private IEnumerable<Error> _errors;
@@ -17,6 +20,9 @@ namespace fugu.graphql
         {
         }
 
+        /// <summary>
+        ///     Source stream of <see cref="ExecutionResult"/>
+        /// </summary>
         public ISourceBlock<ExecutionResult> Source { get; }
 
         public IEnumerable<Error> Errors

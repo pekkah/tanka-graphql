@@ -6,8 +6,17 @@ using fugu.graphql.type;
 
 namespace fugu.graphql.tools
 {
+    //todo(pekka): review API
     public static class SchemaTools
     {
+        /// <summary>
+        ///     Combine resolvers and subscribers with the schema
+        /// </summary>
+        /// <param name="schema"></param>
+        /// <param name="resolvers"></param>
+        /// <param name="subscribers"></param>
+        /// <param name="visitors">Visitors applied to schema after resolvers and subscribers have been set</param>
+        /// <returns></returns>
         public static async Task<ISchema> MakeExecutableSchemaAsync(
             ISchema schema,
             IResolverMap resolvers,
@@ -29,6 +38,14 @@ namespace fugu.graphql.tools
             return schema;
         }
 
+        /// <summary>
+        ///     Combine resolvers and subscribers with the schema and add introspection types
+        /// </summary>
+        /// <param name="schema"></param>
+        /// <param name="resolvers"></param>
+        /// <param name="subscribers"></param>
+        /// <param name="visitors">Visitors applied to schema after resolvers and subscribers have been set</param>
+        /// <returns></returns>
         public static async Task<ISchema> MakeExecutableSchemaWithIntrospection(
             ISchema schema,
             IResolverMap resolvers,

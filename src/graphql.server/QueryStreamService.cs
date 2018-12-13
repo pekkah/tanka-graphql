@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -79,6 +80,9 @@ namespace fugu.graphql.server
             ExecutionOptions options,
             CancellationToken cancellationToken)
         {
+            if (!cancellationToken.CanBeCanceled)
+                throw new InvalidOperationException("Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
+
             var result = await Executor.SubscribeAsync(options, cancellationToken);
             var channel = Channel.CreateUnbounded<ExecutionResult>();
 

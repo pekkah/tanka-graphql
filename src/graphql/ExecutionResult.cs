@@ -1,16 +1,19 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
 namespace fugu.graphql
 {
+    /// <summary>
+    ///     Result of query, mutation or value of one value in the
+    ///     <see cref="SubscriptionResult" /> stream
+    /// </summary>
     public class ExecutionResult : IExecutionResult
     {
         private IDictionary<string, object> _data;
-        private IDictionary<string, object> _extensions;
         private IEnumerable<Error> _errors;
+        private IDictionary<string, object> _extensions;
 
         public IDictionary<string, object> Data
         {
@@ -64,7 +67,7 @@ namespace fugu.graphql
         {
             if (Extensions == null)
             {
-                Extensions = new Dictionary<string, object>()
+                Extensions = new Dictionary<string, object>
                 {
                     {key, value}
                 };
@@ -74,9 +77,14 @@ namespace fugu.graphql
             Extensions[key] = value;
         }
 
+        /// <summary>
+        ///     Select value from <see cref="Data" /> using path syntax
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public object Select(params object[] path)
         {
-            IDictionary<string, object> currentObject = Data;
+            var currentObject = Data;
             object result = null;
             foreach (var segment in path)
             {
@@ -86,13 +94,9 @@ namespace fugu.graphql
                         return null;
 
                     if (currentObject.ContainsKey(stringSegment))
-                    {
                         result = currentObject[stringSegment];
-                    }
                     else
-                    {
                         result = null;
-                    }
                 }
 
                 if (segment is int intSegment)
@@ -117,10 +121,7 @@ namespace fugu.graphql
                     }
                 }
 
-                if (result is IDictionary<string, object> child)
-                {
-                    currentObject = child;
-                }
+                if (result is IDictionary<string, object> child) currentObject = child;
             }
 
             return result;

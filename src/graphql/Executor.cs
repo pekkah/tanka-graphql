@@ -10,8 +10,17 @@ using Microsoft.Extensions.Logging;
 
 namespace fugu.graphql
 {
+    /// <summary>
+    ///     Execute queries, mutations and subscriptions
+    /// </summary>
     public static class Executor
     {
+        /// <summary>
+        ///     Execute query or mutation
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public static async Task<ExecutionResult> ExecuteAsync(
             ExecutionOptions options, 
             CancellationToken cancellationToken = default(CancellationToken))
@@ -57,6 +66,12 @@ namespace fugu.graphql
             }
         }
 
+        /// <summary>
+        ///     Execute subscription
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="cancellationToken">Unsubscribe</param>
+        /// <returns></returns>
         public static async Task<SubscriptionResult> SubscribeAsync(
             ExecutionOptions options, 
             CancellationToken cancellationToken = default(CancellationToken))
