@@ -7,7 +7,7 @@ Fugu GraphQL library
 ## Features
 
 * Execute queries, mutations and subscriptions
-* Validation (Dirty port from graphql-dotnet)
+* Validation (Dirty port from graphql-dotnet). Validation is the slowest part of the execution and needs to be redone.
 * SignalR hub for streaming queries, mutations and subscriptions
 * ApolloLink for the provided SignalR hub
 
