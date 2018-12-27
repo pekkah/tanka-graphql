@@ -46,7 +46,7 @@ namespace fugu.graphql.benchmarks
                     {
                         {
                             "simple", 
-                            async (context, unsubscribe) => Resolve.Stream(await SimpleValueBlock("value")), 
+                            async (context, unsubscribe) => Resolve.AsReader(await SimpleValueBlock("value")), 
                             context => Task.FromResult(Resolve.As(context.ObjectValue))}
                     }
                 }

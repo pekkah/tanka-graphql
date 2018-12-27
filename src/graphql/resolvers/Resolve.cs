@@ -49,9 +49,9 @@ namespace fugu.graphql.resolvers
             };
         }
 
-        public static ISubscribeResult Stream(ChannelReader<object> reader)
+        public static ISubscribeResult AsReader(ChannelReader<object> reader)
         {
-            return new SubscribeResult(reader);
+            return new ChannelReaderSubscribeResult(reader);
         }
     }
 }

@@ -46,7 +46,7 @@ namespace fugu.graphql.samples.chat.data
             CancellationToken cancellationToken)
         {
             var reader = await _chat.JoinAsync(cancellationToken);
-            return Resolve.Stream(reader);
+            return Resolve.AsReader(reader);
         }
 
         public async Task<IResolveResult> ResolveMessageAsync(ResolverContext context)

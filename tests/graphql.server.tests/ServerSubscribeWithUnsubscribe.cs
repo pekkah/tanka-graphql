@@ -8,10 +8,10 @@ using Xunit;
 
 namespace fugu.graphql.server.tests
 {
-    public class ServerSubscribeFacts : ServerFactsBase
+    public class ServerSubscribeWithUnsubscribe : ServerFactsBase
     {
         [Fact]
-        public async Task Subscribe()
+        public async Task Subscribe_with_unsubscribe()
         {
             /* Given */
             var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
@@ -23,7 +23,7 @@ namespace fugu.graphql.server.tests
             {
                 Query = @"
 subscription { 
-    helloEvents
+    helloEvents(id: ""002"")
 }"
             }, cancellationToken: cts.Token);
 
@@ -39,10 +39,11 @@ subscription {
             });
 
             cts.Cancel();
+
             await hubConnection.StopAsync();
         }
 
-        public ServerSubscribeFacts(WebApplicationFactory<Startup> factory) : base(factory)
+        public ServerSubscribeWithUnsubscribe(WebApplicationFactory<Startup> factory) : base(factory)
         {
         }
     }

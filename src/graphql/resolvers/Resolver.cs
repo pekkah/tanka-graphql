@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using fugu.graphql.type;
 
 namespace fugu.graphql.resolvers
 {

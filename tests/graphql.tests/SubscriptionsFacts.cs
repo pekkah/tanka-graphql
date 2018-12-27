@@ -75,7 +75,7 @@ namespace fugu.graphql.tests
                 }
 
                 // return result
-                return Stream(channel.Reader);
+                return AsReader(channel.Reader);
             }
 
             Task<IResolveResult> ResolveMessage(ResolverContext context)

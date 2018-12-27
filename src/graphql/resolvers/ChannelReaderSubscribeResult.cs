@@ -3,9 +3,9 @@ using System.Threading.Channels;
 
 namespace fugu.graphql.resolvers
 {
-    public class SubscribeResult : ISubscribeResult
+    public class ChannelReaderSubscribeResult : ISubscribeResult
     {
-        public SubscribeResult(ChannelReader<object> reader)
+        public ChannelReaderSubscribeResult(ChannelReader<object> reader)
         {
             Reader = reader ?? throw new ArgumentNullException(nameof(reader));
         }
