@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using fugu.graphql.execution;
 using Microsoft.AspNetCore.SignalR;
 
 namespace fugu.graphql.server
@@ -19,8 +20,8 @@ namespace fugu.graphql.server
             QueryRequest query,
             CancellationToken cancellationToken)
         {
-            var queryResult = await _queryStreamService.QueryAsync(query, cancellationToken);
-            return queryResult.Reader;
+            var result = await _queryStreamService.QueryAsync(query, cancellationToken);
+            return result.Reader;
         }
     }
 }

@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using fugu.graphql.server.utilities;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,13 +12,13 @@ namespace fugu.graphql.server
 {
     public class QueryStreamService
     {
+        private readonly List<IExtension> _extensions;
         private readonly ILogger<QueryStreamService> _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly List<IExtension> _extensions;
         private readonly IOptionsMonitor<QueryStreamHubOptions> _optionsMonitor;
 
         public QueryStreamService(
-            IOptionsMonitor<QueryStreamHubOptions> optionsMonitor, 
+            IOptionsMonitor<QueryStreamHubOptions> optionsMonitor,
             ILoggerFactory loggerFactory,
             IEnumerable<IExtension> extensions)
         {
@@ -81,7 +79,8 @@ namespace fugu.graphql.server
             CancellationToken cancellationToken)
         {
             if (!cancellationToken.CanBeCanceled)
-                throw new InvalidOperationException("Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
+                throw new InvalidOperationException(
+                    "Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
 
             var result = await Executor.SubscribeAsync(options, cancellationToken);
             _logger.Subscribed(options.OperationName, options.VariableValues, null);

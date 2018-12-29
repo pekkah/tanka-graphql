@@ -30,7 +30,7 @@ subscription {
             await _eventManager.HelloAllAsync("world");
 
             /* Then */
-            var result = await reader.ReadAsync(cts.Token);
+            var result = await reader.ReadAsync();
 
             Assert.Contains(result.Data, kv =>
             {
@@ -40,6 +40,7 @@ subscription {
 
             cts.Cancel();
             await hubConnection.StopAsync();
+            await hubConnection.DisposeAsync();
         }
 
         public ServerSubscribeFacts(WebApplicationFactory<Startup> factory) : base(factory)
