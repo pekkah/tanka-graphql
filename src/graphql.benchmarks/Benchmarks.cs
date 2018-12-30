@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using BenchmarkDotNet.Attributes;
 using fugu.graphql.type;
+using fugu.graphql.validation;
 using GraphQLParser.AST;
 
 namespace fugu.graphql.benchmarks
@@ -132,6 +133,20 @@ namespace fugu.graphql.benchmarks
 
             var value = result.Source.Receive();
             AssertResult(value.Errors);
+        }
+
+        [Benchmark]
+        public async Task Validate_query_with_defaults()
+        {
+            var result = await Validator.ValidateAsync(
+                _schema,
+                _query);
+
+            if (!result.IsValid)
+            {
+                throw new InvalidOperationException(
+                    $"Validation failed. {result}");
+            }
         }
 
         private static void AssertResult(IEnumerable<Error> errors)

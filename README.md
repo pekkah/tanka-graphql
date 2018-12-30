@@ -29,6 +29,8 @@ Releases:
 ```
 dotnet add fugu.graphql
 dotnet add fugu.graphql.server
+
+npm install @fugu-fw/fugu-graphql-server-link
 ```
 
 ## Sample
@@ -136,8 +138,8 @@ public async Task<IActionResult> Get([FromBody] OperationRequest request)
 {
     var result = await ExecuteAsync(new ExecutionOptions
     {
-        ParseDocumentAsync = ()=> ParseDocumentAsync(request.Query),
-        Schema = _schemas.Chat,
+        Document = ParseDocument(request.Query),
+        Schema = schema,
         OperationName = request.OperationName,
         VariableValues = request
                         .Variables
@@ -154,11 +156,11 @@ Server is implemented as a SignalR Core Hub and it handles queries, mutations
 and subscriptions. This projects provides an Apollo Link implementation to be
 used with the provided hub.
 
-### GraphQL Query Streaming Hub
+#### GraphQL Query Streaming Hub
 
 ```csharp
 // Configure Services
-services.AddSignalR(options => options.EnableDetailedErrors = true)
+services.AddSignalR()
     // add GraphQL query streaming hub
     .AddQueryStreamHub();
 
