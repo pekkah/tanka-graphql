@@ -24,17 +24,17 @@
   "repository": "https://github.com/pekkah/fugu-graphql",
   "homepage": "https://github.com/pekkah/fugu-graphql",
   "devDependencies": {
+    "@types/graphql": "^14.0.3",
     "@types/jest": "^23.3.10",
+    "@types/zen-push": "^0.1.0",
     "jest": "^23.6.0",
     "prettier": "^1.15.3",
-    "rollup": "^0.68.2",
+    "rollup": "^1.0.0",
     "rollup-plugin-typescript2": "^0.18.1",
     "ts-jest": "^23.10.5",
     "tslint": "^5.12.0",
     "tslint-config-prettier": "^1.17.0",
-    "typescript": "^3.2.2",
-    "@types/graphql": "^14.0.3",
-    "@types/zen-push": "^0.1.0"
+    "typescript": "^3.2.2"
   },
   "dependencies": {
     "@aspnet/signalr": "^1.1.0",
