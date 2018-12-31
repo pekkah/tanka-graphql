@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using fugu.graphql.error;
-using fugu.graphql.resolvers;
-using fugu.graphql.type;
+using tanka.graphql.error;
+using tanka.graphql.resolvers;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.execution
+namespace tanka.graphql.execution
 {
     public abstract class ExecutionStrategyBase : IExecutionStrategy
     {

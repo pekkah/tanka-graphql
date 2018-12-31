@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using fugu.graphql.execution;
+using tanka.graphql.execution;
 using Xunit;
 
-namespace fugu.graphql.tests.execution
+namespace tanka.graphql.tests.execution
 {
     public class NodePathFacts
     {

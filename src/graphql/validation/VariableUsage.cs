@@ -1,7 +1,7 @@
-﻿using fugu.graphql.type;
+﻿using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation
+namespace tanka.graphql.validation
 {
     public struct VariableUsage
     {

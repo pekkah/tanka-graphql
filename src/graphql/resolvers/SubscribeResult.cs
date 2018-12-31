@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks.Dataflow;
 
-namespace fugu.graphql.resolvers
+namespace tanka.graphql.resolvers
 {
     public class SubscribeResult : ISubscribeResult
     {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using fugu.graphql.type;
-using fugu.graphql.type.converters;
+using tanka.graphql.type;
+using tanka.graphql.type.converters;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation.rules
+namespace tanka.graphql.validation.rules
 {
     /// <summary>
     ///     Scalar leafs

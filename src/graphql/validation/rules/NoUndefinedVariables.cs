@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation.rules
+namespace tanka.graphql.validation.rules
 {
     /// <summary>
     ///     No undefined variables

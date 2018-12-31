@@ -1,11 +1,11 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql;
-using fugu.graphql.resolvers;
-using fugu.graphql.server;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql;
+using tanka.graphql.resolvers;
+using tanka.graphql.server;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;

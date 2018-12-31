@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using fugu.graphql.error;
+using tanka.graphql.error;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public static class Operations
     {

@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace fugu.graphql.server.utilities
+namespace tanka.graphql.server.utilities
 {
     public static class VariableExtensions
     {

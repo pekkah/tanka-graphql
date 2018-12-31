@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     /// <summary>
     ///     Result of query, mutation or value of one value in the

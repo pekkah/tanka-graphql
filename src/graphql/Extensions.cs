@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using fugu.graphql.resolvers;
-using fugu.graphql.validation;
+using tanka.graphql.resolvers;
+using tanka.graphql.validation;
 using GraphQLParser.AST;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     public class Extensions
     {

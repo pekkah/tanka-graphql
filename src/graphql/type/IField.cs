@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using fugu.graphql.resolvers;
+using tanka.graphql.resolvers;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public interface IField : IDirectives
     {

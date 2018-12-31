@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using BenchmarkDotNet.Attributes;
-using fugu.graphql.type;
-using fugu.graphql.validation;
+using tanka.graphql.type;
+using tanka.graphql.validation;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.benchmarks
+namespace tanka.graphql.benchmarks
 {
     [CoreJob]
     //[ClrJob]

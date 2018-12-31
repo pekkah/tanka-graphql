@@ -1,9 +1,9 @@
 ﻿using System.Linq;
-using fugu.graphql.introspection;
-using fugu.graphql.type;
+using tanka.graphql.introspection;
+using tanka.graphql.type;
 using Xunit;
 
-namespace fugu.graphql.tests.introspection
+namespace tanka.graphql.tests.introspection
 {
     public class ExamineObjectFacts
     {

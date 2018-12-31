@@ -1,4 +1,4 @@
-﻿namespace fugu.graphql.server.transports.websockets
+﻿namespace tanka.graphql.server.transports.websockets
 {
     public class Constants
     {

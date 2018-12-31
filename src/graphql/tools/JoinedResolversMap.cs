@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.resolvers;
-using fugu.graphql.type;
+using tanka.graphql.resolvers;
+using tanka.graphql.type;
 
-namespace fugu.graphql.tools
+namespace tanka.graphql.tools
 {
     internal class JoinedResolversMap : IResolverMap
     {

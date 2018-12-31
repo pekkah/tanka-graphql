@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.resolvers;
-using fugu.graphql.tests.data;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql.resolvers;
+using tanka.graphql.tests.data;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 using Xunit;
-using static fugu.graphql.Executor;
-using static fugu.graphql.Parser;
-using static fugu.graphql.resolvers.Resolve;
+using static tanka.graphql.Executor;
+using static tanka.graphql.Parser;
+using static tanka.graphql.resolvers.Resolve;
 
-namespace fugu.graphql.tests
+namespace tanka.graphql.tests
 {
     public class Message
     {

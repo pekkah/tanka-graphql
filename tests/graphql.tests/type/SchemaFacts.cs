@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using fugu.graphql.type;
+using tanka.graphql.type;
 using Xunit;
 
-namespace fugu.graphql.tests.type
+namespace tanka.graphql.tests.type
 {
     public class SchemaFacts
     {

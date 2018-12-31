@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.type;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.sdl
+namespace tanka.graphql.sdl
 {
     public class SdlParserContext
     {

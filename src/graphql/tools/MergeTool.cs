@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.type;
+using tanka.graphql.type;
 
-namespace fugu.graphql.tools
+namespace tanka.graphql.tools
 {
     public class ConflictingField
     {

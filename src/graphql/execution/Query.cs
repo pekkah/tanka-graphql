@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using fugu.graphql.error;
+using tanka.graphql.error;
 
-namespace fugu.graphql.execution
+namespace tanka.graphql.execution
 {
     public static class Query
     {

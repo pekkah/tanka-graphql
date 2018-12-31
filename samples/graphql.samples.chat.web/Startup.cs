@@ -1,6 +1,6 @@
-using fugu.graphql.samples.chat.data;
-using fugu.graphql.samples.chat.web.GraphQL;
-using fugu.graphql.server;
+using tanka.graphql.samples.chat.data;
+using tanka.graphql.samples.chat.web.GraphQL;
+using tanka.graphql.server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace fugu.graphql.samples.chat.web
+namespace tanka.graphql.samples.chat.web
 {
     public class Startup
     {

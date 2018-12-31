@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 
-namespace fugu.graphql.introspection
+namespace tanka.graphql.introspection
 {
     public static class Introspection
     {

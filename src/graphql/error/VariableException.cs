@@ -1,7 +1,7 @@
 ﻿using System;
-using fugu.graphql.type;
+using tanka.graphql.type;
 
-namespace fugu.graphql.error
+namespace tanka.graphql.error
 {
     public class VariableException : Exception
     {

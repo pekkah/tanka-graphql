@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace fugu.graphql.validation
+namespace tanka.graphql.validation
 {
     public class ValidationResult
     {

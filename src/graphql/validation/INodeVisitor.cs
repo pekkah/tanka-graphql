@@ -1,6 +1,6 @@
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation
+namespace tanka.graphql.validation
 {
     public interface INodeVisitor
     {

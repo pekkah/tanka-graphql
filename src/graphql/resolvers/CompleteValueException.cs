@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using fugu.graphql.error;
-using fugu.graphql.execution;
+using tanka.graphql.error;
+using tanka.graphql.execution;
 using GraphQLParser;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.resolvers
+namespace tanka.graphql.resolvers
 {
     public class CompleteValueException : GraphQLError
     {

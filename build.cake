@@ -6,7 +6,7 @@ var configuration = Argument<string>("configuration", "Release");
 var artifactsDir = Directory(Argument<string>("artifactsDir", "./artifacts"));
 var publishDir = Directory(Argument<string>("publishDir", "./publish"));
 var runtime = Argument<string>("runtime", "win-x64");
-var sln = Argument<string>("sln", "./fugu-graphql.sln");
+var sln = Argument<string>("sln", "./tanka-graphql.sln");
 
 var netstandard20 = "netstandard2.0";
 var netcoreapp21 = "netcoreapp2.1";

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace fugu.graphql.introspection
+namespace tanka.graphql.introspection
 {
     public class __Type
     {

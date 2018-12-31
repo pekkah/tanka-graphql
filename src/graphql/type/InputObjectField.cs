@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using fugu.graphql.execution;
+using tanka.graphql.execution;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public class InputObjectField : IDirectives
     {

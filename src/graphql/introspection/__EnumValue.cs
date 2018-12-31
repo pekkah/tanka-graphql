@@ -1,4 +1,4 @@
-﻿namespace fugu.graphql.introspection
+﻿namespace tanka.graphql.introspection
 {
     public class __EnumValue
     {

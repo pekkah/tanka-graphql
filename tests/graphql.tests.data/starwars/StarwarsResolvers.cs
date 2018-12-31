@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using fugu.graphql.resolvers;
-using fugu.graphql.type;
-using static fugu.graphql.resolvers.Resolve;
+using tanka.graphql.resolvers;
+using tanka.graphql.type;
+using static tanka.graphql.resolvers.Resolve;
 
-namespace fugu.graphql.tests.data.starwars
+namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsResolvers
     {

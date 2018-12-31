@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.error;
-using fugu.graphql.type;
+using tanka.graphql.error;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     /// <summary>
     ///     Execution options

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using fugu.graphql.tools;
+using tanka.graphql.tools;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public class SchemaHealer : SchemaVisitorBase
     {

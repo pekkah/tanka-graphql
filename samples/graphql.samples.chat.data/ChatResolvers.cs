@@ -1,7 +1,7 @@
-﻿using fugu.graphql.samples.chat.data.domain;
-using static fugu.graphql.resolvers.Resolve;
+﻿using tanka.graphql.samples.chat.data.domain;
+using static tanka.graphql.resolvers.Resolve;
 
-namespace fugu.graphql.samples.chat.data
+namespace tanka.graphql.samples.chat.data
 {
     public class ChatResolvers : ResolverMap
     {

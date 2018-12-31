@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public abstract class ComplexType : IGraphQLType
     {

@@ -1,6 +1,6 @@
-﻿using fugu.graphql.type;
+﻿using tanka.graphql.type;
 
-namespace fugu.graphql.server
+namespace tanka.graphql.server
 {
     public class QueryStreamHubOptions
     {

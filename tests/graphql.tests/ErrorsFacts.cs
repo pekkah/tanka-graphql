@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using fugu.graphql.type;
-using fugu.graphql.tests.data;
-using fugu.graphql.tools;
+using tanka.graphql.type;
+using tanka.graphql.tests.data;
+using tanka.graphql.tools;
 using Xunit;
-using static fugu.graphql.Executor;
-using static fugu.graphql.Parser;
-using static fugu.graphql.resolvers.Resolve;
-using static fugu.graphql.type.ScalarType;
+using static tanka.graphql.Executor;
+using static tanka.graphql.Parser;
+using static tanka.graphql.resolvers.Resolve;
+using static tanka.graphql.type.ScalarType;
 
-namespace fugu.graphql.tests
+namespace tanka.graphql.tests
 {
     public class ErrorsFacts
     {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using fugu.graphql.type.converters;
+using tanka.graphql.type.converters;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public class ScalarType : IGraphQLType, IValueConverter, IEquatable<ScalarType>, IEquatable<IGraphQLType>
     {

@@ -5,9 +5,9 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyName>fugu.graphql.tests</AssemblyName>
+    <AssemblyName>tanka.graphql.tests</AssemblyName>
 
-    <RootNamespace>fugu.graphql.tests</RootNamespace>
+    <RootNamespace>tanka.graphql.tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using fugu.graphql.execution;
+using tanka.graphql.execution;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation.rules
+namespace tanka.graphql.validation.rules
 {
     public class SubscriptionHasSingleRootField : IValidationRule
     {

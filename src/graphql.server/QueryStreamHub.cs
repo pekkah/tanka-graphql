@@ -3,7 +3,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
-namespace fugu.graphql.server
+namespace tanka.graphql.server
 {
     public class QueryStreamHub : Hub
     {

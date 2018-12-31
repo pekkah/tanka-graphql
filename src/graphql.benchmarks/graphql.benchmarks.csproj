@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp2.2;net472</TargetFrameworks>
     <AssemblyName>graphql.benchmarks</AssemblyName>
-    <RootNamespace>fugu.graphql.benchmarks</RootNamespace>
+    <RootNamespace>tanka.graphql.benchmarks</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

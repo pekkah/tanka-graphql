@@ -1,6 +1,6 @@
-using fugu.graphql.type;
+using tanka.graphql.type;
 
-namespace fugu.graphql.tests.data.starwars
+namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsSchema
     {

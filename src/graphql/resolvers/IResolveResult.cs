@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using fugu.graphql.execution;
-using fugu.graphql.type;
+using tanka.graphql.execution;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.resolvers
+namespace tanka.graphql.resolvers
 {
     public interface IResolveResult
     {

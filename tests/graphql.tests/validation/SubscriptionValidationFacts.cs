@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using fugu.graphql.type;
-using fugu.graphql.validation;
+using tanka.graphql.type;
+using tanka.graphql.validation;
 using Xunit;
 
-namespace fugu.graphql.tests.validation
+namespace tanka.graphql.tests.validation
 {
     public class SubscriptionValidationFacts
     {

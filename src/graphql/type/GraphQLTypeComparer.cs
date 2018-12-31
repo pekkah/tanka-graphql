@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public class GraphQLTypeComparer : IEqualityComparer<IGraphQLType>
     {

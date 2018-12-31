@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
-using fugu.graphql.samples.chat.data;
-using fugu.graphql.samples.chat.data.idl;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql.samples.chat.data;
+using tanka.graphql.samples.chat.data.idl;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 
-namespace fugu.graphql.samples.chat.web.GraphQL
+namespace tanka.graphql.samples.chat.web.GraphQL
 {
     public class ChatSchemas
     {

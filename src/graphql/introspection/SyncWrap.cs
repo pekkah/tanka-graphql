@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Threading.Tasks;
-using fugu.graphql.resolvers;
+using tanka.graphql.resolvers;
 
-namespace fugu.graphql.introspection
+namespace tanka.graphql.introspection
 {
     internal static class SyncWrap
     {

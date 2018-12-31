@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
-using fugu.graphql.samples.chat.web.GraphQL;
-using fugu.graphql.server.utilities;
+using tanka.graphql.samples.chat.web.GraphQL;
+using tanka.graphql.server.utilities;
 using Microsoft.AspNetCore.Mvc;
-using static fugu.graphql.Executor;
-using static fugu.graphql.Parser;
+using static tanka.graphql.Executor;
+using static tanka.graphql.Parser;
 
-namespace fugu.graphql.samples.chat.web.Controllers
+namespace tanka.graphql.samples.chat.web.Controllers
 {
     [Route("api/graphql")]
     public class QueryController : Controller

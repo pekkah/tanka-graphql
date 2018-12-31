@@ -13,7 +13,7 @@ import {
 import { Request } from "./request";
 import { Subscription } from "./subscription";
 
-export class FuguClient {
+export class TankaClient {
   private hub: HubConnection;
   private started: Promise<void> = undefined;
 

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.type;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation.rules
+namespace tanka.graphql.validation.rules
 {
     /// <summary>
     ///     Variables passed to field arguments conform to type

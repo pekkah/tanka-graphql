@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public class Argument
     {

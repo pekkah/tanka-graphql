@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public class Args : Dictionary<string, Argument>
     {

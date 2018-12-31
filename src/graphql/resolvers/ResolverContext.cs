@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using fugu.graphql.execution;
-using fugu.graphql.type;
+using tanka.graphql.execution;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 using Newtonsoft.Json.Linq;
 
-namespace fugu.graphql.resolvers
+namespace tanka.graphql.resolvers
 {
     public class ResolverContext
     {

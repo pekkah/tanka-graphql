@@ -2,11 +2,13 @@
 # yarn lockfile v1
 
 
-"@aspnet/signalr@^1.1.0-preview3-35497":
-  version "1.1.0-preview3-35497"
-  resolved "https://registry.yarnpkg.com/@aspnet/signalr/-/signalr-1.1.0-preview3-35497.tgz#16e6f1c4291d47554d7488ae044538575378d7eb"
+"@aspnet/signalr@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@aspnet/signalr/-/signalr-1.1.0.tgz#616be5d565f78ea6ab3910d8a5fb0690471b35f9"
+  integrity sha512-UwWXpfVyB7pfod/GmntaYWMdmmqlfuX7hoig7wMs01xxp53FIBrWGFStUKC3y3S4yu83i38NkzBndBIfOHo5Dw==
   dependencies:
     eventsource "^1.0.7"
+    request "^2.88.0"
     ws "^6.0.0"
 
 "@babel/code-frame@^7.0.0-beta.35":
@@ -23,11 +25,11 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@fugu-fw/fugu-graphql-server-link@file:..\\..\\src\\graphql.server.apollo-link":
+"@tanka/tanka-graphql-server-link@file:../../src/graphql.server.link":
   version "0.0.0-dev"
   dependencies:
-    "@aspnet/signalr" "^1.1.0-preview3-35497"
-    apollo-link "^1.2.3"
+    "@aspnet/signalr" "^1.1.0"
+    apollo-link "^1.2.6"
     graphql "^14.0.2"
     zen-push "^0.2.1"
 
@@ -243,6 +245,14 @@ apollo-link@^1.0.7, apollo-link@^1.2.2, apollo-link@^1.2.3:
   dependencies:
     apollo-utilities "^1.0.0"
     zen-observable-ts "^0.8.10"
+
+apollo-link@^1.2.6:
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/apollo-link/-/apollo-link-1.2.6.tgz#d9b5676d79c01eb4e424b95c7171697f6ad2b8da"
+  integrity sha512-sUNlA20nqIF3gG3F8eyMD+mO80fmf3dPZX+GUOs3MI9oZR8ug09H3F0UsWJMcpEg6h55Yy5wZ+BMmAjrbenF/Q==
+  dependencies:
+    apollo-utilities "^1.0.0"
+    zen-observable-ts "^0.8.13"
 
 apollo-utilities@^1.0.0:
   version "1.0.21"
@@ -6767,9 +6777,10 @@ request-promise-native@^1.0.5:
     stealthy-require "^1.1.0"
     tough-cookie ">=2.3.3"
 
-request@^2.79.0, request@^2.87.0:
+request@^2.79.0, request@^2.87.0, request@^2.88.0:
   version "2.88.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.88.0.tgz#9c2fca4f7d35b592efe57c7f0a55e81052124fef"
+  integrity sha512-NAqBSrijGLZdM0WZNsInLJpkJokL72XYjUpnB0iwsRgxh7dB6COrHnTBNwN0E+lHDAJzu7kLAkDeY08z2/A0hg==
   dependencies:
     aws-sign2 "~0.7.0"
     aws4 "^1.8.0"
@@ -8533,6 +8544,13 @@ yargs@~3.10.0:
 zen-observable-ts@^0.8.10:
   version "0.8.10"
   resolved "https://registry.yarnpkg.com/zen-observable-ts/-/zen-observable-ts-0.8.10.tgz#18e2ce1c89fe026e9621fd83cc05168228fce829"
+  dependencies:
+    zen-observable "^0.8.0"
+
+zen-observable-ts@^0.8.13:
+  version "0.8.13"
+  resolved "https://registry.yarnpkg.com/zen-observable-ts/-/zen-observable-ts-0.8.13.tgz#ae1fd77c84ef95510188b1f8bca579d7a5448fc2"
+  integrity sha512-WDb8SM0tHCb6c0l1k60qXWlm1ok3zN9U4VkLdnBKQwIYwUoB9psH7LIFgR+JVCCMmBxUgOjskIid8/N02k/2Bg==
   dependencies:
     zen-observable "^0.8.0"
 

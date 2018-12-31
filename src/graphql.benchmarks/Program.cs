@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Running;
 
-namespace fugu.graphql.benchmarks
+namespace tanka.graphql.benchmarks
 {
     public class Program
     {

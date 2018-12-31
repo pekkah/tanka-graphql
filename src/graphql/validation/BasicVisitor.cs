@@ -3,7 +3,7 @@ using System.Linq;
 using GraphQLParser;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation
+namespace tanka.graphql.validation
 {
     public class BasicVisitor : GraphQLAstVisitor
     {

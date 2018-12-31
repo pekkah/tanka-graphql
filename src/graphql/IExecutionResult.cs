@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     public interface IExecutionResult
     {

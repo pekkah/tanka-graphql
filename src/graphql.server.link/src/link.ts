@@ -5,10 +5,10 @@ import {
   Observable,
   Operation
 } from "apollo-link";
-import { FuguClient } from ".";
+import { TankaClient } from ".";
 
-export class FuguLink extends ApolloLink {
-  constructor(private client: FuguClient) {
+export class TankaLink extends ApolloLink {
+  constructor(private client: TankaClient) {
     super();
   }
 

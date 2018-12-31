@@ -1,11 +1,11 @@
 using System.Linq;
-using fugu.graphql.sdl;
-using fugu.graphql.type;
-using fugu.graphql.type.converters;
+using tanka.graphql.sdl;
+using tanka.graphql.type;
+using tanka.graphql.type.converters;
 using GraphQLParser.AST;
 using Xunit;
 
-namespace fugu.graphql.tests.sdl
+namespace tanka.graphql.tests.sdl
 {
     public class SdlFacts
     {

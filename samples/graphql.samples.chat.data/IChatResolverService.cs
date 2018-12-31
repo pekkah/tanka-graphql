@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using fugu.graphql.resolvers;
+using tanka.graphql.resolvers;
 
-namespace fugu.graphql.samples.chat.data
+namespace tanka.graphql.samples.chat.data
 {
     public interface IChatResolverService
     {

@@ -1,9 +1,9 @@
-﻿using fugu.graphql.error;
-using fugu.graphql.resolvers;
-using fugu.graphql.type;
+﻿using tanka.graphql.resolvers;
+using tanka.graphql.type;
 using GraphQLParser.AST;
+using tanka.graphql.error;
 
-namespace fugu.graphql.execution
+namespace tanka.graphql.execution
 {
     public static class Errors
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace fugu.graphql.tests.data.starwars
+namespace tanka.graphql.tests.data.starwars
 {
     public class Starwars
     {

@@ -1,6 +1,6 @@
 ﻿using GraphQLParser.AST;
 
-namespace fugu.graphql.type.converters
+namespace tanka.graphql.type.converters
 {
     /// <summary>
     ///     See http://facebook.github.io/graphql/#sec-Scalars

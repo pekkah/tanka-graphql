@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace fugu.graphql.samples.chat.web
+namespace tanka.graphql.samples.chat.web
 {
     public class Program
     {

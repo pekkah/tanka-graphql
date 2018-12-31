@@ -1,12 +1,12 @@
 ﻿using System;
-using fugu.graphql.tracing;
-using fugu.graphql.type;
+using tanka.graphql.tracing;
+using tanka.graphql.type;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace fugu.graphql.server
+namespace tanka.graphql.server
 {
     public static class SignalRServerBuilderExtensions
     {

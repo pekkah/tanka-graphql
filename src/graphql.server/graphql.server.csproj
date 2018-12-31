@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyName>fugu.graphql.server</AssemblyName>
-    <RootNamespace>fugu.graphql.server</RootNamespace>
+    <AssemblyName>tanka.graphql.server</AssemblyName>
+    <RootNamespace>tanka.graphql.server</RootNamespace>
     <Copyright>Pekka Heikura</Copyright>
-    <PackageProjectUrl>https://github.com/pekkah/fugu-graphql</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/pekkah/fugu-graphql</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
     <Description>GraphQL server using SignalR</Description>
-    <PackageLicenseUrl>https://github.com/pekkah/fugu-graphql/blob/develop/LICENSE</PackageLicenseUrl>
-    <PackageTags>graphql,fugu-fw,signalr</PackageTags>
+    <PackageLicenseUrl>https://github.com/pekkah/tanka-graphql/blob/develop/LICENSE</PackageLicenseUrl>
+    <PackageTags>graphql,tanka-fw,signalr</PackageTags>
     <Authors>Pekka Heikura</Authors>
   </PropertyGroup>
 

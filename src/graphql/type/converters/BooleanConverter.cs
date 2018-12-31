@@ -2,7 +2,7 @@
 using System.Globalization;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.type.converters
+namespace tanka.graphql.type.converters
 {
     public class BooleanConverter : IValueConverter
     {

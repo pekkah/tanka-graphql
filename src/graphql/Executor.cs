@@ -2,13 +2,13 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using fugu.graphql.execution;
-using fugu.graphql.type;
-using fugu.graphql.validation;
+using tanka.graphql.execution;
+using tanka.graphql.type;
+using tanka.graphql.validation;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     /// <summary>
     ///     Execute queries, mutations and subscriptions

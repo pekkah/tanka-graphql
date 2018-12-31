@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using fugu.graphql.type;
+using tanka.graphql.type;
 
-namespace fugu.graphql.tools
+namespace tanka.graphql.tools
 {
     public abstract class SchemaVisitorBase
     {

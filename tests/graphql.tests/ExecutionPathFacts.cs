@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.XPath;
-using fugu.graphql.resolvers;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql.resolvers;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 using Xunit;
 
-namespace fugu.graphql.tests
+namespace tanka.graphql.tests
 {
     public class ExecutionPathFacts
     {

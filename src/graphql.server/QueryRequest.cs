@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using fugu.graphql.server.utilities;
+using tanka.graphql.server.utilities;
 using Newtonsoft.Json;
 
-namespace fugu.graphql.server
+namespace tanka.graphql.server
 {
     public class QueryRequest
     {

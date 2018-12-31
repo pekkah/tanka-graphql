@@ -1,7 +1,7 @@
-﻿using fugu.graphql.tools;
-using fugu.graphql.type;
+﻿using tanka.graphql.tools;
+using tanka.graphql.type;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     public delegate SchemaVisitorBase SchemaVisitorFactory(ISchema schema, IResolverMap resolvers, ISubscriberMap subscribers = null);
 }

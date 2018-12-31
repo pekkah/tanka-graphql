@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.samples.chat.data.domain;
+using tanka.graphql.samples.chat.data.domain;
 
-namespace fugu.graphql.samples.chat.data
+namespace tanka.graphql.samples.chat.data
 {
     public interface IChat
     {

@@ -2,7 +2,7 @@
 using GraphQLParser.AST;
 using Newtonsoft.Json;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     public class Error
     {

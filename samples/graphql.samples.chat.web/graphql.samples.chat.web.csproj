@@ -5,8 +5,8 @@
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <IsPackable>false</IsPackable>
-    <AssemblyName>fugu.graphql.samples.chat.web</AssemblyName>
-    <RootNamespace>fugu.graphql.samples.chat.web</RootNamespace>
+    <AssemblyName>tanka.graphql.samples.chat.web</AssemblyName>
+    <RootNamespace>tanka.graphql.samples.chat.web</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

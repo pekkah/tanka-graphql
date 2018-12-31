@@ -1,8 +1,8 @@
-﻿using fugu.graphql.type;
-using static fugu.graphql.type.Argument;
-using static fugu.graphql.type.ScalarType;
+﻿using tanka.graphql.type;
+using static tanka.graphql.type.Argument;
+using static tanka.graphql.type.ScalarType;
 
-namespace fugu.graphql.tests.data.validation
+namespace tanka.graphql.tests.data.validation
 {
     public class WeirdSchemaBuilder
     {

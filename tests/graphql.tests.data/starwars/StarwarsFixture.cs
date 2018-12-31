@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 
-namespace fugu.graphql.tests.data.starwars
+namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsFixture : IDisposable
     {

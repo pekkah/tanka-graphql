@@ -1,9 +1,9 @@
 ﻿using System;
-using fugu.graphql.type;
-using static fugu.graphql.type.Argument;
-using static fugu.graphql.type.ScalarType;
+using tanka.graphql.type;
+using static tanka.graphql.type.Argument;
+using static tanka.graphql.type.ScalarType;
 
-namespace fugu.graphql.introspection
+namespace tanka.graphql.introspection
 {
     public class IntrospectionSchemaBuilder
     {

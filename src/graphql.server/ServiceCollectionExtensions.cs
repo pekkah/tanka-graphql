@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace fugu.graphql.server
+namespace tanka.graphql.server
 {
     public static class ServiceCollectionExtensions
     {

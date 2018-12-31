@@ -1,4 +1,4 @@
-﻿namespace fugu.graphql.type
+﻿namespace tanka.graphql.type
 {
     public static class GraphQLTypeExtensions 
     {

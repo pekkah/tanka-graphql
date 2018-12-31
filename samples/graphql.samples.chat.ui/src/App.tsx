@@ -2,7 +2,7 @@ import * as React from "react";
 import { Provider } from "react-redux";
 import { store, Playground } from "graphql-playground-react";
 import { Session } from "graphql-playground-react/lib/state/sessions/reducers";
-import { FuguClient, FuguLink } from "@fugu-fw/fugu-graphql-server-link";
+import { TankaClient, TankaLink } from "@tanka/tanka-graphql-server-link";
 import { IHttpConnectionOptions, LogLevel } from "@aspnet/signalr";
 
 var options: IHttpConnectionOptions = {
@@ -11,8 +11,8 @@ var options: IHttpConnectionOptions = {
   logger: LogLevel.Trace
 };
 
-var client = new FuguClient("https://localhost:5000/graphql", options);
-var link = new FuguLink(client);
+var client = new TankaClient("https://localhost:5000/graphql", options);
+var link = new TankaLink(client);
 
 class App extends React.Component {
   createLink = (session: Session) => {

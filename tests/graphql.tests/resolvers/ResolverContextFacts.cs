@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using fugu.graphql.execution;
-using fugu.graphql.resolvers;
-using fugu.graphql.type;
+using tanka.graphql.execution;
+using tanka.graphql.resolvers;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 using Xunit;
 
-namespace fugu.graphql.tests.resolvers
+namespace tanka.graphql.tests.resolvers
 {
     public class ResolverContextFacts
     {

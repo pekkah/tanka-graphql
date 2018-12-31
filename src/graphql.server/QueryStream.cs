@@ -1,6 +1,6 @@
 ﻿using System.Threading.Channels;
 
-namespace fugu.graphql.server
+namespace tanka.graphql.server
 {
     public class QueryStream
     {

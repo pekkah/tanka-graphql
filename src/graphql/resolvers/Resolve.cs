@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.type;
+using tanka.graphql.type;
 
-namespace fugu.graphql.resolvers
+namespace tanka.graphql.resolvers
 {
     public static class Resolve
     {

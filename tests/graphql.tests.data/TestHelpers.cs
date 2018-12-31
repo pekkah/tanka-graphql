@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using Xunit;
 
-namespace fugu.graphql.tests.data
+namespace tanka.graphql.tests.data
 {
     public static class TestHelpers
     {

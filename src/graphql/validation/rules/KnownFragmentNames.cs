@@ -1,6 +1,6 @@
 ﻿using GraphQLParser.AST;
 
-namespace fugu.graphql.validation.rules
+namespace tanka.graphql.validation.rules
 {
     /// <summary>
     ///     Known fragment names

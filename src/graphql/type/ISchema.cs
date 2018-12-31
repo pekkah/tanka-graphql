@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace fugu.graphql.type
+namespace tanka.graphql.type
 {
     public interface ISchema
     {

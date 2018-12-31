@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.error;
-using fugu.graphql.execution;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql.error;
+using tanka.graphql.execution;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.sdl
+namespace tanka.graphql.sdl
 {
     public static class Sdl
     {

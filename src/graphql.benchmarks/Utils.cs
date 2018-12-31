@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.resolvers;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql.resolvers;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.benchmarks
+namespace tanka.graphql.benchmarks
 {
     public static class Utils
     {

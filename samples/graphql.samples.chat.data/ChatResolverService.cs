@@ -1,10 +1,10 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.resolvers;
-using fugu.graphql.samples.chat.data.domain;
+using tanka.graphql.resolvers;
+using tanka.graphql.samples.chat.data.domain;
 
-namespace fugu.graphql.samples.chat.data
+namespace tanka.graphql.samples.chat.data
 {
     public class ChatResolverService : IChatResolverService
     {

@@ -1,7 +1,7 @@
-Fugu GraphQL library
+Tanka GraphQL library
 =====================================
 
-[![Build Status](https://dev.azure.com/fugu-fw/graphql/_apis/build/status/pekkah.fugu-graphql)](https://dev.azure.com/fugu-fw/graphql/_build/latest?definitionId=1)
+[![Build Status](https://dev.azure.com/tanka-ops/graphql/_apis/build/status/pekkah.tanka-graphql)](https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1)
 
 
 ## Features
@@ -18,8 +18,8 @@ Fugu GraphQL library
 
 Previews: 
 
-* NuGet: https://www.myget.org/F/fugu-fw/api/v3/index.json
-* NPM: https://www.myget.org/F/fugu-fw/npm/
+* NuGet: https://www.myget.org/F/tanka/api/v3/index.json
+* NPM: https://www.myget.org/F/tanka/npm/
 
 Releases:
 (todo)
@@ -27,15 +27,15 @@ Releases:
 ### Install 
 
 ```
-dotnet add fugu.graphql
-dotnet add fugu.graphql.server
+dotnet add tanka.graphql
+dotnet add tanka.graphql.server
 
-npm install @fugu-fw/fugu-graphql-server-link
+npm install @tanka/tanka-graphql-server-link
 ```
 
 ## Sample
 
-See [Sample](https://github.com/pekkah/fugu-graphql-samples)
+See [Sample](https://github.com/pekkah/tanka-graphql-samples)
 
 
 ### Usage
@@ -130,8 +130,8 @@ var executableSchema = SchemaTools.MakeExecutableSchemaWithIntrospection(
 #### Execute query, mutation using ASP.NET Core controller
 
 ```csharp
-using static fugu.graphql.Executor;
-using static fugu.graphql.Parser;
+using static tanka.graphql.Executor;
+using static tanka.graphql.Parser;
 
 [HttpPost]
 public async Task<IActionResult> Get([FromBody] OperationRequest request)
@@ -179,10 +179,10 @@ import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
-import { FuguLink, FuguClient } from '@fugu-fw/fugu-graphql-server-link';
+import { TankaLink, TankaClient } from '@tanka/graphql-server-link';
 
-const fuguClient = new FuguClient("/graphql");
-const fuguLink = new FuguLink(fuguClient);
+const serverClient = new TankaClient("/graphql");
+const serverLink = new TankaLink(serverClient);
 
 const client = new ApolloClient({
   connectToDevTools: true,
@@ -196,7 +196,7 @@ const client = new ApolloClient({
         );
       if (networkError) console.log(`[Network error]: ${networkError}`);
     }),
-    fuguLink
+    tankaLink
   ]),
   cache: new InMemoryCache()
 });

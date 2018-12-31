@@ -1,7 +1,7 @@
-﻿using fugu.graphql.type;
+﻿using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation.rules
+namespace tanka.graphql.validation.rules
 {
     /// <summary>
     ///     Fragments on composite type

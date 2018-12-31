@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace fugu.graphql.samples.chat.data.domain
+namespace tanka.graphql.samples.chat.data.domain
 {
     public class From
     {

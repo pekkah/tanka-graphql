@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using fugu.graphql.type;
-using fugu.graphql.validation.rules;
+using tanka.graphql.type;
+using tanka.graphql.validation.rules;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation
+namespace tanka.graphql.validation
 {
     public static class Validator
     {

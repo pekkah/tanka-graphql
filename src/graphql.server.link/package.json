@@ -1,12 +1,12 @@
 {
-  "name": "@fugu-fw/fugu-graphql-server-link",
+  "name": "@tanka/tanka-graphql-server-link",
   "version": "0.0.0-dev",
-  "description": "ApolloLink implementation for Fugu GraphQL server",
+  "description": "ApolloLink implementation for tanka GraphQL server",
   "keywords": [
     "graphql",
     "apollo",
     "signalr",
-    "fugu-fw"
+    "tanka"
   ],
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -21,8 +21,8 @@
   },
   "author": "Pekka Heikura <pekkah@gmail.com>",
   "license": "Apache-2.0",
-  "repository": "https://github.com/pekkah/fugu-graphql",
-  "homepage": "https://github.com/pekkah/fugu-graphql",
+  "repository": "https://github.com/pekkah/tanka-graphql",
+  "homepage": "https://github.com/pekkah/tanka-graphql",
   "devDependencies": {
     "@types/graphql": "^14.0.3",
     "@types/jest": "^23.3.10",

@@ -2,7 +2,7 @@
 using System.Linq;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation.rules
+namespace tanka.graphql.validation.rules
 {
     /// <summary>
     ///     No unused variables

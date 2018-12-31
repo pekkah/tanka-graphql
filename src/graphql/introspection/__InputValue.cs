@@ -1,7 +1,7 @@
 ﻿using System;
-using fugu.graphql.type;
+using tanka.graphql.type;
 
-namespace fugu.graphql.introspection
+namespace tanka.graphql.introspection
 {
     public class __InputValue
     {

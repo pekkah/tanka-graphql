@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
-namespace fugu.graphql.server
+namespace tanka.graphql.server
 {
     internal static class LogMessages
     {

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>fugu.graphql.samples.chat.data</AssemblyName>
-    <RootNamespace>fugu.graphql.samples.chat.data</RootNamespace>
+    <AssemblyName>tanka.graphql.samples.chat.data</AssemblyName>
+    <RootNamespace>tanka.graphql.samples.chat.data</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

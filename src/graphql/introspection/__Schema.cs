@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.type;
+using tanka.graphql.type;
 // ReSharper disable InconsistentNaming
 
-namespace fugu.graphql.introspection
+namespace tanka.graphql.introspection
 {
     public class __Schema
     {

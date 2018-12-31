@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using fugu.graphql.introspection;
-using fugu.graphql.type;
+using tanka.graphql.introspection;
+using tanka.graphql.type;
 
-namespace fugu.graphql.tools
+namespace tanka.graphql.tools
 {
     //todo(pekka): review API
     public static class SchemaTools

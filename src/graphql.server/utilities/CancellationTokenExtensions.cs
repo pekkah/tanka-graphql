@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace fugu.graphql.server.utilities
+namespace tanka.graphql.server.utilities
 {
     internal static class CancellationTokenExtensions
     {

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using fugu.graphql.error;
-using fugu.graphql.type;
+using tanka.graphql.error;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.execution
+namespace tanka.graphql.execution
 {
     public static class Variables
     {

@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using fugu.graphql.error;
-using fugu.graphql.type;
+using tanka.graphql.error;
+using tanka.graphql.type;
 using GraphQLParser.AST;
-using static fugu.graphql.type.Ast;
+using static tanka.graphql.type.Ast;
 
-namespace fugu.graphql.execution
+namespace tanka.graphql.execution
 {
     public static class SelectionSets
     {

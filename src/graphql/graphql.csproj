@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>fugu.graphql</AssemblyName>
-    <RootNamespace>fugu.graphql</RootNamespace>
+    <AssemblyName>tanka.graphql</AssemblyName>
+    <RootNamespace>tanka.graphql</RootNamespace>
     <Copyright>Pekka Heikura</Copyright>
-    <PackageProjectUrl>https://github.com/pekkah/fugu-graphql</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/pekkah/fugu-graphql</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
     <Description>GraphQL Query, Mutation and Subscription library</Description>
-    <PackageLicenseUrl>https://github.com/pekkah/fugu-graphql/blob/develop/LICENSE</PackageLicenseUrl>
-    <PackageTags>graphql,fugu-fw</PackageTags>
+    <PackageLicenseUrl>https://github.com/pekkah/tanka-graphql/blob/develop/LICENSE</PackageLicenseUrl>
+    <PackageTags>graphql,tanka-fw</PackageTags>
     <Authors>Pekka Heikura</Authors>
   </PropertyGroup>
 

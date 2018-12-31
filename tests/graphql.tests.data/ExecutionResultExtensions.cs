@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Xunit;
 
-namespace fugu.graphql.tests.data
+namespace tanka.graphql.tests.data
 {
     public static class ExecutionResultExtensions
     {

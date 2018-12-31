@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation
+namespace tanka.graphql.validation
 {
     public class DebugNodeVisitor : INodeVisitor
     {

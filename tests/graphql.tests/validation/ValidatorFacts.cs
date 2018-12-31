@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
-using fugu.graphql.tests.data.validation;
-using fugu.graphql.type;
+using tanka.graphql.tests.data.validation;
+using tanka.graphql.type;
 using Xunit;
-using static fugu.graphql.Parser;
-using static fugu.graphql.validation.Validator;
+using static tanka.graphql.Parser;
+using static tanka.graphql.validation.Validator;
 
-namespace fugu.graphql.tests.validation
+namespace tanka.graphql.tests.validation
 {
     public class ValidatorFacts
     {

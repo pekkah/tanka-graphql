@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using fugu.graphql.sdl;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql.sdl;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 using Xunit;
 
-namespace fugu.graphql.tests.resolvers
+namespace tanka.graphql.tests.resolvers
 {
     public abstract class DirectiveVisitorBase : SchemaVisitorBase
     {

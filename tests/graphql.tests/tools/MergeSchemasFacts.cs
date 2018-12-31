@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using fugu.graphql.tools;
-using fugu.graphql.type;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 using Xunit;
 
-namespace fugu.graphql.tests.tools
+namespace tanka.graphql.tests.tools
 {
     public class MergeSchemasFacts
     {

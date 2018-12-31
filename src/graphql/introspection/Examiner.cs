@@ -2,12 +2,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.type;
+using tanka.graphql.type;
 using Newtonsoft.Json;
 
 // ReSharper disable InconsistentNaming
 
-namespace fugu.graphql.introspection
+namespace tanka.graphql.introspection
 {
     public static class Examiner
     {

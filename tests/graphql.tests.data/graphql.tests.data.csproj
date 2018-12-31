@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>fugu.graphql.tests.data</AssemblyName>
-    <RootNamespace>fugu.graphql.tests.data</RootNamespace>
+    <AssemblyName>tanka.graphql.tests.data</AssemblyName>
+    <RootNamespace>tanka.graphql.tests.data</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

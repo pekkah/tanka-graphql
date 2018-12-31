@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.execution;
+using tanka.graphql.execution;
 using GraphQLParser;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.error
+namespace tanka.graphql.error
 {
     public class GraphQLError : Exception
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace fugu.graphql.validation
+namespace tanka.graphql.validation
 {
     public class ValidationException : Exception
     {

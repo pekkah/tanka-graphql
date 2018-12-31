@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace fugu.graphql.server.utilities
+namespace tanka.graphql.server.utilities
 {
     internal class VariableConverter : JsonConverter
     {

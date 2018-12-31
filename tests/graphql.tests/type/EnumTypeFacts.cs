@@ -1,8 +1,8 @@
-﻿using fugu.graphql.type;
+﻿using tanka.graphql.type;
 using GraphQLParser.AST;
 using Xunit;
 
-namespace fugu.graphql.tests.type
+namespace tanka.graphql.tests.type
 {
     public class EnumTypeFacts
     {

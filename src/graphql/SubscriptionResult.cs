@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks.Dataflow;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     /// <summary>
     ///     Result of executing a subscription

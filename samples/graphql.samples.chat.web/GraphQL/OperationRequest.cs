@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
-namespace fugu.graphql.samples.chat.web.GraphQL
+namespace tanka.graphql.samples.chat.web.GraphQL
 {
     public class OperationRequest
     {

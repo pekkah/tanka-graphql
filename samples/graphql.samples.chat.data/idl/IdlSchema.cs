@@ -3,11 +3,11 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using fugu.graphql.sdl;
-using fugu.graphql.type;
-using static fugu.graphql.Parser;
+using tanka.graphql.sdl;
+using tanka.graphql.type;
+using static tanka.graphql.Parser;
 
-namespace fugu.graphql.samples.chat.data.idl
+namespace tanka.graphql.samples.chat.data.idl
 {
     public static class IdlSchema
     {
@@ -28,7 +28,7 @@ namespace fugu.graphql.samples.chat.data.idl
         private static async Task<string> LoadIdlFromResourcesAsync()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceStream = assembly.GetManifestResourceStream("fugu.graphql.samples.chat.data.idl.schema.graphql");
+            var resourceStream = assembly.GetManifestResourceStream("tanka.graphql.samples.chat.data.idl.schema.graphql");
             using (var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
             {

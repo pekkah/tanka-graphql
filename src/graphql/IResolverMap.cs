@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using fugu.graphql.resolvers;
-using fugu.graphql.type;
+using tanka.graphql.resolvers;
+using tanka.graphql.type;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     public interface IResolverMap
     {

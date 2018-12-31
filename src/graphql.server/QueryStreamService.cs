@@ -5,12 +5,12 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.server.utilities;
+using tanka.graphql.server.utilities;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace fugu.graphql.server
+namespace tanka.graphql.server
 {
     public class QueryStreamService
     {

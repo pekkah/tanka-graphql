@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using fugu.graphql.type;
+using tanka.graphql.type;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.execution
+namespace tanka.graphql.execution
 {
     public interface IExecutionStrategy
     {

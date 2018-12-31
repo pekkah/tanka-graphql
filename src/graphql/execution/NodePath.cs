@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace fugu.graphql.execution
+namespace tanka.graphql.execution
 {
     public class NodePath
     {

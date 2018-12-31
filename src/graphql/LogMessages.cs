@@ -1,9 +1,9 @@
 ﻿using System;
-using fugu.graphql.validation;
+using tanka.graphql.validation;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 
-namespace fugu.graphql
+namespace tanka.graphql
 {
     internal static class ExecutorLogger
     {

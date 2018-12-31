@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.error;
-using fugu.graphql.resolvers;
+using tanka.graphql.error;
+using tanka.graphql.resolvers;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.execution
+namespace tanka.graphql.execution
 {
     public static class Subscription
     {

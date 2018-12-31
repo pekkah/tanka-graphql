@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace fugu.graphql.server.tests
+namespace tanka.graphql.server.tests
 {
     public class ServerFacts : IClassFixture<WebApplicationFactory<Startup>>
     {

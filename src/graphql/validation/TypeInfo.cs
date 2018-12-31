@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using fugu.graphql.type;
+using tanka.graphql.type;
 using GraphQLParser.AST;
-using static fugu.graphql.type.Ast;
+using static tanka.graphql.type.Ast;
 
-namespace fugu.graphql.validation
+namespace tanka.graphql.validation
 {
     public class TypeInfo : INodeVisitor
     {

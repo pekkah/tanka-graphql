@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using GraphQLParser.AST;
 
-namespace fugu.graphql.validation.rules
+namespace tanka.graphql.validation.rules
 {
     public class UniqueArgumentNames : IValidationRule
     {
