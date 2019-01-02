@@ -21,8 +21,10 @@ Previews:
 * NuGet: https://www.myget.org/F/tanka/api/v3/index.json
 * NPM: https://www.myget.org/F/tanka/npm/
 
-Releases:
-(todo)
+Non-preview releases are available on NuGet and NPM:
+
+[![](https://buildstats.info/nuget/tanka.graphql)](https://www.nuget.org/packages/tanka.graphql/)
+[![](https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square)](https://www.npmjs.com/package/@tanka/tanka-graphql-server-link)
 
 ### Install 
 
