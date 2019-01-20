@@ -31,5 +31,10 @@ Also standard collection is provided
 
 Create instance of `ScalarType` and provide name, value converter and metadata.
 
-Example:
+#### Example:
+
+Scalar:
 [{tanka.graphql.type.ScalarType.ID}]
+
+Converter:
+[{tanka.graphql.type.converters.IdConverter}]
