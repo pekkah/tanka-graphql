@@ -267,3 +267,4 @@ tools/
 dist/
 coverage/
 BenchmarkDotNet.Artifacts/
+gh-pages/

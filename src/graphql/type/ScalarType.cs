@@ -64,7 +64,7 @@ namespace tanka.graphql.type
             Meta = meta ?? new Meta();
         }
 
-        protected IValueConverter Converter { get; set; }
+        protected IValueConverter Converter { get; }
 
         public Meta Meta { get; }
 

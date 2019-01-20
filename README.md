@@ -28,7 +28,7 @@ Non-preview releases are available on NuGet and NPM:
 
 ### Install 
 
-```
+```bash
 dotnet add tanka.graphql
 dotnet add tanka.graphql.server
 
@@ -46,7 +46,7 @@ Look above or below
 
 #### Define schema in file
 
-```graphql
+```GraphQL
 type From {
     userId: ID!
     name: String!

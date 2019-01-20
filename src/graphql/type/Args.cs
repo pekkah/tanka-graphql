@@ -9,6 +9,11 @@ namespace tanka.graphql.type
             
         }
 
+        public void Add(string key, IGraphQLType type, object defaultValue = null, Meta meta = null)
+        {
+            Add(key, new Argument(type, defaultValue, meta));
+        }
+
         public Args(IEnumerable<KeyValuePair<string, Argument>> arguments)
         {
             foreach (var argument in arguments)

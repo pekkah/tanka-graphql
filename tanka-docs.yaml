@@ -1,0 +1,4 @@
+﻿input: 'docs'
+output: 'gh-pages'
+solution: 'tanka-graphql.sln'
+basepath: '/'
