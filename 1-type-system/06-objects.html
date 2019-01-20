@@ -85,10 +85,55 @@
 <h3 id="creating-objects">Creating objects</h3>
 <h4 id="with-scalar-field">With scalar field</h4>
 <p>Type of field defines the return value of field when resolved during execution.</p>
-<p><pre><code class="language-csharp">tanka.graphql.tests.type.ObjectTypeFacts.Has_scalar_field</code></pre></p>
+<p><pre><code class="language-csharp">        [Fact]
+        public void With_scalar_field()
+        {
+            /* Given */
+            var person = new ObjectType(
+                &quot;Person&quot;,
+                new Fields
+                {
+                    {&quot;name&quot;, ScalarType.NonNullString}
+                });
+
+            /* When */
+            var name = person.GetField(&quot;name&quot;);
+
+            /* Then */
+            Assert.Equal(&quot;Person&quot;, person.Name);
+            Assert.NotNull(name);
+            Assert.Equal(ScalarType.NonNullString, name.Type);
+        }
+</code></pre></p>
 <h4 id="with-scalar-field-taking-a-boolean-argument">With scalar field taking a boolean argument</h4>
 <p>Fields can take arguments which have a name and type.</p>
-<p><pre><code class="language-csharp">tanka.graphql.tests.type.ObjectTypeFacts.Has_scalar_field_with_argument</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void With_scalar_field_with_argument()
+        {
+            /* Given */
+            var person = new ObjectType(
+                &quot;Person&quot;,
+                new Fields
+                {
+                    {
+                        &quot;phoneNumber&quot;, ScalarType.NonNullString, new Args
+                        {
+                            {&quot;primary&quot;, ScalarType.Boolean}
+                        }
+                    }
+                });
+
+            /* When */
+            var phoneNumber = person.GetField(&quot;phoneNumber&quot;);
+
+            /* Then */
+            Assert.NotNull(phoneNumber);
+            Assert.Equal(ScalarType.NonNullString, phoneNumber.Type);
+            Assert.Single(phoneNumber.Arguments,
+                arg =&gt; arg.Key == &quot;primary&quot; &amp;&amp; (ScalarType) arg.Value.Type == ScalarType.Boolean);
+        }
+</code></pre></p>
 
             </article>
         </div>
