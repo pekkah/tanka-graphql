@@ -25,6 +25,13 @@ steps:
     custom: 'tool'
     arguments: 'install --tool-path dotnet-tools Cake.Tool'
 
+- task: DotNetCoreCLI@2
+  displayName: Install generate-docs
+  inputs:
+    command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
+    custom: 'tool'
+    arguments: 'install --tool-path dotnet-tools tanka.generate.docs'
+
 - task: CmdLine@1
   displayName: Build.cake
   inputs:
