@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="/tanka-graphql/beta/">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+        media="screen,projection" />
+
+    <link type="text/css" rel="stylesheet" href="prism.css" media="screen,projection" />
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scalars - Tanka GraphQL</title>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col s12 m4 l3">
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Home</h6>
+                </li>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Type system</h6>
+                </li>
+                        <a class="collection-item" href="1-type-system/01-type-system-extensions.html">Type system extensions</a>
+                        <a class="collection-item" href="1-type-system/02-schema.html">Schema</a>
+                        <a class="collection-item" href="1-type-system/03-descriptions.html">Descriptions</a>
+                        <a class="collection-item" href="1-type-system/04-types.html">Types</a>
+                        <a class="collection-item active" href="1-type-system/05-scalars.html">Scalars</a>
+                        <a class="collection-item" href="1-type-system/06-objects.html">Objects</a>
+                        <a class="collection-item" href="1-type-system/07-interfaces.html">Interfaces</a>
+                        <a class="collection-item" href="1-type-system/08-unions.html">Unions</a>
+                        <a class="collection-item" href="1-type-system/09-enums.html">Enums</a>
+                        <a class="collection-item" href="1-type-system/10-input-objects.html">Input objects</a>
+                        <a class="collection-item" href="1-type-system/11-list.html">List</a>
+                        <a class="collection-item" href="1-type-system/12-non-null.html">Non null</a>
+                        <a class="collection-item" href="1-type-system/13-directives.html">Directives</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Introspection</h6>
+                </li>
+                        <a class="collection-item" href="2-introspection/1-reserved-names.html">Reserved names</a>
+                        <a class="collection-item" href="2-introspection/2-documentation.html">Documentation</a>
+                        <a class="collection-item" href="2-introspection/3-deprecation.html">Deprecation</a>
+                        <a class="collection-item" href="2-introspection/4-type-name-introspection.html">Type name introspection</a>
+                        <a class="collection-item" href="2-introspection/5-schema-introspection.html">Schema introspection</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Validation</h6>
+                </li>
+                        <a class="collection-item" href="3-validation/1-documents.html">Documents</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Execution</h6>
+                </li>
+                        <a class="collection-item" href="4-execution/2-query.html">Query</a>
+                        <a class="collection-item" href="4-execution/3-mutation.html">Mutation</a>
+                        <a class="collection-item" href="4-execution/4-subscription.html">Subscription</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Server</h6>
+                </li>
+                        <a class="collection-item" href="5-server/1-signalr-hub.html">Signalr hub</a>
+                        <a class="collection-item" href="5-server/2-apollo-link.html">Apollo link</a>
+            </ul>
+        </div>
+        <div class="col s12 m8 l9">
+            <article class="flow-text">
+                <h2 id="scalars">Scalars</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Scalars">Specification</a></p>
+</blockquote>
+<p>Scalars are created as instances of <code>ScalarType</code>.</p>
+<h3 id="built-in">Built-in</h3>
+<p>These are provided as static properties on <code>ScalarType</code>.</p>
+<ul>
+<li><code>ScalarType.Boolean</code></li>
+<li><code>ScalarType.Int</code></li>
+<li><code>ScalarType.ID</code></li>
+<li><code>ScalarType.Float</code></li>
+<li><code>ScalarType.String</code></li>
+</ul>
+<p>In addition following non-null instances are provided for convenience.</p>
+<ul>
+<li><code>ScalarType.NonNullBoolean</code></li>
+<li><code>ScalarType.NonNullInt</code></li>
+<li><code>ScalarType.NonNullID</code></li>
+<li><code>ScalarType.NonNullFloat</code></li>
+<li><code>ScalarType.NonNullString</code></li>
+</ul>
+<p>Also standard collection is provided</p>
+<p><pre><code class="language-csharp">Standard = new[]
+        {
+            String,
+            Int,
+            Float,
+            Boolean,
+            ID
+        }</code></pre></p>
+<h3 id="custom-scalars">Custom scalars</h3>
+<p>Create instance of <code>ScalarType</code> and provide name, value converter and metadata.</p>
+<h4 id="example">Example:</h4>
+<p>Scalar:
+<pre><code class="language-csharp">ID = new ScalarType(
+            &quot;ID&quot;,
+            new IdConverter(),
+            new Meta(&quot;The ID scalar type represents a unique identifier, often used to refetch an object&quot; +
+                     &quot; or as the key for a cache. The ID type is serialized in the same way as a String; &quot; +
+                     &quot;however, it is not intended to be human‐readable. While it is often numeric, it &quot; +
+                     &quot;should always serialize as a String.&quot;))</code></pre></p>
+<p>Converter:
+<pre><code class="language-csharp">    public class IdConverter : IValueConverter
+    {
+        public object Serialize(object value)
+        {
+            if (value == null)
+                return null;
+
+            return Convert.ToString(value, CultureInfo.InvariantCulture);
+        }
+
+        public object ParseValue(object input)
+        {
+            if (input == null)
+                return null;
+
+            return Convert.ToString(input, CultureInfo.InvariantCulture);
+        }
+
+        public object ParseLiteral(GraphQLScalarValue input)
+        {
+            if (input.Kind == ASTNodeKind.StringValue || input.Kind == ASTNodeKind.IntValue) 
+                return input.Value;
+
+            return null;
+        }
+    }
+</code></pre></p>
+
+            </article>
+        </div>
+    </div>
+    <!--JavaScript at end of body for optimized loading-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="prism.js"></script>
+    <script>
+        M.AutoInit();
+    </script>
+</body>
+
+</html>

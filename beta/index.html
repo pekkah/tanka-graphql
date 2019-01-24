@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="/tanka-graphql/beta/">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+        media="screen,projection" />
+
+    <link type="text/css" rel="stylesheet" href="prism.css" media="screen,projection" />
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index - Tanka GraphQL</title>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col s12 m4 l3">
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Home</h6>
+                </li>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Type system</h6>
+                </li>
+                        <a class="collection-item" href="1-type-system/01-type-system-extensions.html">Type system extensions</a>
+                        <a class="collection-item" href="1-type-system/02-schema.html">Schema</a>
+                        <a class="collection-item" href="1-type-system/03-descriptions.html">Descriptions</a>
+                        <a class="collection-item" href="1-type-system/04-types.html">Types</a>
+                        <a class="collection-item" href="1-type-system/05-scalars.html">Scalars</a>
+                        <a class="collection-item" href="1-type-system/06-objects.html">Objects</a>
+                        <a class="collection-item" href="1-type-system/07-interfaces.html">Interfaces</a>
+                        <a class="collection-item" href="1-type-system/08-unions.html">Unions</a>
+                        <a class="collection-item" href="1-type-system/09-enums.html">Enums</a>
+                        <a class="collection-item" href="1-type-system/10-input-objects.html">Input objects</a>
+                        <a class="collection-item" href="1-type-system/11-list.html">List</a>
+                        <a class="collection-item" href="1-type-system/12-non-null.html">Non null</a>
+                        <a class="collection-item" href="1-type-system/13-directives.html">Directives</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Introspection</h6>
+                </li>
+                        <a class="collection-item" href="2-introspection/1-reserved-names.html">Reserved names</a>
+                        <a class="collection-item" href="2-introspection/2-documentation.html">Documentation</a>
+                        <a class="collection-item" href="2-introspection/3-deprecation.html">Deprecation</a>
+                        <a class="collection-item" href="2-introspection/4-type-name-introspection.html">Type name introspection</a>
+                        <a class="collection-item" href="2-introspection/5-schema-introspection.html">Schema introspection</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Validation</h6>
+                </li>
+                        <a class="collection-item" href="3-validation/1-documents.html">Documents</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Execution</h6>
+                </li>
+                        <a class="collection-item" href="4-execution/2-query.html">Query</a>
+                        <a class="collection-item" href="4-execution/3-mutation.html">Mutation</a>
+                        <a class="collection-item" href="4-execution/4-subscription.html">Subscription</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <h6>Server</h6>
+                </li>
+                        <a class="collection-item" href="5-server/1-signalr-hub.html">Signalr hub</a>
+                        <a class="collection-item" href="5-server/2-apollo-link.html">Apollo link</a>
+            </ul>
+        </div>
+        <div class="col s12 m8 l9">
+            <article class="flow-text">
+                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
+<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql" alt="Build Status" /></a></p>
+<h2 id="documentation">Documentation</h2>
+<ul>
+<li><a href="https://pekkah.github.io/tanka-graphql/">Release docs</a></li>
+<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Beta docs</a></li>
+</ul>
+<h2 id="features">Features</h2>
+<ul>
+<li>Execute queries, mutations and subscriptions</li>
+<li>Validation (Dirty port from graphql-dotnet). Validation is the slowest part of the execution and needs to be redone.</li>
+<li>SignalR hub for streaming queries, mutations and subscriptions</li>
+<li>ApolloLink for the provided SignalR hub</li>
+</ul>
+<h2 id="getting-started">Getting started</h2>
+<h3 id="feeds">Feeds</h3>
+<p>Previews:</p>
+<ul>
+<li>NuGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
+<li>NPM: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
+</ul>
+<p>Non-preview releases are available on NuGet and NPM:</p>
+<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
+<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
+<h3 id="install">Install</h3>
+<pre><code class="lang-bash">dotnet add tanka.graphql
+dotnet add tanka.graphql.server
+
+npm install @tanka/tanka-graphql-server-link
+</code></pre>
+<h2 id="sample">Sample</h2>
+<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
+<h3 id="usage">Usage</h3>
+<p>Look above or below</p>
+<h4 id="define-schema-in-file">Define schema in file</h4>
+<pre><code class="lang-GraphQL">type From {
+    userId: ID!
+    name: String!
+}
+
+type Message {
+    id: ID!
+    from: From!
+    content: String!
+    timestamp: String
+}
+
+type Query {
+    messages: [Message]
+}
+
+input InputMessage {
+    content: String!
+}
+
+type Mutation {
+    addMessage(message: InputMessage!): Message!
+    editMessage(id: ID!, message: InputMessage!): Message!
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+</code></pre>
+<h4 id="implement-resolvers">Implement resolvers</h4>
+<pre><code class="lang-csharp">public class ChatResolvers : ResolverMap
+{
+    public ChatResolvers(IChatResolverService resolverService)
+    {
+        this[&quot;Query&quot;] = new FieldResolverMap
+        {
+            {&quot;messages&quot;, resolverService.GetMessagesAsync}
+        };
+
+        this[&quot;Mutation&quot;] = new FieldResolverMap()
+        {
+            {&quot;addMessage&quot;, resolverService.AddMessageAsync},
+            {&quot;editMessage&quot;, resolverService.EditMessageAsync}
+        };
+
+        this[&quot;Message&quot;] = new FieldResolverMap()
+        {
+            {&quot;id&quot;, PropertyOf&lt;Message&gt;(m =&gt; m.Id)},
+            {&quot;from&quot;, PropertyOf&lt;Message&gt;(m =&gt; m.From)},
+            {&quot;content&quot;, PropertyOf&lt;Message&gt;(m =&gt; m.Content)},
+            {&quot;timestamp&quot;, PropertyOf&lt;Message&gt;(m =&gt; m.Timestamp)}
+        };
+
+        this[&quot;From&quot;] = new FieldResolverMap()
+        {
+            {&quot;userId&quot;, PropertyOf&lt;From&gt;(f =&gt; f.UserId)},
+            {&quot;name&quot;, PropertyOf&lt;From&gt;(f =&gt; f.Name)}
+        };
+    }
+}
+</code></pre>
+<h4 id="make-executable-schema">Make executable schema</h4>
+<pre><code class="lang-csharp">// load schema from SDL file
+var sdlString = LoadFromFile(..);
+var document = Parser.ParseDocument(sdlString);
+var schema = Sdl.Schema(document);
+
+var resolvers = new ChatResolvers(someResolverService);
+
+// connect resolvers into schema and add introspection
+var executableSchema = SchemaTools.MakeExecutableSchemaWithIntrospection(
+                schema,
+                resolvers);
+</code></pre>
+<h4 id="execute-query-mutation-using-asp.net-core-controller">Execute query, mutation using ASP.NET Core controller</h4>
+<pre><code class="lang-csharp">using static tanka.graphql.Executor;
+using static tanka.graphql.Parser;
+
+[HttpPost]
+public async Task&lt;IActionResult&gt; Get([FromBody] OperationRequest request)
+{
+    var result = await ExecuteAsync(new ExecutionOptions
+    {
+        Document = ParseDocument(request.Query),
+        Schema = schema,
+        OperationName = request.OperationName,
+        VariableValues = request
+                        .Variables
+                        .ToVariableDictionary() // this correctly deserializes the nested dictionaries
+    });
+
+    return Ok(result);
+}
+</code></pre>
+<h3 id="server">Server</h3>
+<p>Server is implemented as a SignalR Core Hub and it handles queries, mutations
+and subscriptions. This projects provides an Apollo Link implementation to be
+used with the provided hub.</p>
+<h4 id="graphql-query-streaming-hub">GraphQL Query Streaming Hub</h4>
+<pre><code class="lang-csharp">// Configure Services
+services.AddSignalR()
+    // add GraphQL query streaming hub
+    .AddQueryStreamHub();
+
+// Configure App
+app.UseSignalR(routes =&gt;
+{
+    routes.MapHub&lt;QueryStreamHub&gt;(new PathString(&quot;/graphql&quot;));
+});
+
+</code></pre>
+<h4 id="apollo-link">Apollo link</h4>
+<pre><code class="lang-js">import { ApolloClient } from 'apollo-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { onError } from 'apollo-link-error';
+import { ApolloLink } from 'apollo-link';
+import { TankaLink, TankaClient } from '@tanka/graphql-server-link';
+
+const serverClient = new TankaClient(&quot;/graphql&quot;);
+const serverLink = new TankaLink(serverClient);
+
+const client = new ApolloClient({
+  connectToDevTools: true,
+  link: ApolloLink.from([
+    onError(({ graphQLErrors, networkError }) =&gt; {
+      if (graphQLErrors)
+        graphQLErrors.map(({ message, locations, path }) =&gt;
+          console.log(
+            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+          ),
+        );
+      if (networkError) console.log(`[Network error]: ${networkError}`);
+    }),
+    tankaLink
+  ]),
+  cache: new InMemoryCache()
+});
+export default client;
+</code></pre>
+<h2 id="develop">Develop</h2>
+<h3 id="run-benchmarks">Run benchmarks</h3>
+<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
+</code></pre>
+
+            </article>
+        </div>
+    </div>
+    <!--JavaScript at end of body for optimized loading-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="prism.js"></script>
+    <script>
+        M.AutoInit();
+    </script>
+</body>
+
+</html>
