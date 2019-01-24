@@ -15,10 +15,12 @@ var packageFolders = GetFiles("./src/*/package.json")
                 .Select(f => f.GetDirectory().FullPath);
 
 var version = "0.0.0-dev";
+var preRelease = true;
 
 Task("Default")
   .IsDependentOn("SetVersion")
-  .IsDependentOn("Pack");
+  .IsDependentOn("Pack")
+  .IsDependentOn("Docs");
 
 Task("Publish")
   .IsDependentOn("Build")
@@ -147,7 +149,8 @@ Task("SetVersion")
         var result = GitVersion();
         
         version = result.SemVer;
-        Information($"Version: {version}, FullSemVer: {result.FullSemVer}");
+        preRelease = result.PreReleaseNumber.HasValue;
+        Information($"Version: {version}, FullSemVer: {result.FullSemVer}, PreRelease: {preRelease}");
         Information($"##vso[build.updatebuildnumber]{version}");
     });
 
@@ -187,5 +190,40 @@ Task("Benchmarks")
 			}
 		}
    });
+
+Task("Docs")
+.IsDependentOn("SetVersion")
+.Does(()=> {
+    Information("Generate docs");
+    var settings = new DotNetCoreRunSettings
+    {
+        Framework = "netcoreapp2.2",
+        Configuration = "Release"
+    };
+
+    var targetFolder = $"{artifactsDir}\\gh-pages";
+    var basepath = "/tanka-graphql/";
+    if (preRelease)
+    {
+        targetFolder += "\\beta";
+        basepath += "beta/";
+    }
+
+     var args = ProcessArgumentBuilder.FromString(
+         $"--output=\"{targetFolder}\" "
+       + $"--basepath=\"{basepath}\"");
+			
+      var exitCode = StartProcess(
+			  "generate-docs",
+			  new ProcessSettings() {
+				  Arguments = args
+			  }
+			);
+
+			if (exitCode != 0)
+			{
+			  throw new Exception($"Failed to generate-docs");
+			}
+});
 
 RunTarget(target);
