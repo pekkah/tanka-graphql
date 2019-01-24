@@ -3,6 +3,11 @@ Tanka GraphQL library
 
 [![Build Status](https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql)](https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1)
 
+## Documentation
+
+* [Release docs](https://pekkah.github.io/tanka-graphql/)
+* [Beta docs](https://pekkah.github.io/tanka-graphql/beta/)
+
 
 ## Features
 
