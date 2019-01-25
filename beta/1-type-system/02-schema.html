@@ -26,9 +26,8 @@
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
-                    <a href="1-type-system/01-type-system-extensions.html"><h6>Type system</h6></a>
+                    <a href="1-type-system/02-schema.html"><h6>Type system</h6></a>
                 </li>
-                        <a class="collection-item" href="1-type-system/01-type-system-extensions.html">Type system extensions</a>
                         <a class="collection-item active" href="1-type-system/02-schema.html">Schema</a>
                         <a class="collection-item" href="1-type-system/03-descriptions.html">Descriptions</a>
                         <a class="collection-item" href="1-type-system/04-types.html">Types</a>
@@ -41,6 +40,8 @@
                         <a class="collection-item" href="1-type-system/11-list.html">List</a>
                         <a class="collection-item" href="1-type-system/12-non-null.html">Non null</a>
                         <a class="collection-item" href="1-type-system/13-directives.html">Directives</a>
+                        <a class="collection-item" href="1-type-system/14-named-type-reference.html">Named type reference</a>
+                        <a class="collection-item" href="1-type-system/15-SDL.html">SDL</a>
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
@@ -54,14 +55,9 @@
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
-                    <a href="3-validation/1-documents.html"><h6>Validation</h6></a>
+                    <a href="4-execution/1-validation.html"><h6>Execution</h6></a>
                 </li>
-                        <a class="collection-item" href="3-validation/1-documents.html">Documents</a>
-            </ul>
-            <ul class="collection with-header">
-                <li class="collection-header">
-                    <a href="4-execution/2-query.html"><h6>Execution</h6></a>
-                </li>
+                        <a class="collection-item" href="4-execution/1-validation.html">Validation</a>
                         <a class="collection-item" href="4-execution/2-query.html">Query</a>
                         <a class="collection-item" href="4-execution/3-mutation.html">Mutation</a>
                         <a class="collection-item" href="4-execution/4-subscription.html">Subscription</a>
@@ -76,7 +72,252 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="schema">Schema</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Schema">Specification</a></p>
+</blockquote>
+<p>Schema is implemented as class <code>Schema</code> and it implements the <code>ISchema</code> interface.</p>
+<p><pre><code class="language-csharp">    public interface ISchema
+    {
+        bool IsInitialized { get; }
+
+        ObjectType Subscription { get; }
+
+        ObjectType Query { get; }
+
+        ObjectType Mutation { get; }
+
+        Task InitializeAsync();
+
+        IGraphQLType GetNamedType(string name);
+
+        T GetNamedType&lt;T&gt;(string name) where T : IGraphQLType;
+
+        IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt; filter = null) where T : IGraphQLType;
+
+        DirectiveType GetDirective(string name);
+
+        IQueryable&lt;DirectiveType&gt; QueryDirectives(Predicate&lt;DirectiveType&gt; filter = null);
+    }
+</code></pre></p>
+<p>Schema is immutable and cannot be changed directly once initialized. To create <code>Schema</code> instance you need to provide <code>query</code> root object at minimum. Optionally <code>mutation</code> and <code>subscription</code> roots can be also provided.</p>
+<blockquote>
+<p>Currently you must initialize <code>Schema</code> by using <code>InitializeAsync</code>. This
+requirement will be removed in later versions. Also immutability will
+be fixed.</p>
+</blockquote>
+<h3 id="root-object-types">Root Object Types</h3>
+<p>Query is required</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Set_Query()
+        {
+            /* Given */
+            var queryType = new ObjectType(
+                &quot;Query&quot;,
+                new Fields());
+
+            /* When */
+            var sut = new Schema(queryType);
+
+            /* Then */
+            Assert.Equal(queryType, sut.Query);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Require_Query()
+        {
+            /* Given */
+
+            /* When */
+            var exception = Assert.Throws&lt;ArgumentNullException&gt;(() =&gt; new Schema(null));
+
+            /* Then */
+            Assert.Equal(&quot;query&quot;, exception.ParamName);
+        }
+</code></pre></p>
+<p>Mutation is optional</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Set_Mutation()
+        {
+            /* Given */
+            var queryType = new ObjectType(
+                &quot;Query&quot;,
+                new Fields());
+
+            var mutationType = new ObjectType(
+                &quot;Mutation&quot;,
+                new Fields());
+
+            /* When */
+            var sut = new Schema(queryType, mutationType);
+
+            /* Then */
+            Assert.Equal(mutationType, sut.Mutation);
+        }
+</code></pre></p>
+<p>Subscription is optional</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Set_Subscription()
+        {
+            /* Given */
+            var queryType = new ObjectType(
+                &quot;Query&quot;,
+                new Fields());
+
+            var mutationType = new ObjectType(
+                &quot;Mutation&quot;,
+                new Fields());
+
+            var subscriptionType = new ObjectType(
+                &quot;Subscription&quot;,
+                new Fields());
+
+            /* When */
+            var sut = new Schema(queryType, mutationType, subscriptionType);
+
+            /* Then */
+            Assert.Equal(subscriptionType, sut.Subscription);
+        }
+</code></pre></p>
+<h4 id="default-types">Default types</h4>
+<p>By default Skip and Include directives are included</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Initialize_directives_with_skip_and_include()
+        {
+            /* Given */
+            var type = new ObjectType(&quot;fieldType&quot;, new Fields());
+            var queryType = new ObjectType(
+                &quot;Q&quot;,
+                new Fields()
+                {
+                    [&quot;field&quot;] = new Field(type),
+                    [&quot;field2&quot;] = new Field(type)
+                });
+
+            var sut = new Schema(queryType);
+
+            /* When */
+            await sut.InitializeAsync();
+
+            /* Then */
+            var directives = sut.QueryDirectives();
+
+            Assert.Single(directives, DirectiveType.Skip);
+            Assert.Single(directives, DirectiveType.Include);
+        }
+</code></pre></p>
+<h4 id="including-types">Including types</h4>
+<p>Types are included in the <code>Schema</code> if they're referenced by root graph types.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Initialize_types()
+        {
+            /* Given */
+            var queryType = new ObjectType(
+                &quot;Q&quot;,
+                new Fields()
+                {
+                    [&quot;field&quot;] = new Field(new ObjectType(&quot;fieldType&quot;, new Fields()))
+                 });
+
+            var sut = new Schema(queryType);
+
+            /* When */
+            await sut.InitializeAsync();
+
+            /* Then */
+            var types = sut.QueryTypes&lt;IGraphQLType&gt;();
+
+            Assert.Contains(types, t =&gt; t.Name == &quot;Q&quot;);
+            Assert.Contains(types, t =&gt; t.Name == &quot;fieldType&quot;);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Initialize_types_with_found_scalars()
+        {
+            /* Given */
+            var queryType = new ObjectType(
+                &quot;Q&quot;,
+                new Fields()
+                {
+                    [&quot;field&quot;] = new Field(new ObjectType(&quot;fieldType&quot;, new Fields()
+                    {
+                        [&quot;scalar&quot;] = new Field(ScalarType.String)
+                    }))
+                });
+
+            var sut = new Schema(queryType);
+
+            /* When */
+            await sut.InitializeAsync();
+
+            /* Then */
+            var types = sut.QueryTypes&lt;IGraphQLType&gt;();
+
+            Assert.Single(types, ScalarType.String);
+        }
+</code></pre></p>
+<p>Type is only included once even if referenced multiple times.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Initialize_types_no_duplicates()
+        {
+            /* Given */
+            var type = new ObjectType(&quot;fieldType&quot;, new Fields());
+            var queryType = new ObjectType(
+                &quot;Q&quot;,
+                new Fields()
+                {
+                    [&quot;field&quot;] = new Field(type),
+                    [&quot;field2&quot;] = new Field(type)
+                });
+
+            var sut = new Schema(queryType);
+
+            /* When */
+            await sut.InitializeAsync();
+
+            /* Then */
+            var types = sut.QueryTypes&lt;IGraphQLType&gt;();
+
+            Assert.Single(types, t =&gt; t.Name == &quot;Q&quot;);
+            Assert.Single(types, t =&gt; t.Name == &quot;fieldType&quot;);
+        }
+</code></pre></p>
+<h4 id="types-referenced-by-name-only">Types referenced by name only</h4>
+<p>If type is referenced as <code>NamedTypeReference</code> the actual type must be included. When schema is initialized the named type reference is replaced with the actual type.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Initialize_heal_schema()
+        {
+            /* Given */
+            var type = new ObjectType(&quot;fieldType&quot;, new Fields());
+            var typeReference = new NamedTypeReference(&quot;fieldType&quot;);
+            var field = new Field(typeReference);
+            var queryType = new ObjectType(
+                &quot;Q&quot;,
+                new Fields()
+                {
+                    [&quot;field&quot;] = field,
+                });
+
+            var sut = new Schema(queryType, typesReferencedByNameOnly: new []{ type });
+
+            /* When */
+            await sut.InitializeAsync();
+
+            /* Then */
+            var actual = sut.Query.GetField(&quot;field&quot;);
+            Assert.Equal(type, actual.Type);
+
+        }
+</code></pre></p>
+
             </article>
         </div>
     </div>

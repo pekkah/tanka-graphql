@@ -13,7 +13,7 @@
 
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Objects - tanka-graphql</title>
+    <title>SDL - tanka-graphql</title>
 </head>
 
 <body>
@@ -32,7 +32,7 @@
                         <a class="collection-item" href="1-type-system/03-descriptions.html">Descriptions</a>
                         <a class="collection-item" href="1-type-system/04-types.html">Types</a>
                         <a class="collection-item" href="1-type-system/05-scalars.html">Scalars</a>
-                        <a class="collection-item active" href="1-type-system/06-objects.html">Objects</a>
+                        <a class="collection-item" href="1-type-system/06-objects.html">Objects</a>
                         <a class="collection-item" href="1-type-system/07-interfaces.html">Interfaces</a>
                         <a class="collection-item" href="1-type-system/08-unions.html">Unions</a>
                         <a class="collection-item" href="1-type-system/09-enums.html">Enums</a>
@@ -41,7 +41,7 @@
                         <a class="collection-item" href="1-type-system/12-non-null.html">Non null</a>
                         <a class="collection-item" href="1-type-system/13-directives.html">Directives</a>
                         <a class="collection-item" href="1-type-system/14-named-type-reference.html">Named type reference</a>
-                        <a class="collection-item" href="1-type-system/15-SDL.html">SDL</a>
+                        <a class="collection-item active" href="1-type-system/15-SDL.html">SDL</a>
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
@@ -72,61 +72,159 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                <h2 id="objects">Objects</h2>
-<blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Objects">Specification</a></p>
-</blockquote>
-<p>Objects are created as instances of <code>ObjectType</code>.</p>
-<h3 id="creating-objects">Creating objects</h3>
-<h4 id="with-scalar-field">With scalar field</h4>
-<p>Type of field defines the return value of field when resolved during execution.</p>
-<p><pre><code class="language-csharp">        [Fact]
-        public void With_scalar_field()
-        {
-            /* Given */
-            var person = new ObjectType(
-                &quot;Person&quot;,
-                new Fields
-                {
-                    {&quot;name&quot;, ScalarType.NonNullString}
-                });
-
-            /* When */
-            var name = person.GetField(&quot;name&quot;);
-
-            /* Then */
-            Assert.Equal(&quot;Person&quot;, person.Name);
-            Assert.NotNull(name);
-            Assert.Equal(ScalarType.NonNullString, name.Type);
-        }
-</code></pre></p>
-<h4 id="with-scalar-field-taking-a-boolean-argument">With scalar field taking a boolean argument</h4>
-<p>Fields can take arguments which have a name and type.</p>
+                <h2 id="schema-definition-language">Schema Definition Language</h2>
+<p>Defining <code>Schema</code> in IDL/SDL can greatly speed up and simplify code base.</p>
+<h3 id="load-schema-from-sdl">Load schema from SDL</h3>
+<p><code>Sdl</code> class provides static methods for parsing types from SDL definitions.</p>
+<h4 id="schema">Schema</h4>
 <p><pre><code class="language-csharp">
         [Fact]
-        public void With_scalar_field_with_argument()
+        public void Parse_Document_as_Schema()
         {
             /* Given */
-            var person = new ObjectType(
-                &quot;Person&quot;,
-                new Fields
-                {
-                    {
-                        &quot;phoneNumber&quot;, ScalarType.NonNullString, new Args
-                        {
-                            {&quot;primary&quot;, ScalarType.Boolean}
-                        }
-                    }
-                });
+            var idl = @&quot;
+type Query {
+}
+
+type Mutation {
+}
+
+type Subscription {
+
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+&quot;;
+            var document = Parser.ParseDocument(idl);
 
             /* When */
-            var phoneNumber = person.GetField(&quot;phoneNumber&quot;);
+            var actual = Sdl.Schema(document);
 
             /* Then */
-            Assert.NotNull(phoneNumber);
-            Assert.Equal(ScalarType.NonNullString, phoneNumber.Type);
-            Assert.Single(phoneNumber.Arguments,
-                arg =&gt; arg.Key == &quot;primary&quot; &amp;&amp; (ScalarType) arg.Value.Type == ScalarType.Boolean);
+            Assert.NotNull(actual);
+            Assert.NotNull(actual.Query);
+            Assert.NotNull(actual.Mutation);
+            Assert.NotNull(actual.Subscription);
+        }
+</code></pre></p>
+<h4 id="types">Types</h4>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Parse_Document_with_types()
+        {
+            /* Given */
+            var idl = @&quot;
+scalar JediPowerLevel
+scalar JediTrickLevel
+
+enum Episode { NEWHOPE, EMPIRE, JEDI }
+
+interface Character {
+  id: String!
+  name: String
+  friends: [Character]
+  appearsIn: [Episode]
+}
+
+type Human implements Character {
+  id: String!
+  name: String
+  friends: [Character]
+  appearsIn: [Episode]
+  homePlanet: String
+}
+
+type Droid implements Character {
+  id: String!
+  name: String
+  friends: [Character]
+  appearsIn: [Episode]
+  primaryFunction: String
+}
+
+input JediPowerInput {
+    power: String
+    level: JediPowerLevel
+}
+&quot;;
+            var jediPowerLevel = new ScalarType(&quot;JediPowerLevel&quot;, new LongConverter());
+            var document = Parser.ParseDocument(idl);
+            var context = new SdlParserContext(document,
+                new[] {jediPowerLevel, new ScalarType(&quot;JediTrickLevel&quot;, new DoubleConverter())});
+
+            /* When */
+            var actual = Sdl.Document(document, context).ToList();
+
+            /* Then */
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Episode&quot; &amp;&amp; type is EnumType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Character&quot; &amp;&amp; type is InterfaceType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Human&quot; &amp;&amp; type is ObjectType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Droid&quot; &amp;&amp; type is ObjectType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;JediPowerInput&quot; &amp;&amp; type is InputObjectType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;JediPowerLevel&quot; &amp;&amp; type.GetType() == typeof(ScalarType));
+            Assert.Contains(actual, type =&gt; type.Name == &quot;JediTrickLevel&quot; &amp;&amp; type.GetType() == typeof(ScalarType));
+
+            var jediPowerInput = (InputObjectType) actual.Single(t =&gt; t.Name == &quot;JediPowerInput&quot;);
+            var level = jediPowerInput.GetField(&quot;level&quot;);
+            Assert.Equal(jediPowerLevel, level.Type);
+        }
+</code></pre></p>
+<h4 id="custom-scalars">Custom scalars</h4>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Parse_custom_scalar()
+        {
+            /* Given */
+            var idl = @&quot;
+scalar Url
+&quot;;
+            var urlScalar = new ScalarType(&quot;Url&quot;, new StringConverter());
+            var document = Parser.ParseDocument(idl);
+            var typeDefinition = document.Definitions.OfType&lt;GraphQLScalarTypeDefinition&gt;().SingleOrDefault();
+            var context = new SdlParserContext(document, new IGraphQLType[]
+            {
+                urlScalar
+            });
+
+            /* When */
+            var actual = Sdl.Scalar(typeDefinition, context);
+
+            /* Then */
+            Assert.Equal(&quot;Url&quot;, actual.Name);
+            Assert.Equal(urlScalar, actual);
+        }
+</code></pre></p>
+<h4 id="types-can-be-extended">Types can be extended</h4>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Parse_ObjectType_with_extension()
+        {
+            /* Given */
+            var idl = @&quot;
+extend type Human {
+    second: Boolean
+}
+
+type Human {
+    first: Int
+}
+&quot;;
+            var document = Parser.ParseDocument(idl);
+            var context = new SdlParserContext(document);
+
+            /* When */
+            var actual = Sdl.Document(document, context);
+
+            /* Then */
+            var human = actual.OfType&lt;ObjectType&gt;().SingleOrDefault();
+
+            Assert.NotNull(human);
+            Assert.Equal(&quot;Human&quot;, human.Name);
+            Assert.Single(human.Fields, f =&gt; f.Key == &quot;first&quot;);
+            Assert.Single(human.Fields, f =&gt; f.Key == &quot;second&quot;);
         }
 </code></pre></p>
 
