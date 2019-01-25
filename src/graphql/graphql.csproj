@@ -8,7 +8,7 @@
     <PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
     <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
     <Description>GraphQL Query, Mutation and Subscription library</Description>
-    <PackageLicenseUrl>https://github.com/pekkah/tanka-graphql/blob/develop/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageTags>graphql,tanka-fw</PackageTags>
     <Authors>Pekka Heikura</Authors>
   </PropertyGroup>

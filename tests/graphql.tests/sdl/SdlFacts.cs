@@ -1,14 +1,37 @@
 using System.Linq;
+using GraphQLParser.AST;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.type.converters;
-using GraphQLParser.AST;
 using Xunit;
 
 namespace tanka.graphql.tests.sdl
 {
     public class SdlFacts
     {
+        [Fact]
+        public void Parse_custom_scalar()
+        {
+            /* Given */
+            var idl = @"
+scalar Url
+";
+            var urlScalar = new ScalarType("Url", new StringConverter());
+            var document = Parser.ParseDocument(idl);
+            var typeDefinition = document.Definitions.OfType<GraphQLScalarTypeDefinition>().SingleOrDefault();
+            var context = new SdlParserContext(document, new IGraphQLType[]
+            {
+                urlScalar
+            });
+
+            /* When */
+            var actual = Sdl.Scalar(typeDefinition, context);
+
+            /* Then */
+            Assert.Equal("Url", actual.Name);
+            Assert.Equal(urlScalar, actual);
+        }
+
         [Fact]
         public void Parse_Document()
         {
@@ -132,7 +155,8 @@ input JediPowerInput {
 ";
             var jediPowerLevel = new ScalarType("JediPowerLevel", new LongConverter());
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document, new []{ jediPowerLevel, new ScalarType("JediTrickLevel", new DoubleConverter())});
+            var context = new SdlParserContext(document,
+                new[] {jediPowerLevel, new ScalarType("JediTrickLevel", new DoubleConverter())});
 
             /* When */
             var actual = Sdl.Document(document, context).ToList();
@@ -146,7 +170,7 @@ input JediPowerInput {
             Assert.Contains(actual, type => type.Name == "JediPowerLevel" && type.GetType() == typeof(ScalarType));
             Assert.Contains(actual, type => type.Name == "JediTrickLevel" && type.GetType() == typeof(ScalarType));
 
-            var jediPowerInput = (InputObjectType)actual.Single(t => t.Name == "JediPowerInput");
+            var jediPowerInput = (InputObjectType) actual.Single(t => t.Name == "JediPowerInput");
             var level = jediPowerInput.GetField("level");
             Assert.Equal(jediPowerLevel, level.Type);
         }
@@ -286,6 +310,32 @@ type Human {
             Assert.Single(human.Fields, f => f.Key == "second");
         }
 
+
+        [Fact]
+        public void Parse_ObjectType_with_field_with_arguments()
+        {
+            /* Given */
+            var idl = @"
+type User {
+    scopes(includeIdentity:Boolean!): [String!]!
+}
+";
+            var document = Parser.ParseDocument(idl);
+            var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
+            var context = new SdlParserContext(document);
+
+            /* When */
+            var actual = Sdl.Object(objectTypeDefinition, context);
+
+            /* Then */
+            Assert.Equal("User", actual.Name);
+
+            var scopesField = actual.Fields.SingleOrDefault();
+            Assert.Equal("scopes", scopesField.Key);
+            Assert.Contains(scopesField.Value.Arguments,
+                a => a.Key == "includeIdentity" && (ScalarType) a.Value.Type.Unwrap() == ScalarType.Boolean);
+        }
+
         [Fact]
         public void Parse_ObjectType_with_inteface_field()
         {
@@ -384,54 +434,6 @@ type User {
             Assert.Contains(actual.Fields, kv => kv.Key == "name" && (ScalarType) kv.Value.Type == ScalarType.String);
             Assert.Contains(actual.Fields,
                 kv => kv.Key == "password" && (ScalarType) kv.Value.Type == ScalarType.String);
-        }
-
-        [Fact]
-        public void Parse_custome_scalar()
-        {
-            /* Given */
-            var idl = @"
-scalar Url
-";
-            var urlScalar = new ScalarType("Url", new StringConverter());
-            var document = Parser.ParseDocument(idl);
-            var typeDefinition = document.Definitions.OfType<GraphQLScalarTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document, new IGraphQLType[]
-            {
-                urlScalar
-            });
-
-            /* When */
-            var actual = Sdl.Scalar(typeDefinition, context);
-
-            /* Then */
-            Assert.Equal("Url", actual.Name);
-            Assert.Equal(urlScalar, actual);
-        }
-
-        
-        [Fact]
-        public void Parse_ObjectType_with_field_with_arguments()
-        {
-            /* Given */
-            var idl = @"
-type User {
-    scopes(includeIdentity:Boolean!): [String!]!
-}
-";
-            var document = Parser.ParseDocument(idl);
-            var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document);
-
-            /* When */
-            var actual = Sdl.Object(objectTypeDefinition, context);
-
-            /* Then */
-            Assert.Equal("User", actual.Name);
-
-            var scopesField = actual.Fields.SingleOrDefault();
-            Assert.Equal("scopes", scopesField.Key);
-            Assert.Contains(scopesField.Value.Arguments, a => a.Key == "includeIdentity" && (ScalarType)a.Value.Type.Unwrap() == ScalarType.Boolean);
         }
 
         [Fact]

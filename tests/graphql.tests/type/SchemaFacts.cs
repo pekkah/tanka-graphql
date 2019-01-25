@@ -149,7 +149,7 @@ namespace tanka.graphql.tests.type
             Assert.Single(types, t => t.Name == "fieldType");
         }
 
-        [Fact(Skip = "Is this right approach?")]
+        [Fact(Skip = "Should these be included?")]
         public async Task Initialize_types_with_default_scalars()
         {
             /* Given */
