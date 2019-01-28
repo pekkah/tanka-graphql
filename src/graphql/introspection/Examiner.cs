@@ -2,8 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using tanka.graphql.type;
 using Newtonsoft.Json;
+using tanka.graphql.type;
 
 // ReSharper disable InconsistentNaming
 
@@ -11,31 +11,26 @@ namespace tanka.graphql.introspection
 {
     public static class Examiner
     {
-        private static readonly ConcurrentDictionary<string, __Type> _cache 
+        private static readonly ConcurrentDictionary<string, __Type> _cache
             = new ConcurrentDictionary<string, __Type>();
 
         public static __Schema Examine(ISchema schema)
         {
-            return new __Schema()
-            {
-
-            };
+            return new __Schema();
         }
 
-        public static __Type Examine(IGraphQLType type, ISchema schema)
+        public static __Type Examine(IType type, ISchema schema)
         {
             if (type == null)
                 return null;
-            
-            if (!string.IsNullOrEmpty(type.Name))
-            {
-                return _cache.GetOrAdd(type.Name, name => InternalExamine(type, schema));
-            }
+
+            if (type is INamedType namedType)
+                return _cache.GetOrAdd(namedType.Name, name => InternalExamine(namedType, schema));
 
             return InternalExamine(type, schema);
         }
 
-        public static __Type InternalExamine(IGraphQLType type, ISchema schema)
+        public static __Type InternalExamine(IType type, ISchema schema)
         {
             switch (type)
             {
@@ -65,17 +60,52 @@ namespace tanka.graphql.introspection
 
         public static __Directive ExamineDirective(DirectiveType directiveType, ISchema schema)
         {
-            return new __Directive()
+            return new __Directive
             {
                 Name = directiveType.Name,
                 Description = directiveType.Meta.Description,
                 Args = directiveType.Arguments.Select(a => ExamineArg(a, schema)).ToList(),
-                Locations = directiveType.Locations.Select(l => (__DirectiveLocation)Enum.Parse(typeof(__DirectiveLocation), l.ToString())).ToList()
+                Locations = directiveType.Locations
+                    .Select(l => (__DirectiveLocation) Enum.Parse(typeof(__DirectiveLocation), l.ToString())).ToList()
             };
         }
 
+        public static __Type ExamineScalar(ScalarType scalarType, ISchema schema)
+        {
+            return new __Type
+            {
+                Kind = __TypeKind.SCALAR,
+                Name = scalarType.Name,
+                Description = scalarType.Meta.Description
+            };
+        }
+
+        public static __Type ExamineObject(
+            ObjectType objectType,
+            ISchema schema)
+        {
+            var fields = objectType.Fields
+                .Select(f => ExamineField(f, schema))
+                .ToList();
+
+            var interfaces = objectType.Interfaces
+                .Select(i => i.Name)
+                .ToList();
+
+            var type = new __Type
+            {
+                Kind = __TypeKind.OBJECT,
+                Name = objectType.Name,
+                Description = objectType.Meta.Description,
+                Fields = fields.ToList(),
+                Interfaces = interfaces
+            };
+
+            return type;
+        }
+
         private static __Type ExamineNonNull(
-            NonNull nonNull, 
+            NonNull nonNull,
             ISchema schema)
         {
             return new __Type
@@ -85,22 +115,13 @@ namespace tanka.graphql.introspection
             };
         }
 
-        private static IGraphQLType BuildTypeRef(IGraphQLType type)
+        private static IType BuildTypeRef(IType type)
         {
-            if (type is NonNull nonNull)
-            {
-                return new NonNull(BuildTypeRef(nonNull.WrappedType));
-            }
+            if (type is NonNull nonNull) return new NonNull(BuildTypeRef(nonNull.WrappedType));
 
-            if (type is List list)
-            {
-                return new List(BuildTypeRef(list.WrappedType));
-            }
+            if (type is List list) return new List(BuildTypeRef(list.WrappedType));
 
-            if (type is NamedTypeReference)
-            {
-                return type;
-            }
+            if (type is NamedTypeReference) return type;
 
             if (type is EnumType)
                 return type;
@@ -108,15 +129,13 @@ namespace tanka.graphql.introspection
             if (type is ScalarType)
                 return type;
 
-            if (string.IsNullOrEmpty(type.Name))
-                throw new InvalidOperationException(
-                    $"Cannot build named type reference from {type} as it doesn't have name");
-
-            return new NamedTypeReference(type.Name);
+            if (type is INamedType namedType) return new NamedTypeReference(namedType.Name);
+            throw new InvalidOperationException(
+                $"Cannot build named type reference from {type} as it's not {typeof(INamedType)}");
         }
 
         private static __Type ExamineList(
-            List listType, 
+            List listType,
             ISchema schema)
         {
             return new __Type
@@ -127,7 +146,7 @@ namespace tanka.graphql.introspection
         }
 
         private static __Type ExamineInput(
-            InputObjectType inputObjectType, 
+            InputObjectType inputObjectType,
             ISchema schema)
         {
             var fields = inputObjectType.Fields
@@ -151,7 +170,9 @@ namespace tanka.graphql.introspection
                 Name = field.Key,
                 Description = field.Value.Meta.Description,
                 Type = BuildTypeRef(field.Value.Type),
-                DefaultValue = field.Value.DefaultValue != null ? JsonConvert.SerializeObject(field.Value.DefaultValue):null
+                DefaultValue = field.Value.DefaultValue != null
+                    ? JsonConvert.SerializeObject(field.Value.DefaultValue)
+                    : null
             };
         }
 
@@ -177,7 +198,7 @@ namespace tanka.graphql.introspection
         }
 
         private static __Type ExamineUnion(
-            UnionType unionType, 
+            UnionType unionType,
             ISchema schema)
         {
             return new __Type
@@ -186,40 +207,6 @@ namespace tanka.graphql.introspection
                 Name = unionType.Name,
                 Description = unionType.Meta.Description
             };
-        }
-
-        public static __Type ExamineScalar(ScalarType scalarType, ISchema schema)
-        {
-            return new __Type
-            {
-                Kind = __TypeKind.SCALAR,
-                Name = scalarType.Name,
-                Description = scalarType.Meta.Description
-            };
-        }
-
-        public static __Type ExamineObject(
-            ObjectType objectType, 
-            ISchema schema)
-        {
-            var fields = objectType.Fields
-                .Select(f => ExamineField(f, schema))
-                .ToList();
-
-            var interfaces = objectType.Interfaces
-                .Select(i => i.Name)
-                .ToList();
-
-            var type = new __Type
-            {
-                Kind = __TypeKind.OBJECT,
-                Name = objectType.Name,
-                Description = objectType.Meta.Description,
-                Fields = fields.ToList(),
-                Interfaces = interfaces
-            };
-
-            return type;
         }
 
         private static __Type ExamineInterface(
@@ -263,7 +250,9 @@ namespace tanka.graphql.introspection
                 Name = arg.Key,
                 Description = arg.Value.Meta?.Description,
                 Type = BuildTypeRef(arg.Value.Type),
-                DefaultValue = arg.Value.DefaultValue != null ? JsonConvert.SerializeObject(arg.Value.DefaultValue):null
+                DefaultValue = arg.Value.DefaultValue != null
+                    ? JsonConvert.SerializeObject(arg.Value.DefaultValue)
+                    : null
             };
         }
     }

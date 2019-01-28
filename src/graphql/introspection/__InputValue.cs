@@ -9,7 +9,7 @@ namespace tanka.graphql.introspection
 
         public string Description { get;set; }
 
-        public IGraphQLType Type { get; set; }
+        public IType Type { get; set; }
 
         public string DefaultValue { get; set; }
     }

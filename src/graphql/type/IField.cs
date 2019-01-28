@@ -5,7 +5,7 @@ namespace tanka.graphql.type
 {
     public interface IField : IDirectives
     {
-        IGraphQLType Type { get; set; }
+        IType Type { get; set; }
 
         IEnumerable<KeyValuePair<string, Argument>> Arguments { get; set; }
 

@@ -23,7 +23,7 @@ namespace tanka.graphql.execution
             ObjectType objectType,
             object objectValue,
             List<GraphQLFieldSelection> fields,
-            IGraphQLType fieldType,
+            IType fieldType,
             Dictionary<string, object> coercedVariableValues, 
             NodePath path)
         {
@@ -102,7 +102,7 @@ namespace tanka.graphql.execution
             // __typename hack
             if (fieldName == "__typename")
             {
-                return objectType.Unwrap().Name;
+                return objectType.Name;
             }
 
             var fieldType = objectType

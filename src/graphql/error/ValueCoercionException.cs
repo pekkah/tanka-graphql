@@ -5,9 +5,9 @@ namespace tanka.graphql.error
 {
     public class ValueCoercionException : Exception
     {
-        public IGraphQLType Type { get; }
+        public IType Type { get; }
 
-        public ValueCoercionException(string message, object value, IGraphQLType type)
+        public ValueCoercionException(string message, object value, IType type)
             :base(message)
         {
             Type = type;

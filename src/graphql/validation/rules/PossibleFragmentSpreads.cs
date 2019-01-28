@@ -29,7 +29,7 @@ namespace tanka.graphql.validation.rules
                 _.Match<GraphQLFragmentSpread>(node =>
                 {
                     var fragName = node.Name.Value;
-                    var fragType = getFragmentType(context, fragName);
+                    var fragType = GetFragmentType(context, fragName);
                     var parentType = context.TypeInfo.GetParentType().Unwrap();
 
                     /*if (fragType != null && parentType != null && !context.Schema.DoTypesOverlap(fragType, parentType))
@@ -52,7 +52,7 @@ namespace tanka.graphql.validation.rules
                 $"Fragment cannot be spread here as objects of type \"{parentType}\" can never be of type \"{fragType}\".";
         }
 
-        private IGraphQLType getFragmentType(ValidationContext context, string name)
+        private static IType GetFragmentType(ValidationContext context, string name)
         {
             var frag = context.GetFragment(name);
             if (frag == null)

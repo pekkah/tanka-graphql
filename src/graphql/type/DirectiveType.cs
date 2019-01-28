@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace tanka.graphql.type
 {
-    public class DirectiveType : IGraphQLType
+    public class DirectiveType : INamedType
     {
         public static DirectiveType Skip = new DirectiveType(
             "skip",

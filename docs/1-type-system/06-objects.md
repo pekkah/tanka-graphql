@@ -6,6 +6,9 @@ Objects are created as instances of `ObjectType`.
 
 ### Creating objects
 
+Objects are created by giving it a unique name and list of fields.
+
+
 #### With scalar field
 
 Type of field defines the return value of field when resolved during execution.

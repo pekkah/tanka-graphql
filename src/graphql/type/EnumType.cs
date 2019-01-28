@@ -8,7 +8,7 @@ using GraphQLParser.AST;
 
 namespace tanka.graphql.type
 {
-    public class EnumType : IGraphQLType, IValueConverter
+    public class EnumType : INamedType, IValueConverter
     {
         private readonly EnumValues _values = new EnumValues();
 

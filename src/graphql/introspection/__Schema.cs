@@ -10,7 +10,7 @@ namespace tanka.graphql.introspection
     {
         public IEnumerable<__Type> GetTypes(ISchema schema)
         {
-            var types = schema.QueryTypes<IGraphQLType>()
+            var types = schema.QueryTypes<IType>()
                 .Distinct(new GraphQLTypeComparer());
 
             return types.Select(t => Examiner.Examine(t, schema));
@@ -39,7 +39,7 @@ namespace tanka.graphql.introspection
             if (type is UnionType unionType)
             {
                 var possibleTypes = schema
-                    .QueryTypes<IGraphQLType>(t => unionType.IsPossible(t));
+                    .QueryTypes<INamedType>(t => unionType.IsPossible(t));
 
                 return possibleTypes.Select(p => Examiner.Examine(p, schema));
             }
@@ -59,7 +59,7 @@ namespace tanka.graphql.introspection
             }
         }
 
-        private IGraphQLType UnwindTypeRef(TypeRef typeRef, ISchema data)
+        private INamedType UnwindTypeRef(TypeRef typeRef, ISchema data)
         {
             return data.GetNamedType(typeRef.Name);
         }
@@ -70,7 +70,7 @@ namespace tanka.graphql.introspection
         /// <param name="type">Named type reference chain</param>
         /// <param name="schema"></param>
         /// <returns></returns>
-        public __Type GetType(IGraphQLType type, ISchema schema)
+        public __Type GetType(IType type, ISchema schema)
         {
             var __type = Examiner.Examine(type, schema);
             return __type;

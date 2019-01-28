@@ -31,7 +31,7 @@ namespace tanka.graphql.validation.rules
             });
         }
 
-        private void ValidateValue(ValidationContext context, GraphQLArgument node, GraphQLValue nodeValue, IGraphQLType type)
+        private void ValidateValue(ValidationContext context, GraphQLArgument node, GraphQLValue nodeValue, IType type)
         {
             if (type is NonNull nonNull) ValidateValue(context, node, nodeValue, nonNull.WrappedType);
 
@@ -81,7 +81,7 @@ namespace tanka.graphql.validation.rules
         public string BadValueMessage(
             string mesage,
             string argName,
-            IGraphQLType type,
+            IType type,
             string value)
         {
             return $"Argument \"{argName}\" has invalid value {value}. {mesage}.";

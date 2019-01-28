@@ -8,7 +8,7 @@ namespace tanka.graphql.type
         private readonly Args _arguments = new Args();
 
         public Field(
-            IGraphQLType type,
+            IType type,
             Args arguments = null,
             Meta meta = null,
             object defaultValue = null)
@@ -30,7 +30,7 @@ namespace tanka.graphql.type
 
         public Subscriber Subscribe { get; set; }
 
-        public IGraphQLType Type { get; set; }
+        public IType Type { get; set; }
 
         public IEnumerable<KeyValuePair<string, Argument>> Arguments
         {

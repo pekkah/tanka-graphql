@@ -2,7 +2,7 @@
 
 namespace tanka.graphql.type
 {
-    public class ObjectType : ComplexType, IGraphQLType
+    public class ObjectType : ComplexType, INamedType
     {
         private readonly Dictionary<string, InterfaceType> _interfaces = new Dictionary<string, InterfaceType>();
 

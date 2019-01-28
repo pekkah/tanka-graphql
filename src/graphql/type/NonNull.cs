@@ -2,28 +2,14 @@
 
 namespace tanka.graphql.type
 {
-    public class NonNull : IGraphQLType, IWrappingType, IEquatable<IGraphQLType>, IEquatable<NonNull>
+    public class NonNull : IWrappingType, IEquatable<NonNull>
     {
-        public NonNull(IGraphQLType wrappedType)
+        public NonNull(IType wrappedType)
         {
             WrappedType = wrappedType;
         }
 
-        public bool Equals(IGraphQLType other)
-        {
-            return Equals((object) other);
-        }
-
-        public bool Equals(NonNull other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Name, other.Name) && Equals(WrappedType.Unwrap().Name, other.WrappedType.Unwrap().Name);
-        }
-
-        public string Name { get; } = null;
-
-        public IGraphQLType WrappedType { get; }
+        public IType WrappedType { get; }
 
         public override string ToString()
         {
@@ -34,17 +20,20 @@ namespace tanka.graphql.type
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (obj.GetType() != this.GetType()) return false;
             return Equals((NonNull) obj);
+        }
+
+        public bool Equals(NonNull other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(WrappedType, other.WrappedType);
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return ((Name != null ? Name.GetHashCode() : 0) * 397) ^
-                       (WrappedType != null ? WrappedType.GetHashCode() : 0);
-            }
+            return (WrappedType != null ? WrappedType.GetHashCode() : 0);
         }
 
         public static bool operator ==(NonNull left, NonNull right)

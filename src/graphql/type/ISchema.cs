@@ -16,11 +16,11 @@ namespace tanka.graphql.type
 
         Task InitializeAsync();
 
-        IGraphQLType GetNamedType(string name);
+        INamedType GetNamedType(string name);
 
-        T GetNamedType<T>(string name) where T : IGraphQLType;
+        T GetNamedType<T>(string name) where T : INamedType;
 
-        IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IGraphQLType;
+        IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IType;
 
         DirectiveType GetDirective(string name);
 

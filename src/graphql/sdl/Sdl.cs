@@ -36,7 +36,7 @@ namespace tanka.graphql.sdl
                 new Meta(directives: Directives(definition.Directives, context)));
         }
 
-        public static IEnumerable<IGraphQLType> Document(GraphQLDocument document, SdlParserContext context)
+        public static IEnumerable<INamedType> Document(GraphQLDocument document, SdlParserContext context)
         {
             foreach (var definition in document.Definitions.OfType<GraphQLScalarTypeDefinition>())
                 Scalar(definition, context);
@@ -113,7 +113,7 @@ namespace tanka.graphql.sdl
             IEnumerable<ScalarType> scalars = null,
             IEnumerable<DirectiveType> directives = null)
         {
-            var knownTypes = new List<IGraphQLType>();
+            var knownTypes = new List<INamedType>();
 
             if (scalars != null)
                 knownTypes.AddRange(scalars);
@@ -243,7 +243,7 @@ namespace tanka.graphql.sdl
             yield return new DirectiveInstance(directiveType, arguments);
         }
 
-        private static IGraphQLType Extend(GraphQLTypeExtensionDefinition definition, SdlParserContext context)
+        private static INamedType Extend(GraphQLTypeExtensionDefinition definition, SdlParserContext context)
         {
             var originalType = context.GetKnownType(definition.Definition.Name.Value);
 
@@ -324,7 +324,7 @@ namespace tanka.graphql.sdl
             return args;
         }
 
-        private static IGraphQLType Type(GraphQLType typeDefinition, SdlParserContext context)
+        private static IType Type(GraphQLType typeDefinition, SdlParserContext context)
         {
             if (typeDefinition.Kind == ASTNodeKind.NonNullType)
             {

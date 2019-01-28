@@ -10,7 +10,7 @@ namespace tanka.graphql.tests.execution
     {
         [Theory]
         [MemberData(nameof(ValidInputTypes))]
-        public void IsInputType(IGraphQLType type)
+        public void IsInputType(INamedType type)
         {
             /* Given */
             /* When */
@@ -28,7 +28,7 @@ namespace tanka.graphql.tests.execution
 
         [Theory]      
         [MemberData(nameof(ValidOutputTypes))]
-        public void IsOutputType(IGraphQLType type)
+        public void IsOutputType(INamedType type)
         {
             /* Given */
             /* When */
@@ -91,7 +91,7 @@ namespace tanka.graphql.tests.execution
                 yield return new object[]
                 {
                     new UnionType("Union",
-                        Enumerable.Empty<IGraphQLType>()), 
+                        Enumerable.Empty<INamedType>()), 
                 };
 
                 yield return new object[]

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
-    public class UnionType : IGraphQLType
+    public class UnionType : INamedType
     {
-        public UnionType(string name, IEnumerable<IGraphQLType> possibleTypes, Meta meta = null)
+        public UnionType(string name, IEnumerable<INamedType> possibleTypes, Meta meta = null)
         {
             Name = name;
             Meta = meta ?? new Meta();
@@ -20,11 +20,11 @@ namespace tanka.graphql.type
             }
         }
 
-        public Dictionary<string, IGraphQLType> PossibleTypes { get; } = new Dictionary<string, IGraphQLType>();
+        public Dictionary<string, INamedType> PossibleTypes { get; } = new Dictionary<string, INamedType>();
 
         public string Name { get; }
 
-        public bool IsPossible(IGraphQLType type)
+        public bool IsPossible(INamedType type)
         {
             return PossibleTypes.ContainsKey(type.Name);
         }

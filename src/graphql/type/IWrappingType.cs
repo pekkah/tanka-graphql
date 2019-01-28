@@ -1,7 +1,7 @@
 ﻿namespace tanka.graphql.type
 {
-    public interface IWrappingType
+    public interface IWrappingType: IType
     {
-        IGraphQLType WrappedType { get; }
+        IType WrappedType { get; }
     }
 }

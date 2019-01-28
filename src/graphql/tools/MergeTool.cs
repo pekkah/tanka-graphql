@@ -36,9 +36,9 @@ namespace tanka.graphql.tools
             if (!left.IsInitialized || !right.IsInitialized)
                 throw new InvalidOperationException($"Schemas must be initialized before merging");
 
-            var types = new List<IGraphQLType>();
+            var types = new List<INamedType>();
 
-            foreach (var leftType in left.QueryTypes<IGraphQLType>())
+            foreach (var leftType in left.QueryTypes<INamedType>())
             {
                 var rightType = right.GetNamedType(leftType.Name);
 
@@ -73,7 +73,7 @@ namespace tanka.graphql.tools
                 }
             }
 
-            foreach (var rightType in right.QueryTypes<IGraphQLType>())
+            foreach (var rightType in right.QueryTypes<INamedType>())
             {
                 if (types.Any(t => t.Name == rightType.Name))
                     continue;

@@ -5,7 +5,7 @@ using GraphQLParser.AST;
 
 namespace tanka.graphql.type
 {
-    public class ScalarType : IGraphQLType, IValueConverter, IEquatable<ScalarType>, IEquatable<IGraphQLType>
+    public class ScalarType : INamedType, IValueConverter, IEquatable<ScalarType>, IEquatable<INamedType>
     {
         public static ScalarType Boolean = new ScalarType(
             "Boolean",
@@ -68,7 +68,7 @@ namespace tanka.graphql.type
 
         public Meta Meta { get; }
 
-        public bool Equals(IGraphQLType other)
+        public bool Equals(INamedType other)
         {
             return Equals((object) other);
         }

@@ -20,7 +20,7 @@ namespace tanka.graphql.validation.rules
                     var type = context.Schema.GetNamedType(node.Name.Value);
                     if (type == null)
                     {
-                        var typeNames = context.Schema.QueryTypes<IGraphQLType>().Select(x => x.Name).ToArray();
+                        var typeNames = context.Schema.QueryTypes<INamedType>().Select(x => x.Name).ToArray();
                         var suggestionList = Enumerable.Empty<string>().ToArray();
                         context.ReportError(new ValidationError(UnknownTypeMessage(node.Name.Value, suggestionList),
                             node));

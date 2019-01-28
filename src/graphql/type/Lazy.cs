@@ -2,22 +2,20 @@
 
 namespace tanka.graphql.type
 {
-    public class Lazy : IWrappingType, IGraphQLType
+    public class Lazy : IWrappingType
     {
-        private readonly Lazy<IGraphQLType> _lazyType;
+        private readonly Lazy<IType> _lazyType;
 
-        public Lazy(Lazy<IGraphQLType> lazyType)
+        public Lazy(Lazy<IType> lazyType)
         {
             _lazyType = lazyType;
         }
 
-        public Lazy(Func<IGraphQLType> lazyFunc)
+        public Lazy(Func<IType> lazyFunc)
         {
-            _lazyType = new Lazy<IGraphQLType>(lazyFunc);
+            _lazyType = new Lazy<IType>(lazyFunc);
         }
 
-        public string Name { get; } = null;
-
-        public IGraphQLType WrappedType => _lazyType.Value;
+        public IType WrappedType => _lazyType.Value;
     }
 }

@@ -13,9 +13,9 @@ namespace tanka.graphql.sdl
         private readonly Stack<GraphQLInterfaceTypeDefinition> _interfaceDefinitions =
             new Stack<GraphQLInterfaceTypeDefinition>();
 
-        public List<IGraphQLType> KnownTypes = new List<IGraphQLType>();
+        public List<INamedType> KnownTypes = new List<INamedType>();
 
-        public SdlParserContext(GraphQLDocument document, IEnumerable<IGraphQLType> knownTypes = null)
+        public SdlParserContext(GraphQLDocument document, IEnumerable<INamedType> knownTypes = null)
         {
             Document = document;
 
@@ -34,7 +34,7 @@ namespace tanka.graphql.sdl
 
         public GraphQLDocument Document { get; }
 
-        public IGraphQLType GetKnownType(string typeName)
+        public INamedType GetKnownType(string typeName)
         {
             return KnownTypes.SingleOrDefault(t => t.Name.ToLowerInvariant() == typeName.ToLowerInvariant());
         }

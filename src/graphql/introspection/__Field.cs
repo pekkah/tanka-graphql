@@ -12,7 +12,7 @@ namespace tanka.graphql.introspection
 
         public List<__InputValue> Args { get; set; }
 
-        public IGraphQLType Type { get; set; }
+        public IType Type { get; set; }
 
         public bool IsDeprecated { get; set; }
 

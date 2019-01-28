@@ -9,9 +9,8 @@ Following types are supported:
 - `UnionType`
 - `EnumType`
 - `InputObjectType`
-- `DirectiveType`
 
-These all exists in `tanka.graphql.type` namespace.
+These all exists in `tanka.graphql.type` namespace and implement `INamedType` interface
 
 
 ### Wrapping types

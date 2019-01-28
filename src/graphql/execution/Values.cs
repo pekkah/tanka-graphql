@@ -11,7 +11,7 @@ namespace tanka.graphql.execution
     {
         public static object CoerceValue(
             object value,
-            IGraphQLType valueType)
+            IType valueType)
         {
             if (valueType is NonNull nonNull) return CoerceNonNullValue(value, nonNull);
 
@@ -24,7 +24,7 @@ namespace tanka.graphql.execution
             if (valueType is InputObjectType input) return CoerceInputValue(value, input);
 
             throw new ValueCoercionException(
-                $"Unexpected valueType {valueType.Name}. Cannot coerce value.",
+                $"Unexpected valueType {valueType}. Cannot coerce value.",
                 value,
                 valueType);
         }
@@ -107,7 +107,7 @@ namespace tanka.graphql.execution
             return scalarType.ParseValue(value);
         }
 
-        private static object CoerceListValues(IGraphQLType listWrappedType, object value)
+        private static object CoerceListValues(IType listWrappedType, object value)
         {
             var coercedListValues = new List<object>();
             if (value is GraphQLListValue listValue)

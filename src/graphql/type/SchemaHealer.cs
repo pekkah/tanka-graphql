@@ -29,7 +29,7 @@ namespace tanka.graphql.type
             return base.VisitObjectFieldAsync(objectType, objectTypeField);
         }
 
-        private IGraphQLType WrapIfRequired(IGraphQLType currentType, IGraphQLType namedType)
+        private IType WrapIfRequired(IType currentType, IType namedType)
         {
             if (currentType is NonNull nonNull)
             {

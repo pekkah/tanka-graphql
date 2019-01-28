@@ -1,8 +1,8 @@
 ﻿namespace tanka.graphql.type
 {
-    public static class GraphQLTypeExtensions 
+    public static class TypeExtensions 
     {
-        public static IGraphQLType Unwrap(this IGraphQLType type)
+        public static IType Unwrap(this IType type)
         {
             switch (type)
             {

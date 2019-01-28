@@ -5,7 +5,7 @@ using tanka.graphql.execution;
 
 namespace tanka.graphql.type
 {
-    public class InputObjectType : IGraphQLType
+    public class InputObjectType : INamedType
     {
         private readonly InputFields _fields = new InputFields();
 

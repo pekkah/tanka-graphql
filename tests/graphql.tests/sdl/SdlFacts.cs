@@ -19,7 +19,7 @@ scalar Url
             var urlScalar = new ScalarType("Url", new StringConverter());
             var document = Parser.ParseDocument(idl);
             var typeDefinition = document.Definitions.OfType<GraphQLScalarTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document, new IGraphQLType[]
+            var context = new SdlParserContext(document, new INamedType[]
             {
                 urlScalar
             });

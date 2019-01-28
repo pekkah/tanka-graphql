@@ -7,14 +7,14 @@ namespace tanka.graphql.type
 {
     public class Schema : ISchema
     {
-        private readonly IEnumerable<IGraphQLType> _typesReferencedByNameOnly;
-        private List<IGraphQLType> _types = new List<IGraphQLType>();
+        private readonly IEnumerable<INamedType> _typesReferencedByNameOnly;
+        private List<IType> _types = new List<IType>();
 
         public Schema(
             ObjectType query,
             ObjectType mutation = null,
             ObjectType subscription = null,
-            IEnumerable<IGraphQLType> typesReferencedByNameOnly = null,
+            IEnumerable<INamedType> typesReferencedByNameOnly = null,
             IEnumerable<DirectiveType> directives = null)
         {
             _typesReferencedByNameOnly = typesReferencedByNameOnly;
@@ -43,7 +43,7 @@ namespace tanka.graphql.type
             if (IsInitialized)
                 return;
 
-            var scanningTasks = new List<Task<IEnumerable<IGraphQLType>>>
+            var scanningTasks = new List<Task<IEnumerable<IType>>>
             {
                 new TypeScanner(Query).ScanAsync()
             };
@@ -60,7 +60,7 @@ namespace tanka.graphql.type
             // combine
             var foundTypes = scanningTasks.SelectMany(r => r.Result)
                 //.Concat(ScalarType.Standard) // disabled for now
-                .Concat(_typesReferencedByNameOnly ?? Enumerable.Empty<IGraphQLType>())
+                .Concat(_typesReferencedByNameOnly ?? Enumerable.Empty<IType>())
                 .Distinct(new GraphQLTypeComparer())
                 .ToList();
 
@@ -76,19 +76,19 @@ namespace tanka.graphql.type
             IsInitialized = true;
         }
 
-        public IGraphQLType GetNamedType(string name)
+        public INamedType GetNamedType(string name)
         {
-            return _types.SingleOrDefault(t => t.Name == name);
+            return _types.OfType<INamedType>().SingleOrDefault(t => t.Name == name);
         }
 
-        public T GetNamedType<T>(string name) where T : IGraphQLType
+        public T GetNamedType<T>(string name) where T : INamedType
         {
             var type = GetNamedType(name);
 
             return (T) type;
         }
 
-        public IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IGraphQLType
+        public IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IType
         {
             if (filter == null)
                 return _types.OfType<T>().AsQueryable();

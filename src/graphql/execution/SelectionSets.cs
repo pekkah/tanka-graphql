@@ -169,7 +169,7 @@ namespace tanka.graphql.execution
                 return true;
 
             var ifArgument = includeDirective.Arguments.SingleOrDefault(a => a.Name?.Value == "if");
-            return GetArgumentValue(includeDirective, coercedVariableValues, ifArgument);
+            return GetIfArgumentValue(includeDirective, coercedVariableValues, ifArgument);
         }
 
         private static bool SkipSelection(GraphQLDirective skipDirective,
@@ -179,10 +179,10 @@ namespace tanka.graphql.execution
                 return false;
 
             var ifArgument = skipDirective.Arguments.SingleOrDefault(a => a.Name?.Value == "if");
-            return GetArgumentValue(skipDirective, coercedVariableValues, ifArgument);
+            return GetIfArgumentValue(skipDirective, coercedVariableValues, ifArgument);
         }
 
-        private static bool GetArgumentValue(
+        private static bool GetIfArgumentValue(
             GraphQLDirective directive,
             Dictionary<string, object> coercedVariableValues,
             GraphQLArgument argument)
@@ -220,7 +220,7 @@ namespace tanka.graphql.execution
             }
         }
 
-        private static bool DoesFragmentTypeApply(ObjectType objectType, IGraphQLType fragmentType)
+        private static bool DoesFragmentTypeApply(ObjectType objectType, IType fragmentType)
         {
             if (fragmentType is ObjectType obj)
                 return string.Equals(obj.Name, objectType.Name, StringComparison.Ordinal);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
-    public class InterfaceType : ComplexType, IGraphQLType, IDirectives
+    public class InterfaceType : ComplexType, INamedType, IDirectives
     {
         public InterfaceType(string name, Fields fields, Meta meta = null)
         {

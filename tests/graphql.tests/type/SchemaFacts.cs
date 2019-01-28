@@ -93,7 +93,7 @@ namespace tanka.graphql.tests.type
             await sut.InitializeAsync();
 
             /* Then */
-            var types = sut.QueryTypes<IGraphQLType>();
+            var types = sut.QueryTypes<INamedType>();
 
             Assert.Contains(types, t => t.Name == "Q");
             Assert.Contains(types, t => t.Name == "fieldType");
@@ -119,7 +119,7 @@ namespace tanka.graphql.tests.type
             await sut.InitializeAsync();
 
             /* Then */
-            var types = sut.QueryTypes<IGraphQLType>();
+            var types = sut.QueryTypes<INamedType>();
 
             Assert.Single(types, ScalarType.String);
         }
@@ -143,7 +143,7 @@ namespace tanka.graphql.tests.type
             await sut.InitializeAsync();
 
             /* Then */
-            var types = sut.QueryTypes<IGraphQLType>();
+            var types = sut.QueryTypes<INamedType>();
 
             Assert.Single(types, t => t.Name == "Q");
             Assert.Single(types, t => t.Name == "fieldType");
@@ -168,7 +168,7 @@ namespace tanka.graphql.tests.type
             await sut.InitializeAsync();
 
             /* Then */
-            var types = sut.QueryTypes<IGraphQLType>();
+            var types = sut.QueryTypes<INamedType>();
 
             foreach (var scalar in ScalarType.Standard)
             {

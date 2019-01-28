@@ -44,7 +44,7 @@ namespace tanka.graphql.validation.rules
                         {
                             context.ReportError(
                                 new ValidationError(
-                                    MissingFieldArgMessage(node.Name.Value, arg.Key, type.Name),
+                                    MissingFieldArgMessage(node.Name.Value, arg.Key, type?.ToString()),
                                     node));
                         }
                     });
@@ -68,7 +68,7 @@ namespace tanka.graphql.validation.rules
                         {
                             context.ReportError(
                                 new ValidationError(
-                                    MissingDirectiveArgMessage(node.Name.Value, arg.Key, type.Name),
+                                    MissingDirectiveArgMessage(node.Name.Value, arg.Key, type?.ToString()),
                                     node));
                         }
                     });

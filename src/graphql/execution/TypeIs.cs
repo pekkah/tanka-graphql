@@ -5,7 +5,7 @@ namespace tanka.graphql.execution
 {
     public static class TypeIs
     {
-        public static bool IsInputType(IGraphQLType type)
+        public static bool IsInputType(IType type)
         {
             if (type is IWrappingType wrappingType)
             {
@@ -30,7 +30,7 @@ namespace tanka.graphql.execution
             return false;
         }
 
-        public static bool IsOutputType(IGraphQLType type)
+        public static bool IsOutputType(IType type)
         {
             if (type is IWrappingType wrappingType)
             {

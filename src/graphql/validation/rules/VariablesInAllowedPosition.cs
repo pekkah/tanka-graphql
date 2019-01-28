@@ -63,9 +63,9 @@ namespace tanka.graphql.validation.rules
         }
 
         /// <summary>
-        ///     if a variable defintion has a default value, it is effectively non-null.
+        ///     if a variable definition has a default value, it is effectively non-null.
         /// </summary>
-        private IGraphQLType EffectiveType(IGraphQLType varType, GraphQLVariableDefinition varDef)
+        private IType EffectiveType(IType varType, GraphQLVariableDefinition varDef)
         {
             if (varDef.DefaultValue == null || varType is NonNull) return varType;
 

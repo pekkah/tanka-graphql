@@ -7,23 +7,23 @@ namespace tanka.graphql.type
 {
     public class TypeScanner
     {
-        private readonly IGraphQLType _root;
+        private readonly IType _root;
 
-        public TypeScanner(IGraphQLType root)
+        public TypeScanner(IType root)
         {
             _root = root;
         }
 
-        public virtual async Task<IEnumerable<IGraphQLType>> ScanAsync()
+        public virtual async Task<IEnumerable<IType>> ScanAsync()
         {
-            var foundTypes = new ConcurrentBag<IGraphQLType>();
+            var foundTypes = new ConcurrentBag<IType>();
 
             await ScanTypeAsync(foundTypes, _root).ConfigureAwait(false);
 
             return foundTypes;
         }
 
-        private async Task ScanTypeAsync(ConcurrentBag<IGraphQLType> foundTypes, IGraphQLType type)
+        private async Task ScanTypeAsync(ConcurrentBag<IType> foundTypes, IType type)
         {
             if (type == null)
                 return;

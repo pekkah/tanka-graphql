@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace tanka.graphql.type
 {
-    public abstract class ComplexType : IGraphQLType
+    public abstract class ComplexType : INamedType
     {
         private readonly Fields _fields = new Fields();
 
