@@ -268,3 +268,4 @@ dist/
 coverage/
 BenchmarkDotNet.Artifacts/
 gh-pages/
+*.saved.bak
