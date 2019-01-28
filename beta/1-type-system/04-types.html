@@ -72,7 +72,134 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="types">Types</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Types">Specification</a></p>
+</blockquote>
+<p>Following types are supported:</p>
+<ul>
+<li><code>ScalarType</code></li>
+<li><code>ObjectType</code></li>
+<li><code>InterfaceType</code></li>
+<li><code>UnionType</code></li>
+<li><code>EnumType</code></li>
+<li><code>InputObjectType</code></li>
+<li><code>DirectiveType</code></li>
+</ul>
+<p>These all exists in <code>tanka.graphql.type</code> namespace.</p>
+<h3 id="wrapping-types">Wrapping types</h3>
+<p>Wrapping types implement the <code>IWrappingType</code></p>
+<p><pre><code class="language-csharp">    public interface IWrappingType
+    {
+        IGraphQLType WrappedType { get; }
+    }
+</code></pre></p>
+<p>Two built-in implementations are provided</p>
+<ul>
+<li><code>List</code></li>
+<li><code>NonNull</code></li>
+</ul>
+<h3 id="input-and-output-types">Input and output types</h3>
+<p>Is input type?</p>
+<p><pre><code class="language-csharp">        [Theory]
+        [MemberData(nameof(ValidInputTypes))]
+        public void IsInputType(IGraphQLType type)
+        {
+            /* Given */
+            /* When */
+            var isInput = TypeIs.IsInputType(type);
+            var isInputAsNonNull = TypeIs.IsInputType(
+                new NonNull(type));
+            var isInputAsList = TypeIs.IsInputType(
+                new List(type));
+
+            /* Then */
+            Assert.True(isInput);
+            Assert.True(isInputAsNonNull);
+            Assert.True(isInputAsList);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        public static IEnumerable&lt;object[]&gt; ValidInputTypes
+        {
+            get
+            {
+                foreach (var scalarType in ScalarType.Standard)
+                {
+                    yield return new object[] {scalarType};
+                }
+
+                yield return new object[]
+                {
+                    new EnumType(&quot;Enum&quot;,
+                        new EnumValues())
+                };
+
+                yield return new object[]
+                {
+                    new InputObjectType(&quot;Input&quot;,
+                        new InputFields())
+                };
+            }
+        }
+</code></pre></p>
+<p>Is output type?</p>
+<p><pre><code class="language-csharp">
+        [Theory]      
+        [MemberData(nameof(ValidOutputTypes))]
+        public void IsOutputType(IGraphQLType type)
+        {
+            /* Given */
+            /* When */
+            var isOutput = TypeIs.IsOutputType(type);
+            var isOutputAsNonNull = TypeIs.IsOutputType(
+                new NonNull(type));
+            var isOutputAsList = TypeIs.IsOutputType(
+                new List(type));
+
+            /* Then */
+            Assert.True(isOutput);
+            Assert.True(isOutputAsNonNull);
+            Assert.True(isOutputAsList);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        public static IEnumerable&lt;object[]&gt; ValidOutputTypes
+        {
+            get
+            {
+                foreach (var scalarType in ScalarType.Standard)
+                {
+                    yield return new object[] {scalarType};
+                }
+
+                yield return new object[]
+                {
+                    new ObjectType(&quot;Object&quot;,
+                        new Fields()), 
+                };
+
+                yield return new object[]
+                {
+                    new InterfaceType(&quot;Interface&quot;,
+                        new Fields()), 
+                };
+
+                yield return new object[]
+                {
+                    new UnionType(&quot;Union&quot;,
+                        Enumerable.Empty&lt;IGraphQLType&gt;()), 
+                };
+
+                yield return new object[]
+                {
+                    new EnumType(&quot;Enum&quot;,
+                        new EnumValues())
+                };
+            }
+        }
+</code></pre></p>
+
             </article>
         </div>
     </div>
