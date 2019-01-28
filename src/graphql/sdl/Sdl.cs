@@ -372,7 +372,7 @@ namespace tanka.graphql.sdl
                     defaultValue = null;
                 }
 
-                if (!Validations.IsInputType(type))
+                if (!TypeIs.IsInputType(type))
                 {
                     throw new GraphQLError($"Type of input value definition is not valid input value type. " +
                                            $"Definition: '{definition.Name.Value}' Type: {definition.Type.Kind}",

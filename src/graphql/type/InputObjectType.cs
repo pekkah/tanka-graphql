@@ -50,7 +50,7 @@ namespace tanka.graphql.type
             {
                 var fieldType = field.Value.Type;
 
-                if (!Validations.IsInputType(fieldType))
+                if (!TypeIs.IsInputType(fieldType))
                     throw new InvalidOperationException(
                         $"Input type {name} cannot contain a non input type field {field.Key}");
 

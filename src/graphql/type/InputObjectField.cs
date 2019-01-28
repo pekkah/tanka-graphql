@@ -41,7 +41,7 @@ namespace tanka.graphql.type
             Meta meta = null,
             object defaultValue = null)
         {
-            if (!Validations.IsInputType(type))
+            if (!TypeIs.IsInputType(type))
             {
                 throw new ArgumentOutOfRangeException(
                     $"Wrapped type of list is not valid input type. Wrapped type: {type.Unwrap().Name}");
@@ -57,7 +57,7 @@ namespace tanka.graphql.type
             Meta meta = null,
             object defaultValue = null)
         {
-            if (!Validations.IsInputType(type))
+            if (!TypeIs.IsInputType(type))
             {
                 throw new ArgumentOutOfRangeException(
                     $"Wrapped type of NonNull is not valid input type. Wrapped type: {type.Unwrap().Name}");
