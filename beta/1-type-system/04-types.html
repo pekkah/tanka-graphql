@@ -84,14 +84,13 @@
 <li><code>UnionType</code></li>
 <li><code>EnumType</code></li>
 <li><code>InputObjectType</code></li>
-<li><code>DirectiveType</code></li>
 </ul>
-<p>These all exists in <code>tanka.graphql.type</code> namespace.</p>
+<p>These all exists in <code>tanka.graphql.type</code> namespace and implement <code>INamedType</code> interface</p>
 <h3 id="wrapping-types">Wrapping types</h3>
 <p>Wrapping types implement the <code>IWrappingType</code></p>
-<p><pre><code class="language-csharp">    public interface IWrappingType
+<p><pre><code class="language-csharp">    public interface IWrappingType: IType
     {
-        IGraphQLType WrappedType { get; }
+        IType WrappedType { get; }
     }
 </code></pre></p>
 <p>Two built-in implementations are provided</p>
@@ -103,7 +102,7 @@
 <p>Is input type?</p>
 <p><pre><code class="language-csharp">        [Theory]
         [MemberData(nameof(ValidInputTypes))]
-        public void IsInputType(IGraphQLType type)
+        public void IsInputType(INamedType type)
         {
             /* Given */
             /* When */
@@ -147,7 +146,7 @@
 <p><pre><code class="language-csharp">
         [Theory]      
         [MemberData(nameof(ValidOutputTypes))]
-        public void IsOutputType(IGraphQLType type)
+        public void IsOutputType(INamedType type)
         {
             /* Given */
             /* When */
@@ -188,7 +187,7 @@
                 yield return new object[]
                 {
                     new UnionType(&quot;Union&quot;,
-                        Enumerable.Empty&lt;IGraphQLType&gt;()), 
+                        Enumerable.Empty&lt;INamedType&gt;()), 
                 };
 
                 yield return new object[]

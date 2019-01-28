@@ -89,11 +89,11 @@
 
         Task InitializeAsync();
 
-        IGraphQLType GetNamedType(string name);
+        INamedType GetNamedType(string name);
 
-        T GetNamedType&lt;T&gt;(string name) where T : IGraphQLType;
+        T GetNamedType&lt;T&gt;(string name) where T : INamedType;
 
-        IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt; filter = null) where T : IGraphQLType;
+        IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt; filter = null) where T : IType;
 
         DirectiveType GetDirective(string name);
 
@@ -230,7 +230,7 @@ be fixed.</p>
             await sut.InitializeAsync();
 
             /* Then */
-            var types = sut.QueryTypes&lt;IGraphQLType&gt;();
+            var types = sut.QueryTypes&lt;INamedType&gt;();
 
             Assert.Contains(types, t =&gt; t.Name == &quot;Q&quot;);
             Assert.Contains(types, t =&gt; t.Name == &quot;fieldType&quot;);
@@ -257,7 +257,7 @@ be fixed.</p>
             await sut.InitializeAsync();
 
             /* Then */
-            var types = sut.QueryTypes&lt;IGraphQLType&gt;();
+            var types = sut.QueryTypes&lt;INamedType&gt;();
 
             Assert.Single(types, ScalarType.String);
         }
@@ -283,7 +283,7 @@ be fixed.</p>
             await sut.InitializeAsync();
 
             /* Then */
-            var types = sut.QueryTypes&lt;IGraphQLType&gt;();
+            var types = sut.QueryTypes&lt;INamedType&gt;();
 
             Assert.Single(types, t =&gt; t.Name == &quot;Q&quot;);
             Assert.Single(types, t =&gt; t.Name == &quot;fieldType&quot;);

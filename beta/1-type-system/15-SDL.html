@@ -76,7 +76,7 @@
 <p>Defining <code>Schema</code> in IDL/SDL can greatly speed up and simplify code base.</p>
 <h3 id="load-schema-from-sdl">Load schema from SDL</h3>
 <p><code>Sdl</code> class provides static methods for parsing types from SDL definitions.</p>
-<h4 id="schema">Schema</h4>
+<p>Schema</p>
 <p><pre><code class="language-csharp">
         [Fact]
         public void Parse_Document_as_Schema()
@@ -111,7 +111,7 @@ schema {
             Assert.NotNull(actual.Subscription);
         }
 </code></pre></p>
-<h4 id="types">Types</h4>
+<p>Types</p>
 <p><pre><code class="language-csharp">
         [Fact]
         public void Parse_Document_with_types()
@@ -173,7 +173,7 @@ input JediPowerInput {
             Assert.Equal(jediPowerLevel, level.Type);
         }
 </code></pre></p>
-<h4 id="custom-scalars">Custom scalars</h4>
+<p>Custom scalars</p>
 <p><pre><code class="language-csharp">        [Fact]
         public void Parse_custom_scalar()
         {
@@ -184,7 +184,7 @@ scalar Url
             var urlScalar = new ScalarType(&quot;Url&quot;, new StringConverter());
             var document = Parser.ParseDocument(idl);
             var typeDefinition = document.Definitions.OfType&lt;GraphQLScalarTypeDefinition&gt;().SingleOrDefault();
-            var context = new SdlParserContext(document, new IGraphQLType[]
+            var context = new SdlParserContext(document, new INamedType[]
             {
                 urlScalar
             });
@@ -197,7 +197,7 @@ scalar Url
             Assert.Equal(urlScalar, actual);
         }
 </code></pre></p>
-<h4 id="types-can-be-extended">Types can be extended</h4>
+<p>Types can be extended</p>
 <p><pre><code class="language-csharp">
         [Fact]
         public void Parse_ObjectType_with_extension()
