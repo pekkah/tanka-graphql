@@ -72,7 +72,62 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="interfaces">Interfaces</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Interfaces">Specification</a></p>
+</blockquote>
+<p>Interfaces are created as instances of <code>InterfaceType</code>.</p>
+<h3 id="creating-interface">Creating interface</h3>
+<p>Define with non-null scalar field</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Define_interface()
+        {
+            /* Given */
+            /* When */
+            var namedEntity = new InterfaceType(
+                &quot;NamedEntity&quot;,
+                new Fields
+                {
+                    {&quot;name&quot;, ScalarType.NonNullString}
+                });
+
+
+            /* Then */
+            Assert.Equal(&quot;NamedEntity&quot;, namedEntity.Name);
+            Assert.Single(namedEntity.Fields, fk =&gt; fk.Key == &quot;name&quot;
+                                                    &amp;&amp; (NonNull) fk.Value.Type == ScalarType.NonNullString);
+        }
+</code></pre></p>
+<h3 id="implementing-interface">Implementing interface</h3>
+<p>Object implements interface</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Implement_interface()
+        {
+            /* Given */
+            var namedEntity = new InterfaceType(
+                &quot;NamedEntity&quot;,
+                new Fields
+                {
+                    {&quot;name&quot;, ScalarType.NonNullString}
+                });
+
+            var person = new ObjectType(
+                &quot;Person&quot;,
+                new Fields
+                {
+                    {&quot;name&quot;, ScalarType.NonNullString}
+                },
+                implements: new[] {namedEntity});
+
+            /* When */
+            var implements = person.Implements(namedEntity);
+
+            /* Then */
+            Assert.True(implements);
+        }
+</code></pre></p>
+
             </article>
         </div>
     </div>
