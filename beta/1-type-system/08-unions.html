@@ -72,7 +72,46 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="unions">Unions</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Unions">Specification</a></p>
+</blockquote>
+<p>Unions are created as instances of <code>UnionType</code>.</p>
+<h3 id="creating-union">Creating union</h3>
+<p>Union with two possible values</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Define_union()
+        {
+            /* Given */
+            var person = new ObjectType(
+                &quot;Person&quot;,
+                new Fields
+                {
+                    {&quot;name&quot;, ScalarType.NonNullString}
+                });
+
+            var photo = new ObjectType(
+                &quot;Photo&quot;,
+                new Fields
+                {
+                    {&quot;height&quot;, ScalarType.NonNullInt},
+                    {&quot;width&quot;, ScalarType.NonNullInt}
+                });
+
+            /* When */
+            var searchResult = new UnionType(
+                &quot;SearchResult&quot;,
+                possibleTypes: new [] {person, photo});
+
+            var personIsPossible = searchResult.IsPossible(person);
+            var photoIsPossible = searchResult.IsPossible(photo);
+
+            /* Then */
+            Assert.True(personIsPossible);
+            Assert.True(photoIsPossible);
+        }
+</code></pre></p>
+
             </article>
         </div>
     </div>
