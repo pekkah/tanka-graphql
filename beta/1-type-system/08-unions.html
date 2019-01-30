@@ -101,7 +101,7 @@
             /* When */
             var searchResult = new UnionType(
                 &quot;SearchResult&quot;,
-                possibleTypes: new [] {person, photo});
+                new[] {person, photo});
 
             var personIsPossible = searchResult.IsPossible(person);
             var photoIsPossible = searchResult.IsPossible(photo);
