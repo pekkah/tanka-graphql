@@ -91,7 +91,7 @@ namespace tanka.graphql.tests.execution
                 yield return new object[]
                 {
                     new UnionType("Union",
-                        Enumerable.Empty<INamedType>()), 
+                        Enumerable.Empty<ObjectType>()), 
                 };
 
                 yield return new object[]

@@ -39,7 +39,7 @@ namespace tanka.graphql.introspection
             if (type is UnionType unionType)
             {
                 var possibleTypes = schema
-                    .QueryTypes<INamedType>(t => unionType.IsPossible(t));
+                    .QueryTypes<ObjectType>(t => unionType.IsPossible(t));
 
                 return possibleTypes.Select(p => Examiner.Examine(p, schema));
             }
