@@ -8,7 +8,7 @@ namespace tanka.graphql.type
 
         public Meta(string description = null, string deprecationReason = null, IEnumerable<DirectiveInstance> directives = null)
         {
-            Description = description;
+            Description = description; //todo: should be  ?? string.Empty ??
             DeprecationReason = deprecationReason;
             _directives = new DirectiveContainer(directives);
         }

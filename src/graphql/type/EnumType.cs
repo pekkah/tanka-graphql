@@ -67,6 +67,11 @@ namespace tanka.graphql.type
         {
             return Name;
         }
+
+        public bool Contains(string value)
+        {
+            return _values.ContainsKey(value);
+        }
     }
 
     public class EnumValues : Dictionary<string, Meta>
@@ -74,6 +79,11 @@ namespace tanka.graphql.type
         public EnumValues()
         {
             
+        }
+
+        public void Add(string name, string description = null, string depricationReason = null)
+        {
+            Add(name, new Meta(description, depricationReason));
         }
 
         public EnumValues(IEnumerable<string> values)

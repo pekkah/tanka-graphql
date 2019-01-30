@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using tanka.graphql.type;
+﻿using tanka.graphql.type;
 using Xunit;
 
 namespace tanka.graphql.tests.type
@@ -28,7 +27,7 @@ namespace tanka.graphql.tests.type
             /* When */
             var searchResult = new UnionType(
                 "SearchResult",
-                possibleTypes: new [] {person, photo});
+                new[] {person, photo});
 
             var personIsPossible = searchResult.IsPossible(person);
             var photoIsPossible = searchResult.IsPossible(photo);
