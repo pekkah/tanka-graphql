@@ -72,7 +72,138 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="directives">Directives</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-System.Directives">Specification</a></p>
+</blockquote>
+<p>Directives are created as instance of <code>DirectiveType</code>. When adding to target instance of <code>DirectiveInstance</code> is used. It contains a reference back to the original type.</p>
+<p>Following directives are provided as static properties of <code>DirectiveType</code></p>
+<p><pre><code class="language-csharp">Skip = new DirectiveType(
+            &quot;skip&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args
+            {
+                {&quot;if&quot;, ScalarType.NonNullBoolean}
+            })</code></pre></p>
+<p><pre><code class="language-csharp">Include = new DirectiveType(
+            &quot;include&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args
+            {
+                {&quot;if&quot;, ScalarType.NonNullBoolean}
+            })</code></pre></p>
+<p><pre><code class="language-csharp">Deprecated = new DirectiveType(
+            &quot;deprecated&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD_DEFINITION,
+                DirectiveLocation.ENUM_VALUE
+            },
+            new Args
+            {
+                {&quot;reason&quot;, ScalarType.String}
+            })</code></pre></p>
+<h3 id="create-custom-directive">Create custom directive</h3>
+<p>Create simple <code>DirectiveType</code> and apply instance of it to a field and modify resolver logic to execute custom logic if it has the directive present.</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public async Task Authorize_field_directive()
+        {
+            /* Given */
+            var authorizeType = new DirectiveType(
+                &quot;authorize&quot;,
+                new[]
+                {
+                    DirectiveLocation.FIELD_DEFINITION
+                });
+
+            var requiresAuthorize = new Field(
+                ScalarType.NonNullString,
+                meta: new Meta(directives: new[]
+                {
+                    authorizeType.CreateInstance()
+                }));
+
+            var query = new ObjectType(&quot;Query&quot;,
+                new Fields
+                {
+                    {&quot;requiresAuthorize&quot;, requiresAuthorize}
+                });
+
+            var resolvers = new ResolverMap
+            {
+                {
+                    query.Name, new FieldResolverMap
+                    {
+                        {&quot;requiresAuthorize&quot;, context =&gt; Task.FromResult(Resolve.As(&quot;Hello World!&quot;))}
+                    }
+                }
+            };
+
+            Func&lt;bool&gt; authorize = () =&gt; true;
+
+            /* When */
+            var schema = await SchemaTools.MakeExecutableSchemaAsync(
+                new Schema(query),
+                resolvers,
+                visitors: new SchemaVisitorFactory[]
+                {
+                    (s, _1, _2) =&gt; new Authorize(s, authorize)
+                });
+
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            {
+                Document = Parser.ParseDocument(@&quot;{ requiresAuthorize }&quot;),
+                Schema = schema
+            });
+
+            /* Then */
+            Assert.Equal(&quot;Hello World! authorize: True&quot;, result.Data[&quot;requiresAuthorize&quot;]);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+    public class Authorize : SchemaVisitorBase
+    {
+        private readonly Func&lt;bool&gt; _authorize;
+
+        public Authorize(ISchema schema, Func&lt;bool&gt; authorize) : base(schema)
+        {
+            _authorize = authorize;
+        }
+
+        protected override Task VisitObjectFieldAsync(ObjectType objectType,
+            KeyValuePair&lt;string, IField&gt; objectTypeField)
+        {
+            var authorizeDirective = objectTypeField.Value.GetDirective(&quot;authorize&quot;);
+
+            if (authorizeDirective != null)
+            {
+                var field = objectTypeField.Value;
+                var originalResolver = field.Resolve;
+
+                field.Resolve = async context =&gt;
+                {
+                    var result = await originalResolver(context);
+                    var value = $&quot;{result.Value} authorize: {_authorize()}&quot;;
+
+                    return Resolve.As(value);
+                };
+            }
+
+            return base.VisitObjectFieldAsync(objectType, objectTypeField);
+        }
+    }
+</code></pre></p>
+
             </article>
         </div>
     </div>
