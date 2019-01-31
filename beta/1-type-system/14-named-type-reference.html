@@ -72,7 +72,38 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="namedtyperereference">NamedTypeRereference</h2>
+<p>Supporting cases where the parent <code>ObjectType</code> would have a field of its own type would be difficult without providing a way of referencing the type by its name. This reference would be then replaced by the actual type when <code>Schema</code> is initialized.</p>
+<p>To reference <code>INamedType</code> by its name create instance of <code>NamedTypeReference</code> giving it the name of the referenced type as parameter.</p>
+<h3 id="creating-namedtypereference">Creating NamedTypeReference</h3>
+<p>Create <code>ObjectType</code> with field having the same object as an type using the <code>NamedTypeReference</code>. Reference is replaced by the actual type when <code>Schema</code> is initialized.</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public async Task Circular_type_reference()
+        {
+            /* Given */
+            var person = new ObjectType(
+                &quot;Person&quot;,
+                new Fields
+                {
+                    {&quot;friends&quot;, new List(new NamedTypeReference(&quot;Person&quot;))}
+                });
+
+            /* When */
+            var schema = new Schema(new ObjectType(&quot;Query&quot;, new Fields
+            {
+                {&quot;person&quot;, person}
+            }));
+
+            await schema.InitializeAsync();
+            var friendsField = schema.GetNamedType&lt;ObjectType&gt;(person.Name)
+                .GetField(&quot;friends&quot;);
+
+            /* Then */          
+            Assert.IsType&lt;List&gt;(friendsField.Type);
+            Assert.Equal(person, ((List)friendsField.Type).WrappedType);
+        }
+</code></pre></p>
+
             </article>
         </div>
     </div>
