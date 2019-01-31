@@ -72,7 +72,27 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="non-null">Non-Null</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-System.Non-Null">Specification</a></p>
+</blockquote>
+<p>NonNulls are created as instances of <code>NonNull</code>.</p>
+<h3 id="creating-nonnull">Creating NonNull</h3>
+<p>NonNull is created by giving it itemType it will apply to.</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Define_NonNull()
+        {
+            /* Given */
+            var itemType = ScalarType.Int;
+
+            /* When */
+            var nonNull = new NonNull(itemType);
+
+            /* Then */
+            Assert.Equal(itemType, nonNull.WrappedType);
+        }
+</code></pre></p>
+
             </article>
         </div>
     </div>
