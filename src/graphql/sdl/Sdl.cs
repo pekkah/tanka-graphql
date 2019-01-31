@@ -240,7 +240,7 @@ namespace tanka.graphql.sdl
                 }
             }
 
-            yield return new DirectiveInstance(directiveType, arguments);
+            yield return directiveType.CreateInstance(arguments);
         }
 
         private static INamedType Extend(GraphQLTypeExtensionDefinition definition, SdlParserContext context)

@@ -22,6 +22,7 @@ namespace tanka.graphql.type
         {
         }
 
+        [Obsolete]
         public static Argument Arg(IType type, object defaultValue = null, Meta meta = null)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));

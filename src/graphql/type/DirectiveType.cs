@@ -6,30 +6,19 @@ namespace tanka.graphql.type
 {
     public class DirectiveType : INamedType
     {
-        public static DirectiveType Skip = new DirectiveType(
-            "skip",
+        /// <summary>
+        ///     Introspection does not yet use this if found
+        /// </summary>
+        public static DirectiveType Deprecated = new DirectiveType(
+            "deprecated",
             new[]
             {
-                DirectiveLocation.FIELD,
-                DirectiveLocation.FRAGMENT_SPREAD,
-                DirectiveLocation.INLINE_FRAGMENT
+                DirectiveLocation.FIELD_DEFINITION,
+                DirectiveLocation.ENUM_VALUE
             },
             new Args
             {
-                ["if"] = Argument.Arg(ScalarType.NonNullBoolean)
-            });
-
-        public static DirectiveType Include = new DirectiveType(
-            "include",
-            new[]
-            {
-                DirectiveLocation.FIELD,
-                DirectiveLocation.FRAGMENT_SPREAD,
-                DirectiveLocation.INLINE_FRAGMENT
-            },
-            new Args
-            {
-                ["if"] = Argument.Arg(ScalarType.NonNullBoolean)
+                {"reason", ScalarType.String}
             });
 
         public static IEnumerable<DirectiveLocation> ExecutableLocations = new[]
@@ -42,6 +31,32 @@ namespace tanka.graphql.type
             DirectiveLocation.FRAGMENT_SPREAD,
             DirectiveLocation.INLINE_FRAGMENT
         };
+
+        public static DirectiveType Include = new DirectiveType(
+            "include",
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args
+            {
+                {"if", ScalarType.NonNullBoolean}
+            });
+
+        public static DirectiveType Skip = new DirectiveType(
+            "skip",
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args
+            {
+                {"if", ScalarType.NonNullBoolean}
+            });
 
         public static IEnumerable<DirectiveLocation> TypeSystemLocations = new[]
         {
@@ -100,6 +115,11 @@ namespace tanka.graphql.type
         {
             return _arguments.ContainsKey(name);
         }
+
+        public DirectiveInstance CreateInstance(Args arguments = null)
+        {
+            return new DirectiveInstance(this, arguments);
+        }
     }
 
     public enum DirectiveLocation
@@ -122,6 +142,6 @@ namespace tanka.graphql.type
         ENUM,
         ENUM_VALUE,
         INPUT_OBJECT,
-        INPUT_FIELD_DEFINITION,
+        INPUT_FIELD_DEFINITION
     }
 }
