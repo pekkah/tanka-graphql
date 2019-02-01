@@ -72,7 +72,65 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="input-objects">Input Objects</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Input-Objects">Specification</a></p>
+</blockquote>
+<p>Input objects are created as instances of <code>InputObjectType</code>.</p>
+<h3 id="creating-input-object">Creating input object</h3>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Define()
+        {
+            /* Given */
+            /* When */
+            var input = new InputObjectType(
+                &quot;ExampleInputObject&quot;,
+                new InputFields
+                {
+                    {&quot;a&quot;, ScalarType.Boolean}
+                });
+
+            /* Then */
+            Assert.Single(input.Fields, fk =&gt; fk.Key == &quot;a&quot;
+                                              &amp;&amp; (ScalarType) fk.Value.Type == ScalarType.Boolean);
+        }
+</code></pre></p>
+<blockquote>
+<p>When using List or NonNull wrappers make sure that the wrapped type passes <code>TypeIs.IsInputType</code>.</p>
+</blockquote>
+<h3 id="input-coercion">Input Coercion</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Input_coercion()
+        {
+            /* Given */
+            var input = new InputObjectType(
+                &quot;ExampleInputObject&quot;,
+                new InputFields
+                {
+                    {&quot;a&quot;, ScalarType.String},
+                    {&quot;b&quot;, ScalarType.NonNullInt}
+                });
+
+            /* When */
+            var literalValue = new Dictionary&lt;string, object&gt;
+            {
+                [&quot;a&quot;] = &quot;abc&quot;,
+                [&quot;b&quot;] = 123L
+            };
+
+            Dictionary&lt;string, object&gt; actual = 
+                (Dictionary&lt;string, object&gt;)Values.CoerceValue(literalValue, input);
+
+            /* Then */
+            foreach (var expectedKv in literalValue)
+            {
+                Assert.True(actual.ContainsKey(expectedKv.Key));
+                Assert.Equal(expectedKv.Value, actual[expectedKv.Key]);
+            }
+        }
+</code></pre></p>
+
             </article>
         </div>
     </div>
