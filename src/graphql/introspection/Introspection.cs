@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections;
+using System.Threading.Tasks;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 

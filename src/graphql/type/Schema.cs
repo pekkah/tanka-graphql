@@ -24,7 +24,10 @@ namespace tanka.graphql.type
             // Mutation and subscription are optional
             Mutation = mutation;
             Subscription = subscription;
-
+            
+            if (directives != null)
+                Directives.AddRange(directives);
+            
             IsInitialized = false;
         }
 
