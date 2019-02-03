@@ -6,6 +6,15 @@ namespace tanka.graphql
 {
     public interface ISubscriberMap
     {
-        Subscriber GetSubscriber(ComplexType type, KeyValuePair<string, IField> field);
+        Subscriber GetSubscriber(string typeName, string fieldName);
+    }
+
+    public static class SubscriberMapExtensions
+    {
+        public static Subscriber GetSubscriber(this ISubscriberMap map, ComplexType type,
+            KeyValuePair<string, IField> field)
+        {
+            return map.GetSubscriber(type.Name, field.Key);
+        }
     }
 }

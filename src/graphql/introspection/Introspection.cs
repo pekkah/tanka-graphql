@@ -102,7 +102,7 @@ namespace tanka.graphql.introspection
                 await schema.InitializeAsync();
 
             var data = Examiner.Examine(schema);
-            var introspectionSchemaBuilder = new IntrospectionSchemaBuilder();
+            var introspectionSchemaBuilder = new IntrospectionSchema();
             var resolvers = new IntrospectionResolvers(
                 data,
                 schema);
