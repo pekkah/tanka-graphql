@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace tanka.graphql.type
 {
-    public class DirectiveType : INamedType
+    public class DirectiveType : IDescribable, INamedType //todo(pekka): should not be named type
     {
         /// <summary>
         ///     Introspection does not yet use this if found
@@ -16,7 +16,7 @@ namespace tanka.graphql.type
                 DirectiveLocation.FIELD_DEFINITION,
                 DirectiveLocation.ENUM_VALUE
             },
-            new Args
+            new Args()
             {
                 {"reason", ScalarType.String}
             });
@@ -40,7 +40,7 @@ namespace tanka.graphql.type
                 DirectiveLocation.FRAGMENT_SPREAD,
                 DirectiveLocation.INLINE_FRAGMENT
             },
-            new Args
+            new Args()
             {
                 {"if", ScalarType.NonNullBoolean}
             });
@@ -120,6 +120,8 @@ namespace tanka.graphql.type
         {
             return new DirectiveInstance(this, arguments);
         }
+
+        public string Description => Meta.Description;
     }
 
     public enum DirectiveLocation

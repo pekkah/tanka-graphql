@@ -3,7 +3,7 @@ using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
-    public class Field : IField
+    public class Field : IField, IDescribable, IDeprecable
     {
         private readonly Args _arguments = new Args();
 
@@ -23,6 +23,12 @@ namespace tanka.graphql.type
         }
 
         public object DefaultValue { get; set; }
+
+        public string Description => Meta.Description;
+
+        public string DeprecationReason => Meta.DeprecationReason;
+
+        public bool IsDeprecated => Meta.IsDeprecated;
 
         public Meta Meta { get; set; }
 

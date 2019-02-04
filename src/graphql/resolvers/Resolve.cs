@@ -45,7 +45,13 @@ namespace tanka.graphql.resolvers
         {
             return context =>
             {
-                var source = (T) context.ObjectValue;
+                var source = context.ObjectValue is T objectValue ? objectValue : default(T);
+
+                if (source == null)
+                {
+                    return Task.FromResult(As(null));
+                }
+
                 var values = getValue(source);
 
                 if (values == null)

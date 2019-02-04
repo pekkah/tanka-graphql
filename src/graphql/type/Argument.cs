@@ -2,7 +2,7 @@
 
 namespace tanka.graphql.type
 {
-    public class Argument
+    public class Argument : IDescribable
     {
         public IType Type { get; set; }
 
@@ -29,5 +29,7 @@ namespace tanka.graphql.type
 
             return new Argument(type, defaultValue, meta);
         }
+
+        public string Description => Meta.Description;
     }
 }

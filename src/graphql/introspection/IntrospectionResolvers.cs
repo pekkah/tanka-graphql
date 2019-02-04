@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 
@@ -6,79 +8,175 @@ namespace tanka.graphql.introspection
 {
     public class IntrospectionResolvers : ResolverMap
     {
-        public IntrospectionResolvers(__Schema translator, ISchema data)
+        public IntrospectionResolvers(ISchema source)
         {
-            this[data.Query.Name] = new FieldResolverMap()
+            this[source.Query.Name] = new FieldResolverMap()
             {
-                {"__schema", context => SyncWrap.Sync(translator)},
-                {"__type", context => SyncWrap.Sync(translator.GetTypes(data))}
+                {"__schema", context => SyncWrap.Sync(source)},
+                {"__type", context => SyncWrap.Sync(
+                    source.GetNamedType(context.GetArgument<string>("name")))}
             };
 
             this[IntrospectionSchema.SchemaName] = new FieldResolverMap()
             {
-                {"types", context => SyncWrap.Sync(translator.GetTypes(data))},
-                {"queryType", context => SyncWrap.Sync(translator.GetType("Query", data))},
-                {"mutationType", context => SyncWrap.Sync(translator.GetType("Mutation", data))},
-                {"subscriptionType", context => SyncWrap.Sync(translator.GetType("Subscription", data))},
-                {"directives", context => SyncWrap.Sync(translator.GetDirectives(data))}
+                {"types", context => SyncWrap.Sync(source.QueryTypes<IType>())},
+                {"queryType", context => SyncWrap.Sync(source.Query)},
+                {"mutationType", context => SyncWrap.Sync(source.Mutation)},
+                {"subscriptionType", context => SyncWrap.Sync(source.Subscription)},
+                {"directives", context => SyncWrap.Sync(source.QueryDirectives())}
             };
-
+        
             this[IntrospectionSchema.TypeName] = new FieldResolverMap()
             {
-                {"kind", Resolve.PropertyOf<__Type>(t => t.Kind)},
-                {"name", Resolve.PropertyOf<__Type>(t => t.Name)},
-                {"description", Resolve.PropertyOf<__Type>(t => t.Description)},
+                {"kind", Resolve.PropertyOf<IType>(t => KindOf(t))},
+                {"name", Resolve.PropertyOf<INamedType>(t => t.Name)},
+                {"description", Resolve.PropertyOf<IDescribable>(t => t.Description)},
+                
+                // OBJECT and INTERFACE only
                 {"fields", context =>
-                {
-                    var type = (__Type) context.ObjectValue;
-                    var includeDeprecated = (bool) context.Arguments["includeDeprecated"];
-                    return SyncWrap.Sync(type.GetFields(includeDeprecated));
-                }},
-                {"interfaces", Resolve.PropertyOf<__Type>(t => translator.GetInterfacesOf(t, data))},
-                {"possibleTypes", Resolve.PropertyOf<__Type>(t => translator.GetPossibleTypes(t.Name, data))},
-                {"enumValues", context =>
-                {
-                    var type = (__Type) context.ObjectValue;
-                    var includeDeprecated = (bool) context.Arguments["includeDeprecated"];
-                    return SyncWrap.Sync(type.GetEnumValues(includeDeprecated));
-                }},
-                {"inputFields", Resolve.PropertyOf<__Type>(t => t.InputFields)},
-                {"ofType", Resolve.PropertyOf<__Type>(t => t.OfType)},
-            };
+                    {
+                        if (!(context.ObjectValue is ComplexType complexType))
+                            return SyncWrap.Sync(null);
 
+                        var includeDeprecated = (bool) context.Arguments["includeDeprecated"];
+
+                        var fields = complexType.Fields;
+
+                        if (!includeDeprecated)
+                        {
+                            fields = fields.Where(f => !f.Value.IsDeprecated);
+                        }
+
+                        return SyncWrap.Sync(fields.ToList());
+                    }
+                },
+                
+                // OBJECT only
+                {"interfaces", Resolve.PropertyOf<ObjectType>(t => t.Interfaces)},
+                
+                
+                // INTERFACE and UNION only
+                {"possibleTypes", context =>
+                {
+                    List<ObjectType> possibleTypes = null;
+
+                    switch (context.ObjectValue)
+                    {
+                        case InterfaceType interfaceType:
+                        {
+                            var objects = source.QueryTypes<ObjectType>()
+                                .Where(o => o.Implements(interfaceType))
+                                .ToList();
+
+                            possibleTypes = objects;
+                            break;
+                        }
+                        case UnionType unionType:
+                            possibleTypes = unionType.PossibleTypes.Select(p => p.Value)
+                                .ToList();
+                            break;
+                    }
+
+                    return SyncWrap.Sync(possibleTypes);
+                }},
+                
+                // ENUM only
+                {"enumValues", context =>
+                    {
+                        var en = context.ObjectValue as EnumType;
+
+                        if (en == null)
+                            return SyncWrap.Sync(null);
+
+                        var includeDeprecated = (bool) context.Arguments["includeDeprecated"];
+
+                        var values = en.Values;
+
+                        if (!includeDeprecated)
+                        {
+                            values = values.Where(v => !v.Value.IsDeprecated);
+                        }
+                        return SyncWrap.Sync(values);
+                    }
+                },
+                
+                // INPUT_OBJECT only
+                //todo(pekka): DirectiveType uses Argument but should use InputFieldType
+                {"inputFields", Resolve.PropertyOf<InputObjectType>(t => t.Fields
+                    .Select(iof => new KeyValuePair<string, Argument>(
+                        iof.Key, 
+                        new Argument(iof.Value.Type, iof.Value.DefaultValue, iof.Value.Meta))))},
+
+                // NON_NULL and LIST only
+                {"ofType", Resolve.PropertyOf<IWrappingType>(t => t.WrappedType)},
+            };
+            
             this[IntrospectionSchema.FieldName] = new FieldResolverMap()
             {
-                {"name", Resolve.PropertyOf<__Field>(f => f.Name)},
-                {"description", Resolve.PropertyOf<__Field>(f => f.Description)},
-                {"args", Resolve.PropertyOf<__Field>(f => f.Args)},
-                {"type", Resolve.PropertyOf<__Field>(f => translator.GetType(f.Type, data))},
-                {"isDeprecated", Resolve.PropertyOf<__Field>(f => f.IsDeprecated)},
-                {"deprecationReason", Resolve.PropertyOf<__Field>(f => f.DeprecationReason)},
+                {"name", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Key)},
+                {"description", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.Description)},
+                {"args", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.Arguments)},
+                {"type", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.Type)},
+                {"isDeprecated", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.IsDeprecated)},
+                {"deprecationReason", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.DeprecationReason)},
             };
 
             this[IntrospectionSchema.InputValueName] = new FieldResolverMap()
             {
-                {"name", Resolve.PropertyOf<__InputValue>(f => f.Name)},
-                {"description", Resolve.PropertyOf<__InputValue>(f => f.Description)},
-                {"type", Resolve.PropertyOf<__InputValue>(f => translator.GetType(f.Type, data))},
-                {"defaultValue", Resolve.PropertyOf<__InputValue>(f => f.DefaultValue)}
+                {"name", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Key)},
+                {"description", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.Description)},
+                {"type", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.Type)},
+                {"defaultValue", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.DefaultValue)}
             };
-
+            
             this[IntrospectionSchema.EnumValueName] = new FieldResolverMap()
             {
-                {"name", Resolve.PropertyOf<__EnumValue>(f => f.Name)},
-                {"description", Resolve.PropertyOf<__EnumValue>(f => f.Description)},
-                {"isDeprecated", Resolve.PropertyOf<__EnumValue>(f => f.IsDeprecated)},
-                {"deprecationReason", Resolve.PropertyOf<__EnumValue>(f => f.DeprecationReason)},
+                {"name", Resolve.PropertyOf<KeyValuePair<string, Meta>>(f => f.Key)},
+                {"description", Resolve.PropertyOf<KeyValuePair<string, Meta>>(f => f.Value.Description)},
+                {"isDeprecated", Resolve.PropertyOf<KeyValuePair<string, Meta>>(f => f.Value.IsDeprecated)},
+                {"deprecationReason", Resolve.PropertyOf<KeyValuePair<string, Meta>>(f => f.Value.DeprecationReason)},
             };
-
+        
             this["__Directive"] = new FieldResolverMap()
             {
-                {"name", Resolve.PropertyOf<__Directive>(d => d.Name)},
-                {"description", Resolve.PropertyOf<__Directive>(d => d.Description)},
-                {"locations", Resolve.PropertyOf<__Directive>(d => d.Locations)},
-                {"args", Resolve.PropertyOf<__Directive>(d => d.Args)},
-            };
+                {"name", Resolve.PropertyOf<DirectiveType>(d => d.Name)},
+                {"description", Resolve.PropertyOf<DirectiveType>(d => d.Meta.Description)},
+                {"locations", Resolve.PropertyOf<DirectiveType>(d => LocationsOf(d.Locations))},
+                {"args", Resolve.PropertyOf<DirectiveType>(d => d.Arguments)},
+            };        
+        }
+
+        private IEnumerable<__DirectiveLocation> LocationsOf(IEnumerable<DirectiveLocation> locations)
+        {
+            return locations
+                .Select(l => (__DirectiveLocation) Enum.Parse(
+                    typeof(__DirectiveLocation),
+                    l.ToString())).ToList();
+        }
+
+        public static __TypeKind KindOf(IType type)
+        {
+            switch (type)
+            {
+                case ObjectType _:
+                    return __TypeKind.OBJECT;
+                case ScalarType _:
+                    return __TypeKind.SCALAR;
+                case EnumType _:
+                    return __TypeKind.ENUM;
+               case InputObjectType _:
+                   return __TypeKind.INPUT_OBJECT;
+               case InterfaceType _:
+                   return __TypeKind.INTERFACE;
+               case List _:
+                   return __TypeKind.LIST;
+               case NonNull _:
+                   return __TypeKind.NON_NULL;
+               case UnionType _:
+                   return __TypeKind.UNION;
+               default:
+                   throw new InvalidOperationException($"Cannot get kind form {type}");
+            }
         }
     }
 }

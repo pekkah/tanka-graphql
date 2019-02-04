@@ -18,7 +18,8 @@ namespace tanka.graphql.tools
         {
             foreach (var directiveType in Schema.QueryDirectives())
             {
-                foreach (var argument in directiveType.Arguments) await VisitArgumentAsync(directiveType, argument);
+                foreach (var argument in directiveType.Arguments) 
+                    await VisitArgumentAsync(directiveType, argument);
 
                 await VisitDirectiveAsync(directiveType);
             }
@@ -80,7 +81,8 @@ namespace tanka.graphql.tools
             return Task.CompletedTask;
         }
 
-        protected virtual Task VisitArgumentAsync(DirectiveType directiveType, KeyValuePair<string, Argument> argument)
+        protected virtual Task VisitArgumentAsync(DirectiveType directiveType,
+            KeyValuePair<string, Argument> argument)
         {
             return Task.CompletedTask;
         }

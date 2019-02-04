@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using tanka.graphql.type.converters;
 using GraphQLParser.AST;
+using tanka.graphql.type.converters;
 
 namespace tanka.graphql.type
 {
-    public class EnumType : INamedType, IValueConverter
+    public class EnumType : INamedType, IValueConverter, IDescribable
     {
         private readonly EnumValues _values = new EnumValues();
 
         public EnumType(
-            string name, 
+            string name,
             EnumValues values,
             Meta meta = null)
         {
@@ -31,9 +30,11 @@ namespace tanka.graphql.type
 
         public Meta Meta { get; set; }
 
-        public string Name { get; }
-
         public IEnumerable<KeyValuePair<string, Meta>> Values => _values;
+
+        public string Description => Meta.Description;
+
+        public string Name { get; }
 
         public object Serialize(object value)
         {
@@ -71,27 +72,6 @@ namespace tanka.graphql.type
         public bool Contains(string value)
         {
             return _values.ContainsKey(value);
-        }
-    }
-
-    public class EnumValues : Dictionary<string, Meta>
-    {
-        public EnumValues()
-        {
-            
-        }
-
-        public void Add(string name, string description = null, string depricationReason = null)
-        {
-            Add(name, new Meta(description, depricationReason));
-        }
-
-        public EnumValues(IEnumerable<string> values)
-        {
-            foreach (var value in values)
-            {
-                this[value] = null;
-            }
         }
     }
 }

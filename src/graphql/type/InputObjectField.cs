@@ -4,7 +4,7 @@ using tanka.graphql.execution;
 
 namespace tanka.graphql.type
 {
-    public class InputObjectField : IDirectives
+    public class InputObjectField : IDirectives, IDescribable
     {
         public InputObjectField(
             ScalarType type,
@@ -42,10 +42,8 @@ namespace tanka.graphql.type
             object defaultValue = null)
         {
             if (!TypeIs.IsInputType(type))
-            {
                 throw new ArgumentOutOfRangeException(
                     $"Wrapped type of list is not valid input type. Wrapped type: {type.Unwrap()}");
-            }
 
             Type = type;
             Meta = meta ?? new Meta();
@@ -58,10 +56,8 @@ namespace tanka.graphql.type
             object defaultValue = null)
         {
             if (!TypeIs.IsInputType(type))
-            {
                 throw new ArgumentOutOfRangeException(
                     $"Wrapped type of NonNull is not valid input type. Wrapped type: {type.Unwrap()}");
-            }
 
             Type = type;
             Meta = meta ?? new Meta();
@@ -73,6 +69,8 @@ namespace tanka.graphql.type
         public Meta Meta { get; set; }
 
         public IType Type { get; }
+
+        public string Description => Meta.Description;
 
         public IEnumerable<DirectiveInstance> Directives => Meta.Directives;
 

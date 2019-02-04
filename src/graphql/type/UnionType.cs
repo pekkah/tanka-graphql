@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
-    public class UnionType : INamedType
+    public class UnionType : INamedType, IDescribable
     {
         public UnionType(string name, IEnumerable<ObjectType> possibleTypes, Meta meta = null)
         {
@@ -22,13 +22,14 @@ namespace tanka.graphql.type
 
         public Dictionary<string, ObjectType> PossibleTypes { get; } = new Dictionary<string, ObjectType>();
 
+        public Meta Meta { get; }
+        public string Description => Meta.Description;
+
         public string Name { get; }
 
         public bool IsPossible(ObjectType type)
         {
             return PossibleTypes.ContainsKey(type.Name);
         }
-
-        public Meta Meta {get;}
     }
 }

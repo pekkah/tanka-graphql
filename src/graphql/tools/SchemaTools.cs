@@ -55,7 +55,7 @@ namespace tanka.graphql.tools
             if (!schema.IsInitialized)
                 await schema.InitializeAsync();
 
-            var introspection = await Introspection.ExamineAsync(schema);
+            var introspection = await Introspect.SchemaAsync(schema);
             var executable = await MakeExecutableSchemaAsync(schema, resolvers, subscribers);
 
             var withIntrospection = MergeTool.MergeSchemas(executable, introspection, (l, r) => r.Field);
