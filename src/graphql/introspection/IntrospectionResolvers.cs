@@ -105,7 +105,7 @@ namespace tanka.graphql.introspection
                 {"inputFields", Resolve.PropertyOf<InputObjectType>(t => t.Fields
                     .Select(iof => new KeyValuePair<string, Argument>(
                         iof.Key, 
-                        new Argument(iof.Value.Type, iof.Value.DefaultValue, iof.Value.Meta))))},
+                        new Argument(iof.Value.Type, iof.Value.DefaultValue, iof.Value.Meta))).ToList())},
 
                 // NON_NULL and LIST only
                 {"ofType", Resolve.PropertyOf<IWrappingType>(t => t.WrappedType)},
@@ -126,7 +126,7 @@ namespace tanka.graphql.introspection
                 {"name", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Key)},
                 {"description", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.Description)},
                 {"type", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.Type)},
-                {"defaultValue", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.DefaultValue)}
+                {"defaultValue", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => null)}
             };
             
             this[IntrospectionSchema.EnumValueName] = new FieldResolverMap()

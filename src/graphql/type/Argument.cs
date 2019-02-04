@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace tanka.graphql.type
 {
@@ -20,6 +21,7 @@ namespace tanka.graphql.type
         [Obsolete]
         public Argument()
         {
+            Meta = new Meta();
         }
 
         [Obsolete]
