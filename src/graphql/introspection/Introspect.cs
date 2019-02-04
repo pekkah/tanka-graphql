@@ -6,8 +6,6 @@ namespace tanka.graphql.introspection
 {
     public class Introspect
     {
-        public static ISchema Schema = new IntrospectionSchema().Build();
-
         public static string DefaultQuery = @"
             query IntrospectionQuery {
               __schema {
@@ -103,9 +101,12 @@ namespace tanka.graphql.introspection
             if (!schema.IsInitialized)
                 await schema.InitializeAsync();
 
+            var introspectionSchema = IntrospectionSchema.Build();
+            await introspectionSchema.InitializeAsync();
+            
             var introspectionResolvers = new IntrospectionResolvers(schema);
             return await SchemaTools.MakeExecutableSchemaAsync(
-                Schema,
+                introspectionSchema,
                 introspectionResolvers);
         }
     }

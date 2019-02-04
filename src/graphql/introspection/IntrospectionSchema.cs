@@ -14,7 +14,7 @@ namespace tanka.graphql.introspection
         public const string EnumValueName = "__EnumValue";
         public const string SchemaName = "__Schema";
 
-        public ISchema Build()
+        public static ISchema Build()
         {
             var typeKind = new NonNull(new EnumType(
                 TypeKindName,

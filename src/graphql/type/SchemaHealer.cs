@@ -29,6 +29,24 @@ namespace tanka.graphql.type
             return base.VisitObjectFieldAsync(objectType, objectTypeField);
         }
 
+        protected override Task VisitInterfaceFieldAsync(InterfaceType interfaceType, KeyValuePair<string, IField> interfaceTypeField)
+        {
+            if (interfaceTypeField.Value.Type.Unwrap() is NamedTypeReference typeReference)
+            {
+                var namedType = Schema.GetNamedType(typeReference.TypeName);
+
+                if (namedType == null)
+                    throw new InvalidOperationException($"Failed to heal schema. Could not build named type for field" +
+                                                        $"{interfaceType}:{interfaceTypeField.Key} from reference " +
+                                                        $"{typeReference.TypeName}");
+                         
+                var maybeWrappedType = WrapIfRequired(interfaceTypeField.Value.Type, namedType);
+                interfaceTypeField.Value.Type = maybeWrappedType;
+            }
+
+            return base.VisitInterfaceFieldAsync(interfaceType, interfaceTypeField);
+        }
+
         private IType WrapIfRequired(IType currentType, IType namedType)
         {
             if (currentType is NonNull nonNull)

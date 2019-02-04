@@ -24,9 +24,11 @@ namespace tanka.graphql.tools
                 await VisitDirectiveAsync(directiveType);
             }
 
-            foreach (var scalarType in Schema.QueryTypes<ScalarType>()) await VisitScalarAsync(scalarType);
+            foreach (var scalarType in Schema.QueryTypes<ScalarType>()) 
+                await VisitScalarAsync(scalarType);
 
-            foreach (var enumType in Schema.QueryTypes<EnumType>()) await VisitEnumAsync(enumType);
+            foreach (var enumType in Schema.QueryTypes<EnumType>()) 
+                await VisitEnumAsync(enumType);
 
             foreach (var inputObjectType in Schema.QueryTypes<InputObjectType>())
             {

@@ -21,411 +21,435 @@ namespace tanka.graphql.tests
         public async Task Introspect()
         {
             /* Given */
-            var schema = _fixture.Schema;
-            await schema.InitializeAsync().ConfigureAwait(false);
+            var starwars = new Starwars();
+            var schema = await _fixture.MakeExecutableAsync(starwars);
 
             /* When */
-            var introspectionSchema = await graphql.introspection.Introspect.SchemaAsync(schema)
-                .ConfigureAwait(false);
-
             var result = await ExecuteAsync(
                 new ExecutionOptions()
                 {
                     Document =  ParseDocument(graphql.introspection.Introspect.DefaultQuery),
-                    Schema = introspectionSchema
+                    Schema = schema
                 }).ConfigureAwait(false);
 
             /* Then */
-            result.ShouldMatchJson(@"{
-  ""data"": {
-    ""__schema"": {
-      ""directives"": [
-        {
-          ""name"": ""include"",
-          ""description"": """",
-          ""locations"": [
-            ""FIELD"",
-            ""FRAGMENT_SPREAD"",
-            ""INLINE_FRAGMENT""
-          ],
-          ""args"": [
-            {
-              ""name"": ""if"",
-              ""description"": """",
-              ""defaultValue"": null,
-              ""type"": {
-                ""name"": null,
-                ""ofType"": {
-                  ""name"": ""Boolean"",
-                  ""ofType"": null,
-                  ""kind"": ""SCALAR""
-                },
-                ""kind"": ""NON_NULL""
-              }
-            }
-          ]
-        },
-        {
-          ""name"": ""skip"",
-          ""description"": """",
-          ""locations"": [
-            ""FIELD"",
-            ""FRAGMENT_SPREAD"",
-            ""INLINE_FRAGMENT""
-          ],
-          ""args"": [
-            {
-              ""name"": ""if"",
-              ""description"": """",
-              ""defaultValue"": null,
-              ""type"": {
-                ""name"": null,
-                ""ofType"": {
-                  ""name"": ""Boolean"",
-                  ""ofType"": null,
-                  ""kind"": ""SCALAR""
-                },
-                ""kind"": ""NON_NULL""
-              }
-            }
-          ]
-        }
-      ],
-      ""mutationType"": {
-        ""name"": ""Mutation""
-      },
-      ""queryType"": {
-        ""name"": ""Query""
-      },
-      ""types"": [
-        {
-          ""enumValues"": null,
-          ""name"": ""InputObject"",
-          ""description"": ""Description"",
-          ""possibleTypes"": null,
-          ""inputFields"": [
-            {
-              ""name"": ""field1"",
-              ""description"": ""Description"",
-              ""defaultValue"": ""True"",
-              ""type"": {
-                ""name"": ""Boolean"",
-                ""ofType"": null,
-                ""kind"": ""SCALAR""
-              }
-            }
-          ],
-          ""interfaces"": null,
-          ""fields"": null,
-          ""kind"": ""INPUT_OBJECT""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Boolean"",
-          ""description"": ""The `Boolean` scalar type represents `true` or `false`"",
-          ""possibleTypes"": null,
-          ""inputFields"": null,
-          ""interfaces"": null,
-          ""fields"": null,
-          ""kind"": ""SCALAR""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Object2"",
-          ""description"": ""Description"",
-          ""possibleTypes"": null,
-          ""inputFields"": null,
-          ""interfaces"": [],
-          ""fields"": [
-            {
-              ""name"": ""int"",
-              ""description"": """",
-              ""args"": [],
-              ""isDeprecated"": false,
-              ""deprecationReason"": null,
-              ""type"": {
-                ""name"": null,
-                ""ofType"": {
-                  ""name"": ""Int"",
-                  ""ofType"": null,
-                  ""kind"": ""SCALAR""
-                },
-                ""kind"": ""LIST""
-              }
-            }
-          ],
-          ""kind"": ""OBJECT""
-        },
-        {
-          ""enumValues"": [
-            {
-              ""name"": ""VALUE1"",
-              ""description"": ""Description"",
-              ""isDeprecated"": false,
-              ""deprecationReason"": null
-            },
-            {
-              ""name"": ""VALUE2"",
-              ""description"": ""Description"",
-              ""isDeprecated"": true,
-              ""deprecationReason"": ""Deprecated""
-            }
-          ],
-          ""name"": ""Enum"",
-          ""description"": ""Description"",
-          ""possibleTypes"": null,
-          ""inputFields"": null,
-          ""interfaces"": null,
-          ""fields"": null,
-          ""kind"": ""ENUM""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Union"",
-          ""description"": ""Description"",
-          ""possibleTypes"": [
-            {
-              ""name"": ""Object"",
-              ""ofType"": null,
-              ""kind"": ""OBJECT""
-            },
-            {
-              ""name"": ""Object2"",
-              ""ofType"": null,
-              ""kind"": ""OBJECT""
-            }
-          ],
-          ""inputFields"": null,
-          ""interfaces"": null,
-          ""fields"": null,
-          ""kind"": ""UNION""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Float"",
-          ""description"": ""The `Float` scalar type represents signed double-precision fractional values as specified by '[IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)"",
-          ""possibleTypes"": null,
-          ""inputFields"": null,
-          ""interfaces"": null,
-          ""fields"": null,
-          ""kind"": ""SCALAR""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Int"",
-          ""description"": ""The `Int` scalar type represents non-fractional signed whole numeric values"",
-          ""possibleTypes"": null,
-          ""inputFields"": null,
-          ""interfaces"": null,
-          ""fields"": null,
-          ""kind"": ""SCALAR""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Interface"",
-          ""description"": ""Description"",
-          ""possibleTypes"": [
-            {
-              ""name"": ""Object"",
-              ""ofType"": null,
-              ""kind"": ""OBJECT""
-            }
-          ],
-          ""inputFields"": null,
-          ""interfaces"": null,
-          ""fields"": [
-            {
-              ""name"": ""int"",
-              ""description"": """",
-              ""args"": [],
-              ""isDeprecated"": false,
-              ""deprecationReason"": null,
-              ""type"": {
-                ""name"": ""Int"",
-                ""ofType"": null,
-                ""kind"": ""SCALAR""
-              }
-            }
-          ],
-          ""kind"": ""INTERFACE""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Object"",
-          ""description"": ""Description"",
-          ""possibleTypes"": null,
-          ""inputFields"": null,
-          ""interfaces"": [
-            {
-              ""name"": ""Interface"",
-              ""ofType"": null,
-              ""kind"": ""INTERFACE""
-            }
-          ],
-          ""fields"": [
-            {
-              ""name"": ""int"",
-              ""description"": ""Description"",
-              ""args"": [
-                {
-                  ""name"": ""arg1"",
-                  ""description"": ""Description"",
-                  ""defaultValue"": ""1"",
-                  ""type"": {
-                    ""name"": ""Float"",
-                    ""ofType"": null,
-                    ""kind"": ""SCALAR""
-                  }
-                }
-              ],
-              ""isDeprecated"": false,
-              ""deprecationReason"": null,
-              ""type"": {
-                ""name"": null,
-                ""ofType"": {
-                  ""name"": ""Int"",
-                  ""ofType"": null,
-                  ""kind"": ""SCALAR""
-                },
-                ""kind"": ""NON_NULL""
-              }
-            }
-          ],
-          ""kind"": ""OBJECT""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Query"",
-          ""description"": """",
-          ""possibleTypes"": null,
-          ""inputFields"": null,
-          ""interfaces"": [],
-          ""fields"": [
-            {
-              ""name"": ""object"",
-              ""description"": """",
-              ""args"": [],
-              ""isDeprecated"": false,
-              ""deprecationReason"": null,
-              ""type"": {
-                ""name"": ""Object"",
-                ""ofType"": null,
-                ""kind"": ""OBJECT""
-              }
-            },
-            {
-              ""name"": ""union"",
-              ""description"": """",
-              ""args"": [],
-              ""isDeprecated"": false,
-              ""deprecationReason"": null,
-              ""type"": {
-                ""name"": ""Union"",
-                ""ofType"": null,
-                ""kind"": ""UNION""
-              }
-            },
-            {
-              ""name"": ""enum"",
-              ""description"": """",
-              ""args"": [],
-              ""isDeprecated"": false,
-              ""deprecationReason"": null,
-              ""type"": {
-                ""name"": ""Enum"",
-                ""ofType"": null,
-                ""kind"": ""ENUM""
-              }
-            },
-            {
-              ""name"": ""listOfObject"",
-              ""description"": """",
-              ""args"": [],
-              ""isDeprecated"": false,
-              ""deprecationReason"": null,
-              ""type"": {
-                ""name"": null,
-                ""ofType"": {
-                  ""name"": ""Object2"",
-                  ""ofType"": null,
-                  ""kind"": ""OBJECT""
-                },
-                ""kind"": ""LIST""
-              }
-            },
-            {
-              ""name"": ""nonNullObject"",
-              ""description"": """",
-              ""args"": [],
-              ""isDeprecated"": false,
-              ""deprecationReason"": null,
-              ""type"": {
-                ""name"": null,
-                ""ofType"": {
-                  ""name"": ""Object"",
-                  ""ofType"": null,
-                  ""kind"": ""OBJECT""
-                },
-                ""kind"": ""NON_NULL""
-              }
-            },
-            {
-              ""name"": ""inputObjectArg"",
-              ""description"": ""With inputObject arg"",
-              ""args"": [
-                {
-                  ""name"": ""arg1"",
-                  ""description"": """",
-                  ""defaultValue"": null,
-                  ""type"": {
-                    ""name"": ""InputObject"",
-                    ""ofType"": null,
-                    ""kind"": ""INPUT_OBJECT""
-                  }
-                }
-              ],
-              ""isDeprecated"": false,
-              ""deprecationReason"": null,
-              ""type"": {
-                ""name"": null,
-                ""ofType"": {
-                  ""name"": ""Boolean"",
-                  ""ofType"": null,
-                  ""kind"": ""SCALAR""
-                },
-                ""kind"": ""NON_NULL""
-              }
-            }
-          ],
-          ""kind"": ""OBJECT""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Mutation"",
-          ""description"": """",
-          ""possibleTypes"": null,
-          ""inputFields"": null,
-          ""interfaces"": [],
-          ""fields"": [],
-          ""kind"": ""OBJECT""
-        },
-        {
-          ""enumValues"": null,
-          ""name"": ""Subscription"",
-          ""description"": """",
-          ""possibleTypes"": null,
-          ""inputFields"": null,
-          ""interfaces"": [],
-          ""fields"": [],
-          ""kind"": ""OBJECT""
-        }
-      ],
-      ""subscriptionType"": {
-        ""name"": ""Subscription""
-      }
-    }
-  }
-}");
+            result.ShouldMatchJson(
+                @"{
+                      ""data"": {
+                        ""__schema"": {
+                          ""queryType"": {
+                            ""name"": ""Query""
+                          },
+                          ""directives"": [
+                            {
+                              ""args"": [
+                                {
+                                  ""defaultValue"": null,
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""NON_NULL"",
+                                    ""ofType"": {
+                                      ""name"": ""Boolean"",
+                                      ""kind"": ""SCALAR"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""description"": """",
+                                  ""name"": ""if""
+                                }
+                              ],
+                              ""description"": """",
+                              ""locations"": [
+                                ""FIELD"",
+                                ""FRAGMENT_SPREAD"",
+                                ""INLINE_FRAGMENT""
+                              ],
+                              ""name"": ""include""
+                            },
+                            {
+                              ""args"": [
+                                {
+                                  ""defaultValue"": null,
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""NON_NULL"",
+                                    ""ofType"": {
+                                      ""name"": ""Boolean"",
+                                      ""kind"": ""SCALAR"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""description"": """",
+                                  ""name"": ""if""
+                                }
+                              ],
+                              ""description"": """",
+                              ""locations"": [
+                                ""FIELD"",
+                                ""FRAGMENT_SPREAD"",
+                                ""INLINE_FRAGMENT""
+                              ],
+                              ""name"": ""skip""
+                            }
+                          ],
+                          ""types"": [
+                            {
+                              ""enumValues"": [
+                                {
+                                  ""deprecationReason"": null,
+                                  ""description"": """",
+                                  ""isDeprecated"": false,
+                                  ""name"": ""NEWHOPE""
+                                },
+                                {
+                                  ""description"": """",
+                                  ""deprecationReason"": null,
+                                  ""isDeprecated"": false,
+                                  ""name"": ""EMPIRE""
+                                },
+                                {
+                                  ""description"": """",
+                                  ""deprecationReason"": null,
+                                  ""isDeprecated"": false,
+                                  ""name"": ""JEDI""
+                                }
+                              ],
+                              ""inputFields"": null,
+                              ""description"": """",
+                              ""fields"": null,
+                              ""name"": ""Episode"",
+                              ""possibleTypes"": null,
+                              ""kind"": ""ENUM"",
+                              ""interfaces"": null
+                            },
+                            {
+                              ""enumValues"": null,
+                              ""inputFields"": null,
+                              ""description"": ""The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text."",
+                              ""fields"": null,
+                              ""name"": ""String"",
+                              ""kind"": ""SCALAR"",
+                              ""possibleTypes"": null,
+                              ""interfaces"": null
+                            },
+                            {
+                              ""enumValues"": null,
+                              ""inputFields"": null,
+                              ""description"": ""Character in the movie"",
+                              ""fields"": [
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""NON_NULL"",
+                                    ""ofType"": {
+                                      ""name"": ""String"",
+                                      ""kind"": ""SCALAR"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""description"": """",
+                                  ""deprecationReason"": null,
+                                  ""isDeprecated"": false,
+                                  ""name"": ""id""
+                                },
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""NON_NULL"",
+                                    ""ofType"": {
+                                      ""name"": ""String"",
+                                      ""kind"": ""SCALAR"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""description"": """",
+                                  ""deprecationReason"": null,
+                                  ""isDeprecated"": false,
+                                  ""name"": ""name""
+                                },
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""LIST"",
+                                    ""ofType"": {
+                                      ""name"": ""Character"",
+                                      ""kind"": ""INTERFACE"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""description"": """",
+                                  ""deprecationReason"": null,
+                                  ""isDeprecated"": false,
+                                  ""name"": ""friends""
+                                },
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""LIST"",
+                                    ""ofType"": {
+                                      ""name"": ""Episode"",
+                                      ""kind"": ""ENUM"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""description"": """",
+                                  ""deprecationReason"": null,
+                                  ""isDeprecated"": false,
+                                  ""name"": ""appearsIn""
+                                }
+                              ],
+                              ""name"": ""Character"",
+                              ""possibleTypes"": [
+                                {
+                                  ""name"": ""Human"",
+                                  ""kind"": ""OBJECT"",
+                                  ""ofType"": null
+                                }
+                              ],
+                              ""kind"": ""INTERFACE"",
+                              ""interfaces"": null
+                            },
+                            {
+                              ""enumValues"": null,
+                              ""inputFields"": null,
+                              ""description"": ""Human character"",
+                              ""fields"": [
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""NON_NULL"",
+                                    ""ofType"": {
+                                      ""name"": ""String"",
+                                      ""kind"": ""SCALAR"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""description"": """",
+                                  ""deprecationReason"": null,
+                                  ""isDeprecated"": false,
+                                  ""name"": ""id""
+                                },
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": ""String"",
+                                    ""kind"": ""SCALAR"",
+                                    ""ofType"": null
+                                  },
+                                  ""deprecationReason"": null,
+                                  ""description"": """",
+                                  ""isDeprecated"": false,
+                                  ""name"": ""name""
+                                },
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": ""String"",
+                                    ""kind"": ""SCALAR"",
+                                    ""ofType"": null
+                                  },
+                                  ""deprecationReason"": null,
+                                  ""description"": """",
+                                  ""isDeprecated"": false,
+                                  ""name"": ""homePlanet""
+                                },
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""LIST"",
+                                    ""ofType"": {
+                                      ""name"": ""Character"",
+                                      ""kind"": ""INTERFACE"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""description"": """",
+                                  ""deprecationReason"": null,
+                                  ""isDeprecated"": false,
+                                  ""name"": ""friends""
+                                },
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""LIST"",
+                                    ""ofType"": {
+                                      ""name"": ""Episode"",
+                                      ""kind"": ""ENUM"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""deprecationReason"": null,
+                                  ""description"": """",
+                                  ""isDeprecated"": false,
+                                  ""name"": ""appearsIn""
+                                }
+                              ],
+                              ""name"": ""Human"",
+                              ""possibleTypes"": null,
+                              ""kind"": ""OBJECT"",
+                              ""interfaces"": [
+                                {
+                                  ""name"": ""Character"",
+                                  ""kind"": ""INTERFACE"",
+                                  ""ofType"": null
+                                }
+                              ]
+                            },
+                            {
+                              ""enumValues"": null,
+                              ""inputFields"": null,
+                              ""description"": """",
+                              ""fields"": [
+                                {
+                                  ""args"": [
+                                    {
+                                      ""defaultValue"": null,
+                                      ""type"": {
+                                        ""name"": null,
+                                        ""kind"": ""NON_NULL"",
+                                        ""ofType"": {
+                                          ""name"": ""String"",
+                                          ""kind"": ""SCALAR"",
+                                          ""ofType"": null
+                                        }
+                                      },
+                                      ""description"": """",
+                                      ""name"": ""id""
+                                    }
+                                  ],
+                                  ""type"": {
+                                    ""name"": ""Human"",
+                                    ""kind"": ""OBJECT"",
+                                    ""ofType"": null
+                                  },
+                                  ""deprecationReason"": null,
+                                  ""description"": """",
+                                  ""isDeprecated"": false,
+                                  ""name"": ""human""
+                                },
+                                {
+                                  ""args"": [
+                                    {
+                                      ""defaultValue"": null,
+                                      ""type"": {
+                                        ""name"": null,
+                                        ""kind"": ""NON_NULL"",
+                                        ""ofType"": {
+                                          ""name"": ""String"",
+                                          ""kind"": ""SCALAR"",
+                                          ""ofType"": null
+                                        }
+                                      },
+                                      ""description"": """",
+                                      ""name"": ""id""
+                                    }
+                                  ],
+                                  ""type"": {
+                                    ""name"": ""Character"",
+                                    ""kind"": ""INTERFACE"",
+                                    ""ofType"": null
+                                  },
+                                  ""description"": """",
+                                  ""deprecationReason"": null,
+                                  ""isDeprecated"": false,
+                                  ""name"": ""character""
+                                },
+                                {
+                                  ""args"": [],
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""LIST"",
+                                    ""ofType"": {
+                                      ""name"": ""Character"",
+                                      ""kind"": ""INTERFACE"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""deprecationReason"": null,
+                                  ""description"": """",
+                                  ""isDeprecated"": false,
+                                  ""name"": ""characters""
+                                }
+                              ],
+                              ""name"": ""Query"",
+                              ""possibleTypes"": null,
+                              ""kind"": ""OBJECT"",
+                              ""interfaces"": []
+                            },
+                            {
+                              ""enumValues"": null,
+                              ""inputFields"": [
+                                {
+                                  ""defaultValue"": null,
+                                  ""type"": {
+                                    ""name"": null,
+                                    ""kind"": ""NON_NULL"",
+                                    ""ofType"": {
+                                      ""name"": ""String"",
+                                      ""kind"": ""SCALAR"",
+                                      ""ofType"": null
+                                    }
+                                  },
+                                  ""description"": """",
+                                  ""name"": ""name""
+                                }
+                              ],
+                              ""description"": null,
+                              ""fields"": null,
+                              ""name"": ""HumanInput"",
+                              ""possibleTypes"": null,
+                              ""kind"": ""INPUT_OBJECT"",
+                              ""interfaces"": null
+                            },
+                            {
+                              ""enumValues"": null,
+                              ""inputFields"": null,
+                              ""description"": """",
+                              ""fields"": [
+                                {
+                                  ""args"": [
+                                    {
+                                      ""defaultValue"": null,
+                                      ""type"": {
+                                        ""name"": ""HumanInput"",
+                                        ""kind"": ""INPUT_OBJECT"",
+                                        ""ofType"": null
+                                      },
+                                      ""description"": """",
+                                      ""name"": ""human""
+                                    }
+                                  ],
+                                  ""type"": {
+                                    ""name"": ""Human"",
+                                    ""kind"": ""OBJECT"",
+                                    ""ofType"": null
+                                  },
+                                  ""deprecationReason"": null,
+                                  ""description"": """",
+                                  ""isDeprecated"": false,
+                                  ""name"": ""addHuman""
+                                }
+                              ],
+                              ""name"": ""Mutation"",
+                              ""kind"": ""OBJECT"",
+                              ""possibleTypes"": null,
+                              ""interfaces"": []
+                            }
+                          ],
+                          ""subscriptionType"": null,
+                          ""mutationType"": {
+                            ""name"": ""Mutation""
+                          }
+                        }
+                      }
+                    }");
         }
 
         [Fact]
