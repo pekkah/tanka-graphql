@@ -2,7 +2,7 @@
 
 namespace tanka.graphql.type
 {
-    public class ObjectType : ComplexType, INamedType
+    public class ObjectType : ComplexType, IDescribable
     {
         private readonly Dictionary<string, InterfaceType> _interfaces = new Dictionary<string, InterfaceType>();
 
@@ -28,6 +28,7 @@ namespace tanka.graphql.type
         public Meta Meta { get; }
 
         public override string Name { get; }
+        public string Description => Meta.Description;
 
         public bool Implements(InterfaceType interfaceType)
         {

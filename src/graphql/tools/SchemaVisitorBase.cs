@@ -18,14 +18,17 @@ namespace tanka.graphql.tools
         {
             foreach (var directiveType in Schema.QueryDirectives())
             {
-                foreach (var argument in directiveType.Arguments) await VisitArgumentAsync(directiveType, argument);
+                foreach (var argument in directiveType.Arguments) 
+                    await VisitArgumentAsync(directiveType, argument);
 
                 await VisitDirectiveAsync(directiveType);
             }
 
-            foreach (var scalarType in Schema.QueryTypes<ScalarType>()) await VisitScalarAsync(scalarType);
+            foreach (var scalarType in Schema.QueryTypes<ScalarType>()) 
+                await VisitScalarAsync(scalarType);
 
-            foreach (var enumType in Schema.QueryTypes<EnumType>()) await VisitEnumAsync(enumType);
+            foreach (var enumType in Schema.QueryTypes<EnumType>()) 
+                await VisitEnumAsync(enumType);
 
             foreach (var inputObjectType in Schema.QueryTypes<InputObjectType>())
             {
@@ -80,7 +83,8 @@ namespace tanka.graphql.tools
             return Task.CompletedTask;
         }
 
-        protected virtual Task VisitArgumentAsync(DirectiveType directiveType, KeyValuePair<string, Argument> argument)
+        protected virtual Task VisitArgumentAsync(DirectiveType directiveType,
+            KeyValuePair<string, Argument> argument)
         {
             return Task.CompletedTask;
         }

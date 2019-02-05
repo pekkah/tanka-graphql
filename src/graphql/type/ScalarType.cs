@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using tanka.graphql.type.converters;
 using GraphQLParser.AST;
+using tanka.graphql.type.converters;
 
 namespace tanka.graphql.type
 {
-    public class ScalarType : INamedType, IValueConverter, IEquatable<ScalarType>, IEquatable<INamedType>
+    public class ScalarType : INamedType, IValueConverter, IEquatable<ScalarType>, IEquatable<INamedType>, IDescribable
     {
         public static ScalarType Boolean = new ScalarType(
             "Boolean",
@@ -31,6 +31,11 @@ namespace tanka.graphql.type
             new LongConverter(),
             new Meta("The `Int` scalar type represents non-fractional signed whole numeric values"));
 
+        public static NonNull NonNullBoolean = new NonNull(Boolean);
+        public static NonNull NonNullFloat = new NonNull(Float);
+        public static NonNull NonNullID = new NonNull(ID);
+        public static NonNull NonNullInt = new NonNull(Int);
+
         public static ScalarType String = new ScalarType(
             "String",
             new StringConverter(),
@@ -39,10 +44,6 @@ namespace tanka.graphql.type
                      " represent free-form human-readable text."));
 
         public static NonNull NonNullString = new NonNull(String);
-        public static NonNull NonNullBoolean = new NonNull(Boolean);
-        public static NonNull NonNullFloat = new NonNull(Float);
-        public static NonNull NonNullID = new NonNull(ID);
-        public static NonNull NonNullInt = new NonNull(Int);
 
         public static IEnumerable<ScalarType> Standard = new[]
         {
@@ -67,6 +68,7 @@ namespace tanka.graphql.type
         protected IValueConverter Converter { get; }
 
         public Meta Meta { get; }
+        public string Description => Meta.Description;
 
         public bool Equals(INamedType other)
         {

@@ -66,7 +66,10 @@ namespace tanka.graphql.tests.data.starwars
                 });
 
 
-            var schema = new Schema(Query, Mutation);
+            var schema = new Schema(Query, Mutation, typesReferencedByNameOnly: new []
+            {
+                Character
+            });
             return schema;
         }
     }

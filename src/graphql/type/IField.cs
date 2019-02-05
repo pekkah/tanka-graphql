@@ -3,7 +3,7 @@ using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
-    public interface IField : IDirectives
+    public interface IField : IDirectives, IDeprecable, IDescribable
     {
         IType Type { get; set; }
 

@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Reflection;
 
 namespace tanka.graphql.type
 {
-    public class Argument
+    public class Argument : IDescribable
     {
         public IType Type { get; set; }
 
@@ -20,6 +21,7 @@ namespace tanka.graphql.type
         [Obsolete]
         public Argument()
         {
+            Meta = new Meta();
         }
 
         [Obsolete]
@@ -29,5 +31,7 @@ namespace tanka.graphql.type
 
             return new Argument(type, defaultValue, meta);
         }
+
+        public string Description => Meta.Description;
     }
 }

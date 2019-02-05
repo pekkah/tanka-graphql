@@ -24,7 +24,10 @@ namespace tanka.graphql.type
             // Mutation and subscription are optional
             Mutation = mutation;
             Subscription = subscription;
-
+            
+            if (directives != null)
+                Directives.AddRange(directives);
+            
             IsInitialized = false;
         }
 
@@ -78,7 +81,9 @@ namespace tanka.graphql.type
 
         public INamedType GetNamedType(string name)
         {
-            return _types.OfType<INamedType>().SingleOrDefault(t => t.Name == name);
+            return _types.OfType<INamedType>()
+                .Where(type => !(type is DirectiveType))
+                .SingleOrDefault(t => t.Name == name);
         }
 
         public T GetNamedType<T>(string name) where T : INamedType
@@ -91,7 +96,9 @@ namespace tanka.graphql.type
         public IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IType
         {
             if (filter == null)
-                return _types.OfType<T>().AsQueryable();
+                return _types.OfType<T>()
+                    .Where(type => !(type is DirectiveType))
+                    .AsQueryable();
 
             return _types.OfType<T>().Where(t => filter(t)).AsQueryable();
         }

@@ -5,13 +5,8 @@ using GraphQLParser.AST;
 
 namespace tanka.graphql
 {
-    public abstract class ExtensionBase : IExtension
+    public abstract class ExtensionScopeBase : IExtensionScope
     {
-        public virtual Task BeginExecuteAsync(ExecutionOptions options)
-        {
-            return Task.CompletedTask;
-        }
-
         public virtual Task BeginValidationAsync()
         {
             return Task.CompletedTask;

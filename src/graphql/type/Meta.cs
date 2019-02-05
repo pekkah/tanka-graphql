@@ -2,7 +2,7 @@
 
 namespace tanka.graphql.type
 {
-    public class Meta : IDirectives
+    public class Meta : IDirectives, IDescribable, IDeprecable
     {
         private readonly DirectiveContainer _directives;
 

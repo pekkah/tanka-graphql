@@ -116,11 +116,6 @@ namespace tanka.graphql.tools
                 interfaces);
         }
 
-        public static IResolverMap Merge(params IResolverMap[] resolverMaps)
-        {
-            return new JoinedResolversMap(resolverMaps);
-        }
-
         private static Fields MergeFields(ComplexType left, ComplexType right, FieldConflictResolver conflictResolver)
         {
             var fields = new Fields();

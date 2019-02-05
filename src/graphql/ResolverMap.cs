@@ -7,6 +7,24 @@ namespace tanka.graphql
 {
     public class ResolverMap : Dictionary<string, FieldResolverMap>, IResolverMap, ISubscriberMap
     {
+        public Resolver GetResolver(string typeName, string fieldName)
+        {
+            if (!TryGetValue(typeName, out var objectNode))
+                return null;
+
+            var resolver = objectNode.GetResolver(fieldName);
+            return resolver;
+        }
+
+        public Subscriber GetSubscriber(string typeName, string fieldName)
+        {
+            if (!TryGetValue(typeName, out var objectNode))
+                return null;
+
+            var resolver = objectNode.GetSubscriber(fieldName);
+            return resolver;
+        }
+
         public Resolver GetResolver(ComplexType type, KeyValuePair<string, IField> field)
         {
             if (type == null)
@@ -17,15 +35,12 @@ namespace tanka.graphql
 
             var fieldName = field.Key;
 
-            if (!TryGetValue(type.Name, out var objectNode)) 
+            if (!TryGetValue(type.Name, out var objectNode))
                 return null;
 
             var resolver = objectNode.GetResolver(fieldName);
 
-            if (resolver == null)
-            {
-                return null;
-            }
+            if (resolver == null) return null;
 
             return resolver;
         }

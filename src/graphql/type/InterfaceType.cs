@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
-    public class InterfaceType : ComplexType, INamedType, IDirectives
+    public class InterfaceType : ComplexType, IDirectives, IDescribable
     {
         public InterfaceType(string name, Fields fields, Meta meta = null)
         {
@@ -18,19 +18,20 @@ namespace tanka.graphql.type
         }
 
         public Meta Meta { get; }
-
-        public override string Name { get; }
-
-        public override string ToString()
-        {
-            return $"{Name}";
-        }
+        public string Description => Meta.Description;
 
         public IEnumerable<DirectiveInstance> Directives => Meta.Directives;
 
         public DirectiveInstance GetDirective(string name)
         {
             return Meta.GetDirective(name);
+        }
+
+        public override string Name { get; }
+
+        public override string ToString()
+        {
+            return $"{Name}";
         }
     }
 }

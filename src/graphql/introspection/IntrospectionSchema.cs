@@ -5,7 +5,7 @@ using static tanka.graphql.type.ScalarType;
 
 namespace tanka.graphql.introspection
 {
-    public class IntrospectionSchemaBuilder
+    public class IntrospectionSchema
     {
         public const string TypeKindName = "__TypeKind";
         public const string TypeName = "__Type";
@@ -14,7 +14,7 @@ namespace tanka.graphql.introspection
         public const string EnumValueName = "__EnumValue";
         public const string SchemaName = "__Schema";
 
-        public ISchema Build()
+        public static ISchema Build()
         {
             var typeKind = new NonNull(new EnumType(
                 TypeKindName,
