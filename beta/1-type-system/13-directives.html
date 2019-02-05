@@ -45,11 +45,8 @@
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
-                    <a href="2-introspection/1-reserved-names.html"><h6>Introspection</h6></a>
+                    <a href="2-introspection/4-type-name-introspection.html"><h6>Introspection</h6></a>
                 </li>
-                        <a class="collection-item" href="2-introspection/1-reserved-names.html">Reserved names</a>
-                        <a class="collection-item" href="2-introspection/2-documentation.html">Documentation</a>
-                        <a class="collection-item" href="2-introspection/3-deprecation.html">Deprecation</a>
                         <a class="collection-item" href="2-introspection/4-type-name-introspection.html">Type name introspection</a>
                         <a class="collection-item" href="2-introspection/5-schema-introspection.html">Schema introspection</a>
             </ul>
@@ -98,7 +95,7 @@
                 DirectiveLocation.FRAGMENT_SPREAD,
                 DirectiveLocation.INLINE_FRAGMENT
             },
-            new Args
+            new Args()
             {
                 {&quot;if&quot;, ScalarType.NonNullBoolean}
             })</code></pre></p>
@@ -109,7 +106,7 @@
                 DirectiveLocation.FIELD_DEFINITION,
                 DirectiveLocation.ENUM_VALUE
             },
-            new Args
+            new Args()
             {
                 {&quot;reason&quot;, ScalarType.String}
             })</code></pre></p>

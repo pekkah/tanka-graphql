@@ -45,11 +45,8 @@
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
-                    <a href="2-introspection/1-reserved-names.html"><h6>Introspection</h6></a>
+                    <a href="2-introspection/4-type-name-introspection.html"><h6>Introspection</h6></a>
                 </li>
-                        <a class="collection-item" href="2-introspection/1-reserved-names.html">Reserved names</a>
-                        <a class="collection-item" href="2-introspection/2-documentation.html">Documentation</a>
-                        <a class="collection-item" href="2-introspection/3-deprecation.html">Deprecation</a>
                         <a class="collection-item active" href="2-introspection/4-type-name-introspection.html">Type name introspection</a>
                         <a class="collection-item" href="2-introspection/5-schema-introspection.html">Schema introspection</a>
             </ul>
@@ -72,7 +69,72 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="type-name-introspection">Type Name Introspection</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-Name-Introspection">Specification</a></p>
+</blockquote>
+<p>Any query can include the <code>__typename</code> meta-field. It returns the name of the object type currently being queried.</p>
+<h3 id="query-the-actual-type-name-of-when-querying-on-interface">Query the actual type name of when querying on interface</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Query_typename_of_characters()
+        {
+            /* Given */
+            var starwars = new Starwars();
+
+            var query = $@&quot;{{
+                    characters {{
+                        __typename
+                        id
+                        name
+                        appearsIn
+                    }}
+                }}&quot;;
+
+            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var options = new ExecutionOptions
+            {
+                Schema = executableSchema,
+                Document =  ParseDocument(query),
+                OperationName = null,
+                InitialValue = null,
+                VariableValues = null
+            };
+
+            /* When */
+            var actual = await ExecuteAsync(options).ConfigureAwait(false);
+
+            /* Then */
+            actual.ShouldMatchJson(
+                @&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;characters&quot;&quot;: [
+                      {
+                        &quot;&quot;appearsIn&quot;&quot;: [
+                          &quot;&quot;JEDI&quot;&quot;,
+                          &quot;&quot;EMPIRE&quot;&quot;,
+                          &quot;&quot;NEWHOPE&quot;&quot;
+                        ],
+                        &quot;&quot;name&quot;&quot;: &quot;&quot;Han&quot;&quot;,
+                        &quot;&quot;id&quot;&quot;: &quot;&quot;humans/han&quot;&quot;,
+                        &quot;&quot;__typename&quot;&quot;: &quot;&quot;Human&quot;&quot;
+                      },
+                      {
+                        &quot;&quot;appearsIn&quot;&quot;: [
+                          &quot;&quot;JEDI&quot;&quot;,
+                          &quot;&quot;EMPIRE&quot;&quot;,
+                          &quot;&quot;NEWHOPE&quot;&quot;
+                        ],
+                        &quot;&quot;name&quot;&quot;: &quot;&quot;Luke&quot;&quot;,
+                        &quot;&quot;id&quot;&quot;: &quot;&quot;humans/luke&quot;&quot;,
+                        &quot;&quot;__typename&quot;&quot;: &quot;&quot;Human&quot;&quot;
+                      }
+                    ]
+                  }
+                }&quot;);
+        }
+</code></pre></p>
+
             </article>
         </div>
     </div>
