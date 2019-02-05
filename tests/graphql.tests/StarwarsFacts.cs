@@ -592,6 +592,64 @@ namespace tanka.graphql.tests
         }
 
         [Fact]
+        public async Task Query_typename_of_characters()
+        {
+            /* Given */
+            var starwars = new Starwars();
+
+            var query = $@"{{
+                    characters {{
+                        __typename
+                        id
+                        name
+                        appearsIn
+                    }}
+                }}";
+
+            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var options = new ExecutionOptions
+            {
+                Schema = executableSchema,
+                Document =  ParseDocument(query),
+                OperationName = null,
+                InitialValue = null,
+                VariableValues = null
+            };
+
+            /* When */
+            var actual = await ExecuteAsync(options).ConfigureAwait(false);
+
+            /* Then */
+            actual.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""characters"": [
+                      {
+                        ""appearsIn"": [
+                          ""JEDI"",
+                          ""EMPIRE"",
+                          ""NEWHOPE""
+                        ],
+                        ""name"": ""Han"",
+                        ""id"": ""humans/han"",
+                        ""__typename"": ""Human""
+                      },
+                      {
+                        ""appearsIn"": [
+                          ""JEDI"",
+                          ""EMPIRE"",
+                          ""NEWHOPE""
+                        ],
+                        ""name"": ""Luke"",
+                        ""id"": ""humans/luke"",
+                        ""__typename"": ""Human""
+                      }
+                    ]
+                  }
+                }");
+        }
+
+        [Fact]
         public async Task Query_character_luke_skip_appearsIn()
         {
             /* Given */
