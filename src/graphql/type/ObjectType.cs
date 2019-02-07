@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace tanka.graphql.type
 {
@@ -38,6 +39,11 @@ namespace tanka.graphql.type
         public override string ToString()
         {
             return $"{Name}";
+        }
+
+        public KeyValuePair<string, IField> GetFieldWithKey(string name)
+        {
+            return Fields.SingleOrDefault(f => f.Key == name);
         }
     }
 }

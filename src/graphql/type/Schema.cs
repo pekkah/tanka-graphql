@@ -41,10 +41,10 @@ namespace tanka.graphql.type
 
         public ObjectType Mutation { get; protected set; }
 
-        public virtual async Task InitializeAsync()
+        public virtual async Task<ISchema> InitializeAsync()
         {
             if (IsInitialized)
-                return;
+                return this;
 
             var scanningTasks = new List<Task<IEnumerable<IType>>>
             {
@@ -77,6 +77,7 @@ namespace tanka.graphql.type
             await heal.VisitAsync();
 
             IsInitialized = true;
+            return this;
         }
 
         public INamedType GetNamedType(string name)

@@ -8,5 +8,18 @@ namespace tanka.graphql.type
         {
             Add(key, new Field(type, arguments, meta, defaultValue));
         }
+
+        public Fields(IEnumerable<KeyValuePair<string, IField>> fields)
+        {
+            foreach (var kv in fields)
+            {
+                Add(kv.Key, kv.Value);
+            }
+        }
+
+        public Fields()
+        {
+            
+        }
     }
 }

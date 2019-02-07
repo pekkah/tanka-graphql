@@ -1,4 +1,6 @@
-﻿namespace tanka.graphql.type
+﻿using System;
+
+namespace tanka.graphql.type
 {
     public interface INamedType: IType
     {

@@ -1,4 +1,6 @@
-﻿using tanka.graphql.type;
+﻿using System.Collections.Generic;
+using tanka.graphql.graph;
+using tanka.graphql.type;
 using Xunit;
 
 namespace tanka.graphql.tests.type
@@ -49,6 +51,52 @@ namespace tanka.graphql.tests.type
             Assert.Equal(ScalarType.NonNullString, phoneNumber.Type);
             Assert.Single(phoneNumber.Arguments,
                 arg => arg.Key == "primary" && (ScalarType) arg.Value.Type == ScalarType.Boolean);
+        }
+
+        [Fact]
+        public void Include_scalar_field()
+        {
+            /* Given */
+            var person = new ObjectType(
+                "Person",
+                new Fields
+                {
+                    {"name", ScalarType.NonNullString}
+                });
+
+            /* When */
+            var personWithAge = person.IncludeFields(
+                new KeyValuePair<string, IField>(
+                    "age",
+                    new Field(ScalarType.Int)
+                ));
+
+            var age = personWithAge.GetField("age");
+
+            /* Then */
+            Assert.NotNull(age);
+            Assert.Equal(ScalarType.Int, age.Type);
+        }
+
+        [Fact]
+        public void Exclude_scalar_field()
+        {
+            /* Given */
+            var person = new ObjectType(
+                "Person",
+                new Fields
+                {
+                    {"name", ScalarType.NonNullString},
+                    {"age", ScalarType.Int}
+                });
+
+            /* When */
+            var age = person.GetFieldWithKey("age");
+            var personWithoutAge = person.ExcludeFields(age);
+            var actual = personWithoutAge.GetFieldWithKey("age");
+
+            /* Then */
+            Assert.Equal(default, actual);
         }
     }
 }

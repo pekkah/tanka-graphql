@@ -14,7 +14,7 @@ namespace tanka.graphql.type
 
         ObjectType Mutation { get; }
 
-        Task InitializeAsync();
+        Task<ISchema> InitializeAsync();
 
         INamedType GetNamedType(string name);
 
