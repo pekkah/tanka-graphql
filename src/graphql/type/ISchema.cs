@@ -16,7 +16,7 @@ namespace tanka.graphql.type
 
         Task<ISchema> InitializeAsync();
 
-        ISchema Initialize();
+        //ISchema Initialize();
 
         INamedType GetNamedType(string name);
 

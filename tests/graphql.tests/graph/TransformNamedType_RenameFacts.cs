@@ -30,11 +30,10 @@ namespace tanka.graphql.tests.graph
                     {"container", container}
                 });
 
-            var schema = new Schema(query).Initialize();
+            var schema = Schema.Initialize(query);
 
             /* When */
-            var newSchema = Transforms.Apply(schema, Transforms.Delete(originalName))
-                .Initialize();
+            var newSchema = Transforms.Apply(schema, Transforms.Delete(originalName));
 
             /* Then */
             Assert.Null(newSchema.GetNamedType(originalName));

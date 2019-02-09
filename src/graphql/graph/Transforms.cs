@@ -12,7 +12,8 @@ namespace tanka.graphql.graph
         public static ISchema Apply(ISchema schema, params SchemaTransform[] transforms)
         {
             var result = schema;
-            foreach (var transform in transforms) result = transform(schema);
+            foreach (var transform in transforms) 
+                result = transform(schema);
 
             return result;
         }
@@ -70,7 +71,7 @@ namespace tanka.graphql.graph
 
                     if (namedType == null)
                         throw new InvalidOperationException(
-                            "Failed to heal schema. Could not build named type for field" +
+                            "Failed to heal schema. Could not build named type for field " +
                             $"{complexType}.{name} from reference " +
                             $"{typeReference.TypeName}");
 

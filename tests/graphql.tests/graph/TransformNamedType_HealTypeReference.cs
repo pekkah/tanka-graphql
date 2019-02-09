@@ -27,11 +27,8 @@ namespace tanka.graphql.tests.graph
                     {"object", interface1}
                 });
 
-            var schema = new Schema(query).Initialize();
-
             /* When */
-            var newSchema = Transforms.Apply(schema, Transforms.Heal())
-                .Initialize();
+            var newSchema = Schema.Initialize(query);
 
             /* Then */
             var queryObjectField = newSchema.Query.GetField("object");
@@ -66,12 +63,8 @@ namespace tanka.graphql.tests.graph
                     {"object", object1}
                 });
 
-            var schema = new Schema(query, typesReferencedByNameOnly:new []{object2})
-                .Initialize();
-
             /* When */
-            var newSchema = Transforms.Apply(schema, Transforms.Heal())
-                .Initialize();
+            var newSchema = Schema.Initialize(query, byNameOnly: new [] { object2});
 
             /* Then */
             var queryObjectField = newSchema.Query.GetFieldWithKey("object");
@@ -103,11 +96,8 @@ namespace tanka.graphql.tests.graph
                     {"field2", object1}
                 });
 
-            var schema = new Schema(query).Initialize();
-
             /* When */
-            var newSchema = Transforms.Apply(schema, Transforms.Heal())
-                .Initialize();
+            var newSchema = Schema.Initialize(query);
 
             /* Then */
             var queryObjectField1 = newSchema.Query.GetField("field1");
