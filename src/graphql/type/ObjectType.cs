@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace tanka.graphql.type
@@ -44,6 +45,88 @@ namespace tanka.graphql.type
         public KeyValuePair<string, IField> GetFieldWithKey(string name)
         {
             return Fields.SingleOrDefault(f => f.Key == name);
+        }
+
+        public ObjectType WithEachInterface(
+            Func<InterfaceType, InterfaceType> withInterface)
+        {
+            if (!Interfaces.Any())
+                return this;
+
+            var interfaces = Interfaces.Select(withInterface)
+                .ToList();
+
+            return new ObjectType(
+                Name,
+                new Fields(Fields),
+                Meta,
+                interfaces
+            );
+        }
+
+        public ObjectType WithEachField(
+            Func<KeyValuePair<string, IField>, KeyValuePair<string, IField>> withField)
+        {
+            var deletedFields = new List<KeyValuePair<string, IField>>();
+            var addedFields = new List<KeyValuePair<string, IField>>();
+
+            foreach (var field in Fields)
+            {
+                var maybeNewField = withField(field);
+
+                if (Equals(maybeNewField, field))
+                    continue;
+
+                if (Equals(maybeNewField, default(KeyValuePair<string, IField>)))
+                {
+                    deletedFields.Add(field);
+                    continue;
+                }
+
+                addedFields.Add(maybeNewField);
+                deletedFields.Add(field);
+            }
+
+            return ExcludeFields(deletedFields.ToArray())
+                .IncludeFields(addedFields.ToArray());
+        }
+
+        public ObjectType ExcludeFields(
+            params KeyValuePair<string, IField>[] excludedFields)
+        {
+            if (!excludedFields.Any())
+                return this;
+
+            return WithFields(
+                Fields
+                    .Where(field => !excludedFields.Contains(field))
+                    .ToArray()
+            );
+        }
+
+        public ObjectType WithFields(
+            params KeyValuePair<string, IField>[] fields)
+        {
+            return new ObjectType(
+                Name,
+                new Fields(fields),
+                Meta,
+                Interfaces
+            );
+        }
+
+        public ObjectType IncludeFields(
+            params KeyValuePair<string, IField>[] includedFields)
+        {
+            if (!includedFields.Any())
+                return this;
+
+            return new ObjectType(
+                Name,
+                new Fields(Fields.Concat(includedFields)),
+                Meta,
+                Interfaces
+            );
         }
     }
 }

@@ -24,10 +24,10 @@ namespace tanka.graphql.type
             // Mutation and subscription are optional
             Mutation = mutation;
             Subscription = subscription;
-            
+
             if (directives != null)
                 Directives.AddRange(directives);
-            
+
             IsInitialized = false;
         }
 
@@ -41,6 +41,7 @@ namespace tanka.graphql.type
 
         public ObjectType Mutation { get; protected set; }
 
+        [Obsolete]
         public virtual async Task<ISchema> InitializeAsync()
         {
             if (IsInitialized)
@@ -80,18 +81,44 @@ namespace tanka.graphql.type
             return this;
         }
 
+        public ISchema Initialize()
+        {
+            var scanningTasks = new List<Task<IEnumerable<IType>>>
+            {
+                new TypeScanner(Query).ScanAsync()
+            };
+
+            if (Mutation != null)
+                scanningTasks.Add(new TypeScanner(Mutation).ScanAsync());
+
+            if (Subscription != null)
+                scanningTasks.Add(new TypeScanner(Subscription).ScanAsync());
+
+            Task.WhenAll(scanningTasks).ConfigureAwait(false)
+                .GetAwaiter().GetResult();
+
+            // combine
+            var foundTypes = scanningTasks.SelectMany(r => r.Result)
+                //.Concat(ScalarType.Standard) // disabled for now
+                .Concat(_typesReferencedByNameOnly ?? Enumerable.Empty<IType>())
+                .Distinct(new GraphQLTypeComparer())
+                .ToList();
+
+            // add default directives
+            Directives.Add(DirectiveType.Include);
+            Directives.Add(DirectiveType.Skip);
+
+            _types = foundTypes;
+
+            IsInitialized = true;
+            return this;
+        }
+
         public INamedType GetNamedType(string name)
         {
             return _types.OfType<INamedType>()
                 .Where(type => !(type is DirectiveType))
                 .SingleOrDefault(t => t.Name == name);
-        }
-
-        public T GetNamedType<T>(string name) where T : INamedType
-        {
-            var type = GetNamedType(name);
-
-            return (T) type;
         }
 
         public IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IType
@@ -115,6 +142,13 @@ namespace tanka.graphql.type
                 return Directives.AsQueryable();
 
             return Directives.Where(d => filter(d)).AsQueryable();
+        }
+
+        public T GetNamedType<T>(string name) where T : INamedType
+        {
+            var type = GetNamedType(name);
+
+            return (T) type;
         }
     }
 }
