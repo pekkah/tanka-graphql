@@ -28,10 +28,10 @@ namespace tanka.graphql.tests.validation
             var query = new ObjectType(
                 "Query",
                 new Fields());
-            _schema = new Schema(query, null, subscription);
+            _schema = Schema.Initialize(query, null, subscription);
         }
 
-        private readonly Schema _schema;
+        private readonly ISchema _schema;
 
         [Fact]
         public async Task Subscriptions_SingleRootField()

@@ -4,7 +4,7 @@ namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsSchema
     {
-        public static Schema BuildSchema()
+        public static ISchema BuildSchema()
         {
             var Episode = new EnumType("Episode", new EnumValues
             {
@@ -66,10 +66,11 @@ namespace tanka.graphql.tests.data.starwars
                 });
 
 
-            var schema = new Schema(Query, Mutation, typesReferencedByNameOnly: new []
+            var schema = Schema.Initialize(Query, Mutation, byNameOnly: new []
             {
                 Character
             });
+
             return schema;
         }
     }

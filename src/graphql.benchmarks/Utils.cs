@@ -52,7 +52,7 @@ namespace tanka.graphql.benchmarks
             };
 
             var schema = SchemaTools.MakeExecutableSchemaAsync(
-                new Schema(query, 
+                Schema.Initialize(query, 
                     mutation,
                     subscription), 
                 resolvers,

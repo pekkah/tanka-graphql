@@ -6,7 +6,7 @@ using Xunit;
 
 namespace tanka.graphql.tests.graph
 {
-    public class TransformNamedType_HealTypeReference
+    public class HealTransformFacts
     {
         [Fact]
         public void Heal_Interface_field_with_self_reference()
@@ -106,6 +106,38 @@ namespace tanka.graphql.tests.graph
             Assert.IsType<ObjectType>(queryObjectField1.Type);
             Assert.Same(queryObjectField1.Type, queryObjectField2.Type);
             Assert.Equal(2, newSchema.QueryTypes<INamedType>().Count());
+        }
+
+        [Fact(Skip ="Is the object model for schema wrong?")]
+        public void Heal_objects_referencing_each_other()
+        {
+            /* Given */
+            var object1 = new ObjectType(
+                "object1",
+                new Fields
+                {
+                    {"obj1-obj2", new NamedTypeReference("object2")}
+                });
+
+            var object2 = new ObjectType(
+                "object2",
+                new Fields
+                {
+                    {"obj2-obj1", new NamedTypeReference("object1")}
+                });
+
+            var query = new ObjectType(
+                "Query",
+                new Fields
+                {
+                    {"field1", object1},
+                });
+
+            /* When */
+            var newSchema = Schema.Initialize(query, byNameOnly: new []{object2});
+
+            /* Then */
+            var queryObjectField1 = newSchema.Query.GetField("field1");
         }
     }
 }

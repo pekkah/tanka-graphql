@@ -32,7 +32,7 @@ namespace tanka.graphql.tests
                 });
 
             var messageListType = new List(messageType);
-            var schema = new Schema(
+            var schema = Schema.Initialize(
                 new ObjectType(
                     "Query",
                     new Fields

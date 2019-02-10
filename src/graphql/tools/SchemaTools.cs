@@ -23,9 +23,6 @@ namespace tanka.graphql.tools
             ISubscriberMap subscribers = null,
             IEnumerable<SchemaVisitorFactory> visitors = null)
         {
-            if (!schema.IsInitialized)
-                await schema.InitializeAsync();
-
             AddResolversAndSubscribers(schema, resolvers, subscribers);
 
             if (visitors != null)
@@ -53,7 +50,7 @@ namespace tanka.graphql.tools
             IEnumerable<SchemaVisitorFactory> visitors = null)
         {
             if (!schema.IsInitialized)
-                await schema.InitializeAsync();
+                ;
 
             var introspection = await Introspect.SchemaAsync(schema);
             var executable = await MakeExecutableSchemaAsync(
@@ -71,7 +68,6 @@ namespace tanka.graphql.tools
                     await visitor.VisitAsync();
                 }
 
-            await withIntrospection.InitializeAsync();
             return withIntrospection;
         }
 

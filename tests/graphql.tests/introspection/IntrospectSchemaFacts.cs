@@ -86,13 +86,13 @@ namespace tanka.graphql.tests.introspection
                 "Subscription",
                 new Fields());
 
-            _sourceSchema = new Schema(query, mutation, subscription);
+            _sourceSchema = Schema.Initialize(query, mutation, subscription);
             _introspectionSchema = Introspect.SchemaAsync(_sourceSchema)
                 .GetAwaiter()
                 .GetResult();
         }
 
-        private readonly Schema _sourceSchema;
+        private readonly ISchema _sourceSchema;
         private readonly ISchema _introspectionSchema;
 
         public const string ObjectTypeName = "Object";

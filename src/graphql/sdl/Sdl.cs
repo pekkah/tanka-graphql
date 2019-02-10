@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GraphQLParser.AST;
 using tanka.graphql.error;
 using tanka.graphql.execution;
 using tanka.graphql.tools;
 using tanka.graphql.type;
-using GraphQLParser.AST;
 
 namespace tanka.graphql.sdl
 {
@@ -127,7 +127,7 @@ namespace tanka.graphql.sdl
 
             if (schemaDefinition == null)
                 throw new GraphQLError(
-                    $"Could not find single schema definition from document", document);
+                    "Could not find single schema definition from document", document);
 
             Document(document, context);
 
@@ -150,7 +150,7 @@ namespace tanka.graphql.sdl
             if (!string.IsNullOrEmpty(subscriptionTypeName))
                 subscriptionType = (ObjectType) context.GetKnownType(subscriptionTypeName);
 
-            return new Schema(queryType, mutationType, subscriptionType);
+            return type.Schema.Initialize(queryType, mutationType, subscriptionType);
         }
 
         public static ScalarType Scalar(GraphQLScalarTypeDefinition definition, SdlParserContext context)
@@ -219,7 +219,7 @@ namespace tanka.graphql.sdl
                 if (type is NonNull
                     && (!hasValue || value == null))
                     throw new ValueCoercionException(
-                        $"Argument {argument.Key} type is non-nullable but value is null or not set", 
+                        $"Argument {argument.Key} type is non-nullable but value is null or not set",
                         value,
                         directiveType);
 
@@ -257,7 +257,7 @@ namespace tanka.graphql.sdl
             {
                 var extendedType =
                     MergeTool.Merge(
-                        originalObjectType, 
+                        originalObjectType,
                         extensionType,
                         (l, r) => r.Field); //todo: this needs fixing
 
@@ -270,7 +270,8 @@ namespace tanka.graphql.sdl
             return null;
         }
 
-        private static IEnumerable<InterfaceType> Interfaces(IEnumerable<GraphQLNamedType> definitions, SdlParserContext context)
+        private static IEnumerable<InterfaceType> Interfaces(IEnumerable<GraphQLNamedType> definitions,
+            SdlParserContext context)
         {
             var interfaces = new List<InterfaceType>();
 
@@ -354,7 +355,8 @@ namespace tanka.graphql.sdl
             return new NamedTypeReference(typeName);
         }
 
-        private static InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions, SdlParserContext context)
+        private static InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions,
+            SdlParserContext context)
         {
             var fields = new InputFields();
 
@@ -373,11 +375,9 @@ namespace tanka.graphql.sdl
                 }
 
                 if (!TypeIs.IsInputType(type))
-                {
-                    throw new GraphQLError($"Type of input value definition is not valid input value type. " +
+                    throw new GraphQLError("Type of input value definition is not valid input value type. " +
                                            $"Definition: '{definition.Name.Value}' Type: {definition.Type.Kind}",
                         definition);
-                }
 
                 var directives = Directives(definition.Directives, context);
 
@@ -387,31 +387,31 @@ namespace tanka.graphql.sdl
                         fields[definition.Name.Value] = new InputObjectField(
                             scalarType,
                             new Meta(directives: directives),
-                            defaultValue: defaultValue);
+                            defaultValue);
                         break;
                     case EnumType enumType:
                         fields[definition.Name.Value] = new InputObjectField(
-                            enumType, 
+                            enumType,
                             new Meta(directives: directives),
-                            defaultValue: defaultValue);
+                            defaultValue);
                         break;
                     case InputObjectType inputObjectType:
                         fields[definition.Name.Value] = new InputObjectField(
-                            inputObjectType, 
+                            inputObjectType,
                             new Meta(directives: directives),
-                            defaultValue: defaultValue);
+                            defaultValue);
                         break;
                     case NonNull nonNull:
                         fields[definition.Name.Value] = new InputObjectField(
                             nonNull,
                             new Meta(directives: directives),
-                            defaultValue: defaultValue);
+                            defaultValue);
                         break;
                     case List list:
                         fields[definition.Name.Value] = new InputObjectField(
                             list,
                             new Meta(directives: directives),
-                            defaultValue: defaultValue);
+                            defaultValue);
                         break;
                 }
             }

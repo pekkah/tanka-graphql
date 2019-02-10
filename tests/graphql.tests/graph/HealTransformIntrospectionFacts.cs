@@ -1,23 +1,20 @@
 ﻿using System;
+using tanka.graphql.introspection;
 using tanka.graphql.type;
+using Xunit;
 using static tanka.graphql.type.Argument;
 using static tanka.graphql.type.ScalarType;
 
-namespace tanka.graphql.introspection
+namespace tanka.graphql.tests.graph
 {
-    public class IntrospectionSchema
+    public class HealTransformIntrospectionFacts
     {
-        public const string TypeKindName = "__TypeKind";
-        public const string TypeName = "__Type";
-        public const string InputValueName = "__InputValue";
-        public const string FieldName = "__Field";
-        public const string EnumValueName = "__EnumValue";
-        public const string SchemaName = "__Schema";
-
-        public static ISchema Build()
+        [Fact]
+        public void Heal_introspection_schema()
         {
+            /* Given */
             var typeKind = new NonNull(new EnumType(
-                TypeKindName,
+                IntrospectionSchema.TypeKindName,
                 new EnumValues
                 {
                     [__TypeKind.SCALAR.ToString()] = null,
@@ -30,24 +27,24 @@ namespace tanka.graphql.introspection
                     [__TypeKind.UNION.ToString()] = null
                 }));
 
-            var typeReference = new NamedTypeReference(TypeName);
+            var typeReference = new NamedTypeReference(IntrospectionSchema.TypeName);
             var nonNullTypeReference = new NonNull(typeReference);
             var typeListReference = new List(new NonNull(typeReference));
 
             var inputValue = new ObjectType(
-                InputValueName,
+                IntrospectionSchema.InputValueName,
                 new Fields
                 {
-                    ["name"] = new Field(NonNullString),
-                    ["description"] = new Field(ScalarType.String),
+                    /*["name"] = new Field(NonNullString),
+                    ["description"] = new Field(ScalarType.String),*/
                     ["type"] = new Field(nonNullTypeReference),
-                    ["defaultValue"] = new Field(ScalarType.String),
+                    /*["defaultValue"] = new Field(ScalarType.String),*/
                 });
 
             var argsList = new NonNull(new List(new NonNull(inputValue)));
 
             var field = new ObjectType(
-                FieldName,
+                IntrospectionSchema.FieldName,
                 new Fields
                 {
                     ["name"] = new Field(NonNullString),
@@ -61,7 +58,7 @@ namespace tanka.graphql.introspection
             var fieldList = new List(new NonNull(field));
 
             var enumValue = new ObjectType(
-                EnumValueName,
+                IntrospectionSchema.EnumValueName,
                 new Fields
                 {
                     ["name"] = new Field(NonNullString),
@@ -75,24 +72,24 @@ namespace tanka.graphql.introspection
             var inputValueList = new List(new NonNull(inputValue));
 
             var type = new ObjectType(
-                TypeName,
+                IntrospectionSchema.TypeName,
                 new Fields
                 {
-                    ["kind"] = new Field(typeKind),
+                    /*["kind"] = new Field(typeKind),
                     ["name"] = new Field(ScalarType.String),
                     ["description"] = new Field(ScalarType.String),
                     ["fields"] = new Field(fieldList, new Args
                     {
                         ["includeDeprecated"] = Arg(ScalarType.Boolean, false)
                     }),
-                    ["interfaces"] = new Field(typeListReference),
-                    ["possibleTypes"] = new Field(typeListReference),
+                   ["interfaces"] = new Field(typeListReference),
+                   ["possibleTypes"] = new Field(typeListReference),
                     ["enumValues"] = new Field(enumValueList, new Args
                     {
                         ["includeDeprecated"] = Arg(ScalarType.Boolean, false)
-                    }),
+                    }),*/
                     ["inputFields"] = new Field(inputValueList),
-                    ["ofType"] = new Field(typeReference)
+                    /*["ofType"] = new Field(typeReference)*/
                 });
 
             var typeList = new List(new NonNull(type));
@@ -112,7 +109,7 @@ namespace tanka.graphql.introspection
                 });
 
             var schema = new ObjectType(
-                SchemaName,
+                IntrospectionSchema.SchemaName,
                 new Fields
                 {
                     ["types"] = new Field(typeListReference),
@@ -126,16 +123,17 @@ namespace tanka.graphql.introspection
                 "Query",
                 new Fields
                 {
-                    ["__schema"] = new Field(schema),
+                    /*["__schema"] = new Field(schema),*/
                     ["__type"] = new Field(type, new Args
                     {
                         ["name"] = Arg(NonNullString)
                     })
                 });
 
-            return Schema.Initialize(
-                query,
-                byNameOnly: new [] { type });
+            /* When */
+            var actual = Schema.Initialize(query);
+
+            /* Then */
         }
     }
 }

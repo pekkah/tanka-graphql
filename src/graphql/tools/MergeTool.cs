@@ -81,7 +81,7 @@ namespace tanka.graphql.tools
                 types.Add(rightType);
             }
 
-            return new Schema(
+            return Schema.Initialize(
                 types.Single(t => t.Name == left.Query.Name) as ObjectType,
                 left.Mutation != null ? types.SingleOrDefault(t => t.Name == left.Mutation.Name) as ObjectType : null,
                 left.Subscription != null

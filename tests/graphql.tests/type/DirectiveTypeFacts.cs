@@ -48,7 +48,7 @@ namespace tanka.graphql.tests.type
 
             /* When */
             var schema = await SchemaTools.MakeExecutableSchemaAsync(
-                new Schema(query),
+                Schema.Initialize(query),
                 resolvers,
                 visitors: new SchemaVisitorFactory[]
                 {

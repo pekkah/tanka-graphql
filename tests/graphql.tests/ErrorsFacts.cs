@@ -22,7 +22,7 @@ namespace tanka.graphql.tests
                     ["nestedNonNull"] = new Field(NonNullString)
                 });
 
-            _schema = new Schema(
+            _schema = Schema.Initialize(
                 new ObjectType(
                     "Query",
                     new Fields
@@ -63,7 +63,7 @@ namespace tanka.graphql.tests
                 _resolvers).Result;
         }
 
-        private readonly Schema _schema;
+        private readonly ISchema _schema;
         private readonly IResolverMap _resolvers;
         private readonly ISchema _executable;
 

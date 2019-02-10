@@ -22,6 +22,8 @@ namespace tanka.graphql.graph
         {
             var healedTypes = new Dictionary<string, IType>();
 
+            var healingTypes = new List<string>();
+
             IType HealType(IType type, Func<string, INamedType> getNamedType)
             {
                 var namedType = type as INamedType;
@@ -31,6 +33,8 @@ namespace tanka.graphql.graph
 
                 if (healedTypes.ContainsKey(namedType.Name))
                     return healedTypes[namedType.Name];
+
+                healingTypes.Add(namedType.Name);
 
                 var newType = namedType;
                 if (namedType is ObjectType objectType)
@@ -48,7 +52,6 @@ namespace tanka.graphql.graph
                     newType = unionType.WithEachPossibleType(possibleType =>
                     {
                         var newPossibleType = (ObjectType) HealType(possibleType, getNamedType);
-                        healedTypes.Add(newPossibleType.Name, newPossibleType);
                         return newPossibleType;
                     });
 
@@ -76,9 +79,9 @@ namespace tanka.graphql.graph
                             $"{typeReference.TypeName}");
 
                     if (Equals(complexType, namedType))
-                        return new KeyValuePair<string, IField>(
-                            field.Key,
-                            new SelfReferenceField());
+                        return field.WithType(
+                            WrapIfRequired(value.Type, 
+                                new SelfReferenceType()));
 
                     return field.WithType(
                         WrapIfRequired(value.Type,

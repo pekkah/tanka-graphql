@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using tanka.graphql.graph;
 using tanka.graphql.type;
 using Xunit;
 
@@ -7,7 +8,7 @@ namespace tanka.graphql.tests.type
     public class NamedTypeReferenceFacts
     {
         [Fact]
-        public async Task Circular_type_reference()
+        public void Circular_type_reference()
         {
             /* Given */
             var person = new ObjectType(
@@ -18,18 +19,17 @@ namespace tanka.graphql.tests.type
                 });
 
             /* When */
-            var schema = new Schema(new ObjectType("Query", new Fields
+            var schema = Schema.Initialize(new ObjectType("Query", new Fields
             {
                 {"person", person}
             }));
 
-            await schema.InitializeAsync();
-            var friendsField = schema.GetNamedType<ObjectType>(person.Name)
-                .GetField("friends");
+            var actualPerson = schema.GetNamedType<ObjectType>(person.Name);
+            var friendsField = actualPerson.GetField("friends");
 
             /* Then */          
             Assert.IsType<List>(friendsField.Type);
-            Assert.Equal(person, ((List)friendsField.Type).WrappedType);
+            Assert.Equal(actualPerson, ((List)friendsField.Type).WrappedType);
         }
     }
 }

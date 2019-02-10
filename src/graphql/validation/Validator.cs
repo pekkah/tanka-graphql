@@ -15,8 +15,6 @@ namespace tanka.graphql.validation
             IDictionary<string, object> variables = null, 
             IEnumerable<IValidationRule> rules = null)
         {
-            if (!schema.IsInitialized) await schema.InitializeAsync().ConfigureAwait(false);
-
             var context = new ValidationContext
             {
                 Schema = schema,

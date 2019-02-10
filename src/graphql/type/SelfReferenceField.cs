@@ -2,8 +2,8 @@
 {
     public class SelfReferenceField : Field
     {
-        public SelfReferenceField(Args arguments = null, Meta meta = null, object defaultValue = null) 
-            : base(null, arguments, meta, defaultValue)
+        public SelfReferenceField(IType templateType, Args arguments = null, Meta meta = null, object defaultValue = null) 
+            : base(templateType, arguments, meta, defaultValue)
         {
         }
     }

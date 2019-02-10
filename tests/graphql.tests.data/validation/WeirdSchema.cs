@@ -121,7 +121,7 @@ namespace tanka.graphql.tests.data.validation
                     ["mutateDog"] = new Field(Dog)
                 });
 
-            return new Schema(query, mutation);
+            return Schema.Initialize(query, mutation);
         }
 
         public static UnionType HumanOrAlien { get; }

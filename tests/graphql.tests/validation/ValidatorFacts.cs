@@ -12,7 +12,6 @@ namespace tanka.graphql.tests.validation
         public ValidatorFacts()
         {
             _schema = WeirdSchemaBuilder.Build();
-            _schema.InitializeAsync().Wait();
         }
 
         private readonly ISchema _schema;

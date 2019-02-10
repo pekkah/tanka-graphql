@@ -8,30 +8,8 @@ namespace tanka.graphql.type
 {
     public class Schema : ISchema
     {
-        private readonly IEnumerable<INamedType> _typesReferencedByNameOnly;
-        private List<IType> _types = new List<IType>();
-
-        [Obsolete("Use Schema.Initialize")]
-        public Schema(
-            ObjectType query,
-            ObjectType mutation = null,
-            ObjectType subscription = null,
-            IEnumerable<INamedType> typesReferencedByNameOnly = null,
-            IEnumerable<DirectiveType> directives = null)
-        {
-            _typesReferencedByNameOnly = typesReferencedByNameOnly;
-            // Query is required
-            Query = query ?? throw new ArgumentNullException(nameof(query));
-
-            // Mutation and subscription are optional
-            Mutation = mutation;
-            Subscription = subscription;
-
-            if (directives != null)
-                Directives.AddRange(directives);
-
-            IsInitialized = false;
-        }
+        private readonly List<IType> _types = new List<IType>();
+        private readonly List<DirectiveType> _directives = new List<DirectiveType>();
 
         protected Schema(
             string queryTypeName,
@@ -43,22 +21,26 @@ namespace tanka.graphql.type
             if (queryTypeName == null) throw new ArgumentNullException(nameof(queryTypeName));
             if (types == null) throw new ArgumentNullException(nameof(types));
 
-            _types.AddRange(types);       
-            Directives.AddRange(directives);
+            _types.AddRange(types);
+            _directives.AddRange(directives);
 
             var namedTypes = _types.OfType<ObjectType>()
                 .ToList();
 
-            Query = namedTypes.Single(t => t.Name == queryTypeName);
+            Query = namedTypes.SingleOrDefault(t => t.Name == queryTypeName) 
+                    ?? throw new ArgumentNullException("Query is required for schema " +
+                                                       $"Could not find type '{queryTypeName}'");
 
             if (!string.IsNullOrEmpty(mutationTypeName))
                 Mutation = namedTypes.Single(t => t.Name == mutationTypeName);
 
             if (!string.IsNullOrEmpty(subscriptionTypeName))
                 Subscription = namedTypes.Single(t => t.Name == subscriptionTypeName);
+
+            IsInitialized = true;
         }
 
-        public List<DirectiveType> Directives { get; } = new List<DirectiveType>();
+        public IEnumerable<DirectiveType> Directives => _directives;
 
         public bool IsInitialized { get; protected set; }
 
@@ -67,46 +49,6 @@ namespace tanka.graphql.type
         public ObjectType Query { get; protected set; }
 
         public ObjectType Mutation { get; protected set; }
-
-        [Obsolete]
-        public virtual async Task<ISchema> InitializeAsync()
-        {
-            if (IsInitialized)
-                return this;
-
-            var scanningTasks = new List<Task<IEnumerable<IType>>>
-            {
-                new TypeScanner(Query).ScanAsync()
-            };
-
-            if (Mutation != null)
-                scanningTasks.Add(new TypeScanner(Mutation).ScanAsync());
-
-            if (Subscription != null)
-                scanningTasks.Add(new TypeScanner(Subscription).ScanAsync());
-
-
-            await Task.WhenAll(scanningTasks).ConfigureAwait(false);
-
-            // combine
-            var foundTypes = scanningTasks.SelectMany(r => r.Result)
-                //.Concat(ScalarType.Standard) // disabled for now
-                .Concat(_typesReferencedByNameOnly ?? Enumerable.Empty<IType>())
-                .Distinct(new GraphQLTypeComparer())
-                .ToList();
-
-            // add default directives
-            Directives.Add(DirectiveType.Include);
-            Directives.Add(DirectiveType.Skip);
-
-            _types = foundTypes;
-
-            var heal = new SchemaHealer(this);
-            await heal.VisitAsync();
-
-            IsInitialized = true;
-            return this;
-        }
 
         public INamedType GetNamedType(string name)
         {
@@ -138,6 +80,16 @@ namespace tanka.graphql.type
             return Directives.Where(d => filter(d)).AsQueryable();
         }
 
+        /// <summary>
+        ///     Initialize schema and replace NamedTypeReferences
+        ///     with actual types
+        /// </summary>
+        /// <param name="query">Query</param>
+        /// <param name="mutation">Mutation</param>
+        /// <param name="subscription">Subscription</param>
+        /// <param name="byNameOnly">Types referenced by name only</param>
+        /// <param name="directiveTypes">Directives</param>
+        /// <returns>Initialized <see cref="ISchema" /></returns>
         public static ISchema Initialize(
             ObjectType query,
             ObjectType mutation = null,
@@ -154,6 +106,16 @@ namespace tanka.graphql.type
                 Transforms.Heal());
         }
 
+        /// <summary>
+        ///     Initialize schema
+        /// </summary>
+        /// <param name="query">Query</param>
+        /// <param name="mutation">Mutation</param>
+        /// <param name="subscription">Subscription</param>
+        /// <param name="byNameOnly">Types referenced by name only</param>
+        /// <param name="directiveTypes">Directives</param>
+        /// <param name="transforms">Schema transformations</param>
+        /// <returns>Initialized <see cref="ISchema" /></returns>
         public static ISchema Initialize(
             ObjectType query,
             ObjectType mutation = null,
@@ -162,6 +124,8 @@ namespace tanka.graphql.type
             IEnumerable<DirectiveType> directiveTypes = null,
             params SchemaTransform[] transforms)
         {
+            if (query == null) throw new ArgumentNullException(nameof(query));
+
             var scanningTasks = new List<Task<IEnumerable<IType>>>
             {
                 new TypeScanner(query).ScanAsync()
@@ -184,9 +148,7 @@ namespace tanka.graphql.type
                 .ToList();
 
             // add default directives
-            var directives = new List<DirectiveType>(
-                directiveTypes ?? Enumerable.Empty<DirectiveType>()
-            )
+            var directives = directiveTypes ?? new List<DirectiveType>()
             {
                 DirectiveType.Include,
                 DirectiveType.Skip
@@ -200,13 +162,6 @@ namespace tanka.graphql.type
                 directives);
 
             return Transforms.Apply(schema, transforms.ToArray());
-        }
-
-        public T GetNamedType<T>(string name) where T : INamedType
-        {
-            var type = GetNamedType(name);
-
-            return (T) type;
         }
     }
 }

@@ -13,7 +13,8 @@ namespace tanka.graphql.tests.type
             /* Given */
 
             /* When */
-            var exception = Assert.Throws<ArgumentNullException>(() => new Schema(null));
+            var exception = Assert.Throws<ArgumentNullException>(
+                () => Schema.Initialize(null));
 
             /* Then */
             Assert.Equal("query", exception.ParamName);
@@ -32,7 +33,7 @@ namespace tanka.graphql.tests.type
                 new Fields());
 
             /* When */
-            var sut = new Schema(queryType, mutationType);
+            var sut = Schema.Initialize(queryType, mutationType);
 
             /* Then */
             Assert.Equal(mutationType, sut.Mutation);
@@ -47,7 +48,7 @@ namespace tanka.graphql.tests.type
                 new Fields());
 
             /* When */
-            var sut = new Schema(queryType);
+            var sut = Schema.Initialize(queryType);
 
             /* Then */
             Assert.Equal(queryType, sut.Query);
@@ -70,14 +71,14 @@ namespace tanka.graphql.tests.type
                 new Fields());
 
             /* When */
-            var sut = new Schema(queryType, mutationType, subscriptionType);
+            var sut = Schema.Initialize(queryType, mutationType, subscriptionType);
 
             /* Then */
             Assert.Equal(subscriptionType, sut.Subscription);
         }
 
         [Fact]
-        public async Task Initialize_types()
+        public void Initialize_types()
         {
             /* Given */
             var queryType = new ObjectType(
@@ -87,10 +88,8 @@ namespace tanka.graphql.tests.type
                     ["field"] = new Field(new ObjectType("fieldType", new Fields()))
                  });
 
-            var sut = new Schema(queryType);
-
             /* When */
-            await sut.InitializeAsync();
+            var sut = Schema.Initialize(queryType);
 
             /* Then */
             var types = sut.QueryTypes<INamedType>();
@@ -100,7 +99,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
-        public async Task Initialize_types_with_found_scalars()
+        public void Initialize_types_with_found_scalars()
         {
             /* Given */
             var queryType = new ObjectType(
@@ -113,10 +112,10 @@ namespace tanka.graphql.tests.type
                     }))
                 });
 
-            var sut = new Schema(queryType);
+            
 
             /* When */
-            await sut.InitializeAsync();
+            var sut = Schema.Initialize(queryType);
 
             /* Then */
             var types = sut.QueryTypes<INamedType>();
@@ -125,7 +124,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
-        public async Task Initialize_types_no_duplicates()
+        public void Initialize_types_no_duplicates()
         {
             /* Given */
             var type = new ObjectType("fieldType", new Fields());
@@ -137,10 +136,8 @@ namespace tanka.graphql.tests.type
                     ["field2"] = new Field(type)
                 });
 
-            var sut = new Schema(queryType);
-
             /* When */
-            await sut.InitializeAsync();
+            var sut = Schema.Initialize(queryType);
 
             /* Then */
             var types = sut.QueryTypes<INamedType>();
@@ -150,7 +147,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact(Skip = "Should these be included?")]
-        public async Task Initialize_types_with_default_scalars()
+        public void Initialize_types_with_default_scalars()
         {
             /* Given */
             var type = new ObjectType("fieldType", new Fields());
@@ -162,10 +159,8 @@ namespace tanka.graphql.tests.type
                     ["field2"] = new Field(type)
                 });
 
-            var sut = new Schema(queryType);
-
             /* When */
-            await sut.InitializeAsync();
+            var sut = Schema.Initialize(queryType);
 
             /* Then */
             var types = sut.QueryTypes<INamedType>();
@@ -177,7 +172,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
-        public async Task Initialize_directives_with_skip_and_include()
+        public void Initialize_directives_with_skip_and_include()
         {
             /* Given */
             var type = new ObjectType("fieldType", new Fields());
@@ -189,10 +184,8 @@ namespace tanka.graphql.tests.type
                     ["field2"] = new Field(type)
                 });
 
-            var sut = new Schema(queryType);
-
             /* When */
-            await sut.InitializeAsync();
+            var sut = Schema.Initialize(queryType);
 
             /* Then */
             var directives = sut.QueryDirectives();
@@ -202,7 +195,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
-        public async Task Initialize_heal_schema()
+        public void Initialize_heal_schema()
         {
             /* Given */
             var type = new ObjectType("fieldType", new Fields());
@@ -215,10 +208,8 @@ namespace tanka.graphql.tests.type
                     ["field"] = field,
                 });
 
-            var sut = new Schema(queryType, typesReferencedByNameOnly: new []{ type });
-
             /* When */
-            await sut.InitializeAsync();
+            var sut = Schema.Initialize(queryType, byNameOnly: new []{ type });
 
             /* Then */
             var actual = sut.Query.GetField("field");

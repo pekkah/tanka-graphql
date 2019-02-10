@@ -4,7 +4,7 @@ using Xunit;
 
 namespace tanka.graphql.tests.graph
 {
-    public class TransformNamedType_RenameFacts
+    public class DeleteTransformFacts
     {
         [Fact]
         public void Delete_ObjectType_contained_by_nested_object_type_query()

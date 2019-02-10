@@ -27,7 +27,7 @@ namespace tanka.graphql.tests
                 {"children", new Field(new List(new NamedTypeReference("Node")))}
             });
 
-            var schema = new Schema(
+            var schema = Schema.Initialize(
                 new ObjectType(
                     "Query",
                     new Fields

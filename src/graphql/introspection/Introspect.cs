@@ -97,14 +97,10 @@ namespace tanka.graphql.introspection
             }";
 
         public static async Task<ISchema> SchemaAsync(ISchema schema)
-        {
-            if (!schema.IsInitialized)
-                await schema.InitializeAsync();
-
-            var introspectionSchema = IntrospectionSchema.Build();
-            await introspectionSchema.InitializeAsync();
-            
+        {        
+            var introspectionSchema = IntrospectionSchema.Build(); 
             var introspectionResolvers = new IntrospectionResolvers(schema);
+
             return await SchemaTools.MakeExecutableSchemaAsync(
                 introspectionSchema,
                 introspectionResolvers);
