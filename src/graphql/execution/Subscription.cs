@@ -122,13 +122,15 @@ namespace tanka.graphql.execution
             var fieldSelection = fields.First();
 
             var coercedArgumentValues = Arguments.CoerceArgumentValues(
+                schema,
                 subscriptionType,
                 fieldSelection,
                 coercedVariableValues);
 
-            var field = subscriptionType.GetField(fieldName);
+            var field = schema.GetField(subscriptionType.Name, fieldName);
             var path = new NodePath();
             var resolveContext = new ResolverContext(
+                schema,
                 subscriptionType,
                 initialValue,
                 field,

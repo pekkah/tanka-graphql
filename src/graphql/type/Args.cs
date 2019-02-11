@@ -21,5 +21,13 @@ namespace tanka.graphql.type
                 this[argument.Key] = argument.Value;
             }
         }
+
+        public Args((string Name, IType Type, object DefaultValue, string Description)[] args)
+        {
+            foreach (var (name, type, defaultValue, description) in args)
+            {
+                Add(name, type, defaultValue, new Meta(description));
+            }
+        }
     }
 }

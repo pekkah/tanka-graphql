@@ -40,7 +40,7 @@ namespace tanka.graphql.introspection
 
                         var includeDeprecated = (bool) context.Arguments["includeDeprecated"];
 
-                        var fields = complexType.Fields;
+                        var fields = context.Schema.GetFields(complexType.Name);
 
                         if (!includeDeprecated)
                         {

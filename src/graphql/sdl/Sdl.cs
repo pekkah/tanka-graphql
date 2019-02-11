@@ -4,158 +4,53 @@ using System.Linq;
 using GraphQLParser.AST;
 using tanka.graphql.error;
 using tanka.graphql.execution;
-using tanka.graphql.tools;
 using tanka.graphql.type;
+using tanka.graphql.typeSystem;
 
 namespace tanka.graphql.sdl
 {
-    public static class Sdl
+    public class SdlReader
     {
-        public static ObjectType Object(GraphQLObjectTypeDefinition definition, SdlParserContext context)
+        private readonly SchemaBuilder _builder;
+        private readonly GraphQLDocument _document;
+
+        public SdlReader(GraphQLDocument document, SchemaBuilder builder = null)
         {
-            context.PushObject(definition);
-
-            var fields = Fields(definition.Fields, context);
-            var interfaces = Interfaces(definition.Interfaces, context);
-            var result = new ObjectType(
-                definition.Name.Value,
-                fields,
-                implements: interfaces);
-
-            context.KnownTypes.Add(result);
-            context.PopObject();
-            return result;
+            _document = document;
+            _builder = builder ?? new SchemaBuilder();
         }
 
-        public static IField Field(GraphQLFieldDefinition definition, SdlParserContext context)
+        public SchemaBuilder Read()
         {
-            var args = Args(definition.Arguments, context);
-            return new Field(
-                Type(definition.Type, context),
-                args,
-                new Meta(directives: Directives(definition.Directives, context)));
+            var definitions = _document.Definitions;
+
+            foreach (var definition in definitions.OfType<GraphQLScalarTypeDefinition>())
+                Scalar(definition);
+
+            foreach (var directiveDefinition in _document.Definitions.OfType<GraphQLDirectiveDefinition>())
+                DirectiveType(directiveDefinition);
+
+            foreach (var definition in _document.Definitions.OfType<GraphQLInputObjectTypeDefinition>())
+                InputObject(definition);
+
+            foreach (var definition in _document.Definitions.OfType<GraphQLEnumTypeDefinition>())
+                Enum(definition);
+
+            foreach (var definition in _document.Definitions.OfType<GraphQLInterfaceTypeDefinition>())
+                Interface(definition);
+
+            foreach (var definition in _document.Definitions.OfType<GraphQLObjectTypeDefinition>())
+                Object(definition);
+
+            foreach (var definition in _document.Definitions.OfType<GraphQLTypeExtensionDefinition>())
+                Extend(definition);
+
+            return _builder;
         }
 
-        public static IEnumerable<INamedType> Document(GraphQLDocument document, SdlParserContext context)
+        protected ScalarType Scalar(GraphQLScalarTypeDefinition definition)
         {
-            foreach (var definition in document.Definitions.OfType<GraphQLScalarTypeDefinition>())
-                Scalar(definition, context);
-
-            foreach (var directiveDefinition in document.Definitions.OfType<GraphQLDirectiveDefinition>())
-                DirectiveType(directiveDefinition, context);
-
-            foreach (var definition in document.Definitions.OfType<GraphQLInputObjectTypeDefinition>())
-                InputObject(definition, context);
-
-            foreach (var definition in document.Definitions.OfType<GraphQLEnumTypeDefinition>())
-                Enum(definition, context);
-
-            foreach (var definition in document.Definitions.OfType<GraphQLInterfaceTypeDefinition>())
-                Interface(definition, context);
-
-            foreach (var definition in document.Definitions.OfType<GraphQLObjectTypeDefinition>())
-                Object(definition, context);
-
-
-            foreach (var definition in document.Definitions.OfType<GraphQLTypeExtensionDefinition>())
-                Extend(definition, context);
-
-            return context.KnownTypes;
-        }
-
-        public static InputObjectType InputObject(GraphQLInputObjectTypeDefinition definition, SdlParserContext context)
-        {
-            var fields = InputValues(definition.Fields, context);
-
-            var result = new InputObjectType(
-                definition.Name.Value,
-                fields);
-
-            context.KnownTypes.Add(result);
-            return result;
-        }
-
-        public static InterfaceType Interface(GraphQLInterfaceTypeDefinition definition, SdlParserContext context)
-        {
-            context.PushInterface(definition);
-
-            var fields = Fields(definition.Fields, context);
-            var directives = Directives(definition.Directives, context);
-            var result = new InterfaceType(
-                definition.Name.Value,
-                fields,
-                new Meta(directives: directives));
-
-            context.KnownTypes.Add(result);
-            context.PopInterface();
-            return result;
-        }
-
-        public static EnumType Enum(GraphQLEnumTypeDefinition definition, SdlParserContext context)
-        {
-            var values = new EnumValues();
-
-            foreach (var valueDefinition in definition.Values)
-                values[valueDefinition.Name.Value] = new Meta(
-                    directives: Directives(valueDefinition.Directives, context));
-
-            var directives = Directives(definition.Directives, context);
-            var result = new EnumType(
-                definition.Name.Value,
-                values,
-                new Meta(directives: directives));
-
-            context.KnownTypes.Add(result);
-            return result;
-        }
-
-        public static ISchema Schema(GraphQLDocument document,
-            IEnumerable<ScalarType> scalars = null,
-            IEnumerable<DirectiveType> directives = null)
-        {
-            var knownTypes = new List<INamedType>();
-
-            if (scalars != null)
-                knownTypes.AddRange(scalars);
-
-            if (directives != null)
-                knownTypes.AddRange(directives);
-
-            var context = new SdlParserContext(document, knownTypes);
-
-            var schemaDefinition = document.Definitions.OfType<GraphQLSchemaDefinition>().SingleOrDefault();
-
-            if (schemaDefinition == null)
-                throw new GraphQLError(
-                    "Could not find single schema definition from document", document);
-
-            Document(document, context);
-
-            var queryTypeName = schemaDefinition.OperationTypes.Single(o => o.Operation == OperationType.Query).Type
-                .Name.Value;
-
-            var mutationTypeName = schemaDefinition.OperationTypes
-                .SingleOrDefault(o => o.Operation == OperationType.Mutation)?.Type.Name.Value;
-
-            var subscriptionTypeName = schemaDefinition.OperationTypes
-                .SingleOrDefault(o => o.Operation == OperationType.Subscription)?.Type.Name.Value;
-
-            var queryType = (ObjectType) context.GetKnownType(queryTypeName);
-            ObjectType mutationType = null;
-            ObjectType subscriptionType = null;
-
-            if (!string.IsNullOrEmpty(mutationTypeName))
-                mutationType = (ObjectType) context.GetKnownType(mutationTypeName);
-
-            if (!string.IsNullOrEmpty(subscriptionTypeName))
-                subscriptionType = (ObjectType) context.GetKnownType(subscriptionTypeName);
-
-            return type.Schema.Initialize(queryType, mutationType, subscriptionType);
-        }
-
-        public static ScalarType Scalar(GraphQLScalarTypeDefinition definition, SdlParserContext context)
-        {
-            var scalar = context.GetKnownType(definition.Name.Value) as ScalarType;
+            _builder.PredefinedScalar(definition.Name.Value, out var scalar);
 
             if (scalar == null)
                 throw new GraphQLError(
@@ -165,145 +60,30 @@ namespace tanka.graphql.sdl
             return scalar;
         }
 
-        private static DirectiveType DirectiveType(GraphQLDirectiveDefinition definition, SdlParserContext context)
+        protected DirectiveType DirectiveType(GraphQLDirectiveDefinition definition)
         {
-            var directiveType = context.GetKnownType(definition.Name.Value) as DirectiveType;
+            var locations = definition.Locations
+                .Select(location =>
+                    (DirectiveLocation) System.Enum.Parse(typeof(DirectiveLocation), location.Value))
+                .ToList();
 
-            if (directiveType == null)
-                throw new GraphQLError(
-                    $"DirectiveType type '{definition.Name.Value}' not known. Add it to the context before parsing.",
-                    definition);
+            var args = Args(definition.Arguments);
+
+            _builder.DirectiveType(
+                definition.Name.Value,
+                out var directiveType,
+                locations,
+                args.ToArray());
 
             return directiveType;
         }
 
-        private static IEnumerable<DirectiveInstance> Directives(IEnumerable<GraphQLDirective> directiveDefinitions,
-            SdlParserContext context)
+        protected IEnumerable<(string Name, IType Type, object DefaultValue, string Description)> Args(
+            IEnumerable<GraphQLInputValueDefinition> definitions)
         {
-            foreach (var directiveDefinition in directiveDefinitions)
-            foreach (var directiveInstance in DirectiveInstance(context, directiveDefinition))
-                yield return directiveInstance;
-        }
-
-        private static IEnumerable<DirectiveInstance> DirectiveInstance(SdlParserContext context,
-            GraphQLDirective directiveDefinition)
-        {
-            var name = directiveDefinition.Name.Value;
-            var directiveType = context.GetKnownType(name) as DirectiveType;
-
-            if (directiveType == null)
-                throw new GraphQLError(
-                    $"Could not find DirectiveType with name '{name}'");
-
-            var arguments = new Args();
-            foreach (var argument in directiveType.Arguments)
-            {
-                var type = argument.Value.Type;
-                var defaultValue = argument.Value.DefaultValue;
-                var definition = directiveDefinition.Arguments.SingleOrDefault(a => a.Name.Value == argument.Key);
-
-                var hasValue = definition != null;
-                var value = definition?.Value;
-
-                if (!hasValue && defaultValue != null)
-                {
-                    //todo: this needs it's own type
-                    arguments.Add(argument.Key, new Argument
-                    {
-                        DefaultValue = defaultValue,
-                        Type = type
-                    });
-                    continue;
-                }
-
-                if (type is NonNull
-                    && (!hasValue || value == null))
-                    throw new ValueCoercionException(
-                        $"Argument {argument.Key} type is non-nullable but value is null or not set",
-                        value,
-                        directiveType);
-
-                if (hasValue)
-                {
-                    if (value == null)
-                        arguments.Add(argument.Key, new Argument
-                        {
-                            DefaultValue = null,
-                            Type = type
-                        });
-                    else
-                        arguments.Add(argument.Key, new Argument
-                        {
-                            DefaultValue = Values.CoerceValue(value, type),
-                            Type = type
-                        });
-                }
-            }
-
-            yield return directiveType.CreateInstance(arguments);
-        }
-
-        private static INamedType Extend(GraphQLTypeExtensionDefinition definition, SdlParserContext context)
-        {
-            var originalType = context.GetKnownType(definition.Definition.Name.Value);
-
-            if (originalType == null)
-                return null;
-
-            var extensionType = Object(definition.Definition, context);
-            context.KnownTypes.Remove(extensionType);
-
-            if (originalType is ObjectType originalObjectType)
-            {
-                var extendedType =
-                    MergeTool.Merge(
-                        originalObjectType,
-                        extensionType,
-                        (l, r) => r.Field); //todo: this needs fixing
-
-                context.KnownTypes.Remove(originalType);
-                context.KnownTypes.Add(extendedType);
-
-                return extendedType;
-            }
-
-            return null;
-        }
-
-        private static IEnumerable<InterfaceType> Interfaces(IEnumerable<GraphQLNamedType> definitions,
-            SdlParserContext context)
-        {
-            var interfaces = new List<InterfaceType>();
-
-            foreach (var namedType in definitions)
-            {
-                var type = Type(namedType, context) as InterfaceType;
-
-                if (type == null)
-                    continue;
-
-                interfaces.Add(type);
-            }
-
-            return interfaces;
-        }
-
-        private static Fields Fields(IEnumerable<GraphQLFieldDefinition> definitions, SdlParserContext context)
-        {
-            var fields = new Fields();
-            foreach (var definition in definitions)
-                fields[definition.Name.Value] = Field(definition, context);
-
-            return fields;
-        }
-
-        private static Args Args(IEnumerable<GraphQLInputValueDefinition> definitions, SdlParserContext context)
-        {
-            var args = new Args();
-
             foreach (var definition in definitions)
             {
-                var type = Type(definition.Type, context);
+                var type = InputType(definition.Type);
                 object defaultValue;
 
                 try
@@ -315,54 +95,210 @@ namespace tanka.graphql.sdl
                     defaultValue = null;
                 }
 
-                args[definition.Name.Value] = new Argument
-                {
-                    Type = type,
-                    DefaultValue = defaultValue
-                };
+                yield return (definition.Name.Value, type, defaultValue, default);
             }
-
-            return args;
         }
 
-        private static IType Type(GraphQLType typeDefinition, SdlParserContext context)
+        protected IType InputType(GraphQLType typeDefinition)
         {
             if (typeDefinition.Kind == ASTNodeKind.NonNullType)
             {
-                var innerType = Type(((GraphQLNonNullType) typeDefinition).Type, context);
+                var innerType = InputType(((GraphQLNonNullType) typeDefinition).Type);
                 return innerType != null ? new NonNull(innerType) : null;
             }
 
             if (typeDefinition.Kind == ASTNodeKind.ListType)
             {
-                var innerType = Type(((GraphQLListType) typeDefinition).Type, context);
+                var innerType = InputType(((GraphQLListType) typeDefinition).Type);
                 return innerType != null ? new List(innerType) : null;
             }
 
             var namedTypeDefinition = (GraphQLNamedType) typeDefinition;
             var typeName = namedTypeDefinition.Name.Value;
 
-            // avoid getting caught in circular graph
-            if (context.IsBeingBuilt(typeName))
-                return new NamedTypeReference(typeName);
+            // is type already known by the builder?
+            if (_builder.IsPredefinedType<INamedType>(typeName, out var knownType))
+                return knownType;
 
-            // is known type?
-            var type = context.GetKnownType(typeName);
+            // type is not known so we need to get the
+            // definition and build it
+            var definition = _document.Definitions
+                .OfType<GraphQLTypeDefinition>()
+                .InputType(typeName);
 
-            if (type != null)
-                return type;
+            if (definition == null)
+                throw new InvalidOperationException(
+                    $"Could not find a input type definition '{typeName}'.");
 
-            return new NamedTypeReference(typeName);
+            switch (definition)
+            {
+                // so we have InputObject, Enum or Scalar
+                case GraphQLScalarTypeDefinition scalarTypeDefinition:
+                    return Scalar(scalarTypeDefinition);
+                case GraphQLEnumTypeDefinition enumTypeDefinition:
+                    return Enum(enumTypeDefinition);
+                case GraphQLInputObjectTypeDefinition inputObjectTypeDefinition:
+                    return InputObject(inputObjectTypeDefinition);
+            }
+
+            //todo: we should not come here ever
+            return null;
         }
 
-        private static InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions,
-            SdlParserContext context)
+        protected IType OutputType(GraphQLType typeDefinition)
+        {
+            if (typeDefinition.Kind == ASTNodeKind.NonNullType)
+            {
+                var innerType = InputType(((GraphQLNonNullType) typeDefinition).Type);
+                return innerType != null ? new NonNull(innerType) : null;
+            }
+
+            if (typeDefinition.Kind == ASTNodeKind.ListType)
+            {
+                var innerType = InputType(((GraphQLListType) typeDefinition).Type);
+                return innerType != null ? new List(innerType) : null;
+            }
+
+            var namedTypeDefinition = (GraphQLNamedType) typeDefinition;
+            var typeName = namedTypeDefinition.Name.Value;
+
+            // is type already known by the builder?
+            if (_builder.IsPredefinedType<INamedType>(typeName, out var knownType))
+                return knownType;
+
+            // type is not known so we need to get the
+            // definition and build it
+            var definition = _document.Definitions
+                .OfType<GraphQLTypeDefinition>()
+                .OutputType(typeName);
+
+            if (definition == null)
+                throw new InvalidOperationException(
+                    $"Could not find a input type definition '{typeName}'.");
+
+            switch (definition)
+            {
+                // so we have InputObject, Enum or Scalar
+                case GraphQLScalarTypeDefinition scalarTypeDefinition:
+                    return Scalar(scalarTypeDefinition);
+                case GraphQLEnumTypeDefinition enumTypeDefinition:
+                    return Enum(enumTypeDefinition);
+                case GraphQLInputObjectTypeDefinition inputObjectTypeDefinition:
+                    return InputObject(inputObjectTypeDefinition);
+                case GraphQLObjectTypeDefinition objectType:
+                    return Object(objectType);
+                case GraphQLInterfaceTypeDefinition interfaceType:
+                    return Interface(interfaceType);
+                case GraphQLUnionTypeDefinition unionType:
+                    return Union(unionType);
+            }
+
+            //todo: we should not come here ever
+            return null;
+        }
+
+        protected EnumType Enum(GraphQLEnumTypeDefinition definition)
+        {
+            var values = definition.Values.Select(value =>
+                (value.Name.Value, new Meta(directives: Directives(value.Directives))));
+
+            //todo: extend builder
+            var directives = Directives(definition.Directives);
+
+            _builder.Enum(definition.Name.Value, out var enumType,
+                values.ToArray() /*, directives */);
+
+            return enumType;
+        }
+
+        protected IEnumerable<DirectiveInstance> Directives(
+            IEnumerable<GraphQLDirective> directives)
+        {
+            foreach (var directive in directives)
+            foreach (var directiveInstance in DirectiveInstance(directive))
+                yield return directiveInstance;
+        }
+
+        protected IEnumerable<DirectiveInstance> DirectiveInstance(
+            GraphQLDirective directiveDefinition)
+        {
+            var name = directiveDefinition.Name.Value;
+
+            _builder.IsPredefinedType<DirectiveType>(name, out var directiveType);
+
+            if (directiveType == null)
+                throw new GraphQLError(
+                    $"Could not find DirectiveType with name '{name}'");
+
+            var arguments = new Args();
+            foreach (var argument in directiveType.Arguments)
+            {
+                var type = argument.Value.Type;
+                var defaultValue = argument.Value.DefaultValue;
+
+                var definition = directiveDefinition.Arguments
+                    .SingleOrDefault(a => a.Name.Value == argument.Key);
+
+                var hasValue = definition != null;
+                var value = definition?.Value;
+
+                if (!hasValue && defaultValue != null)
+                {
+                    //todo: this needs it's own type
+                    arguments.Add(argument.Key, new Argument(type, defaultValue));
+                    continue;
+                }
+
+                if (type is NonNull
+                    && (!hasValue || value == null))
+                    throw new ValueCoercionException(
+                        $"Argument {argument.Key} type is non-nullable but value is null or not set",
+                        null,
+                        directiveType);
+
+                if (hasValue)
+                    arguments.Add(argument.Key,
+                        value == null
+                            ? new Argument(type, defaultValue)
+                            : new Argument(type, Values.CoerceValue(value, type)));
+            }
+
+            yield return directiveType.CreateInstance(arguments);
+        }
+
+        protected InputObjectType InputObject(GraphQLInputObjectTypeDefinition definition)
+        {
+            _builder.InputObject(definition.Name.Value, out var inputObject);
+            _builder.LateBuild(builder =>
+            {
+                var fields = InputValues(definition.Fields);
+                foreach (var inputField in fields)
+                    builder.InputField(
+                        inputObject,
+                        inputField.Key,
+                        inputField.Value.Type,
+                        inputField.Value.DefaultValue,
+                        inputField.Value.Description,
+                        inputField.Value.Directives);
+            });
+
+            return inputObject;
+        }
+
+        protected InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions)
         {
             var fields = new InputFields();
 
             foreach (var definition in definitions)
             {
-                var type = Type(definition.Type, context);
+                var type = InputType(definition.Type);
+
+                if (!TypeIs.IsInputType(type))
+                    throw new GraphQLError(
+                        "Type of input value definition is not valid input value type. " +
+                        $"Definition: '{definition.Name.Value}' Type: {definition.Type.Kind}",
+                        definition);
+
                 object defaultValue = null;
 
                 try
@@ -374,12 +310,7 @@ namespace tanka.graphql.sdl
                     defaultValue = null;
                 }
 
-                if (!TypeIs.IsInputType(type))
-                    throw new GraphQLError("Type of input value definition is not valid input value type. " +
-                                           $"Definition: '{definition.Name.Value}' Type: {definition.Type.Kind}",
-                        definition);
-
-                var directives = Directives(definition.Directives, context);
+                var directives = Directives(definition.Directives);
 
                 switch (type)
                 {
@@ -417,6 +348,95 @@ namespace tanka.graphql.sdl
             }
 
             return fields;
+        }
+
+        protected InterfaceType Interface(GraphQLInterfaceTypeDefinition definition)
+        {
+            var directives = Directives(definition.Directives);
+
+            _builder.Interface(definition.Name.Value, out var interfaceType,
+                directives: directives);
+
+            _builder.LateBuild(_ => { Fields(interfaceType, definition.Fields); });
+
+            return interfaceType;
+        }
+
+        protected ObjectType Object(GraphQLObjectTypeDefinition definition)
+        {
+            var directives = Directives(definition.Directives);
+
+            _builder.Object(definition.Name.Value, out var objectType,
+                directives: directives);
+
+            _builder.LateBuild(_ => { Fields(objectType, definition.Fields); });
+
+            return objectType;
+        }
+
+        protected void Extend(GraphQLTypeExtensionDefinition definition)
+        {
+            _builder.LateBuild(_ =>
+            {
+                if (!_builder.IsPredefinedType<ObjectType>(definition.Definition.Name.Value, out var type))
+                    throw new InvalidOperationException(
+                        $"Cannot extend type '{definition.Definition.Name}'. Type to extend not found.");
+
+                Fields(type, definition.Definition.Fields);
+            });
+        }
+
+        private IType Union(GraphQLUnionTypeDefinition definition)
+        {
+            var possibleTypes = new List<ObjectType>();
+            foreach (var astType in definition.Types)
+            {
+                var type = (ObjectType) OutputType(astType);
+                possibleTypes.Add(type);
+            }
+
+            var directives = Directives(definition.Directives);
+            _builder.Union(definition.Name.Value, out var unionType, default, directives, possibleTypes.ToArray());
+            return unionType;
+        }
+
+        private IEnumerable<InterfaceType> Interfaces(IEnumerable<GraphQLNamedType> definitions)
+        {
+            var interfaces = new List<InterfaceType>();
+
+            foreach (var namedType in definitions)
+            {
+                var type = OutputType(namedType) as InterfaceType;
+
+                if (type == null)
+                    continue;
+
+                interfaces.Add(type);
+            }
+
+            return interfaces;
+        }
+
+        private void Fields(ComplexType owner, IEnumerable<GraphQLFieldDefinition> definitions)
+        {
+            foreach (var definition in definitions)
+            {
+                var type = OutputType(definition.Type);
+                var name = definition.Name.Value;
+                var args = Args(definition.Arguments);
+                var directives = Directives(definition.Directives);
+
+                _builder.Field(owner, name, type, default, directives, args.ToArray());
+            }
+        }
+    }
+
+    public static class Sdl
+    {
+        public static ISchema Schema(GraphQLDocument document)
+        {
+            var reader = new SdlReader(document);
+            return reader.Read().Build();
         }
     }
 }

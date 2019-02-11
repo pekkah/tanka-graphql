@@ -115,13 +115,6 @@ namespace tanka.graphql
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            /* Schema should be always initialized
-            if (!options.Schema.IsInitialized)
-            {
-                logger.SchemaNotInitialized();
-                await options.Schema.InitializeAsync().ConfigureAwait(false);
-            }*/
-
             await extensions.BeginParseDocumentAsync();
             var document = options.Document;
             await extensions.EndParseDocumentAsync(document);

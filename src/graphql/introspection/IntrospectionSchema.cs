@@ -1,141 +1,101 @@
 ﻿using System;
+using System.Linq;
 using tanka.graphql.type;
-using static tanka.graphql.type.Argument;
-using static tanka.graphql.type.ScalarType;
+using tanka.graphql.typeSystem;
 
 namespace tanka.graphql.introspection
 {
     public class IntrospectionSchema
     {
+        public const string EnumValueName = "__EnumValue";
+        public const string FieldName = "__Field";
+        public const string InputValueName = "__InputValue";
+        public const string SchemaName = "__Schema";
         public const string TypeKindName = "__TypeKind";
         public const string TypeName = "__Type";
-        public const string InputValueName = "__InputValue";
-        public const string FieldName = "__Field";
-        public const string EnumValueName = "__EnumValue";
-        public const string SchemaName = "__Schema";
 
         public static ISchema Build()
         {
-            var typeKind = new NonNull(new EnumType(
-                TypeKindName,
-                new EnumValues
-                {
-                    [__TypeKind.SCALAR.ToString()] = null,
-                    [__TypeKind.OBJECT.ToString()] = null,
-                    [__TypeKind.ENUM.ToString()] = null,
-                    [__TypeKind.INPUT_OBJECT.ToString()] = null,
-                    [__TypeKind.INTERFACE.ToString()] = null,
-                    [__TypeKind.LIST.ToString()] = null,
-                    [__TypeKind.NON_NULL.ToString()] = null,
-                    [__TypeKind.UNION.ToString()] = null
-                }));
+            var builder = new SchemaBuilder();
 
-            var typeReference = new NamedTypeReference(TypeName);
-            var nonNullTypeReference = new NonNull(typeReference);
-            var typeListReference = new List(new NonNull(typeReference));
+            // define type here so that it can be referenced early
+            builder.Object("type", out var type);
+            var typeList = new List(new NonNull(type));
 
-            var inputValue = new ObjectType(
-                InputValueName,
-                new Fields
-                {
-                    ["name"] = new Field(NonNullString),
-                    ["description"] = new Field(ScalarType.String),
-                    ["type"] = new Field(nonNullTypeReference),
-                    ["defaultValue"] = new Field(ScalarType.String),
-                });
+            builder.Enum(TypeKindName, out var typeKind,
+                (__TypeKind.SCALAR.ToString(), default),
+                (__TypeKind.OBJECT.ToString(), default),
+                (__TypeKind.ENUM.ToString(), default),
+                (__TypeKind.INPUT_OBJECT.ToString(), default),
+                (__TypeKind.INTERFACE.ToString(), default),
+                (__TypeKind.LIST.ToString(), default),
+                (__TypeKind.NON_NULL.ToString(), default),
+                (__TypeKind.UNION.ToString(), default));
 
-            var argsList = new NonNull(new List(new NonNull(inputValue)));
+            builder.Object(InputValueName, out var inputValue)
+                .Field(inputValue, "name", ScalarType.NonNullString)
+                .Field(inputValue, "description", ScalarType.String)
+                .Field(inputValue, "defaultValue", ScalarType.String)
+                .Field(inputValue, "type", new NonNull(type));
 
-            var field = new ObjectType(
-                FieldName,
-                new Fields
-                {
-                    ["name"] = new Field(NonNullString),
-                    ["description"] = new Field(ScalarType.String),
-                    ["args"] = new Field(argsList),
-                    ["type"] = new Field(nonNullTypeReference),
-                    ["isDeprecated"] = new Field(NonNullBoolean),
-                    ["deprecationReason"] = new Field(ScalarType.String)
-                });
+            var inputValueList = new List(new NonNull(inputValue));
+            var argsList = new List(new NonNull(inputValue));
+
+            builder.Object(FieldName, out var field)
+                .Field(field, "name", ScalarType.NonNullString)
+                .Field(field, "description", ScalarType.String)
+                .Field(field, "args", argsList)
+                .Field(field, "type", new NonNull(type))
+                .Field(field, "isDeprecated", ScalarType.NonNullBoolean)
+                .Field(field, "deprecationReason", ScalarType.String);
 
             var fieldList = new List(new NonNull(field));
 
-            var enumValue = new ObjectType(
-                EnumValueName,
-                new Fields
-                {
-                    ["name"] = new Field(NonNullString),
-                    ["description"] = new Field(ScalarType.String),
-                    ["isDeprecated"] = new Field(NonNullBoolean),
-                    ["deprecationReason"] = new Field(ScalarType.String)
-                });
+            builder.Object(EnumValueName, out var enumValue)
+                .Field(enumValue, "name", ScalarType.NonNullString)
+                .Field(enumValue, "description", ScalarType.String)
+                .Field(enumValue, "isDeprecated", ScalarType.NonNullBoolean)
+                .Field(enumValue, "deprecationReason", ScalarType.String);
 
             var enumValueList = new List(new NonNull(enumValue));
 
-            var inputValueList = new List(new NonNull(inputValue));
+            builder
+                .Field(type, "kind", new NonNull(typeKind))
+                .Field(type, "name", ScalarType.String)
+                .Field(type, "description", ScalarType.String)
+                .Field(type, "fields", fieldList,
+                    args: ("includeDeprecated", ScalarType.Boolean, false, default))
+                .Field(type, "interfaces", typeList)
+                .Field(type, "possibleTypes", typeList)
+                .Field(type, "enumValues", enumValueList,
+                    args: ("includeDeprecated", ScalarType.Boolean, false, default))
+                .Field(type, "inputFields", inputValueList)
+                .Field(type, "ofType", type);
 
-            var type = new ObjectType(
-                TypeName,
-                new Fields
-                {
-                    ["kind"] = new Field(typeKind),
-                    ["name"] = new Field(ScalarType.String),
-                    ["description"] = new Field(ScalarType.String),
-                    ["fields"] = new Field(fieldList, new Args
-                    {
-                        ["includeDeprecated"] = Arg(ScalarType.Boolean, false)
-                    }),
-                    ["interfaces"] = new Field(typeListReference),
-                    ["possibleTypes"] = new Field(typeListReference),
-                    ["enumValues"] = new Field(enumValueList, new Args
-                    {
-                        ["includeDeprecated"] = Arg(ScalarType.Boolean, false)
-                    }),
-                    ["inputFields"] = new Field(inputValueList),
-                    ["ofType"] = new Field(typeReference)
-                });
+            builder.Enum("__DirectiveLocation", out var directiveLocation,
+                Enum.GetNames(typeof(__DirectiveLocation))
+                    .Select(loc => (loc, default(Meta)))
+                    .ToArray());
 
-            var typeList = new List(new NonNull(type));
+            builder.Object("__Directive", out var directive)
+                .Field(directive, "name", ScalarType.String)
+                .Field(directive, "description", ScalarType.String)
+                .Field(directive, "locations", new List(directiveLocation))
+                .Field(directive, "args", argsList);
 
-            var directiveLocation = new EnumType(
-                "__DirectiveLocation",
-                new EnumValues(Enum.GetNames(typeof(__DirectiveLocation))));
+            builder.Object(SchemaName, out var schema)
+                .Field(schema, "types", typeList)
+                .Field(schema, "queryType", type)
+                .Field(schema, "mutationType", type)
+                .Field(schema, "subscriptionType", type)
+                .Field(schema, "directives", new List(directive));
 
-            var directive = new ObjectType(
-                "__Directive",
-                new Fields()
-                {
-                    ["name"] = new Field(ScalarType.String),
-                    ["description"] = new Field(ScalarType.String),
-                    ["locations"] = new Field(new List(directiveLocation)),
-                    ["args"] = new Field(argsList),
-                });
+            builder.Query(out var query)
+                .Field(query, "__schema", schema)
+                .Field(query, "__type", type,
+                    args: ("name", ScalarType.NonNullString, default, default));
 
-            var schema = new ObjectType(
-                SchemaName,
-                new Fields
-                {
-                    ["types"] = new Field(typeListReference),
-                    ["queryType"] = new Field(type),
-                    ["mutationType"] = new Field(type),
-                    ["subscriptionType"] = new Field(type),
-                    ["directives"] = new Field(new List(directive))
-                });
-
-            var query = new ObjectType(
-                "Query",
-                new Fields
-                {
-                    ["__schema"] = new Field(schema),
-                    ["__type"] = new Field(type, new Args
-                    {
-                        ["name"] = Arg(NonNullString)
-                    })
-                });
-
-            return Schema.Initialize(
-                query,
-                byNameOnly: new [] { type });
+            return builder.Build();
         }
     }
 }

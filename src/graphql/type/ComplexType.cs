@@ -6,7 +6,11 @@ namespace tanka.graphql.type
 {
     public abstract class ComplexType : INamedType
     {
-        private readonly Fields _fields = new Fields();
+        protected ComplexType(string name)
+        {
+            Name = name;
+        }
+       /* private readonly Fields _fields = new Fields();
 
         public IEnumerable<KeyValuePair<string, IField>> Fields => _fields;
 
@@ -53,7 +57,8 @@ namespace tanka.graphql.type
 
             _fields[name] = field;
         }
-
-        public abstract string Name { get; }
+        
+        */
+        public string Name { get; }
     }
 }
