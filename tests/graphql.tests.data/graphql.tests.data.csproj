@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>tanka.graphql.tests.data</AssemblyName>
     <RootNamespace>tanka.graphql.tests.data</RootNamespace>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +15,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="validation\" />
   </ItemGroup>
 
 </Project>

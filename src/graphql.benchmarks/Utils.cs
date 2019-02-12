@@ -4,6 +4,7 @@ using tanka.graphql.resolvers;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using GraphQLParser.AST;
+using tanka.graphql.typeSystem;
 
 namespace tanka.graphql.benchmarks
 {
@@ -11,20 +12,15 @@ namespace tanka.graphql.benchmarks
     {
         public static Task<ISchema> InitializeSchema()
         {
-            var query = new ObjectType("Query", new Fields
-            {
-                {"simple", new Field(ScalarType.String)}
-            });
+            var builder = new SchemaBuilder();
+            builder.Query(out var query)
+                .Field(query, "simple", ScalarType.String);
 
-            var mutation = new ObjectType("Mutation", new Fields
-            {
-                {"simple", new Field(ScalarType.String)}
-            });
+            builder.Mutation(out var mutation)
+                .Field(mutation, "simple", ScalarType.String);
 
-            var subscription = new ObjectType("Subscription", new Fields
-            {
-                {"simple", new Field(ScalarType.String)}
-            });
+            builder.Subscription(out var subscription)
+                .Field(subscription, "simple", ScalarType.String);
 
             var resolvers = new ResolverMap
             {
@@ -52,9 +48,7 @@ namespace tanka.graphql.benchmarks
             };
 
             var schema = SchemaTools.MakeExecutableSchemaAsync(
-                Schema.Initialize(query, 
-                    mutation,
-                    subscription), 
+                builder.Build(), 
                 resolvers,
                 resolvers);
 

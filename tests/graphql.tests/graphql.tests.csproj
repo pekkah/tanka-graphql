@@ -29,4 +29,8 @@
     <ProjectReference Include="..\graphql.tests.data\graphql.tests.data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="validation\" />
+  </ItemGroup>
+
 </Project>

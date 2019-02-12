@@ -61,8 +61,7 @@ namespace tanka.graphql.tests.execution
 
                 yield return new object[]
                 {
-                    new InputObjectType("Input",
-                        new InputFields())
+                    new InputObjectType("Input")
                 };
             }
         }
@@ -78,14 +77,12 @@ namespace tanka.graphql.tests.execution
 
                 yield return new object[]
                 {
-                    new ObjectType("Object",
-                        new Fields()), 
+                    new ObjectType("Object"), 
                 };
 
                 yield return new object[]
                 {
-                    new InterfaceType("Interface",
-                        new Fields()), 
+                    new InterfaceType("Interface"), 
                 };
 
                 yield return new object[]

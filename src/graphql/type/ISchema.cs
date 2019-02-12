@@ -25,13 +25,9 @@ namespace tanka.graphql.type
         DirectiveType GetDirective(string name);
 
         IQueryable<DirectiveType> QueryDirectives(Predicate<DirectiveType> filter = null);
-    }
 
-    public static class SchemaExtensions
-    {
-        public static T GetNamedType<T>(this ISchema schema, string name) where T: INamedType
-        {
-            return (T) schema.GetNamedType(name);
-        }
+        IEnumerable<KeyValuePair<string, InputObjectField>> GetInputFields(string type);
+
+        InputObjectField GetInputField(string type, string name);
     }
 }

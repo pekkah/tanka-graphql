@@ -3,6 +3,7 @@ using GraphQLParser.AST;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.type.converters;
+using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests.sdl
@@ -14,18 +15,22 @@ namespace tanka.graphql.tests.sdl
         {
             /* Given */
             var idl = @"
-scalar Url
-";
+                scalar Url
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
             var urlScalar = new ScalarType("Url", new StringConverter());
             var document = Parser.ParseDocument(idl);
-            var typeDefinition = document.Definitions.OfType<GraphQLScalarTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document, new INamedType[]
-            {
-                urlScalar
-            });
+            var reader = new SdlReader(document, new SchemaBuilder()
+                .Include(urlScalar));
+
 
             /* When */
-            var actual = Sdl.Scalar(typeDefinition, context);
+            var actual = reader.Read().Build().GetNamedType<ScalarType>("Url");
 
             /* Then */
             Assert.Equal("Url", actual.Name);
@@ -37,22 +42,31 @@ scalar Url
         {
             /* Given */
             var idl = @"
-type User {
-    name: String
-    password: String
-}
-";
+                type User {
+                    name: String
+                    password: String
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document);
+            var reader = new SdlReader(document);
 
             /* When */
-            var actual = Sdl.Document(document, context).OfType<ObjectType>().SingleOrDefault();
+            var schema = reader.Read().Build();
+            var actual = schema.GetNamedType<ObjectType>("User");
+            var fields = schema.GetFields(actual.Name);
 
             /* Then */
             Assert.NotNull(actual);
             Assert.Equal("User", actual.Name);
-            Assert.Contains(actual.Fields, kv => kv.Key == "name" && (ScalarType) kv.Value.Type == ScalarType.String);
-            Assert.Contains(actual.Fields,
+            Assert.Contains(fields, kv => kv.Key == "name" && (ScalarType) kv.Value.Type == ScalarType.String);
+            Assert.Contains(fields,
                 kv => kv.Key == "password" && (ScalarType) kv.Value.Type == ScalarType.String);
         }
 
@@ -61,22 +75,22 @@ type User {
         {
             /* Given */
             var idl = @"
-type Query {
-}
+                type Query {
+                }
 
-type Mutation {
-}
+                type Mutation {
+                }
 
-type Subscription {
+                type Subscription {
 
-}
+                }
 
-schema {
-  query: Query
-  mutation: Mutation
-  subscription: Subscription
-}
-";
+                schema {
+                  query: Query
+                  mutation: Mutation
+                  subscription: Subscription
+                }";
+
             var document = Parser.ParseDocument(idl);
 
             /* When */
@@ -94,21 +108,27 @@ schema {
         {
             /* Given */
             var idl = @"
-type User {
-    name: String
-    password: String
-}
+                type User {
+                    name: String
+                    password: String
+                }
 
-type Role {
-    name: String
-    id: Int
-}
-";
+                type Role {
+                    name: String
+                    id: Int
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Document(document, context).ToList();
+            var actual = Sdl.Schema(document).QueryTypes<INamedType>();
 
             /* Then */
             Assert.Contains(actual, user => user.Name == "User");
@@ -120,46 +140,57 @@ type Role {
         {
             /* Given */
             var idl = @"
-scalar JediPowerLevel
-scalar JediTrickLevel
+                scalar JediPowerLevel
+                scalar JediTrickLevel
 
-enum Episode { NEWHOPE, EMPIRE, JEDI }
+                enum Episode { NEWHOPE, EMPIRE, JEDI }
 
-interface Character {
-  id: String!
-  name: String
-  friends: [Character]
-  appearsIn: [Episode]
-}
+                interface Character {
+                  id: String!
+                  name: String
+                  friends: [Character]
+                  appearsIn: [Episode]
+                }
 
-type Human implements Character {
-  id: String!
-  name: String
-  friends: [Character]
-  appearsIn: [Episode]
-  homePlanet: String
-}
+                type Human implements Character {
+                  id: String!
+                  name: String
+                  friends: [Character]
+                  appearsIn: [Episode]
+                  homePlanet: String
+                }
 
-type Droid implements Character {
-  id: String!
-  name: String
-  friends: [Character]
-  appearsIn: [Episode]
-  primaryFunction: String
-}
+                type Droid implements Character {
+                  id: String!
+                  name: String
+                  friends: [Character]
+                  appearsIn: [Episode]
+                  primaryFunction: String
+                }
 
-input JediPowerInput {
-    power: String
-    level: JediPowerLevel
-}
-";
+                input JediPowerInput {
+                    power: String
+                    level: JediPowerLevel
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var jediPowerLevel = new ScalarType("JediPowerLevel", new LongConverter());
+            var jediTrickLevel = new ScalarType("JediTrickLevel", new DoubleConverter());
+
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document,
-                new[] {jediPowerLevel, new ScalarType("JediTrickLevel", new DoubleConverter())});
+            var reader = new SdlReader(document, new SchemaBuilder()
+                .Include(jediPowerLevel)
+                .Include(jediTrickLevel));
 
             /* When */
-            var actual = Sdl.Document(document, context).ToList();
+            var schema = reader.Read().Build();
+            var actual = schema.QueryTypes<INamedType>();
 
             /* Then */
             Assert.Contains(actual, type => type.Name == "Episode" && type is EnumType);
@@ -171,7 +202,7 @@ input JediPowerInput {
             Assert.Contains(actual, type => type.Name == "JediTrickLevel" && type.GetType() == typeof(ScalarType));
 
             var jediPowerInput = (InputObjectType) actual.Single(t => t.Name == "JediPowerInput");
-            var level = jediPowerInput.GetField("level");
+            var level = schema.GetInputField(jediPowerInput.Name, "level");
             Assert.Equal(jediPowerLevel, level.Type);
         }
 
@@ -181,18 +212,24 @@ input JediPowerInput {
         {
             /* Given */
             var idl = @"
-enum Episode {
-  NEWHOPE
-  EMPIRE
-  JEDI
-}
-";
+                enum Episode {
+                  NEWHOPE
+                  EMPIRE
+                  JEDI
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var typeDefinition = document.Definitions.OfType<GraphQLEnumTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document);
+            var reader = new SdlReader(document);
 
             /* When */
-            var actual = Sdl.Enum(typeDefinition, context);
+            var actual = reader.Read().Build().GetNamedType<EnumType>("Episode");
 
             /* Then */
             Assert.Equal("Episode", actual.Name);
@@ -206,28 +243,35 @@ enum Episode {
         {
             /* Given */
             var idl = @"
-interface Character {
-    parent: Human
-}
+                interface Character {
+                    parent: Human
+                }
 
-type Human implements Character { 
-}
-";
+                type Human implements Character { 
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Document(document, context).ToList();
+            var actual = Sdl.Schema(document);
 
             /* Then */
-            var character = actual.OfType<InterfaceType>().SingleOrDefault();
-            var human = actual.OfType<ObjectType>().SingleOrDefault();
+            var character = actual.GetNamedType<InterfaceType>("Character");
+            var human = actual.GetNamedType<ObjectType>("Human");
+            var characterFields = actual.GetFields(character.Name);
 
             Assert.NotNull(character);
             Assert.NotNull(human);
             Assert.Equal("Character", character.Name);
-            Assert.Contains(character.Fields,
-                field => field.Key == "parent" && ((NamedTypeReference) field.Value.Type).TypeName == human.Name);
+            Assert.Contains(characterFields,
+                field => field.Key == "parent" && (ObjectType) field.Value.Type == human);
         }
 
         [Fact]
@@ -235,24 +279,31 @@ type Human implements Character {
         {
             /* Given */
             var idl = @"
-interface Character {
-    parent: Character
-}
-";
+                interface Character {
+                    parent: Character
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Document(document, context);
+            var schema = Sdl.Schema(document);
 
             /* Then */
-            var character = actual.OfType<InterfaceType>().SingleOrDefault();
+            var character = schema.GetNamedType<InterfaceType>("Character");
+            var characterFields = schema.GetFields(character.Name);
 
             Assert.NotNull(character);
             Assert.Equal("Character", character.Name);
-            Assert.Contains(character.Fields,
+            Assert.Contains(characterFields,
                 field => field.Key == "parent" &&
-                         (NamedTypeReference) field.Value.Type == new NamedTypeReference("Character"));
+                         (InterfaceType) field.Value.Type == character);
         }
 
         [Fact]
@@ -260,22 +311,28 @@ interface Character {
         {
             /* Given */
             var idl = @"
-interface Character {
+                interface Character {
 
-}
+                }
 
-type Human implements Character {
+                type Human implements Character {
 
-}
-";
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Document(document, context);
+            var actual = Sdl.Schema(document);
 
             /* Then */
-            var human = actual.OfType<ObjectType>().SingleOrDefault();
+            var human = actual.GetNamedType<ObjectType>("Human");
 
             Assert.NotNull(human);
             Assert.Equal("Human", human.Name);
@@ -287,27 +344,34 @@ type Human implements Character {
         {
             /* Given */
             var idl = @"
-extend type Human {
-    second: Boolean
-}
+                extend type Human {
+                    second: Boolean
+                }
 
-type Human {
-    first: Int
-}
-";
+                type Human {
+                    first: Int
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Document(document, context);
+            var actual = Sdl.Schema(document);
 
             /* Then */
-            var human = actual.OfType<ObjectType>().SingleOrDefault();
+            var human = actual.GetNamedType<ObjectType>("Human");
+            var humanFields = actual.GetFields(human.Name);
 
             Assert.NotNull(human);
             Assert.Equal("Human", human.Name);
-            Assert.Single(human.Fields, f => f.Key == "first");
-            Assert.Single(human.Fields, f => f.Key == "second");
+            Assert.Single(humanFields, f => f.Key == "first");
+            Assert.Single(humanFields, f => f.Key == "second");
         }
 
 
@@ -316,21 +380,28 @@ type Human {
         {
             /* Given */
             var idl = @"
-type User {
-    scopes(includeIdentity:Boolean!): [String!]!
-}
-";
+                type User {
+                    scopes(includeIdentity:Boolean!): [String!]!
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Object(objectTypeDefinition, context);
+            var schema = Sdl.Schema(document);
+            var actual = schema.GetNamedType<ObjectType>("User");
+            var actualFields = schema.GetFields("User");
 
             /* Then */
             Assert.Equal("User", actual.Name);
 
-            var scopesField = actual.Fields.SingleOrDefault();
+            var scopesField = actualFields.SingleOrDefault();
             Assert.Equal("scopes", scopesField.Key);
             Assert.Contains(scopesField.Value.Arguments,
                 a => a.Key == "includeIdentity" && (ScalarType) a.Value.Type.Unwrap() == ScalarType.Boolean);
@@ -341,28 +412,35 @@ type User {
         {
             /* Given */
             var idl = @"
-interface Character {
+                interface Character {
 
-}
+                }
 
-type Human implements Character {
-    parent: Character
-}
-";
+                type Human implements Character {
+                    parent: Character
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Document(document, context).ToList();
+            var actual = Sdl.Schema(document);
 
             /* Then */
-            var character = actual.OfType<InterfaceType>().SingleOrDefault();
-            var human = actual.OfType<ObjectType>().SingleOrDefault();
+            var character = actual.GetNamedType<InterfaceType>("Character");
+            var human = actual.GetNamedType<ObjectType>("Human");
+            var humanFields = actual.GetFields(human.Name);
 
             Assert.NotNull(character);
             Assert.NotNull(human);
             Assert.Equal("Human", human.Name);
-            Assert.Contains(human.Fields,
+            Assert.Contains(humanFields,
                 field => field.Key == "parent" && (InterfaceType) field.Value.Type == character);
         }
 
@@ -371,24 +449,31 @@ type Human implements Character {
         {
             /* Given */
             var idl = @"
-type Human implements Character {
-    parent: Human
-}
-";
+                type Human {
+                    parent: Human
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Document(document, context);
+            var actual = Sdl.Schema(document);
 
             /* Then */
-            var human = actual.OfType<ObjectType>().SingleOrDefault();
+            var human = actual.GetNamedType<ObjectType>("Human");
+            var humanFields = actual.GetFields(human.Name);
 
             Assert.NotNull(human);
             Assert.Equal("Human", human.Name);
-            Assert.Contains(human.Fields,
+            Assert.Contains(humanFields,
                 field => field.Key == "parent" &&
-                         (NamedTypeReference) field.Value.Type == new NamedTypeReference("Human"));
+                         (ObjectType) field.Value.Type == human);
         }
 
         [Fact]
@@ -396,20 +481,27 @@ type Human implements Character {
         {
             /* Given */
             var idl = @"
-interface Person {
-    name: String
-}
-";
+                interface Person {
+                    name: String
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var typeDefinition = document.Definitions.OfType<GraphQLInterfaceTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Interface(typeDefinition, context);
+            var schema = Sdl.Schema(document);
+            var actual = schema.GetNamedType<InterfaceType>("Person");
+            var actualFields = schema.GetFields(actual.Name);
 
             /* Then */
             Assert.Equal("Person", actual.Name);
-            Assert.Contains(actual.Fields, kv => kv.Key == "name" && (ScalarType) kv.Value.Type == ScalarType.String);
+            Assert.Contains(actualFields, kv => kv.Key == "name" && (ScalarType) kv.Value.Type == ScalarType.String);
         }
 
         [Fact]
@@ -417,22 +509,29 @@ interface Person {
         {
             /* Given */
             var idl = @"
-type User {
-    name: String
-    password: String
-}
-";
+                type User {
+                    name: String
+                    password: String
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Object(objectTypeDefinition, context);
+            var schema = Sdl.Schema(document);
+            var actual = schema.GetNamedType<ObjectType>("User");
+            var actualFields = schema.GetFields(actual.Name);
 
             /* Then */
             Assert.Equal("User", actual.Name);
-            Assert.Contains(actual.Fields, kv => kv.Key == "name" && (ScalarType) kv.Value.Type == ScalarType.String);
-            Assert.Contains(actual.Fields,
+            Assert.Contains(actualFields, kv => kv.Key == "name" && (ScalarType) kv.Value.Type == ScalarType.String);
+            Assert.Contains(actualFields,
                 kv => kv.Key == "password" && (ScalarType) kv.Value.Type == ScalarType.String);
         }
 
@@ -441,20 +540,26 @@ type User {
         {
             /* Given */
             var idl = @"
-type User {
-    names: [String]
-}
-";
+                type User {
+                    names: [String]
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
             var document = Parser.ParseDocument(idl);
-            var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Object(objectTypeDefinition, context);
+            var schema = Sdl.Schema(document);
+            var actual = schema.GetNamedType<ObjectType>("User");
+            var actualFields = schema.GetFields(actual.Name);
 
             /* Then */
             Assert.Equal("User", actual.Name);
-            Assert.Contains(actual.Fields,
+            Assert.Contains(actualFields,
                 kv => kv.Key == "names" && (List) kv.Value.Type == new List(ScalarType.String));
         }
 
@@ -463,20 +568,27 @@ type User {
         {
             /* Given */
             var idl = @"
-type User {
-    name: String!
-}
-";
+                type User {
+                    name: String!
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                ";
+
             var document = Parser.ParseDocument(idl);
-            var objectTypeDefinition = document.Definitions.OfType<GraphQLObjectTypeDefinition>().SingleOrDefault();
-            var context = new SdlParserContext(document);
 
             /* When */
-            var actual = Sdl.Object(objectTypeDefinition, context);
+            var schema = Sdl.Schema(document);
+            var actual = schema.GetNamedType<ObjectType>("User");
+            var actualFields = schema.GetFields(actual.Name);
 
             /* Then */
             Assert.Equal("User", actual.Name);
-            Assert.Contains(actual.Fields,
+            Assert.Contains(actualFields,
                 kv => kv.Key == "name" && (NonNull) kv.Value.Type == new NonNull(ScalarType.String));
         }
     }

@@ -40,7 +40,7 @@ namespace tanka.graphql.introspection
 
                         var includeDeprecated = (bool) context.Arguments["includeDeprecated"];
 
-                        var fields = context.Schema.GetFields(complexType.Name);
+                        var fields = source.GetFields(complexType.Name);
 
                         if (!includeDeprecated)
                         {
@@ -102,7 +102,7 @@ namespace tanka.graphql.introspection
                 
                 // INPUT_OBJECT only
                 //todo(pekka): DirectiveType uses Argument but should use InputFieldType
-                {"inputFields", Resolve.PropertyOf<InputObjectType>(t => t.Fields
+                {"inputFields", Resolve.PropertyOf<InputObjectType>(t => source.GetInputFields(t.Name)
                     .Select(iof => new KeyValuePair<string, Argument>(
                         iof.Key, 
                         new Argument(iof.Value.Type, iof.Value.DefaultValue, iof.Value.Meta))).ToList())},

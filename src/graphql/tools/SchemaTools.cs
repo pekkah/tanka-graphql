@@ -75,7 +75,7 @@ namespace tanka.graphql.tools
             ISubscriberMap subscribers)
         {
             foreach (var type in schema.QueryTypes<ComplexType>())
-            foreach (var field in type.Fields)
+            foreach (var field in schema.GetFields(type.Name))
             {
                 field.Value.Resolve = field.Value.Resolve ?? resolvers.GetResolver(type, field);
 

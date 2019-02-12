@@ -1,4 +1,5 @@
 ﻿using tanka.graphql.type;
+using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests.type
@@ -9,25 +10,18 @@ namespace tanka.graphql.tests.type
         public void Define_union()
         {
             /* Given */
-            var person = new ObjectType(
-                "Person",
-                new Fields
-                {
-                    {"name", ScalarType.NonNullString}
-                });
+            var builder = new SchemaBuilder();
 
-            var photo = new ObjectType(
-                "Photo",
-                new Fields
-                {
-                    {"height", ScalarType.NonNullInt},
-                    {"width", ScalarType.NonNullInt}
-                });
+            builder.Object("Person", out var person)
+                .Field(person, "name", ScalarType.NonNullString);
+
+            builder.Object("Photo", out var photo)
+                .Field(photo, "height", ScalarType.NonNullInt)
+                .Field(photo, "width", ScalarType.NonNullInt);
 
             /* When */
-            var searchResult = new UnionType(
-                "SearchResult",
-                new[] {person, photo});
+            builder.Union("SearchResult", out var searchResult,
+                possibleTypes: new []{ person, photo});
 
             var personIsPossible = searchResult.IsPossible(person);
             var photoIsPossible = searchResult.IsPossible(photo);

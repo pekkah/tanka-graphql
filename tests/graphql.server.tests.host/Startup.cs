@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using tanka.graphql.typeSystem;
 
 namespace graphql.server.tests.host
 {
@@ -20,15 +21,13 @@ namespace graphql.server.tests.host
         public void ConfigureServices(IServiceCollection services)
         {
             var eventManager = new EventManager();
-            var query = new ObjectType("Query", new Fields
-            {
-                {"hello", new Field(ScalarType.String)}
-            });
+            var builder = new SchemaBuilder();
 
-            var sub = new ObjectType("Subscription", new Fields
-            {
-                {"helloEvents", new Field(ScalarType.String)}
-            });
+            builder.Query(out var query)
+                .Field(query, "hello", ScalarType.String);
+
+            builder.Subscription(out var subscription)
+                .Field(subscription, "helloEvents", ScalarType.String);
 
             var resolvers = new ResolverMap
             {
@@ -39,7 +38,7 @@ namespace graphql.server.tests.host
                     }
                 },
                 {
-                    sub.Name, new FieldResolverMap
+                    subscription.Name, new FieldResolverMap
                     {
                         {
                             "helloEvents", (context,ct) =>
@@ -54,7 +53,7 @@ namespace graphql.server.tests.host
             };
 
             var executable = SchemaTools
-                .MakeExecutableSchemaWithIntrospection(Schema.Initialize(query, null, sub), resolvers, resolvers).Result;
+                .MakeExecutableSchemaWithIntrospection(builder.Build(), resolvers, resolvers).Result;
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
 

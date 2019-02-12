@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using tanka.graphql.sdl;
 using tanka.graphql.tools;
 using tanka.graphql.type;
+using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests.resolvers
@@ -36,7 +37,7 @@ namespace tanka.graphql.tests.resolvers
                 return Task.CompletedTask;
 
             var field = objectTypeField.Value;
-            field.Meta = new Meta(field.Meta.Description, deprecated.GetArgument("reason")?.DefaultValue.ToString());
+            field.Meta = new Meta(field.Meta.Description, deprecated.GetArgument("reason")?.DefaultValue?.ToString());
 
             return Task.CompletedTask;
         }
@@ -51,22 +52,22 @@ namespace tanka.graphql.tests.resolvers
                 DirectiveType.TypeSystemLocations,
                 new Args
                 {
-                    ["reason"] = new Argument
-                    {
-                        Type = ScalarType.String,
-                        DefaultValue = "No longer supported"
-                    }
+                    ["reason"] = new Argument(
+                        ScalarType.String,
+                        "No longer supported")
                 });
-            _schema = Sdl.Schema(Parser.ParseDocument(@"
-type Query {
-    deprecated: String @deprecated
-    deprecatedWithReason: String @deprecated(reason: ""Reason"")
-}
 
-schema {
-    query: Query
-}
-"), directives: new[] {_directiveType});
+
+            _schema = Sdl.Schema(Parser.ParseDocument(@"
+                type Query {
+                    deprecated: String @deprecated
+                    deprecatedWithReason: String @deprecated(reason: ""Reason"")
+                }
+
+                schema {
+                    query: Query
+                }
+                "), new SchemaBuilder().Include(_directiveType));
         }
 
         private readonly ISchema _schema;
@@ -90,7 +91,7 @@ schema {
                 new SchemaVisitorFactory[] {VisitorFactory});
 
             /* Then */
-            var deprecatedField = executable.Query.GetField("deprecated");
+            var deprecatedField = executable.GetField("Query", "deprecated");
             Assert.True(deprecatedField.Meta.IsDeprecated);
             Assert.Equal("No longer supported", deprecatedField.Meta.DeprecationReason);
         }

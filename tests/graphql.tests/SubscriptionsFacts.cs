@@ -7,6 +7,7 @@ using tanka.graphql.resolvers;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
+using tanka.graphql.typeSystem;
 using Xunit;
 using static tanka.graphql.Executor;
 using static tanka.graphql.Parser;
@@ -24,29 +25,19 @@ namespace tanka.graphql.tests
         public SubscriptionsFacts()
         {
             // schema
-            var messageType = new ObjectType(
-                "Message",
-                new Fields
-                {
-                    ["content"] = new Field(ScalarType.String)
-                });
+            var builder = new SchemaBuilder();
+            builder.Object("Message", out var messageType)
+                .Field(messageType, "content", ScalarType.String);
 
             var messageListType = new List(messageType);
-            var schema = Schema.Initialize(
-                new ObjectType(
-                    "Query",
-                    new Fields
-                    {
-                        ["messages"] = new Field(messageListType)
-                    }),
-                null,
-                new ObjectType(
-                    "Subscription",
-                    new Fields
-                    {
-                        ["messageAdded"] = new Field(messageType)
-                    }));
 
+            builder.Query(out var query)
+                .Field(query, "messages", messageListType);
+
+            builder.Subscription(out var subscription)
+                .Field(subscription, "messageAdded", messageType);
+
+            var schema = builder.Build();
 
             // data
             var messages = new List<Message>();

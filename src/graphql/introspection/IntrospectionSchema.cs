@@ -19,10 +19,11 @@ namespace tanka.graphql.introspection
             var builder = new SchemaBuilder();
 
             // define type here so that it can be referenced early
-            builder.Object("type", out var type);
+            builder.Object(TypeName, out var type);
             var typeList = new List(new NonNull(type));
 
             builder.Enum(TypeKindName, out var typeKind,
+                directives: null,
                 (__TypeKind.SCALAR.ToString(), default),
                 (__TypeKind.OBJECT.ToString(), default),
                 (__TypeKind.ENUM.ToString(), default),
@@ -73,6 +74,7 @@ namespace tanka.graphql.introspection
                 .Field(type, "ofType", type);
 
             builder.Enum("__DirectiveLocation", out var directiveLocation,
+                directives: null,
                 Enum.GetNames(typeof(__DirectiveLocation))
                     .Select(loc => (loc, default(Meta)))
                     .ToArray());

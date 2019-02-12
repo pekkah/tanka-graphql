@@ -10,18 +10,19 @@ namespace tanka.graphql.execution
     public static class Values
     {
         public static object CoerceValue(
+            ISchema schema,
             object value,
             IType valueType)
         {
-            if (valueType is NonNull nonNull) return CoerceNonNullValue(value, nonNull);
+            if (valueType is NonNull nonNull) return CoerceNonNullValue(schema, value, nonNull);
 
-            if (valueType is List list) return CoerceListValues(list.WrappedType, value);
+            if (valueType is List list) return CoerceListValues(schema, list.WrappedType, value);
 
             if (valueType is ScalarType scalar) return CoerceScalarValue(value, scalar);
 
             if (valueType is EnumType enumType) return CoerceEnumValue(value, enumType);
 
-            if (valueType is InputObjectType input) return CoerceInputValue(value, input);
+            if (valueType is InputObjectType input) return CoerceInputValue(schema, value, input);
 
             throw new ValueCoercionException(
                 $"Unexpected valueType {valueType}. Cannot coerce value.",
@@ -29,18 +30,19 @@ namespace tanka.graphql.execution
                 valueType);
         }
 
-        private static IDictionary<string, object> CoerceInputValue(object value, InputObjectType input)
+        private static IDictionary<string, object> CoerceInputValue(ISchema schema, object value, InputObjectType input)
         {
             var result = new Dictionary<string, object>();
 
             if (value is GraphQLObjectValue objectValue)
             {
-                return CoerceInputValueAst(input, objectValue, result);
+                return CoerceInputValueAst(schema, input, objectValue, result);
             }
 
             if (value is IDictionary<string, object> dictionaryValues)
             {
-                foreach (var inputField in input.Fields)
+                var fields = schema.GetInputFields(input.Name);
+                foreach (var inputField in fields)
                 {
                     var fieldName = inputField.Key;
                     var field = inputField.Value;
@@ -53,7 +55,7 @@ namespace tanka.graphql.execution
                         astValue = dictionaryValues[fieldName];
                     }
 
-                    var coercedFieldValue = CoerceValue(astValue, fieldType);
+                    var coercedFieldValue = CoerceValue(schema, astValue, fieldType);
 
                     result[fieldName] = coercedFieldValue;
                 }
@@ -62,17 +64,21 @@ namespace tanka.graphql.execution
             return result;
         }
 
-        private static IDictionary<string, object> CoerceInputValueAst(InputObjectType input, GraphQLObjectValue graphQLObjectValue,
+        private static IDictionary<string, object> CoerceInputValueAst(
+            ISchema schema, 
+            InputObjectType input, 
+            GraphQLObjectValue graphQLObjectValue,
             Dictionary<string, object> result)
         {
-            foreach (var inputField in input.Fields)
+            var fields = schema.GetInputFields(input.Name);
+            foreach (var inputField in fields)
             {
                 var fieldName = inputField.Key;
                 var field = inputField.Value;
                 var fieldType = field.Type;
 
                 var astValue = graphQLObjectValue.Fields.SingleOrDefault(v => v.Name.Value == fieldName);
-                var coercedFieldValue = CoerceValue(astValue.Value, fieldType);
+                var coercedFieldValue = CoerceValue(schema, astValue.Value, fieldType);
 
                 result[fieldName] = coercedFieldValue;
             }
@@ -80,9 +86,9 @@ namespace tanka.graphql.execution
             return result;
         }
 
-        private static object CoerceNonNullValue(object value, NonNull nonNull)
+        private static object CoerceNonNullValue(ISchema schema, object value, NonNull nonNull)
         {
-            var coercedValue = CoerceValue(value, nonNull.WrappedType);
+            var coercedValue = CoerceValue(schema, value, nonNull.WrappedType);
             if (coercedValue == null)
                 throw new ValueCoercionException("Coerced value is null", 
                     value,
@@ -107,14 +113,14 @@ namespace tanka.graphql.execution
             return scalarType.ParseValue(value);
         }
 
-        private static object CoerceListValues(IType listWrappedType, object value)
+        private static object CoerceListValues(ISchema schema, IType listWrappedType, object value)
         {
             var coercedListValues = new List<object>();
             if (value is GraphQLListValue listValue)
             {
                 foreach (var listValueValue in listValue.Values)
                 {
-                    var coercedValue = CoerceValue(listValueValue, listWrappedType);
+                    var coercedValue = CoerceValue(schema, listValueValue, listWrappedType);
                     coercedListValues.Add(coercedValue);
                 }
 
@@ -125,14 +131,14 @@ namespace tanka.graphql.execution
             {
                 foreach (var v in values)
                 {
-                    var coercedValue = CoerceValue(v, listWrappedType);
+                    var coercedValue = CoerceValue(schema, v, listWrappedType);
                     coercedListValues.Add(coercedValue);
                 }
 
                 return coercedListValues;
             }
 
-            coercedListValues.Add(CoerceValue(value, listWrappedType));
+            coercedListValues.Add(CoerceValue(schema, value, listWrappedType));
             return coercedListValues;
         }
     }

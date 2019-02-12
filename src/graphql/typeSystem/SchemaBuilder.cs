@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using tanka.graphql.type;
 
 namespace tanka.graphql.typeSystem
@@ -23,7 +22,46 @@ namespace tanka.graphql.typeSystem
         public SchemaBuilder()
         {
             foreach (var scalarType in ScalarType.Standard)
-                _types.Add(scalarType.Name, scalarType);
+                Include(scalarType);
+
+            IncludeDirective(type.DirectiveType.Include);
+            IncludeDirective(type.DirectiveType.Skip);
+        }
+
+        public SchemaBuilder(ISchema from): this()
+        {
+            foreach (var namedType in from.QueryTypes<INamedType>())
+            {
+                if (IsPredefinedType<INamedType>(namedType.Name, out _))
+                    continue;
+
+                switch (namedType)
+                {
+                    case ObjectType objectType:
+                        Include(objectType);
+                        IncludeFields(objectType, from.GetFields(objectType.Name));
+                        break;
+                    case InterfaceType interfaceType:
+                        Include(interfaceType);
+                        IncludeFields(interfaceType, from.GetFields(interfaceType.Name));
+                        break;
+                    case InputObjectType inputType:
+                        Include(inputType);
+                        IncludeInputFields(inputType, from.GetInputFields(inputType.Name));
+                        break;
+                    default:
+                        Include(namedType);
+                        break;
+                }
+            }
+
+            foreach (var directiveType in from.QueryDirectives())
+            {
+                if (_directives.ContainsKey(directiveType.Name))
+                    continue;
+
+                IncludeDirective(directiveType);
+            }
         }
 
         public SchemaBuilder Object(
@@ -99,7 +137,8 @@ namespace tanka.graphql.typeSystem
             if (!_fields.ContainsKey(owner.Name))
                 _fields[owner.Name] = new Dictionary<string, IField>();
 
-            _fields[owner.Name].Add(fieldName, new Field(to, new Args(args)));
+            _fields[owner.Name].Add(fieldName, new Field(to, new Args(args), 
+                new Meta(description, directives: directives)));
             return this;
         }
 
@@ -121,12 +160,12 @@ namespace tanka.graphql.typeSystem
             return this;
         }
 
-        public SchemaBuilder Enum(
-            string name,
+        public SchemaBuilder Enum(string name,
             out EnumType enumType,
+            IEnumerable<DirectiveInstance> directives = null,
             params (string value, Meta meta)[] values)
         {
-            enumType = new EnumType(name, new EnumValues(values));
+            enumType = new EnumType(name, new EnumValues(values), new Meta(directives: directives));
             _types.Add(name, enumType);
             return this;
         }
@@ -136,10 +175,10 @@ namespace tanka.graphql.typeSystem
             foreach (var lateBuildAction in _lateBuild) lateBuildAction(this);
 
             return new SchemaGraph(
-                new ReadOnlyDictionary<string, INamedType>(_types),
-                new ReadOnlyDictionary<string, ReadOnlyDictionary<string, IField>>(_fields),
-                new ReadOnlyDictionary<string, ReadOnlyDictionary<string, InputObjectField>>(_inputFields),
-                new ReadOnlyDictionary<string, DirectiveType>(_directives));
+                _types,
+                _fields,
+                _inputFields,
+                _directives);
         }
 
         public SchemaBuilder LateBuild(Action<SchemaBuilder> lateBuild)
@@ -185,6 +224,59 @@ namespace tanka.graphql.typeSystem
             unionType = new UnionType(name, possibleTypes, new Meta(description, directives: directives));
             _types.Add(name, unionType);
             return this;
+        }
+
+        public SchemaBuilder IncludeDirective(DirectiveType directiveType)
+        {
+            _directives.Add(directiveType.Name, directiveType);
+            return this;
+        }
+
+        public SchemaBuilder Include(INamedType type)
+        {
+            _types.Add(type.Name, type);
+            return this;
+        }
+
+        public SchemaBuilder IncludeFields(ComplexType owner, IEnumerable<KeyValuePair<string, IField>> fields)
+        {
+            foreach (var field in fields)
+            {
+                if (!_fields.ContainsKey(owner.Name))
+                    _fields[owner.Name] = new Dictionary<string, IField>();
+
+                _fields[owner.Name].Add(field.Key, field.Value);
+            }
+
+            return this;
+        }
+
+        protected SchemaBuilder IncludeInputFields(InputObjectType owner,
+            IEnumerable<KeyValuePair<string, InputObjectField>> fields)
+        {
+            foreach (var field in fields)
+            {
+                if (!_fields.ContainsKey(owner.Name))
+                    _inputFields[owner.Name] = new Dictionary<string, InputObjectField>();
+
+                _inputFields[owner.Name].Add(field.Key, field.Value);
+            }
+
+            return this;
+        }
+
+        public bool IsPredefinedField(ComplexType owner, string fieldName, out IField field)
+        {
+            if (_fields.TryGetValue(owner.Name, out var fields))
+            {
+                if (fields.TryGetValue(fieldName, out field))
+                {
+                    return true;
+                }
+            }
+
+            field = null;
+            return false;
         }
     }
 }

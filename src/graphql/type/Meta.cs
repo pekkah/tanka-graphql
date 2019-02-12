@@ -17,6 +17,7 @@ namespace tanka.graphql.type
         {
             Description = string.Empty;
             DeprecationReason = null;
+            _directives = new DirectiveContainer();
         }
 
         public string Description { get; }

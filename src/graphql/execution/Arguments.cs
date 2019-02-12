@@ -68,6 +68,7 @@ namespace tanka.graphql.execution
                     else
                     {
                         var coercedValue = Values.CoerceValue(
+                            schema,
                             value,
                             argumentType);
 

@@ -122,7 +122,7 @@ namespace tanka.graphql.validation
 
                 if (objectType is InputObjectType inputObjectType)
                 {
-                    var inputField = inputObjectType.GetField(objectField.Name.Value);
+                    var inputField = _schema.GetInputField(inputObjectType.Name, objectField.Name.Value);
                     fieldType = inputField?.Type;
                 }
 
@@ -244,7 +244,7 @@ namespace tanka.graphql.validation
 
             if (parentType is ComplexType complexType)
             {
-                return complexType.GetField(name);
+                return schema.GetField(complexType.Name, name);
             }
 
             return null;

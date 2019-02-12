@@ -1,40 +1,47 @@
 ﻿using System.Collections.Generic;
 using tanka.graphql.execution;
 using tanka.graphql.type;
+using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests.type
 {
     public class InputObjectTypeFacts
     {
+        public InputObjectTypeFacts()
+        {
+            _builder = new SchemaBuilder();
+            _builder.Query(out _);
+        }
+
+        private readonly SchemaBuilder _builder;
+
         [Fact]
         public void Define()
         {
             /* Given */
             /* When */
-            var input = new InputObjectType(
-                "ExampleInputObject",
-                new InputFields
-                {
-                    {"a", ScalarType.Boolean}
-                });
+            _builder.InputObject("ExampleInputObject", out var input)
+                .InputField(input, "a", ScalarType.Boolean);
+
+            var schema = _builder.Build();
 
             /* Then */
-            Assert.Single(input.Fields, fk => fk.Key == "a"
-                                              && (ScalarType) fk.Value.Type == ScalarType.Boolean);
+            var inputFields = schema.GetInputFields(input.Name);
+            Assert.Single(inputFields,
+                fk => fk.Key == "a"
+                      && (ScalarType) fk.Value.Type == ScalarType.Boolean);
         }
 
         [Fact]
         public void Input_coercion()
         {
             /* Given */
-            var input = new InputObjectType(
-                "ExampleInputObject",
-                new InputFields
-                {
-                    {"a", ScalarType.String},
-                    {"b", ScalarType.NonNullInt}
-                });
+            _builder.InputObject("ExampleInputObject", out var input)
+                .InputField(input, "a", ScalarType.String)
+                .InputField(input, "b", ScalarType.Int);
+
+            var schema = _builder.Build();
 
             /* When */
             var literalValue = new Dictionary<string, object>
@@ -43,8 +50,8 @@ namespace tanka.graphql.tests.type
                 ["b"] = 123L
             };
 
-            Dictionary<string, object> actual = 
-                (Dictionary<string, object>)Values.CoerceValue(literalValue, input);
+            var actual =
+                (Dictionary<string, object>) Values.CoerceValue(schema, literalValue, input);
 
             /* Then */
             foreach (var expectedKv in literalValue)

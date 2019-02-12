@@ -7,6 +7,7 @@ using System.Xml.XPath;
 using tanka.graphql.resolvers;
 using tanka.graphql.tools;
 using tanka.graphql.type;
+using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests
@@ -18,28 +19,21 @@ namespace tanka.graphql.tests
         public ExecutionPathFacts()
         {
             // schema
+            var builder = new SchemaBuilder();
 
-            var node = new ObjectType("Node", new Fields()
-            {
-                {"child", new Field(new NamedTypeReference("Node"))},
-                {"path", new Field(new List(ScalarType.String))},
-                {"value", new Field(ScalarType.String)},
-                {"children", new Field(new List(new NamedTypeReference("Node")))}
-            });
+            builder.Object("Node", out var node)
+                .Field(node, "child", node)
+                .Field(node, "path", new List(ScalarType.String))
+                .Field(node, "value", ScalarType.String)
+                .Field(node, "children", new List(node));
 
-            var schema = Schema.Initialize(
-                new ObjectType(
-                    "Query",
-                    new Fields
-                    {
-                        ["root"] = new Field(node)
-                    }),
-                new ObjectType(
-                    "Mutation",
-                    new Fields()
-                    {
-                        ["root"] = new Field(node)
-                    }));
+            builder.Query(out var query)
+                .Field(query, "root", node);
+
+            builder.Mutation(out var mutation)
+                .Field(mutation, "root", node);
+
+            var schema = builder.Build();
 
             var resolvers = new ResolverMap()
             {
