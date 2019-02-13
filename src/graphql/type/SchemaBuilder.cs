@@ -8,19 +8,17 @@ namespace tanka.graphql.type
     {
         private readonly Dictionary<string, DirectiveType> _directives = new Dictionary<string, DirectiveType>();
 
-        private readonly Dictionary<string, Dictionary<string, IField>> _fields =
-            new Dictionary<string, Dictionary<string, IField>>();
-
-        private readonly Dictionary<string, Dictionary<string, InputObjectField>> _inputFields =
-            new Dictionary<string, Dictionary<string, InputObjectField>>();
-
         private readonly List<Action<SchemaBuilder>> _lateBuild = new List<Action<SchemaBuilder>>();
 
         private readonly Dictionary<string, INamedType> _types =
             new Dictionary<string, INamedType>();
 
+        private ConnectionBuilder _connections;
+
         public SchemaBuilder()
         {
+            _connections = new ConnectionBuilder(this);
+
             foreach (var scalarType in ScalarType.Standard)
                 Include(scalarType);
 
@@ -39,15 +37,15 @@ namespace tanka.graphql.type
                 {
                     case ObjectType objectType:
                         Include(objectType);
-                        IncludeFields(objectType, from.GetFields(objectType.Name));
+                        _connections.IncludeFields(objectType, from.GetFields(objectType.Name));
                         break;
                     case InterfaceType interfaceType:
                         Include(interfaceType);
-                        IncludeFields(interfaceType, from.GetFields(interfaceType.Name));
+                        _connections.IncludeFields(interfaceType, from.GetFields(interfaceType.Name));
                         break;
                     case InputObjectType inputType:
                         Include(inputType);
-                        IncludeInputFields(inputType, from.GetInputFields(inputType.Name));
+                        _connections.IncludeInputFields(inputType, from.GetInputFields(inputType.Name));
                         break;
                     default:
                         Include(namedType);
@@ -62,6 +60,14 @@ namespace tanka.graphql.type
 
                 IncludeDirective(directiveType);
             }
+        }
+
+        public SchemaBuilder Connections(Action<ConnectionBuilder> connections)
+        {
+            if (connections == null) throw new ArgumentNullException(nameof(connections));
+            connections(_connections);
+
+            return this;
         }
 
         public SchemaBuilder Object(
@@ -126,40 +132,6 @@ namespace tanka.graphql.type
             return this;
         }
 
-        public SchemaBuilder Field(
-            ComplexType owner,
-            string fieldName,
-            IType to,
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null,
-            params (string Name, IType Type, object DefaultValue, string Description)[] args)
-        {
-            if (!_fields.ContainsKey(owner.Name))
-                _fields[owner.Name] = new Dictionary<string, IField>();
-
-            _fields[owner.Name].Add(fieldName, new Field(to, new Args(args),
-                new Meta(description, directives: directives)));
-            return this;
-        }
-
-        public SchemaBuilder InputField(
-            InputObjectType owner,
-            string fieldName,
-            IType to,
-            object defaultValue = null,
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null)
-        {
-            if (!_inputFields.ContainsKey(owner.Name))
-                _inputFields[owner.Name] = new Dictionary<string, InputObjectField>();
-
-            _inputFields[owner.Name].Add(
-                fieldName,
-                new InputObjectField(to, new Meta(description, directives: directives), defaultValue));
-
-            return this;
-        }
-
         public SchemaBuilder Enum(string name,
             out EnumType enumType,
             string description = null,
@@ -174,12 +146,14 @@ namespace tanka.graphql.type
 
         public ISchema Build()
         {
-            foreach (var lateBuildAction in _lateBuild) lateBuildAction(this);
+            foreach (var lateBuildAction in _lateBuild) 
+                lateBuildAction(this);
 
+            var (fields, inputFields) = _connections.Build();
             return new SchemaGraph(
                 _types,
-                _fields,
-                _inputFields,
+                fields,
+                inputFields,
                 _directives);
         }
 
@@ -241,48 +215,11 @@ namespace tanka.graphql.type
             return this;
         }
 
-        public SchemaBuilder IncludeFields(ComplexType owner, IEnumerable<KeyValuePair<string, IField>> fields)
-        {
-            foreach (var field in fields)
-            {
-                if (!_fields.ContainsKey(owner.Name))
-                    _fields[owner.Name] = new Dictionary<string, IField>();
-
-                _fields[owner.Name].Add(field.Key, field.Value);
-            }
-
-            return this;
-        }
-
-        public bool IsPredefinedField(ComplexType owner, string fieldName, out IField field)
-        {
-            if (_fields.TryGetValue(owner.Name, out var fields))
-                if (fields.TryGetValue(fieldName, out field))
-                    return true;
-
-            field = null;
-            return false;
-        }
-
         public SchemaBuilder Scalar(string name, out ScalarType scalarType, IValueConverter converter,
             string description = null, IEnumerable<DirectiveInstance> directives = null)
         {
             scalarType = new ScalarType(name, converter, new Meta(description, null, directives));
             _types.Add(name, scalarType);
-            return this;
-        }
-
-        protected SchemaBuilder IncludeInputFields(InputObjectType owner,
-            IEnumerable<KeyValuePair<string, InputObjectField>> fields)
-        {
-            foreach (var field in fields)
-            {
-                if (!_fields.ContainsKey(owner.Name))
-                    _inputFields[owner.Name] = new Dictionary<string, InputObjectField>();
-
-                _inputFields[owner.Name].Add(field.Key, field.Value);
-            }
-
             return this;
         }
     }

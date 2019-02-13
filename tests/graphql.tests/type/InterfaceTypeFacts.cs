@@ -19,7 +19,8 @@ namespace tanka.graphql.tests.type
             /* Given */
             /* When */
             _builder.Interface("NamedEntity", out var namedEntity)
-                .Field(namedEntity, "name", ScalarType.NonNullString);
+                .Connections(connect => connect
+                .Field(namedEntity, "name", ScalarType.NonNullString));
 
             var schema = _builder.Build();
 
@@ -35,10 +36,12 @@ namespace tanka.graphql.tests.type
         {
             /* Given */
             _builder.Interface("NamedEntity", out var namedEntity)
-                .Field(namedEntity, "name", ScalarType.NonNullString);
+                .Connections(connect => connect
+                .Field(namedEntity, "name", ScalarType.NonNullString));
 
             _builder.Object("Person", out var person, interfaces: new []{namedEntity})
-                .Field(person, "name", ScalarType.NonNullString);
+                .Connections(connect => connect
+                .Field(person, "name", ScalarType.NonNullString));
 
             /* When */
             //todo: interfaces should be behind a connection

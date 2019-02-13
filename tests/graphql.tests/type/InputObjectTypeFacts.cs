@@ -21,7 +21,8 @@ namespace tanka.graphql.tests.type
             /* Given */
             /* When */
             _builder.InputObject("ExampleInputObject", out var input)
-                .InputField(input, "a", ScalarType.Boolean);
+                .Connections(connect => connect
+                    .InputField(input, "a", ScalarType.Boolean));
 
             var schema = _builder.Build();
 
@@ -37,8 +38,9 @@ namespace tanka.graphql.tests.type
         {
             /* Given */
             _builder.InputObject("ExampleInputObject", out var input)
-                .InputField(input, "a", ScalarType.String)
-                .InputField(input, "b", ScalarType.Int);
+                .Connections(connect => connect
+                    .InputField(input, "a", ScalarType.String)
+                    .InputField(input, "b", ScalarType.Int));
 
             var schema = _builder.Build();
 

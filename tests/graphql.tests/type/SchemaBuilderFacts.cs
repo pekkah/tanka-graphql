@@ -193,11 +193,13 @@ namespace tanka.graphql.tests.type
             var schema = builder
                 .Object("Object1", out var obj1)
                 .Object("Object2", out var obj2)
-                .Field(obj1, "obj1-obj2", obj2)
-                .Field(obj2, "obj2-obj1", obj1)
-                .Field(obj1, "scalar", ScalarType.Int)
+                .Connections(connect => connect
+                    .Field(obj1, "obj1-obj2", obj2)
+                    .Field(obj2, "obj2-obj1", obj1)
+                    .Field(obj1, "scalar", ScalarType.Int))
                 .Query(out var query)
-                .Field(query, "query-obj1", obj1)
+                .Connections(connect => connect
+                    .Field(query, "query-obj1", obj1))
                 .Build();
 
             /* Then */
@@ -217,11 +219,12 @@ namespace tanka.graphql.tests.type
             /* Given */
             var builder = new SchemaBuilder();
 
-            builder.Object("Object1", out var object1)
-                .Field(object1, "field1", ScalarType.Float);
+            builder.Object("Object1", out var object1);
+            builder.Query(out var query);
 
-            builder.Query(out var query)
-                .Field(query, "field1", object1);
+            builder.Connections(connect => connect
+                .Field(object1, "field1", ScalarType.Float)
+                .Field(query, "field1", object1));
 
             /* When */
             var sut = builder.Build();

@@ -17,15 +17,17 @@ namespace tanka.graphql.tests
         {
             var builder = new SchemaBuilder();
             builder.Object("Nest", out var nested)
-                .Field(nested, "nestedNonNull", NonNullString);
+                .Connections(connect => connect
+                .Field(nested, "nestedNonNull", NonNullString));
 
             builder.Query(out var query)
+                .Connections(connect => connect
                 .Field(query, "nonNull", NonNullString)
                 .Field(query, "nonNullNested", new NonNull(nested))
                 .Field(query, "nonNullListItem", new List(NonNullString))
                 .Field(query, "nonNullList", new NonNull(new List(String)))
                 .Field(query, "nullableNested", nested)
-                .Field(query, "nullable", String);
+                .Field(query, "nullable", String));
 
 
             var nestedNonNullData = new Dictionary<string, string>

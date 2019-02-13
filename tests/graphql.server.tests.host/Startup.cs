@@ -22,11 +22,12 @@ namespace graphql.server.tests.host
             var eventManager = new EventManager();
             var builder = new SchemaBuilder();
 
-            builder.Query(out var query)
-                .Field(query, "hello", ScalarType.String);
+            builder.Query(out var query);
+            builder.Subscription(out var subscription);
 
-            builder.Subscription(out var subscription)
-                .Field(subscription, "helloEvents", ScalarType.String);
+            builder.Connections(connect => connect
+                .Field(query, "hello", ScalarType.String)
+                .Field(subscription, "helloEvents", ScalarType.String));
 
             var resolvers = new ResolverMap
             {

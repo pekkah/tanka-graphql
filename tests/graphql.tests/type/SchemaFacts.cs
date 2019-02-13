@@ -11,9 +11,11 @@ namespace tanka.graphql.tests.type
         {
             Schema = new SchemaBuilder()
                 .InputObject("input", out var input)
-                .InputField(input, "id", ScalarType.ID)
+                .Connections(connect => connect
+                    .InputField(input, "id", ScalarType.ID))
                 .Query(out var query)
-                .Field(query, "name", ScalarType.String)
+                .Connections(connect => connect
+                    .Field(query, "name", ScalarType.String))
                 .Build();
         }
 

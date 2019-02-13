@@ -13,13 +13,16 @@ namespace tanka.graphql.benchmarks
         {
             var builder = new SchemaBuilder();
             builder.Query(out var query)
-                .Field(query, "simple", ScalarType.String);
+                .Connections(connect => connect
+                .Field(query, "simple", ScalarType.String));
 
             builder.Mutation(out var mutation)
-                .Field(mutation, "simple", ScalarType.String);
+                .Connections(connect => connect
+                .Field(mutation, "simple", ScalarType.String));
 
             builder.Subscription(out var subscription)
-                .Field(subscription, "simple", ScalarType.String);
+                .Connections(connect => connect
+                .Field(subscription, "simple", ScalarType.String));
 
             var resolvers = new ResolverMap
             {

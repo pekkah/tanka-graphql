@@ -18,7 +18,8 @@ namespace tanka.graphql.tests.type
         {
             /* Given */
             _builder.Object("Person", out var person)
-                .Field(person, "name", ScalarType.NonNullString);
+                .Connections(connect => connect
+                    .Field(person, "name", ScalarType.NonNullString));
 
             var schema = _builder.Build();
 
@@ -36,8 +37,9 @@ namespace tanka.graphql.tests.type
         {
             /* Given */
             _builder.Object("Person", out var person)
-                .Field(person, "phoneNumber", ScalarType.NonNullString,
-                    args: ("primary", ScalarType.Boolean, default, default));
+                .Connections(connect => connect
+                    .Field(person, "phoneNumber", ScalarType.NonNullString,
+                        args: ("primary", ScalarType.Boolean, default, default)));
 
             var schema = _builder.Build();
 

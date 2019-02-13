@@ -12,15 +12,17 @@ namespace tanka.graphql.tests.type
             var builder = new SchemaBuilder();
 
             builder.Object("Person", out var person)
-                .Field(person, "name", ScalarType.NonNullString);
+                .Connections(connect => connect
+                    .Field(person, "name", ScalarType.NonNullString));
 
             builder.Object("Photo", out var photo)
-                .Field(photo, "height", ScalarType.NonNullInt)
-                .Field(photo, "width", ScalarType.NonNullInt);
+                .Connections(connect => connect
+                    .Field(photo, "height", ScalarType.NonNullInt)
+                    .Field(photo, "width", ScalarType.NonNullInt));
 
             /* When */
             builder.Union("SearchResult", out var searchResult,
-                possibleTypes: new []{ person, photo});
+                possibleTypes: new[] {person, photo});
 
             var personIsPossible = searchResult.IsPossible(person);
             var photoIsPossible = searchResult.IsPossible(photo);

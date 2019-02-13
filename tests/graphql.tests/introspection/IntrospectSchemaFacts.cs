@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using tanka.graphql.execution;
 using tanka.graphql.introspection;
 using tanka.graphql.tests.data;
 using tanka.graphql.type;
@@ -18,18 +17,21 @@ namespace tanka.graphql.tests.introspection
 
             builder.Interface("Interface", out var interface1,
                     "Description")
-                .Field(interface1, ScalarFieldName, ScalarType.Int);
+                .Connections(connect => connect
+                    .Field(interface1, ScalarFieldName, ScalarType.Int));
 
             builder.Object(ObjectTypeName, out var type1,
                     "Description",
                     new[] {interface1})
-                .Field(type1, ScalarFieldName, ScalarType.NonNullInt,
-                    "Description",
-                    args: ("arg1", ScalarType.Float, 1d, "Description"));
+                .Connections(connect => connect
+                    .Field(type1, ScalarFieldName, ScalarType.NonNullInt,
+                        "Description",
+                        args: ("arg1", ScalarType.Float, 1d, "Description")));
 
             builder.Object($"{ObjectTypeName}2", out var type2,
                     "Description")
-                .Field(type2, ScalarFieldName, new List(ScalarType.Int));
+                .Connections(connect => connect
+                    .Field(type2, ScalarFieldName, new List(ScalarType.Int)));
 
 
             var union = new UnionType(
@@ -52,16 +54,18 @@ namespace tanka.graphql.tests.introspection
 
             builder.InputObject("InputObject", out var inputObject,
                     "Description")
-                .InputField(inputObject, "field1", ScalarType.Boolean, true, "Description");
+                .Connections(connect => connect
+                    .InputField(inputObject, "field1", ScalarType.Boolean, true, "Description"));
 
             builder.Query(out var query)
-                .Field(query, "object", type1)
-                .Field(query, "union", union)
-                .Field(query, "enum", enum1)
-                .Field(query, "listOfObjects", new List(type2))
-                .Field(query, "nonNullObject", new NonNull(type1))
-                .Field(query, "inputObjectArg", ScalarType.NonNullBoolean,
-                    args: ("arg1", inputObject, default, "With inputObject arg"));
+                .Connections(connect => connect
+                    .Field(query, "object", type1)
+                    .Field(query, "union", union)
+                    .Field(query, "enum", enum1)
+                    .Field(query, "listOfObjects", new List(type2))
+                    .Field(query, "nonNullObject", new NonNull(type1))
+                    .Field(query, "inputObjectArg", ScalarType.NonNullBoolean,
+                        args: ("arg1", inputObject, default, "With inputObject arg")));
 
             builder.Mutation(out var mutation);
             builder.Subscription(out var subscription);

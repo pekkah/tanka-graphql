@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using Xunit;
@@ -14,12 +13,14 @@ namespace tanka.graphql.tests.tools
             /* Given */
             var left = new SchemaBuilder()
                 .Query(out var leftQuery)
-                .Field(leftQuery, "left", ScalarType.Int)
+                .Connections(connect => connect
+                    .Field(leftQuery, "left", ScalarType.Int))
                 .Build();
 
             var right = new SchemaBuilder()
                 .Query(out var rightQuery)
-                .Field(rightQuery, "right", ScalarType.String)
+                .Connections(connect => connect
+                    .Field(rightQuery, "right", ScalarType.String))
                 .Build();
 
 

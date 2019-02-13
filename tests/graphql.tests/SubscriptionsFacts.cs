@@ -26,15 +26,18 @@ namespace tanka.graphql.tests
             // schema
             var builder = new SchemaBuilder();
             builder.Object("Message", out var messageType)
-                .Field(messageType, "content", ScalarType.String);
+                .Connections(connect => connect
+                    .Field(messageType, "content", ScalarType.String));
 
             var messageListType = new List(messageType);
 
             builder.Query(out var query)
-                .Field(query, "messages", messageListType);
+                .Connections(connect => connect
+                    .Field(query, "messages", messageListType));
 
             builder.Subscription(out var subscription)
-                .Field(subscription, "messageAdded", messageType);
+                .Connections(connect => connect
+                    .Field(subscription, "messageAdded", messageType));
 
             var schema = builder.Build();
 

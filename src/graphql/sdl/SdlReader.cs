@@ -274,15 +274,19 @@ namespace tanka.graphql.sdl
             _builder.InputObject(definition.Name.Value, out var inputObject);
             _builder.LateBuild(builder =>
             {
-                var fields = InputValues(definition.Fields);
-                foreach (var inputField in fields)
-                    builder.InputField(
-                        inputObject,
-                        inputField.Key,
-                        inputField.Value.Type,
-                        inputField.Value.DefaultValue,
-                        inputField.Value.Description,
-                        inputField.Value.Directives);
+                builder.Connections(connect =>
+                {
+                    var fields = InputValues(definition.Fields);
+                    foreach (var inputField in fields)
+                        connect.InputField(
+                            inputObject,
+                            inputField.Key,
+                            inputField.Value.Type,
+                            inputField.Value.DefaultValue,
+                            inputField.Value.Description,
+                            inputField.Value.Directives);
+
+                });
             });
 
             return inputObject;
@@ -433,7 +437,7 @@ namespace tanka.graphql.sdl
                 var args = Args(definition.Arguments);
                 var directives = Directives(definition.Directives);
 
-                _builder.Field(owner, name, type, default, directives, args.ToArray());
+                _builder.Connections(connect => connect.Field(owner, name, type, default, directives, args.ToArray()));
             }
         }
     }

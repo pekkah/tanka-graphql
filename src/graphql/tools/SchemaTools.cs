@@ -59,7 +59,7 @@ namespace tanka.graphql.tools
                 subscribers);
 
             var withIntrospection = MergeTool
-                .MergeSchemas(executable, introspection, (l, r) => r.Field);
+                .MergeSchemas(executable, introspection);
 
             if (visitors != null)
                 foreach (var visitorFactory in visitors)

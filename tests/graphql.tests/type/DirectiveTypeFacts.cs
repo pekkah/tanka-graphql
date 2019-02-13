@@ -25,11 +25,12 @@ namespace tanka.graphql.tests.type
             builder.IncludeDirective(authorizeType);
 
             builder.Query(out var query)
-                .Field(query, "requiresAuthorize", ScalarType.NonNullString,
-                    directives: new [] {
-                        authorizeType.CreateInstance()
-
-                    });
+                .Connections(connect => connect
+                    .Field(query, "requiresAuthorize", ScalarType.NonNullString,
+                        directives: new[]
+                        {
+                            authorizeType.CreateInstance()
+                        }));
 
             var resolvers = new ResolverMap
             {
