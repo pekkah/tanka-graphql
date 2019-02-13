@@ -57,7 +57,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
-        public void Require_Query()
+        public void Requires_Query()
         {
             /* Given */
             var builder = new SchemaBuilder();
@@ -71,7 +71,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
-        public void Set_Mutation()
+        public void Create_Mutation()
         {
             /* Given */
             var builder = new SchemaBuilder();
@@ -86,7 +86,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
-        public void Set_Query()
+        public void Create_Query()
         {
             /* Given */
             var builder = new SchemaBuilder();
@@ -100,7 +100,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
-        public void Set_Subscription()
+        public void Create_Subscription()
         {
             /* Given */
             var builder = new SchemaBuilder();
