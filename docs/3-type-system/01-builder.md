@@ -29,9 +29,11 @@
 [{tanka.graphql.tests.type.SchemaBuilderFacts.Create_DirectiveType}]
 
 
-### Build schema
+### Build and validate schema
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Build_schema}]
+> NotImplemented: future enhancement
+
+[{tanka.graphql.tests.type.SchemaBuilderFacts.Build_and_validate_schema}]
 
 
 ### Connecting types using fields

@@ -183,7 +183,7 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
-        public void Build_schema()
+        public void Build_and_validate_schema()
         {
             /* Given */
             var builder = new SchemaBuilder()
@@ -191,12 +191,13 @@ namespace tanka.graphql.tests.type
                 .Query(out _);
 
             /* When */
-            var schema = builder.Build();
+            var (schema, validationResult) = builder.BuildAndValidate();
 
             /* Then */
             Assert.IsAssignableFrom<ISchema>(schema);
             Assert.IsType<SchemaGraph>(schema);
             Assert.NotNull(schema.Query);
+            Assert.IsType<NotImplementedException>(validationResult);
         }
 
         [Fact]
