@@ -3,7 +3,6 @@ using GraphQLParser.AST;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.type.converters;
-using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests.sdl

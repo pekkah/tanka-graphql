@@ -19,7 +19,7 @@ namespace tanka.graphql.introspection
 
             this[IntrospectionSchema.SchemaName] = new FieldResolverMap()
             {
-                {"types", context => SyncWrap.Sync(source.QueryTypes<IType>())},
+                {"types", context => SyncWrap.Sync(source.QueryTypes<INamedType>())},
                 {"queryType", context => SyncWrap.Sync(source.Query)},
                 {"mutationType", context => SyncWrap.Sync(source.Mutation)},
                 {"subscriptionType", context => SyncWrap.Sync(source.Subscription)},

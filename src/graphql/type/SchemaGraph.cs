@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using tanka.graphql.type;
 
-namespace tanka.graphql.typeSystem
+namespace tanka.graphql.type
 {
     public class SchemaGraph : ISchema
     {
@@ -66,7 +65,7 @@ namespace tanka.graphql.typeSystem
             return Enumerable.Empty<KeyValuePair<string, IField>>();
         }
 
-        public IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IType
+        public IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : INamedType
         {
             if (filter == null)
                 return _types.Select(t => t.Value)

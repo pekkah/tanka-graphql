@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using tanka.graphql.type;
 
-namespace tanka.graphql.typeSystem
+namespace tanka.graphql.type
 {
     public static class TypeDictionaryExtensions
     {

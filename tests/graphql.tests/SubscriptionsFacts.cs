@@ -7,7 +7,6 @@ using tanka.graphql.resolvers;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
-using tanka.graphql.typeSystem;
 using Xunit;
 using static tanka.graphql.Executor;
 using static tanka.graphql.Parser;

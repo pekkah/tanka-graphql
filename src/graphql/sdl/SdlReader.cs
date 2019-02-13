@@ -5,7 +5,6 @@ using GraphQLParser.AST;
 using tanka.graphql.error;
 using tanka.graphql.execution;
 using tanka.graphql.type;
-using tanka.graphql.typeSystem;
 
 namespace tanka.graphql.sdl
 {

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using tanka.graphql.execution;
 using tanka.graphql.type;
-using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests.type

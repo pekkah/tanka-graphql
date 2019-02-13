@@ -20,7 +20,7 @@ namespace tanka.graphql.type
 
         IEnumerable<KeyValuePair<string, IField>> GetFields(string type);
 
-        IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IType;
+        IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : INamedType;
 
         DirectiveType GetDirective(string name);
 

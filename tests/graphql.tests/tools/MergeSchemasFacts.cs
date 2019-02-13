@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using tanka.graphql.tools;
 using tanka.graphql.type;
-using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests.tools

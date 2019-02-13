@@ -1,91 +1,192 @@
 ﻿using System;
+using System.Linq;
 using tanka.graphql.type;
-using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests.type
 {
     public class SchemaFacts
     {
+        public SchemaFacts()
+        {
+            Schema = new SchemaBuilder()
+                .InputObject("input", out var input)
+                .InputField(input, "id", ScalarType.ID)
+                .Query(out var query)
+                .Field(query, "name", ScalarType.String)
+                .Build();
+        }
+
+        protected readonly ISchema Schema;
+
         [Fact]
-        public void Build_types()
+        public void GetDirective()
         {
             /* Given */
-            var builder = new SchemaBuilder();
-
-            builder.Object("Object1", out var object1)
-                .Field(object1, "field1", ScalarType.Float);
-
-            builder.Query(out var query)
-                .Field(query, "field1", object1);
+            var directiveTypeName = DirectiveType.Include.Name;
 
             /* When */
-            var sut = builder.Build();
+            var directiveType = Schema.GetDirective(directiveTypeName);
 
             /* Then */
-            var types = sut.QueryTypes<INamedType>();
-
-            Assert.Contains(types, t => t.Name == "Query");
-            Assert.Contains(types, t => t.Name == "Object1");
+            Assert.NotNull(directiveType);
+            Assert.IsType<DirectiveType>(directiveType);
         }
 
         [Fact]
-        public void Require_Query()
+        public void GetField()
         {
             /* Given */
-            var builder = new SchemaBuilder();
+            var namedTypeName = Schema.Query.Name;
 
             /* When */
-            var exception = Assert.Throws<ArgumentNullException>(
-                () => builder.Build());
+            var field = Schema.GetField(namedTypeName, "name");
 
             /* Then */
-            Assert.Equal("types", exception.ParamName);
+            Assert.NotNull(field);
+            Assert.Same(ScalarType.String, field.Type);
         }
 
         [Fact]
-        public void Set_Mutation()
+        public void GetFields()
         {
             /* Given */
-            var builder = new SchemaBuilder();
-            builder.Query(out _);
-            builder.Mutation(out var mutation);
+            var namedTypeName = Schema.Query.Name;
 
             /* When */
-            var sut = builder.Build();
+            var fields = Schema.GetFields(namedTypeName);
 
             /* Then */
-            Assert.Equal(mutation, sut.Mutation);
+            Assert.Single(
+                fields,
+                kv => kv.Key == "name" && (ScalarType) kv.Value.Type == ScalarType.String);
         }
 
         [Fact]
-        public void Set_Query()
+        public void GetInputField()
         {
             /* Given */
-            var builder = new SchemaBuilder();
-            builder.Query(out var query);
+            var inputTypeName = "input";
 
             /* When */
-            var sut = builder.Build();
+            var field = Schema.GetInputField(inputTypeName, "id");
 
             /* Then */
-            Assert.Equal(query, sut.Query);
+            Assert.NotNull(field);
+            Assert.Same(ScalarType.ID, field.Type);
         }
 
         [Fact]
-        public void Set_Subscription()
+        public void GetInputFields()
         {
             /* Given */
-            var builder = new SchemaBuilder();
-            builder.Query(out _);
-            builder.Mutation(out _);
-            builder.Subscription(out var subscription);
+            var inputTypeName = "input";
 
             /* When */
-            var sut = builder.Build();
+            var fields = Schema.GetInputFields(inputTypeName);
 
             /* Then */
-            Assert.Equal(subscription, sut.Subscription);
+            Assert.Single(
+                fields,
+                kv => kv.Key == "id" && (ScalarType) kv.Value.Type == ScalarType.ID);
+        }
+
+        [Fact]
+        public void GetNamedType()
+        {
+            /* Given */
+            var namedTypeName = Schema.Query.Name;
+
+            /* When */
+            var namedType = Schema.GetNamedType(namedTypeName);
+
+            /* Then */
+            Assert.NotNull(namedType);
+            Assert.IsAssignableFrom<INamedType>(namedType);
+        }
+
+        [Fact]
+        public void QueryDirectives()
+        {
+            /* Given */
+            bool AppliesToField(DirectiveType type)
+            {
+                return type.Locations.Contains(DirectiveLocation.FIELD);
+            }
+
+            /* When */
+            var directives = Schema.QueryDirectives(AppliesToField);
+
+            /* Then */
+            foreach (var directiveType in directives) Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
+        }
+
+        [Fact]
+        public void QueryNamedTypes()
+        {
+            /* Given */
+            bool TypesWithoutDescription(ObjectType type)
+            {
+                return string.IsNullOrEmpty(type.Description);
+            }
+
+            /* When */
+            var undocumentedTypes = Schema.QueryTypes<ObjectType>(TypesWithoutDescription);
+
+            /* Then */
+            Assert.NotNull(undocumentedTypes);
+            Assert.Single(undocumentedTypes, type => type.Name == "Query");
+        }
+
+        [Fact]
+        public void Roots_Mutation()
+        {
+            /* Given */
+            /* When */
+            /* Then */
+            Assert.Null(Schema.Mutation);
+        }
+
+        [Fact]
+        public void Roots_Query()
+        {
+            /* Given */
+            /* When */
+            /* Then */
+            Assert.NotNull(Schema.Query);
+            Assert.IsType<ObjectType>(Schema.Query);
+        }
+
+        [Fact]
+        public void Roots_Subscription()
+        {
+            /* Given */
+            /* When */
+            /* Then */
+            Assert.Null(Schema.Subscription);
+        }
+
+        [Fact]
+        public void Included_directives()
+        {
+            /* Given */ 
+            /* When */
+            var directives = Schema.QueryDirectives();
+
+            /* Then */
+            Assert.Single(directives, DirectiveType.Include);
+            Assert.Single(directives, DirectiveType.Skip);
+        }
+
+        [Fact]
+        public void Included_scalars()
+        {
+            /* Given */
+            /* When */
+            var scalars = Schema.QueryTypes<ScalarType>();
+
+            /* Then */
+            Assert.Equal(ScalarType.Standard, scalars);
         }
     }
 }

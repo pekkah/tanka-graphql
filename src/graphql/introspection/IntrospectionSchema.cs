@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using tanka.graphql.type;
-using tanka.graphql.typeSystem;
 
 namespace tanka.graphql.introspection
 {

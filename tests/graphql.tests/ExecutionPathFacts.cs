@@ -7,7 +7,6 @@ using System.Xml.XPath;
 using tanka.graphql.resolvers;
 using tanka.graphql.tools;
 using tanka.graphql.type;
-using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests

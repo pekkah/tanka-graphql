@@ -3,7 +3,6 @@ using tanka.graphql.execution;
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 using GraphQLParser.AST;
-using tanka.graphql.typeSystem;
 using Xunit;
 
 namespace tanka.graphql.tests.resolvers
