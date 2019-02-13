@@ -72,6 +72,7 @@ namespace tanka.graphql.sdl
                 definition.Name.Value,
                 out var directiveType,
                 locations,
+                null,
                 args.ToArray());
 
             return directiveType;
@@ -201,12 +202,13 @@ namespace tanka.graphql.sdl
         protected EnumType Enum(GraphQLEnumTypeDefinition definition)
         {
             var values = definition.Values.Select(value =>
-                (value.Name.Value, new Meta(directives: Directives(value.Directives))));
+                (value.Name.Value, string.Empty, Directives(definition.Directives), string.Empty));
 
             var directives = Directives(definition.Directives);
 
             _builder.Enum(definition.Name.Value, out var enumType,
                 directives: directives,
+                description:null,
                 values: values.ToArray());
 
             return enumType;

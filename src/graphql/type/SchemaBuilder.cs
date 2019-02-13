@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using tanka.graphql.type.converters;
 
 namespace tanka.graphql.type
 {
@@ -27,7 +28,7 @@ namespace tanka.graphql.type
             IncludeDirective(type.DirectiveType.Skip);
         }
 
-        public SchemaBuilder(ISchema from): this()
+        public SchemaBuilder(ISchema from) : this()
         {
             foreach (var namedType in from.QueryTypes<INamedType>())
             {
@@ -136,7 +137,7 @@ namespace tanka.graphql.type
             if (!_fields.ContainsKey(owner.Name))
                 _fields[owner.Name] = new Dictionary<string, IField>();
 
-            _fields[owner.Name].Add(fieldName, new Field(to, new Args(args), 
+            _fields[owner.Name].Add(fieldName, new Field(to, new Args(args),
                 new Meta(description, directives: directives)));
             return this;
         }
@@ -161,10 +162,12 @@ namespace tanka.graphql.type
 
         public SchemaBuilder Enum(string name,
             out EnumType enumType,
+            string description = null,
             IEnumerable<DirectiveInstance> directives = null,
-            params (string value, Meta meta)[] values)
+            params (string value, string description, IEnumerable<DirectiveInstance> directives, string
+                deprecationReason)[] values)
         {
-            enumType = new EnumType(name, new EnumValues(values), new Meta(directives: directives));
+            enumType = new EnumType(name, new EnumValues(values), new Meta(description, directives: directives));
             _types.Add(name, enumType);
             return this;
         }
@@ -199,6 +202,7 @@ namespace tanka.graphql.type
             string name,
             out DirectiveType directiveType,
             IEnumerable<DirectiveLocation> locations,
+            string description = null,
             params (string Name, IType Type, object DefaultValue, string Description)[] args)
         {
             directiveType = new DirectiveType(name, locations, new Args(args));
@@ -250,6 +254,24 @@ namespace tanka.graphql.type
             return this;
         }
 
+        public bool IsPredefinedField(ComplexType owner, string fieldName, out IField field)
+        {
+            if (_fields.TryGetValue(owner.Name, out var fields))
+                if (fields.TryGetValue(fieldName, out field))
+                    return true;
+
+            field = null;
+            return false;
+        }
+
+        public SchemaBuilder Scalar(string name, out ScalarType scalarType, IValueConverter converter,
+            string description = null, IEnumerable<DirectiveInstance> directives = null)
+        {
+            scalarType = new ScalarType(name, converter, new Meta(description, null, directives));
+            _types.Add(name, scalarType);
+            return this;
+        }
+
         protected SchemaBuilder IncludeInputFields(InputObjectType owner,
             IEnumerable<KeyValuePair<string, InputObjectField>> fields)
         {
@@ -262,20 +284,6 @@ namespace tanka.graphql.type
             }
 
             return this;
-        }
-
-        public bool IsPredefinedField(ComplexType owner, string fieldName, out IField field)
-        {
-            if (_fields.TryGetValue(owner.Name, out var fields))
-            {
-                if (fields.TryGetValue(fieldName, out field))
-                {
-                    return true;
-                }
-            }
-
-            field = null;
-            return false;
         }
     }
 }

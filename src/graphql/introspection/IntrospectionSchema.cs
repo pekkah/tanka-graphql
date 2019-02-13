@@ -22,15 +22,16 @@ namespace tanka.graphql.introspection
             var typeList = new List(new NonNull(type));
 
             builder.Enum(TypeKindName, out var typeKind,
+                description: null,
                 directives: null,
-                (__TypeKind.SCALAR.ToString(), default),
-                (__TypeKind.OBJECT.ToString(), default),
-                (__TypeKind.ENUM.ToString(), default),
-                (__TypeKind.INPUT_OBJECT.ToString(), default),
-                (__TypeKind.INTERFACE.ToString(), default),
-                (__TypeKind.LIST.ToString(), default),
-                (__TypeKind.NON_NULL.ToString(), default),
-                (__TypeKind.UNION.ToString(), default));
+    (__TypeKind.SCALAR.ToString(), default, null, null),
+                (__TypeKind.OBJECT.ToString(), default, null, null),
+                (__TypeKind.ENUM.ToString(), default, null, null),
+                (__TypeKind.INPUT_OBJECT.ToString(), default, null, null),
+                (__TypeKind.INTERFACE.ToString(), default, null, null),
+                (__TypeKind.LIST.ToString(), default, null, null),
+                (__TypeKind.NON_NULL.ToString(), default, null, null),
+                (__TypeKind.UNION.ToString(), default, null, null));
 
             builder.Object(InputValueName, out var inputValue)
                 .Field(inputValue, "name", ScalarType.NonNullString)
@@ -74,8 +75,8 @@ namespace tanka.graphql.introspection
 
             builder.Enum("__DirectiveLocation", out var directiveLocation,
                 directives: null,
-                Enum.GetNames(typeof(__DirectiveLocation))
-                    .Select(loc => (loc, default(Meta)))
+                values: Enum.GetNames(typeof(__DirectiveLocation))
+                    .Select(loc => (loc, string.Empty, Enumerable.Empty<DirectiveInstance>(), string.Empty))
                     .ToArray());
 
             builder.Object("__Directive", out var directive)

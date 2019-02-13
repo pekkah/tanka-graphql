@@ -2,6 +2,13 @@
 
 `SchemaBuilder` is the recommended way of creating `ISchema`s. It provides methods to create types and connect them to each other with fields.
 
+### Creating Root Types
+
+[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Query}]
+
+[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Mutation}]
+
+[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Subscription}]
 
 ### Creating types
 
@@ -13,11 +20,14 @@
 
 [{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Enum}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Include_Scalar}]
+[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Scalar}]
 
 [{tanka.graphql.tests.type.SchemaBuilderFacts.Create_InputObject}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Include_Directive}]
+[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_DirectiveType}]
+
+
+### Build schema
 
 
 ### Connecting types using fields

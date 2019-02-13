@@ -4,26 +4,22 @@ namespace tanka.graphql.type
 {
     public class EnumValues : Dictionary<string, Meta>
     {
-        public EnumValues()
-        {
-        }
-
         public EnumValues(IEnumerable<string> values)
         {
             foreach (var value in values) this[value] = null;
         }
 
-        public EnumValues(params (string value, Meta meta)[] values)
+        public EnumValues(params (string value, string description, IEnumerable<DirectiveInstance> directives,  string deprecationReson)[] values)
         {
-            foreach (var (value, meta) in values)
+            foreach (var (value, description, directives, deprecationReson) in values)
             {
-                Add(value, meta);
+                Add(value, new Meta(description, deprecationReson, directives));
             }
         }
 
-        public void Add(string name, string description = null, string depricationReason = null)
+        public void Add(string name, string description = null, string deprecationReason = null)
         {
-            Add(name, new Meta(description, depricationReason));
+            Add(name, new Meta(description, deprecationReason));
         }
     }
 }
