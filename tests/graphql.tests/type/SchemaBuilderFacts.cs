@@ -182,6 +182,22 @@ namespace tanka.graphql.tests.type
             Assert.Equal(name, object1.Name);
         }
 
+        [Fact]
+        public void Build_schema()
+        {
+            /* Given */
+            var builder = new SchemaBuilder()
+                // query is required to build schema
+                .Query(out _);
+
+            /* When */
+            var schema = builder.Build();
+
+            /* Then */
+            Assert.IsAssignableFrom<ISchema>(schema);
+            Assert.IsType<SchemaGraph>(schema);
+            Assert.NotNull(schema.Query);
+        }
 
         [Fact]
         public void Build_with_circular_reference_between_two_objects()

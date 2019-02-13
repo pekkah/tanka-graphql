@@ -157,6 +157,12 @@ namespace tanka.graphql.type
                 _directives);
         }
 
+        public (ISchema Schema, object ValidationResult) BuildAndValidate()
+        {
+            var schema = Build();
+            return (schema, new NotImplementedException("todo"));
+        }
+
         public SchemaBuilder LateBuild(Action<SchemaBuilder> lateBuild)
         {
             _lateBuild.Add(lateBuild);
