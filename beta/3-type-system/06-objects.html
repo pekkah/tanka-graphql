@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="/tanka-graphql/beta/">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+        media="screen,projection" />
+
+    <link type="text/css" rel="stylesheet" href="prism.css" media="screen,projection" />
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Objects - tanka-graphql</title>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col s12 m4 l3">
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="index.html"><h6>Home</h6></a>
+                </li>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="1-execution/1-validation.html"><h6>Execution</h6></a>
+                </li>
+                        <a class="collection-item" href="1-execution/1-validation.html">Validation</a>
+                        <a class="collection-item" href="1-execution/2-query.html">Query</a>
+                        <a class="collection-item" href="1-execution/3-mutation.html">Mutation</a>
+                        <a class="collection-item" href="1-execution/4-subscription.html">Subscription</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="2-server/1-signalr-hub.html"><h6>Server</h6></a>
+                </li>
+                        <a class="collection-item" href="2-server/1-signalr-hub.html">Signalr hub</a>
+                        <a class="collection-item" href="2-server/2-apollo-link.html">Apollo link</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="3-type-system/00-SDL.html"><h6>Type system</h6></a>
+                </li>
+                        <a class="collection-item" href="3-type-system/00-SDL.html">SDL</a>
+                        <a class="collection-item" href="3-type-system/01-builder.html">Builder</a>
+                        <a class="collection-item" href="3-type-system/02-schema.html">Schema</a>
+                        <a class="collection-item" href="3-type-system/03-descriptions.html">Descriptions</a>
+                        <a class="collection-item" href="3-type-system/04-types.html">Types</a>
+                        <a class="collection-item" href="3-type-system/05-scalars.html">Scalars</a>
+                        <a class="collection-item active" href="3-type-system/06-objects.html">Objects</a>
+                        <a class="collection-item" href="3-type-system/07-interfaces.html">Interfaces</a>
+                        <a class="collection-item" href="3-type-system/08-unions.html">Unions</a>
+                        <a class="collection-item" href="3-type-system/09-enums.html">Enums</a>
+                        <a class="collection-item" href="3-type-system/10-input-objects.html">Input objects</a>
+                        <a class="collection-item" href="3-type-system/11-list.html">List</a>
+                        <a class="collection-item" href="3-type-system/12-non-null.html">Non null</a>
+                        <a class="collection-item" href="3-type-system/13-directives.html">Directives</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="4-introspection/4-type-name-introspection.html"><h6>Introspection</h6></a>
+                </li>
+                        <a class="collection-item" href="4-introspection/4-type-name-introspection.html">Type name introspection</a>
+                        <a class="collection-item" href="4-introspection/5-schema-introspection.html">Schema introspection</a>
+            </ul>
+        </div>
+        <div class="col s12 m8 l9">
+            <article class="flow-text">
+                <h2 id="objects">Objects</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Objects">Specification</a></p>
+</blockquote>
+<p>Objects are created as instances of <code>ObjectType</code>.</p>
+<h3 id="creating-objects">Creating objects</h3>
+<p>Objects are created by giving them a unique name and list of fields.</p>
+<h4 id="with-scalar-field">With scalar field</h4>
+<p>Type of field defines the return value of field when resolved during execution.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void With_scalar_field()
+        {
+            /* Given */
+            _builder.Object(&quot;Person&quot;, out var person)
+                .Connections(connect =&gt; connect
+                    .Field(person, &quot;name&quot;, ScalarType.NonNullString));
+
+            var schema = _builder.Build();
+
+            /* When */
+            var name = schema.GetField(person.Name, &quot;name&quot;);
+
+            /* Then */
+            Assert.Equal(&quot;Person&quot;, person.Name);
+            Assert.NotNull(name);
+            Assert.Equal(ScalarType.NonNullString, name.Type);
+        }
+</code></pre></p>
+<h4 id="with-scalar-field-taking-a-boolean-argument">With scalar field taking a boolean argument</h4>
+<p>Fields can take arguments which have a name and type.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void With_scalar_field_with_argument()
+        {
+            /* Given */
+            _builder.Object(&quot;Person&quot;, out var person)
+                .Connections(connect =&gt; connect
+                    .Field(person, &quot;phoneNumber&quot;, ScalarType.NonNullString,
+                        args: (&quot;primary&quot;, ScalarType.Boolean, default, default)));
+
+            var schema = _builder.Build();
+
+            /* When */
+            var phoneNumber = schema.GetField(person.Name, &quot;phoneNumber&quot;);
+
+            /* Then */
+            Assert.NotNull(phoneNumber);
+            Assert.Equal(ScalarType.NonNullString, phoneNumber.Type);
+            Assert.Single(phoneNumber.Arguments,
+                arg =&gt; arg.Key == &quot;primary&quot; &amp;&amp; (ScalarType) arg.Value.Type == ScalarType.Boolean);
+        }
+</code></pre></p>
+
+            </article>
+        </div>
+    </div>
+    <!--JavaScript at end of body for optimized loading-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="prism.js"></script>
+    <script>
+        M.AutoInit();
+    </script>
+</body>
+
+</html>

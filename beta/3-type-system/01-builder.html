@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="/tanka-graphql/beta/">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+        media="screen,projection" />
+
+    <link type="text/css" rel="stylesheet" href="prism.css" media="screen,projection" />
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Builder - tanka-graphql</title>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col s12 m4 l3">
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="index.html"><h6>Home</h6></a>
+                </li>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="1-execution/1-validation.html"><h6>Execution</h6></a>
+                </li>
+                        <a class="collection-item" href="1-execution/1-validation.html">Validation</a>
+                        <a class="collection-item" href="1-execution/2-query.html">Query</a>
+                        <a class="collection-item" href="1-execution/3-mutation.html">Mutation</a>
+                        <a class="collection-item" href="1-execution/4-subscription.html">Subscription</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="2-server/1-signalr-hub.html"><h6>Server</h6></a>
+                </li>
+                        <a class="collection-item" href="2-server/1-signalr-hub.html">Signalr hub</a>
+                        <a class="collection-item" href="2-server/2-apollo-link.html">Apollo link</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="3-type-system/00-SDL.html"><h6>Type system</h6></a>
+                </li>
+                        <a class="collection-item" href="3-type-system/00-SDL.html">SDL</a>
+                        <a class="collection-item active" href="3-type-system/01-builder.html">Builder</a>
+                        <a class="collection-item" href="3-type-system/02-schema.html">Schema</a>
+                        <a class="collection-item" href="3-type-system/03-descriptions.html">Descriptions</a>
+                        <a class="collection-item" href="3-type-system/04-types.html">Types</a>
+                        <a class="collection-item" href="3-type-system/05-scalars.html">Scalars</a>
+                        <a class="collection-item" href="3-type-system/06-objects.html">Objects</a>
+                        <a class="collection-item" href="3-type-system/07-interfaces.html">Interfaces</a>
+                        <a class="collection-item" href="3-type-system/08-unions.html">Unions</a>
+                        <a class="collection-item" href="3-type-system/09-enums.html">Enums</a>
+                        <a class="collection-item" href="3-type-system/10-input-objects.html">Input objects</a>
+                        <a class="collection-item" href="3-type-system/11-list.html">List</a>
+                        <a class="collection-item" href="3-type-system/12-non-null.html">Non null</a>
+                        <a class="collection-item" href="3-type-system/13-directives.html">Directives</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="4-introspection/4-type-name-introspection.html"><h6>Introspection</h6></a>
+                </li>
+                        <a class="collection-item" href="4-introspection/4-type-name-introspection.html">Type name introspection</a>
+                        <a class="collection-item" href="4-introspection/5-schema-introspection.html">Schema introspection</a>
+            </ul>
+        </div>
+        <div class="col s12 m8 l9">
+            <article class="flow-text">
+                <h2 id="schema-builder">Schema Builder</h2>
+<p><code>SchemaBuilder</code> is the recommended way of creating <code>ISchema</code>s. It provides methods to create types and connect them to each other with fields.</p>
+<h3 id="creating-root-types">Creating Root Types</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Query()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out var query);
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            Assert.Equal(query, sut.Query);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Mutation()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out _);
+            builder.Mutation(out var mutation);
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            Assert.Equal(mutation, sut.Mutation);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Subscription()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out _);
+            builder.Mutation(out _);
+            builder.Subscription(out var subscription);
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            Assert.Equal(subscription, sut.Subscription);
+        }
+</code></pre></p>
+<h3 id="creating-types">Creating types</h3>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Create_Object()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Object1&quot;;
+            
+            /* When */
+            builder.Object(
+                name: name,
+                out var object1,
+                description: &quot;Description&quot;,
+                interfaces: new InterfaceType[]
+                {
+                    /*interfaceType*/
+                },
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, object1.Name);
+            Assert.True(builder.TryGetType&lt;ObjectType&gt;(object1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Interface()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Interface1&quot;;
+            
+            /* When */
+            builder.Interface(
+                name: name,
+                out var interface1,
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, interface1.Name);
+            Assert.True(builder.TryGetType&lt;InterfaceType&gt;(interface1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Union()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Object(&quot;Object1&quot;, out var object1);
+            builder.Object(&quot;Object2&quot;, out var object2);
+            
+            const string name = &quot;Union1&quot;;
+            
+            /* When */
+            builder.Union(
+                name: name,
+                out var union1,
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                },
+                possibleTypes: new []{object1, object2});
+
+            /* Then */
+            Assert.Equal(name, union1.Name);
+            Assert.True(builder.TryGetType&lt;UnionType&gt;(union1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Enum()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Enum1&quot;;
+            
+            /* When */
+            builder.Enum(
+                name: name,
+                enumType: out var enum1,
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                },
+                (value: &quot;VALUE1&quot;, 
+                 description: &quot;Description&quot;,
+                 directives: new DirectiveInstance[] { /*directive*/},
+                 deprecationReason: null)
+                );
+
+            /* Then */
+            Assert.Equal(name, enum1.Name);
+            Assert.True(builder.TryGetType&lt;EnumType&gt;(enum1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Scalar()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Url&quot;;
+            
+            /* When */
+            builder.Scalar(
+                name: name,
+                out var url,
+                converter: new StringConverter(),
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, url.Name);
+            Assert.True(builder.TryGetType&lt;ScalarType&gt;(url.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_InputObject()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;InputObject1&quot;;
+            
+            /* When */
+            builder.InputObject(
+                name: name,
+                out var object1,
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, object1.Name);
+            Assert.True(builder.TryGetType&lt;InputObjectType&gt;(object1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_DirectiveType()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Deprecated&quot;;
+            
+            /* When */
+            builder.DirectiveType(
+                name: name,
+                out var object1,
+                locations: new []
+                {
+                    DirectiveLocation.FIELD
+                },
+                description: &quot;Description&quot;,
+                (Name: &quot;Reason&quot;,
+                 Type: ScalarType.String,
+                 DefaultValue: &quot;Deprecated&quot;,
+                 Description: &quot;Description&quot;)
+                );
+
+            /* Then */
+            Assert.Equal(name, object1.Name);
+        }
+</code></pre></p>
+<h3 id="build-and-validate-schema">Build and validate schema</h3>
+<blockquote>
+<p>NotImplemented: future enhancement</p>
+</blockquote>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Build_and_validate_schema()
+        {
+            /* Given */
+            var builder = new SchemaBuilder()
+                // query is required to build schema
+                .Query(out _);
+
+            /* When */
+            var (schema, validationResult) = builder.BuildAndValidate();
+
+            /* Then */
+            Assert.IsAssignableFrom&lt;ISchema&gt;(schema);
+            Assert.IsType&lt;SchemaGraph&gt;(schema);
+            Assert.NotNull(schema.Query);
+            Assert.IsType&lt;NotImplementedException&gt;(validationResult);
+        }
+</code></pre></p>
+<h3 id="connecting-types-using-fields">Connecting types using fields</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Object_field()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Object(
+                name: &quot;Object1&quot;,
+                out var object1);
+            
+            /* When */
+            builder.Connections(connect =&gt;
+            {
+                connect.Field(
+                    owner: object1,
+                    fieldName: &quot;field1&quot;,
+                    to: ScalarType.Int,
+                    description: &quot;Description&quot;,
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    },
+                    (Name: &quot;arg1&quot;,
+                     Type: ScalarType.Boolean,
+                     DefaultValue: true,
+                     Description: &quot;Description&quot;)
+                    );
+            });
+
+            /* Then */
+            var isDefined = false;
+            builder.Connections(connect =&gt; isDefined = connect.TryGetField(object1, &quot;field1&quot;, out _));
+            Assert.True(isDefined);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Interface_field()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Interface(
+                name: &quot;Interface1&quot;,
+                out var interface1);
+
+            /* When */
+            builder.Connections(connect =&gt;
+            {
+                connect.Field(
+                    owner: interface1,
+                    fieldName: &quot;field1&quot;,
+                    to: ScalarType.Int,
+                    description: &quot;Description&quot;,
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    },
+                    (Name: &quot;arg1&quot;,
+                     Type: ScalarType.Boolean,
+                     DefaultValue: true,
+                     Description: &quot;Description&quot;)
+                );
+            });
+
+            /* Then */
+            var isDefined = false;
+            builder.Connections(connect =&gt; isDefined = connect.TryGetField(interface1, &quot;field1&quot;, out _));
+            Assert.True(isDefined);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_InputObject_field()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();        
+            builder.InputObject(
+                name: &quot;Input1&quot;,
+                out var input1);
+
+            /* When */
+            builder.Connections(connect =&gt; connect
+                .InputField(
+                    owner: input1,
+                    fieldName: &quot;field1&quot;,
+                    to: ScalarType.NonNullBoolean,
+                    defaultValue: true,
+                    description: &quot;Descriptipn&quot;,
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    })
+            );
+
+
+            /* Then */
+            var isDefined = false;
+            builder.Connections(connect =&gt; isDefined = connect.TryGetInputField(input1, &quot;field1&quot;, out _));
+            Assert.True(isDefined);
+        }
+</code></pre></p>
+<h3 id="configuring-new-schema-based-on-existing-schema">Configuring new schema based on existing schema</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Use_existing_schema()
+        {
+            /* Given */
+            var existingSchema = new SchemaBuilder()
+                .Query(out var query)
+                .Connections(connect =&gt;
+                    connect.Field(query, &quot;field1&quot;, ScalarType.String)
+                    )
+                .Build();
+
+            /* When */
+            var schema = new SchemaBuilder(existingSchema)
+                /* Or: .Import(existingSchema) */
+                .Connections(connect =&gt; connect
+                    .Field(query, &quot;field2&quot;, ScalarType.Int)
+                )
+                .Build();
+
+            /* Then */
+            var queryFields = schema.GetFields(query.Name).ToList();
+            Assert.Single(queryFields, f =&gt; f.Key == &quot;field1&quot;);
+            Assert.Single(queryFields, f =&gt; f.Key == &quot;field2&quot;);
+        }
+</code></pre></p>
+<h3 id="merging-schemas">Merging schemas</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Merge_schemas()
+        {
+            /* Given */
+            var schema1 = new SchemaBuilder()
+                .Query(out var query1)
+                .Connections(connect =&gt;
+                    connect.Field(query1, &quot;field1&quot;, ScalarType.String)
+                )
+                .Build();
+
+            var schema2 = new SchemaBuilder()
+                .Query(out var query2)
+                .Connections(connect =&gt;
+                    connect.Field(query2, &quot;field2&quot;, ScalarType.Int)
+                )
+                .Build();
+
+            /* When */
+            var schema = MergeTool.MergeSchemas(schema1, schema2);
+
+            /* Then */
+            var queryFields = schema.GetFields(query1.Name).ToList();
+            Assert.Single(queryFields, f =&gt; f.Key == &quot;field1&quot;);
+            Assert.Single(queryFields, f =&gt; f.Key == &quot;field2&quot;);
+        }
+</code></pre></p>
+<h3 id="making-executable-schema">Making executable schema</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Make_executable_schema()
+        {
+            /* Given */
+            var schema1 = new SchemaBuilder()
+                .Query(out var query1)
+                .Connections(connect =&gt;
+                    connect.Field(query1, &quot;field1&quot;, ScalarType.Int)
+                )
+                .Build();
+
+            var resolvers = new ResolverMap()
+            {
+                {
+                    query1.Name, new FieldResolverMap()
+                    {
+                        { &quot;field1&quot;, async context =&gt;
+                            {
+                                await Task.Delay(1);
+                                return Resolve.As(1);
+                            }
+                        }
+                    }
+
+                }
+            };
+
+            /* When */
+            var executableSchema = await SchemaTools.MakeExecutableSchemaAsync(
+                schema: schema1,
+                resolvers: resolvers,
+                subscribers: null,
+                visitors: new SchemaVisitorFactory[]
+                {
+                    /* schema visitor factory */
+                });
+
+            /* Then */
+            var result = await Executor.ExecuteAsync(
+                new ExecutionOptions()
+                {
+                    Document = Parser.ParseDocument(@&quot;{ field1 }&quot;),
+                    Schema = executableSchema
+                });
+
+            result.ShouldMatchJson(
+                @&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;field1&quot;&quot;: 1
+                  }
+                }&quot;);
+        }
+</code></pre></p>
+<h3 id="special-cases">Special cases</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Build_with_circular_reference_between_two_objects()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+
+            /* When */
+            var schema = builder
+                .Object(&quot;Object1&quot;, out var obj1)
+                .Object(&quot;Object2&quot;, out var obj2)
+                .Connections(connect =&gt; connect
+                    .Field(obj1, &quot;obj1-obj2&quot;, obj2)
+                    .Field(obj2, &quot;obj2-obj1&quot;, obj1)
+                    .Field(obj1, &quot;scalar&quot;, ScalarType.Int))
+                .Query(out var query)
+                .Connections(connect =&gt; connect
+                    .Field(query, &quot;query-obj1&quot;, obj1))
+                .Build();
+
+            /* Then */
+            var object1 = schema.GetNamedType&lt;ObjectType&gt;(obj1.Name);
+            var object1ToObject2 = schema.GetField(object1.Name, &quot;obj1-obj2&quot;);
+
+            var object2 = schema.GetNamedType&lt;ObjectType&gt;(obj2.Name);
+            var object2ToObject1 = schema.GetField(object2.Name, &quot;obj2-obj1&quot;);
+
+            Assert.Equal(object1, object2ToObject1.Type);
+            Assert.Equal(object2, object1ToObject2.Type);
+        }
+</code></pre></p>
+
+            </article>
+        </div>
+    </div>
+    <!--JavaScript at end of body for optimized loading-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="prism.js"></script>
+    <script>
+        M.AutoInit();
+    </script>
+</body>
+
+</html>

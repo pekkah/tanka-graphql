@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="/tanka-graphql/beta/">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+        media="screen,projection" />
+
+    <link type="text/css" rel="stylesheet" href="prism.css" media="screen,projection" />
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Descriptions - tanka-graphql</title>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col s12 m4 l3">
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="index.html"><h6>Home</h6></a>
+                </li>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="1-execution/1-validation.html"><h6>Execution</h6></a>
+                </li>
+                        <a class="collection-item" href="1-execution/1-validation.html">Validation</a>
+                        <a class="collection-item" href="1-execution/2-query.html">Query</a>
+                        <a class="collection-item" href="1-execution/3-mutation.html">Mutation</a>
+                        <a class="collection-item" href="1-execution/4-subscription.html">Subscription</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="2-server/1-signalr-hub.html"><h6>Server</h6></a>
+                </li>
+                        <a class="collection-item" href="2-server/1-signalr-hub.html">Signalr hub</a>
+                        <a class="collection-item" href="2-server/2-apollo-link.html">Apollo link</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="3-type-system/00-SDL.html"><h6>Type system</h6></a>
+                </li>
+                        <a class="collection-item" href="3-type-system/00-SDL.html">SDL</a>
+                        <a class="collection-item" href="3-type-system/01-builder.html">Builder</a>
+                        <a class="collection-item" href="3-type-system/02-schema.html">Schema</a>
+                        <a class="collection-item active" href="3-type-system/03-descriptions.html">Descriptions</a>
+                        <a class="collection-item" href="3-type-system/04-types.html">Types</a>
+                        <a class="collection-item" href="3-type-system/05-scalars.html">Scalars</a>
+                        <a class="collection-item" href="3-type-system/06-objects.html">Objects</a>
+                        <a class="collection-item" href="3-type-system/07-interfaces.html">Interfaces</a>
+                        <a class="collection-item" href="3-type-system/08-unions.html">Unions</a>
+                        <a class="collection-item" href="3-type-system/09-enums.html">Enums</a>
+                        <a class="collection-item" href="3-type-system/10-input-objects.html">Input objects</a>
+                        <a class="collection-item" href="3-type-system/11-list.html">List</a>
+                        <a class="collection-item" href="3-type-system/12-non-null.html">Non null</a>
+                        <a class="collection-item" href="3-type-system/13-directives.html">Directives</a>
+            </ul>
+            <ul class="collection with-header">
+                <li class="collection-header">
+                    <a href="4-introspection/4-type-name-introspection.html"><h6>Introspection</h6></a>
+                </li>
+                        <a class="collection-item" href="4-introspection/4-type-name-introspection.html">Type name introspection</a>
+                        <a class="collection-item" href="4-introspection/5-schema-introspection.html">Schema introspection</a>
+            </ul>
+        </div>
+        <div class="col s12 m8 l9">
+            <article class="flow-text">
+                <h2 id="descriptions">Descriptions</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Descriptions">Specification</a></p>
+</blockquote>
+<blockquote>
+<p>NotSupported: the parser used does not currently support block string
+documentation.
+Issue <a href="https://github.com/pekkah/tanka-graphql/issues/24">#24</a></p>
+</blockquote>
+<p><code>Meta</code> class provides the fields for descriptions. Following elements can be described using the <code>Meta</code> class. Usually by providing it as an constructor parameter.</p>
+<ul>
+<li><code>Argument</code></li>
+<li><code>DirectiveType</code></li>
+<li><code>EnumType</code> and values</li>
+<li><code>Field</code></li>
+<li><code>InputObjectField</code></li>
+<li><code>InputObjectType</code></li>
+<li><code>InterfaceType</code></li>
+<li><code>ObjectType</code></li>
+<li><code>ScalarType</code></li>
+<li><code>UnionType</code></li>
+</ul>
+<h3 id="example-field-description">Example: Field description</h3>
+<p>Description for the field is given by providing instance of <code>Meta</code>.</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Describe()
+        {
+            /* Given */
+            var meta = new Meta(
+                &quot;Unique ID of the object&quot;);
+
+            /* When */
+            var field = new Field(
+                ScalarType.NonNullID,
+                meta: meta);
+
+            /* Then */
+            Assert.Equal(field.Meta.Description, meta.Description);
+        }
+</code></pre></p>
+<p>If no meta is given then the default <code>Meta</code> is used with empty value as description.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Meta_is_always_available()
+        {
+            /* Given */
+            /* When */
+            var field = new Field(
+                ScalarType.NonNullID);
+
+            /* Then */
+            Assert.NotNull(field.Meta);
+            Assert.Empty(field.Meta.Description);
+        }
+</code></pre></p>
+
+            </article>
+        </div>
+    </div>
+    <!--JavaScript at end of body for optimized loading-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="prism.js"></script>
+    <script>
+        M.AutoInit();
+    </script>
+</body>
+
+</html>
