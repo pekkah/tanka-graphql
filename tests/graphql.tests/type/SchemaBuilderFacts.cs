@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using tanka.graphql.resolvers;
+using tanka.graphql.tests.data;
+using tanka.graphql.tools;
 using tanka.graphql.type;
 using tanka.graphql.type.converters;
 using Xunit;
 // ReSharper disable ArgumentsStyleOther
 // ReSharper disable ArgumentsStyleStringLiteral
 // ReSharper disable ArgumentsStyleNamedExpression
+// ReSharper disable ArgumentsStyleLiteral
 
 namespace tanka.graphql.tests.type
 {
@@ -33,7 +39,7 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             Assert.Equal(name, object1.Name);
-            Assert.True(builder.IsPredefinedType<ObjectType>(object1.Name, out _));
+            Assert.True(builder.TryGetType<ObjectType>(object1.Name, out _));
         }
 
         [Fact]
@@ -55,7 +61,7 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             Assert.Equal(name, interface1.Name);
-            Assert.True(builder.IsPredefinedType<InterfaceType>(interface1.Name, out _));
+            Assert.True(builder.TryGetType<InterfaceType>(interface1.Name, out _));
         }
 
         [Fact]
@@ -81,7 +87,7 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             Assert.Equal(name, union1.Name);
-            Assert.True(builder.IsPredefinedType<UnionType>(union1.Name, out _));
+            Assert.True(builder.TryGetType<UnionType>(union1.Name, out _));
         }
 
         [Fact]
@@ -108,7 +114,7 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             Assert.Equal(name, enum1.Name);
-            Assert.True(builder.IsPredefinedType<EnumType>(enum1.Name, out _));
+            Assert.True(builder.TryGetType<EnumType>(enum1.Name, out _));
         }
 
         [Fact]
@@ -131,7 +137,7 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             Assert.Equal(name, url.Name);
-            Assert.True(builder.IsPredefinedType<ScalarType>(url.Name, out _));
+            Assert.True(builder.TryGetType<ScalarType>(url.Name, out _));
         }
 
         [Fact]
@@ -153,7 +159,7 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             Assert.Equal(name, object1.Name);
-            Assert.True(builder.IsPredefinedType<InputObjectType>(object1.Name, out _));
+            Assert.True(builder.TryGetType<InputObjectType>(object1.Name, out _));
         }
 
         [Fact]
@@ -198,6 +204,209 @@ namespace tanka.graphql.tests.type
             Assert.IsType<SchemaGraph>(schema);
             Assert.NotNull(schema.Query);
             Assert.IsType<NotImplementedException>(validationResult);
+        }
+
+        [Fact]
+        public void Create_Object_field()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Object(
+                name: "Object1",
+                out var object1);
+            
+            /* When */
+            builder.Connections(connect =>
+            {
+                connect.Field(
+                    owner: object1,
+                    fieldName: "field1",
+                    to: ScalarType.Int,
+                    description: "Description",
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    },
+                    (Name: "arg1",
+                     Type: ScalarType.Boolean,
+                     DefaultValue: true,
+                     Description: "Description")
+                    );
+            });
+
+            /* Then */
+            var isDefined = false;
+            builder.Connections(connect => isDefined = connect.TryGetField(object1, "field1", out _));
+            Assert.True(isDefined);
+        }
+
+        [Fact]
+        public void Create_Interface_field()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Interface(
+                name: "Interface1",
+                out var interface1);
+
+            /* When */
+            builder.Connections(connect =>
+            {
+                connect.Field(
+                    owner: interface1,
+                    fieldName: "field1",
+                    to: ScalarType.Int,
+                    description: "Description",
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    },
+                    (Name: "arg1",
+                     Type: ScalarType.Boolean,
+                     DefaultValue: true,
+                     Description: "Description")
+                );
+            });
+
+            /* Then */
+            var isDefined = false;
+            builder.Connections(connect => isDefined = connect.TryGetField(interface1, "field1", out _));
+            Assert.True(isDefined);
+        }
+
+        [Fact]
+        public void Create_InputObject_field()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();        
+            builder.InputObject(
+                name: "Input1",
+                out var input1);
+
+            /* When */
+            builder.Connections(connect => connect
+                .InputField(
+                    owner: input1,
+                    fieldName: "field1",
+                    to: ScalarType.NonNullBoolean,
+                    defaultValue: true,
+                    description: "Descriptipn",
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    })
+            );
+
+
+            /* Then */
+            var isDefined = false;
+            builder.Connections(connect => isDefined = connect.TryGetInputField(input1, "field1", out _));
+            Assert.True(isDefined);
+        }
+
+        [Fact]
+        public void Use_existing_schema()
+        {
+            /* Given */
+            var existingSchema = new SchemaBuilder()
+                .Query(out var query)
+                .Connections(connect =>
+                    connect.Field(query, "field1", ScalarType.String)
+                    )
+                .Build();
+
+            /* When */
+            var schema = new SchemaBuilder(existingSchema)
+                /* Or: .Import(existingSchema) */
+                .Connections(connect => connect
+                    .Field(query, "field2", ScalarType.Int)
+                )
+                .Build();
+
+            /* Then */
+            var queryFields = schema.GetFields(query.Name).ToList();
+            Assert.Single(queryFields, f => f.Key == "field1");
+            Assert.Single(queryFields, f => f.Key == "field2");
+        }
+
+        [Fact]
+        public void Merge_schemas()
+        {
+            /* Given */
+            var schema1 = new SchemaBuilder()
+                .Query(out var query1)
+                .Connections(connect =>
+                    connect.Field(query1, "field1", ScalarType.String)
+                )
+                .Build();
+
+            var schema2 = new SchemaBuilder()
+                .Query(out var query2)
+                .Connections(connect =>
+                    connect.Field(query2, "field2", ScalarType.Int)
+                )
+                .Build();
+
+            /* When */
+            var schema = MergeTool.MergeSchemas(schema1, schema2);
+
+            /* Then */
+            var queryFields = schema.GetFields(query1.Name).ToList();
+            Assert.Single(queryFields, f => f.Key == "field1");
+            Assert.Single(queryFields, f => f.Key == "field2");
+        }
+
+        [Fact]
+        public async Task Make_executable_schema()
+        {
+            /* Given */
+            var schema1 = new SchemaBuilder()
+                .Query(out var query1)
+                .Connections(connect =>
+                    connect.Field(query1, "field1", ScalarType.Int)
+                )
+                .Build();
+
+            var resolvers = new ResolverMap()
+            {
+                {
+                    query1.Name, new FieldResolverMap()
+                    {
+                        { "field1", async context =>
+                            {
+                                await Task.Delay(1);
+                                return Resolve.As(1);
+                            }
+                        }
+                    }
+
+                }
+            };
+
+            /* When */
+            var executableSchema = await SchemaTools.MakeExecutableSchemaAsync(
+                schema: schema1,
+                resolvers: resolvers,
+                subscribers: null,
+                visitors: new SchemaVisitorFactory[]
+                {
+                    /* schema visitor factory */
+                });
+
+            /* Then */
+            var result = await Executor.ExecuteAsync(
+                new ExecutionOptions()
+                {
+                    Document = Parser.ParseDocument(@"{ field1 }"),
+                    Schema = executableSchema
+                });
+
+            result.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""field1"": 1
+                  }
+                }");
         }
 
         [Fact]

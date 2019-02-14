@@ -119,7 +119,7 @@ namespace tanka.graphql.sdl
             var typeName = namedTypeDefinition.Name.Value;
 
             // is type already known by the builder?
-            if (_builder.IsPredefinedType<INamedType>(typeName, out var knownType))
+            if (_builder.TryGetType<INamedType>(typeName, out var knownType))
                 return knownType;
 
             // type is not known so we need to get the
@@ -165,7 +165,7 @@ namespace tanka.graphql.sdl
             var typeName = namedTypeDefinition.Name.Value;
 
             // is type already known by the builder?
-            if (_builder.IsPredefinedType<INamedType>(typeName, out var knownType))
+            if (_builder.TryGetType<INamedType>(typeName, out var knownType))
                 return knownType;
 
             // type is not known so we need to get the
@@ -227,7 +227,7 @@ namespace tanka.graphql.sdl
         {
             var name = directiveDefinition.Name.Value;
 
-            _builder.IsPredefinedType<DirectiveType>(name, out var directiveType);
+            _builder.TryGetType<DirectiveType>(name, out var directiveType);
 
             if (directiveType == null)
                 throw new GraphQLError(
@@ -389,7 +389,7 @@ namespace tanka.graphql.sdl
         {
             _builder.LateBuild(_ =>
             {
-                if (!_builder.IsPredefinedType<ObjectType>(definition.Definition.Name.Value, out var type))
+                if (!_builder.TryGetType<ObjectType>(definition.Definition.Name.Value, out var type))
                     throw new InvalidOperationException(
                         $"Cannot extend type '{definition.Definition.Name}'. Type to extend not found.");
 

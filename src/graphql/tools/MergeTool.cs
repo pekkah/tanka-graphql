@@ -11,18 +11,18 @@ namespace tanka.graphql.tools
             var builder = new SchemaBuilder(left);
 
             foreach (var rightType in right.QueryTypes<ComplexType>())
-                if (builder.IsPredefinedType<ComplexType>(rightType.Name, out var leftType))
+                if (builder.TryGetType<ComplexType>(rightType.Name, out var leftType))
                 {
                     var rightTypeFields = right.GetFields(rightType.Name);
 
                     foreach (var rightTypeField in rightTypeFields)
                         builder.Connections(connect =>
                         {
-                            if (!connect.IsPredefinedField(leftType, rightTypeField.Key, out _))
+                            if (!connect.TryGetField(leftType, rightTypeField.Key, out _))
                                 connect.IncludeFields(leftType, new[] {rightTypeField});
                         });
                 }
-                else if (builder.IsPredefinedType<ScalarType>(rightType.Name, out var leftScalarType))
+                else if (builder.TryGetType<ScalarType>(rightType.Name, out _))
                 {
                     // noop
                 }

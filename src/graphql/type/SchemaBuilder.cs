@@ -13,7 +13,7 @@ namespace tanka.graphql.type
         private readonly Dictionary<string, INamedType> _types =
             new Dictionary<string, INamedType>();
 
-        private ConnectionBuilder _connections;
+        private readonly ConnectionBuilder _connections;
 
         public SchemaBuilder()
         {
@@ -28,24 +28,29 @@ namespace tanka.graphql.type
 
         public SchemaBuilder(ISchema from) : this()
         {
-            foreach (var namedType in from.QueryTypes<INamedType>())
+            Import(@from);
+        }
+
+        public SchemaBuilder Import(ISchema @from)
+        {
+            foreach (var namedType in @from.QueryTypes<INamedType>())
             {
-                if (IsPredefinedType<INamedType>(namedType.Name, out _))
+                if (TryGetType<INamedType>(namedType.Name, out _))
                     continue;
 
                 switch (namedType)
                 {
                     case ObjectType objectType:
                         Include(objectType);
-                        _connections.IncludeFields(objectType, from.GetFields(objectType.Name));
+                        _connections.IncludeFields(objectType, @from.GetFields(objectType.Name));
                         break;
                     case InterfaceType interfaceType:
                         Include(interfaceType);
-                        _connections.IncludeFields(interfaceType, from.GetFields(interfaceType.Name));
+                        _connections.IncludeFields(interfaceType, @from.GetFields(interfaceType.Name));
                         break;
                     case InputObjectType inputType:
                         Include(inputType);
-                        _connections.IncludeInputFields(inputType, from.GetInputFields(inputType.Name));
+                        _connections.IncludeInputFields(inputType, @from.GetInputFields(inputType.Name));
                         break;
                     default:
                         Include(namedType);
@@ -53,13 +58,15 @@ namespace tanka.graphql.type
                 }
             }
 
-            foreach (var directiveType in from.QueryDirectives())
+            foreach (var directiveType in @from.QueryDirectives())
             {
                 if (_directives.ContainsKey(directiveType.Name))
                     continue;
 
                 IncludeDirective(directiveType);
             }
+
+            return this;
         }
 
         public SchemaBuilder Connections(Action<ConnectionBuilder> connections)
@@ -191,7 +198,7 @@ namespace tanka.graphql.type
         }
 
         //todo: predefined is bit misleading term to use here
-        public bool IsPredefinedType<T>(string name, out T namedType)
+        public bool TryGetType<T>(string name, out T namedType)
             where T : INamedType
         {
             return _types.TryGetValue(name, out namedType);

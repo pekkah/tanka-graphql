@@ -65,7 +65,7 @@ namespace tanka.graphql.type
             return this;
         }
 
-        public bool IsPredefinedField(ComplexType owner, string fieldName, out IField field)
+        public bool TryGetField(ComplexType owner, string fieldName, out IField field)
         {
             if (_fields.TryGetValue(owner.Name, out var fields))
                 if (fields.TryGetValue(fieldName, out field))
@@ -93,6 +93,16 @@ namespace tanka.graphql.type
             Dictionary<string, Dictionary<string, InputObjectField>> InputFields) Build()
         {
             return (_fields, _inputFields);
+        }
+
+        public bool TryGetInputField(InputObjectType owner, string fieldName, out InputObjectField field)
+        {
+            if (_inputFields.TryGetValue(owner.Name, out var fields))
+                if (fields.TryGetValue(fieldName, out field))
+                    return true;
+
+            field = null;
+            return false;
         }
     }
 }
