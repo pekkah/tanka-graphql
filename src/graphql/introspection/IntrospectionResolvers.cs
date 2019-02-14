@@ -19,7 +19,7 @@ namespace tanka.graphql.introspection
 
             this[IntrospectionSchema.SchemaName] = new FieldResolverMap()
             {
-                {"types", context => SyncWrap.Sync(source.QueryTypes<IType>())},
+                {"types", context => SyncWrap.Sync(source.QueryTypes<INamedType>())},
                 {"queryType", context => SyncWrap.Sync(source.Query)},
                 {"mutationType", context => SyncWrap.Sync(source.Mutation)},
                 {"subscriptionType", context => SyncWrap.Sync(source.Subscription)},
@@ -40,7 +40,7 @@ namespace tanka.graphql.introspection
 
                         var includeDeprecated = (bool) context.Arguments["includeDeprecated"];
 
-                        var fields = complexType.Fields;
+                        var fields = source.GetFields(complexType.Name);
 
                         if (!includeDeprecated)
                         {
@@ -102,7 +102,7 @@ namespace tanka.graphql.introspection
                 
                 // INPUT_OBJECT only
                 //todo(pekka): DirectiveType uses Argument but should use InputFieldType
-                {"inputFields", Resolve.PropertyOf<InputObjectType>(t => t.Fields
+                {"inputFields", Resolve.PropertyOf<InputObjectType>(t => source.GetInputFields(t.Name)
                     .Select(iof => new KeyValuePair<string, Argument>(
                         iof.Key, 
                         new Argument(iof.Value.Type, iof.Value.DefaultValue, iof.Value.Meta))).ToList())},

@@ -10,7 +10,7 @@ namespace tanka.graphql.tests.data.starwars
         public async Task<ISchema> MakeExecutableAsync(Starwars starwars)
         {
             var schema = StarwarsSchema.BuildSchema();
-            await schema.InitializeAsync();
+            ;
 
             var resolvers = StarwarsResolvers.BuildResolvers(starwars, schema);
             var executable = await MakeExecutableSchemaWithIntrospection(

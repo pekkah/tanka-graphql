@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using tanka.graphql.graph;
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 using static tanka.graphql.resolvers.Resolve;
@@ -9,7 +10,7 @@ namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsResolvers
     {
-        public static ResolverMap BuildResolvers(Starwars starwars, Schema schema)
+        public static ResolverMap BuildResolvers(Starwars starwars, ISchema schema)
         {
             async Task<IResolveResult> ResolveCharacter(ResolverContext context)
             {

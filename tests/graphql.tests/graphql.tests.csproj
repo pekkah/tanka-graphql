@@ -8,6 +8,8 @@
     <AssemblyName>tanka.graphql.tests</AssemblyName>
 
     <RootNamespace>tanka.graphql.tests</RootNamespace>
+
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +27,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
     <ProjectReference Include="..\graphql.tests.data\graphql.tests.data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="validation\" />
   </ItemGroup>
 
 </Project>

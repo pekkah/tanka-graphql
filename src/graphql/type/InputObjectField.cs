@@ -7,57 +7,13 @@ namespace tanka.graphql.type
     public class InputObjectField : IDirectives, IDescribable
     {
         public InputObjectField(
-            ScalarType type,
-            Meta meta = null,
-            object defaultValue = null)
-        {
-            Type = type;
-            Meta = meta ?? new Meta();
-            DefaultValue = defaultValue;
-        }
-
-        public InputObjectField(
-            EnumType type,
-            Meta meta = null,
-            object defaultValue = null)
-        {
-            Type = type;
-            Meta = meta ?? new Meta();
-            DefaultValue = defaultValue;
-        }
-
-        public InputObjectField(
-            InputObjectType type,
-            Meta meta = null,
-            object defaultValue = null)
-        {
-            Type = type;
-            Meta = meta ?? new Meta();
-            DefaultValue = defaultValue;
-        }
-
-        public InputObjectField(
-            List type,
+            IType type,
             Meta meta = null,
             object defaultValue = null)
         {
             if (!TypeIs.IsInputType(type))
                 throw new ArgumentOutOfRangeException(
-                    $"Wrapped type of list is not valid input type. Wrapped type: {type.Unwrap()}");
-
-            Type = type;
-            Meta = meta ?? new Meta();
-            DefaultValue = defaultValue;
-        }
-
-        public InputObjectField(
-            NonNull type,
-            Meta meta = null,
-            object defaultValue = null)
-        {
-            if (!TypeIs.IsInputType(type))
-                throw new ArgumentOutOfRangeException(
-                    $"Wrapped type of NonNull is not valid input type. Wrapped type: {type.Unwrap()}");
+                    $" Type '{type}' is not valid input type");
 
             Type = type;
             Meta = meta ?? new Meta();

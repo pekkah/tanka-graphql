@@ -32,12 +32,14 @@ namespace tanka.graphql.execution
             if (fieldType == null) throw new ArgumentNullException(nameof(fieldType));
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
 
+            var schema = context.Schema;
             var fieldSelection = fields.First();
             var fieldName = fieldSelection.Name.Value;
-            var field = objectType.GetField(fieldName);
+            var field = schema.GetField(objectType.Name, fieldName);
             object completedValue = null;
 
             var argumentValues = Arguments.CoerceArgumentValues(
+                schema,
                 objectType,
                 fieldSelection,
                 coercedVariableValues);
@@ -46,6 +48,7 @@ namespace tanka.graphql.execution
             {
                 var resolverContext =
                     new ResolverContext(
+                        context.Schema,
                         objectType,
                         objectValue,
                         field,
@@ -86,7 +89,8 @@ namespace tanka.graphql.execution
             }
         }
 
-        protected async Task<object> ExecuteFieldGroupAsync(IExecutorContext context,
+        protected async Task<object> ExecuteFieldGroupAsync(
+            IExecutorContext context,
             ObjectType objectType,
             object objectValue,
             Dictionary<string, object> coercedVariableValues,
@@ -95,6 +99,7 @@ namespace tanka.graphql.execution
         {
             if (objectType == null) throw new ArgumentNullException(nameof(objectType));
 
+            var schema = context.Schema;
             var fields = fieldGroup.Value;
             var fieldName = fields.First().Name.Value;
             path.Append(fieldName);
@@ -105,8 +110,8 @@ namespace tanka.graphql.execution
                 return objectType.Name;
             }
 
-            var fieldType = objectType
-                .GetField(fieldName)?
+            var fieldType = schema
+                .GetField(objectType.Name, fieldName)?
                 .Type;
 
             if (fieldType == null)

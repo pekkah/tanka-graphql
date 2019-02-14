@@ -11,20 +11,18 @@ namespace tanka.graphql.benchmarks
     {
         public static Task<ISchema> InitializeSchema()
         {
-            var query = new ObjectType("Query", new Fields
-            {
-                {"simple", new Field(ScalarType.String)}
-            });
+            var builder = new SchemaBuilder();
+            builder.Query(out var query)
+                .Connections(connect => connect
+                .Field(query, "simple", ScalarType.String));
 
-            var mutation = new ObjectType("Mutation", new Fields
-            {
-                {"simple", new Field(ScalarType.String)}
-            });
+            builder.Mutation(out var mutation)
+                .Connections(connect => connect
+                .Field(mutation, "simple", ScalarType.String));
 
-            var subscription = new ObjectType("Subscription", new Fields
-            {
-                {"simple", new Field(ScalarType.String)}
-            });
+            builder.Subscription(out var subscription)
+                .Connections(connect => connect
+                .Field(subscription, "simple", ScalarType.String));
 
             var resolvers = new ResolverMap
             {
@@ -52,9 +50,7 @@ namespace tanka.graphql.benchmarks
             };
 
             var schema = SchemaTools.MakeExecutableSchemaAsync(
-                new Schema(query, 
-                    mutation,
-                    subscription), 
+                builder.Build(), 
                 resolvers,
                 resolvers);
 

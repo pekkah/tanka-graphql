@@ -5,19 +5,26 @@ namespace tanka.graphql.tests.type
 {
     public class ObjectTypeFacts
     {
+        public ObjectTypeFacts()
+        {
+            _builder = new SchemaBuilder();
+            _builder.Query(out _);
+        }
+
+        private readonly SchemaBuilder _builder;
+
         [Fact]
         public void With_scalar_field()
         {
             /* Given */
-            var person = new ObjectType(
-                "Person",
-                new Fields
-                {
-                    {"name", ScalarType.NonNullString}
-                });
+            _builder.Object("Person", out var person)
+                .Connections(connect => connect
+                    .Field(person, "name", ScalarType.NonNullString));
+
+            var schema = _builder.Build();
 
             /* When */
-            var name = person.GetField("name");
+            var name = schema.GetField(person.Name, "name");
 
             /* Then */
             Assert.Equal("Person", person.Name);
@@ -29,20 +36,15 @@ namespace tanka.graphql.tests.type
         public void With_scalar_field_with_argument()
         {
             /* Given */
-            var person = new ObjectType(
-                "Person",
-                new Fields
-                {
-                    {
-                        "phoneNumber", ScalarType.NonNullString, new Args
-                        {
-                            {"primary", ScalarType.Boolean}
-                        }
-                    }
-                });
+            _builder.Object("Person", out var person)
+                .Connections(connect => connect
+                    .Field(person, "phoneNumber", ScalarType.NonNullString,
+                        args: ("primary", ScalarType.Boolean, default, default)));
+
+            var schema = _builder.Build();
 
             /* When */
-            var phoneNumber = person.GetField("phoneNumber");
+            var phoneNumber = schema.GetField(person.Name, "phoneNumber");
 
             /* Then */
             Assert.NotNull(phoneNumber);

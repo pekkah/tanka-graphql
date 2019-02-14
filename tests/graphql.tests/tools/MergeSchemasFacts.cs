@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using Xunit;
@@ -8,54 +8,30 @@ namespace tanka.graphql.tests.tools
     public class MergeSchemasFacts
     {
         [Fact]
-        public async Task should_include_fields_if_no_conflict()
+        public void should_include_fields_if_no_conflict()
         {
             /* Given */
-            var left = new Schema(new ObjectType("Q", new Fields
-            {
-                ["left"] = new Field(ScalarType.Int)
-            }));
-            await left.InitializeAsync();
+            var left = new SchemaBuilder()
+                .Query(out var leftQuery)
+                .Connections(connect => connect
+                    .Field(leftQuery, "left", ScalarType.Int))
+                .Build();
 
-            var right = new Schema(new ObjectType("Q", new Fields
-            {
-                ["right"] = new Field(ScalarType.String)
-            }));
-            await right.InitializeAsync();
+            var right = new SchemaBuilder()
+                .Query(out var rightQuery)
+                .Connections(connect => connect
+                    .Field(rightQuery, "right", ScalarType.String))
+                .Build();
 
 
             /* When */
-            var mergedSchema = MergeTool.MergeSchemas(left, right, (l, r) => r.Field);
-            await mergedSchema.InitializeAsync();
+            var mergedSchema = MergeTool.MergeSchemas(left, right);
+            var queryFields = mergedSchema.GetFields(mergedSchema.Query.Name)
+                .ToList();
 
             /* Then */
-            Assert.Single(mergedSchema.Query.Fields, pair => pair.Key == "left");
-            Assert.Single(mergedSchema.Query.Fields, pair => pair.Key == "right");
-        }
-
-        [Fact]
-        public async Task should_resolve_conflict_with_resolver()
-        {
-            /* Given */
-            var left = new Schema(new ObjectType("Q", new Fields
-            {
-                ["left"] = new Field(ScalarType.Int)
-            }));
-            await left.InitializeAsync();
-
-            var right = new Schema(new ObjectType("Q", new Fields
-            {
-                ["left"] = new Field(ScalarType.String)
-            }));
-            await right.InitializeAsync();
-
-
-            /* When */
-            var mergedSchema = MergeTool.MergeSchemas(left, right, (l, r) => r.Field);
-            await mergedSchema.InitializeAsync();
-
-            /* Then */
-            Assert.Single(mergedSchema.Query.Fields, pair => pair.Key == "left" && (ScalarType) pair.Value.Type == ScalarType.String);
+            Assert.Single(queryFields, pair => pair.Key == "left");
+            Assert.Single(queryFields, pair => pair.Key == "right");
         }
     }
 }

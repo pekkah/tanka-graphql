@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using tanka.graphql.introspection;
 using tanka.graphql.tests.data;
 using tanka.graphql.type;
@@ -14,85 +13,70 @@ namespace tanka.graphql.tests.introspection
     {
         public IntrospectSchemaFacts()
         {
-            var interface1 = new InterfaceType(
-                "Interface",
-                new Fields
-                {
-                    {ScalarFieldName, ScalarType.Int}
-                },
-                new Meta("Description"));
+            var builder = new SchemaBuilder();
 
-            var type1 = new ObjectType(
-                ObjectTypeName,
-                new Fields
-                {
-                    {ScalarFieldName, ScalarType.NonNullInt, new Args()
-                    {
-                        {"arg1", ScalarType.Float, 1d, new Meta("Description")}
-                    }, new Meta("Description")}
-                },
-                new Meta("Description"),
-                new[] {interface1});
+            builder.Interface("Interface", out var interface1,
+                    "Description")
+                .Connections(connect => connect
+                    .Field(interface1, ScalarFieldName, ScalarType.Int));
 
-            var type2 = new ObjectType(
-                $"{ObjectTypeName}2",
-                new Fields
-                {
-                    {ScalarFieldName, new List(ScalarType.Int)}
-                },
-                new Meta("Description"));
+            builder.Object(ObjectTypeName, out var type1,
+                    "Description",
+                    new[] {interface1})
+                .Connections(connect => connect
+                    .Field(type1, ScalarFieldName, ScalarType.NonNullInt,
+                        "Description",
+                        args: ("arg1", ScalarType.Float, 1d, "Description")));
+
+            builder.Object($"{ObjectTypeName}2", out var type2,
+                    "Description")
+                .Connections(connect => connect
+                    .Field(type2, ScalarFieldName, new List(ScalarType.Int)));
+
 
             var union = new UnionType(
                 "Union",
                 new[] {type1, type2},
                 new Meta("Description"));
 
+            builder.Include(union);
+
             var enum1 = new EnumType(
                 "Enum",
-                new EnumValues()
+                new EnumValues
                 {
                     {"value1", "Description"},
                     {"value2", "Description", "Deprecated"}
                 },
                 new Meta("Description"));
 
-            var inputObject = new InputObjectType(
-                "InputObject",
-                new InputFields()
-                {
-                    {"field1", ScalarType.Boolean, true, new Meta("Description")}
-                }, new Meta("Description"));
+            builder.Include(enum1);
 
-            var query = new ObjectType(
-                "Query",
-                new Fields
-                {
-                    {"object", type1},
-                    {"union", union},
-                    {"enum", enum1},
-                    {"listOfObject", new List(type2)},
-                    {"nonNullObject", new NonNull(type1)},
-                    {"inputObjectArg", ScalarType.NonNullBoolean, new Args()
-                    {
-                        {"arg1", inputObject}
-                    }, new Meta("With inputObject arg")}
-                });
+            builder.InputObject("InputObject", out var inputObject,
+                    "Description")
+                .Connections(connect => connect
+                    .InputField(inputObject, "field1", ScalarType.Boolean, true, "Description"));
 
-            var mutation = new ObjectType(
-                "Mutation",
-                new Fields());
+            builder.Query(out var query)
+                .Connections(connect => connect
+                    .Field(query, "object", type1)
+                    .Field(query, "union", union)
+                    .Field(query, "enum", enum1)
+                    .Field(query, "listOfObjects", new List(type2))
+                    .Field(query, "nonNullObject", new NonNull(type1))
+                    .Field(query, "inputObjectArg", ScalarType.NonNullBoolean,
+                        args: ("arg1", inputObject, default, "With inputObject arg")));
 
-            var subscription = new ObjectType(
-                "Subscription",
-                new Fields());
+            builder.Mutation(out var mutation);
+            builder.Subscription(out var subscription);
 
-            _sourceSchema = new Schema(query, mutation, subscription);
+            _sourceSchema = builder.Build();
             _introspectionSchema = Introspect.SchemaAsync(_sourceSchema)
                 .GetAwaiter()
                 .GetResult();
         }
 
-        private readonly Schema _sourceSchema;
+        private readonly ISchema _sourceSchema;
         private readonly ISchema _introspectionSchema;
 
         public const string ObjectTypeName = "Object";
@@ -192,31 +176,37 @@ namespace tanka.graphql.tests.introspection
                     ""__schema"": {
                       ""types"": [
                         {
-                          ""name"": ""InputObject""
+                          ""name"": ""String""
                         },
                         {
-                          ""name"": ""Boolean""
-                        },
-                        {
-                          ""name"": ""Object2""
-                        },
-                        {
-                          ""name"": ""Enum""
-                        },
-                        {
-                          ""name"": ""Union""
+                          ""name"": ""Int""
                         },
                         {
                           ""name"": ""Float""
                         },
                         {
-                          ""name"": ""Int""
+                          ""name"": ""Boolean""
+                        },
+                        {
+                          ""name"": ""ID""
                         },
                         {
                           ""name"": ""Interface""
                         },
                         {
                           ""name"": ""Object""
+                        },
+                        {
+                          ""name"": ""Object2""
+                        },
+                        {
+                          ""name"": ""Union""
+                        },
+                        {
+                          ""name"": ""Enum""
+                        },
+                        {
+                          ""name"": ""InputObject""
                         },
                         {
                           ""name"": ""Query""
@@ -226,6 +216,64 @@ namespace tanka.graphql.tests.introspection
                         },
                         {
                           ""name"": ""Subscription""
+                        }
+                      ]
+                    }
+                  }
+                }");
+        }
+
+        [Fact]
+        public async Task Type_DirectiveType()
+        {
+            /* Given */
+            var query = @"{ 
+                            __schema {
+                                directives {
+                                    name
+                                    description
+                                    locations
+                                    args { name }
+                                }
+                            }
+                        }";
+
+            /* When */
+            var result = await QueryAsync(query);
+
+            /* Then */
+            result.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""__schema"": {
+                      ""directives"": [
+                        {
+                          ""locations"": [
+                            ""FIELD"",
+                            ""FRAGMENT_SPREAD"",
+                            ""INLINE_FRAGMENT""
+                          ],
+                          ""description"": """",
+                          ""name"": ""include"",
+                          ""args"": [
+                            {
+                              ""name"": ""if""
+                            }
+                          ]
+                        },
+                        {
+                          ""locations"": [
+                            ""FIELD"",
+                            ""FRAGMENT_SPREAD"",
+                            ""INLINE_FRAGMENT""
+                          ],
+                          ""description"": """",
+                          ""name"": ""skip"",
+                          ""args"": [
+                            {
+                              ""name"": ""if""
+                            }
+                          ]
                         }
                       ]
                     }
@@ -325,6 +373,74 @@ namespace tanka.graphql.tests.introspection
         }
 
         [Fact]
+        public async Task Type_InputObjectType()
+        {
+            /* Given */
+            var query = @"{ 
+                            __type(name: ""InputObject"") {
+                                kind
+                                name
+                                description
+                            }
+                        }";
+
+            /* When */
+            var result = await QueryAsync(query);
+
+            /* Then */
+            result.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""__type"": {
+                      ""name"": ""InputObject"",
+                      ""description"": ""Description"",
+                      ""kind"": ""INPUT_OBJECT""
+                    }
+                  }
+                }");
+        }
+
+        [Fact]
+        //todo(pekka): fix the defaultValue
+        public async Task Type_InputObjectType_fields()
+        {
+            /* Given */
+            var query = @"{ 
+                            __type(name: ""InputObject"") {
+                                inputFields {
+                                    name
+                                    description
+                                    type { name kind }
+                                    defaultValue
+                                }
+                            }
+                        }";
+
+            /* When */
+            var result = await QueryAsync(query);
+
+            /* Then */
+            result.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""__type"": {
+                      ""inputFields"": [
+                        {
+                          ""description"": ""Description"",
+                          ""name"": ""field1"",
+                          ""defaultValue"": null,
+                          ""type"": {
+                            ""kind"": ""SCALAR"",
+                            ""name"": ""Boolean""
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }");
+        }
+
+        [Fact]
         public async Task Type_InterfaceType()
         {
             /* Given */
@@ -399,74 +515,6 @@ namespace tanka.graphql.tests.introspection
                       ""kind"": ""OBJECT"",
                       ""description"": ""Description"",
                       ""name"": ""Object""
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Type_InputObjectType()
-        {
-            /* Given */
-            var query = @"{ 
-                            __type(name: ""InputObject"") {
-                                kind
-                                name
-                                description
-                            }
-                        }";
-
-            /* When */
-            var result = await QueryAsync(query);
-
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""name"": ""InputObject"",
-                      ""description"": ""Description"",
-                      ""kind"": ""INPUT_OBJECT""
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        //todo(pekka): fix the defaultValue
-        public async Task Type_InputObjectType_fields()
-        {
-            /* Given */
-            var query = @"{ 
-                            __type(name: ""InputObject"") {
-                                inputFields {
-                                    name
-                                    description
-                                    type { name kind }
-                                    defaultValue
-                                }
-                            }
-                        }";
-
-            /* When */
-            var result = await QueryAsync(query);
-
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""inputFields"": [
-                        {
-                          ""description"": ""Description"",
-                          ""name"": ""field1"",
-                          ""defaultValue"": null,
-                          ""type"": {
-                            ""kind"": ""SCALAR"",
-                            ""name"": ""Boolean""
-                          }
-                        }
-                      ]
                     }
                   }
                 }");
@@ -589,64 +637,6 @@ namespace tanka.graphql.tests.introspection
                       ""name"": ""Int"",
                       ""description"": ""The `Int` scalar type represents non-fractional signed whole numeric values"",
                       ""kind"": ""SCALAR""
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Type_DirectiveType()
-        {
-            /* Given */
-            var query = @"{ 
-                            __schema {
-                                directives {
-                                    name
-                                    description
-                                    locations
-                                    args { name }
-                                }
-                            }
-                        }";
-
-            /* When */
-            var result = await QueryAsync(query);
-
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__schema"": {
-                      ""directives"": [
-                        {
-                          ""locations"": [
-                            ""FIELD"",
-                            ""FRAGMENT_SPREAD"",
-                            ""INLINE_FRAGMENT""
-                          ],
-                          ""description"": """",
-                          ""name"": ""include"",
-                          ""args"": [
-                            {
-                              ""name"": ""if""
-                            }
-                          ]
-                        },
-                        {
-                          ""locations"": [
-                            ""FIELD"",
-                            ""FRAGMENT_SPREAD"",
-                            ""INLINE_FRAGMENT""
-                          ],
-                          ""description"": """",
-                          ""name"": ""skip"",
-                          ""args"": [
-                            {
-                              ""name"": ""if""
-                            }
-                          ]
-                        }
-                      ]
                     }
                   }
                 }");

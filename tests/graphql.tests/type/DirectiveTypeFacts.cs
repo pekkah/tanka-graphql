@@ -21,18 +21,16 @@ namespace tanka.graphql.tests.type
                     DirectiveLocation.FIELD_DEFINITION
                 });
 
-            var requiresAuthorize = new Field(
-                ScalarType.NonNullString,
-                meta: new Meta(directives: new[]
-                {
-                    authorizeType.CreateInstance()
-                }));
+            var builder = new SchemaBuilder();
+            builder.IncludeDirective(authorizeType);
 
-            var query = new ObjectType("Query",
-                new Fields
-                {
-                    {"requiresAuthorize", requiresAuthorize}
-                });
+            builder.Query(out var query)
+                .Connections(connect => connect
+                    .Field(query, "requiresAuthorize", ScalarType.NonNullString,
+                        directives: new[]
+                        {
+                            authorizeType.CreateInstance()
+                        }));
 
             var resolvers = new ResolverMap
             {
@@ -48,7 +46,7 @@ namespace tanka.graphql.tests.type
 
             /* When */
             var schema = await SchemaTools.MakeExecutableSchemaAsync(
-                new Schema(query),
+                builder.Build(),
                 resolvers,
                 visitors: new SchemaVisitorFactory[]
                 {

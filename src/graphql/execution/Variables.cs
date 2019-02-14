@@ -46,6 +46,7 @@ namespace tanka.graphql.execution
                         coercedValues[variableName] = null;
                     else
                         coercedValues[variableName] = Values.CoerceValue(
+                            schema,
                             value,
                             variableType);
                 }

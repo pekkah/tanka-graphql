@@ -4,8 +4,10 @@ namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsSchema
     {
-        public static Schema BuildSchema()
+        public static ISchema BuildSchema()
         {
+            var builder = new SchemaBuilder();
+
             var Episode = new EnumType("Episode", new EnumValues
             {
                 ["NEWHOPE"] = null,
@@ -13,63 +15,52 @@ namespace tanka.graphql.tests.data.starwars
                 ["JEDI"] = null
             });
 
+            builder.Include(Episode);
+
             var EpisodeList = new List(Episode);
 
+            builder.Interface("Character", out var Character,
+                "Character in the movie");
+
             // use NamedTypeReference as proxy to bypass circular dependencies
-            var CharacterList = new List(new NamedTypeReference("Character"));
-            var Character = new InterfaceType(
-                "Character",
-                fields: new Fields
-                {
-                    ["id"] = new Field(ScalarType.NonNullString),
-                    ["name"] = new Field(ScalarType.NonNullString),
-                    ["friends"] = new Field(CharacterList),
-                    ["appearsIn"] = new Field(EpisodeList)
-                }, meta: new Meta("Character in the movie"));
+            var CharacterList = new List(Character);
+
+            builder.Connections(connect => connect
+                .Field(Character, "id", ScalarType.NonNullString)
+                .Field(Character, "name", ScalarType.NonNullString)
+                .Field(Character, "friends", CharacterList)
+                .Field(Character, "appearsIn", EpisodeList));
+
+            builder.Object("Human", out var Human,
+                    "Human character",
+                    new[] {Character})
+                .Connections(connect => connect
+                    .Field(Human, "id", ScalarType.NonNullString)
+                    .Field(Human, "name", ScalarType.NonNullString)
+                    .Field(Human, "friends", CharacterList)
+                    .Field(Human, "appearsIn", EpisodeList)
+                    .Field(Human, "homePlanet", ScalarType.String));
+
+            builder.Query(out var Query)
+                .Connections(connect => connect
+                    .Field(Query, "human", Human,
+                        args: ("id", ScalarType.NonNullString, default, default))
+                    .Field(Query, "character", Character,
+                        args: ("id", ScalarType.NonNullString, default, default))
+                    .Field(Query, "characters", CharacterList));
 
 
-            var Human = new ObjectType(
-                "Human",
-                meta: new Meta("Human character"),
-                implements: new[] {Character},
-                fields: new Fields
-                {
-                    ["id"] = new Field(ScalarType.NonNullString),
-                    ["name"] = new Field(ScalarType.String),
-                    ["homePlanet"] = new Field(ScalarType.String),
-                    ["friends"] = new Field(CharacterList),
-                    ["appearsIn"] = new Field(EpisodeList)
-                });
+            builder.InputObject("HumanInput", out var HumanInput)
+                .Connections(connect => connect
+                    .InputField(HumanInput, "name", ScalarType.NonNullString));
 
-            var Query = new ObjectType(
-                "Query",
-                new Fields
-                {
-                    ["human"] = new Field(Human, new Args {["id"] = Argument.Arg(ScalarType.NonNullString)}),
-                    ["character"] = new Field(Character, new Args {["id"] = Argument.Arg(ScalarType.NonNullString)}),
-                    ["characters"] = new Field(CharacterList)
-                });
+            builder.Mutation(out var Mutation)
+                .Connections(connect => connect
+                    .Field(Mutation, "addHuman", Human,
+                        args: ("human", HumanInput, default, default)));
 
+            var schema = builder.Build();
 
-            var HumanInput = new InputObjectType(
-                "HumanInput",
-                new InputFields()
-                {
-                    ["name"] = new InputObjectField(ScalarType.NonNullString)
-                });
-
-            var Mutation = new ObjectType(
-                "Mutation",
-                new Fields
-                {
-                    ["addHuman"] = new Field(Human, new Args {["human"] = Argument.Arg(HumanInput)})
-                });
-
-
-            var schema = new Schema(Query, Mutation, typesReferencedByNameOnly: new []
-            {
-                Character
-            });
             return schema;
         }
     }

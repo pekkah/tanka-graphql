@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace tanka.graphql.type
 {
@@ -14,16 +14,20 @@ namespace tanka.graphql.type
 
         ObjectType Mutation { get; }
 
-        Task InitializeAsync();
-
         INamedType GetNamedType(string name);
 
-        T GetNamedType<T>(string name) where T : INamedType;
+        IField GetField(string type, string name);
 
-        IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : IType;
+        IEnumerable<KeyValuePair<string, IField>> GetFields(string type);
+
+        IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : INamedType;
 
         DirectiveType GetDirective(string name);
 
         IQueryable<DirectiveType> QueryDirectives(Predicate<DirectiveType> filter = null);
+
+        IEnumerable<KeyValuePair<string, InputObjectField>> GetInputFields(string type);
+
+        InputObjectField GetInputField(string type, string name);
     }
 }

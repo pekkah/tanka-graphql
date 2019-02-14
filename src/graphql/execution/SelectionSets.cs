@@ -169,7 +169,7 @@ namespace tanka.graphql.execution
                 return true;
 
             var ifArgument = includeDirective.Arguments.SingleOrDefault(a => a.Name?.Value == "if");
-            return GetIfArgumentValue(includeDirective, coercedVariableValues, ifArgument);
+            return GetIfArgumentValue(schema, includeDirective, coercedVariableValues, ifArgument);
         }
 
         private static bool SkipSelection(GraphQLDirective skipDirective,
@@ -179,10 +179,11 @@ namespace tanka.graphql.execution
                 return false;
 
             var ifArgument = skipDirective.Arguments.SingleOrDefault(a => a.Name?.Value == "if");
-            return GetIfArgumentValue(skipDirective, coercedVariableValues, ifArgument);
+            return GetIfArgumentValue(schema, skipDirective, coercedVariableValues, ifArgument);
         }
 
         private static bool GetIfArgumentValue(
+            ISchema schema,
             GraphQLDirective directive,
             Dictionary<string, object> coercedVariableValues,
             GraphQLArgument argument)
@@ -196,7 +197,7 @@ namespace tanka.graphql.execution
             switch (argument.Value)
             {
                 case GraphQLScalarValue scalarValue:
-                    return (bool) Values.CoerceValue(scalarValue, ScalarType.NonNullBoolean);
+                    return (bool) Values.CoerceValue(schema, scalarValue, ScalarType.NonNullBoolean);
                 case GraphQLVariable variable:
                     var variableValue = coercedVariableValues[variable.Name.Value];
                     return (bool) variableValue;

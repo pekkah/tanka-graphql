@@ -24,29 +24,22 @@ namespace tanka.graphql.tests
         public SubscriptionsFacts()
         {
             // schema
-            var messageType = new ObjectType(
-                "Message",
-                new Fields
-                {
-                    ["content"] = new Field(ScalarType.String)
-                });
+            var builder = new SchemaBuilder();
+            builder.Object("Message", out var messageType)
+                .Connections(connect => connect
+                    .Field(messageType, "content", ScalarType.String));
 
             var messageListType = new List(messageType);
-            var schema = new Schema(
-                new ObjectType(
-                    "Query",
-                    new Fields
-                    {
-                        ["messages"] = new Field(messageListType)
-                    }),
-                null,
-                new ObjectType(
-                    "Subscription",
-                    new Fields
-                    {
-                        ["messageAdded"] = new Field(messageType)
-                    }));
 
+            builder.Query(out var query)
+                .Connections(connect => connect
+                    .Field(query, "messages", messageListType));
+
+            builder.Subscription(out var subscription)
+                .Connections(connect => connect
+                    .Field(subscription, "messageAdded", messageType));
+
+            var schema = builder.Build();
 
             // data
             var messages = new List<Message>();
