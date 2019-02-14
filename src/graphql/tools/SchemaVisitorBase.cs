@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using tanka.graphql.type;
 
@@ -14,6 +15,7 @@ namespace tanka.graphql.tools
             Schema = schema;
         }
 
+        [Obsolete("Default will be the non async version")]
         public virtual async Task VisitAsync()
         {
             foreach (var directiveType in Schema.QueryDirectives())
