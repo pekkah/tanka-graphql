@@ -15,9 +15,17 @@ namespace tanka.graphql.validation
             _nodes.AddRange(nodes);
         }
 
+        public ValidationError(int code, string message, params ASTNode[] nodes)
+            : this(message, nodes)
+        {
+            Code = code;
+        }
+
         public string Message { get; set; }
 
         public IEnumerable<ASTNode> Nodes => _nodes;
+
+        public int Code { get; set; } = -1;
 
         public override string ToString()
         {

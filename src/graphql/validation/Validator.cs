@@ -43,6 +43,7 @@ namespace tanka.graphql.validation
         {
             var rules = new List<IValidationRule>
             {
+                new R511ExecutableDefinitions(),
                 new UniqueOperationNames(),
                 new LoneAnonymousOperation(),
                 new KnownTypeNames(),
