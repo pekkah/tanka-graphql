@@ -13,7 +13,7 @@
 
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Input objects - tanka-graphql</title>
+    <title>Validation - tanka-graphql</title>
 </head>
 
 <body>
@@ -28,7 +28,7 @@
                 <li class="collection-header">
                     <a href="1-execution/01-validation.html"><h6>Execution</h6></a>
                 </li>
-                        <a class="collection-item" href="1-execution/01-validation.html">Validation</a>
+                        <a class="collection-item active" href="1-execution/01-validation.html">Validation</a>
                         <a class="collection-item" href="1-execution/02-query.html">Query</a>
                         <a class="collection-item" href="1-execution/03-mutation.html">Mutation</a>
                         <a class="collection-item" href="1-execution/04-subscription.html">Subscription</a>
@@ -54,7 +54,7 @@
                         <a class="collection-item" href="3-type-system/07-interfaces.html">Interfaces</a>
                         <a class="collection-item" href="3-type-system/08-unions.html">Unions</a>
                         <a class="collection-item" href="3-type-system/09-enums.html">Enums</a>
-                        <a class="collection-item active" href="3-type-system/10-input-objects.html">Input objects</a>
+                        <a class="collection-item" href="3-type-system/10-input-objects.html">Input objects</a>
                         <a class="collection-item" href="3-type-system/11-list.html">List</a>
                         <a class="collection-item" href="3-type-system/12-non-null.html">Non null</a>
                         <a class="collection-item" href="3-type-system/13-directives.html">Directives</a>
@@ -69,65 +69,61 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                <h2 id="input-objects">Input Objects</h2>
+                <h2 id="validation">Validation</h2>
 <blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Input-Objects">Specification</a></p>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Validation">Specification</a></p>
 </blockquote>
-<p>Input objects are created as instances of <code>InputObjectType</code>.</p>
-<h3 id="creating-input-object">Creating input object</h3>
+<h3 id="execution">Execution</h3>
+<p><pre><code class="language-csharp">
+        private Task&lt;ValidationResult&gt; ValidateAsync(
+            GraphQLDocument document,
+            IValidationRule rule,
+            Dictionary&lt;string, object&gt; variables = null)
+        {
+            if (document == null) throw new ArgumentNullException(nameof(document));
+            if (rule == null) throw new ArgumentNullException(nameof(rule));
+
+            return Validator.ValidateAsync(
+                Schema,
+                document,
+                variables,
+                new[] {rule});
+        }
+</code></pre></p>
+<h3 id="rules">Rules</h3>
+<p>5.1.1 Executable Definitions</p>
 <p><pre><code class="language-csharp">
         [Fact]
-        public void Define()
+        public async Task Rule_511_Executable_Definitions()
         {
             /* Given */
-            /* When */
-            _builder.InputObject(&quot;ExampleInputObject&quot;, out var input)
-                .Connections(connect =&gt; connect
-                    .InputField(input, &quot;a&quot;, ScalarType.Boolean));
+            var document = Parser.ParseDocument(
+                @&quot;query getDogName {
+                  dog {
+                    name
+                    color
+                  }
+                }
 
-            var schema = _builder.Build();
+                extend type Dog {
+                  color: String
+                }&quot;);
+
+            /* When */
+            var result = await ValidateAsync(
+                document,
+                new R511ExecutableDefinitions());
 
             /* Then */
-            var inputFields = schema.GetInputFields(input.Name);
-            Assert.Single(inputFields,
-                fk =&gt; fk.Key == &quot;a&quot;
-                      &amp;&amp; (ScalarType) fk.Value.Type == ScalarType.Boolean);
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error =&gt; error.Code == Errors.R511ExecutableDefinitions);
         }
 </code></pre></p>
 <blockquote>
-<p>When using List or NonNull wrappers make sure that the wrapped type passes <code>TypeIs.IsInputType</code>.</p>
+<p>TODO: Rest of the rules. Issue <a href="https://github.com/pekkah/tanka-graphql/issues/16">#16</a></p>
 </blockquote>
-<h3 id="input-coercion">Input Coercion</h3>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public void Input_coercion()
-        {
-            /* Given */
-            _builder.InputObject(&quot;ExampleInputObject&quot;, out var input)
-                .Connections(connect =&gt; connect
-                    .InputField(input, &quot;a&quot;, ScalarType.String)
-                    .InputField(input, &quot;b&quot;, ScalarType.Int));
-
-            var schema = _builder.Build();
-
-            /* When */
-            var literalValue = new Dictionary&lt;string, object&gt;
-            {
-                [&quot;a&quot;] = &quot;abc&quot;,
-                [&quot;b&quot;] = 123L
-            };
-
-            var actual =
-                (Dictionary&lt;string, object&gt;) Values.CoerceValue(schema, literalValue, input);
-
-            /* Then */
-            foreach (var expectedKv in literalValue)
-            {
-                Assert.True(actual.ContainsKey(expectedKv.Key));
-                Assert.Equal(expectedKv.Value, actual[expectedKv.Key]);
-            }
-        }
-</code></pre></p>
 
             </article>
         </div>
