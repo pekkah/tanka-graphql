@@ -16,8 +16,9 @@ namespace tanka.graphql.validation
 
         public override void Visit(GraphQLDocument ast)
         {
-            BeginVisitNode(ast);
+            //foreach (var visitor in _visitors) visitor.Enter(ast);
             base.Visit(ast);
+            //foreach (var visitor in _visitors.Reverse()) visitor.Leave(ast);
         }
 
         public override ASTNode BeginVisitNode(ASTNode node)
