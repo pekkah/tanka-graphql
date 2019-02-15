@@ -93,7 +93,7 @@
 <h3 id="rules">Rules</h3>
 <p>5.1.1 Executable Definitions</p>
 <p><pre><code class="language-csharp">
-        [Fact]
+        [Fact(Skip = &quot;Some validation rules are behaving strangely. #16&quot;)]
         public async Task Rule_511_Executable_Definitions()
         {
             /* Given */
