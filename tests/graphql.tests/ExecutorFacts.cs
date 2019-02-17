@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using tanka.graphql.resolvers;
 using tanka.graphql.sdl;
 using tanka.graphql.tests.data;
@@ -91,7 +92,7 @@ namespace tanka.graphql.tests
                 {
                     "Query", new FieldResolverMap
                     {
-                        {"events", context => Task.FromResult(Resolve.As(Model))}
+                        {"events", context => Task.FromResult(Resolve.As(Model.Events))}
                     }
                 },
                 {
@@ -168,6 +169,7 @@ namespace tanka.graphql.tests
             var mutation = Parser.ParseDocument(
                 @"mutation AddEvent($event: NewEvent!) {
                     create(event: $event) {
+                        __typename
                         ...on Success {
                             id
                         }
@@ -194,6 +196,7 @@ namespace tanka.graphql.tests
                 @"{
                   ""data"": {
                     ""create"": {
+                      ""__typename"": ""Success"",
                       ""id"": ""1""
                     }
                   }
@@ -207,6 +210,7 @@ namespace tanka.graphql.tests
             var mutation = Parser.ParseDocument(
                 @"mutation AddEvent($event: NewEvent!) {
                     create(event: $event) {
+                        __typename
                         ...on Success {
                             id
                         }
@@ -233,6 +237,7 @@ namespace tanka.graphql.tests
                 @"{
                   ""data"": {
                     ""create"": {
+                      ""__typename"": ""Failure"",
                       ""message"": ""Payload should be given""
                     }
                   }
@@ -240,23 +245,99 @@ namespace tanka.graphql.tests
         }
 
         [Fact]
-        public void Query()
+        public async Task Query()
         {
             /* Given */
+            await Model.AddAsync(new EventsModel.NewEvent()
+            {
+                Type = EventsModel.EventType.DELETE,
+                Payload = "payload1"
+            });
+
+            await Model.AddAsync(new EventsModel.NewEvent()
+            {
+                Type = EventsModel.EventType.UPDATE,
+                Payload = "payload2"
+            });
+
+            var query = Parser.ParseDocument(
+                @"{
+                    events {
+                        __typename
+                        id
+                        type
+                    }
+                }");
 
             /* When */
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            {
+                Schema = Schema,
+                Document = query
+            });
 
             /* Then */
+            result.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""events"": [
+                      {
+                        ""__typename"": ""Event"",
+                        ""type"": ""INSERT"",
+                        ""id"": ""1""
+                      },
+                      {
+                        ""__typename"": ""Event"",
+                        ""type"": ""INSERT"",
+                        ""id"": ""2""
+                      }
+                    ]
+                  }
+                }");
         }
 
         [Fact]
-        public void Subscription()
+        public async Task Subscription()
         {
             /* Given */
+            var subscription = Parser.ParseDocument(
+                @"subscription {
+                    events {
+                        __typename
+                        id
+                        type
+                    }
+                }");
 
             /* When */
+            var result = await Executor.SubscribeAsync(new ExecutionOptions()
+            {
+                Schema = Schema,
+                Document = subscription
+            });
+
+            await Model.AddAsync(new EventsModel.NewEvent()
+            {
+                Type = EventsModel.EventType.DELETE,
+                Payload = "payload1"
+            });
+
+            var ev = await result.Source.ReceiveAsync();
+
+            // unsubscribe
+            result.Source.Complete();
 
             /* Then */
+            ev.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""events"": {
+                      ""type"": ""INSERT"",
+                      ""id"": ""1"",
+                      ""__typename"": ""Event""
+                    }
+                  }
+                }");
         }
     }
 }
