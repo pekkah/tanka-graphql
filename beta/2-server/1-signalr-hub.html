@@ -69,7 +69,24 @@
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="server">Server</h2>
+<p>Server is implemented as a SignalR Core Hub and it handles queries, mutations
+and subscriptions. This projects provides an Apollo Link implementation to be
+used with the provided hub.</p>
+<h3 id="graphql-query-streaming-hub">GraphQL Query Streaming Hub</h3>
+<pre><code class="lang-csharp">// Configure Services
+services.AddSignalR()
+    // add GraphQL query streaming hub
+    .AddQueryStreamHub();
+
+// Configure App
+app.UseSignalR(routes =&gt;
+{
+    routes.MapHub&lt;QueryStreamHub&gt;(new PathString(&quot;/graphql&quot;));
+});
+
+</code></pre>
+
             </article>
         </div>
     </div>

@@ -76,13 +76,47 @@
 <h3 id="execution">Execution</h3>
 <p><pre><code class="language-csharp">
         [Fact]
-        public void Subscription()
+        public async Task Subscription()
         {
             /* Given */
+            var subscription = Parser.ParseDocument(
+                @&quot;subscription {
+                    events {
+                        __typename
+                        id
+                        type
+                    }
+                }&quot;);
 
             /* When */
+            var result = await Executor.SubscribeAsync(new ExecutionOptions()
+            {
+                Schema = Schema,
+                Document = subscription
+            });
+
+            await Model.AddAsync(new EventsModel.NewEvent()
+            {
+                Type = EventsModel.EventType.DELETE,
+                Payload = &quot;payload1&quot;
+            });
+
+            var ev = await result.Source.ReceiveAsync();
+
+            // unsubscribe
+            result.Source.Complete();
 
             /* Then */
+            ev.ShouldMatchJson(
+                @&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;events&quot;&quot;: {
+                      &quot;&quot;type&quot;&quot;: &quot;&quot;INSERT&quot;&quot;,
+                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;,
+                      &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;
+                    }
+                  }
+                }&quot;);
         }
 </code></pre></p>
 <h3 id="example">Example</h3>
@@ -169,7 +203,7 @@
                 {
                     &quot;Query&quot;, new FieldResolverMap
                     {
-                        {&quot;events&quot;, context =&gt; Task.FromResult(Resolve.As(Model))}
+                        {&quot;events&quot;, context =&gt; Task.FromResult(Resolve.As(Model.Events))}
                     }
                 },
                 {

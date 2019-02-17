@@ -76,13 +76,55 @@
 <h3 id="execution">Execution</h3>
 <p><pre><code class="language-csharp">
         [Fact]
-        public void Query()
+        public async Task Query()
         {
             /* Given */
+            await Model.AddAsync(new EventsModel.NewEvent()
+            {
+                Type = EventsModel.EventType.DELETE,
+                Payload = &quot;payload1&quot;
+            });
+
+            await Model.AddAsync(new EventsModel.NewEvent()
+            {
+                Type = EventsModel.EventType.UPDATE,
+                Payload = &quot;payload2&quot;
+            });
+
+            var query = Parser.ParseDocument(
+                @&quot;{
+                    events {
+                        __typename
+                        id
+                        type
+                    }
+                }&quot;);
 
             /* When */
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            {
+                Schema = Schema,
+                Document = query
+            });
 
             /* Then */
+            result.ShouldMatchJson(
+                @&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;events&quot;&quot;: [
+                      {
+                        &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
+                        &quot;&quot;type&quot;&quot;: &quot;&quot;INSERT&quot;&quot;,
+                        &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;
+                      },
+                      {
+                        &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
+                        &quot;&quot;type&quot;&quot;: &quot;&quot;INSERT&quot;&quot;,
+                        &quot;&quot;id&quot;&quot;: &quot;&quot;2&quot;&quot;
+                      }
+                    ]
+                  }
+                }&quot;);
         }
 </code></pre></p>
 <h3 id="example">Example</h3>
@@ -169,7 +211,7 @@
                 {
                     &quot;Query&quot;, new FieldResolverMap
                     {
-                        {&quot;events&quot;, context =&gt; Task.FromResult(Resolve.As(Model))}
+                        {&quot;events&quot;, context =&gt; Task.FromResult(Resolve.As(Model.Events))}
                     }
                 },
                 {
