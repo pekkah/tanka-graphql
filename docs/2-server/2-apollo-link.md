@@ -22,7 +22,7 @@ const client = new ApolloClient({
         );
       if (networkError) console.log(`[Network error]: ${networkError}`);
     }),
-    tankaLink
+    serverLink
   ]),
   cache: new InMemoryCache()
 });
