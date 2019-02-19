@@ -19,8 +19,7 @@ var preRelease = true;
 
 Task("Default")
   .IsDependentOn("SetVersion")
-  .IsDependentOn("Pack")
-  .IsDependentOn("Docs");
+  .IsDependentOn("Pack");
 
 Task("Publish")
   .IsDependentOn("Build")
@@ -199,12 +198,6 @@ Task("Docs")
 .IsDependentOn("SetVersion")
 .Does(()=> {
     Information("Generate docs");
-    var settings = new DotNetCoreRunSettings
-    {
-        Framework = "netcoreapp2.2",
-        Configuration = "Release"
-    };
-
     var targetFolder = $"{artifactsDir}\\gh-pages";
     var basepath = "/tanka-graphql/";
     if (preRelease)
