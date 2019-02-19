@@ -146,7 +146,11 @@ Task("Restore")
 
 Task("SetVersion")
     .Does(()=> {
-        var result = GitVersion();
+        var result = GitVersion(new GitVersionSettings() 
+        {
+          ArgumentCustomization = args => args.Append("/verbosity debug"),
+          LogFilePath = "gitversion.log"
+        });
         
         version = result.SemVer;
         preRelease = result.PreReleaseNumber.HasValue;
