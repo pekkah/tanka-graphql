@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Index - tanka-graphql</title>
+    <title>Types - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -117,7 +117,7 @@
                                     <a class="nav-link" href="3-type-system/03-descriptions.html">Descriptions</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="3-type-system/04-types.html">Types</a>
+                                    <a class="nav-link active bg-light" href="3-type-system/04-types.html">Types</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/05-scalars.html">Scalars</a>
@@ -161,42 +161,129 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql" alt="Build Status" /></a></p>
-<h2 id="features">Features</h2>
+                <h2 id="types">Types</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Types">Specification</a></p>
+</blockquote>
+<p>Following types are supported:</p>
 <ul>
-<li>Execute queries, mutations and subscriptions</li>
-<li>Validation (Dirty port from graphql-dotnet). Validation is the slowest part of the execution and needs to be redone.</li>
-<li>SignalR hub for streaming queries, mutations and subscriptions</li>
-<li>ApolloLink for the provided SignalR hub</li>
+<li><code>ScalarType</code></li>
+<li><code>ObjectType</code></li>
+<li><code>InterfaceType</code></li>
+<li><code>UnionType</code></li>
+<li><code>EnumType</code></li>
+<li><code>InputObjectType</code></li>
 </ul>
-<h3 id="feeds">Feeds</h3>
-<p>Beta:</p>
+<p>These all exists in <code>tanka.graphql.type</code> namespace and implement <code>INamedType</code> interface</p>
+<h3 id="wrapping-types">Wrapping types</h3>
+<p>Wrapping types implement the <code>IWrappingType</code></p>
+<p><pre><code class="language-csharp">    public interface IWrappingType: IType
+    {
+        IType WrappedType { get; }
+    }
+</code></pre></p>
+<p>Two built-in implementations are provided</p>
 <ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Beta docs</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
+<li><code>List</code></li>
+<li><code>NonNull</code></li>
 </ul>
-<p>Release</p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Release docs</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
-</ul>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+<h3 id="input-and-output-types">Input and output types</h3>
+<p>Is input type?</p>
+<p><pre><code class="language-csharp">        [Theory]
+        [MemberData(nameof(ValidInputTypes))]
+        public void IsInputType(INamedType type)
+        {
+            /* Given */
+            /* When */
+            var isInput = TypeIs.IsInputType(type);
+            var isInputAsNonNull = TypeIs.IsInputType(
+                new NonNull(type));
+            var isInputAsList = TypeIs.IsInputType(
+                new List(type));
 
-npm install @tanka/tanka-graphql-server-link
-</code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
-<h2 id="develop">Develop</h2>
-<h3 id="run-benchmarks">Run benchmarks</h3>
-<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
-</code></pre>
+            /* Then */
+            Assert.True(isInput);
+            Assert.True(isInputAsNonNull);
+            Assert.True(isInputAsList);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        public static IEnumerable&lt;object[]&gt; ValidInputTypes
+        {
+            get
+            {
+                foreach (var scalarType in ScalarType.Standard)
+                {
+                    yield return new object[] {scalarType};
+                }
+
+                yield return new object[]
+                {
+                    new EnumType(&quot;Enum&quot;,
+                        new EnumValues())
+                };
+
+                yield return new object[]
+                {
+                    new InputObjectType(&quot;Input&quot;)
+                };
+            }
+        }
+</code></pre></p>
+<p>Is output type?</p>
+<p><pre><code class="language-csharp">
+        [Theory]      
+        [MemberData(nameof(ValidOutputTypes))]
+        public void IsOutputType(INamedType type)
+        {
+            /* Given */
+            /* When */
+            var isOutput = TypeIs.IsOutputType(type);
+            var isOutputAsNonNull = TypeIs.IsOutputType(
+                new NonNull(type));
+            var isOutputAsList = TypeIs.IsOutputType(
+                new List(type));
+
+            /* Then */
+            Assert.True(isOutput);
+            Assert.True(isOutputAsNonNull);
+            Assert.True(isOutputAsList);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        public static IEnumerable&lt;object[]&gt; ValidOutputTypes
+        {
+            get
+            {
+                foreach (var scalarType in ScalarType.Standard)
+                {
+                    yield return new object[] {scalarType};
+                }
+
+                yield return new object[]
+                {
+                    new ObjectType(&quot;Object&quot;), 
+                };
+
+                yield return new object[]
+                {
+                    new InterfaceType(&quot;Interface&quot;), 
+                };
+
+                yield return new object[]
+                {
+                    new UnionType(&quot;Union&quot;,
+                        Enumerable.Empty&lt;ObjectType&gt;()), 
+                };
+
+                yield return new object[]
+                {
+                    new EnumType(&quot;Enum&quot;,
+                        new EnumValues())
+                };
+            }
+        }
+</code></pre></p>
                     
             </main>
         </div>

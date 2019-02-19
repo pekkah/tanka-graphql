@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Index - tanka-graphql</title>
+    <title>Directives - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -144,7 +144,7 @@
                                     <a class="nav-link" href="3-type-system/12-non-null.html">Non null</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="3-type-system/13-directives.html">Directives</a>
+                                    <a class="nav-link active bg-light" href="3-type-system/13-directives.html">Directives</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -161,42 +161,135 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql" alt="Build Status" /></a></p>
-<h2 id="features">Features</h2>
-<ul>
-<li>Execute queries, mutations and subscriptions</li>
-<li>Validation (Dirty port from graphql-dotnet). Validation is the slowest part of the execution and needs to be redone.</li>
-<li>SignalR hub for streaming queries, mutations and subscriptions</li>
-<li>ApolloLink for the provided SignalR hub</li>
-</ul>
-<h3 id="feeds">Feeds</h3>
-<p>Beta:</p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Beta docs</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
-</ul>
-<p>Release</p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Release docs</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
-</ul>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+                <h2 id="directives">Directives</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-System.Directives">Specification</a></p>
+</blockquote>
+<p>Directives are created as instance of <code>DirectiveType</code>. When adding to target instance of <code>DirectiveInstance</code> is used. It contains a reference back to the original type.</p>
+<p>Following directives are provided as static properties of <code>DirectiveType</code></p>
+<p><pre><code class="language-csharp">Skip = new DirectiveType(
+            &quot;skip&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args
+            {
+                {&quot;if&quot;, ScalarType.NonNullBoolean}
+            })</code></pre></p>
+<p><pre><code class="language-csharp">Include = new DirectiveType(
+            &quot;include&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args()
+            {
+                {&quot;if&quot;, ScalarType.NonNullBoolean}
+            })</code></pre></p>
+<p><pre><code class="language-csharp">Deprecated = new DirectiveType(
+            &quot;deprecated&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD_DEFINITION,
+                DirectiveLocation.ENUM_VALUE
+            },
+            new Args()
+            {
+                {&quot;reason&quot;, ScalarType.String}
+            })</code></pre></p>
+<h3 id="create-custom-directive">Create custom directive</h3>
+<p>Create simple <code>DirectiveType</code> and apply instance of it to a field and modify resolver logic to execute custom logic if it has the directive present.</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public async Task Authorize_field_directive()
+        {
+            /* Given */
+            var authorizeType = new DirectiveType(
+                &quot;authorize&quot;,
+                new[]
+                {
+                    DirectiveLocation.FIELD_DEFINITION
+                });
 
-npm install @tanka/tanka-graphql-server-link
-</code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
-<h2 id="develop">Develop</h2>
-<h3 id="run-benchmarks">Run benchmarks</h3>
-<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
-</code></pre>
+            var builder = new SchemaBuilder();
+            builder.IncludeDirective(authorizeType);
+
+            builder.Query(out var query)
+                .Connections(connect =&gt; connect
+                    .Field(query, &quot;requiresAuthorize&quot;, ScalarType.NonNullString,
+                        directives: new[]
+                        {
+                            authorizeType.CreateInstance()
+                        }));
+
+            var resolvers = new ResolverMap
+            {
+                {
+                    query.Name, new FieldResolverMap
+                    {
+                        {&quot;requiresAuthorize&quot;, context =&gt; Task.FromResult(Resolve.As(&quot;Hello World!&quot;))}
+                    }
+                }
+            };
+
+            Func&lt;bool&gt; authorize = () =&gt; true;
+
+            /* When */
+            var schema = await SchemaTools.MakeExecutableSchemaAsync(
+                builder.Build(),
+                resolvers,
+                visitors: new SchemaVisitorFactory[]
+                {
+                    (s, _1, _2) =&gt; new Authorize(s, authorize)
+                });
+
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            {
+                Document = Parser.ParseDocument(@&quot;{ requiresAuthorize }&quot;),
+                Schema = schema
+            });
+
+            /* Then */
+            Assert.Equal(&quot;Hello World! authorize: True&quot;, result.Data[&quot;requiresAuthorize&quot;]);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+    public class Authorize : SchemaVisitorBase
+    {
+        private readonly Func&lt;bool&gt; _authorize;
+
+        public Authorize(ISchema schema, Func&lt;bool&gt; authorize) : base(schema)
+        {
+            _authorize = authorize;
+        }
+
+        protected override Task VisitObjectFieldAsync(ObjectType objectType,
+            KeyValuePair&lt;string, IField&gt; objectTypeField)
+        {
+            var authorizeDirective = objectTypeField.Value.GetDirective(&quot;authorize&quot;);
+
+            if (authorizeDirective != null)
+            {
+                var field = objectTypeField.Value;
+                var originalResolver = field.Resolve;
+
+                field.Resolve = async context =&gt;
+                {
+                    var result = await originalResolver(context);
+                    var value = $&quot;{result.Value} authorize: {_authorize()}&quot;;
+
+                    return Resolve.As(value);
+                };
+            }
+
+            return base.VisitObjectFieldAsync(objectType, objectTypeField);
+        }
+    }
+</code></pre></p>
                     
             </main>
         </div>

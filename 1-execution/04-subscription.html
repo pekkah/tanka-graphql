@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Index - tanka-graphql</title>
+    <title>Subscription - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -86,7 +86,7 @@
                                     <a class="nav-link" href="1-execution/03-mutation.html">Mutation</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/04-subscription.html">Subscription</a>
+                                    <a class="nav-link active bg-light" href="1-execution/04-subscription.html">Subscription</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -161,42 +161,190 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql" alt="Build Status" /></a></p>
-<h2 id="features">Features</h2>
-<ul>
-<li>Execute queries, mutations and subscriptions</li>
-<li>Validation (Dirty port from graphql-dotnet). Validation is the slowest part of the execution and needs to be redone.</li>
-<li>SignalR hub for streaming queries, mutations and subscriptions</li>
-<li>ApolloLink for the provided SignalR hub</li>
-</ul>
-<h3 id="feeds">Feeds</h3>
-<p>Beta:</p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Beta docs</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
-</ul>
-<p>Release</p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Release docs</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
-</ul>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+                <h2 id="subscription">Subscription</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Subscription">Specification</a></p>
+</blockquote>
+<h3 id="execution">Execution</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Subscription()
+        {
+            /* Given */
+            var subscription = Parser.ParseDocument(
+                @&quot;subscription {
+                    events {
+                        __typename
+                        id
+                        type
+                    }
+                }&quot;);
 
-npm install @tanka/tanka-graphql-server-link
-</code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
-<h2 id="develop">Develop</h2>
-<h3 id="run-benchmarks">Run benchmarks</h3>
-<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
-</code></pre>
+            /* When */
+            var result = await Executor.SubscribeAsync(new ExecutionOptions()
+            {
+                Schema = Schema,
+                Document = subscription
+            });
+
+            await Model.AddAsync(new EventsModel.NewEvent()
+            {
+                Type = EventsModel.EventType.DELETE,
+                Payload = &quot;payload1&quot;
+            });
+
+            var ev = await result.Source.ReceiveAsync();
+
+            // unsubscribe
+            result.Source.Complete();
+
+            /* Then */
+            ev.ShouldMatchJson(
+                @&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;events&quot;&quot;: {
+                      &quot;&quot;type&quot;&quot;: &quot;&quot;INSERT&quot;&quot;,
+                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;,
+                      &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;
+                    }
+                  }
+                }&quot;);
+        }
+</code></pre></p>
+<h3 id="example">Example</h3>
+<p>These are the schema and resolvers used in the above section.</p>
+<p>Schema
+<pre><code class="language-csharp">Sdl = @&quot;
+                enum EventType {
+                    INSERT
+                    UPDATE
+                    DELETE
+                }
+
+                type Success {
+                    id: ID!
+                }
+
+                type Failure {
+                    message: String!
+                }
+
+                union Result = Success | Failure
+
+                type Event {
+                    id: ID!
+                    type: EventType!
+                }
+
+                input NewEvent {
+                    type: String!
+                    payload: String
+                }
+
+                type Query {
+                    events: [Event!]
+                }
+
+                type Mutation {
+                    create(event: NewEvent!): Result
+                }
+
+                type Subscription {
+                    events: Event!
+                }
+
+                schema {
+                    query: Query
+                    mutation: Mutation
+                    subscription: Subscription
+                }
+                &quot;</code></pre></p>
+<p>Initialization</p>
+<p><pre><code class="language-csharp">
+        public ExecutorFacts()
+        {
+            Model = new EventsModel();
+            Resolvers = new ResolverMap
+            {
+                {
+                    &quot;Success&quot;, new FieldResolverMap
+                    {
+                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)}
+                    }
+                },
+                {
+                    &quot;Failure&quot;, new FieldResolverMap
+                    {
+                        {&quot;message&quot;, Resolve.PropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message)}
+                    }
+                },
+                {
+                    &quot;Event&quot;, new FieldResolverMap
+                    {
+                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
+                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)}
+                    }
+                },
+                {
+                    &quot;NewEvent&quot;, new FieldResolverMap
+                    {
+                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type)},
+                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload)}
+                    }
+                },
+                {
+                    &quot;Query&quot;, new FieldResolverMap
+                    {
+                        {&quot;events&quot;, context =&gt; Task.FromResult(Resolve.As(Model.Events))}
+                    }
+                },
+                {
+                    &quot;Mutation&quot;, new FieldResolverMap
+                    {
+                        {
+                            &quot;create&quot;, async context =&gt;
+                            {
+                                var newEvent = context.GetArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
+
+                                if (newEvent.Payload == null)
+                                    return Resolve.As(
+                                        context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Failure&quot;),
+                                        new EventsModel.Failure(&quot;Payload should be given&quot;));
+
+                                var id = await Model.AddAsync(newEvent);
+
+                                return Resolve.As(
+                                    context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
+                                    new EventsModel.Success(id));
+                            }
+                        }
+                    }
+                },
+                {
+                    &quot;Subscription&quot;, new FieldResolverMap
+                    {
+                        {
+                            &quot;events&quot;, async (context, unsubscribe) =&gt;
+                            {
+                                await Task.Delay(0);
+                                var source = Model.Subscribe(unsubscribe);
+                                return Resolve.Stream(source);
+                            },
+                            context =&gt; Task.FromResult(Resolve.As(context.ObjectValue))
+                        }
+                    }
+                }
+            };
+
+            var schema = graphql.sdl.Sdl.Schema(Parser.ParseDocument(Sdl));
+            Schema = SchemaTools.MakeExecutableSchemaAsync(
+                    schema,
+                    Resolvers,
+                    Resolvers)
+                //todo: non async
+                .GetAwaiter().GetResult();
+        }
+</code></pre></p>
                     
             </main>
         </div>

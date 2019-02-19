@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Index - tanka-graphql</title>
+    <title>Validation - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -77,7 +77,7 @@
                         </h6>
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/01-validation.html">Validation</a>
+                                    <a class="nav-link active bg-light" href="1-execution/01-validation.html">Validation</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="1-execution/02-query.html">Query</a>
@@ -161,42 +161,61 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql" alt="Build Status" /></a></p>
-<h2 id="features">Features</h2>
-<ul>
-<li>Execute queries, mutations and subscriptions</li>
-<li>Validation (Dirty port from graphql-dotnet). Validation is the slowest part of the execution and needs to be redone.</li>
-<li>SignalR hub for streaming queries, mutations and subscriptions</li>
-<li>ApolloLink for the provided SignalR hub</li>
-</ul>
-<h3 id="feeds">Feeds</h3>
-<p>Beta:</p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Beta docs</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
-</ul>
-<p>Release</p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Release docs</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
-</ul>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+                <h2 id="validation">Validation</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Validation">Specification</a></p>
+</blockquote>
+<h3 id="execution">Execution</h3>
+<p><pre><code class="language-csharp">
+        private Task&lt;ValidationResult&gt; ValidateAsync(
+            GraphQLDocument document,
+            IValidationRule rule,
+            Dictionary&lt;string, object&gt; variables = null)
+        {
+            if (document == null) throw new ArgumentNullException(nameof(document));
+            if (rule == null) throw new ArgumentNullException(nameof(rule));
 
-npm install @tanka/tanka-graphql-server-link
-</code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
-<h2 id="develop">Develop</h2>
-<h3 id="run-benchmarks">Run benchmarks</h3>
-<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
-</code></pre>
+            return Validator.ValidateAsync(
+                Schema,
+                document,
+                variables,
+                new[] {rule});
+        }
+</code></pre></p>
+<h3 id="rules">Rules</h3>
+<p>5.1.1 Executable Definitions</p>
+<p><pre><code class="language-csharp">
+        [Fact(Skip = &quot;Some validation rules are behaving strangely. #16&quot;)]
+        public async Task Rule_511_Executable_Definitions()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @&quot;query getDogName {
+                  dog {
+                    name
+                    color
+                  }
+                }
+
+                extend type Dog {
+                  color: String
+                }&quot;);
+
+            /* When */
+            var result = await ValidateAsync(
+                document,
+                new R511ExecutableDefinitions());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error =&gt; error.Code == Errors.R511ExecutableDefinitions);
+        }
+</code></pre></p>
+<blockquote>
+<p>TODO: Rest of the rules. Issue <a href="https://github.com/pekkah/tanka-graphql/issues/16">#16</a></p>
+</blockquote>
                     
             </main>
         </div>

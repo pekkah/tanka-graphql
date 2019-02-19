@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Index - tanka-graphql</title>
+    <title>Descriptions - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -114,7 +114,7 @@
                                     <a class="nav-link" href="3-type-system/02-schema.html">Schema</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="3-type-system/03-descriptions.html">Descriptions</a>
+                                    <a class="nav-link active bg-light" href="3-type-system/03-descriptions.html">Descriptions</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/04-types.html">Types</a>
@@ -161,42 +161,61 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql" alt="Build Status" /></a></p>
-<h2 id="features">Features</h2>
+                <h2 id="descriptions">Descriptions</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Descriptions">Specification</a></p>
+</blockquote>
+<blockquote>
+<p>NotSupported: the parser used does not currently support block string
+documentation.
+Issue <a href="https://github.com/pekkah/tanka-graphql/issues/24">#24</a></p>
+</blockquote>
+<p><code>Meta</code> class provides the fields for descriptions. Following elements can be described using the <code>Meta</code> class. Usually by providing it as an constructor parameter.</p>
 <ul>
-<li>Execute queries, mutations and subscriptions</li>
-<li>Validation (Dirty port from graphql-dotnet). Validation is the slowest part of the execution and needs to be redone.</li>
-<li>SignalR hub for streaming queries, mutations and subscriptions</li>
-<li>ApolloLink for the provided SignalR hub</li>
+<li><code>Argument</code></li>
+<li><code>DirectiveType</code></li>
+<li><code>EnumType</code> and values</li>
+<li><code>Field</code></li>
+<li><code>InputObjectField</code></li>
+<li><code>InputObjectType</code></li>
+<li><code>InterfaceType</code></li>
+<li><code>ObjectType</code></li>
+<li><code>ScalarType</code></li>
+<li><code>UnionType</code></li>
 </ul>
-<h3 id="feeds">Feeds</h3>
-<p>Beta:</p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Beta docs</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
-</ul>
-<p>Release</p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Release docs</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
-</ul>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+<h3 id="example-field-description">Example: Field description</h3>
+<p>Description for the field is given by providing instance of <code>Meta</code>.</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Describe()
+        {
+            /* Given */
+            var meta = new Meta(
+                &quot;Unique ID of the object&quot;);
 
-npm install @tanka/tanka-graphql-server-link
-</code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
-<h2 id="develop">Develop</h2>
-<h3 id="run-benchmarks">Run benchmarks</h3>
-<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
-</code></pre>
+            /* When */
+            var field = new Field(
+                ScalarType.NonNullID,
+                meta: meta);
+
+            /* Then */
+            Assert.Equal(field.Meta.Description, meta.Description);
+        }
+</code></pre></p>
+<p>If no meta is given then the default <code>Meta</code> is used with empty value as description.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Meta_is_always_available()
+        {
+            /* Given */
+            /* When */
+            var field = new Field(
+                ScalarType.NonNullID);
+
+            /* Then */
+            Assert.NotNull(field.Meta);
+            Assert.Empty(field.Meta.Description);
+        }
+</code></pre></p>
                     
             </main>
         </div>
