@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Schema - tanka-graphql</title>
+    <title>Benchmarks - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -74,7 +74,7 @@
                         </h6>
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="benchmarks.html">Benchmarks</a>
+                                    <a class="nav-link active bg-light" href="benchmarks.html">Benchmarks</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -116,7 +116,7 @@
                                     <a class="nav-link" href="3-type-system/01-builder.html">Builder</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active bg-light" href="3-type-system/02-schema.html">Schema</a>
+                                    <a class="nav-link" href="3-type-system/02-schema.html">Schema</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/03-descriptions.html">Descriptions</a>
@@ -166,250 +166,127 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="schema">Schema</h2>
+                <pre><code class="lang-ini">
+BenchmarkDotNet=v0.11.4, OS=Windows 10.0.14393.2665 (1607/AnniversaryUpdate/Redstone1), VM=Hyper-V
+Intel Xeon CPU E5-2673 v3 2.40GHz, 1 CPU, 2 logical and 2 physical cores
+.NET Core SDK=2.2.102
+  [Host] : .NET Core 2.2.1 (CoreCLR 4.6.27207.03, CoreFX 4.6.27207.03), 64bit RyuJIT
+  Core   : .NET Core 2.2.1 (CoreCLR 4.6.27207.03, CoreFX 4.6.27207.03), 64bit RyuJIT
+
+Job=Core  Runtime=Core  
+
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Error</th>
+<th style="text-align: right;">StdDev</th>
+<th style="text-align: right;">Gen 0/1k Op</th>
+<th style="text-align: right;">Gen 1/1k Op</th>
+<th style="text-align: right;">Gen 2/1k Op</th>
+<th style="text-align: right;">Allocated Memory/Op</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Query_with_defaults</td>
+<td style="text-align: right;">194.140 us</td>
+<td style="text-align: right;">3.8696 us</td>
+<td style="text-align: right;">5.7918 us</td>
+<td style="text-align: right;">16.6016</td>
+<td style="text-align: right;">2.1973</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">103.21 KB</td>
+</tr>
+<tr>
+<td>Query_without_validation</td>
+<td style="text-align: right;">18.063 us</td>
+<td style="text-align: right;">0.3537 us</td>
+<td style="text-align: right;">0.5185 us</td>
+<td style="text-align: right;">0.8545</td>
+<td style="text-align: right;">0.4272</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">4.49 KB</td>
+</tr>
+<tr>
+<td>Mutation_with_defaults</td>
+<td style="text-align: right;">148.126 us</td>
+<td style="text-align: right;">2.8519 us</td>
+<td style="text-align: right;">3.6067 us</td>
+<td style="text-align: right;">16.1133</td>
+<td style="text-align: right;">0.9766</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">102.35 KB</td>
+</tr>
+<tr>
+<td>Mutation_without_validation</td>
+<td style="text-align: right;">7.508 us</td>
+<td style="text-align: right;">0.1175 us</td>
+<td style="text-align: right;">0.1099 us</td>
+<td style="text-align: right;">0.5798</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">3.64 KB</td>
+</tr>
+<tr>
+<td>Subscribe_with_defaults</td>
+<td style="text-align: right;">169.007 us</td>
+<td style="text-align: right;">3.3061 us</td>
+<td style="text-align: right;">3.6747 us</td>
+<td style="text-align: right;">18.3105</td>
+<td style="text-align: right;">2.6855</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">108.94 KB</td>
+</tr>
+<tr>
+<td>Subscribe_without_validation</td>
+<td style="text-align: right;">22.574 us</td>
+<td style="text-align: right;">0.6927 us</td>
+<td style="text-align: right;">1.9650 us</td>
+<td style="text-align: right;">2.2278</td>
+<td style="text-align: right;">1.0681</td>
+<td style="text-align: right;">0.0916</td>
+<td style="text-align: right;">9.52 KB</td>
+</tr>
+<tr>
+<td>Subscribe_with_defaults_and_get_value</td>
+<td style="text-align: right;">220.882 us</td>
+<td style="text-align: right;">4.3787 us</td>
+<td style="text-align: right;">3.8816 us</td>
+<td style="text-align: right;">18.0664</td>
+<td style="text-align: right;">2.1973</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">109.58 KB</td>
+</tr>
+<tr>
+<td>Subscribe_without_validation_and_get_value</td>
+<td style="text-align: right;">48.345 us</td>
+<td style="text-align: right;">1.0159 us</td>
+<td style="text-align: right;">1.3562 us</td>
+<td style="text-align: right;">2.1973</td>
+<td style="text-align: right;">0.7324</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">10.16 KB</td>
+</tr>
+<tr>
+<td>Validate_query_with_defaults</td>
+<td style="text-align: right;">130.484 us</td>
+<td style="text-align: right;">2.6969 us</td>
+<td style="text-align: right;">4.8631 us</td>
+<td style="text-align: right;">15.6250</td>
+<td style="text-align: right;">0.7324</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">98.59 KB</td>
+</tr>
+</tbody>
+</table>
+
 <blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Schema">Specification</a></p>
+<p>DISCLAIMER
+Benchmarks are run as part of the build and as such are not comparable</p>
 </blockquote>
-<p>Schema is implemented as class <code>GraphSchema</code> and it implements the <code>ISchema</code> interface.</p>
-<p><pre><code class="language-csharp">    public interface ISchema
-    {
-        bool IsInitialized { get; }
-
-        ObjectType Subscription { get; }
-
-        ObjectType Query { get; }
-
-        ObjectType Mutation { get; }
-
-        INamedType GetNamedType(string name);
-
-        IField GetField(string type, string name);
-
-        IEnumerable&lt;KeyValuePair&lt;string, IField&gt;&gt; GetFields(string type);
-
-        IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt; filter = null) where T : INamedType;
-
-        DirectiveType GetDirective(string name);
-
-        IQueryable&lt;DirectiveType&gt; QueryDirectives(Predicate&lt;DirectiveType&gt; filter = null);
-
-        IEnumerable&lt;KeyValuePair&lt;string, InputObjectField&gt;&gt; GetInputFields(string type);
-
-        InputObjectField GetInputField(string type, string name);
-    }
-</code></pre></p>
-<blockquote>
-<p>Rarely accessing the actual implemention class <code>GraphSchema</code> is required</p>
-</blockquote>
-<p>Schema is immutable and cannot be changed directly once created. To create <code>Schema</code> instance you need to provide <code>query</code> root object at minimum. Optionally <code>mutation</code> and <code>subscription</code> roots can be also provided.</p>
-<h3 id="basics">Basics</h3>
-<p>Built by <code>SchemaBuilder</code></p>
-<p><pre><code class="language-csharp">        public SchemaFacts()
-        {
-            Schema = new SchemaBuilder()
-                .InputObject(&quot;input&quot;, out var input)
-                .Connections(connect =&gt; connect
-                    .InputField(input, &quot;id&quot;, ScalarType.ID))
-                .Query(out var query)
-                .Connections(connect =&gt; connect
-                    .Field(query, &quot;name&quot;, ScalarType.String))
-                .Build();
-        }
-</code></pre></p>
-<p>Query root is <code>ObjectType</code></p>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public void Roots_Query()
-        {
-            /* Given */
-            /* When */
-            /* Then */
-            Assert.NotNull(Schema.Query);
-            Assert.IsType&lt;ObjectType&gt;(Schema.Query);
-        }
-</code></pre></p>
-<p>Mutation is optional</p>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public void Roots_Mutation()
-        {
-            /* Given */
-            /* When */
-            /* Then */
-            Assert.Null(Schema.Mutation);
-        }
-</code></pre></p>
-<p>Subscription is optional</p>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public void Roots_Subscription()
-        {
-            /* Given */
-            /* When */
-            /* Then */
-            Assert.Null(Schema.Subscription);
-        }
-</code></pre></p>
-<h3 id="querying-types">Querying types</h3>
-<p>Query named types
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetNamedType()
-        {
-            /* Given */
-            var namedTypeName = Schema.Query.Name;
-
-            /* When */
-            var namedType = Schema.GetNamedType(namedTypeName);
-
-            /* Then */
-            Assert.NotNull(namedType);
-            Assert.IsAssignableFrom&lt;INamedType&gt;(namedType);
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact]
-        public void QueryNamedTypes()
-        {
-            /* Given */
-            bool TypesWithoutDescription(ObjectType type)
-            {
-                return string.IsNullOrEmpty(type.Description);
-            }
-
-            /* When */
-            var undocumentedTypes = Schema.QueryTypes&lt;ObjectType&gt;(TypesWithoutDescription);
-
-            /* Then */
-            Assert.NotNull(undocumentedTypes);
-            Assert.Single(undocumentedTypes, type =&gt; type.Name == &quot;Query&quot;);
-        }
-</code></pre></p>
-<p>Query directives
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetDirective()
-        {
-            /* Given */
-            var directiveTypeName = DirectiveType.Include.Name;
-
-            /* When */
-            var directiveType = Schema.GetDirective(directiveTypeName);
-
-            /* Then */
-            Assert.NotNull(directiveType);
-            Assert.IsType&lt;DirectiveType&gt;(directiveType);
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact]
-        public void QueryDirectives()
-        {
-            /* Given */
-            bool AppliesToField(DirectiveType type)
-            {
-                return type.Locations.Contains(DirectiveLocation.FIELD);
-            }
-
-            /* When */
-            var directives = Schema.QueryDirectives(AppliesToField);
-
-            /* Then */
-            foreach (var directiveType in directives) Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
-        }
-</code></pre></p>
-<p>Query fields
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetField()
-        {
-            /* Given */
-            var namedTypeName = Schema.Query.Name;
-
-            /* When */
-            var field = Schema.GetField(namedTypeName, &quot;name&quot;);
-
-            /* Then */
-            Assert.NotNull(field);
-            Assert.Same(ScalarType.String, field.Type);
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetFields()
-        {
-            /* Given */
-            var namedTypeName = Schema.Query.Name;
-
-            /* When */
-            var fields = Schema.GetFields(namedTypeName);
-
-            /* Then */
-            Assert.Single(
-                fields,
-                kv =&gt; kv.Key == &quot;name&quot; &amp;&amp; (ScalarType) kv.Value.Type == ScalarType.String);
-        }
-</code></pre></p>
-<p>Query input fields
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetInputField()
-        {
-            /* Given */
-            var inputTypeName = &quot;input&quot;;
-
-            /* When */
-            var field = Schema.GetInputField(inputTypeName, &quot;id&quot;);
-
-            /* Then */
-            Assert.NotNull(field);
-            Assert.Same(ScalarType.ID, field.Type);
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetInputFields()
-        {
-            /* Given */
-            var inputTypeName = &quot;input&quot;;
-
-            /* When */
-            var fields = Schema.GetInputFields(inputTypeName);
-
-            /* Then */
-            Assert.Single(
-                fields,
-                kv =&gt; kv.Key == &quot;id&quot; &amp;&amp; (ScalarType) kv.Value.Type == ScalarType.ID);
-        }
-</code></pre></p>
-<h4 id="defaults">Defaults</h4>
-<p>By default Skip and Include directives are included
-<pre><code class="language-csharp">
-        [Fact]
-        public void Included_directives()
-        {
-            /* Given */ 
-            /* When */
-            var directives = Schema.QueryDirectives();
-
-            /* Then */
-            Assert.Single(directives, DirectiveType.Include);
-            Assert.Single(directives, DirectiveType.Skip);
-        }
-</code></pre></p>
-<p>By default all standard <code>ScalarType</code>s are included
-<pre><code class="language-csharp">
-        [Fact]
-        public void Included_scalars()
-        {
-            /* Given */
-            /* When */
-            var scalars = Schema.QueryTypes&lt;ScalarType&gt;();
-
-            /* Then */
-            Assert.Equal(ScalarType.Standard, scalars);
-        }
-</code></pre></p>
                     
             </main>
         </div>
