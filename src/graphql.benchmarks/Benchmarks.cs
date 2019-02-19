@@ -12,6 +12,7 @@ namespace tanka.graphql.benchmarks
 {
     [CoreJob]
     //[ClrJob]
+    [MarkdownExporterAttribute.GitHub()]
     [MemoryDiagnoser]
     public class Benchmarks
     {
