@@ -5,7 +5,7 @@ namespace tanka.graphql.type
 {
     public static class Ast
     {
-        public static IGraphQLType TypeFromAst(ISchema schema, GraphQLType type)
+        public static IType TypeFromAst(ISchema schema, GraphQLType type)
         {
             if (type.Kind == ASTNodeKind.NonNullType)
             {

@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using static tanka.graphql.graph.Wrapper;
 
 namespace tanka.graphql.type
 {
-    public abstract class ComplexType : IGraphQLType
+    public abstract class ComplexType : INamedType
     {
-        private readonly Fields _fields = new Fields();
+        protected ComplexType(string name)
+        {
+            Name = name;
+        }
+       /* private readonly Fields _fields = new Fields();
 
         public IEnumerable<KeyValuePair<string, IField>> Fields => _fields;
 
@@ -28,18 +32,33 @@ namespace tanka.graphql.type
             if (HasField(name))
             {
                 throw new InvalidOperationException(
-                    $"Cannot add field to type. Field {name} already exists.");
+                    $"Cannot add field to type '{Name}'. Field '{name}' already exists.");
+            }
+
+            if (field.Type.Unwrap() is SelfReferenceType)
+            {
+                var actualType = WrapIfRequired(field.Type, this);
+                _fields[name] = new SelfReferenceField(
+                    actualType, 
+                    new Args(field.Arguments), 
+                    field.Meta);
+
+                return;
+            }
+
+            if (field is SelfReferenceField selfReference)
+            {
+                var actualType = WrapIfRequired(selfReference.Type, this);
+                _fields[name] = new SelfReferenceField(
+                    actualType,
+                    new Args(field.Arguments),
+                    field.Meta);
             }
 
             _fields[name] = field;
         }
-
-        public string GetFieldName(IField field)
-        {
-            var foundField = _fields.Single(f => f.Value == field).Key;
-            return foundField;
-        }
-
-        public abstract string Name { get; }
+        
+        */
+        public string Name { get; }
     }
 }

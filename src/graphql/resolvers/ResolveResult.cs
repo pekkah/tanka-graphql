@@ -37,7 +37,7 @@ namespace tanka.graphql.resolvers
         public virtual async Task<object> CompleteValueAsync(IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
-            IGraphQLType fieldType,
+            IType fieldType,
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
             Dictionary<string, object> coercedVariableValues, 
@@ -63,7 +63,7 @@ namespace tanka.graphql.resolvers
         public async Task<object> CompleteValueAsync(IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
-            IGraphQLType fieldType,
+            IType fieldType,
             ObjectType actualType,
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
@@ -222,7 +222,7 @@ namespace tanka.graphql.resolvers
                 return data;
             }
 
-            throw new CompleteValueException($"Cannot complete value for field {fieldType.Name}. No handling for the type.");
+            throw new CompleteValueException($"Cannot complete value for field {field}. No handling for the type {fieldType}.");
         }
     }
 }

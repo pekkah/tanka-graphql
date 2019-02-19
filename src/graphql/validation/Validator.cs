@@ -15,8 +15,6 @@ namespace tanka.graphql.validation
             IDictionary<string, object> variables = null, 
             IEnumerable<IValidationRule> rules = null)
         {
-            if (!schema.IsInitialized) await schema.InitializeAsync().ConfigureAwait(false);
-
             var context = new ValidationContext
             {
                 Schema = schema,
@@ -45,6 +43,7 @@ namespace tanka.graphql.validation
         {
             var rules = new List<IValidationRule>
             {
+                new R511ExecutableDefinitions(),
                 new UniqueOperationNames(),
                 new LoneAnonymousOperation(),
                 new KnownTypeNames(),

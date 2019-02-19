@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Linq;
 using tanka.graphql.type;
 using Xunit;
 
@@ -7,223 +7,188 @@ namespace tanka.graphql.tests.type
 {
     public class SchemaFacts
     {
+        public SchemaFacts()
+        {
+            Schema = new SchemaBuilder()
+                .InputObject("input", out var input)
+                .Connections(connect => connect
+                    .InputField(input, "id", ScalarType.ID))
+                .Query(out var query)
+                .Connections(connect => connect
+                    .Field(query, "name", ScalarType.String))
+                .Build();
+        }
+
+        protected readonly ISchema Schema;
+
         [Fact]
-        public void Require_Query()
+        public void GetDirective()
         {
             /* Given */
+            var directiveTypeName = DirectiveType.Include.Name;
 
             /* When */
-            var exception = Assert.Throws<ArgumentNullException>(() => new Schema(null));
+            var directiveType = Schema.GetDirective(directiveTypeName);
 
             /* Then */
-            Assert.Equal("query", exception.ParamName);
+            Assert.NotNull(directiveType);
+            Assert.IsType<DirectiveType>(directiveType);
         }
 
         [Fact]
-        public void Set_Mutation()
+        public void GetField()
         {
             /* Given */
-            var queryType = new ObjectType(
-                "Query",
-                new Fields());
-
-            var mutationType = new ObjectType(
-                "Mutation",
-                new Fields());
+            var namedTypeName = Schema.Query.Name;
 
             /* When */
-            var sut = new Schema(queryType, mutationType);
+            var field = Schema.GetField(namedTypeName, "name");
 
             /* Then */
-            Assert.Equal(mutationType, sut.Mutation);
+            Assert.NotNull(field);
+            Assert.Same(ScalarType.String, field.Type);
         }
 
         [Fact]
-        public void Set_Query()
+        public void GetFields()
         {
             /* Given */
-            var queryType = new ObjectType(
-                "Query",
-                new Fields());
+            var namedTypeName = Schema.Query.Name;
 
             /* When */
-            var sut = new Schema(queryType);
+            var fields = Schema.GetFields(namedTypeName);
 
             /* Then */
-            Assert.Equal(queryType, sut.Query);
+            Assert.Single(
+                fields,
+                kv => kv.Key == "name" && (ScalarType) kv.Value.Type == ScalarType.String);
         }
 
         [Fact]
-        public void Set_Subscription()
+        public void GetInputField()
         {
             /* Given */
-            var queryType = new ObjectType(
-                "Query",
-                new Fields());
-
-            var mutationType = new ObjectType(
-                "Mutation",
-                new Fields());
-
-            var subscriptionType = new ObjectType(
-                "Subscription",
-                new Fields());
+            var inputTypeName = "input";
 
             /* When */
-            var sut = new Schema(queryType, mutationType, subscriptionType);
+            var field = Schema.GetInputField(inputTypeName, "id");
 
             /* Then */
-            Assert.Equal(subscriptionType, sut.Subscription);
+            Assert.NotNull(field);
+            Assert.Same(ScalarType.ID, field.Type);
         }
 
         [Fact]
-        public async Task Initialize_types()
+        public void GetInputFields()
         {
             /* Given */
-            var queryType = new ObjectType(
-                "Q",
-                new Fields()
-                {
-                    ["field"] = new Field(new ObjectType("fieldType", new Fields()))
-                 });
-
-            var sut = new Schema(queryType);
+            var inputTypeName = "input";
 
             /* When */
-            await sut.InitializeAsync();
+            var fields = Schema.GetInputFields(inputTypeName);
 
             /* Then */
-            var types = sut.QueryTypes<IGraphQLType>();
-
-            Assert.Contains(types, t => t.Name == "Q");
-            Assert.Contains(types, t => t.Name == "fieldType");
+            Assert.Single(
+                fields,
+                kv => kv.Key == "id" && (ScalarType) kv.Value.Type == ScalarType.ID);
         }
 
         [Fact]
-        public async Task Initialize_types_with_found_scalars()
+        public void GetNamedType()
         {
             /* Given */
-            var queryType = new ObjectType(
-                "Q",
-                new Fields()
-                {
-                    ["field"] = new Field(new ObjectType("fieldType", new Fields()
-                    {
-                        ["scalar"] = new Field(ScalarType.String)
-                    }))
-                });
-
-            var sut = new Schema(queryType);
+            var namedTypeName = Schema.Query.Name;
 
             /* When */
-            await sut.InitializeAsync();
+            var namedType = Schema.GetNamedType(namedTypeName);
 
             /* Then */
-            var types = sut.QueryTypes<IGraphQLType>();
-
-            Assert.Single(types, ScalarType.String);
+            Assert.NotNull(namedType);
+            Assert.IsAssignableFrom<INamedType>(namedType);
         }
 
         [Fact]
-        public async Task Initialize_types_no_duplicates()
+        public void QueryDirectives()
         {
             /* Given */
-            var type = new ObjectType("fieldType", new Fields());
-            var queryType = new ObjectType(
-                "Q",
-                new Fields()
-                {
-                    ["field"] = new Field(type),
-                    ["field2"] = new Field(type)
-                });
-
-            var sut = new Schema(queryType);
-
-            /* When */
-            await sut.InitializeAsync();
-
-            /* Then */
-            var types = sut.QueryTypes<IGraphQLType>();
-
-            Assert.Single(types, t => t.Name == "Q");
-            Assert.Single(types, t => t.Name == "fieldType");
-        }
-
-        [Fact(Skip = "Is this right approach?")]
-        public async Task Initialize_types_with_default_scalars()
-        {
-            /* Given */
-            var type = new ObjectType("fieldType", new Fields());
-            var queryType = new ObjectType(
-                "Q",
-                new Fields()
-                {
-                    ["field"] = new Field(type),
-                    ["field2"] = new Field(type)
-                });
-
-            var sut = new Schema(queryType);
-
-            /* When */
-            await sut.InitializeAsync();
-
-            /* Then */
-            var types = sut.QueryTypes<IGraphQLType>();
-
-            foreach (var scalar in ScalarType.Standard)
+            bool AppliesToField(DirectiveType type)
             {
-                Assert.Single(types, scalar);
+                return type.Locations.Contains(DirectiveLocation.FIELD);
             }
+
+            /* When */
+            var directives = Schema.QueryDirectives(AppliesToField);
+
+            /* Then */
+            foreach (var directiveType in directives) Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
         }
 
         [Fact]
-        public async Task Initialize_directives_with_skip_and_include()
+        public void QueryNamedTypes()
         {
             /* Given */
-            var type = new ObjectType("fieldType", new Fields());
-            var queryType = new ObjectType(
-                "Q",
-                new Fields()
-                {
-                    ["field"] = new Field(type),
-                    ["field2"] = new Field(type)
-                });
-
-            var sut = new Schema(queryType);
+            bool TypesWithoutDescription(ObjectType type)
+            {
+                return string.IsNullOrEmpty(type.Description);
+            }
 
             /* When */
-            await sut.InitializeAsync();
+            var undocumentedTypes = Schema.QueryTypes<ObjectType>(TypesWithoutDescription);
 
             /* Then */
-            var directives = sut.QueryDirectives();
+            Assert.NotNull(undocumentedTypes);
+            Assert.Single(undocumentedTypes, type => type.Name == "Query");
+        }
 
-            Assert.Single(directives, DirectiveType.Skip);
+        [Fact]
+        public void Roots_Mutation()
+        {
+            /* Given */
+            /* When */
+            /* Then */
+            Assert.Null(Schema.Mutation);
+        }
+
+        [Fact]
+        public void Roots_Query()
+        {
+            /* Given */
+            /* When */
+            /* Then */
+            Assert.NotNull(Schema.Query);
+            Assert.IsType<ObjectType>(Schema.Query);
+        }
+
+        [Fact]
+        public void Roots_Subscription()
+        {
+            /* Given */
+            /* When */
+            /* Then */
+            Assert.Null(Schema.Subscription);
+        }
+
+        [Fact]
+        public void Included_directives()
+        {
+            /* Given */ 
+            /* When */
+            var directives = Schema.QueryDirectives();
+
+            /* Then */
             Assert.Single(directives, DirectiveType.Include);
+            Assert.Single(directives, DirectiveType.Skip);
         }
 
         [Fact]
-        public async Task Initialize_heal_schema()
+        public void Included_scalars()
         {
             /* Given */
-            var type = new ObjectType("fieldType", new Fields());
-            var typeReference = new NamedTypeReference("fieldType");
-            var field = new Field(typeReference);
-            var queryType = new ObjectType(
-                "Q",
-                new Fields()
-                {
-                    ["field"] = field,
-                });
-
-            var sut = new Schema(queryType, typesReferencedByNameOnly: new []{ type });
-
             /* When */
-            await sut.InitializeAsync();
+            var scalars = Schema.QueryTypes<ScalarType>();
 
             /* Then */
-            var actual = sut.Query.GetField("field");
-            Assert.Equal(type, actual.Type);
-
+            Assert.Equal(ScalarType.Standard, scalars);
         }
     }
 }

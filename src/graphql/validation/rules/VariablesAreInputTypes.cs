@@ -13,7 +13,7 @@ namespace tanka.graphql.validation.rules
     /// </summary>
     public class VariablesAreInputTypes : IValidationRule
     {
-        public Func<string, string, string> UndefinedVarMessage = (variableName, typeName) =>
+        public Func<string, IType, string> UndefinedVarMessage = (variableName, typeName) =>
             $"Variable \"{variableName}\" cannot be non-input type \"{typeName}\".";
 
         public INodeVisitor CreateVisitor(ValidationContext context)
@@ -30,7 +30,7 @@ namespace tanka.graphql.validation.rules
                     if (type is IValueConverter)
                         return;
 
-                   context.ReportError(new ValidationError(UndefinedVarMessage(varDef.Variable.Name.Value, type?.Name), varDef));
+                   context.ReportError(new ValidationError(UndefinedVarMessage(varDef.Variable.Name.Value, type), varDef));
                 });
             });
         }

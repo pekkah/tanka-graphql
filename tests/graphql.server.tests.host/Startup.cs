@@ -20,15 +20,14 @@ namespace graphql.server.tests.host
         public void ConfigureServices(IServiceCollection services)
         {
             var eventManager = new EventManager();
-            var query = new ObjectType("Query", new Fields
-            {
-                {"hello", new Field(ScalarType.String)}
-            });
+            var builder = new SchemaBuilder();
 
-            var sub = new ObjectType("Subscription", new Fields
-            {
-                {"helloEvents", new Field(ScalarType.String)}
-            });
+            builder.Query(out var query);
+            builder.Subscription(out var subscription);
+
+            builder.Connections(connect => connect
+                .Field(query, "hello", ScalarType.String)
+                .Field(subscription, "helloEvents", ScalarType.String));
 
             var resolvers = new ResolverMap
             {
@@ -39,7 +38,7 @@ namespace graphql.server.tests.host
                     }
                 },
                 {
-                    sub.Name, new FieldResolverMap
+                    subscription.Name, new FieldResolverMap
                     {
                         {
                             "helloEvents", (context,ct) =>
@@ -54,7 +53,7 @@ namespace graphql.server.tests.host
             };
 
             var executable = SchemaTools
-                .MakeExecutableSchemaWithIntrospection(new Schema(query, null, sub), resolvers, resolvers).Result;
+                .MakeExecutableSchemaWithIntrospection(builder.Build(), resolvers, resolvers).Result;
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
 

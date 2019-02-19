@@ -26,14 +26,23 @@ namespace tanka.graphql.validation
 
         public void Leave(ASTNode node)
         {
-            foreach (var listener in _listeners.Where(l => l.Leave != null).Where(l => l.Matches(node)))
+            foreach (var listener in _listeners.Where(l => l.Leave != null)
+                .Where(l => l.Matches(node)))
                 listener.Leave(node);
         }
 
         public void Enter(ASTNode node)
         {
-            foreach (var listener in _listeners.Where(l => l.Enter != null).Where(l => l.Matches(node)))
-                listener.Enter(node);
+            try
+            {
+                foreach (var listener in _listeners.Where(l => l.Enter != null)
+                    .Where(l => l.Matches(node)))
+                    listener.Enter(node);
+            }
+            catch (InvalidCastException e)
+            {
+                throw;
+            }
         }
 
         public void Match<T>(
@@ -54,7 +63,6 @@ namespace tanka.graphql.validation
             };
 
             if (enter != null) listener.Enter = n => enter((T) n);
-
             if (leave != null) listener.Leave = n => leave((T) n);
 
             _listeners.Add(listener);

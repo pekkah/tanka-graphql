@@ -15,25 +15,20 @@ namespace tanka.graphql.tests
     {
         public ErrorsFacts()
         {
-            var nested = new ObjectType(
-                "Nest",
-                new Fields
-                {
-                    ["nestedNonNull"] = new Field(NonNullString)
-                });
+            var builder = new SchemaBuilder();
+            builder.Object("Nest", out var nested)
+                .Connections(connect => connect
+                .Field(nested, "nestedNonNull", NonNullString));
 
-            _schema = new Schema(
-                new ObjectType(
-                    "Query",
-                    new Fields
-                    {
-                        ["nonNull"] = new Field(NonNullString),
-                        ["nonNullNested"] = new Field(new NonNull(nested)),
-                        ["nonNullListItem"] = new Field(new List(NonNullString)),
-                        ["nonNullList"] = new Field(new NonNull(new List(String))),
-                        ["nullableNested"] = new Field(nested),
-                        ["nullable"] = new Field(String)
-                    }));
+            builder.Query(out var query)
+                .Connections(connect => connect
+                .Field(query, "nonNull", NonNullString)
+                .Field(query, "nonNullNested", new NonNull(nested))
+                .Field(query, "nonNullListItem", new List(NonNullString))
+                .Field(query, "nonNullList", new NonNull(new List(String)))
+                .Field(query, "nullableNested", nested)
+                .Field(query, "nullable", String));
+
 
             var nestedNonNullData = new Dictionary<string, string>
             {
@@ -58,12 +53,13 @@ namespace tanka.graphql.tests
                 }
             };
 
+            _schema = builder.Build();
             _executable = SchemaTools.MakeExecutableSchemaAsync(
                 _schema,
                 _resolvers).Result;
         }
 
-        private readonly Schema _schema;
+        private readonly ISchema _schema;
         private readonly IResolverMap _resolvers;
         private readonly ISchema _executable;
 

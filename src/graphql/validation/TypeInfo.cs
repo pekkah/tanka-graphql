@@ -10,11 +10,11 @@ namespace tanka.graphql.validation
     {
         private readonly Stack<ASTNode> _ancestorStack = new Stack<ASTNode>();
         private readonly Stack<IField> _fieldDefStack = new Stack<IField>();
-        private readonly Stack<IGraphQLType> _inputTypeStack = new Stack<IGraphQLType>();
-        private readonly Stack<IGraphQLType> _parentTypeStack = new Stack<IGraphQLType>();
+        private readonly Stack<IType> _inputTypeStack = new Stack<IType>();
+        private readonly Stack<INamedType> _parentTypeStack = new Stack<INamedType>();
         private readonly ISchema _schema;
 
-        private readonly Stack<IGraphQLType> _typeStack = new Stack<IGraphQLType>();
+        private readonly Stack<IType> _typeStack = new Stack<IType>();
 
         //private DirectiveType _directive;
         private Argument _argument;
@@ -58,7 +58,7 @@ namespace tanka.graphql.validation
 
             if (node is GraphQLOperationDefinition op)
             {
-                IGraphQLType type = null;
+                INamedType type = null;
                 if (op.Operation == OperationType.Query)
                     type = _schema.Query;
                 else if (op.Operation == OperationType.Mutation)
@@ -95,7 +95,7 @@ namespace tanka.graphql.validation
             if (node is GraphQLArgument argAst)
             {
                 Argument argDef = null;
-                IGraphQLType argType = null;
+                IType argType = null;
 
                 var args = GetDirective() != null ? GetDirective()?.Arguments : GetFieldDef()?.Arguments;
 
@@ -118,11 +118,11 @@ namespace tanka.graphql.validation
             if (node is GraphQLObjectField objectField)
             {
                 var objectType = GetInputType().Unwrap();
-                IGraphQLType fieldType = null;
+                IType fieldType = null;
 
                 if (objectType is InputObjectType inputObjectType)
                 {
-                    var inputField = inputObjectType.GetField(objectField.Name.Value);
+                    var inputField = _schema.GetInputField(inputObjectType.Name, objectField.Name.Value);
                     fieldType = inputField?.Type;
                 }
 
@@ -185,38 +185,38 @@ namespace tanka.graphql.validation
             return _ancestorStack.Select(x => x).Skip(1).Reverse().ToArray();
         }
 
-        public IGraphQLType GetLastType()
+        public INamedType GetLastType()
         {
             var type = _typeStack.Any() ? _typeStack.Peek() : null;
 
             return ResolveNamedReference(type);
         }
 
-        private IGraphQLType ResolveNamedReference(IGraphQLType type)
+        private INamedType ResolveNamedReference(IType type)
         {
             if (type == null)
-                return type;
+                return null;
 
             if (type is NamedTypeReference typeRef)
             {
                 return ResolveNamedReference(typeRef.TypeName);
             }
 
-            return type;
+            return type as INamedType;
         }
 
-        private IGraphQLType ResolveNamedReference(string typeName)
+        private INamedType ResolveNamedReference(string typeName)
         {
             var type = _schema.GetNamedType(typeName);
             return type;
         }
 
-        public IGraphQLType GetInputType()
+        public IType GetInputType()
         {
             return _inputTypeStack.Any() ? _inputTypeStack.Peek() : null;
         }
 
-        public IGraphQLType GetParentType()
+        public INamedType GetParentType()
         {
             var type = _parentTypeStack.Any() ? _parentTypeStack.Peek() : null;
 
@@ -238,13 +238,13 @@ namespace tanka.graphql.validation
             return _argument;
         }
 
-        private IField GetFieldDef(ISchema schema, IGraphQLType parentType, GraphQLFieldSelection fieldSelection)
+        private IField GetFieldDef(ISchema schema, IType parentType, GraphQLFieldSelection fieldSelection)
         {
             var name = fieldSelection.Name.Value;
 
             if (parentType is ComplexType complexType)
             {
-                return complexType.GetField(name);
+                return schema.GetField(complexType.Name, name);
             }
 
             return null;

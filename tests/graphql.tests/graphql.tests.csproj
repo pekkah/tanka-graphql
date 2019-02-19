@@ -8,6 +8,8 @@
     <AssemblyName>tanka.graphql.tests</AssemblyName>
 
     <RootNamespace>tanka.graphql.tests</RootNamespace>
+
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

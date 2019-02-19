@@ -8,7 +8,7 @@ namespace tanka.graphql.server
         public static IServiceCollection AddQueryExtension<TExtension>(this IServiceCollection services)
             where TExtension: class, IExtension
         {
-            services.TryAddTransient<IExtension, TExtension>();
+            services.TryAddSingleton<IExtension, TExtension>();
 
             return services;
         }

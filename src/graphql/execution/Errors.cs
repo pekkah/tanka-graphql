@@ -11,7 +11,7 @@ namespace tanka.graphql.execution
             IExecutorContext context,
             ObjectType objectType,
             string fieldName,
-            IGraphQLType fieldType,
+            IType fieldType,
             GraphQLFieldSelection fieldSelection,
             object completedValue,
             GraphQLError error,

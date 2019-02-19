@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using tanka.graphql.type;
 
@@ -14,24 +15,29 @@ namespace tanka.graphql.tools
             Schema = schema;
         }
 
+        [Obsolete("Default will be the non async version")]
         public virtual async Task VisitAsync()
         {
             foreach (var directiveType in Schema.QueryDirectives())
             {
-                foreach (var argument in directiveType.Arguments) await VisitArgumentAsync(directiveType, argument);
+                foreach (var argument in directiveType.Arguments) 
+                    await VisitArgumentAsync(directiveType, argument);
 
                 await VisitDirectiveAsync(directiveType);
             }
 
-            foreach (var scalarType in Schema.QueryTypes<ScalarType>()) await VisitScalarAsync(scalarType);
+            foreach (var scalarType in Schema.QueryTypes<ScalarType>()) 
+                await VisitScalarAsync(scalarType);
 
-            foreach (var enumType in Schema.QueryTypes<EnumType>()) await VisitEnumAsync(enumType);
+            foreach (var enumType in Schema.QueryTypes<EnumType>()) 
+                await VisitEnumAsync(enumType);
 
             foreach (var inputObjectType in Schema.QueryTypes<InputObjectType>())
             {
                 await VisitInputObjectTypeAsync(inputObjectType);
 
-                foreach (var inputObjectField in inputObjectType.Fields)
+                var fields = Schema.GetInputFields(inputObjectType.Name);
+                foreach (var inputObjectField in fields)
                     await VisitInputObjectFieldAsync(inputObjectType, inputObjectField);
             }
 
@@ -39,7 +45,8 @@ namespace tanka.graphql.tools
             {
                 await VisitInterfaceTypeAsync(interfaceType);
 
-                foreach (var interfaceTypeField in interfaceType.Fields)
+                var fields = Schema.GetFields(interfaceType.Name);
+                foreach (var interfaceTypeField in fields)
                 {
                     foreach (var argument in interfaceTypeField.Value.Arguments)
                         await VisitArgumentAsync(interfaceType, interfaceTypeField, argument);
@@ -52,7 +59,8 @@ namespace tanka.graphql.tools
             {
                 await VisitObjectTypeAsync(objectType);
 
-                foreach (var objectTypeField in objectType.Fields)
+                var fields = Schema.GetFields(objectType.Name);
+                foreach (var objectTypeField in fields)
                 {
                     foreach (var argument in objectTypeField.Value.Arguments)
                         await VisitArgumentAsync(objectType, objectTypeField, argument);
@@ -80,7 +88,8 @@ namespace tanka.graphql.tools
             return Task.CompletedTask;
         }
 
-        protected virtual Task VisitArgumentAsync(DirectiveType directiveType, KeyValuePair<string, Argument> argument)
+        protected virtual Task VisitArgumentAsync(DirectiveType directiveType,
+            KeyValuePair<string, Argument> argument)
         {
             return Task.CompletedTask;
         }

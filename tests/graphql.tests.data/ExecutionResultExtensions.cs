@@ -13,14 +13,19 @@ namespace tanka.graphql.tests.data
             if (expectedJson == null) throw new ArgumentNullException(nameof(expectedJson));
             if (actualResult == null) throw new ArgumentNullException(nameof(actualResult));
 
-            var actualJson = JObject.FromObject(
-                actualResult,
-                JsonSerializer.CreateDefault(new JsonSerializerSettings()
+            var actualJson = JToken.FromObject(actualResult, 
+                JsonSerializer.Create(new JsonSerializerSettings()
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 }));
 
-            var expectedJsonObject = JObject.Parse(expectedJson); 
+            var expectedJsonObject = JObject.FromObject(
+                JsonConvert.DeserializeObject<ExecutionResult>(expectedJson),
+                JsonSerializer.Create(                new JsonSerializerSettings()
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }));
+
             Assert.True(JToken.DeepEquals(expectedJsonObject, actualJson), 
                 $"Expected: {expectedJsonObject}\r\nActual: {actualJson}");
         }

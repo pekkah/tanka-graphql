@@ -17,7 +17,7 @@ namespace tanka.graphql.samples.chat.data.idl
             var schema = Sdl.Schema(ParseDocument(idl));
 
             // this will initialize schema by scanning the type graph
-            await schema.InitializeAsync();
+            ;
             return schema;
         }
 

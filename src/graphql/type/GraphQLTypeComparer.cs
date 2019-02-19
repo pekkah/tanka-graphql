@@ -3,19 +3,34 @@ using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
-    public class GraphQLTypeComparer : IEqualityComparer<IGraphQLType>
+    public class GraphQLTypeComparer : IEqualityComparer<IType>
     {
-        public bool Equals(IGraphQLType x, IGraphQLType y)
+        public bool Equals(IType x, IType y)
         {
             if (x == null) throw new ArgumentNullException(nameof(x));
             if (y == null) throw new ArgumentNullException(nameof(y));
 
-            return string.Equals(x.Name, y.Name, StringComparison.Ordinal);
+            if (x is List listX && y is List listY)
+            {
+                return Object.Equals(listX.WrappedType, listY.WrappedType);
+            }
+
+            if (x is NonNull nonNullX && y is NonNull nonNullY)
+            {
+                return Object.Equals(nonNullX.WrappedType, nonNullY.WrappedType);
+            }
+
+            if (x is INamedType namedTypeX && y is INamedType namedTypeY)
+            {
+                return Object.Equals(namedTypeX, namedTypeY);
+            }
+
+            return false;
         }
 
-        public int GetHashCode(IGraphQLType obj)
+        public int GetHashCode(IType obj)
         {
-            return obj.Name?.GetHashCode() ?? string.Empty.GetHashCode();
+            return obj.GetHashCode();
         }
     }
 }

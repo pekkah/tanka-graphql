@@ -8,7 +8,7 @@
     <PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
     <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
     <Description>GraphQL server using SignalR</Description>
-    <PackageLicenseUrl>https://github.com/pekkah/tanka-graphql/blob/develop/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageTags>graphql,tanka-fw,signalr</PackageTags>
     <Authors>Pekka Heikura</Authors>
   </PropertyGroup>

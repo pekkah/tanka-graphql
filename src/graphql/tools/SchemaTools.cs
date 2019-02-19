@@ -23,9 +23,6 @@ namespace tanka.graphql.tools
             ISubscriberMap subscribers = null,
             IEnumerable<SchemaVisitorFactory> visitors = null)
         {
-            if (!schema.IsInitialized)
-                await schema.InitializeAsync();
-
             AddResolversAndSubscribers(schema, resolvers, subscribers);
 
             if (visitors != null)
@@ -53,12 +50,16 @@ namespace tanka.graphql.tools
             IEnumerable<SchemaVisitorFactory> visitors = null)
         {
             if (!schema.IsInitialized)
-                await schema.InitializeAsync();
+                ;
 
-            var introspection = await Introspection.ExamineAsync(schema);
-            var executable = await MakeExecutableSchemaAsync(schema, resolvers, subscribers);
+            var introspection = await Introspect.SchemaAsync(schema);
+            var executable = await MakeExecutableSchemaAsync(
+                schema, 
+                resolvers, 
+                subscribers);
 
-            var withIntrospection = MergeTool.MergeSchemas(executable, introspection, (l, r) => r.Field);
+            var withIntrospection = MergeTool
+                .MergeSchemas(executable, introspection);
 
             if (visitors != null)
                 foreach (var visitorFactory in visitors)
@@ -67,7 +68,6 @@ namespace tanka.graphql.tools
                     await visitor.VisitAsync();
                 }
 
-            await withIntrospection.InitializeAsync();
             return withIntrospection;
         }
 
@@ -75,7 +75,7 @@ namespace tanka.graphql.tools
             ISubscriberMap subscribers)
         {
             foreach (var type in schema.QueryTypes<ComplexType>())
-            foreach (var field in type.Fields)
+            foreach (var field in schema.GetFields(type.Name))
             {
                 field.Value.Resolve = field.Value.Resolve ?? resolvers.GetResolver(type, field);
 

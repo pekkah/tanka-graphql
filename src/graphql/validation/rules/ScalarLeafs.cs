@@ -27,7 +27,7 @@ namespace tanka.graphql.validation.rules
             });
         }
 
-        private void Field(IGraphQLType type, GraphQLFieldSelection field, ValidationContext context)
+        private void Field(IType type, GraphQLFieldSelection field, ValidationContext context)
         {
             if (type == null) return;
 
@@ -35,14 +35,14 @@ namespace tanka.graphql.validation.rules
             {
                 if (field.SelectionSet != null && field.SelectionSet.Selections.Any())
                 {
-                    var error = new ValidationError(NoSubselectionAllowedMessage(field.Name.Value, type.Name),
+                    var error = new ValidationError(NoSubselectionAllowedMessage(field.Name.Value, type?.ToString()),
                         field.SelectionSet);
                     context.ReportError(error);
                 }
             }
             else if (field.SelectionSet == null || !field.SelectionSet.Selections.Any())
             {
-                var error = new ValidationError(RequiredSubselectionMessage(field.Name.Value, type.Name), field);
+                var error = new ValidationError(RequiredSubselectionMessage(field.Name.Value, type?.ToString()), field);
                 context.ReportError(error);
             }
         }

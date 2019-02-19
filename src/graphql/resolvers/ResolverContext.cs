@@ -9,13 +9,16 @@ namespace tanka.graphql.resolvers
 {
     public class ResolverContext
     {
-        public ResolverContext(ObjectType objectType,
+        public ResolverContext(
+            ISchema schema, 
+            ObjectType objectType,
             object objectValue,
             IField field,
             GraphQLFieldSelection selection,
-            Dictionary<string, object> arguments, 
+            Dictionary<string, object> arguments,
             NodePath path)
         {
+            Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             ObjectType = objectType ?? throw new ArgumentNullException(nameof(objectType));
             ObjectValue = objectValue;
             Field = field ?? throw new ArgumentNullException(nameof(field));
@@ -23,6 +26,8 @@ namespace tanka.graphql.resolvers
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Path = path ?? throw new ArgumentNullException(nameof(path));
         }
+
+        public ISchema Schema { get; }
 
         public ObjectType ObjectType { get; }
 

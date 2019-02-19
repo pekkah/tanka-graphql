@@ -39,9 +39,9 @@ namespace tanka.graphql.validation.rules
                                 ? new string[] { }
                                 : GetSuggestedGraphQLFieldSelectionNames(type, fieldName);
 
-                            // Retport an error, including helpful suggestions.
+                            // Report an error, including helpful suggestions.
                             context.ReportError(new ValidationError(
-                                UndefinedGraphQLFieldSelectionMessage(fieldName, type.Name,
+                                UndefinedGraphQLFieldSelectionMessage(fieldName, type,
                                     suggestedTypeNames, suggestedGraphQLFieldSelectionNames),
                                 node
                             ));
@@ -53,7 +53,7 @@ namespace tanka.graphql.validation.rules
 
         public string UndefinedGraphQLFieldSelectionMessage(
             string field,
-            string type,
+            IType type,
             IEnumerable<string> suggestedTypeNames,
             IEnumerable<string> suggestedGraphQLFieldSelectionNames)
         {
@@ -80,7 +80,7 @@ namespace tanka.graphql.validation.rules
         /// </summary>
         private IEnumerable<string> GetSuggestedTypeNames(
             ISchema schema,
-            IGraphQLType type,
+            IType type,
             string graphQLFieldSelectionName)
         {
             /*
@@ -122,7 +122,7 @@ namespace tanka.graphql.validation.rules
         ///     that may be the result of a typo.
         /// </summary>
         private IEnumerable<string> GetSuggestedGraphQLFieldSelectionNames(
-            IGraphQLType type,
+            IType type,
             string graphQLFieldSelectionName)
         {
             /*

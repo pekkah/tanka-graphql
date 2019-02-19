@@ -16,7 +16,7 @@ namespace tanka.graphql.resolvers
             IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
-            IGraphQLType fieldType,
+            IType fieldType,
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
             Dictionary<string, object> coercedVariableValues, 

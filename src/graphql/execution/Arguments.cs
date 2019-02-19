@@ -8,14 +8,17 @@ namespace tanka.graphql.execution
 {
     public static class Arguments
     {
-        public static Dictionary<string, object> CoerceArgumentValues(ObjectType objectType,
-            GraphQLFieldSelection field, Dictionary<string, object> coercedVariableValues)
+        public static Dictionary<string, object> CoerceArgumentValues(
+            ISchema schema,
+            ObjectType objectType,
+            GraphQLFieldSelection field, 
+            Dictionary<string, object> coercedVariableValues)
         {
             var coercedValues = new Dictionary<string, object>();
 
             var argumentValues = field.Arguments?.ToList() ?? new List<GraphQLArgument>();
             var fieldName = field.Name.Value;
-            var argumentDefinitions = objectType.GetField(fieldName).Arguments;
+            var argumentDefinitions = schema.GetField(objectType.Name, fieldName).Arguments;
 
             if (argumentDefinitions == null)
                 return coercedValues;
@@ -65,6 +68,7 @@ namespace tanka.graphql.execution
                     else
                     {
                         var coercedValue = Values.CoerceValue(
+                            schema,
                             value,
                             argumentType);
 

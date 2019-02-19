@@ -3,12 +3,12 @@ using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
-    public class Field : IField
+    public class Field : IField, IDescribable, IDeprecable
     {
         private readonly Args _arguments = new Args();
 
         public Field(
-            IGraphQLType type,
+            IType type,
             Args arguments = null,
             Meta meta = null,
             object defaultValue = null)
@@ -24,13 +24,19 @@ namespace tanka.graphql.type
 
         public object DefaultValue { get; set; }
 
+        public string Description => Meta.Description;
+
+        public string DeprecationReason => Meta.DeprecationReason;
+
+        public bool IsDeprecated => Meta.IsDeprecated;
+
         public Meta Meta { get; set; }
 
         public Resolver Resolve { get; set; }
 
         public Subscriber Subscribe { get; set; }
 
-        public IGraphQLType Type { get; set; }
+        public IType Type { get; set; }
 
         public IEnumerable<KeyValuePair<string, Argument>> Arguments
         {

@@ -7,6 +7,6 @@ namespace tanka.graphql.validation
     {
         public GraphQLVariable Node;
 
-        public IGraphQLType Type;
+        public IType Type;
     }
 }

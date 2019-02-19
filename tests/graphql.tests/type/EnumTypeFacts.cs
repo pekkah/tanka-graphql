@@ -1,5 +1,6 @@
-﻿using tanka.graphql.type;
+﻿using System.Linq;
 using GraphQLParser.AST;
+using tanka.graphql.type;
 using Xunit;
 
 namespace tanka.graphql.tests.type
@@ -13,7 +14,7 @@ namespace tanka.graphql.tests.type
         public void ParseValue(object input, string expected)
         {
             /* Given */
-            var Enum = new EnumType("TestResult", new EnumValues()
+            var Enum = new EnumType("TestResult", new EnumValues
             {
                 ["SUCCESS"] = null,
                 ["FAILURE"] = null,
@@ -34,7 +35,7 @@ namespace tanka.graphql.tests.type
         public void Serialize(object input, string expected)
         {
             /* Given */
-            var Enum = new EnumType("TestResult", new EnumValues()
+            var Enum = new EnumType("TestResult", new EnumValues
             {
                 ["SUCCESS"] = null,
                 ["FAILURE"] = null,
@@ -60,7 +61,7 @@ namespace tanka.graphql.tests.type
                 Value = input
             };
 
-            var Enum = new EnumType("TestResult", new EnumValues()
+            var Enum = new EnumType("TestResult", new EnumValues
             {
                 ["SUCCESS"] = null,
                 ["FAILURE"] = null,
@@ -72,6 +73,28 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Define_enum()
+        {
+            /* Given */
+            /* When */
+            var Enum = new EnumType(
+                "Direction",
+                new EnumValues
+                {
+                    "NORTH",
+                    "EAST",
+                    "SOUTH",
+                    "WEST"
+                });
+
+            /* Then */
+            Assert.True(Enum.Contains("NORTH"));
+            Assert.True(Enum.Contains("EAST"));
+            Assert.True(Enum.Contains("SOUTH"));
+            Assert.True(Enum.Contains("WEST"));
         }
     }
 }

@@ -2,13 +2,11 @@
 
 namespace tanka.graphql.type
 {
-    public class List : IGraphQLType, IWrappingType, IEquatable<List>
+    public class List : IWrappingType, IEquatable<List>
     {
-        public string Name { get; } = null;
+        public IType WrappedType { get; }
 
-        public IGraphQLType WrappedType { get; }
-
-        public List(IGraphQLType wrappedType)
+        public List(IType wrappedType)
         {
             WrappedType = wrappedType ?? throw new ArgumentNullException(nameof(wrappedType));
         }
@@ -16,13 +14,6 @@ namespace tanka.graphql.type
         public override string ToString()
         {
             return $"[{WrappedType}]";
-        }
-
-        public bool Equals(List other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Name, other.Name) && Equals(WrappedType.Unwrap().Name, other.WrappedType.Unwrap().Name);
         }
 
         public override bool Equals(object obj)
@@ -33,12 +24,16 @@ namespace tanka.graphql.type
             return Equals((List) obj);
         }
 
+        public bool Equals(List other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(WrappedType, other.WrappedType);
+        }
+
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return ((Name != null ? Name.GetHashCode() : 0) * 397) ^ (WrappedType != null ? WrappedType.GetHashCode() : 0);
-            }
+            return (WrappedType != null ? WrappedType.GetHashCode() : 0);
         }
 
         public static bool operator ==(List left, List right)

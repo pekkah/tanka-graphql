@@ -1,150 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using tanka.graphql.type;
+﻿using tanka.graphql.type;
 
 namespace tanka.graphql.tools
 {
-    public class ConflictingField
-    {
-        public ConflictingField(ISchema schema, ComplexType type, string fieldName, IField field)
-        {
-            Schema = schema;
-            Type = type;
-            FieldName = fieldName;
-            Field = field;
-        }
-
-        public ISchema Schema { get; }
-        public ComplexType Type { get; }
-        public string FieldName { get; }
-        public IField Field { get; }
-    }
-
-    public delegate IField FieldConflictResolver(
-        ConflictingField left,
-        ConflictingField right);
-
-
     public static class MergeTool
     {
         public static ISchema MergeSchemas(
             ISchema left,
-            ISchema right,
-            FieldConflictResolver fieldConflict)
+            ISchema right)
         {
-            if (!left.IsInitialized || !right.IsInitialized)
-                throw new InvalidOperationException($"Schemas must be initialized before merging");
+            var builder = new SchemaBuilder(left);
 
-            var types = new List<IGraphQLType>();
-
-            foreach (var leftType in left.QueryTypes<IGraphQLType>())
-            {
-                var rightType = right.GetNamedType(leftType.Name);
-
-                // type does not exists in right
-                if (rightType == null)
+            foreach (var rightType in right.QueryTypes<ComplexType>())
+                if (builder.TryGetType<ComplexType>(rightType.Name, out var leftType))
                 {
-                    types.Add(leftType);
-                    continue;
+                    var rightTypeFields = right.GetFields(rightType.Name);
+
+                    foreach (var rightTypeField in rightTypeFields)
+                        builder.Connections(connect =>
+                        {
+                            if (!connect.TryGetField(leftType, rightTypeField.Key, out _))
+                                connect.IncludeFields(leftType, new[] {rightTypeField});
+                        });
                 }
-
-                // requires merging
-
-                // invalid types?
-                if (leftType.GetType() != rightType.GetType())
-                    throw new InvalidOperationException($"Cannot merge {rightType} to {leftType}. Types do not match.");
-
-                // merge types
-                if (leftType is InterfaceType leftInterface && rightType is InterfaceType rightInterface)
+                else if (builder.TryGetType<ScalarType>(rightType.Name, out _))
                 {
-                    var mergedType = Merge(leftInterface, rightInterface, fieldConflict);
-                    types.Add(mergedType);
-                }
-                else if (leftType is ObjectType leftObject && rightType is ObjectType rightObject)
-                {
-                    var mergedType = Merge(leftObject, rightObject, fieldConflict);
-                    types.Add(mergedType);
+                    // noop
                 }
                 else
                 {
-                    if (leftType is ScalarType)
-                        types.Add(leftType);
-                }
-            }
-
-            foreach (var rightType in right.QueryTypes<IGraphQLType>())
-            {
-                if (types.Any(t => t.Name == rightType.Name))
-                    continue;
-
-                types.Add(rightType);
-            }
-
-            return new Schema(
-                types.Single(t => t.Name == left.Query.Name) as ObjectType,
-                left.Mutation != null ? types.SingleOrDefault(t => t.Name == left.Mutation.Name) as ObjectType : null,
-                left.Subscription != null
-                    ? types.SingleOrDefault(t => t.Name == left.Subscription.Name) as ObjectType
-                    : null);
-        }
-
-        public static InterfaceType Merge(InterfaceType left, InterfaceType right,
-            FieldConflictResolver conflictResolver)
-        {
-            var fields = MergeFields(left, right, conflictResolver);
-
-            return new InterfaceType(
-                left.Name,
-                fields,
-                left.Meta);
-        }
-
-        public static ObjectType Merge(ObjectType left, ObjectType right,
-            FieldConflictResolver conflictResolver)
-        {
-            var interfaces = left.Interfaces
-                .Concat(right.Interfaces)
-                .Distinct();
-
-            var fields = MergeFields(left, right, conflictResolver);
-
-            return new ObjectType(
-                left.Name,
-                fields,
-                left.Meta,
-                interfaces);
-        }
-
-        public static IResolverMap Merge(params IResolverMap[] resolverMaps)
-        {
-            return new JoinedResolversMap(resolverMaps);
-        }
-
-        private static Fields MergeFields(ComplexType left, ComplexType right, FieldConflictResolver conflictResolver)
-        {
-            var fields = new Fields();
-            foreach (var field in left.Fields)
-                fields[field.Key] = field.Value;
-
-            foreach (var field in right.Fields)
-            {
-                // conflict?
-                if (fields.TryGetValue(field.Key, out var leftField))
-                {
-                    var resolvedField = conflictResolver(
-                        new ConflictingField(null, left, field.Key, leftField),
-                        new ConflictingField(null, right, field.Key, field.Value));
-
-                    fields[field.Key] = resolvedField;
-
-                    continue;
+                    builder
+                        .Include(rightType)
+                        .Connections(connect => connect.IncludeFields(rightType, right.GetFields(rightType.Name)));
                 }
 
-                fields[field.Key] = field.Value;
-            }
+            // todo: input objects
 
-            return fields;
+            return builder.Build();
         }
     }
 }

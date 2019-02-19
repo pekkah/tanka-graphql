@@ -12,7 +12,7 @@ namespace tanka.graphql.validation.rules
     /// </summary>
     public class DefaultValuesOfCorrectType : IValidationRule
     {
-        public Func<string, string, string, string, string> BadValueForDefaultArgMessage =
+        public Func<string, string, IType, string, string> BadValueForDefaultArgMessage =
             (message, varName, type, value) =>
                 $"Variable \"{varName}\" of type \"{type}\" has invalid default value {value}. {message}";
 
@@ -35,8 +35,8 @@ namespace tanka.graphql.validation.rules
                         context.ReportError(new ValidationError(
                             BadValueForNonNullArgMessage(
                                 name,
-                                nonNull.Name,
-                                nonNull.WrappedType.Name),
+                                nonNull.ToString(),
+                                nonNull.WrappedType.ToString()),
                             node));
 
                     if (inputType != null && defaultValue != null)
@@ -46,7 +46,7 @@ namespace tanka.graphql.validation.rules
         }
 
         private void ValidateValue(ValidationContext context, GraphQLVariableDefinition node, object nodeValue,
-            IGraphQLType type)
+            IType type)
         {
             if (type is NonNull nonNull) ValidateValue(context, node, nodeValue, nonNull.WrappedType);
 
@@ -60,7 +60,7 @@ namespace tanka.graphql.validation.rules
                         BadValueForDefaultArgMessage(
                             "Expected type is list but value is not list value",
                             node.Variable.Name.Value,
-                            type.Name,
+                            type,
                             null)));
             }
 
@@ -74,7 +74,7 @@ namespace tanka.graphql.validation.rules
                             BadValueForNonNullArgMessage(
                                 "Expected non-null value but null was parsed",
                                 node.Variable.Name.Value,
-                                type.Name), node));
+                                type.ToString()), node));
                 }
                 else if (nodeValue is GraphQLVariable variableValue)
                 {
@@ -86,7 +86,7 @@ namespace tanka.graphql.validation.rules
                         BadValueForDefaultArgMessage(
                             $"Expected leaf type value but was {nodeValue.GetType()}",
                             node.Variable.Name.Value,
-                            type.Name,
+                            type,
                             nodeValue?.ToString()), node));
                 }
             }

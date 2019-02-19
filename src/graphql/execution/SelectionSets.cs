@@ -169,7 +169,7 @@ namespace tanka.graphql.execution
                 return true;
 
             var ifArgument = includeDirective.Arguments.SingleOrDefault(a => a.Name?.Value == "if");
-            return GetArgumentValue(includeDirective, coercedVariableValues, ifArgument);
+            return GetIfArgumentValue(schema, includeDirective, coercedVariableValues, ifArgument);
         }
 
         private static bool SkipSelection(GraphQLDirective skipDirective,
@@ -179,10 +179,11 @@ namespace tanka.graphql.execution
                 return false;
 
             var ifArgument = skipDirective.Arguments.SingleOrDefault(a => a.Name?.Value == "if");
-            return GetArgumentValue(skipDirective, coercedVariableValues, ifArgument);
+            return GetIfArgumentValue(schema, skipDirective, coercedVariableValues, ifArgument);
         }
 
-        private static bool GetArgumentValue(
+        private static bool GetIfArgumentValue(
+            ISchema schema,
             GraphQLDirective directive,
             Dictionary<string, object> coercedVariableValues,
             GraphQLArgument argument)
@@ -196,7 +197,7 @@ namespace tanka.graphql.execution
             switch (argument.Value)
             {
                 case GraphQLScalarValue scalarValue:
-                    return (bool) Values.CoerceValue(scalarValue, ScalarType.NonNullBoolean);
+                    return (bool) Values.CoerceValue(schema, scalarValue, ScalarType.NonNullBoolean);
                 case GraphQLVariable variable:
                     var variableValue = coercedVariableValues[variable.Name.Value];
                     return (bool) variableValue;
@@ -220,7 +221,7 @@ namespace tanka.graphql.execution
             }
         }
 
-        private static bool DoesFragmentTypeApply(ObjectType objectType, IGraphQLType fragmentType)
+        private static bool DoesFragmentTypeApply(ObjectType objectType, IType fragmentType)
         {
             if (fragmentType is ObjectType obj)
                 return string.Equals(obj.Name, objectType.Name, StringComparison.Ordinal);

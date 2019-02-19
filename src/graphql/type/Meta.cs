@@ -2,13 +2,13 @@
 
 namespace tanka.graphql.type
 {
-    public class Meta : IDirectives
+    public class Meta : IDirectives, IDescribable, IDeprecable
     {
         private readonly DirectiveContainer _directives;
 
         public Meta(string description = null, string deprecationReason = null, IEnumerable<DirectiveInstance> directives = null)
         {
-            Description = description;
+            Description = description; //todo: should be  ?? string.Empty ??
             DeprecationReason = deprecationReason;
             _directives = new DirectiveContainer(directives);
         }
@@ -17,6 +17,7 @@ namespace tanka.graphql.type
         {
             Description = string.Empty;
             DeprecationReason = null;
+            _directives = new DirectiveContainer();
         }
 
         public string Description { get; }

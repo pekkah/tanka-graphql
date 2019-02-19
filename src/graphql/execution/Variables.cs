@@ -22,7 +22,7 @@ namespace tanka.graphql.execution
                 var variableType = Ast.TypeFromAst(schema, variableDefinition.Type);
 
                 //  should be assert?
-                if (!Validations.IsInputType(variableType))
+                if (!TypeIs.IsInputType(variableType))
                     throw new VariableException($"Variable is not of input type", variableName, variableType);
 
                 var defaultValue = variableDefinition.DefaultValue;
@@ -46,6 +46,7 @@ namespace tanka.graphql.execution
                         coercedValues[variableName] = null;
                     else
                         coercedValues[variableName] = Values.CoerceValue(
+                            schema,
                             value,
                             variableType);
                 }
