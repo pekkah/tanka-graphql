@@ -1,4 +1,4 @@
-mode: ContinuousDelivery
+mode: ContinuousDeployment
 branches:
   develop:
     tag: beta

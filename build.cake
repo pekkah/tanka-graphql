@@ -1,4 +1,4 @@
-#tool "nuget:?package=GitVersion.CommandLine&version=4.0.0-beta0014&prerelease"
+#tool "nuget:?package=GitVersion.CommandLine&version=4.0.0"
 #addin "Cake.Npm"
 
 var target = Argument<string>("target", "Default");
@@ -146,7 +146,11 @@ Task("Restore")
 
 Task("SetVersion")
     .Does(()=> {
-        var result = GitVersion();
+        var result = GitVersion(new GitVersionSettings() 
+        {
+          ArgumentCustomization = args => args.Append("/verbosity debug"),
+          LogFilePath = "gitversion.log"
+        });
         
         version = result.SemVer;
         preRelease = result.PreReleaseNumber.HasValue;
