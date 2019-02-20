@@ -194,6 +194,7 @@
                         __typename
                         id
                         type
+                        payload
                     }
                 }&quot;);
 
@@ -210,13 +211,15 @@
                   &quot;&quot;data&quot;&quot;: {
                     &quot;&quot;events&quot;&quot;: [
                       {
+                        &quot;&quot;type&quot;&quot;: &quot;&quot;DELETE&quot;&quot;,
                         &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                        &quot;&quot;type&quot;&quot;: &quot;&quot;INSERT&quot;&quot;,
+                        &quot;&quot;payload&quot;&quot;: &quot;&quot;payload1&quot;&quot;,
                         &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;
                       },
                       {
+                        &quot;&quot;type&quot;&quot;: &quot;&quot;UPDATE&quot;&quot;,
                         &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                        &quot;&quot;type&quot;&quot;: &quot;&quot;INSERT&quot;&quot;,
+                        &quot;&quot;payload&quot;&quot;: &quot;&quot;payload2&quot;&quot;,
                         &quot;&quot;id&quot;&quot;: &quot;&quot;2&quot;&quot;
                       }
                     ]
@@ -247,6 +250,7 @@
                 type Event {
                     id: ID!
                     type: EventType!
+                    payload: String
                 }
 
                 input NewEvent {
@@ -295,7 +299,8 @@
                     &quot;Event&quot;, new FieldResolverMap
                     {
                         {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)}
+                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
+                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload)}
                     }
                 },
                 {

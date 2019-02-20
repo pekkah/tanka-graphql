@@ -278,6 +278,7 @@
                 type Event {
                     id: ID!
                     type: EventType!
+                    payload: String
                 }
 
                 input NewEvent {
@@ -326,7 +327,8 @@
                     &quot;Event&quot;, new FieldResolverMap
                     {
                         {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)}
+                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
+                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload)}
                     }
                 },
                 {
