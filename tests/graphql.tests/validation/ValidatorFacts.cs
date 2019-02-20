@@ -106,5 +106,64 @@ namespace tanka.graphql.tests.validation
                 result.Errors,
                 error => error.Code == Errors.R511ExecutableDefinitions);
         }
+
+        [Fact]
+        public void Rule_5211_Operation_Name_Uniqueness_valid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query getDogName {
+                      dog {
+                        name
+                      }
+                    }
+
+                    query getOwnerName {
+                      dog {
+                        owner {
+                          name
+                        }
+                      }
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5211OperationNameUniqueness());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5211_Operation_Name_Uniqueness_invalid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query getName {
+                      dog {
+                        name
+                      }
+                    }
+
+                    query getName {
+                      dog {
+                        owner {
+                          name
+                        }
+                      }
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5211OperationNameUniqueness());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R5211OperationNameUniqueness);
+        }
     }
 }

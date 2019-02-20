@@ -3,6 +3,12 @@ using GraphQLParser.AST;
 
 namespace tanka.graphql.validation.rules2
 {
+    /// <summary>
+    /// Formal Specification
+    /// 
+    /// For each definition definition in the document.
+    /// definition must be OperationDefinition or FragmentDefinition (it must not be TypeSystemDefinition).
+    /// </summary>
     public class R511ExecutableDefinitions : Rule
     {
         public override IEnumerable<ASTNodeKind> AppliesToNodeKinds => new[] {ASTNodeKind.Document};
