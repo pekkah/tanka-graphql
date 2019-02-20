@@ -32,7 +32,8 @@ namespace tanka.graphql.tests
             var ev = new Event
             {
                 Id = LastId,
-                Type = EventType.INSERT
+                Type = newEvent.Type,
+                Payload = newEvent.Payload
             };
             Events.Add(ev);
             await Broadcast.SendAsync(ev);
@@ -75,6 +76,8 @@ namespace tanka.graphql.tests
             public int Id { get; set; }
 
             public EventType Type { get; set; }
+
+            public string Payload { get; set; }
         }
 
         public class NewEvent

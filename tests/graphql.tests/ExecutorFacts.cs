@@ -32,6 +32,7 @@ namespace tanka.graphql.tests
                 type Event {
                     id: ID!
                     type: EventType!
+                    payload: String
                 }
 
                 input NewEvent {
@@ -79,7 +80,8 @@ namespace tanka.graphql.tests
                     "Event", new FieldResolverMap
                     {
                         {"id", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Id)},
-                        {"type", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Type)}
+                        {"type", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Type)},
+                        {"payload", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Payload)}
                     }
                 },
                 {
@@ -266,6 +268,7 @@ namespace tanka.graphql.tests
                         __typename
                         id
                         type
+                        payload
                     }
                 }");
 
@@ -282,13 +285,15 @@ namespace tanka.graphql.tests
                   ""data"": {
                     ""events"": [
                       {
+                        ""type"": ""DELETE"",
                         ""__typename"": ""Event"",
-                        ""type"": ""INSERT"",
+                        ""payload"": ""payload1"",
                         ""id"": ""1""
                       },
                       {
+                        ""type"": ""UPDATE"",
                         ""__typename"": ""Event"",
-                        ""type"": ""INSERT"",
+                        ""payload"": ""payload2"",
                         ""id"": ""2""
                       }
                     ]
@@ -306,6 +311,7 @@ namespace tanka.graphql.tests
                         __typename
                         id
                         type
+                        payload
                     }
                 }");
 
@@ -332,9 +338,10 @@ namespace tanka.graphql.tests
                 @"{
                   ""data"": {
                     ""events"": {
-                      ""type"": ""INSERT"",
+                      ""type"": ""DELETE"",
                       ""id"": ""1"",
-                      ""__typename"": ""Event""
+                      ""__typename"": ""Event"",
+                      ""payload"": ""payload1""
                     }
                   }
                 }");
