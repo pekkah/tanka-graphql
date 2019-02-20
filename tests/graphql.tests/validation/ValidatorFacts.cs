@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using GraphQLParser.AST;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.validation;
-using tanka.graphql.validation.rules;
+using tanka.graphql.validation.rules2;
 using Xunit;
 
 namespace tanka.graphql.tests.validation
@@ -65,23 +64,23 @@ namespace tanka.graphql.tests.validation
 
         public ISchema Schema { get; }
 
-        private Task<ValidationResult> ValidateAsync(
+        private ValidationResult Validate(
             GraphQLDocument document,
-            IValidationRule rule,
+            IRule rule,
             Dictionary<string, object> variables = null)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
             if (rule == null) throw new ArgumentNullException(nameof(rule));
 
-            return Validator.ValidateAsync(
+            return Validator.Validate(           
+                new[] {rule},
                 Schema,
                 document,
-                variables,
-                new[] {rule});
+                variables);
         }
 
-        [Fact(Skip = "Some validation rules are behaving strangely. #16")]
-        public async Task Rule_511_Executable_Definitions()
+        [Fact]
+        public void Rule_511_Executable_Definitions()
         {
             /* Given */
             var document = Parser.ParseDocument(
@@ -97,7 +96,7 @@ namespace tanka.graphql.tests.validation
                 }");
 
             /* When */
-            var result = await ValidateAsync(
+            var result = Validate(
                 document,
                 new R511ExecutableDefinitions());
 

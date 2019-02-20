@@ -1,14 +1,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GraphQLParser.AST;
 using tanka.graphql.type;
 using tanka.graphql.validation.rules;
-using GraphQLParser.AST;
 
 namespace tanka.graphql.validation
 {
     public static class Validator
     {
+        public static ValidationResult Validate(
+            IEnumerable<IRule> rules,
+            ISchema schema,
+            GraphQLDocument document,
+            Dictionary<string, object> variableValues = null)
+        {
+            var visitor = new DocumentRulesVisitor(rules, schema, document, variableValues);
+            return visitor.Validate();
+        }
+
         public static async Task<ValidationResult> ValidateAsync(
             ISchema schema,
             GraphQLDocument document,
