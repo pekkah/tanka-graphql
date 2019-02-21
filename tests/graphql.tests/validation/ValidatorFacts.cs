@@ -625,5 +625,69 @@ namespace tanka.graphql.tests.validation
                 result.Errors,
                 error => error.Code == Errors.R533LeafFieldSelections);
         }
+
+        [Fact]
+        public void Rule_541_Argument_Names_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment argOnRequiredArg on Dog {
+                      doesKnowCommand(dogCommand: SIT)
+                    }
+
+                    fragment argOnOptional on Dog {
+                      isHousetrained(atOtherHomes: true) @include(if: true)
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R541ArgumentNames());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_541_Argument_Names_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment invalidArgName on Dog {
+                      doesKnowCommand(command: CLEAN_UP_HOUSE)
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R541ArgumentNames());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R541ArgumentNames);
+        }
+
+        [Fact]
+        public void Rule_541_Argument_Names_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment invalidArgName on Dog {
+                      isHousetrained(atOtherHomes: true) @include(unless: false)
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R541ArgumentNames());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R541ArgumentNames);
+        }
     }
 }

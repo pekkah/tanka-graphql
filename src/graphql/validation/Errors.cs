@@ -13,5 +13,7 @@
         public const string R531FieldSelections = "5.3.1 Field Selections on Objects, Interfaces, and Unions Types";
 
         public const string R533LeafFieldSelections = "5.3.3 Leaf Field Selections";
+
+        public const string R541ArgumentNames = "5.4.1 Argument Names";
     }
 }

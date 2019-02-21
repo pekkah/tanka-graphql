@@ -63,13 +63,13 @@ namespace tanka.graphql.validation
             return BuildResult();
         }
 
-        public override void Visit(GraphQLDocument ast)
+        public override void Visit(GraphQLDocument document)
         {
-            var rules = GetRules(ast);
+            var rules = GetRules(document);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.Visit(ast, this));
+                CollectErrors(rule, rule.Visit(document, this));
 
-            base.Visit(ast);
+            base.Visit(document);
         }
 
         public override GraphQLName BeginVisitAlias(GraphQLName alias)
