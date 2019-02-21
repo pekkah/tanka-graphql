@@ -14,8 +14,23 @@ namespace tanka.graphql.tests.validation
         public ValidatorFacts()
         {
             var sdl =
-                @"type Query {
+                @"
+                schema {
+                    query: Query
+                    subscription: Subscription
+                }
+
+                type Query {
                   dog: Dog
+                }
+
+                type Subscription {
+                    newMessage: Message
+                }
+
+                type Message {
+                    body: String
+                    sender: String
                 }
 
                 enum DogCommand { SIT, DOWN, HEEL }
@@ -215,6 +230,131 @@ namespace tanka.graphql.tests.validation
             Assert.Single(
                 result.Errors,
                 error => error.Code == Errors.R5221LoneAnonymousOperation);
+        }
+
+        [Fact]
+        public void Rule_5231_Single_root_field_valid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"subscription sub {
+                      newMessage {
+                        body
+                        sender
+                      }
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5221LoneAnonymousOperation());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5231_Single_root_field_valid_with_fragment()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"subscription sub {
+                      ...newMessageFields
+                    }
+
+                    fragment newMessageFields on Subscription {
+                      newMessage {
+                        body
+                        sender
+                      }
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5231SingleRootField());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5231_Single_root_field_invalid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"subscription sub {
+                      newMessage {
+                        body
+                        sender
+                      }
+                      disallowedSecondRootField
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5231SingleRootField());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R5231SingleRootField);
+        }
+
+        [Fact]
+        public void Rule_5231_Single_root_field_invalid_with_fragment()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"subscription sub {
+                      ...multipleSubscriptions
+                    }
+
+                    fragment multipleSubscriptions on Subscription {
+                      newMessage {
+                        body
+                        sender
+                      }
+                      disallowedSecondRootField
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5231SingleRootField());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R5231SingleRootField);
+        }
+
+        [Fact]
+        public void Rule_5231_Single_root_field_invalid_with_typename()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"subscription sub {
+                      newMessage {
+                        body
+                        sender
+                      }
+                      __typename
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5231SingleRootField());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R5231SingleRootField);
         }
     }
 }

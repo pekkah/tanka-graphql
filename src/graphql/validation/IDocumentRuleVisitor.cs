@@ -5,85 +5,99 @@ namespace tanka.graphql.validation
 {
     public interface IDocumentRuleVisitor
     {
-        IEnumerable<ValidationError> BeginVisitAlias(GraphQLName alias);
+        IEnumerable<ValidationError> BeginVisitAlias(GraphQLName alias,
+            IValidationContext context);
 
-        IEnumerable<ValidationError> BeginVisitArgument(GraphQLArgument argument);
+        IEnumerable<ValidationError> BeginVisitArgument(GraphQLArgument argument,
+            IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitArguments(
-            IEnumerable<GraphQLArgument> arguments);
+            IEnumerable<GraphQLArgument> arguments,
+            IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitBooleanValue(
-            GraphQLScalarValue value);
+            GraphQLScalarValue value, IValidationContext context);
 
-        IEnumerable<ValidationError> BeginVisitDirective(GraphQLDirective directive);
+        IEnumerable<ValidationError> BeginVisitDirective(GraphQLDirective directive,
+            IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitDirectives(
-            IEnumerable<GraphQLDirective> directives);
+            IEnumerable<GraphQLDirective> directives, IValidationContext context);
 
-        IEnumerable<ValidationError> BeginVisitEnumValue(GraphQLScalarValue value);
+        IEnumerable<ValidationError> BeginVisitEnumValue(GraphQLScalarValue value,
+            IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitFieldSelection(
-            GraphQLFieldSelection selection);
+            GraphQLFieldSelection selection, IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitFloatValue(
-            GraphQLScalarValue value);
+            GraphQLScalarValue value, IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitFragmentDefinition(
-            GraphQLFragmentDefinition node);
+            GraphQLFragmentDefinition node, IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitFragmentSpread(
-            GraphQLFragmentSpread fragmentSpread);
+            GraphQLFragmentSpread fragmentSpread, IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitInlineFragment(
-            GraphQLInlineFragment inlineFragment);
+            GraphQLInlineFragment inlineFragment, IValidationContext context);
 
-        IEnumerable<ValidationError> BeginVisitIntValue(GraphQLScalarValue value);
+        IEnumerable<ValidationError> BeginVisitIntValue(GraphQLScalarValue value,
+            IValidationContext context);
 
-        IEnumerable<ValidationError> BeginVisitName(GraphQLName name);
+        IEnumerable<ValidationError> BeginVisitName(GraphQLName name,
+            IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitNamedType(
-            GraphQLNamedType typeCondition);
+            GraphQLNamedType typeCondition, IValidationContext context);
 
-        IEnumerable<ValidationError> BeginVisitNode(ASTNode node);
+        IEnumerable<ValidationError> BeginVisitNode(ASTNode node,
+            IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitOperationDefinition(
-            GraphQLOperationDefinition definition);
+            GraphQLOperationDefinition definition, IValidationContext context);
 
         IEnumerable<ValidationError> EndVisitOperationDefinition(
-            GraphQLOperationDefinition definition);
+            GraphQLOperationDefinition definition, IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitSelectionSet(
-            GraphQLSelectionSet selectionSet);
+            GraphQLSelectionSet selectionSet, IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitStringValue(
-            GraphQLScalarValue value);
+            GraphQLScalarValue value, IValidationContext context);
 
-        IEnumerable<ValidationError> BeginVisitVariable(GraphQLVariable variable);
+        IEnumerable<ValidationError> BeginVisitVariable(GraphQLVariable variable,
+            IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitVariableDefinition(
-            GraphQLVariableDefinition node);
+            GraphQLVariableDefinition node, IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitVariableDefinitions(
-            IEnumerable<GraphQLVariableDefinition> variableDefinitions);
+            IEnumerable<GraphQLVariableDefinition> variableDefinitions,
+            IValidationContext context);
 
-        IEnumerable<ValidationError> EndVisitArgument(GraphQLArgument argument);
+        IEnumerable<ValidationError> EndVisitArgument(GraphQLArgument argument,
+            IValidationContext context);
 
         IEnumerable<ValidationError> EndVisitFieldSelection(
-            GraphQLFieldSelection selection);
+            GraphQLFieldSelection selection, IValidationContext context);
 
-        IEnumerable<ValidationError> EndVisitVariable(GraphQLVariable variable);
+        IEnumerable<ValidationError> EndVisitVariable(GraphQLVariable variable,
+            IValidationContext context);
 
-        IEnumerable<ValidationError> Visit(GraphQLDocument document);
+        IEnumerable<ValidationError> Visit(GraphQLDocument document,
+            IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitObjectField(
-            GraphQLObjectField node);
+            GraphQLObjectField node, IValidationContext context);
 
         IEnumerable<ValidationError> BeginVisitObjectValue(
-            GraphQLObjectValue node);
+            GraphQLObjectValue node, IValidationContext context);
 
-        IEnumerable<ValidationError> EndVisitObjectValue(GraphQLObjectValue node);
+        IEnumerable<ValidationError> EndVisitObjectValue(GraphQLObjectValue node,
+            IValidationContext context);
 
-        IEnumerable<ValidationError> EndVisitListValue(GraphQLListValue node);
-
+        IEnumerable<ValidationError> EndVisitListValue(GraphQLListValue node,
+            IValidationContext context);
     }
 }

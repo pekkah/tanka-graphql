@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GraphQLParser.AST;
+using tanka.graphql.type;
 
 namespace tanka.graphql.validation.rules2
 {
@@ -13,7 +14,7 @@ namespace tanka.graphql.validation.rules2
     {
         public override IEnumerable<ASTNodeKind> AppliesToNodeKinds => new[] {ASTNodeKind.Document};
 
-        public override IEnumerable<ValidationError> Visit(GraphQLDocument document)
+        public override IEnumerable<ValidationError> Visit(GraphQLDocument document, IValidationContext context)
         {
             foreach (var definition in document.Definitions)
             {
