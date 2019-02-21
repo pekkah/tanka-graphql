@@ -21,27 +21,32 @@ namespace tanka.graphql.sdl
 
         public SchemaBuilder Read()
         {
-            var definitions = _document.Definitions;
+            var definitions = _document.Definitions.ToList();
 
             foreach (var definition in definitions.OfType<GraphQLScalarTypeDefinition>())
                 Scalar(definition);
 
-            foreach (var directiveDefinition in _document.Definitions.OfType<GraphQLDirectiveDefinition>())
+            foreach (var directiveDefinition in definitions.OfType<GraphQLDirectiveDefinition>())
                 DirectiveType(directiveDefinition);
 
-            foreach (var definition in _document.Definitions.OfType<GraphQLInputObjectTypeDefinition>())
+            foreach (var definition in definitions.OfType<GraphQLInputObjectTypeDefinition>())
                 InputObject(definition);
 
-            foreach (var definition in _document.Definitions.OfType<GraphQLEnumTypeDefinition>())
+            foreach (var definition in definitions.OfType<GraphQLEnumTypeDefinition>())
                 Enum(definition);
 
-            foreach (var definition in _document.Definitions.OfType<GraphQLInterfaceTypeDefinition>())
+            foreach (var definition in definitions.OfType<GraphQLInterfaceTypeDefinition>())
                 Interface(definition);
 
-            foreach (var definition in _document.Definitions.OfType<GraphQLObjectTypeDefinition>())
+            foreach (var definition in definitions.OfType<GraphQLObjectTypeDefinition>())
                 Object(definition);
 
-            foreach (var definition in _document.Definitions.OfType<GraphQLTypeExtensionDefinition>())
+            foreach (var definition in definitions.OfType<GraphQLUnionTypeDefinition>())
+            {
+                Union(definition);
+            }
+
+            foreach (var definition in definitions.OfType<GraphQLTypeExtensionDefinition>())
                 Extend(definition);
 
             return _builder;

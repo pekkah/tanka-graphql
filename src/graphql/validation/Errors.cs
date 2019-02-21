@@ -9,5 +9,7 @@
         public const string R5221LoneAnonymousOperation = "5.2.2.1 Lone Anonymous Operation";
 
         public const string R5231SingleRootField = "5.2.3.1 Single root field";
+
+        public const string R531FieldSelections = "5.3.1 Field Selections on Objects, Interfaces, and Unions Types";
     }
 }

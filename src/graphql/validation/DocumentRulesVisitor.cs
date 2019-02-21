@@ -220,7 +220,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(definition);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitOperationDefinition(definition, this));
+                CollectErrors(rule, rule.EndVisitOperationDefinition(definition, this));
 
             return base.EndVisitOperationDefinition(definition);
         }

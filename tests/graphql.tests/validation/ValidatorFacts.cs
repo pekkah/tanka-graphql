@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using GraphQLParser.AST;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
@@ -182,7 +183,7 @@ namespace tanka.graphql.tests.validation
         }
 
         [Fact]
-        public void Rule_5221_Lone_Anonymous_Operation_invalid_valid()
+        public void Rule_5221_Lone_Anonymous_Operation_valid()
         {
             /* Given */
             var document = Parser.ParseDocument(
@@ -355,6 +356,161 @@ namespace tanka.graphql.tests.validation
             Assert.Single(
                 result.Errors,
                 error => error.Code == Errors.R5231SingleRootField);
+        }
+
+        [Fact]
+        public void Rule_531_Field_Selections_invalid_with_fragment()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment fieldNotDefined on Dog {
+                      meowVolume
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R531FieldSelections());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R531FieldSelections);
+        }
+
+        [Fact]
+        public void Rule_531_Field_Selections_invalid_with_alias()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment aliasedLyingFieldTargetNotDefined on Dog {
+                      barkVolume: kawVolume
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R531FieldSelections());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R531FieldSelections);
+        }
+
+        [Fact]
+        public void Rule_531_Field_Selections_valid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                  dog {
+                    name
+                  }
+                }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R531FieldSelections());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_531_Field_Selections_valid_with_interface()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment interfaceFieldSelection on Pet {
+                  name
+                }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R531FieldSelections());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_531_Field_Selections_invalid_with_interface()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment definedOnImplementorsButNotInterface on Pet {
+                      nickname
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R531FieldSelections());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R531FieldSelections);
+        }
+
+        [Fact]
+        public void Rule_531_Field_Selections_valid_with_union()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment inDirectFieldSelectionOnUnion on CatOrDog {
+                  __typename
+                  ... on Pet {
+                    name
+                  }
+                  ... on Dog {
+                    barkVolume
+                  }
+                }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R531FieldSelections());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_531_Field_Selections_invalid_with_union()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment directFieldSelectionOnUnion on CatOrDog {
+                      name
+                      barkVolume
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R531FieldSelections());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R531FieldSelections 
+                         && error.Nodes.OfType<GraphQLFieldSelection>()
+                             .Any(n => n.Name.Value == "name"));
+
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R531FieldSelections 
+                         && error.Nodes.OfType<GraphQLFieldSelection>()
+                             .Any(n => n.Name.Value == "barkVolume"));
         }
     }
 }
