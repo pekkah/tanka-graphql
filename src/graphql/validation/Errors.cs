@@ -11,5 +11,7 @@
         public const string R5231SingleRootField = "5.2.3.1 Single root field";
 
         public const string R531FieldSelections = "5.3.1 Field Selections on Objects, Interfaces, and Unions Types";
+
+        public const string R533LeafFieldSelections = "5.3.3 Leaf Field Selections";
     }
 }

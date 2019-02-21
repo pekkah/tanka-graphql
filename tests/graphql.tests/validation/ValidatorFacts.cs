@@ -23,6 +23,9 @@ namespace tanka.graphql.tests.validation
 
                 type Query {
                   dog: Dog
+                  human: Human
+                  pet: Pet
+                  catOrDog: CatOrDog
                 }
 
                 type Subscription {
@@ -511,6 +514,116 @@ namespace tanka.graphql.tests.validation
                 error => error.Code == Errors.R531FieldSelections 
                          && error.Nodes.OfType<GraphQLFieldSelection>()
                              .Any(n => n.Name.Value == "barkVolume"));
+        }
+
+        [Fact(Skip = "Not implemented")]
+        public void Rule_532_Field_Selection_Merging()
+        {
+            //todo
+        }
+
+        [Fact]
+        public void Rule_533_Leaf_Field_Selections_valid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment scalarSelection on Dog {
+                      barkVolume
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R533LeafFieldSelections());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_533_Leaf_Field_Selections_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment scalarSelectionsNotAllowedOnInt on Dog {
+                      barkVolume {
+                        sinceWhen
+                      }
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R533LeafFieldSelections());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R533LeafFieldSelections);
+        }
+
+        [Fact]
+        public void Rule_533_Leaf_Field_Selections_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query directQueryOnObjectWithoutSubFields {
+                      human
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R533LeafFieldSelections());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R533LeafFieldSelections);
+        }
+
+        [Fact]
+        public void Rule_533_Leaf_Field_Selections_invalid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query directQueryOnInterfaceWithoutSubFields {
+                      pet
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R533LeafFieldSelections());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R533LeafFieldSelections);
+        }
+
+        [Fact]
+        public void Rule_533_Leaf_Field_Selections_invalid4()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query directQueryOnUnionWithoutSubFields {
+                      catOrDog
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R533LeafFieldSelections());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R533LeafFieldSelections);
         }
     }
 }
