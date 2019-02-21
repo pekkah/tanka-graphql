@@ -165,5 +165,56 @@ namespace tanka.graphql.tests.validation
                 result.Errors,
                 error => error.Code == Errors.R5211OperationNameUniqueness);
         }
+
+        [Fact]
+        public void Rule_5221_Lone_Anonymous_Operation_invalid_valid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                  dog {
+                    name
+                  }
+                }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5221LoneAnonymousOperation());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5221_Lone_Anonymous_Operation_invalid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                  dog {
+                    name
+                  }
+                }
+
+                query getName {
+                  dog {
+                    owner {
+                      name
+                    }
+                  }
+                }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5221LoneAnonymousOperation());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == Errors.R5221LoneAnonymousOperation);
+        }
     }
 }
