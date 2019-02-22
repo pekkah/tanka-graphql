@@ -4,18 +4,52 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using tanka.graphql.type;
 using tanka.graphql.validation.rules;
+using V2 = tanka.graphql.validation.rules2;
 
 namespace tanka.graphql.validation
 {
     public static class Validator
     {
+        public static Dictionary<ASTNodeKind, List<IRule>> DefaultRules =
+            DocumentRulesVisitor.InitializeRuleActionMap(new IRule[]
+            {
+                new V2.R5211OperationNameUniqueness(), 
+                new V2.R5221LoneAnonymousOperation(), 
+                new V2.R5231SingleRootField(), 
+                new V2.R531FieldSelections(), 
+                new V2.R533LeafFieldSelections(), 
+                new V2.R541ArgumentNames(),
+                new V2.R511ExecutableDefinitions(),
+
+            });
+
         public static ValidationResult Validate(
             IEnumerable<IRule> rules,
             ISchema schema,
             GraphQLDocument document,
             Dictionary<string, object> variableValues = null)
         {
-            var visitor = new DocumentRulesVisitor(rules, schema, document, variableValues);
+            var visitor = new DocumentRulesVisitor(
+                rules, 
+                schema, 
+                document, 
+                variableValues);
+
+            return visitor.Validate();
+        }
+
+        public static ValidationResult Validate(
+            Dictionary<ASTNodeKind, List<IRule>> ruleMap,
+            ISchema schema,
+            GraphQLDocument document,
+            Dictionary<string, object> variableValues = null)
+        {
+            var visitor = new DocumentRulesVisitor(
+                ruleMap,
+                schema, 
+                document, 
+                variableValues);
+
             return visitor.Validate();
         }
 

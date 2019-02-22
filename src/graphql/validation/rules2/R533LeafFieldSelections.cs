@@ -13,68 +13,27 @@ namespace tanka.graphql.validation.rules2
     ///     If selectionType is an interface, union, or object
     ///     The subselection set of that selection must NOT BE empty
     /// </summary>
-    public class R533LeafFieldSelections : Rule
+    public class R533LeafFieldSelections : TypeTrackingRuleBase
     {
-        public override IEnumerable<ASTNodeKind> AppliesToNodeKinds => new[]
-        {
-            ASTNodeKind.OperationDefinition,
-            ASTNodeKind.InlineFragment,
-            ASTNodeKind.FragmentDefinition,
-            ASTNodeKind.Field
-        };
-
-        public INamedType ParentType { get; set; }
-
-        public override IEnumerable<ValidationError> BeginVisitInlineFragment(GraphQLInlineFragment inlineFragment,
-            IValidationContext context)
-        {
-            var typeName = inlineFragment.TypeCondition.Name.Value;
-            ParentType = context.Schema.GetNamedType(typeName);
-            yield break;
-        }
-
-        public override IEnumerable<ValidationError> BeginVisitFragmentDefinition(GraphQLFragmentDefinition node,
-            IValidationContext context)
-        {
-            var typeName = node.TypeCondition.Name.Value;
-            ParentType = context.Schema.GetNamedType(typeName);
-            yield break;
-        }
-
-        public override IEnumerable<ValidationError> BeginVisitOperationDefinition(
-            GraphQLOperationDefinition definition, IValidationContext context)
-        {
-            var schema = context.Schema;
-
-            switch (definition.Operation)
-            {
-                case OperationType.Query:
-                    ParentType = schema.Query;
-                    break;
-                case OperationType.Mutation:
-                    ParentType = schema.Mutation;
-                    break;
-                case OperationType.Subscription:
-                    ParentType = schema.Subscription;
-                    break;
-            }
-
-            yield break;
-        }
 
         public override IEnumerable<ValidationError> BeginVisitFieldSelection(GraphQLFieldSelection selection,
             IValidationContext context)
         {
+            foreach (var validationError in base.BeginVisitFieldSelection(selection, context))
+            {
+                yield return validationError;
+            }
+
             var fieldName = selection.Name.Value;
 
             if (fieldName == "__typename")
                 yield break;
 
-            var field = GetField(fieldName, context.Schema);
+            var field = getFieldDef();
 
             if (field != null)
             {
-                var selectionType = field.Type;
+                var selectionType = field.Value.Field.Type;
                 var hasSubSelection = selection.SelectionSet?.Selections?.Any();
 
                 if (selectionType is ScalarType && hasSubSelection == true)
@@ -113,17 +72,6 @@ namespace tanka.graphql.validation.rules2
                         selection);
                 }
             }
-        }
-
-        private IField GetField(string fieldName, ISchema schema)
-        {
-            if (ParentType is null)
-                return null;
-
-            if (!(ParentType is ComplexType))
-                return null;
-
-            return schema.GetField(ParentType.Name, fieldName);
         }
     }
 }

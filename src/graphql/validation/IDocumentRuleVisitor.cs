@@ -99,5 +99,19 @@ namespace tanka.graphql.validation
 
         IEnumerable<ValidationError> EndVisitListValue(GraphQLListValue node,
             IValidationContext context);
+
+        IEnumerable<ValidationError> EndVisitFragmentDefinition(GraphQLFragmentDefinition node,
+            IValidationContext context);
+
+        IEnumerable<ValidationError> EndVisitInlineFragment(GraphQLInlineFragment inlineFragment, IValidationContext context);
+
+        IEnumerable<ValidationError> EndVisitDirective(GraphQLDirective directive,
+            IValidationContext context);
+
+        IEnumerable<ValidationError> BeginVisitListValue(GraphQLListValue node, IValidationContext context);
+        IEnumerable<ValidationError> EndVisitSelectionSet(GraphQLSelectionSet selectionSet, IValidationContext context);
+        IEnumerable<ValidationError> EndVisitVariableDefinition(GraphQLVariableDefinition node, IValidationContext context);
+        IEnumerable<ValidationError> EndVisitObjectField(GraphQLObjectField node, IValidationContext context);
+        IEnumerable<ValidationError> EndVisitEnumValue(GraphQLScalarValue value, IValidationContext context);
     }
 }

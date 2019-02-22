@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser;
 using GraphQLParser.AST;
+using tanka.graphql.language;
 using tanka.graphql.type;
 
 namespace tanka.graphql.validation
 {
-    public class DocumentRulesVisitor : GraphQLAstVisitor, IValidationContext
+    public class DocumentRulesVisitor : Visitor, IValidationContext
     {
         private readonly Dictionary<ASTNodeKind, List<IRule>> _visitorMap;
 
@@ -111,20 +111,30 @@ namespace tanka.graphql.validation
 
         public override GraphQLDirective BeginVisitDirective(GraphQLDirective directive)
         {
-            var rules = GetRules(directive);
+            var rules = GetRules(directive).ToList();
             foreach (var rule in rules)
                 CollectErrors(rule, rule.BeginVisitDirective(directive, this));
 
-            return base.BeginVisitDirective(directive);
+            var _ = base.BeginVisitDirective(directive);
+
+            foreach (var rule in rules)
+                CollectErrors(rule, rule.EndVisitDirective(directive, this));
+
+            return _;
         }
 
         public override GraphQLScalarValue BeginVisitEnumValue(GraphQLScalarValue value)
         {
-            var rules = GetRules(value);
+            var rules = GetRules(value).ToList();
             foreach (var rule in rules)
                 CollectErrors(rule, rule.BeginVisitEnumValue(value, this));
 
-            return base.BeginVisitEnumValue(value);
+            var _ = base.BeginVisitEnumValue(value);
+
+            foreach (var rule in rules)
+                CollectErrors(rule, rule.EndVisitEnumValue(value, this));
+
+            return _;
         }
 
         public override GraphQLFieldSelection BeginVisitFieldSelection(
@@ -150,11 +160,16 @@ namespace tanka.graphql.validation
         public override GraphQLFragmentDefinition BeginVisitFragmentDefinition(
             GraphQLFragmentDefinition node)
         {
-            var rules = GetRules(node);
+            var rules = GetRules(node).ToList();
             foreach (var rule in rules)
                 CollectErrors(rule, rule.BeginVisitFragmentDefinition(node, this));
 
-            return base.BeginVisitFragmentDefinition(node);
+            var result = base.BeginVisitFragmentDefinition(node);
+
+            foreach (var rule in rules)
+                CollectErrors(rule, rule.EndVisitFragmentDefinition(node, this));
+
+            return result;
         }
 
         public override GraphQLFragmentSpread BeginVisitFragmentSpread(
@@ -170,11 +185,16 @@ namespace tanka.graphql.validation
         public override GraphQLInlineFragment BeginVisitInlineFragment(
             GraphQLInlineFragment inlineFragment)
         {
-            var rules = GetRules(inlineFragment);
+            var rules = GetRules(inlineFragment).ToList();
             foreach (var rule in rules)
                 CollectErrors(rule, rule.BeginVisitInlineFragment(inlineFragment, this));
 
-            return base.BeginVisitInlineFragment(inlineFragment);
+            var _ = base.BeginVisitInlineFragment(inlineFragment);
+
+            foreach (var rule in rules)
+                CollectErrors(rule, rule.EndVisitInlineFragment(inlineFragment, this));
+
+            return _;
         }
 
         public override GraphQLScalarValue BeginVisitIntValue(GraphQLScalarValue value)
@@ -228,11 +248,16 @@ namespace tanka.graphql.validation
         public override GraphQLSelectionSet BeginVisitSelectionSet(
             GraphQLSelectionSet selectionSet)
         {
-            var rules = GetRules(selectionSet);
+            var rules = GetRules(selectionSet).ToList();
             foreach (var rule in rules)
                 CollectErrors(rule, rule.BeginVisitSelectionSet(selectionSet, this));
 
-            return base.BeginVisitSelectionSet(selectionSet);
+            var _ = base.BeginVisitSelectionSet(selectionSet);
+
+            foreach (var rule in rules)
+                CollectErrors(rule, rule.EndVisitSelectionSet(selectionSet, this));
+
+            return _;
         }
 
         public override GraphQLScalarValue BeginVisitStringValue(
@@ -257,11 +282,16 @@ namespace tanka.graphql.validation
         public override GraphQLVariableDefinition BeginVisitVariableDefinition(
             GraphQLVariableDefinition node)
         {
-            var rules = GetRules(node);
+            var rules = GetRules(node).ToList();
             foreach (var rule in rules)
                 CollectErrors(rule, rule.BeginVisitVariableDefinition(node, this));
 
-            return base.BeginVisitVariableDefinition(node);
+            var _ = base.BeginVisitVariableDefinition(node);
+
+            foreach (var rule in rules)
+                CollectErrors(rule, rule.EndVisitVariableDefinition(node, this));
+
+            return _;
         }
 
         public override IEnumerable<GraphQLVariableDefinition> BeginVisitVariableDefinitions(
@@ -306,11 +336,16 @@ namespace tanka.graphql.validation
         public override GraphQLObjectField BeginVisitObjectField(
             GraphQLObjectField node)
         {
-            var rules = GetRules(node);
+            var rules = GetRules(node).ToList();
             foreach (var rule in rules)
                 CollectErrors(rule, rule.BeginVisitObjectField(node, this));
 
-            return base.BeginVisitObjectField(node);
+            var _= base.BeginVisitObjectField(node);
+
+            foreach (var rule in rules)
+                CollectErrors(rule, rule.EndVisitObjectField(node, this));
+
+            return _;
         }
 
         public override GraphQLObjectValue BeginVisitObjectValue(
@@ -332,6 +367,20 @@ namespace tanka.graphql.validation
             return base.EndVisitObjectValue(node);
         }
 
+        public override ASTNode BeginVisitNode(ASTNode node)
+        {
+            return base.BeginVisitNode(node);
+        }
+
+        public override GraphQLListValue BeginVisitListValue(GraphQLListValue node)
+        {
+            var rules = GetRules(node);
+            foreach (var rule in rules)
+                CollectErrors(rule, rule.BeginVisitListValue(node, this));
+
+            return base.BeginVisitListValue(node);
+        }
+
         public override GraphQLListValue EndVisitListValue(GraphQLListValue node)
         {
             var rules = GetRules(node);
@@ -343,7 +392,7 @@ namespace tanka.graphql.validation
 
         private void CollectErrors(IRule rule, IEnumerable<ValidationError> validationErrors)
         {
-            _errors.Add((rule, validationErrors));
+            _errors.Add((rule, validationErrors.ToList()));
         }
 
         private ValidationResult BuildResult()

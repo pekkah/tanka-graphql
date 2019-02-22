@@ -20,6 +20,8 @@ namespace tanka.graphql.benchmarks
         private ISchema _schema;
         private GraphQLDocument _mutation;
         private GraphQLDocument _subscription;
+        private Dictionary<ASTNodeKind, List<IRule>> _defaultRulesMap;
+        private IEnumerable<IRule> _defaultRulesList;
 
         [GlobalSetup]
         public async Task Setup()
@@ -28,8 +30,12 @@ namespace tanka.graphql.benchmarks
             _query = Utils.InitializeQuery();
             _mutation = Utils.InitializeMutation();
             _subscription = Utils.InitializeSubscription();
+            _defaultRulesMap = Validator.DefaultRules;
+            _defaultRulesList = Validator.DefaultRules
+                .SelectMany(r => r.Value)
+                .ToList();
         }
-
+        /*
         [Benchmark]
         public async Task Query_with_defaults()
         {
@@ -135,6 +141,7 @@ namespace tanka.graphql.benchmarks
             var value = result.Source.Receive();
             AssertResult(value.Errors);
         }
+        */
 
         [Benchmark]
         public async Task Validate_query_with_defaults()
@@ -148,6 +155,42 @@ namespace tanka.graphql.benchmarks
                 throw new InvalidOperationException(
                     $"Validation failed. {result}");
             }
+        }
+
+        [Benchmark]
+        public void Validate_query_with_defaults_v2_rules()
+        {
+            var result = Validator.Validate(
+                _defaultRulesList,
+                _schema,
+                _query);
+
+            if (!result.IsValid)
+            {
+                throw new InvalidOperationException(
+                    $"Validation failed. {result}");
+            }
+        }
+
+        [Benchmark]
+        public void Validate_query_with_defaults_v2_rulesMap()
+        {
+            var result = Validator.Validate(
+                _defaultRulesMap,
+                _schema,
+                _query);
+
+            if (!result.IsValid)
+            {
+                throw new InvalidOperationException(
+                    $"Validation failed. {result}");
+            }
+        }
+
+        [Benchmark]
+        public void Initialize_validation_rules_map()
+        {
+            DocumentRulesVisitor.InitializeRuleActionMap(_defaultRulesList);
         }
 
         private static void AssertResult(IEnumerable<Error> errors)
