@@ -1,7 +1,7 @@
 ﻿namespace tanka.graphql.validation
 {
     public static class ValidationErrorCodes
-    {
+    {    
         public const string R5211OperationNameUniqueness = "5.2.1.1 Operation Name Uniqueness";
 
         public const string R511ExecutableDefinitions = "5.1.1 Executable Definitions";
@@ -23,5 +23,7 @@
         public const string R5511FragmentNameUniqueness = "5.5.1.1 Fragment Name Uniqueness";
         
         public const string R5512FragmentSpreadTypeExistence = "5.5.1.2 Fragment Spread Type Existence";
+
+        public const string R5513FragmentsOnCompositeTypes = "5.5.1.3 Fragments On Composite Types";
     }
 }

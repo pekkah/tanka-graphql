@@ -975,5 +975,80 @@ namespace tanka.graphql.tests.validation
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R5512FragmentSpreadTypeExistence);
         }
+
+        [Fact]
+        public void Rule_5513_FragmentsOnCompositeTypes_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment fragOnObject on Dog {
+                      name
+                    }
+
+                    fragment fragOnInterface on Pet {
+                      name
+                    }
+
+                    fragment fragOnUnion on CatOrDog {
+                      ... on Dog {
+                        name
+                      }
+                    }
+                  ");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5513FragmentsOnCompositeTypes());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5513_FragmentsOnCompositeTypes_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment fragOnScalar on Int {
+                      something
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5513FragmentsOnCompositeTypes());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5513FragmentsOnCompositeTypes);
+        }
+
+        [Fact]
+        public void Rule_5513_FragmentsOnCompositeTypes_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment inlineFragOnScalar on Dog {
+                      ... on Boolean {
+                        somethingElse
+                      }
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5513FragmentsOnCompositeTypes());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5513FragmentsOnCompositeTypes);
+        }
     }
 }
