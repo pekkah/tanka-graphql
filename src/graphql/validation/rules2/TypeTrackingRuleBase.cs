@@ -7,15 +7,9 @@ using tanka.graphql.type;
 
 namespace tanka.graphql.validation.rules2
 {
-    public abstract class TypeTrackingRuleBase : Rule
+    public abstract class TypeTrackingRuleBase : RuleBase
     {
-        private Argument _argument;
-
         private readonly Stack<object> _defaultValueStack = new Stack<object>();
-
-        private DirectiveType _directive;
-
-        private object _enumValue;
 
         private readonly Stack<(string Name, IField Field)?> _fieldDefStack = new Stack<(string Name, IField Field)?>();
 
@@ -24,6 +18,11 @@ namespace tanka.graphql.validation.rules2
         private readonly Stack<ComplexType> _parentTypeStack = new Stack<ComplexType>();
 
         private readonly Stack<IType> _typeStack = new Stack<IType>();
+        private Argument _argument;
+
+        private DirectiveType _directive;
+
+        private object _enumValue;
 
         public override IEnumerable<ASTNodeKind> AppliesToNodeKinds => new[]
         {
@@ -40,20 +39,18 @@ namespace tanka.graphql.validation.rules2
             ASTNodeKind.EnumValue
         };
 
-        public override IEnumerable<ValidationError> BeginVisitSelectionSet(GraphQLSelectionSet selectionSet,
+        public override void BeginVisitSelectionSet(GraphQLSelectionSet selectionSet,
             IValidationContext context)
         {
-            var namedType = getNamedType(getType());
+            var namedType = GetNamedType(GetCurrentType());
             var complexType = namedType as ComplexType;
             _parentTypeStack.Push(complexType);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitFieldSelection(GraphQLFieldSelection selection,
+        public override void BeginVisitFieldSelection(GraphQLFieldSelection selection,
             IValidationContext context)
         {
-            var parentType = getParentType();
+            var parentType = GetParentType();
             (string Name, IField Field)? fieldDef = null;
             IType fieldType = null;
 
@@ -66,19 +63,15 @@ namespace tanka.graphql.validation.rules2
 
             _fieldDefStack.Push(fieldDef);
             _typeStack.Push(TypeIs.IsOutputType(fieldType) ? fieldType : null);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitDirective(GraphQLDirective directive,
+        public override void BeginVisitDirective(GraphQLDirective directive,
             IValidationContext context)
         {
             _directive = context.Schema.GetDirective(directive.Name.Value);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitOperationDefinition(
+        public override void BeginVisitOperationDefinition(
             GraphQLOperationDefinition definition, IValidationContext context)
         {
             ObjectType type = null;
@@ -98,82 +91,70 @@ namespace tanka.graphql.validation.rules2
             }
 
             _typeStack.Push(type);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitInlineFragment(GraphQLInlineFragment inlineFragment,
+        public override void BeginVisitInlineFragment(GraphQLInlineFragment inlineFragment,
             IValidationContext context)
         {
             var typeConditionAst = inlineFragment.TypeCondition;
             var outputType = Ast.TypeFromAst(context.Schema, typeConditionAst)
-                             ?? getNamedType(getType());
+                             ?? GetNamedType(GetCurrentType());
             _typeStack.Push(TypeIs.IsOutputType(outputType) ? outputType : null);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitFragmentDefinition(GraphQLFragmentDefinition node,
+        public override void BeginVisitFragmentDefinition(GraphQLFragmentDefinition node,
             IValidationContext context)
         {
             var typeConditionAst = node.TypeCondition;
             var outputType = Ast.TypeFromAst(context.Schema, typeConditionAst)
-                             ?? getNamedType(getType());
+                             ?? GetNamedType(GetCurrentType());
             _typeStack.Push(TypeIs.IsOutputType(outputType) ? outputType : null);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitVariableDefinition(GraphQLVariableDefinition node,
+        public override void BeginVisitVariableDefinition(GraphQLVariableDefinition node,
             IValidationContext context)
         {
             var inputType = Ast.TypeFromAst(context.Schema, node.Type);
             _inputTypeStack.Push(TypeIs.IsInputType(inputType) ? inputType : null);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitArgument(GraphQLArgument argument,
+        public override void BeginVisitArgument(GraphQLArgument argument,
             IValidationContext context)
         {
             Argument argDef = null;
             IType argType = null;
 
-            if (getDirective() != null)
+            if (GetDirective() != null)
             {
-                argDef = getDirective()?.GetArgument(argument.Name.Value);
+                argDef = GetDirective()?.GetArgument(argument.Name.Value);
                 argType = argDef?.Type;
             }
-            else if (getFieldDef() != null)
+            else if (GetFieldDef() != null)
             {
-                argDef = getFieldDef()?.Field.GetArgument(argument.Name.Value);
+                argDef = GetFieldDef()?.Field.GetArgument(argument.Name.Value);
                 argType = argDef?.Type;
             }
 
             _argument = argDef;
             _defaultValueStack.Push(argDef?.DefaultValue);
             _inputTypeStack.Push(TypeIs.IsInputType(argType) ? argType : null);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitListValue(GraphQLListValue node,
+        public override void BeginVisitListValue(GraphQLListValue node,
             IValidationContext context)
         {
-            var listType = getNullableType(getInputType());
+            var listType = GetNullableType(GetInputType());
             var itemType = listType is List list ? list.WrappedType : listType;
 
             // List positions never have a default value
             _defaultValueStack.Push(null);
             _inputTypeStack.Push(TypeIs.IsInputType(itemType) ? itemType : null);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitObjectField(GraphQLObjectField node,
+        public override void BeginVisitObjectField(GraphQLObjectField node,
             IValidationContext context)
         {
-            var objectType = getNamedType(getInputType());
+            var objectType = GetNamedType(GetInputType());
             IType inputFieldType = null;
             InputObjectField inputField = null;
 
@@ -189,107 +170,90 @@ namespace tanka.graphql.validation.rules2
 
             _defaultValueStack.Push(inputField?.DefaultValue);
             _inputTypeStack.Push(TypeIs.IsInputType(inputFieldType) ? inputFieldType : null);
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> BeginVisitEnumValue(GraphQLScalarValue value,
+        public override void BeginVisitEnumValue(GraphQLScalarValue value,
             IValidationContext context)
         {
-            var maybeEnumType = getNamedType(getInputType());
+            var maybeEnumType = GetNamedType(GetInputType());
             object enumValue = null;
             if (maybeEnumType is EnumType enumType) enumValue = enumType.ParseLiteral(value);
 
             _enumValue = enumValue;
-
-            yield break;
         }
 
-        public override IEnumerable<ValidationError> EndVisitSelectionSet(GraphQLSelectionSet selectionSet,
+        public override void EndVisitSelectionSet(GraphQLSelectionSet selectionSet,
             IValidationContext context)
         {
             _parentTypeStack.Pop();
-
-            return base.EndVisitSelectionSet(selectionSet, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitFieldSelection(GraphQLFieldSelection selection,
+        public override void EndVisitFieldSelection(GraphQLFieldSelection selection,
             IValidationContext context)
         {
             _fieldDefStack.Pop();
             _typeStack.Pop();
-
-            return base.EndVisitFieldSelection(selection, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitDirective(GraphQLDirective directive,
+        public override void EndVisitDirective(GraphQLDirective directive,
             IValidationContext context)
         {
             _directive = null;
-            return base.EndVisitDirective(directive, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitOperationDefinition(GraphQLOperationDefinition definition,
+        public override void EndVisitOperationDefinition(GraphQLOperationDefinition definition,
             IValidationContext context)
         {
             _typeStack.Pop();
-            return base.EndVisitOperationDefinition(definition, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitInlineFragment(GraphQLInlineFragment inlineFragment,
+        public override void EndVisitInlineFragment(GraphQLInlineFragment inlineFragment,
             IValidationContext context)
         {
             _typeStack.Pop();
-            return base.EndVisitInlineFragment(inlineFragment, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitFragmentDefinition(GraphQLFragmentDefinition node,
+        public override void EndVisitFragmentDefinition(GraphQLFragmentDefinition node,
             IValidationContext context)
         {
             _typeStack.Pop();
-            return base.EndVisitFragmentDefinition(node, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitVariableDefinition(GraphQLVariableDefinition node,
+        public override void EndVisitVariableDefinition(GraphQLVariableDefinition node,
             IValidationContext context)
         {
             _inputTypeStack.Pop();
-            return base.EndVisitVariableDefinition(node, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitArgument(GraphQLArgument argument,
+        public override void EndVisitArgument(GraphQLArgument argument,
             IValidationContext context)
         {
             _argument = null;
             _defaultValueStack.Pop();
             _inputTypeStack.Pop();
-            return base.EndVisitArgument(argument, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitListValue(GraphQLListValue node,
+        public override void EndVisitListValue(GraphQLListValue node,
             IValidationContext context)
         {
             _defaultValueStack.Pop();
             _inputTypeStack.Pop();
-            return base.EndVisitListValue(node, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitObjectField(GraphQLObjectField node,
+        public override void EndVisitObjectField(GraphQLObjectField node,
             IValidationContext context)
         {
             _defaultValueStack.Pop();
             _inputTypeStack.Pop();
-            return base.EndVisitObjectField(node, context);
         }
 
-        public override IEnumerable<ValidationError> EndVisitEnumValue(GraphQLScalarValue value,
+        public override void EndVisitEnumValue(GraphQLScalarValue value,
             IValidationContext context)
         {
             _enumValue = null;
-            return base.EndVisitEnumValue(value, context);
         }
 
-        protected IType getType()
+        protected IType GetCurrentType()
         {
             if (_typeStack.Count == 0)
                 return null;
@@ -297,7 +261,7 @@ namespace tanka.graphql.validation.rules2
             return _typeStack.Peek();
         }
 
-        protected ComplexType getParentType()
+        protected ComplexType GetParentType()
         {
             if (_typeStack.Count == 0)
                 return null;
@@ -306,7 +270,7 @@ namespace tanka.graphql.validation.rules2
         }
 
         //todo: originally returns an input type
-        protected IType getInputType()
+        protected IType GetInputType()
         {
             if (_typeStack.Count == 0)
                 return null;
@@ -314,13 +278,13 @@ namespace tanka.graphql.validation.rules2
             return _inputTypeStack.Peek();
         }
 
-        protected IType getParentInputType()
+        protected IType GetParentInputType()
         {
             //todo: probably a bad idea
             return _inputTypeStack.ElementAtOrDefault(_inputTypeStack.Count - 2);
         }
 
-        protected (string Name, IField Field)? getFieldDef()
+        protected (string Name, IField Field)? GetFieldDef()
         {
             if (_fieldDefStack.Count == 0)
                 return null;
@@ -328,7 +292,7 @@ namespace tanka.graphql.validation.rules2
             return _fieldDefStack.Peek();
         }
 
-        protected object getDefaultValue()
+        protected object GetDefaultValue()
         {
             if (_defaultValueStack.Count == 0)
                 return null;
@@ -336,27 +300,27 @@ namespace tanka.graphql.validation.rules2
             return _defaultValueStack.Peek();
         }
 
-        protected DirectiveType getDirective()
+        protected DirectiveType GetDirective()
         {
             return _directive;
         }
 
-        protected Argument getArgument()
+        protected Argument GetArgument()
         {
             return _argument;
         }
 
-        protected object getEnumValue()
+        protected object GetEnumValue()
         {
             return _enumValue;
         }
 
-        protected IType getNamedType(IType type)
+        protected IType GetNamedType(IType type)
         {
             return type?.Unwrap();
         }
 
-        protected IType getNullableType(IType type)
+        protected IType GetNullableType(IType type)
         {
             if (type is NonNull nonNull)
                 return nonNull.WrappedType;

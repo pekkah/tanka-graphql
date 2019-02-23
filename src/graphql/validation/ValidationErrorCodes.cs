@@ -1,6 +1,6 @@
 ﻿namespace tanka.graphql.validation
 {
-    public static class Errors
+    public static class ValidationErrorCodes
     {
         public const string R5211OperationNameUniqueness = "5.2.1.1 Operation Name Uniqueness";
 

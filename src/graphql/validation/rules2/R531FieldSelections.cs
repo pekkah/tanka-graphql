@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using GraphQLParser.AST;
+﻿using GraphQLParser.AST;
 
 namespace tanka.graphql.validation.rules2
 {
@@ -10,29 +9,24 @@ namespace tanka.graphql.validation.rules2
     /// </summary>
     public class R531FieldSelections : TypeTrackingRuleBase
     {
-        public override IEnumerable<ValidationError> BeginVisitFieldSelection(
+        public override void BeginVisitFieldSelection(
             GraphQLFieldSelection selection,
             IValidationContext context)
         {
-            foreach (var validationError in base.BeginVisitFieldSelection(selection, context))
-            {
-                yield return validationError;
-            }
+            base.BeginVisitFieldSelection(selection, context);
 
             var fieldName = selection.Name.Value;
 
             if (fieldName == "__typename")
-                yield break;
+                return;
 
-
-            if (getFieldDef() == null)
-                yield return new ValidationError(
-                    Errors.R531FieldSelections,
+            if (GetFieldDef() == null)
+                context.Error(
+                    ValidationErrorCodes.R531FieldSelections,
                     "The target field of a field selection must be defined " +
                     "on the scoped type of the selection set. There are no " +
                     "limitations on alias names.",
                     selection);
-
         }
     }
 }

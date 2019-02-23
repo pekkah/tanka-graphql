@@ -123,7 +123,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R511ExecutableDefinitions);
+                error => error.Code == ValidationErrorCodes.R511ExecutableDefinitions);
         }
 
         [Fact]
@@ -182,7 +182,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R5211OperationNameUniqueness);
+                error => error.Code == ValidationErrorCodes.R5211OperationNameUniqueness);
         }
 
         [Fact]
@@ -233,7 +233,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R5221LoneAnonymousOperation);
+                error => error.Code == ValidationErrorCodes.R5221LoneAnonymousOperation);
         }
 
         [Fact]
@@ -304,7 +304,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R5231SingleRootField);
+                error => error.Code == ValidationErrorCodes.R5231SingleRootField);
         }
 
         [Fact]
@@ -333,7 +333,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R5231SingleRootField);
+                error => error.Code == ValidationErrorCodes.R5231SingleRootField);
         }
 
         [Fact]
@@ -358,7 +358,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R5231SingleRootField);
+                error => error.Code == ValidationErrorCodes.R5231SingleRootField);
         }
 
         [Fact]
@@ -379,7 +379,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R531FieldSelections);
+                error => error.Code == ValidationErrorCodes.R531FieldSelections);
         }
 
         [Fact]
@@ -400,7 +400,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R531FieldSelections);
+                error => error.Code == ValidationErrorCodes.R531FieldSelections);
         }
 
         [Fact]
@@ -459,7 +459,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R531FieldSelections);
+                error => error.Code == ValidationErrorCodes.R531FieldSelections);
         }
 
         [Fact]
@@ -505,13 +505,13 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R531FieldSelections 
+                error => error.Code == ValidationErrorCodes.R531FieldSelections 
                          && error.Nodes.OfType<GraphQLFieldSelection>()
                              .Any(n => n.Name.Value == "name"));
 
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R531FieldSelections 
+                error => error.Code == ValidationErrorCodes.R531FieldSelections 
                          && error.Nodes.OfType<GraphQLFieldSelection>()
                              .Any(n => n.Name.Value == "barkVolume"));
         }
@@ -560,7 +560,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R533LeafFieldSelections);
+                error => error.Code == ValidationErrorCodes.R533LeafFieldSelections);
         }
 
         [Fact]
@@ -581,7 +581,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R533LeafFieldSelections);
+                error => error.Code == ValidationErrorCodes.R533LeafFieldSelections);
         }
 
         [Fact]
@@ -602,7 +602,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R533LeafFieldSelections);
+                error => error.Code == ValidationErrorCodes.R533LeafFieldSelections);
         }
 
         [Fact]
@@ -623,7 +623,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R533LeafFieldSelections);
+                error => error.Code == ValidationErrorCodes.R533LeafFieldSelections);
         }
 
         [Fact]
@@ -666,7 +666,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R541ArgumentNames);
+                error => error.Code == ValidationErrorCodes.R541ArgumentNames);
         }
 
         [Fact]
@@ -687,7 +687,7 @@ namespace tanka.graphql.tests.validation
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == Errors.R541ArgumentNames);
+                error => error.Code == ValidationErrorCodes.R541ArgumentNames);
         }
     }
 }

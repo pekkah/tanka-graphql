@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.type;
 
 namespace tanka.graphql.validation.rules2
 {
@@ -13,17 +12,17 @@ namespace tanka.graphql.validation.rules2
     ///     Let operations be all operation definitions in the document named operationName.
     ///     operations must be a set of one.
     /// </summary>
-    public class R5211OperationNameUniqueness : Rule
+    public class R5211OperationNameUniqueness : RuleBase
     {
         public override IEnumerable<ASTNodeKind> AppliesToNodeKinds => new[]
         {
             ASTNodeKind.Document
         };
 
-        public override IEnumerable<ValidationError> Visit(GraphQLDocument document, IValidationContext context)
+        public override void Visit(GraphQLDocument document, IValidationContext context)
         {
-            if (document.Definitions.OfType<GraphQLOperationDefinition>().Count() < 2) 
-                yield break;
+            if (document.Definitions.OfType<GraphQLOperationDefinition>().Count() < 2)
+                return;
 
             var operations = document.Definitions.OfType<GraphQLOperationDefinition>()
                 .ToList();
@@ -32,7 +31,7 @@ namespace tanka.graphql.validation.rules2
             {
                 var operationName = op.Name?.Value;
 
-                if (string.IsNullOrWhiteSpace(operationName)) 
+                if (string.IsNullOrWhiteSpace(operationName))
                     continue;
 
                 var matchingOperations = operations.Where(def => def.Name?.Value == operationName)
@@ -40,15 +39,14 @@ namespace tanka.graphql.validation.rules2
 
                 if (matchingOperations.Count() > 1)
                 {
-                    yield return new ValidationError(
-                        Errors.R5211OperationNameUniqueness,
-                        "Each named operation definition must be unique within a document when referred to by its name.",
+                    context.Error(ValidationErrorCodes.R5211OperationNameUniqueness,
+                        "Each named operation definition must be unique within a " +
+                        "document when referred to by its name.",
                         matchingOperations);
 
-                    yield break;
+                    break;
                 }
             }
-            
         }
     }
 }

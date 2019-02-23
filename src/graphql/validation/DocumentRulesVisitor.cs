@@ -8,10 +8,10 @@ namespace tanka.graphql.validation
 {
     public class DocumentRulesVisitor : Visitor, IValidationContext
     {
-        private readonly Dictionary<ASTNodeKind, List<IRule>> _visitorMap;
+        private readonly List<ValidationError> _errors =
+            new List<ValidationError>();
 
-        private readonly List<(IRule, IEnumerable<ValidationError>)> _errors =
-            new List<(IRule, IEnumerable<ValidationError>)>();
+        private readonly Dictionary<ASTNodeKind, List<IRule>> _visitorMap;
 
         public DocumentRulesVisitor(
             IEnumerable<IRule> rules,
@@ -41,6 +41,21 @@ namespace tanka.graphql.validation
 
         public ISchema Schema { get; }
 
+        public void Error(string code, string message, params ASTNode[] nodes)
+        {
+            _errors.Add(new ValidationError(code, message, nodes));
+        }
+
+        public void Error(string code, string message, ASTNode node)
+        {
+            _errors.Add(new ValidationError(code, message, node));
+        }
+
+        public void Error(string code, string message, IEnumerable<ASTNode> nodes)
+        {
+            _errors.Add(new ValidationError(code, message, nodes));
+        }
+
         public static Dictionary<ASTNodeKind, List<IRule>> InitializeRuleActionMap(IEnumerable<IRule> rules)
         {
             var visitors = new Dictionary<ASTNodeKind, List<IRule>>();
@@ -67,7 +82,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(document);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.Visit(document, this));
+                rule.Visit(document, this);
 
             base.Visit(document);
         }
@@ -76,7 +91,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(alias);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitAlias(alias, this));
+                rule.BeginVisitAlias(alias, this);
 
             return base.BeginVisitAlias(alias);
         }
@@ -85,7 +100,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(argument);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitArgument(argument, this));
+                rule.BeginVisitArgument(argument, this);
 
             return base.BeginVisitArgument(argument);
         }
@@ -94,7 +109,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(ASTNodeKind.Argument);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitArguments(arguments, this));
+                rule.BeginVisitArguments(arguments, this);
 
             return base.BeginVisitArguments(arguments);
         }
@@ -104,7 +119,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(value);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitBooleanValue(value, this));
+                rule.BeginVisitBooleanValue(value, this);
 
             return base.BeginVisitBooleanValue(value);
         }
@@ -113,12 +128,12 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(directive).ToList();
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitDirective(directive, this));
+                rule.BeginVisitDirective(directive, this);
 
             var _ = base.BeginVisitDirective(directive);
 
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitDirective(directive, this));
+                rule.EndVisitDirective(directive, this);
 
             return _;
         }
@@ -127,12 +142,12 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(value).ToList();
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitEnumValue(value, this));
+                rule.BeginVisitEnumValue(value, this);
 
             var _ = base.BeginVisitEnumValue(value);
 
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitEnumValue(value, this));
+                rule.EndVisitEnumValue(value, this);
 
             return _;
         }
@@ -142,7 +157,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(selection);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitFieldSelection(selection, this));
+                rule.BeginVisitFieldSelection(selection, this);
 
             return base.BeginVisitFieldSelection(selection);
         }
@@ -152,7 +167,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(value);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitFloatValue(value, this));
+                rule.BeginVisitFloatValue(value, this);
 
             return base.BeginVisitFloatValue(value);
         }
@@ -162,12 +177,12 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(node).ToList();
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitFragmentDefinition(node, this));
+                rule.BeginVisitFragmentDefinition(node, this);
 
             var result = base.BeginVisitFragmentDefinition(node);
 
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitFragmentDefinition(node, this));
+                rule.EndVisitFragmentDefinition(node, this);
 
             return result;
         }
@@ -177,7 +192,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(fragmentSpread);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitFragmentSpread(fragmentSpread, this));
+                rule.BeginVisitFragmentSpread(fragmentSpread, this);
 
             return base.BeginVisitFragmentSpread(fragmentSpread);
         }
@@ -187,12 +202,12 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(inlineFragment).ToList();
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitInlineFragment(inlineFragment, this));
+                rule.BeginVisitInlineFragment(inlineFragment, this);
 
             var _ = base.BeginVisitInlineFragment(inlineFragment);
 
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitInlineFragment(inlineFragment, this));
+                rule.EndVisitInlineFragment(inlineFragment, this);
 
             return _;
         }
@@ -201,7 +216,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(value);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitIntValue(value, this));
+                rule.BeginVisitIntValue(value, this);
 
             return base.BeginVisitIntValue(value);
         }
@@ -210,7 +225,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(name);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitName(name, this));
+                rule.BeginVisitName(name, this);
 
             return base.BeginVisitName(name);
         }
@@ -220,7 +235,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(typeCondition);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitNamedType(typeCondition, this));
+                rule.BeginVisitNamedType(typeCondition, this);
 
             return base.BeginVisitNamedType(typeCondition);
         }
@@ -230,7 +245,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(definition);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitOperationDefinition(definition, this));
+                rule.BeginVisitOperationDefinition(definition, this);
 
             return base.BeginVisitOperationDefinition(definition);
         }
@@ -240,7 +255,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(definition);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitOperationDefinition(definition, this));
+                rule.EndVisitOperationDefinition(definition, this);
 
             return base.EndVisitOperationDefinition(definition);
         }
@@ -250,12 +265,12 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(selectionSet).ToList();
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitSelectionSet(selectionSet, this));
+                rule.BeginVisitSelectionSet(selectionSet, this);
 
             var _ = base.BeginVisitSelectionSet(selectionSet);
 
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitSelectionSet(selectionSet, this));
+                rule.EndVisitSelectionSet(selectionSet, this);
 
             return _;
         }
@@ -265,7 +280,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(value);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitStringValue(value, this));
+                rule.BeginVisitStringValue(value, this);
 
             return base.BeginVisitStringValue(value);
         }
@@ -274,7 +289,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(variable);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitVariable(variable, this));
+                rule.BeginVisitVariable(variable, this);
 
             return base.BeginVisitVariable(variable);
         }
@@ -284,12 +299,12 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(node).ToList();
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitVariableDefinition(node, this));
+                rule.BeginVisitVariableDefinition(node, this);
 
             var _ = base.BeginVisitVariableDefinition(node);
 
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitVariableDefinition(node, this));
+                rule.EndVisitVariableDefinition(node, this);
 
             return _;
         }
@@ -300,7 +315,7 @@ namespace tanka.graphql.validation
             var rules = GetRules(ASTNodeKind.VariableDefinition);
 
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitVariableDefinitions(variableDefinitions, this));
+                rule.BeginVisitVariableDefinitions(variableDefinitions, this);
 
             return base.BeginVisitVariableDefinitions(variableDefinitions);
         }
@@ -309,7 +324,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(argument);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitArgument(argument, this));
+                rule.EndVisitArgument(argument, this);
 
             return base.EndVisitArgument(argument);
         }
@@ -319,7 +334,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(selection);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitFieldSelection(selection, this));
+                rule.EndVisitFieldSelection(selection, this);
 
             return base.EndVisitFieldSelection(selection);
         }
@@ -328,7 +343,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(variable);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitVariable(variable, this));
+                rule.EndVisitVariable(variable, this);
 
             return base.EndVisitVariable(variable);
         }
@@ -338,12 +353,12 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(node).ToList();
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitObjectField(node, this));
+                rule.BeginVisitObjectField(node, this);
 
-            var _= base.BeginVisitObjectField(node);
+            var _ = base.BeginVisitObjectField(node);
 
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitObjectField(node, this));
+                rule.EndVisitObjectField(node, this);
 
             return _;
         }
@@ -353,7 +368,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(node);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitObjectValue(node, this));
+                rule.BeginVisitObjectValue(node, this);
 
             return base.BeginVisitObjectValue(node);
         }
@@ -362,7 +377,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(node);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitObjectValue(node, this));
+                rule.EndVisitObjectValue(node, this);
 
             return base.EndVisitObjectValue(node);
         }
@@ -376,7 +391,7 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(node);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.BeginVisitListValue(node, this));
+                rule.BeginVisitListValue(node, this);
 
             return base.BeginVisitListValue(node);
         }
@@ -385,21 +400,16 @@ namespace tanka.graphql.validation
         {
             var rules = GetRules(node);
             foreach (var rule in rules)
-                CollectErrors(rule, rule.EndVisitListValue(node, this));
+                rule.EndVisitListValue(node, this);
 
             return base.EndVisitListValue(node);
-        }
-
-        private void CollectErrors(IRule rule, IEnumerable<ValidationError> validationErrors)
-        {
-            _errors.Add((rule, validationErrors.ToList()));
         }
 
         private ValidationResult BuildResult()
         {
             return new ValidationResult
             {
-                Errors = _errors.SelectMany(e => e.Item2).ToList()
+                Errors = _errors
             };
         }
 

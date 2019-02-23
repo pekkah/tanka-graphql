@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using GraphQLParser.AST;
 using tanka.graphql.type;
 
@@ -15,21 +14,17 @@ namespace tanka.graphql.validation.rules2
     /// </summary>
     public class R533LeafFieldSelections : TypeTrackingRuleBase
     {
-
-        public override IEnumerable<ValidationError> BeginVisitFieldSelection(GraphQLFieldSelection selection,
+        public override void BeginVisitFieldSelection(GraphQLFieldSelection selection,
             IValidationContext context)
         {
-            foreach (var validationError in base.BeginVisitFieldSelection(selection, context))
-            {
-                yield return validationError;
-            }
+            base.BeginVisitFieldSelection(selection, context);
 
             var fieldName = selection.Name.Value;
 
             if (fieldName == "__typename")
-                yield break;
+                return;
 
-            var field = getFieldDef();
+            var field = GetFieldDef();
 
             if (field != null)
             {
@@ -37,40 +32,32 @@ namespace tanka.graphql.validation.rules2
                 var hasSubSelection = selection.SelectionSet?.Selections?.Any();
 
                 if (selectionType is ScalarType && hasSubSelection == true)
-                {
-                    yield return new ValidationError(
-                        Errors.R533LeafFieldSelections,
+                    context.Error(
+                        ValidationErrorCodes.R533LeafFieldSelections,
                         "Field selections on scalars or enums are never " +
                         "allowed, because they are the leaf nodes of any GraphQL query.",
                         selection);
-                }
 
                 if (selectionType is EnumType && hasSubSelection == true)
-                {
-                    yield return new ValidationError(
-                        Errors.R533LeafFieldSelections,
+                    context.Error(
+                        ValidationErrorCodes.R533LeafFieldSelections,
                         "Field selections on scalars or enums are never " +
                         "allowed, because they are the leaf nodes of any GraphQL query.",
                         selection);
-                }
 
                 if (selectionType is ComplexType && hasSubSelection == null)
-                {
-                    yield return new ValidationError(
-                        Errors.R533LeafFieldSelections,
+                    context.Error(
+                        ValidationErrorCodes.R533LeafFieldSelections,
                         "Leaf selections on objects, interfaces, and unions " +
                         "without subfields are disallowed.",
                         selection);
-                }
 
                 if (selectionType is UnionType && hasSubSelection == null)
-                {
-                    yield return new ValidationError(
-                        Errors.R533LeafFieldSelections,
+                    context.Error(
+                        ValidationErrorCodes.R533LeafFieldSelections,
                         "Leaf selections on objects, interfaces, and unions " +
                         "without subfields are disallowed.",
                         selection);
-                }
             }
         }
     }

@@ -8,11 +8,11 @@ namespace tanka.graphql.validation.rules2
     ///     For each definition definition in the document.
     ///     definition must be OperationDefinition or FragmentDefinition (it must not be TypeSystemDefinition).
     /// </summary>
-    public class R511ExecutableDefinitions : Rule
+    public class R511ExecutableDefinitions : RuleBase
     {
         public override IEnumerable<ASTNodeKind> AppliesToNodeKinds => new[] {ASTNodeKind.Document};
 
-        public override IEnumerable<ValidationError> Visit(GraphQLDocument document, IValidationContext context)
+        public override void Visit(GraphQLDocument document, IValidationContext context)
         {
             foreach (var definition in document.Definitions)
             {
@@ -20,8 +20,8 @@ namespace tanka.graphql.validation.rules2
                             || definition.Kind == ASTNodeKind.FragmentDefinition;
 
                 if (!valid)
-                    yield return new ValidationError(
-                        Errors.R511ExecutableDefinitions,
+                    context.Error(
+                        ValidationErrorCodes.R511ExecutableDefinitions,
                         "GraphQL execution will only consider the " +
                         "executable definitions Operation and Fragment. " +
                         "Type system definitions and extensions are not " +

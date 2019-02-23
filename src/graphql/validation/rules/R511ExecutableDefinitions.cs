@@ -18,7 +18,7 @@ namespace tanka.graphql.validation.rules
 
                             if (!valid)
                                 context.ReportError(new ValidationError(
-                                    Errors.R511ExecutableDefinitions,
+                                    ValidationErrorCodes.R511ExecutableDefinitions,
                                     "GraphQL execution will only consider the " +
                                     "executable definitions Operation and Fragment. " +
                                     "Type system definitions and extensions are not " +

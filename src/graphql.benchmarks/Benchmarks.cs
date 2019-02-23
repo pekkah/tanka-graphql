@@ -21,7 +21,6 @@ namespace tanka.graphql.benchmarks
         private GraphQLDocument _mutation;
         private GraphQLDocument _subscription;
         private Dictionary<ASTNodeKind, List<IRule>> _defaultRulesMap;
-        private IEnumerable<IRule> _defaultRulesList;
 
         [GlobalSetup]
         public async Task Setup()
@@ -31,9 +30,6 @@ namespace tanka.graphql.benchmarks
             _mutation = Utils.InitializeMutation();
             _subscription = Utils.InitializeSubscription();
             _defaultRulesMap = Validator.DefaultRules;
-            _defaultRulesList = Validator.DefaultRules
-                .SelectMany(r => r.Value)
-                .ToList();
         }
         /*
         [Benchmark]
@@ -158,22 +154,7 @@ namespace tanka.graphql.benchmarks
         }
 
         [Benchmark]
-        public void Validate_query_with_defaults_v2_rules()
-        {
-            var result = Validator.Validate(
-                _defaultRulesList,
-                _schema,
-                _query);
-
-            if (!result.IsValid)
-            {
-                throw new InvalidOperationException(
-                    $"Validation failed. {result}");
-            }
-        }
-
-        [Benchmark]
-        public void Validate_query_with_defaults_v2_rulesMap()
+        public void Validate_query_with_defaults_v2()
         {
             var result = Validator.Validate(
                 _defaultRulesMap,
@@ -185,12 +166,6 @@ namespace tanka.graphql.benchmarks
                 throw new InvalidOperationException(
                     $"Validation failed. {result}");
             }
-        }
-
-        [Benchmark]
-        public void Initialize_validation_rules_map()
-        {
-            DocumentRulesVisitor.InitializeRuleActionMap(_defaultRulesList);
         }
 
         private static void AssertResult(IEnumerable<Error> errors)

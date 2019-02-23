@@ -1,243 +1,119 @@
 using System.Collections.Generic;
-using System.Linq;
 using GraphQLParser.AST;
 
 namespace tanka.graphql.validation
 {
-    public interface IRule : IDocumentRuleVisitor
+    public interface IRule
     {
         IEnumerable<ASTNodeKind> AppliesToNodeKinds { get; }
-    }
 
-    public abstract class Rule : IRule
-    {
-        public virtual IEnumerable<ValidationError> BeginVisitAlias(GraphQLName alias, IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitAlias(GraphQLName alias,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitArgument(GraphQLArgument argument,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitArgument(GraphQLArgument argument,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitArguments(IEnumerable<GraphQLArgument> arguments,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitArguments(
+            IEnumerable<GraphQLArgument> arguments,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitBooleanValue(GraphQLScalarValue value,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitBooleanValue(
+            GraphQLScalarValue value, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitDirective(GraphQLDirective directive,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitDirective(GraphQLDirective directive,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitDirective(GraphQLDirective directive,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitDirectives(
+            IEnumerable<GraphQLDirective> directives, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitListValue(GraphQLListValue node,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitEnumValue(GraphQLScalarValue value,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitSelectionSet(GraphQLSelectionSet selectionSet,
-            IValidationContext context)
-        {
-            yield break;
-        }
+        void BeginVisitFieldSelection(
+            GraphQLFieldSelection selection, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitVariableDefinition(GraphQLVariableDefinition node,
-            IValidationContext context)
-        {
-            yield break;
-        }
+        void BeginVisitFloatValue(
+            GraphQLScalarValue value, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitObjectField(GraphQLObjectField node, IValidationContext context)
-        {
-            yield break;
-        }
+        void BeginVisitFragmentDefinition(
+            GraphQLFragmentDefinition node, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitEnumValue(GraphQLScalarValue value, IValidationContext context)
-        {
-            yield break;
-        }
+        void BeginVisitFragmentSpread(
+            GraphQLFragmentSpread fragmentSpread, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitDirectives(IEnumerable<GraphQLDirective> directives,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitInlineFragment(
+            GraphQLInlineFragment inlineFragment, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitEnumValue(GraphQLScalarValue value,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitIntValue(GraphQLScalarValue value,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitFieldSelection(GraphQLFieldSelection selection,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitName(GraphQLName name,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitFloatValue(GraphQLScalarValue value,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitNamedType(
+            GraphQLNamedType typeCondition, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitFragmentDefinition(GraphQLFragmentDefinition node,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitNode(ASTNode node,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitFragmentDefinition(GraphQLFragmentDefinition node,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitOperationDefinition(
+            GraphQLOperationDefinition definition, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitFragmentSpread(GraphQLFragmentSpread fragmentSpread,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void EndVisitOperationDefinition(
+            GraphQLOperationDefinition definition, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitInlineFragment(GraphQLInlineFragment inlineFragment,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitSelectionSet(
+            GraphQLSelectionSet selectionSet, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitInlineFragment(GraphQLInlineFragment inlineFragment,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitStringValue(
+            GraphQLScalarValue value, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitIntValue(GraphQLScalarValue value,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitVariable(GraphQLVariable variable,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitName(GraphQLName name, IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitVariableDefinition(
+            GraphQLVariableDefinition node, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitNamedType(GraphQLNamedType typeCondition,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitVariableDefinitions(
+            IEnumerable<GraphQLVariableDefinition> variableDefinitions,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitNode(ASTNode node, IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void EndVisitArgument(GraphQLArgument argument,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitOperationDefinition(GraphQLOperationDefinition definition,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void EndVisitFieldSelection(
+            GraphQLFieldSelection selection, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitOperationDefinition(GraphQLOperationDefinition definition,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void EndVisitVariable(GraphQLVariable variable,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitSelectionSet(GraphQLSelectionSet selectionSet,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void Visit(GraphQLDocument document,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitStringValue(GraphQLScalarValue value,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitObjectField(
+            GraphQLObjectField node, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitVariable(GraphQLVariable variable,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void BeginVisitObjectValue(
+            GraphQLObjectValue node, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitVariableDefinition(GraphQLVariableDefinition node,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void EndVisitObjectValue(GraphQLObjectValue node,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> BeginVisitVariableDefinitions(
-            IEnumerable<GraphQLVariableDefinition> variableDefinitions, IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void EndVisitListValue(GraphQLListValue node,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitArgument(GraphQLArgument argument,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void EndVisitFragmentDefinition(GraphQLFragmentDefinition node,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitFieldSelection(GraphQLFieldSelection selection,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void EndVisitInlineFragment(GraphQLInlineFragment inlineFragment, IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> EndVisitVariable(GraphQLVariable variable,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
+        void EndVisitDirective(GraphQLDirective directive,
+            IValidationContext context);
 
-        public virtual IEnumerable<ValidationError> Visit(GraphQLDocument document, IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
-
-        public virtual IEnumerable<ValidationError> BeginVisitObjectField(GraphQLObjectField node,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
-
-        public virtual IEnumerable<ValidationError> BeginVisitObjectValue(GraphQLObjectValue node,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
-
-        public virtual IEnumerable<ValidationError> EndVisitObjectValue(GraphQLObjectValue node,
-            IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
-
-        public virtual IEnumerable<ValidationError> EndVisitListValue(GraphQLListValue node, IValidationContext context)
-        {
-            return Enumerable.Empty<ValidationError>();
-        }
-
-        public abstract IEnumerable<ASTNodeKind> AppliesToNodeKinds { get; }
+        void BeginVisitListValue(GraphQLListValue node, IValidationContext context);
+        void EndVisitSelectionSet(GraphQLSelectionSet selectionSet, IValidationContext context);
+        void EndVisitVariableDefinition(GraphQLVariableDefinition node, IValidationContext context);
+        void EndVisitObjectField(GraphQLObjectField node, IValidationContext context);
+        void EndVisitEnumValue(GraphQLScalarValue value, IValidationContext context);
     }
 }

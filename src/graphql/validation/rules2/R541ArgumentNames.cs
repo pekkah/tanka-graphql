@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using GraphQLParser.AST;
+﻿using GraphQLParser.AST;
 
 namespace tanka.graphql.validation.rules2
 {
@@ -11,16 +10,15 @@ namespace tanka.graphql.validation.rules2
     /// </summary>
     public class R541ArgumentNames : TypeTrackingRuleBase
     {
-        public override IEnumerable<ValidationError> BeginVisitArgument(
+        public override void BeginVisitArgument(
             GraphQLArgument argument,
             IValidationContext context)
         {
-            foreach (var validationError in base.BeginVisitArgument(argument, context)) 
-                yield return validationError;
+            base.BeginVisitArgument(argument, context);
 
-            if (getArgument() == null)
-                yield return new ValidationError(
-                    Errors.R541ArgumentNames,
+            if (GetArgument() == null)
+                context.Error(
+                    ValidationErrorCodes.R541ArgumentNames,
                     "Every argument provided to a field or directive " +
                     "must be defined in the set of possible arguments of that " +
                     "field or directive.",
