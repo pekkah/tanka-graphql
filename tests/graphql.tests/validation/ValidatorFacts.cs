@@ -76,7 +76,22 @@ namespace tanka.graphql.tests.validation
 
                 union CatOrDog = Cat | Dog
                 union DogOrHuman = Dog | Human
-                union HumanOrAlien = Human | Alien";
+                union HumanOrAlien = Human | Alien
+
+                type Arguments {
+                  multipleReqs(x: Int!, y: Int!): Int!
+                  booleanArgField(booleanArg: Boolean): Boolean
+                  floatArgField(floatArg: Float): Float
+                  intArgField(intArg: Int): Int
+                  nonNullBooleanArgField(nonNullBooleanArg: Boolean!): Boolean!
+                  booleanListArgField(booleanListArg: [Boolean]!): [Boolean]
+                  optionalNonNullBooleanArgField(optionalBooleanArg: Boolean! = false): Boolean!
+                }
+
+                extend type Query {
+                  arguments: Arguments
+                }
+                ";
 
             Schema = Sdl.Schema(Parser.ParseDocument(sdl));
         }
@@ -688,6 +703,135 @@ namespace tanka.graphql.tests.validation
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R541ArgumentNames);
+        }
+
+        [Fact]
+        public void Rule_542_Argument_Uniqueness_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment argOnRequiredArg on Dog {
+                      doesKnowCommand(dogCommand: SIT)
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R542ArgumentUniqueness());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_542_Argument_Uniqueness_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment invalidArgName on Dog {
+                      doesKnowCommand(command: SIT, command: SIT)
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R542ArgumentUniqueness());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R542ArgumentUniqueness);
+        }
+
+        [Fact]
+        public void Rule_542_Argument_Uniqueness_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment invalidArgName on Dog {
+                      doesKnowCommand(command: SIT) @skip(if: true, if: true)
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R542ArgumentUniqueness());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R542ArgumentUniqueness);
+        }
+
+        [Fact]
+        public void Rule_5421_Required_Arguments_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment goodBooleanArg on Arguments {
+                      booleanArgField(booleanArg: true)
+                    }
+
+                    fragment goodNonNullArg on Arguments {
+                      nonNullBooleanArgField(nonNullBooleanArg: true)
+                    }
+
+                    fragment goodBooleanArgDefault on Arguments {
+                      booleanArgField
+                    }
+                    ");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5421RequiredArguments());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5421_Required_Arguments_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment missingRequiredArg on Arguments {
+                      nonNullBooleanArgField
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5421RequiredArguments());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5421RequiredArguments);
+        }
+
+        [Fact]
+        public void Rule_5421_Required_Arguments_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment missingRequiredArg on Arguments {
+                      nonNullBooleanArgField(nonNullBooleanArg: null)
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5421RequiredArguments());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5421RequiredArguments);
         }
     }
 }

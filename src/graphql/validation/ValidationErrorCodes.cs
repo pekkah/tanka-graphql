@@ -15,5 +15,9 @@
         public const string R533LeafFieldSelections = "5.3.3 Leaf Field Selections";
 
         public const string R541ArgumentNames = "5.4.1 Argument Names";
+        
+        public const string R542ArgumentUniqueness = "5.4.2 Argument Uniqueness";
+
+        public static string R5421RequiredArguments = "5.4.2.1 Required Arguments";
     }
 }
