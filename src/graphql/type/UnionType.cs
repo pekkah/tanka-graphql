@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
-    public class UnionType : INamedType, IDescribable
+    public class UnionType : INamedType, IDescribable, IAbstractType
     {
         public UnionType(string name, IEnumerable<ObjectType> possibleTypes, Meta meta = null)
         {

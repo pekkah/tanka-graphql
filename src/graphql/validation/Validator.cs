@@ -15,8 +15,10 @@ namespace tanka.graphql.validation
             {
                 new V2.R511ExecutableDefinitions(),
                 new V2.R5211OperationNameUniqueness(), 
-                new V2.R5221LoneAnonymousOperation(), 
-                new V2.R5231SingleRootField(), 
+                new V2.R5221LoneAnonymousOperation(),  
+                new V2.R5511FragmentNameUniqueness(),
+                new V2.R5512FragmentSpreadTypeExistence(),
+                new V2.R5231SingleRootField(),
                 new V2.R531FieldSelections(), 
                 new V2.R533LeafFieldSelections(), 
                 new V2.R541ArgumentNames(),
@@ -31,7 +33,7 @@ namespace tanka.graphql.validation
             Dictionary<string, object> variableValues = null)
         {
             var visitor = new DocumentRulesVisitor(
-                rules, 
+                DocumentRulesVisitor.InitializeRuleActionMap(rules), 
                 schema, 
                 document, 
                 variableValues);

@@ -97,8 +97,17 @@ namespace tanka.graphql.validation.rules2
             IValidationContext context)
         {
             var typeConditionAst = inlineFragment.TypeCondition;
-            var outputType = Ast.TypeFromAst(context.Schema, typeConditionAst)
-                             ?? GetNamedType(GetCurrentType());
+
+            IType outputType;
+            if (typeConditionAst != null)
+            {
+                outputType = Ast.TypeFromAst(context.Schema, typeConditionAst);
+            }
+            else
+            {
+                outputType = GetNamedType(GetCurrentType());
+            }
+
             _typeStack.Push(TypeIs.IsOutputType(outputType) ? outputType : null);
         }
 
@@ -106,8 +115,17 @@ namespace tanka.graphql.validation.rules2
             IValidationContext context)
         {
             var typeConditionAst = node.TypeCondition;
-            var outputType = Ast.TypeFromAst(context.Schema, typeConditionAst)
-                             ?? GetNamedType(GetCurrentType());
+
+            IType outputType;
+            if (typeConditionAst != null)
+            {
+                outputType = Ast.TypeFromAst(context.Schema, typeConditionAst);
+            }
+            else
+            {
+                outputType = GetNamedType(GetCurrentType());
+            }
+
             _typeStack.Push(TypeIs.IsOutputType(outputType) ? outputType : null);
         }
 

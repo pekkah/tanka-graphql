@@ -5,13 +5,10 @@ namespace tanka.graphql.language
 {
     public class Visitor
     {
-        public Visitor()
-        {
-            Fragments =
-                new Dictionary<string, GraphQLFragmentDefinition>();
-        }
+        private readonly List<GraphQLFragmentDefinition> _fragments = 
+            new List<GraphQLFragmentDefinition>();
 
-        protected IDictionary<string, GraphQLFragmentDefinition> Fragments { get; }
+        public IEnumerable<GraphQLFragmentDefinition> Fragments => _fragments;
 
         public virtual GraphQLName BeginVisitAlias(GraphQLName alias)
         {
@@ -91,6 +88,8 @@ namespace tanka.graphql.language
             BeginVisitNode(node.Name);
             if (node.SelectionSet != null)
                 BeginVisitNode(node.SelectionSet);
+
+            _fragments.Add(node);
             return node;
         }
 
@@ -249,13 +248,6 @@ namespace tanka.graphql.language
 
         public virtual void Visit(GraphQLDocument ast)
         {
-            foreach (var definition in ast.Definitions)
-                if (definition.Kind == ASTNodeKind.FragmentDefinition)
-                {
-                    var fragmentDefinition = (GraphQLFragmentDefinition) definition;
-                    Fragments.Add(fragmentDefinition.Name.Value, fragmentDefinition);
-                }
-
             foreach (var definition in ast.Definitions)
                 BeginVisitNode(definition);
         }

@@ -833,5 +833,147 @@ namespace tanka.graphql.tests.validation
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R5421RequiredArguments);
         }
+
+        [Fact]
+        public void Rule_5511_Fragment_Name_Uniqueness_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                      dog {
+                        ...fragmentOne
+                        ...fragmentTwo
+                      }
+                    }
+
+                    fragment fragmentOne on Dog {
+                      name
+                    }
+
+                    fragment fragmentTwo on Dog {
+                      owner {
+                        name
+                      }
+                    }
+                  ");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5511FragmentNameUniqueness());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5511_Fragment_Name_Uniqueness_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                      dog {
+                        ...fragmentOne
+                      }
+                    }
+
+                    fragment fragmentOne on Dog {
+                      name
+                    }
+
+                    fragment fragmentOne on Dog {
+                      owner {
+                        name
+                      }
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5511FragmentNameUniqueness());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5511FragmentNameUniqueness);
+        }
+
+        [Fact]
+        public void Rule_5512_Fragment_Spread_Type_Existence_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment correctType on Dog {
+                      name
+                    }
+
+                    fragment inlineFragment on Dog {
+                      ... on Dog {
+                        name
+                      }
+                    }
+
+                    fragment inlineFragment2 on Dog {
+                      ... @include(if: true) {
+                        name
+                      }
+                    }
+                  ");
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5512FragmentSpreadTypeExistence());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5512_Fragment_Spread_Type_Existence_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment notOnExistingType on NotInSchema {
+                      name
+                    }"
+                );
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5512FragmentSpreadTypeExistence());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5512FragmentSpreadTypeExistence);
+        }
+
+        [Fact]
+        public void Rule_5512_Fragment_Spread_Type_Existence_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment inlineNotExistingType on Dog {
+                      ... on NotInSchema {
+                        name
+                      }
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                new R5512FragmentSpreadTypeExistence());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5512FragmentSpreadTypeExistence);
+        }
     }
 }

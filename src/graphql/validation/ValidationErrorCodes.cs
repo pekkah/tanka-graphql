@@ -18,6 +18,10 @@
         
         public const string R542ArgumentUniqueness = "5.4.2 Argument Uniqueness";
 
-        public static string R5421RequiredArguments = "5.4.2.1 Required Arguments";
+        public const string R5421RequiredArguments = "5.4.2.1 Required Arguments";
+
+        public const string R5511FragmentNameUniqueness = "5.5.1.1 Fragment Name Uniqueness";
+        
+        public const string R5512FragmentSpreadTypeExistence = "5.5.1.2 Fragment Spread Type Existence";
     }
 }

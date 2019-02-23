@@ -17,5 +17,7 @@ namespace tanka.graphql.validation
         void Error(string code, string message, ASTNode node);
 
         void Error(string code, string message, IEnumerable<ASTNode> nodes);
+
+        IEnumerable<GraphQLFragmentDefinition> Fragments { get; }
     }
 }

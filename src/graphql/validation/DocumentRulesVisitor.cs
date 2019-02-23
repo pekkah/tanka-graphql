@@ -13,15 +13,6 @@ namespace tanka.graphql.validation
 
         private readonly Dictionary<ASTNodeKind, List<IRule>> _visitorMap;
 
-        public DocumentRulesVisitor(
-            IEnumerable<IRule> rules,
-            ISchema schema,
-            GraphQLDocument document,
-            Dictionary<string, object> variableValues = null)
-            : this(InitializeRuleActionMap(rules), schema, document, variableValues)
-        {
-        }
-
 
         public DocumentRulesVisitor(
             Dictionary<ASTNodeKind, List<IRule>> ruleMap,
