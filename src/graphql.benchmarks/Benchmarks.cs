@@ -137,7 +137,7 @@ namespace tanka.graphql.benchmarks
             var value = result.Source.Receive();
             AssertResult(value.Errors);
         }
-        */
+        
 
         [Benchmark]
         public async Task Validate_query_with_defaults()
@@ -152,6 +152,7 @@ namespace tanka.graphql.benchmarks
                     $"Validation failed. {result}");
             }
         }
+        */
 
         [Benchmark]
         public void Validate_query_with_defaults_v2()

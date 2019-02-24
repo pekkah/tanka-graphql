@@ -2,7 +2,7 @@ using GraphQLParser.AST;
 
 namespace tanka.graphql.validation
 {
-    public class RuleVisitor : IRuleVisitor
+    public class RuleVisitor
     {
         public NodeVisitor<GraphQLName> EnterAlias { get; set; }
 
