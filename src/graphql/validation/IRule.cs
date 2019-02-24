@@ -111,9 +111,15 @@ namespace tanka.graphql.validation
             IValidationContext context);
 
         void BeginVisitListValue(GraphQLListValue node, IValidationContext context);
+        
         void EndVisitSelectionSet(GraphQLSelectionSet selectionSet, IValidationContext context);
+        
         void EndVisitVariableDefinition(GraphQLVariableDefinition node, IValidationContext context);
+        
         void EndVisitObjectField(GraphQLObjectField node, IValidationContext context);
+
         void EndVisitEnumValue(GraphQLScalarValue value, IValidationContext context);
+
+        void EndVisit(GraphQLDocument document, IValidationContext context);
     }
 }

@@ -10,46 +10,14 @@ namespace tanka.graphql.validation
 {
     public static class Validator
     {
-        public static Dictionary<ASTNodeKind, List<IRule>> DefaultRules =
-            DocumentRulesVisitor.InitializeRuleActionMap(new IRule[]
-            {
-                new V2.R511ExecutableDefinitions(),
-                new V2.R5211OperationNameUniqueness(), 
-                new V2.R5221LoneAnonymousOperation(),  
-                new V2.R5511FragmentNameUniqueness(),
-                new V2.R5512FragmentSpreadTypeExistence(),
-                new V2.R5513FragmentsOnCompositeTypes(),
-                new V2.R5231SingleRootField(),
-                new V2.R531FieldSelections(), 
-                new V2.R533LeafFieldSelections(), 
-                new V2.R541ArgumentNames(),
-                new V2.R542ArgumentUniqueness(), 
-                new V2.R5421RequiredArguments(),
-            });
-
         public static ValidationResult Validate(
-            IEnumerable<IRule> rules,
+            IEnumerable<CreateRule> rules,
             ISchema schema,
             GraphQLDocument document,
             Dictionary<string, object> variableValues = null)
         {
-            var visitor = new DocumentRulesVisitor(
-                DocumentRulesVisitor.InitializeRuleActionMap(rules), 
-                schema, 
-                document, 
-                variableValues);
-
-            return visitor.Validate();
-        }
-
-        public static ValidationResult Validate(
-            Dictionary<ASTNodeKind, List<IRule>> ruleMap,
-            ISchema schema,
-            GraphQLDocument document,
-            Dictionary<string, object> variableValues = null)
-        {
-            var visitor = new DocumentRulesVisitor(
-                ruleMap,
+            var visitor = new RulesWalker(
+                rules, 
                 schema, 
                 document, 
                 variableValues);

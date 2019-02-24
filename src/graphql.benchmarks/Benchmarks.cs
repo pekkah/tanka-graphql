@@ -20,7 +20,7 @@ namespace tanka.graphql.benchmarks
         private ISchema _schema;
         private GraphQLDocument _mutation;
         private GraphQLDocument _subscription;
-        private Dictionary<ASTNodeKind, List<IRule>> _defaultRulesMap;
+        private IEnumerable<CreateRule> _defaultRulesMap;
 
         [GlobalSetup]
         public async Task Setup()
@@ -29,7 +29,7 @@ namespace tanka.graphql.benchmarks
             _query = Utils.InitializeQuery();
             _mutation = Utils.InitializeMutation();
             _subscription = Utils.InitializeSubscription();
-            _defaultRulesMap = Validator.DefaultRules;
+            _defaultRulesMap = ExecutionRules.All;
         }
         /*
         [Benchmark]

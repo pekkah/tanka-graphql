@@ -57,6 +57,10 @@ namespace tanka.graphql.validation
         {
         }
 
+        public virtual void EndVisit(GraphQLDocument document, IValidationContext context)
+        {
+        }
+
         public virtual void BeginVisitDirectives(IEnumerable<GraphQLDirective> directives,
             IValidationContext context)
         {

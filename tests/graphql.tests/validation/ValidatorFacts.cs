@@ -100,7 +100,7 @@ namespace tanka.graphql.tests.validation
 
         private ValidationResult Validate(
             GraphQLDocument document,
-            IRule rule,
+            CreateRule rule,
             Dictionary<string, object> variables = null)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
@@ -132,7 +132,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R511ExecutableDefinitions());
+                ExecutionRules.R511ExecutableDefinitions());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -163,7 +163,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5211OperationNameUniqueness());
+                ExecutionRules.R5211OperationNameUniqueness());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -191,7 +191,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5211OperationNameUniqueness());
+                ExecutionRules.R5211OperationNameUniqueness());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -214,7 +214,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5221LoneAnonymousOperation());
+                ExecutionRules.R5221LoneAnonymousOperation());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -242,7 +242,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5221LoneAnonymousOperation());
+                ExecutionRules.R5221LoneAnonymousOperation());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -266,7 +266,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5221LoneAnonymousOperation());
+                ExecutionRules.R5221LoneAnonymousOperation());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -291,7 +291,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5231SingleRootField());
+                ExecutionRules.R5231SingleRootField());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -313,7 +313,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5231SingleRootField());
+                ExecutionRules.R5231SingleRootField());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -342,7 +342,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5231SingleRootField());
+                ExecutionRules.R5231SingleRootField());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -367,7 +367,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5231SingleRootField());
+                ExecutionRules.R5231SingleRootField());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -388,7 +388,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R531FieldSelections());
+                ExecutionRules.R531FieldSelections());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -409,7 +409,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R531FieldSelections());
+                ExecutionRules.R531FieldSelections());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -432,7 +432,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R531FieldSelections());
+                ExecutionRules.R531FieldSelections());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -450,7 +450,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R531FieldSelections());
+                ExecutionRules.R531FieldSelections());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -468,7 +468,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R531FieldSelections());
+                ExecutionRules.R531FieldSelections());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -495,7 +495,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R531FieldSelections());
+                ExecutionRules.R531FieldSelections());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -514,7 +514,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R531FieldSelections());
+                ExecutionRules.R531FieldSelections());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -549,7 +549,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R533LeafFieldSelections());
+                ExecutionRules.R533LeafFieldSelections());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -569,7 +569,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R533LeafFieldSelections());
+                ExecutionRules.R533LeafFieldSelections());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -590,7 +590,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R533LeafFieldSelections());
+                ExecutionRules.R533LeafFieldSelections());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -611,7 +611,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R533LeafFieldSelections());
+                ExecutionRules.R533LeafFieldSelections());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -632,7 +632,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R533LeafFieldSelections());
+                ExecutionRules.R533LeafFieldSelections());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -657,7 +657,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R541ArgumentNames());
+                ExecutionRules.R541ArgumentNames());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -675,7 +675,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R541ArgumentNames());
+                ExecutionRules.R541ArgumentNames());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -696,7 +696,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R541ArgumentNames());
+                ExecutionRules.R541ArgumentNames());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -717,7 +717,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R542ArgumentUniqueness());
+                ExecutionRules.R542ArgumentUniqueness());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -735,7 +735,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R542ArgumentUniqueness());
+                ExecutionRules.R542ArgumentUniqueness());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -756,7 +756,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R542ArgumentUniqueness());
+                ExecutionRules.R542ArgumentUniqueness());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -786,7 +786,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5421RequiredArguments());
+                ExecutionRules.R5421RequiredArguments());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -804,7 +804,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5421RequiredArguments());
+                ExecutionRules.R5421RequiredArguments());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -825,7 +825,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5421RequiredArguments());
+                ExecutionRules.R5421RequiredArguments());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -860,7 +860,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5511FragmentNameUniqueness());
+                ExecutionRules.R5511FragmentNameUniqueness());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -890,7 +890,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5511FragmentNameUniqueness());
+                ExecutionRules.R5511FragmentNameUniqueness());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -924,7 +924,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5512FragmentSpreadTypeExistence());
+                ExecutionRules.R5512FragmentSpreadTypeExistence());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -943,7 +943,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5512FragmentSpreadTypeExistence());
+                ExecutionRules.R5512FragmentSpreadTypeExistence());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -967,7 +967,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5512FragmentSpreadTypeExistence());
+                ExecutionRules.R5512FragmentSpreadTypeExistence());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -999,7 +999,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5513FragmentsOnCompositeTypes());
+                ExecutionRules.R5513FragmentsOnCompositeTypes());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -1018,7 +1018,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5513FragmentsOnCompositeTypes());
+                ExecutionRules.R5513FragmentsOnCompositeTypes());
 
             /* Then */
             Assert.False(result.IsValid);
@@ -1042,13 +1042,66 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                new R5513FragmentsOnCompositeTypes());
+                ExecutionRules.R5513FragmentsOnCompositeTypes());
 
             /* Then */
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R5513FragmentsOnCompositeTypes);
+        }
+
+        [Fact]
+        public void Rule_5514_FragmentsMustBeUsed_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment nameFragment on Dog {
+                      name
+                    }
+
+                    {
+                      dog {
+                        ...nameFragment
+                      }
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5514FragmentsMustBeUsed());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5514_FragmentsMustBeUsed_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment nameFragment on Dog {
+                      name
+                    }
+
+                    {
+                      dog {
+                        name
+                      }
+                    }"
+                );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5514FragmentsMustBeUsed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5514FragmentsMustBeUsed);
         }
     }
 }

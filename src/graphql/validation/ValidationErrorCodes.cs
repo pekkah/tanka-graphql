@@ -25,5 +25,7 @@
         public const string R5512FragmentSpreadTypeExistence = "5.5.1.2 Fragment Spread Type Existence";
 
         public const string R5513FragmentsOnCompositeTypes = "5.5.1.3 Fragments On Composite Types";
+
+        public const string R5514FragmentsMustBeUsed = "5.5.1.4 Fragments Must Be Used";
     }
 }
