@@ -1,4 +1,4 @@
 namespace tanka.graphql.validation
 {
-    public delegate RuleVisitor CreateRule(IRuleVisitorContext context);
+    public delegate void CreateRule(IRuleVisitorContext context, RuleVisitor rule);
 }

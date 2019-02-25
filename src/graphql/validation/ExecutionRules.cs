@@ -33,9 +33,9 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R511ExecutableDefinitions()
         {
-            return context => new RuleVisitor
+            return (context, rule) =>
             {
-                EnterDocument = document =>
+                rule.EnterDocument += document =>
                 {
                     foreach (var definition in document.Definitions)
                     {
@@ -51,7 +51,7 @@ namespace tanka.graphql.validation
                                 "executable, and are not considered during execution.",
                                 definition);
                     }
-                }
+                };
             };
         }
 
@@ -65,26 +65,23 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R5211OperationNameUniqueness()
         {
-            return context =>
+            return (context, rule) =>
             {
                 var known = new List<string>();
-                return new RuleVisitor
+                rule.EnterOperationDefinition += definition =>
                 {
-                    EnterOperationDefinition = definition =>
-                    {
-                        var operationName = definition.Name?.Value;
+                    var operationName = definition.Name?.Value;
 
-                        if (string.IsNullOrWhiteSpace(operationName))
-                            return;
+                    if (string.IsNullOrWhiteSpace(operationName))
+                        return;
 
-                        if (known.Contains(operationName))
-                            context.Error(ValidationErrorCodes.R5211OperationNameUniqueness,
-                                "Each named operation definition must be unique within a " +
-                                "document when referred to by its name.",
-                                definition);
+                    if (known.Contains(operationName))
+                        context.Error(ValidationErrorCodes.R5211OperationNameUniqueness,
+                            "Each named operation definition must be unique within a " +
+                            "document when referred to by its name.",
+                            definition);
 
-                        known.Add(operationName);
-                    }
+                    known.Add(operationName);
                 };
             };
         }
@@ -97,11 +94,9 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R5221LoneAnonymousOperation()
         {
-            return context =>
+            return (context, rule) =>
             {
-                return new RuleVisitor
-                {
-                    EnterDocument = document =>
+                rule.EnterDocument += document =>
                     {
                         var operations = document.Definitions
                             .OfType<GraphQLOperationDefinition>()
@@ -118,7 +113,6 @@ namespace tanka.graphql.validation
                                     "query operations when only that one operation exists in " +
                                     "the document.",
                                     operations);
-                    }
                 };
             };
         }
@@ -133,9 +127,9 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R5231SingleRootField()
         {
-            return context => new RuleVisitor
+            return (context, rule) =>
             {
-                EnterDocument = document =>
+                rule.EnterDocument += document =>
                 {
                     var subscriptions = document.Definitions
                         .OfType<GraphQLOperationDefinition>()
@@ -169,7 +163,7 @@ namespace tanka.graphql.validation
                                 "Subscription operations must have exactly one root field.",
                                 subscription);
                     }
-                }
+                };
             };
         }
 
@@ -180,9 +174,9 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R531FieldSelections()
         {
-            return context => new RuleVisitor
+            return (context, rule) =>
             {
-                EnterFieldSelection = selection =>
+                rule.EnterFieldSelection += selection =>
                 {
                     var fieldName = selection.Name.Value;
 
@@ -196,7 +190,7 @@ namespace tanka.graphql.validation
                             "on the scoped type of the selection set. There are no " +
                             "limitations on alias names.",
                             selection);
-                }
+                };
             };
         }
 
@@ -210,9 +204,9 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R533LeafFieldSelections()
         {
-            return context => new RuleVisitor
+            return (context, rule) =>
             {
-                EnterFieldSelection = selection =>
+                rule.EnterFieldSelection += selection =>
                 {
                     var fieldName = selection.Name.Value;
 
@@ -254,7 +248,7 @@ namespace tanka.graphql.validation
                                 "without subfields are disallowed.",
                                 selection);
                     }
-                }
+                };
             };
         }
 
@@ -266,9 +260,9 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R541ArgumentNames()
         {
-            return context => new RuleVisitor
+            return (context, rule) =>
             {
-                EnterArgument = argument =>
+                rule.EnterArgument += argument =>
                 {
                     if (context.Tracker.GetArgument() == null)
                         context.Error(
@@ -277,7 +271,7 @@ namespace tanka.graphql.validation
                             "must be defined in the set of possible arguments of that " +
                             "field or directive.",
                             argument);
-                }
+                };
             };
         }
 
@@ -346,9 +340,9 @@ namespace tanka.graphql.validation
                 }
             }
 
-            return context => new RuleVisitor
+            return (context, rule) =>
             {
-                EnterFieldSelection = field =>
+                rule.EnterFieldSelection += field =>
                 {
                     var args = field.Arguments.ToList();
                     var argumentDefinitions = GetArgumentDefinitions(context);
@@ -358,8 +352,8 @@ namespace tanka.graphql.validation
                         return;
 
                     ValidateArguments(argumentDefinitions, args, context);
-                },
-                EnterDirective = directive =>
+                };
+                rule.EnterDirective += directive =>
                 {
                     var args = directive.Arguments.ToList();
                     var argumentDefinitions = GetArgumentDefinitions(context);
@@ -369,7 +363,7 @@ namespace tanka.graphql.validation
                         return;
 
                     ValidateArguments(argumentDefinitions, args, context);
-                }
+                };
             };
         }
 
@@ -381,12 +375,10 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R542ArgumentUniqueness()
         {
-            return context =>
+            return (context, rule) =>
             {
                 var knownArgs = new List<string>();
-                return new RuleVisitor
-                {
-                    EnterArgument = argument =>
+                rule.EnterArgument += argument =>
                     {
                         if (knownArgs.Contains(argument.Name.Value))
                             context.Error(
@@ -397,7 +389,6 @@ namespace tanka.graphql.validation
                                 argument);
 
                         knownArgs.Add(argument.Name.Value);
-                    }
                 };
             };
         }
@@ -410,22 +401,19 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R5511FragmentNameUniqueness()
         {
-            return context =>
+            return (context, rule) =>
             {
                 var knownFragments = new List<string>();
-                return new RuleVisitor
+                rule.EnterFragmentDefinition += fragment =>
                 {
-                    EnterFragmentDefinition = fragment =>
-                    {
-                        if (knownFragments.Contains(fragment.Name.Value))
-                            context.Error(
-                                ValidationErrorCodes.R5511FragmentNameUniqueness,
-                                "Fragment definitions are referenced in fragment spreads by name. To avoid " +
-                                "ambiguity, each fragment’s name must be unique within a document.",
-                                fragment);
+                    if (knownFragments.Contains(fragment.Name.Value))
+                        context.Error(
+                            ValidationErrorCodes.R5511FragmentNameUniqueness,
+                            "Fragment definitions are referenced in fragment spreads by name. To avoid " +
+                            "ambiguity, each fragment’s name must be unique within a document.",
+                            fragment);
 
-                        knownFragments.Add(fragment.Name.Value);
-                    }
+                    knownFragments.Add(fragment.Name.Value);
                 };
             };
         }
@@ -437,9 +425,9 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R5512FragmentSpreadTypeExistence()
         {
-            return context => new RuleVisitor
+            return (context, rule) =>
             {
-                EnterFragmentDefinition = node =>
+                rule.EnterFragmentDefinition += node =>
                 {
                     var type = context.Tracker.GetCurrentType();
 
@@ -449,8 +437,8 @@ namespace tanka.graphql.validation
                             "Fragments must be specified on types that exist in the schema. This " +
                             "applies for both named and inline fragments. ",
                             node);
-                },
-                EnterInlineFragment = node =>
+                };
+                rule.EnterInlineFragment += node =>
                 {
                     var type = context.Tracker.GetCurrentType();
 
@@ -460,7 +448,7 @@ namespace tanka.graphql.validation
                             "Fragments must be specified on types that exist in the schema. This " +
                             "applies for both named and inline fragments. ",
                             node);
-                }
+                };
             };
         }
 
@@ -470,9 +458,9 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R5513FragmentsOnCompositeTypes()
         {
-            return context => new RuleVisitor
+            return (context, rule) =>
             {
-                EnterFragmentDefinition = node =>
+                rule.EnterFragmentDefinition += node =>
                 {
                     var type = context.Tracker.GetCurrentType();
 
@@ -486,8 +474,8 @@ namespace tanka.graphql.validation
                         ValidationErrorCodes.R5513FragmentsOnCompositeTypes,
                         "Fragments can only be declared on unions, interfaces, and objects",
                         node);
-                },
-                EnterInlineFragment = node =>
+                };
+                rule.EnterInlineFragment += node =>
                 {
                     var type = context.Tracker.GetCurrentType();
 
@@ -501,7 +489,7 @@ namespace tanka.graphql.validation
                         ValidationErrorCodes.R5513FragmentsOnCompositeTypes,
                         "Fragments can only be declared on unions, interfaces, and objects",
                         node);
-                }
+                };
             };
         }
 
@@ -511,26 +499,23 @@ namespace tanka.graphql.validation
         /// </summary>
         public static CreateRule R5514FragmentsMustBeUsed()
         {
-            return context =>
+            return (context, rule) =>
             {
                 var fragments = new Dictionary<string, GraphQLFragmentDefinition>();
                 var fragmentSpreads = new List<string>();
 
-                return new RuleVisitor
+                rule.EnterFragmentDefinition += fragment => { fragments.Add(fragment.Name.Value, fragment); };
+                rule.EnterFragmentSpread += spread => { fragmentSpreads.Add(spread.Name.Value); };
+                rule.LeaveDocument += document =>
                 {
-                    EnterFragmentDefinition = fragment => { fragments.Add(fragment.Name.Value, fragment); },
-                    EnterFragmentSpread = spread => { fragmentSpreads.Add(spread.Name.Value); },
-                    LeaveDocument = document =>
+                    foreach (var fragment in fragments)
                     {
-                        foreach (var fragment in fragments)
-                        {
-                            var name = fragment.Key;
-                            if (!fragmentSpreads.Contains(name))
-                                context.Error(
-                                    ValidationErrorCodes.R5514FragmentsMustBeUsed,
-                                    "Defined fragments must be used within a document.",
-                                    fragment.Value);
-                        }
+                        var name = fragment.Key;
+                        if (!fragmentSpreads.Contains(name))
+                            context.Error(
+                                ValidationErrorCodes.R5514FragmentsMustBeUsed,
+                                "Defined fragments must be used within a document.",
+                                fragment.Value);
                     }
                 };
             };
