@@ -550,7 +550,10 @@ namespace tanka.graphql.validation
             string CycleErrorMessage(string fragName, string[] spreadNames)
             {
                 var via = spreadNames.Any() ? " via " + string.Join(", ", spreadNames) : "";
-                return $"Cannot spread fragment \"{fragName}\" within itself {via}.";
+                return "The graph of fragment spreads must not form any cycles including spreading itself. " +
+                       "Otherwise an operation could infinitely spread or infinitely execute on cycles in the " +
+                       "underlying data. " +
+                       $"Cannot spread fragment \"{fragName}\" within itself {via}.";
             }
 
             IEnumerable<GraphQLFragmentSpread> GetFragmentSpreads(GraphQLSelectionSet node)
