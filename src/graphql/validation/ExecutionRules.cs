@@ -17,12 +17,13 @@ namespace tanka.graphql.validation
             R5512FragmentSpreadTypeExistence(),
             R5513FragmentsOnCompositeTypes(),
             R5514FragmentsMustBeUsed(),
+            R5522FragmentSpreadsMustNotFormCycles(),
             R5231SingleRootField(),
             R531FieldSelections(),
             R533LeafFieldSelections(),
             R541ArgumentNames(),
             R542ArgumentUniqueness(),
-            R5421RequiredArguments(),
+            R5421RequiredArguments()
         };
 
 
@@ -97,22 +98,22 @@ namespace tanka.graphql.validation
             return (context, rule) =>
             {
                 rule.EnterDocument += document =>
-                    {
-                        var operations = document.Definitions
-                            .OfType<GraphQLOperationDefinition>()
-                            .ToList();
+                {
+                    var operations = document.Definitions
+                        .OfType<GraphQLOperationDefinition>()
+                        .ToList();
 
-                        var anonymous = operations
-                            .Count(op => string.IsNullOrEmpty(op.Name?.Value));
+                    var anonymous = operations
+                        .Count(op => string.IsNullOrEmpty(op.Name?.Value));
 
-                        if (operations.Count() > 1)
-                            if (anonymous > 0)
-                                context.Error(
-                                    ValidationErrorCodes.R5221LoneAnonymousOperation,
-                                    "GraphQL allows a short‐hand form for defining " +
-                                    "query operations when only that one operation exists in " +
-                                    "the document.",
-                                    operations);
+                    if (operations.Count() > 1)
+                        if (anonymous > 0)
+                            context.Error(
+                                ValidationErrorCodes.R5221LoneAnonymousOperation,
+                                "GraphQL allows a short‐hand form for defining " +
+                                "query operations when only that one operation exists in " +
+                                "the document.",
+                                operations);
                 };
             };
         }
@@ -379,16 +380,16 @@ namespace tanka.graphql.validation
             {
                 var knownArgs = new List<string>();
                 rule.EnterArgument += argument =>
-                    {
-                        if (knownArgs.Contains(argument.Name.Value))
-                            context.Error(
-                                ValidationErrorCodes.R542ArgumentUniqueness,
-                                "Fields and directives treat arguments as a mapping of " +
-                                "argument name to value. More than one argument with the same " +
-                                "name in an argument set is ambiguous and invalid.",
-                                argument);
+                {
+                    if (knownArgs.Contains(argument.Name.Value))
+                        context.Error(
+                            ValidationErrorCodes.R542ArgumentUniqueness,
+                            "Fields and directives treat arguments as a mapping of " +
+                            "argument name to value. More than one argument with the same " +
+                            "name in an argument set is ambiguous and invalid.",
+                            argument);
 
-                        knownArgs.Add(argument.Name.Value);
+                    knownArgs.Add(argument.Name.Value);
                 };
             };
         }
@@ -519,6 +520,125 @@ namespace tanka.graphql.validation
                     }
                 };
             };
+        }
+
+        public static CreateRule R5522FragmentSpreadsMustNotFormCycles()
+        {
+            return (context, rule) =>
+            {
+                var visitedFrags = new List<string>();
+                var spreadPath = new Stack<GraphQLFragmentSpread>();
+
+                // Position in the spread path
+                var spreadPathIndexByName = new Dictionary<string, int?>();
+
+                var fragments = context.Document.Definitions.OfType<GraphQLFragmentDefinition>()
+                    .ToList();
+
+                rule.EnterFragmentDefinition += node =>
+                {
+                    DetectCycleRecursive(
+                        node, 
+                        spreadPath, 
+                        visitedFrags, 
+                        spreadPathIndexByName, 
+                        context, 
+                        fragments);
+                };
+            };
+
+            string CycleErrorMessage(string fragName, string[] spreadNames)
+            {
+                var via = spreadNames.Any() ? " via " + string.Join(", ", spreadNames) : "";
+                return $"Cannot spread fragment \"{fragName}\" within itself {via}.";
+            }
+
+            IEnumerable<GraphQLFragmentSpread> GetFragmentSpreads(GraphQLSelectionSet node)
+            {
+                var spreads = new List<GraphQLFragmentSpread>();
+
+                var setsToVisit = new Stack<GraphQLSelectionSet>(new[] {node});
+
+                while (setsToVisit.Any())
+                {
+                    var set = setsToVisit.Pop();
+
+                    foreach (var selection in set.Selections)
+                        if (selection is GraphQLFragmentSpread spread)
+                        {
+                            spreads.Add(spread);
+                        }
+                        else if (selection is GraphQLFieldSelection fieldSelection)
+                        {
+                            if (fieldSelection.SelectionSet != null)
+                                setsToVisit.Push(fieldSelection.SelectionSet);
+                        }
+                }
+
+                return spreads;
+            }
+
+            void DetectCycleRecursive(
+                GraphQLFragmentDefinition fragment,
+                Stack<GraphQLFragmentSpread> spreadPath,
+                List<string> visitedFrags,
+                Dictionary<string, int?> spreadPathIndexByName,
+                IRuleVisitorContext context,
+                List<GraphQLFragmentDefinition> fragments)
+            {
+                var fragmentName = fragment.Name.Value;
+                if (visitedFrags.Contains(fragmentName))
+                    return;
+
+                var spreadNodes = GetFragmentSpreads(fragment.SelectionSet)
+                    .ToArray();
+                
+                if (!spreadNodes.Any()) 
+                    return;
+
+                spreadPathIndexByName[fragmentName] = spreadPath.Count;
+
+                for (int i = 0; i < spreadNodes.Length; i++)
+                {
+                    var spreadNode = spreadNodes[i];
+                    var spreadName = spreadNode.Name.Value;
+                    int? cycleIndex = spreadPathIndexByName.ContainsKey(spreadName)
+                        ? spreadPathIndexByName[spreadName]
+                        : default;
+
+                    spreadPath.Push(spreadNode);
+
+                    if (cycleIndex == null)
+                    {
+                        var spreadFragment = fragments.SingleOrDefault(f => f.Name.Value == spreadName);
+
+                        if (spreadFragment != null)
+                            DetectCycleRecursive(
+                                spreadFragment,
+                                spreadPath,
+                                visitedFrags,
+                                spreadPathIndexByName,
+                                context,
+                                fragments);
+                    }
+                    else
+                    {
+                        var cyclePath = spreadPath.Skip(cycleIndex.Value).ToList();
+                        var fragmentNames = cyclePath.Take(cyclePath.Count() - 1)
+                            .Select(s => s.Name.Value)
+                            .ToArray();
+
+                        context.Error(
+                            ValidationErrorCodes.R5522FragmentSpreadsMustNotFormCycles,
+                            CycleErrorMessage(spreadName, fragmentNames),
+                            cyclePath);
+                    }
+
+                    spreadPath.Pop();
+                }
+
+                spreadPathIndexByName[fragmentName] = null;
+            }
         }
     }
 }

@@ -5,7 +5,6 @@ using GraphQLParser.AST;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.validation;
-using tanka.graphql.validation.rules2;
 using Xunit;
 
 namespace tanka.graphql.tests.validation
@@ -1102,6 +1101,78 @@ namespace tanka.graphql.tests.validation
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R5514FragmentsMustBeUsed);
+        }
+
+        [Fact]
+        public void Rule_5522_FragmentSpreadsMustNotFormCycles_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                      dog {
+                        ...nameFragment
+                      }
+                    }
+
+                    fragment nameFragment on Dog {
+                      name
+                      ...barkVolumeFragment
+                    }
+
+                    fragment barkVolumeFragment on Dog {
+                      barkVolume
+                      ...nameFragment
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5522FragmentSpreadsMustNotFormCycles());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Contains(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5522FragmentSpreadsMustNotFormCycles);
+        }
+
+        [Fact]
+        public void Rule_5522_FragmentSpreadsMustNotFormCycles_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                      dog {
+                        ...dogFragment
+                      }
+                    }
+
+                    fragment dogFragment on Dog {
+                      name
+                      owner {
+                        ...ownerFragment
+                      }
+                    }
+
+                    fragment ownerFragment on Dog {
+                      name
+                      pets {
+                        ...dogFragment
+                      }
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5522FragmentSpreadsMustNotFormCycles());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Contains(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5522FragmentSpreadsMustNotFormCycles);
         }
     }
 }
