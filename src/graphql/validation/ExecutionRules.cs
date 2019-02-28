@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
 using tanka.graphql.execution;
 using tanka.graphql.type;
+using tanka.graphql.type.converters;
 
 namespace tanka.graphql.validation
 {
     public static class ExecutionRules
     {
-        public static IEnumerable<CreateRule> All = new[]
+        public static IEnumerable<CombineRule> All = new[]
         {
             R511ExecutableDefinitions(),
             R5211OperationNameUniqueness(),
@@ -18,12 +20,19 @@ namespace tanka.graphql.validation
             R5513FragmentsOnCompositeTypes(),
             R5514FragmentsMustBeUsed(),
             R5522FragmentSpreadsMustNotFormCycles(),
+            R5523FragmentSpreadIsPossible(),
             R5231SingleRootField(),
             R531FieldSelections(),
             R533LeafFieldSelections(),
             R541ArgumentNames(),
             R542ArgumentUniqueness(),
-            R5421RequiredArguments()
+            R5421RequiredArguments(),
+            R561ValuesOfCorrectType(),
+            R562InputObjectFieldNames(),
+            R563InputObjectFieldUniqueness(),
+            R564InputObjectRequiredFields(),
+            R57Directives(),
+            R58Variables()
         };
 
 
@@ -32,7 +41,7 @@ namespace tanka.graphql.validation
         ///     For each definition definition in the document.
         ///     definition must be OperationDefinition or FragmentDefinition (it must not be TypeSystemDefinition).
         /// </summary>
-        public static CreateRule R511ExecutableDefinitions()
+        public static CombineRule R511ExecutableDefinitions()
         {
             return (context, rule) =>
             {
@@ -64,7 +73,7 @@ namespace tanka.graphql.validation
         ///     Let operations be all operation definitions in the document named operationName.
         ///     operations must be a set of one.
         /// </summary>
-        public static CreateRule R5211OperationNameUniqueness()
+        public static CombineRule R5211OperationNameUniqueness()
         {
             return (context, rule) =>
             {
@@ -93,7 +102,7 @@ namespace tanka.graphql.validation
         ///     If operations is a set of more than 1:
         ///     anonymous must be empty.
         /// </summary>
-        public static CreateRule R5221LoneAnonymousOperation()
+        public static CombineRule R5221LoneAnonymousOperation()
         {
             return (context, rule) =>
             {
@@ -126,7 +135,7 @@ namespace tanka.graphql.validation
         ///     Let groupedFieldSet be the result of CollectFields(subscriptionType, selectionSet, variableValues).
         ///     groupedFieldSet must have exactly one entry.
         /// </summary>
-        public static CreateRule R5231SingleRootField()
+        public static CombineRule R5231SingleRootField()
         {
             return (context, rule) =>
             {
@@ -173,7 +182,7 @@ namespace tanka.graphql.validation
         ///     Let fieldName be the target field of selection
         ///     fieldName must be defined on type in scope
         /// </summary>
-        public static CreateRule R531FieldSelections()
+        public static CombineRule R531FieldSelections()
         {
             return (context, rule) =>
             {
@@ -203,7 +212,7 @@ namespace tanka.graphql.validation
         ///     If selectionType is an interface, union, or object
         ///     The subselection set of that selection must NOT BE empty
         /// </summary>
-        public static CreateRule R533LeafFieldSelections()
+        public static CombineRule R533LeafFieldSelections()
         {
             return (context, rule) =>
             {
@@ -218,7 +227,7 @@ namespace tanka.graphql.validation
 
                     if (field != null)
                     {
-                        var selectionType = field.Value.Field.Type;
+                        var selectionType = field.Value.Field.Type.Unwrap();
                         var hasSubSelection = selection.SelectionSet?.Selections?.Any();
 
                         if (selectionType is ScalarType && hasSubSelection == true)
@@ -235,7 +244,14 @@ namespace tanka.graphql.validation
                                 "allowed, because they are the leaf nodes of any GraphQL query.",
                                 selection);
 
-                        if (selectionType is ComplexType && hasSubSelection == null)
+                        if (selectionType is ObjectType && hasSubSelection == null)
+                            context.Error(
+                                ValidationErrorCodes.R533LeafFieldSelections,
+                                "Leaf selections on objects, interfaces, and unions " +
+                                "without subfields are disallowed.",
+                                selection);
+
+                        if (selectionType is InterfaceType && hasSubSelection == null)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Leaf selections on objects, interfaces, and unions " +
@@ -259,7 +275,7 @@ namespace tanka.graphql.validation
         ///     Let argumentDefinition be the argument definition provided by the parent field or definition named argumentName.
         ///     argumentDefinition must exist.
         /// </summary>
-        public static CreateRule R541ArgumentNames()
+        public static CombineRule R541ArgumentNames()
         {
             return (context, rule) =>
             {
@@ -290,7 +306,7 @@ namespace tanka.graphql.validation
         ///     - Let value be the value of argument.
         ///     value must not be the null literal.
         /// </summary>
-        public static CreateRule R5421RequiredArguments()
+        public static CombineRule R5421RequiredArguments()
         {
             IEnumerable<KeyValuePair<string, Argument>> GetArgumentDefinitions(IRuleVisitorContext context)
             {
@@ -374,11 +390,13 @@ namespace tanka.graphql.validation
         ///     Let arguments be all Arguments named argumentName in the Argument Set which contains argument.
         ///     arguments must be the set containing only argument.
         /// </summary>
-        public static CreateRule R542ArgumentUniqueness()
+        public static CombineRule R542ArgumentUniqueness()
         {
             return (context, rule) =>
             {
                 var knownArgs = new List<string>();
+                rule.EnterFieldSelection += _ => knownArgs = new List<string>();
+                rule.EnterDirective += _ => knownArgs = new List<string>();
                 rule.EnterArgument += argument =>
                 {
                     if (knownArgs.Contains(argument.Name.Value))
@@ -400,7 +418,7 @@ namespace tanka.graphql.validation
         ///     Let fragments be all fragment definitions in the document named fragmentName.
         ///     fragments must be a set of one.
         /// </summary>
-        public static CreateRule R5511FragmentNameUniqueness()
+        public static CombineRule R5511FragmentNameUniqueness()
         {
             return (context, rule) =>
             {
@@ -424,7 +442,7 @@ namespace tanka.graphql.validation
         ///     Let fragment be the target of namedSpread
         ///     The target type of fragment must be defined in the schema
         /// </summary>
-        public static CreateRule R5512FragmentSpreadTypeExistence()
+        public static CombineRule R5512FragmentSpreadTypeExistence()
         {
             return (context, rule) =>
             {
@@ -457,7 +475,7 @@ namespace tanka.graphql.validation
         ///     For each fragment defined in the document.
         ///     The target type of fragment must have kind UNION, INTERFACE, or OBJECT.
         /// </summary>
-        public static CreateRule R5513FragmentsOnCompositeTypes()
+        public static CombineRule R5513FragmentsOnCompositeTypes()
         {
             return (context, rule) =>
             {
@@ -498,7 +516,7 @@ namespace tanka.graphql.validation
         ///     For each fragment defined in the document.
         ///     fragment must be the target of at least one spread in the document
         /// </summary>
-        public static CreateRule R5514FragmentsMustBeUsed()
+        public static CombineRule R5514FragmentsMustBeUsed()
         {
             return (context, rule) =>
             {
@@ -522,7 +540,7 @@ namespace tanka.graphql.validation
             };
         }
 
-        public static CreateRule R5522FragmentSpreadsMustNotFormCycles()
+        public static CombineRule R5522FragmentSpreadsMustNotFormCycles()
         {
             return (context, rule) =>
             {
@@ -538,11 +556,11 @@ namespace tanka.graphql.validation
                 rule.EnterFragmentDefinition += node =>
                 {
                     DetectCycleRecursive(
-                        node, 
-                        spreadPath, 
-                        visitedFrags, 
-                        spreadPathIndexByName, 
-                        context, 
+                        node,
+                        spreadPath,
+                        visitedFrags,
+                        spreadPathIndexByName,
+                        context,
                         fragments);
                 };
             };
@@ -568,14 +586,10 @@ namespace tanka.graphql.validation
 
                     foreach (var selection in set.Selections)
                         if (selection is GraphQLFragmentSpread spread)
-                        {
                             spreads.Add(spread);
-                        }
                         else if (selection is GraphQLFieldSelection fieldSelection)
-                        {
                             if (fieldSelection.SelectionSet != null)
                                 setsToVisit.Push(fieldSelection.SelectionSet);
-                        }
                 }
 
                 return spreads;
@@ -595,17 +609,17 @@ namespace tanka.graphql.validation
 
                 var spreadNodes = GetFragmentSpreads(fragment.SelectionSet)
                     .ToArray();
-                
-                if (!spreadNodes.Any()) 
+
+                if (!spreadNodes.Any())
                     return;
 
                 spreadPathIndexByName[fragmentName] = spreadPath.Count;
 
-                for (int i = 0; i < spreadNodes.Length; i++)
+                for (var i = 0; i < spreadNodes.Length; i++)
                 {
                     var spreadNode = spreadNodes[i];
                     var spreadName = spreadNode.Name.Value;
-                    int? cycleIndex = spreadPathIndexByName.ContainsKey(spreadName)
+                    var cycleIndex = spreadPathIndexByName.ContainsKey(spreadName)
                         ? spreadPathIndexByName[spreadName]
                         : default;
 
@@ -642,6 +656,422 @@ namespace tanka.graphql.validation
 
                 spreadPathIndexByName[fragmentName] = null;
             }
+        }
+
+        /// <summary>
+        ///     For each spread (named or inline) defined in the document.
+        ///     Let fragment be the target of spread
+        ///     Let fragmentType be the type condition of fragment
+        ///     Let parentType be the type of the selection set containing spread
+        ///     Let applicableTypes be the intersection of GetPossibleTypes(fragmentType) and GetPossibleTypes(parentType)
+        ///     applicableTypes must not be empty.
+        /// </summary>
+        /// <returns></returns>
+        public static CombineRule R5523FragmentSpreadIsPossible()
+        {
+            return (context, rule) =>
+            {
+                var fragments = context.Document.Definitions.OfType<GraphQLFragmentDefinition>()
+                    .ToDictionary(f => f.Name.Value);
+
+                rule.EnterFragmentSpread += node =>
+                {
+                    var fragment = fragments[node.Name.Value];
+                    var fragmentType = Ast.TypeFromAst(context.Schema, fragment.TypeCondition);
+                    var parentType = context.Tracker.GetParentType();
+                    var applicableTypes = GetPossibleTypes(fragmentType, context.Schema)
+                        .Intersect(GetPossibleTypes(parentType, context.Schema));
+
+                    if (!applicableTypes.Any())
+                        context.Error(
+                            ValidationErrorCodes.R5523FragmentSpreadIsPossible,
+                            "Fragments are declared on a type and will only apply " +
+                            "when the runtime object type matches the type condition. They " +
+                            "also are spread within the context of a parent type. A fragment " +
+                            "spread is only valid if its type condition could ever apply within " +
+                            "the parent type.",
+                            node);
+                };
+
+                rule.EnterInlineFragment += node =>
+                {
+                    var fragmentType = Ast.TypeFromAst(context.Schema, node.TypeCondition);
+                    var parentType = context.Tracker.GetParentType();
+                    var applicableTypes = GetPossibleTypes(fragmentType, context.Schema)
+                        .Intersect(GetPossibleTypes(parentType, context.Schema));
+
+                    if (!applicableTypes.Any())
+                        context.Error(
+                            ValidationErrorCodes.R5523FragmentSpreadIsPossible,
+                            "Fragments are declared on a type and will only apply " +
+                            "when the runtime object type matches the type condition. They " +
+                            "also are spread within the context of a parent type. A fragment " +
+                            "spread is only valid if its type condition could ever apply within " +
+                            "the parent type.",
+                            node);
+                };
+            };
+
+            ObjectType[] GetPossibleTypes(IType type, ISchema schema)
+            {
+                switch (type)
+                {
+                    case ObjectType objectType:
+                        return new[] {objectType};
+                    case InterfaceType interfaceType:
+                        return schema.GetPossibleTypes(interfaceType).ToArray();
+                    case UnionType unionType:
+                        return schema.GetPossibleTypes(unionType).ToArray();
+                    default: return new ObjectType[] { };
+                }
+            }
+        }
+
+        public static CombineRule R561ValuesOfCorrectType()
+        {
+            return (context, rule) =>
+            {
+                //todo: there's an astnodekind for nullvalue but no type
+                //rule.EnterNullValue += node => { };
+
+                rule.EnterListValue += node =>
+                {
+                    var type = context.Tracker.GetNullableType(
+                        context.Tracker.GetParentInputType());
+
+                    if (!(type is List)) IsValidScalar(context, node);
+                };
+                rule.EnterObjectValue += node =>
+                {
+                    var type = context.Tracker.GetNamedType(
+                        context.Tracker.GetInputType());
+
+                    if (!(type is InputObjectType inputType))
+                    {
+                        IsValidScalar(context, node);
+                        // return false;
+                        return;
+                    }
+
+                    var fieldNodeMap = node.Fields.ToDictionary(
+                        f => f.Name.Value);
+
+                    foreach (var fieldDef in context.Schema.GetInputFields(
+                        inputType.Name))
+                    {
+                        var fieldNode = fieldNodeMap.ContainsKey(fieldDef.Key);
+                        if (!fieldNode && fieldDef.Value.Type is NonNull nonNull)
+                            context.Error(
+                                ValidationErrorCodes.R561ValuesOfCorrectType,
+                                RequiredFieldMessage(
+                                    type.ToString(),
+                                    fieldDef.Key,
+                                    nonNull.ToString()),
+                                node);
+                    }
+                };
+                rule.EnterObjectField += node =>
+                {
+                    var parentType = context.Tracker
+                        .GetNamedType(context.Tracker.GetParentInputType());
+
+                    var fieldType = context.Tracker.GetInputType();
+                    if (fieldType == null && parentType is InputObjectType)
+                        context.Error(
+                            ValidationErrorCodes.R561ValuesOfCorrectType,
+                            UnknownFieldMessage(
+                                parentType.ToString(),
+                                node.Name.Value,
+                                string.Empty),
+                            node);
+                };
+                rule.EnterEnumValue += node =>
+                {
+                    var maybeEnumType = context.Tracker.GetNamedType(
+                        context.Tracker.GetInputType());
+
+                    if (!(maybeEnumType is EnumType type))
+                        IsValidScalar(context, node);
+                    else if (type.ParseValue(node.Value) == null)
+                        context.Error(
+                            ValidationErrorCodes.R561ValuesOfCorrectType,
+                            BadValueMessage(
+                                type.Name,
+                                node.ToString(),
+                                string.Empty));
+                };
+                rule.EnterIntValue += node => IsValidScalar(context, node);
+                rule.EnterFloatValue += node => IsValidScalar(context, node);
+                rule.EnterStringValue += node => IsValidScalar(context, node);
+                rule.EnterBooleanValue += node => IsValidScalar(context, node);
+            };
+
+            string BadValueMessage(
+                string typeName,
+                string valueName,
+                string message
+            )
+            {
+                return $"Expected type {typeName}, found {valueName} " +
+                       message;
+            }
+
+            string RequiredFieldMessage(
+                string typeName,
+                string fieldName,
+                string fieldTypeName
+            )
+            {
+                return $"Field {typeName}.{fieldName} of required type " +
+                       $"{fieldTypeName} was not provided.";
+            }
+
+            string UnknownFieldMessage(
+                string typeName,
+                string fieldName,
+                string message
+            )
+            {
+                return $"Field {fieldName} is not defined by type {typeName} " +
+                       message;
+            }
+
+            void IsValidScalar(
+                IRuleVisitorContext context,
+                GraphQLValue node)
+            {
+                var locationType = context.Tracker.GetInputType();
+
+                if (locationType == null)
+                    return;
+
+                var maybeScalarType = context
+                    .Tracker
+                    .GetNamedType(locationType);
+
+                if (!(maybeScalarType is IValueConverter type))
+                {
+                    context.Error(
+                        ValidationErrorCodes.R561ValuesOfCorrectType,
+                        BadValueMessage(
+                            maybeScalarType?.ToString(),
+                            node.ToString(),
+                            string.Empty),
+                        node);
+
+                    return;
+                }
+
+                try
+                {
+                    type.ParseLiteral((GraphQLScalarValue) node);
+                }
+                catch (Exception e)
+                {
+                    context.Error(
+                        ValidationErrorCodes.R561ValuesOfCorrectType,
+                        BadValueMessage(locationType?.ToString(),
+                            node.ToString(),
+                            e.ToString()),
+                        node);
+                }
+            }
+        }
+
+        public static CombineRule R562InputObjectFieldNames()
+        {
+            return (context, rule) =>
+            {
+                rule.EnterObjectField += inputField =>
+                {
+                    var inputFieldName = inputField.Name.Value;
+
+                    if (!(context.Tracker
+                        .GetParentInputType() is InputObjectType parentType))
+                        return;
+
+                    var inputFieldDefinition = context.Schema
+                        .GetInputField(parentType.Name, inputFieldName);
+
+                    if (inputFieldDefinition == null)
+                        context.Error(
+                            ValidationErrorCodes.R562InputObjectFieldNames,
+                            "Every input field provided in an input object " +
+                            "value must be defined in the set of possible fields of " +
+                            "that input object’s expected type.",
+                            inputField);
+                };
+            };
+        }
+
+        public static CombineRule R563InputObjectFieldUniqueness()
+        {
+            return (context, rule) =>
+            {
+                rule.EnterObjectValue += node =>
+                {
+                    var fields = node.Fields.ToList();
+
+                    foreach (var inputField in fields)
+                    {
+                        var name = inputField.Name.Value;
+                        if (fields.Count(f => f.Name.Value == name) > 1)
+                            context.Error(
+                                ValidationErrorCodes.R563InputObjectFieldUniqueness,
+                                "Input objects must not contain more than one field " +
+                                "of the same name, otherwise an ambiguity would exist which " +
+                                "includes an ignored portion of syntax.",
+                                fields.Where(f => f.Name.Value == name));
+                    }
+                };
+            };
+        }
+
+        public static CombineRule R564InputObjectRequiredFields()
+        {
+            return (context, rule) =>
+            {
+                rule.EnterObjectValue += node =>
+                {
+                    var inputObject = context.Tracker.GetInputType() as InputObjectType;
+
+                    if (inputObject == null)
+                        return;
+
+                    var fields = node.Fields.ToDictionary(f => f.Name.Value);
+                    var fieldDefinitions = context.Schema.GetInputFields(inputObject.Name);
+
+                    foreach (var fieldDefinition in fieldDefinitions)
+                    {
+                        var type = fieldDefinition.Value.Type;
+                        var defaultValue = fieldDefinition.Value.DefaultValue;
+
+                        if (type is NonNull nonNull && defaultValue == null)
+                        {
+                            var fieldName = fieldDefinition.Key;
+                            if (!fields.TryGetValue(fieldName, out var field))
+                            {
+                                context.Error(
+                                    ValidationErrorCodes.R564InputObjectRequiredFields,
+                                    "Input object fields may be required. Much like a field " +
+                                    "may have required arguments, an input object may have required " +
+                                    "fields. An input field is required if it has a non‐null type and " +
+                                    "does not have a default value. Otherwise, the input object field " +
+                                    "is optional. " +
+                                    $"Field '{nonNull}.{fieldName}' is required.",
+                                    node);
+
+                                return;
+                            }
+
+                            if (field.Value.Kind == ASTNodeKind.NullValue)
+                                context.Error(
+                                    ValidationErrorCodes.R564InputObjectRequiredFields,
+                                    "Input object fields may be required. Much like a field " +
+                                    "may have required arguments, an input object may have required " +
+                                    "fields. An input field is required if it has a non‐null type and " +
+                                    "does not have a default value. Otherwise, the input object field " +
+                                    "is optional. " +
+                                    $"Field '{nonNull}.{field}' value cannot be null.",
+                                    node, field);
+                        }
+                    }
+                };
+            };
+        }
+
+        /// <summary>
+        ///     5.7.1, 5.73
+        /// </summary>
+        /// <returns></returns>
+        public static CombineRule R57Directives()
+        {
+            return (context, rule) =>
+            {
+                rule.EnterDirective += directive =>
+                {
+                    var directiveName = directive.Name.Value;
+                    var directiveDefinition = context.Schema.GetDirective(directiveName);
+
+                    if (directiveDefinition == null)
+                        context.Error(
+                            ValidationErrorCodes.R57Directives,
+                            "GraphQL servers define what directives they support. " +
+                            "For each usage of a directive, the directive must be available " +
+                            "on that server.",
+                            directive);
+                };
+
+                rule.EnterOperationDefinition += node => CheckDirectives(context, node.Directives);
+                rule.EnterFieldSelection += node => CheckDirectives(context, node.Directives);
+                rule.EnterFragmentDefinition += node => CheckDirectives(context, node.Directives);
+                rule.EnterFragmentSpread += node => CheckDirectives(context, node.Directives);
+                rule.EnterInlineFragment += node => CheckDirectives(context, node.Directives);
+            };
+
+            // 5.7.3
+            void CheckDirectives(IRuleVisitorContext context, IEnumerable<GraphQLDirective> directives)
+            {
+                var knownDirectives = new List<string>();
+
+                foreach (var directive in directives)
+                {
+                    if (knownDirectives.Contains(directive.Name.Value))
+                        context.Error(
+                            ValidationErrorCodes.R57Directives,
+                            "For each usage of a directive, the directive must be used in a " +
+                            "location that the server has declared support for. " +
+                            $"Directive '{directive.Name.Value}' is used multiple times on same location",
+                            directive);
+
+                    knownDirectives.Add(directive.Name.Value);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     5.8.1, 5.8.2
+        /// </summary>
+        /// <returns></returns>
+        public static CombineRule R58Variables()
+        {
+            return (context, rule) =>
+            {
+                rule.EnterOperationDefinition += node =>
+                {
+                    var knownVariables = new List<string>();
+                    if (node.VariableDefinitions == null)
+                        return;
+
+                    foreach (var variableUsage in node.VariableDefinitions)
+                    {
+                        var variable = variableUsage.Variable;
+                        var variableName = variable.Name.Value;
+
+                        // 5.8.1 Variable Uniqueness
+                        if (knownVariables.Contains(variableName))
+                            context.Error(
+                                ValidationErrorCodes.R58Variables,
+                                "If any operation defines more than one " +
+                                "variable with the same name, it is ambiguous and " +
+                                "invalid. It is invalid even if the type of the " +
+                                "duplicate variable is the same.",
+                                node);
+
+                        knownVariables.Add(variableName);
+
+                        // 5.8.2
+                        var variableType = Ast.TypeFromAst(context.Schema, variableUsage.Type);
+                        if (!TypeIs.IsInputType(variableType))
+                            context.Error(
+                                ValidationErrorCodes.R58Variables,
+                                "Variables can only be input types. Objects, unions, " +
+                                "and interfaces cannot be used as inputs.." +
+                                $"Given variable type is '{variableType}'",
+                                node);
+                    }
+                };
+            };
         }
     }
 }

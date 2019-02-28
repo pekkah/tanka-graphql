@@ -35,7 +35,6 @@ namespace tanka.graphql.validation
         public override string ToString()
         {
             var builder = new StringBuilder();
-            builder.AppendLine(Code);
             builder.Append(Message);
 
             if (Nodes.Any())
@@ -50,6 +49,23 @@ namespace tanka.graphql.validation
             }
 
             return builder.ToString().TrimEnd(',');
+        }
+
+        public Error ToError()
+        {
+            return new Error(ToString())
+            {
+                Locations = Nodes.Select(n => n.Location).ToList(),
+                Extensions = new Dictionary<string, object>
+                {
+                    {
+                        "doc", new
+                        {
+                            section = Code
+                        }
+                    }
+                }
+            };
         }
     }
 }

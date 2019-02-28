@@ -14,7 +14,7 @@ namespace tanka.graphql
         public string Message { get; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<GraphQLLocation> Locations { get; set;  }
+        public List<GraphQLLocation> Locations { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<object> Path { get; set; }

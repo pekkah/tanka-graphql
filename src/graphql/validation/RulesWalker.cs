@@ -11,7 +11,7 @@ namespace tanka.graphql.validation
             new List<ValidationError>();
 
         public RulesWalker(
-            IEnumerable<CreateRule> rules,
+            IEnumerable<CombineRule> rules,
             ISchema schema,
             GraphQLDocument document,
             Dictionary<string, object> variableValues = null)
@@ -381,7 +381,7 @@ namespace tanka.graphql.validation
             return base.EndVisitListValue(node);
         }
 
-        protected void CreateVisitors(IEnumerable<CreateRule> rules)
+        protected void CreateVisitors(IEnumerable<CombineRule> rules)
         {
             Tracker = new TypeTracker(Schema);
 

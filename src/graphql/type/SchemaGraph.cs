@@ -80,7 +80,12 @@ namespace tanka.graphql.type
 
         public DirectiveType GetDirective(string name)
         {
-            return _directiveTypes[name];
+            if (_directiveTypes.TryGetValue(name, out var directive))
+            {
+                return directive;
+            }
+
+            return null;
         }
 
         public IQueryable<DirectiveType> QueryDirectives(Predicate<DirectiveType> filter = null)
@@ -100,7 +105,16 @@ namespace tanka.graphql.type
 
         public InputObjectField GetInputField(string type, string name)
         {
-            return _inputFields[type][name];
+            if (_inputFields.TryGetValue(type, out var fields))
+                if (fields.TryGetValue(name, out var field))
+                    return field;
+
+            return null;
+        }
+
+        public IEnumerable<ObjectType> GetPossibleTypes(IAbstractType abstractType)
+        {
+            return QueryTypes<ObjectType>(abstractType.IsPossible);
         }
 
         public T GetNamedType<T>(string name) where T : INamedType

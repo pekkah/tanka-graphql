@@ -41,7 +41,7 @@ namespace tanka.graphql
                 if (!validationResult.IsValid)
                     return new ExecutionResult
                     {
-                        Errors = validationResult.Errors.Select(e => new Error(e.Message))
+                        Errors = validationResult.Errors.Select(e =>e.ToError())
                     };
 
                 ExecutionResult executionResult;
@@ -141,10 +141,11 @@ namespace tanka.graphql
             if (options.Validate)
             {
                 await extensions.BeginValidationAsync();
-                validationResult = await Validator.ValidateAsync(
+                validationResult = Validator.Validate(
+                    ExecutionRules.All,
                     options.Schema,
                     document,
-                    coercedVariableValues).ConfigureAwait(false);
+                    coercedVariableValues);
 
                 logger.ValidationResult(validationResult);
 

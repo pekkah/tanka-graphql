@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
-    public class UnionType : INamedType, IDescribable, IAbstractType
+    public class UnionType : ComplexType, INamedType, IDescribable, IAbstractType
     {
-        public UnionType(string name, IEnumerable<ObjectType> possibleTypes, Meta meta = null)
+        public UnionType(string name, IEnumerable<ObjectType> possibleTypes, Meta meta = null) :base(name)
         {
-            Name = name;
+            //Name = name;
             Meta = meta ?? new Meta();
 
             foreach (var possibleType in possibleTypes)
@@ -25,7 +25,7 @@ namespace tanka.graphql.type
         public Meta Meta { get; }
         public string Description => Meta.Description;
 
-        public string Name { get; }
+        //public string Name { get; }
 
         public bool IsPossible(ObjectType type)
         {

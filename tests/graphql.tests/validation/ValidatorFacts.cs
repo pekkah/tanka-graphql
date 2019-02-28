@@ -90,6 +90,13 @@ namespace tanka.graphql.tests.validation
                 extend type Query {
                   arguments: Arguments
                 }
+
+                input ComplexInput { name: String!, owner: String }
+
+                extend type Query {
+                  findDog(complex: ComplexInput): Dog
+                  booleanList(booleanListArg: [Boolean!]): Boolean
+                }
                 ";
 
             Schema = Sdl.Schema(Parser.ParseDocument(sdl));
@@ -99,7 +106,7 @@ namespace tanka.graphql.tests.validation
 
         private ValidationResult Validate(
             GraphQLDocument document,
-            CreateRule rule,
+            CombineRule rule,
             Dictionary<string, object> variables = null)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
@@ -1173,6 +1180,557 @@ namespace tanka.graphql.tests.validation
             Assert.Contains(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R5522FragmentSpreadsMustNotFormCycles);
+        }
+
+        [Fact]
+        public void Rule_5523_FragmentSpreadIsPossible_in_scope_valid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment dogFragment on Dog {
+                      ... on Dog {
+                        barkVolume
+                      }
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5523FragmentSpreadIsPossible());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5523_FragmentSpreadIsPossible_in_scope_invalid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment catInDogFragmentInvalid on Dog {
+                  ... on Cat {
+                    meowVolume
+                  }
+                }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5523FragmentSpreadIsPossible());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5523FragmentSpreadIsPossible);
+        }
+
+        [Fact]
+        public void Rule_5523_FragmentSpreadIsPossible_in_abstract_scope_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment petNameFragment on Pet {
+                      name
+                    }
+
+                    fragment interfaceWithinObjectFragment on Dog {
+                      ...petNameFragment
+                    }
+                    ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5523FragmentSpreadIsPossible());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5523_FragmentSpreadIsPossible_in_abstract_scope_valid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment catOrDogNameFragment on CatOrDog {
+                      ... on Cat {
+                        meowVolume
+                      }
+                    }
+
+                    fragment unionWithObjectFragment on Dog {
+                      ...catOrDogNameFragment
+                    }
+                    ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5523FragmentSpreadIsPossible());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5523_FragmentSpreadIsPossible_abstract_in_abstract_scope_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment unionWithInterface on Pet {
+                      ...dogOrHumanFragment
+                    }
+
+                    fragment dogOrHumanFragment on DogOrHuman {
+                      ... on Dog {
+                        barkVolume
+                      }
+                    }
+                    ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5523FragmentSpreadIsPossible());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_5523_FragmentSpreadIsPossible_abstract_in_abstract_scope_invalid()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment nonIntersectingInterfaces on Pet {
+                      ...sentientFragment
+                    }
+
+                    fragment sentientFragment on Sentient {
+                      name
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5523FragmentSpreadIsPossible());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5523FragmentSpreadIsPossible);
+        }
+
+        [Fact]
+        public void Rule_561_ValuesOfCorrectType_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment goodBooleanArg on Arguments {
+                      booleanArgField(booleanArg: true)
+                    }
+
+                    fragment coercedIntIntoFloatArg on Arguments {
+                      # Note: The input coercion rules for Float allow Int literals.
+                      floatArgField(floatArg: 123)
+                    }
+
+                    query goodComplexDefaultValue($search: ComplexInput = { name: ""Fido"" }) {
+                      findDog(complex: $search)
+                    }
+                  ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R561ValuesOfCorrectType());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_561_ValuesOfCorrectType_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"fragment stringIntoInt on Arguments {
+                      intArgField(intArg: ""123"")
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R561ValuesOfCorrectType());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R561ValuesOfCorrectType);
+        }
+
+        [Fact]
+        public void Rule_561_ValuesOfCorrectType_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query badComplexValue {
+                      findDog(complex: { name: 123 })
+                    }"
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R561ValuesOfCorrectType());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R561ValuesOfCorrectType);
+        }
+
+        [Fact]
+        public void Rule_562_InputObjectFieldNames_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                      findDog(complex: { name: ""Fido"" })
+                    }
+                  ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R562InputObjectFieldNames());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_562_InputObjectFieldNames_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                      findDog(complex: { favoriteCookieFlavor: ""Bacon"" })
+                    }
+                    ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R562InputObjectFieldNames());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R562InputObjectFieldNames);
+        }
+
+        [Fact]
+        public void Rule_563_InputObjectFieldUniqueness_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                      field(arg: { field: true, field: false })
+                    }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R563InputObjectFieldUniqueness());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Contains(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R563InputObjectFieldUniqueness);
+        }
+
+        [Fact]
+        public void Rule_564_InputObjectRequiredFields_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                       findDog(complex: { owner: ""Fido"" })
+                  }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R564InputObjectRequiredFields());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R564InputObjectRequiredFields);
+        }
+
+        [Fact]
+        public void Rule_564_InputObjectRequiredFields_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                       findDog(complex: { name: null })
+                  }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R564InputObjectRequiredFields());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R564InputObjectRequiredFields);
+        }
+
+        [Fact]
+        public void Rule_57_DirectivesAreDefined_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                       findDog(complex: { name: ""Fido"" }) @skip(if: false)
+                  }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R57Directives());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_57_DirectivesAreDefined_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                       findDog(complex: { name: ""Fido"" }) @doesNotExists
+                  }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R57Directives());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R57Directives);
+        }
+
+        [Fact(Skip = "TODO: 5.7.2")]
+        public void Rule_572_DirectivesAreInValidLocations_valid1()
+        {
+        }
+
+        [Fact]
+        public void Rule_573_DirectivesAreUniquePerLocation_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query ($foo: Boolean = true, $bar: Boolean = false) {
+                      field @skip(if: $foo) {
+                        subfieldA
+                      }
+                      field @skip(if: $bar) {
+                        subfieldB
+                      }
+                    }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R57Directives());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_573_DirectivesAreUniquePerLocation_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query ($foo: Boolean = true, $bar: Boolean = false) {
+                      field @skip(if: $foo) @skip(if: $bar)
+                    }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R57Directives());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R57Directives);
+        }
+
+        [Fact]
+        public void Rule_58_Variables_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query A($atOtherHomes: Boolean) {
+                      ...HouseTrainedFragment
+                    }
+
+                    query B($atOtherHomes: Boolean) {
+                      ...HouseTrainedFragment
+                    }
+
+                    fragment HouseTrainedFragment on Query {
+                      dog {
+                        isHousetrained(atOtherHomes: $atOtherHomes)
+                      }
+                    }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R58Variables());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_58_Variables_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query houseTrainedQuery($atOtherHomes: Boolean, $atOtherHomes: Boolean) {
+                      dog {
+                        isHousetrained(atOtherHomes: $atOtherHomes)
+                      }
+                    }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R58Variables());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R58Variables);
+        }
+
+        [Fact]
+        public void Rule_582_VariablesAreInputTypes_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query takesBoolean($atOtherHomes: Boolean) {
+                      dog {
+                        isHousetrained(atOtherHomes: $atOtherHomes)
+                      }
+                    }
+
+                    query takesComplexInput($complexInput: ComplexInput) {
+                      findDog(complex: $complexInput) {
+                        name
+                      }
+                    }
+
+                    query TakesListOfBooleanBang($booleans: [Boolean!]) {
+                      booleanList(booleanListArg: $booleans)
+                    }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R58Variables());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_582_VariablesAreInputTypes_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query takesCat($cat: Cat) {
+                      __typename
+                    }
+
+                    query takesDogBang($dog: Dog!) {
+                      __typename
+                    }
+
+                    query takesListOfPet($pets: [Pet]) {
+                      __typename
+                    }
+
+                    query takesCatOrDog($catOrDog: CatOrDog) {
+                      __typename
+                    }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R58Variables());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Equal(4, result.Errors.Count());
+            Assert.Contains(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R58Variables
+                         && error.Message.StartsWith("Variables can only be input types. Objects, unions,"));
+        }
+
+        [Fact(Skip = "TODO")]
+        public void Rule_583_AllVariableUsesDefined()
+        {
+
+        }
+
+        [Fact(Skip = "TODO")]
+        public void Rule_584_AllVariablesUsed_valid1()
+        {
+        }
+
+        [Fact(Skip = "TODO")]
+        public void Rule_585_AllVariableUsagesAreAllowed_valid1()
+        {
         }
     }
 }

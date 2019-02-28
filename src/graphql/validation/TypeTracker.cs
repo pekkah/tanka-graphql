@@ -235,7 +235,7 @@ namespace tanka.graphql.validation
         public IType GetParentInputType()
         {
             //todo: probably a bad idea
-            return _inputTypeStack.ElementAtOrDefault(_inputTypeStack.Count - 2);
+            return _inputTypeStack.ElementAtOrDefault(_inputTypeStack.Count - 1);
         }
 
         public (string Name, IField Field)? GetFieldDef()
