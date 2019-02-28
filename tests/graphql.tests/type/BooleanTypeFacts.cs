@@ -52,7 +52,7 @@ namespace tanka.graphql.tests.type
             Assert.Equal(expected, actual);
         }
 
-        [Theory]
+        [Theory(Skip = "Coercion not allowed")]
         [InlineData("1", true)]
         [InlineData("0", false)]
         public void ParseIntLiteral(string input, bool expected)

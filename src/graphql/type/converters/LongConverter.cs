@@ -24,6 +24,11 @@ namespace tanka.graphql.type.converters
 
         public object ParseLiteral(GraphQLScalarValue input)
         {
+            if (input.Kind == ASTNodeKind.NullValue)
+            {
+                return null;
+            }
+
             if (input.Kind == ASTNodeKind.IntValue)
             {
                 if (input.Value == null)
@@ -32,7 +37,8 @@ namespace tanka.graphql.type.converters
                 return Convert.ToInt64(input.Value);
             }
 
-            return null;
+            throw new FormatException(
+                $"Cannot coerce Long value from '{input.Kind}'");
         }
     }
 }

@@ -15,17 +15,22 @@ namespace tanka.graphql.validation
             _nodes.AddRange(nodes);
         }
 
-        public ValidationError(int code, string message, params ASTNode[] nodes)
-            : this(message, nodes)
+        public ValidationError(string code, string message, IEnumerable<ASTNode> nodes)
+            : this(message, nodes.ToArray())
         {
             Code = code;
+        }
+
+        public ValidationError(string code, string message, ASTNode node)
+            : this(code, message, new[] {node})
+        {
         }
 
         public string Message { get; set; }
 
         public IEnumerable<ASTNode> Nodes => _nodes;
 
-        public int Code { get; set; } = -1;
+        public string Code { get; set; }
 
         public override string ToString()
         {
@@ -44,6 +49,23 @@ namespace tanka.graphql.validation
             }
 
             return builder.ToString().TrimEnd(',');
+        }
+
+        public Error ToError()
+        {
+            return new Error(ToString())
+            {
+                Locations = Nodes.Select(n => n.Location).ToList(),
+                Extensions = new Dictionary<string, object>
+                {
+                    {
+                        "doc", new
+                        {
+                            section = Code
+                        }
+                    }
+                }
+            };
         }
     }
 }

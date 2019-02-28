@@ -29,5 +29,7 @@ namespace tanka.graphql.type
         IEnumerable<KeyValuePair<string, InputObjectField>> GetInputFields(string type);
 
         InputObjectField GetInputField(string type, string name);
+
+        IEnumerable<ObjectType> GetPossibleTypes(IAbstractType abstractType);
     }
 }

@@ -33,8 +33,12 @@ namespace tanka.graphql.type.converters
 
         public object ParseLiteral(GraphQLScalarValue input)
         {
-            if (input.Kind == ASTNodeKind.BooleanValue || input.Kind == ASTNodeKind.StringValue ||
-                input.Kind == ASTNodeKind.IntValue)
+            if (input.Kind == ASTNodeKind.NullValue)
+            {
+                return null;
+            }
+
+            if (input.Kind == ASTNodeKind.BooleanValue)
             {
                 var value = input.Value;
 
@@ -50,7 +54,8 @@ namespace tanka.graphql.type.converters
                 return Convert.ToBoolean(input.Value, NumberFormatInfo.InvariantInfo);
             }
 
-            return null;
+            throw new FormatException(
+                $"Cannot coerce Bool value from '{input.Kind}'");
         }
     }
 }

@@ -14,5 +14,8 @@ namespace tanka.graphql.type
         Resolver Resolve { get; set; }
 
         Subscriber Subscribe {get; set; }
+        DirectiveInstance GetDirective(string name);
+        Argument GetArgument(string name);
+        bool HasArgument(string name);
     }
 }

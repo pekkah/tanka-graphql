@@ -2,7 +2,7 @@
 
 namespace tanka.graphql.type
 {
-    public class InterfaceType : ComplexType, IDirectives, IDescribable
+    public class InterfaceType : ComplexType, IDirectives, IDescribable, IAbstractType
     {
         public InterfaceType(string name, Meta meta = null)
             : base(name)
@@ -24,6 +24,11 @@ namespace tanka.graphql.type
         public override string ToString()
         {
             return $"{Name}";
+        }
+
+        public bool IsPossible(ObjectType type)
+        {
+            return type.Implements(this);
         }
     }
 }

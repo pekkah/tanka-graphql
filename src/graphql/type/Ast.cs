@@ -7,6 +7,9 @@ namespace tanka.graphql.type
     {
         public static IType TypeFromAst(ISchema schema, GraphQLType type)
         {
+            if (type == null)
+                return null;
+
             if (type.Kind == ASTNodeKind.NonNullType)
             {
                 var innerType = TypeFromAst(schema, ((GraphQLNonNullType)type).Type);
