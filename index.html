@@ -61,7 +61,7 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Tanka GraphQL</a>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="https://github.com/pekkah/tanka-docs-gen">GitHub</a>
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
             </li>
         </ul>
     </nav>
@@ -72,6 +72,11 @@
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                             <a class="d-flex align-items-center text-muted" href="index.html">Home</a>
                         </h6>
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="benchmarks.html">Benchmarks</a>
+                                </li>
+                            </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                             <a class="d-flex align-items-center text-muted" href="1-execution/01-validation.html">Execution</a>
                         </h6>
@@ -166,25 +171,27 @@
 <h2 id="features">Features</h2>
 <ul>
 <li>Execute queries, mutations and subscriptions</li>
-<li>Validation (Dirty port from graphql-dotnet). Validation is the slowest part of the execution and needs to be redone.</li>
+<li>Validation (new implementation in v0.3.0)</li>
 <li>SignalR hub for streaming queries, mutations and subscriptions</li>
 <li>ApolloLink for the provided SignalR hub</li>
 </ul>
 <h3 id="feeds">Feeds</h3>
-<p>Beta:</p>
+<p>Beta</p>
+<p><a href="https://www.myget.org/feed/tanka/package/nuget/tanka.graphql"><img src="https://img.shields.io/myget/tanka/vpre/tanka.graphql.svg?style=popout-square" alt="" /></a>
+<a href="https://www.myget.org/feed/tanka/package/npm/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/latest.svg?registry_uri=https%3A%2F%2Fwww.myget.org%2FF%2Ftanka%2Fnpm%2F&amp;style=popout-square" alt="" /></a></p>
 <ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Beta docs</a></li>
+<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Documentation</a></li>
 <li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
 <li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
 </ul>
 <p>Release</p>
+<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
+<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
 <ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Release docs</a></li>
+<li><a href="https://pekkah.github.io/tanka-graphql/">Documentation</a></li>
 <li>From NuGet</li>
 <li>From NPM</li>
 </ul>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
 <h3 id="install">Install</h3>
 <pre><code class="lang-bash">dotnet add tanka.graphql
 dotnet add tanka.graphql.server

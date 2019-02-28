@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>List - tanka-graphql</title>
+    <title>Benchmarks - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -74,7 +74,7 @@
                         </h6>
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="benchmarks.html">Benchmarks</a>
+                                    <a class="nav-link active bg-light" href="benchmarks.html">Benchmarks</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -143,7 +143,7 @@
                                     <a class="nav-link" href="3-type-system/10-input-objects.html">Input objects</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active bg-light" href="3-type-system/11-list.html">List</a>
+                                    <a class="nav-link" href="3-type-system/11-list.html">List</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/12-non-null.html">Non null</a>
@@ -166,26 +166,137 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="list">List</h2>
+                <pre><code class="lang-ini">
+BenchmarkDotNet=v0.11.4, OS=Windows 10.0.14393.2724 (1607/AnniversaryUpdate/Redstone1), VM=Hyper-V
+Intel Xeon CPU E5-2673 v4 2.30GHz, 1 CPU, 2 logical and 2 physical cores
+.NET Core SDK=2.2.103
+  [Host] : .NET Core 2.2.1 (CoreCLR 4.6.27207.03, CoreFX 4.6.27207.03), 64bit RyuJIT
+  Core   : .NET Core 2.2.1 (CoreCLR 4.6.27207.03, CoreFX 4.6.27207.03), 64bit RyuJIT
+
+Job=Core  Runtime=Core  
+
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Error</th>
+<th style="text-align: right;">StdDev</th>
+<th style="text-align: right;">Median</th>
+<th style="text-align: right;">Gen 0/1k Op</th>
+<th style="text-align: right;">Gen 1/1k Op</th>
+<th style="text-align: right;">Gen 2/1k Op</th>
+<th style="text-align: right;">Allocated Memory/Op</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Query_with_defaults</td>
+<td style="text-align: right;">54.845 us</td>
+<td style="text-align: right;">2.2859 us</td>
+<td style="text-align: right;">6.7401 us</td>
+<td style="text-align: right;">57.972 us</td>
+<td style="text-align: right;">2.4414</td>
+<td style="text-align: right;">0.7935</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">15.25 KB</td>
+</tr>
+<tr>
+<td>Query_without_validation</td>
+<td style="text-align: right;">16.069 us</td>
+<td style="text-align: right;">0.3526 us</td>
+<td style="text-align: right;">0.6447 us</td>
+<td style="text-align: right;">15.939 us</td>
+<td style="text-align: right;">0.7935</td>
+<td style="text-align: right;">0.3967</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">4.49 KB</td>
+</tr>
+<tr>
+<td>Mutation_with_defaults</td>
+<td style="text-align: right;">18.296 us</td>
+<td style="text-align: right;">0.3901 us</td>
+<td style="text-align: right;">0.5718 us</td>
+<td style="text-align: right;">18.231 us</td>
+<td style="text-align: right;">2.2278</td>
+<td style="text-align: right;">0.0305</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">14.39 KB</td>
+</tr>
+<tr>
+<td>Mutation_without_validation</td>
+<td style="text-align: right;">6.070 us</td>
+<td style="text-align: right;">0.1208 us</td>
+<td style="text-align: right;">0.2522 us</td>
+<td style="text-align: right;">6.040 us</td>
+<td style="text-align: right;">0.5646</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">3.64 KB</td>
+</tr>
+<tr>
+<td>Subscribe_with_defaults</td>
+<td style="text-align: right;">30.197 us</td>
+<td style="text-align: right;">0.6028 us</td>
+<td style="text-align: right;">0.9205 us</td>
+<td style="text-align: right;">29.980 us</td>
+<td style="text-align: right;">4.1199</td>
+<td style="text-align: right;">0.8545</td>
+<td style="text-align: right;">0.2747</td>
+<td style="text-align: right;">21.04 KB</td>
+</tr>
+<tr>
+<td>Subscribe_without_validation</td>
+<td style="text-align: right;">22.567 us</td>
+<td style="text-align: right;">0.6808 us</td>
+<td style="text-align: right;">1.9644 us</td>
+<td style="text-align: right;">22.505 us</td>
+<td style="text-align: right;">2.2583</td>
+<td style="text-align: right;">0.8545</td>
+<td style="text-align: right;">0.2136</td>
+<td style="text-align: right;">9.53 KB</td>
+</tr>
+<tr>
+<td>Subscribe_with_defaults_and_get_value</td>
+<td style="text-align: right;">78.868 us</td>
+<td style="text-align: right;">1.5738 us</td>
+<td style="text-align: right;">2.9560 us</td>
+<td style="text-align: right;">78.554 us</td>
+<td style="text-align: right;">3.7842</td>
+<td style="text-align: right;">0.9766</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">21.67 KB</td>
+</tr>
+<tr>
+<td>Subscribe_without_validation_and_get_value</td>
+<td style="text-align: right;">44.624 us</td>
+<td style="text-align: right;">0.9227 us</td>
+<td style="text-align: right;">2.3148 us</td>
+<td style="text-align: right;">43.819 us</td>
+<td style="text-align: right;">2.1362</td>
+<td style="text-align: right;">0.7324</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">10.16 KB</td>
+</tr>
+<tr>
+<td>Validate_query_with_defaults</td>
+<td style="text-align: right;">8.415 us</td>
+<td style="text-align: right;">0.1670 us</td>
+<td style="text-align: right;">0.3177 us</td>
+<td style="text-align: right;">8.411 us</td>
+<td style="text-align: right;">1.6632</td>
+<td style="text-align: right;">0.0305</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">10.52 KB</td>
+</tr>
+</tbody>
+</table>
+
 <blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-System.List">Specification</a></p>
+<p>DISCLAIMER
+Benchmarks are run as part of the build and as such are not comparable</p>
 </blockquote>
-<p>Lists are created as instances of <code>List</code>.</p>
-<h3 id="creating-list">Creating list</h3>
-<p>List is created by giving it itemType it will contain.</p>
-<p><pre><code class="language-csharp">        [Fact]
-        public void Define_list()
-        {
-            /* Given */
-            var itemType = ScalarType.Int;
-
-            /* When */
-            var list = new List(itemType);
-
-            /* Then */
-            Assert.Equal(itemType, list.WrappedType);
-        }
-</code></pre></p>
                     
             </main>
         </div>

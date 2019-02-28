@@ -61,7 +61,7 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Tanka GraphQL</a>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="https://github.com/pekkah/tanka-docs-gen">GitHub</a>
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
             </li>
         </ul>
     </nav>
@@ -72,6 +72,11 @@
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                             <a class="d-flex align-items-center text-muted" href="index.html">Home</a>
                         </h6>
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="benchmarks.html">Benchmarks</a>
+                                </li>
+                            </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                             <a class="d-flex align-items-center text-muted" href="1-execution/01-validation.html">Execution</a>
                         </h6>
@@ -189,6 +194,7 @@
                         __typename
                         id
                         type
+                        payload
                     }
                 }&quot;);
 
@@ -205,13 +211,15 @@
                   &quot;&quot;data&quot;&quot;: {
                     &quot;&quot;events&quot;&quot;: [
                       {
+                        &quot;&quot;type&quot;&quot;: &quot;&quot;DELETE&quot;&quot;,
                         &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                        &quot;&quot;type&quot;&quot;: &quot;&quot;INSERT&quot;&quot;,
+                        &quot;&quot;payload&quot;&quot;: &quot;&quot;payload1&quot;&quot;,
                         &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;
                       },
                       {
+                        &quot;&quot;type&quot;&quot;: &quot;&quot;UPDATE&quot;&quot;,
                         &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                        &quot;&quot;type&quot;&quot;: &quot;&quot;INSERT&quot;&quot;,
+                        &quot;&quot;payload&quot;&quot;: &quot;&quot;payload2&quot;&quot;,
                         &quot;&quot;id&quot;&quot;: &quot;&quot;2&quot;&quot;
                       }
                     ]
@@ -242,6 +250,7 @@
                 type Event {
                     id: ID!
                     type: EventType!
+                    payload: String
                 }
 
                 input NewEvent {
@@ -290,7 +299,8 @@
                     &quot;Event&quot;, new FieldResolverMap
                     {
                         {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)}
+                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
+                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload)}
                     }
                 },
                 {
