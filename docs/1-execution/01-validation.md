@@ -5,14 +5,22 @@
 
 ### Execution
 
-[{tanka.graphql.tests.validation.ValidatorFacts.ValidateAsync}]
+[{tanka.graphql.tests.validation.ValidatorFacts.Validate}]
 
 
 ### Rules
 
-5.1.1 Executable Definitions
+Execution
 
-[{tanka.graphql.tests.validation.ValidatorFacts.Rule_511_Executable_Definitions}]
+[{tanka.graphql.validation.ExecutionRules.All}]
 
->TODO: Rest of the rules. Issue [#16](https://github.com/pekkah/tanka-graphql/issues/16)
+Rules not implemented
+[{tanka.graphql.tests.validation.ValidatorFacts.Rule_532_Field_Selection_Merging}]
+[{tanka.graphql.tests.validation.ValidatorFacts.Rule_572_DirectivesAreInValidLocations_valid1}]
+[{tanka.graphql.tests.validation.ValidatorFacts.Rule_583_AllVariableUsesDefined}]
+[{tanka.graphql.tests.validation.ValidatorFacts.Rule_584_AllVariablesUsed_valid1}]
+[{tanka.graphql.tests.validation.ValidatorFacts.Rule_585_AllVariableUsagesAreAllowed_valid1}]
+
+
+
 
