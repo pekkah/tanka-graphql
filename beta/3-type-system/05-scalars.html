@@ -61,7 +61,7 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Tanka GraphQL</a>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="https://github.com/pekkah/tanka-docs-gen">GitHub</a>
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
             </li>
         </ul>
     </nav>
@@ -229,10 +229,16 @@
 
         public object ParseLiteral(GraphQLScalarValue input)
         {
-            if (input.Kind == ASTNodeKind.StringValue || input.Kind == ASTNodeKind.IntValue) 
+            if (input.Kind == ASTNodeKind.NullValue)
+            {
+                return null;
+            }
+
+            if (input.Kind == ASTNodeKind.StringValue) 
                 return input.Value;
 
-            return null;
+            throw new FormatException(
+                $&quot;Cannot coerce Long value from '{input.Kind}'&quot;);
         }
     }
 </code></pre></p>

@@ -61,7 +61,7 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Tanka GraphQL</a>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="https://github.com/pekkah/tanka-docs-gen">GitHub</a>
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
             </li>
         </ul>
     </nav>
@@ -172,55 +172,80 @@
 </blockquote>
 <h3 id="execution">Execution</h3>
 <p><pre><code class="language-csharp">
-        private Task&lt;ValidationResult&gt; ValidateAsync(
+        private ValidationResult Validate(
             GraphQLDocument document,
-            IValidationRule rule,
+            CombineRule rule,
             Dictionary&lt;string, object&gt; variables = null)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
             if (rule == null) throw new ArgumentNullException(nameof(rule));
 
-            return Validator.ValidateAsync(
+            return Validator.Validate(           
+                new[] {rule},
                 Schema,
                 document,
-                variables,
-                new[] {rule});
+                variables);
         }
 </code></pre></p>
 <h3 id="rules">Rules</h3>
-<p>5.1.1 Executable Definitions</p>
-<p><pre><code class="language-csharp">
-        [Fact(Skip = &quot;Some validation rules are behaving strangely. #16&quot;)]
-        public async Task Rule_511_Executable_Definitions()
+<p>Execution</p>
+<p><pre><code class="language-csharp">All = new[]
         {
-            /* Given */
-            var document = Parser.ParseDocument(
-                @&quot;query getDogName {
-                  dog {
-                    name
-                    color
-                  }
-                }
+            R511ExecutableDefinitions(),
+            R5211OperationNameUniqueness(),
+            R5221LoneAnonymousOperation(),
+            R5511FragmentNameUniqueness(),
+            R5512FragmentSpreadTypeExistence(),
+            R5513FragmentsOnCompositeTypes(),
+            R5514FragmentsMustBeUsed(),
+            R5522FragmentSpreadsMustNotFormCycles(),
+            R5523FragmentSpreadIsPossible(),
+            R5231SingleRootField(),
+            R531FieldSelections(),
+            R533LeafFieldSelections(),
+            R541ArgumentNames(),
+            R542ArgumentUniqueness(),
+            R5421RequiredArguments(),
+            R561ValuesOfCorrectType(),
+            R562InputObjectFieldNames(),
+            R563InputObjectFieldUniqueness(),
+            R564InputObjectRequiredFields(),
+            R57Directives(),
+            R58Variables()
+        }</code></pre></p>
+<p>Rules not implemented
+<pre><code class="language-csharp">
+        [Fact(Skip = &quot;Not implemented&quot;)]
+        public void Rule_532_Field_Selection_Merging()
+        {
+            //todo
+        }
+</code></pre>
+<pre><code class="language-csharp">
+        [Fact(Skip = &quot;TODO: 5.7.2&quot;)]
+        public void Rule_572_DirectivesAreInValidLocations_valid1()
+        {
+        }
+</code></pre>
+<pre><code class="language-csharp">
+        [Fact(Skip = &quot;TODO&quot;)]
+        public void Rule_583_AllVariableUsesDefined()
+        {
 
-                extend type Dog {
-                  color: String
-                }&quot;);
-
-            /* When */
-            var result = await ValidateAsync(
-                document,
-                new R511ExecutableDefinitions());
-
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error =&gt; error.Code == Errors.R511ExecutableDefinitions);
+        }
+</code></pre>
+<pre><code class="language-csharp">
+        [Fact(Skip = &quot;TODO&quot;)]
+        public void Rule_584_AllVariablesUsed_valid1()
+        {
+        }
+</code></pre>
+<pre><code class="language-csharp">
+        [Fact(Skip = &quot;TODO&quot;)]
+        public void Rule_585_AllVariableUsagesAreAllowed_valid1()
+        {
         }
 </code></pre></p>
-<blockquote>
-<p>TODO: Rest of the rules. Issue <a href="https://github.com/pekkah/tanka-graphql/issues/16">#16</a></p>
-</blockquote>
                     
             </main>
         </div>

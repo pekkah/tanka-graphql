@@ -61,7 +61,7 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Tanka GraphQL</a>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="https://github.com/pekkah/tanka-docs-gen">GitHub</a>
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
             </li>
         </ul>
     </nav>
@@ -196,6 +196,8 @@
         IEnumerable&lt;KeyValuePair&lt;string, InputObjectField&gt;&gt; GetInputFields(string type);
 
         InputObjectField GetInputField(string type, string name);
+
+        IEnumerable&lt;ObjectType&gt; GetPossibleTypes(IAbstractType abstractType);
     }
 </code></pre></p>
 <blockquote>
