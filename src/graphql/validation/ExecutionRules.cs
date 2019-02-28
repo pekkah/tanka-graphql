@@ -343,10 +343,11 @@ namespace tanka.graphql.validation
                         return;
                     }
 
-                    // We don't want to throw error here due to non-null so we use the WrappedType directly
-                    var argumentValue =
-                        Values.CoerceValue(ruleVisitorContext.Schema, argument.Value, nonNull.WrappedType);
-                    if (argumentValue == null)
+                    // variables should be valid
+                    if (argument.Value is GraphQLVariable)
+                        continue;
+
+                    if (argument.Value == null || argument.Value.Kind == ASTNodeKind.NullValue)
                         ruleVisitorContext.Error(
                             ValidationErrorCodes.R5421RequiredArguments,
                             "Arguments is required. An argument is required " +
