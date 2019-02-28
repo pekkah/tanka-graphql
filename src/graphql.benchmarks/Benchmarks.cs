@@ -138,21 +138,6 @@ namespace tanka.graphql.benchmarks
             AssertResult(value.Errors);
         }
         
-
-        [Benchmark]
-        public async Task Validate_query_with_defaults_old()
-        {
-            var result = await Validator.ValidateAsync(
-                _schema,
-                _query);
-
-            if (!result.IsValid)
-            {
-                throw new InvalidOperationException(
-                    $"Validation failed. {result}");
-            }
-        }
-        
         [Benchmark]
         public void Validate_query_with_defaults()
         {
