@@ -168,7 +168,7 @@
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <pre><code class="lang-ini">
 BenchmarkDotNet=v0.11.4, OS=Windows 10.0.14393.2724 (1607/AnniversaryUpdate/Redstone1), VM=Hyper-V
-Intel Xeon CPU E5-2673 v4 2.30GHz, 1 CPU, 2 logical and 2 physical cores
+Intel Xeon CPU E5-2673 v3 2.40GHz, 1 CPU, 2 logical and 2 physical cores
 .NET Core SDK=2.2.103
   [Host] : .NET Core 2.2.1 (CoreCLR 4.6.27207.03, CoreFX 4.6.27207.03), 64bit RyuJIT
   Core   : .NET Core 2.2.1 (CoreCLR 4.6.27207.03, CoreFX 4.6.27207.03), 64bit RyuJIT
@@ -193,99 +193,99 @@ Job=Core  Runtime=Core
 <tbody>
 <tr>
 <td>Query_with_defaults</td>
-<td style="text-align: right;">53.935 us</td>
-<td style="text-align: right;">1.0708 us</td>
-<td style="text-align: right;">2.8020 us</td>
-<td style="text-align: right;">54.073 us</td>
-<td style="text-align: right;">2.4414</td>
-<td style="text-align: right;">0.7935</td>
+<td style="text-align: right;">48.341 us</td>
+<td style="text-align: right;">1.7258 us</td>
+<td style="text-align: right;">5.0615 us</td>
+<td style="text-align: right;">47.527 us</td>
+<td style="text-align: right;">2.5024</td>
+<td style="text-align: right;">0.8545</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">15.24 KB</td>
+<td style="text-align: right;">15.2 KB</td>
 </tr>
 <tr>
 <td>Query_without_validation</td>
-<td style="text-align: right;">15.859 us</td>
-<td style="text-align: right;">0.3197 us</td>
-<td style="text-align: right;">0.8310 us</td>
-<td style="text-align: right;">15.785 us</td>
-<td style="text-align: right;">0.8392</td>
-<td style="text-align: right;">0.4120</td>
+<td style="text-align: right;">15.799 us</td>
+<td style="text-align: right;">0.3130 us</td>
+<td style="text-align: right;">0.8080 us</td>
+<td style="text-align: right;">15.697 us</td>
+<td style="text-align: right;">0.8850</td>
+<td style="text-align: right;">0.4272</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">4.48 KB</td>
+<td style="text-align: right;">4.49 KB</td>
 </tr>
 <tr>
 <td>Mutation_with_defaults</td>
-<td style="text-align: right;">17.297 us</td>
-<td style="text-align: right;">0.2105 us</td>
-<td style="text-align: right;">0.1866 us</td>
-<td style="text-align: right;">17.257 us</td>
-<td style="text-align: right;">2.2278</td>
+<td style="text-align: right;">20.599 us</td>
+<td style="text-align: right;">0.3984 us</td>
+<td style="text-align: right;">0.6202 us</td>
+<td style="text-align: right;">20.745 us</td>
+<td style="text-align: right;">2.2888</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">14.39 KB</td>
 </tr>
 <tr>
 <td>Mutation_without_validation</td>
-<td style="text-align: right;">5.738 us</td>
-<td style="text-align: right;">0.0843 us</td>
-<td style="text-align: right;">0.0788 us</td>
-<td style="text-align: right;">5.713 us</td>
-<td style="text-align: right;">0.5646</td>
+<td style="text-align: right;">6.584 us</td>
+<td style="text-align: right;">0.1410 us</td>
+<td style="text-align: right;">0.1319 us</td>
+<td style="text-align: right;">6.584 us</td>
+<td style="text-align: right;">0.5798</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">3.64 KB</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults</td>
-<td style="text-align: right;">28.035 us</td>
-<td style="text-align: right;">0.4260 us</td>
-<td style="text-align: right;">0.5072 us</td>
-<td style="text-align: right;">27.972 us</td>
-<td style="text-align: right;">3.9978</td>
-<td style="text-align: right;">1.0681</td>
+<td style="text-align: right;">31.304 us</td>
+<td style="text-align: right;">0.6009 us</td>
+<td style="text-align: right;">0.5621 us</td>
+<td style="text-align: right;">31.340 us</td>
+<td style="text-align: right;">3.9673</td>
+<td style="text-align: right;">1.1597</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">21.04 KB</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
-<td style="text-align: right;">21.942 us</td>
-<td style="text-align: right;">0.9790 us</td>
-<td style="text-align: right;">2.7129 us</td>
-<td style="text-align: right;">21.156 us</td>
-<td style="text-align: right;">2.2583</td>
-<td style="text-align: right;">0.8850</td>
-<td style="text-align: right;">0.1831</td>
+<td style="text-align: right;">24.996 us</td>
+<td style="text-align: right;">0.9781 us</td>
+<td style="text-align: right;">2.8532 us</td>
+<td style="text-align: right;">24.971 us</td>
+<td style="text-align: right;">2.2888</td>
+<td style="text-align: right;">0.9155</td>
+<td style="text-align: right;">0.2747</td>
 <td style="text-align: right;">9.53 KB</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
-<td style="text-align: right;">79.589 us</td>
-<td style="text-align: right;">1.6425 us</td>
-<td style="text-align: right;">3.6396 us</td>
-<td style="text-align: right;">79.145 us</td>
-<td style="text-align: right;">3.7842</td>
+<td style="text-align: right;">83.865 us</td>
+<td style="text-align: right;">1.9173 us</td>
+<td style="text-align: right;">2.4247 us</td>
+<td style="text-align: right;">83.270 us</td>
+<td style="text-align: right;">4.0283</td>
 <td style="text-align: right;">0.9766</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">21.68 KB</td>
+<td style="text-align: right;">21.69 KB</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation_and_get_value</td>
-<td style="text-align: right;">39.929 us</td>
-<td style="text-align: right;">0.7961 us</td>
-<td style="text-align: right;">1.5338 us</td>
-<td style="text-align: right;">39.771 us</td>
-<td style="text-align: right;">2.1362</td>
+<td style="text-align: right;">45.943 us</td>
+<td style="text-align: right;">1.6529 us</td>
+<td style="text-align: right;">4.8737 us</td>
+<td style="text-align: right;">43.008 us</td>
+<td style="text-align: right;">2.1973</td>
 <td style="text-align: right;">0.7324</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">10.17 KB</td>
+<td style="text-align: right;">10.16 KB</td>
 </tr>
 <tr>
 <td>Validate_query_with_defaults</td>
-<td style="text-align: right;">7.854 us</td>
-<td style="text-align: right;">0.1546 us</td>
-<td style="text-align: right;">0.2360 us</td>
-<td style="text-align: right;">7.743 us</td>
-<td style="text-align: right;">1.6632</td>
+<td style="text-align: right;">8.566 us</td>
+<td style="text-align: right;">0.1199 us</td>
+<td style="text-align: right;">0.1121 us</td>
+<td style="text-align: right;">8.545 us</td>
+<td style="text-align: right;">1.6785</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">10.52 KB</td>
