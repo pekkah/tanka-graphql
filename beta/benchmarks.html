@@ -183,6 +183,7 @@ Job=Core  Runtime=Core
 <th style="text-align: right;">Mean</th>
 <th style="text-align: right;">Error</th>
 <th style="text-align: right;">StdDev</th>
+<th style="text-align: right;">Median</th>
 <th style="text-align: right;">Gen 0/1k Op</th>
 <th style="text-align: right;">Gen 1/1k Op</th>
 <th style="text-align: right;">Gen 2/1k Op</th>
@@ -192,29 +193,32 @@ Job=Core  Runtime=Core
 <tbody>
 <tr>
 <td>Query_with_defaults</td>
-<td style="text-align: right;">55.419 us</td>
-<td style="text-align: right;">1.3051 us</td>
-<td style="text-align: right;">3.8481 us</td>
+<td style="text-align: right;">53.935 us</td>
+<td style="text-align: right;">1.0708 us</td>
+<td style="text-align: right;">2.8020 us</td>
+<td style="text-align: right;">54.073 us</td>
 <td style="text-align: right;">2.4414</td>
 <td style="text-align: right;">0.7935</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">15.23 KB</td>
+<td style="text-align: right;">15.24 KB</td>
 </tr>
 <tr>
 <td>Query_without_validation</td>
-<td style="text-align: right;">15.775 us</td>
-<td style="text-align: right;">0.3332 us</td>
-<td style="text-align: right;">0.5474 us</td>
-<td style="text-align: right;">0.7935</td>
-<td style="text-align: right;">0.3967</td>
+<td style="text-align: right;">15.859 us</td>
+<td style="text-align: right;">0.3197 us</td>
+<td style="text-align: right;">0.8310 us</td>
+<td style="text-align: right;">15.785 us</td>
+<td style="text-align: right;">0.8392</td>
+<td style="text-align: right;">0.4120</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">4.49 KB</td>
+<td style="text-align: right;">4.48 KB</td>
 </tr>
 <tr>
 <td>Mutation_with_defaults</td>
-<td style="text-align: right;">17.993 us</td>
-<td style="text-align: right;">0.3157 us</td>
-<td style="text-align: right;">0.2953 us</td>
+<td style="text-align: right;">17.297 us</td>
+<td style="text-align: right;">0.2105 us</td>
+<td style="text-align: right;">0.1866 us</td>
+<td style="text-align: right;">17.257 us</td>
 <td style="text-align: right;">2.2278</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -222,9 +226,10 @@ Job=Core  Runtime=Core
 </tr>
 <tr>
 <td>Mutation_without_validation</td>
-<td style="text-align: right;">5.835 us</td>
-<td style="text-align: right;">0.1156 us</td>
-<td style="text-align: right;">0.1135 us</td>
+<td style="text-align: right;">5.738 us</td>
+<td style="text-align: right;">0.0843 us</td>
+<td style="text-align: right;">0.0788 us</td>
+<td style="text-align: right;">5.713 us</td>
 <td style="text-align: right;">0.5646</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -232,29 +237,32 @@ Job=Core  Runtime=Core
 </tr>
 <tr>
 <td>Subscribe_with_defaults</td>
-<td style="text-align: right;">28.265 us</td>
-<td style="text-align: right;">0.5517 us</td>
-<td style="text-align: right;">0.7365 us</td>
+<td style="text-align: right;">28.035 us</td>
+<td style="text-align: right;">0.4260 us</td>
+<td style="text-align: right;">0.5072 us</td>
+<td style="text-align: right;">27.972 us</td>
 <td style="text-align: right;">3.9978</td>
-<td style="text-align: right;">0.0916</td>
-<td style="text-align: right;">0.0305</td>
+<td style="text-align: right;">1.0681</td>
+<td style="text-align: right;">-</td>
 <td style="text-align: right;">21.04 KB</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
-<td style="text-align: right;">21.463 us</td>
-<td style="text-align: right;">0.6446 us</td>
-<td style="text-align: right;">1.8803 us</td>
-<td style="text-align: right;">2.2888</td>
-<td style="text-align: right;">0.9766</td>
+<td style="text-align: right;">21.942 us</td>
+<td style="text-align: right;">0.9790 us</td>
+<td style="text-align: right;">2.7129 us</td>
+<td style="text-align: right;">21.156 us</td>
+<td style="text-align: right;">2.2583</td>
+<td style="text-align: right;">0.8850</td>
 <td style="text-align: right;">0.1831</td>
 <td style="text-align: right;">9.53 KB</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
-<td style="text-align: right;">82.026 us</td>
-<td style="text-align: right;">1.6281 us</td>
-<td style="text-align: right;">3.9321 us</td>
+<td style="text-align: right;">79.589 us</td>
+<td style="text-align: right;">1.6425 us</td>
+<td style="text-align: right;">3.6396 us</td>
+<td style="text-align: right;">79.145 us</td>
 <td style="text-align: right;">3.7842</td>
 <td style="text-align: right;">0.9766</td>
 <td style="text-align: right;">-</td>
@@ -262,9 +270,10 @@ Job=Core  Runtime=Core
 </tr>
 <tr>
 <td>Subscribe_without_validation_and_get_value</td>
-<td style="text-align: right;">44.679 us</td>
-<td style="text-align: right;">0.9191 us</td>
-<td style="text-align: right;">1.7486 us</td>
+<td style="text-align: right;">39.929 us</td>
+<td style="text-align: right;">0.7961 us</td>
+<td style="text-align: right;">1.5338 us</td>
+<td style="text-align: right;">39.771 us</td>
 <td style="text-align: right;">2.1362</td>
 <td style="text-align: right;">0.7324</td>
 <td style="text-align: right;">-</td>
@@ -272,9 +281,10 @@ Job=Core  Runtime=Core
 </tr>
 <tr>
 <td>Validate_query_with_defaults</td>
-<td style="text-align: right;">8.917 us</td>
-<td style="text-align: right;">0.1734 us</td>
-<td style="text-align: right;">0.2898 us</td>
+<td style="text-align: right;">7.854 us</td>
+<td style="text-align: right;">0.1546 us</td>
+<td style="text-align: right;">0.2360 us</td>
+<td style="text-align: right;">7.743 us</td>
 <td style="text-align: right;">1.6632</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
