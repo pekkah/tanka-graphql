@@ -6,9 +6,7 @@ import { TankaClient, TankaLink } from "@tanka/tanka-graphql-server-link";
 import { IHttpConnectionOptions, LogLevel } from "@aspnet/signalr";
 
 var options: IHttpConnectionOptions = {
-  accessTokenFactory: () => "123123",
-  logMessageContent: true,
-  logger: LogLevel.Trace
+  logger: LogLevel.Information
 };
 
 var client = new TankaClient("https://localhost:5000/graphql", options);
