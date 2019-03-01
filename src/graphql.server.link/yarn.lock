@@ -3,9 +3,9 @@
 
 
 "@aspnet/signalr@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@aspnet/signalr/-/signalr-1.1.0.tgz#616be5d565f78ea6ab3910d8a5fb0690471b35f9"
-  integrity sha512-UwWXpfVyB7pfod/GmntaYWMdmmqlfuX7hoig7wMs01xxp53FIBrWGFStUKC3y3S4yu83i38NkzBndBIfOHo5Dw==
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@aspnet/signalr/-/signalr-1.1.2.tgz#eb9cbc758ff5bfe9a2aba6669e05dfc25a6d783d"
+  integrity sha512-Xu2ndFTWYhyE+TOCK3LkPWGmc5xGLezBKgGEchyOA++alJ6fdWJ8P/Wsb4Mmd1buzcxGLlIyjpLfUP20rrCHIg==
   dependencies:
     eventsource "^1.0.7"
     request "^2.88.0"
