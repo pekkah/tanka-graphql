@@ -49,9 +49,6 @@ namespace tanka.graphql.tools
             ISubscriberMap subscribers = null,
             IEnumerable<SchemaVisitorFactory> visitors = null)
         {
-            if (!schema.IsInitialized)
-                ;
-
             var introspection = await Introspect.SchemaAsync(schema);
             var executable = await MakeExecutableSchemaAsync(
                 schema, 
