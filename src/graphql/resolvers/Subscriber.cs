@@ -3,5 +3,5 @@ using System.Threading.Tasks;
 
 namespace tanka.graphql.resolvers
 {
-    public delegate Task<ISubscribeResult> Subscriber(ResolverContext context, CancellationToken cancellationToken = default(CancellationToken));
+    public delegate ValueTask<ISubscribeResult> Subscriber(ResolverContext context, CancellationToken unsubscribe);
 }

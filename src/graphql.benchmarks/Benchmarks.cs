@@ -121,22 +121,6 @@ namespace tanka.graphql.benchmarks
             var value = result.Source.Receive();
             AssertResult(value.Errors);
         }
-
-        [Benchmark]
-        public async Task Subscribe_without_validation_and_get_value()
-        {
-            var result = await Executor.SubscribeAsync(new ExecutionOptions()
-            {
-                Document = _subscription,
-                Schema = _schema,
-                Validate = false
-            });
-
-            AssertResult(result.Errors);
-
-            var value = result.Source.Receive();
-            AssertResult(value.Errors);
-        }
         
         [Benchmark]
         public void Validate_query_with_defaults()

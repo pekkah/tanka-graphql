@@ -12,14 +12,14 @@ namespace tanka.graphql.tests.data.starwars
     {
         public static ResolverMap BuildResolvers(Starwars starwars, ISchema schema)
         {
-            async Task<IResolveResult> ResolveCharacter(ResolverContext context)
+            async ValueTask<IResolveResult> ResolveCharacter(ResolverContext context)
             {
                 var id = (string) context.Arguments["id"];
                 var character = await starwars.GetCharacter(id).ConfigureAwait(false);
                 return As(schema.GetNamedType<ObjectType>("Human"), character);
             }
 
-            async Task<IResolveResult> ResolveHuman(ResolverContext context)
+            async ValueTask<IResolveResult> ResolveHuman(ResolverContext context)
             {
                 var id = (string) context.Arguments["id"];
 
@@ -27,7 +27,7 @@ namespace tanka.graphql.tests.data.starwars
                 return As(human);
             }
 
-            async Task<IResolveResult> ResolveFriends(ResolverContext context)
+            async ValueTask<IResolveResult> ResolveFriends(ResolverContext context)
             {
                 var character = (Starwars.Character) context.ObjectValue;
                 var friends = character.GetFriends();
@@ -35,13 +35,13 @@ namespace tanka.graphql.tests.data.starwars
                 return As(friends.Select(c => As(schema.GetNamedType<ObjectType>("Human"), c)));
             }
 
-            async Task<IResolveResult> ResolveCharacters(ResolverContext context)
+            async ValueTask<IResolveResult> ResolveCharacters(ResolverContext context)
             {
                 await Task.Delay(0).ConfigureAwait(false);
                 return As(starwars.Characters.Select(c => As(schema.GetNamedType<ObjectType>("Human"), c)));
             }
 
-            async Task<IResolveResult> AddHuman(ResolverContext context)
+            async ValueTask<IResolveResult> AddHuman(ResolverContext context)
             {
                 var humanInput = (IDictionary<string, object>) context.Arguments["human"];
                 var human = starwars.AddHuman(humanInput["name"].ToString());

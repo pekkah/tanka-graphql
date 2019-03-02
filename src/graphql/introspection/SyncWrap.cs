@@ -6,14 +6,14 @@ namespace tanka.graphql.introspection
 {
     internal static class SyncWrap
     {
-        public static Task<IResolveResult> Sync(object result)
+        public static ValueTask<IResolveResult> Sync(object result)
         {
-            return Task.FromResult(Resolve.As(result));
+            return new ValueTask<IResolveResult>(Resolve.As(result));
         }
 
-        public static Task<IResolveResult> Sync(IEnumerable result)
+        public static ValueTask<IResolveResult> Sync(IEnumerable result)
         {
-            return Task.FromResult(Resolve.As(result));
+            return new ValueTask<IResolveResult>(Resolve.As(result));
         }
     }
 }

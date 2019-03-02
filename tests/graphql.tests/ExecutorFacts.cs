@@ -94,7 +94,7 @@ namespace tanka.graphql.tests
                 {
                     "Query", new FieldResolverMap
                     {
-                        {"events", context => Task.FromResult(Resolve.As(Model.Events))}
+                        {"events", context => new ValueTask<IResolveResult>(Resolve.As(Model.Events))}
                     }
                 },
                 {
@@ -129,7 +129,7 @@ namespace tanka.graphql.tests
                                 var source = Model.Subscribe(unsubscribe);
                                 return Resolve.Stream(source);
                             },
-                            context => Task.FromResult(Resolve.As(context.ObjectValue))
+                            context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))
                         }
                     }
                 }

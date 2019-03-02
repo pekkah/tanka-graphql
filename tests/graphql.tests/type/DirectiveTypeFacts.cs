@@ -37,7 +37,7 @@ namespace tanka.graphql.tests.type
                 {
                     query.Name, new FieldResolverMap
                     {
-                        {"requiresAuthorize", context => Task.FromResult(Resolve.As("Hello World!"))}
+                        {"requiresAuthorize", context => new ValueTask<IResolveResult>(Resolve.As("Hello World!"))}
                     }
                 }
             };
