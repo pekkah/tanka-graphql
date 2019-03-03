@@ -43,6 +43,24 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
+        public void Create_Object_throws_on_duplicate()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = "Object1";
+
+            builder.Object(
+                name: name,
+                out _);
+            
+            /* When */
+            var exception = Assert.Throws<SchemaBuilderException>(()=> builder.Object(name: name, out _));
+
+            /* Then */
+            Assert.Equal(name, exception.TypeName);
+        }
+
+        [Fact]
         public void Create_Interface()
         {
             /* Given */
@@ -241,6 +259,36 @@ namespace tanka.graphql.tests.type
         }
 
         [Fact]
+        public void Create_Object_field_when_type_not_known()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            var object1 = new ObjectType("Type");
+            
+            /* When */
+            var exception = Assert.Throws<SchemaBuilderException>(()=>builder.Connections(connect =>
+            {
+                connect.Field(
+                    owner: object1,
+                    fieldName: "field1",
+                    to: ScalarType.Int,
+                    description: "Description",
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    },
+                    (Name: "arg1",
+                        Type: ScalarType.Boolean,
+                        DefaultValue: true,
+                        Description: "Description")
+                );
+            }));
+
+            /* Then */
+            Assert.Equal("Type", exception.TypeName);
+        }
+
+        [Fact]
         public void Create_Interface_field()
         {
             /* Given */
@@ -302,6 +350,32 @@ namespace tanka.graphql.tests.type
             var isDefined = false;
             builder.Connections(connect => isDefined = connect.TryGetInputField(input1, "field1", out _));
             Assert.True(isDefined);
+        }
+
+        [Fact]
+        public void Create_InputObject_field_when_type_not_known()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();        
+            var input1 = new InputObjectType("Type");
+
+            /* When */
+            var exception = Assert.Throws<SchemaBuilderException>(()=> builder.Connections(connect => connect
+                .InputField(
+                    owner: input1,
+                    fieldName: "field1",
+                    to: ScalarType.NonNullBoolean,
+                    defaultValue: true,
+                    description: "Descriptipn",
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    })
+            ));
+
+
+            /* Then */
+            Assert.Equal("Type", exception.TypeName);
         }
 
         [Fact]

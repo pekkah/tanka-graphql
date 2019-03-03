@@ -54,7 +54,7 @@ namespace tanka.graphql.sdl
 
         protected ScalarType Scalar(GraphQLScalarTypeDefinition definition)
         {
-            _builder.PredefinedScalar(definition.Name.Value, out var scalar);
+            _builder.GetScalar(definition.Name.Value, out var scalar);
 
             if (scalar == null)
                 throw new GraphQLError(

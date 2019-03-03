@@ -2,7 +2,7 @@
 {
     public static class TypeExtensions 
     {
-        public static IType Unwrap(this IType type)
+        public static INamedType Unwrap(this IType type)
         {
             switch (type)
             {
@@ -12,7 +12,7 @@
                     return Unwrap(list.WrappedType);
             }
 
-            return type;
+            return (INamedType)type;
         }
     }
 }
