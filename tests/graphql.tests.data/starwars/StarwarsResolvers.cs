@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.graph;
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 using static tanka.graphql.resolvers.Resolve;
@@ -55,15 +54,15 @@ namespace tanka.graphql.tests.data.starwars
                 // Root query
                 ["Query"] = new FieldResolverMap
                 {
-                    {"human", new Resolver(ResolveHuman)},
-                    {"character", new Resolver(ResolveCharacter)},
-                    {"characters", new Resolver(ResolveCharacters)}
+                    {"human", ResolveHuman},
+                    {"character", ResolveCharacter},
+                    {"characters", ResolveCharacters}
                 },
 
                 // Root mutation
                 ["Mutation"] = new FieldResolverMap
                 {
-                    {"addHuman", new Resolver(AddHuman)}
+                    {"addHuman", AddHuman}
                 },
 
                 // ObjectType
@@ -72,7 +71,7 @@ namespace tanka.graphql.tests.data.starwars
                     {"id", PropertyOf<Starwars.Human>(c => c.Id)},
                     {"name", PropertyOf<Starwars.Human>(c => c.Name)},
                     {"homePlanet", PropertyOf<Starwars.Human>(c => c.HomePlanet)},
-                    {"friends", new Resolver(ResolveFriends)},
+                    {"friends", ResolveFriends},
                     {"appearsIn", PropertyOf<Starwars.Human>(h => h.AppearsIn)}
                 }
             };

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using static tanka.graphql.graph.Wrapper;
-
-namespace tanka.graphql.type
+﻿namespace tanka.graphql.type
 {
     public abstract class ComplexType : INamedType
     {
@@ -10,7 +6,8 @@ namespace tanka.graphql.type
         {
             Name = name;
         }
-       /* private readonly Fields _fields = new Fields();
+
+        /* private readonly Fields _fields = new Fields();
 
         public IEnumerable<KeyValuePair<string, IField>> Fields => _fields;
 
