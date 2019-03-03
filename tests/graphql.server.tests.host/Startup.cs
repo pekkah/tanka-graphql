@@ -34,7 +34,7 @@ namespace graphql.server.tests.host
                 {
                     query.Name, new FieldResolverMap
                     {
-                        {"hello", context => Task.FromResult(Resolve.As("world"))}
+                        {"hello", context => new ValueTask<IResolveResult>(Resolve.As("world"))}
                     }
                 },
                 {
@@ -44,9 +44,9 @@ namespace graphql.server.tests.host
                             "helloEvents", (context,ct) =>
                             {
                                 var events = eventManager.Subscribe(ct);
-                                return Task.FromResult(Resolve.Stream(events));
+                                return new ValueTask<ISubscribeResult>(Resolve.Stream(events));
                             },
-                            context => Task.FromResult(Resolve.As(context.ObjectValue))
+                            context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))
                         }
                     }
                 }

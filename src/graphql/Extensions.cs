@@ -25,7 +25,7 @@ namespace tanka.graphql
 
         public Task BeginValidationAsync()
         {
-            return Task.WhenAll(_scopes.Select(e => e.BeginValidationAsync()));
+            return Task.WhenAll(_scopes.Select(e => e.BeginValidationAsync().AsTask()));
         }
 
         public async Task EndValidationAsync(ValidationResult validationResult)
@@ -40,7 +40,7 @@ namespace tanka.graphql
 
         public Task BeginParseDocumentAsync()
         {
-            return Task.WhenAll(_scopes.Select(e => e.BeginParseDocumentAsync()));
+            return Task.WhenAll(_scopes.Select(e => e.BeginParseDocumentAsync().AsTask()));
         }
 
         public async Task EndParseDocumentAsync(GraphQLDocument document)

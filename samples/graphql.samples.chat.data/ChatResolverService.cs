@@ -15,13 +15,13 @@ namespace tanka.graphql.samples.chat.data
             _chat = chat;
         }
 
-        public async Task<IResolveResult> GetMessagesAsync(ResolverContext context)
+        public async ValueTask<IResolveResult> GetMessagesAsync(ResolverContext context)
         {
             var messages = await _chat.GetMessagesAsync(100);
             return Resolve.As(messages);
         }
 
-        public async Task<IResolveResult> AddMessageAsync(ResolverContext context)
+        public async ValueTask<IResolveResult> AddMessageAsync(ResolverContext context)
         {
             var input = context.GetArgument<InputMessage>("message");
             var message = await _chat.AddMessageAsync(
@@ -31,7 +31,7 @@ namespace tanka.graphql.samples.chat.data
             return Resolve.As(message);
         }
 
-        public async Task<IResolveResult> EditMessageAsync(ResolverContext context)
+        public async ValueTask<IResolveResult> EditMessageAsync(ResolverContext context)
         {
             var id = context.GetArgument<string>("id");
             var input = context.GetArgument<InputMessage>("message");
@@ -43,7 +43,7 @@ namespace tanka.graphql.samples.chat.data
             return Resolve.As(message);
         }
 
-        public async Task<ISubscribeResult> StreamMessagesAsync(ResolverContext context, CancellationToken cancellationToken)
+        public async ValueTask<ISubscribeResult> StreamMessagesAsync(ResolverContext context, CancellationToken cancellationToken)
         {
             var target = new BufferBlock<Message>();
             var subscription = await _chat.JoinAsync(target);
@@ -52,7 +52,7 @@ namespace tanka.graphql.samples.chat.data
             return Resolve.Stream(target);
         }
 
-        public async Task<IResolveResult> ResolveMessageAsync(ResolverContext context)
+        public async ValueTask<IResolveResult> ResolveMessageAsync(ResolverContext context)
         {
             await Task.Delay(0);
             return Resolve.As(context.ObjectValue);

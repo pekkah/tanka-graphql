@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using tanka.graphql.resolvers;
@@ -94,7 +95,7 @@ namespace tanka.graphql.tests
                 {
                     "Query", new FieldResolverMap
                     {
-                        {"events", context => Task.FromResult(Resolve.As(Model.Events))}
+                        {"events", context => new ValueTask<IResolveResult>(Resolve.As(Model.Events))}
                     }
                 },
                 {
@@ -129,7 +130,7 @@ namespace tanka.graphql.tests
                                 var source = Model.Subscribe(unsubscribe);
                                 return Resolve.Stream(source);
                             },
-                            context => Task.FromResult(Resolve.As(context.ObjectValue))
+                            context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))
                         }
                     }
                 }
@@ -315,12 +316,13 @@ namespace tanka.graphql.tests
                     }
                 }");
 
+            var cts = new CancellationTokenSource();
             /* When */
             var result = await Executor.SubscribeAsync(new ExecutionOptions()
             {
                 Schema = Schema,
                 Document = subscription
-            });
+            }, cts.Token);
 
             await Model.AddAsync(new EventsModel.NewEvent()
             {
@@ -331,7 +333,7 @@ namespace tanka.graphql.tests
             var ev = await result.Source.ReceiveAsync();
 
             // unsubscribe
-            result.Source.Complete();
+            cts.Cancel();
 
             /* Then */
             ev.ShouldMatchJson(

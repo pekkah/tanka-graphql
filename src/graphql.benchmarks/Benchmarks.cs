@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using BenchmarkDotNet.Attributes;
@@ -85,11 +86,12 @@ namespace tanka.graphql.benchmarks
         [Benchmark]
         public async Task Subscribe_with_defaults()
         {
+            var cts = new CancellationTokenSource();
             var result = await Executor.SubscribeAsync(new ExecutionOptions()
             {
                 Document = _subscription,
                 Schema = _schema
-            });
+            }, cts.Token);
 
             AssertResult(result.Errors);
         }
@@ -97,12 +99,13 @@ namespace tanka.graphql.benchmarks
         [Benchmark]
         public async Task Subscribe_without_validation()
         {
+            var cts = new CancellationTokenSource();
             var result = await Executor.SubscribeAsync(new ExecutionOptions()
             {
                 Document = _subscription,
                 Schema = _schema,
                 Validate = false
-            });
+            }, cts.Token);
 
             AssertResult(result.Errors);
         }
@@ -110,27 +113,12 @@ namespace tanka.graphql.benchmarks
         [Benchmark]
         public async Task Subscribe_with_defaults_and_get_value()
         {
+            var cts = new CancellationTokenSource();
             var result = await Executor.SubscribeAsync(new ExecutionOptions()
             {
                 Document = _subscription,
                 Schema = _schema
-            });
-
-            AssertResult(result.Errors);
-
-            var value = result.Source.Receive();
-            AssertResult(value.Errors);
-        }
-
-        [Benchmark]
-        public async Task Subscribe_without_validation_and_get_value()
-        {
-            var result = await Executor.SubscribeAsync(new ExecutionOptions()
-            {
-                Document = _subscription,
-                Schema = _schema,
-                Validate = false
-            });
+            }, cts.Token);
 
             AssertResult(result.Errors);
 

@@ -36,28 +36,28 @@ namespace tanka.graphql.tests
                 {
                     "Query", new FieldResolverMap
                     {
-                        {"root", context => Task.FromResult(Resolve.As(new { }))}
+                        {"root", context => new ValueTask<IResolveResult>(Resolve.As(new { }))}
                     }
                 },
                 {
                     "Mutation", new FieldResolverMap
                     {
-                        {"root", context => Task.FromResult(Resolve.As(new { }))}
+                        {"root", context => new ValueTask<IResolveResult>(Resolve.As(new { }))}
                     }
                 },
                 {
                     "Node", new FieldResolverMap
                     {
-                        {"child", context => Task.FromResult(Resolve.As(new { }))},
+                        {"child", context => new ValueTask<IResolveResult>(Resolve.As(new { }))},
                         {
-                            "children", context => Task.FromResult(Resolve.As(new[]
+                            "children", context => new ValueTask<IResolveResult>(Resolve.As(new[]
                             {
                                 new {id = 0},
                                 new {id = 1}
                             }))
                         },
-                        {"value", context => Task.FromResult(Resolve.As("value"))},
-                        {"path", context => Task.FromResult(Resolve.As(context.Path.Segments))}
+                        {"value", context => new ValueTask<IResolveResult>(Resolve.As("value"))},
+                        {"path", context => new ValueTask<IResolveResult>(Resolve.As(context.Path.Segments))}
                     }
                 }
             };

@@ -9,7 +9,7 @@ using tanka.graphql.validation;
 
 namespace tanka.graphql.tracing
 {
-    public class TraceExtensionScope : ExtensionScopeBase
+    public class TraceExtensionScope : IExtensionScope
     {
         private readonly DateTime _startTime;
         private readonly Stopwatch _stopwatch;
@@ -32,19 +32,19 @@ namespace tanka.graphql.tracing
             _stopwatch = Stopwatch.StartNew();
         }
 
-        public override Task BeginValidationAsync()
+        public ValueTask BeginValidationAsync()
         {
             _validationStarted = _stopwatch.Elapsed;
-            return Task.CompletedTask;
+            return default;
         }
 
-        public override Task EndValidationAsync(ValidationResult validationResult)
+        public ValueTask EndValidationAsync(ValidationResult validationResult)
         {
             _validationEnded = _stopwatch.Elapsed;
-            return Task.CompletedTask;
+            return default;
         }
 
-        public override Task EndExecuteAsync(ExecutionResult executionResult)
+        public ValueTask EndExecuteAsync(ExecutionResult executionResult)
         {
             _stopwatch.Stop();
 
@@ -80,22 +80,22 @@ namespace tanka.graphql.tracing
             };
 
             executionResult.AddExtension("tracing", record);
-            return Task.CompletedTask;
+            return default;
         }
 
-        public override Task BeginParseDocumentAsync()
+        public ValueTask BeginParseDocumentAsync()
         {
             _parsingStarted = _stopwatch.Elapsed;
-            return Task.CompletedTask;
+            return default;
         }
 
-        public override Task EndParseDocumentAsync(GraphQLDocument document)
+        public ValueTask EndParseDocumentAsync(GraphQLDocument document)
         {
             _parsingEnded = _stopwatch.Elapsed;
-            return Task.CompletedTask;
+            return default;
         }
 
-        public override Resolver Resolver(Resolver next)
+        public Resolver Resolver(Resolver next)
         {
             return async context =>
             {

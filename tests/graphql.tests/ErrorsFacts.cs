@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using tanka.graphql.resolvers;
 using tanka.graphql.type;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
@@ -39,12 +40,12 @@ namespace tanka.graphql.tests
             {
                 ["Query"] = new FieldResolverMap
                 {
-                    {"nonNull", context => Task.FromResult(As(null))},
-                    {"nonNullNested", context => Task.FromResult(As(nestedNonNullData))},
-                    {"nonNullListItem", context => Task.FromResult(As(new[] {"str", null, "str"}))},
-                    {"nonNullList", context => Task.FromResult(As(null))},
-                    {"nullableNested", context => Task.FromResult(As(nestedNonNullData))},
-                    {"nullable", context => Task.FromResult(As("hello"))}
+                    {"nonNull", context => new ValueTask<IResolveResult>(As(null))},
+                    {"nonNullNested", context => new ValueTask<IResolveResult>(As(nestedNonNullData))},
+                    {"nonNullListItem", context => new ValueTask<IResolveResult>(As(new[] {"str", null, "str"}))},
+                    {"nonNullList", context => new ValueTask<IResolveResult>(As(null))},
+                    {"nullableNested", context => new ValueTask<IResolveResult>(As(nestedNonNullData))},
+                    {"nullable", context => new ValueTask<IResolveResult>(As("hello"))}
                 },
 
                 ["Nest"] = new FieldResolverMap

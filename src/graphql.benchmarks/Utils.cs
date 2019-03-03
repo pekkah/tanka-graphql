@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using tanka.graphql.resolvers;
 using tanka.graphql.tools;
@@ -29,13 +30,13 @@ namespace tanka.graphql.benchmarks
                 {
                     query.Name, new FieldResolverMap
                     {
-                        {"simple", context => Task.FromResult(Resolve.As("value"))}
+                        {"simple", context => new ValueTask<IResolveResult>(Resolve.As("value"))}
                     }
                 },
                 {
                     mutation.Name, new FieldResolverMap
                     {
-                        {"simple", context => Task.FromResult(Resolve.As("value"))}
+                        {"simple", context => new ValueTask<IResolveResult>(Resolve.As("value"))}
                     }
                 },
                 {
@@ -43,8 +44,8 @@ namespace tanka.graphql.benchmarks
                     {
                         {
                             "simple", 
-                            (context, unsubscribe) => Task.FromResult(Resolve.Stream(SimpleValueBlock("value"))), 
-                            context => Task.FromResult(Resolve.As(context.ObjectValue))}
+                            (context, unsubscribe) => new ValueTask<ISubscribeResult>(Resolve.Stream(SimpleValueBlock("value"))), 
+                            context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))}
                     }
                 }
             };

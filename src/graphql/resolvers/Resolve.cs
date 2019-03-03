@@ -33,11 +33,11 @@ namespace tanka.graphql.resolvers
 
                 if (source == null)
                 {
-                    return Task.FromResult(As(null));
+                    return new ValueTask<IResolveResult>(As(null));
                 }
 
                 var value = getValue(source);
-                return Task.FromResult(As(value));
+                return new ValueTask<IResolveResult>(As(value));
             };
         }
 
@@ -49,15 +49,15 @@ namespace tanka.graphql.resolvers
 
                 if (source == null)
                 {
-                    return Task.FromResult(As(null));
+                    return new ValueTask<IResolveResult>(As(null));
                 }
 
                 var values = getValue(source);
 
                 if (values == null)
-                    return Task.FromResult(As(null));
+                    return new ValueTask<IResolveResult>(As(null));
 
-                return Task.FromResult(As(values.Select(As)));
+                return new ValueTask<IResolveResult>(As(values.Select(As)));
             };
         }
 

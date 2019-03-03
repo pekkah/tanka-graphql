@@ -7,15 +7,15 @@ namespace tanka.graphql
 {
     public interface IExtensionScope
     {
-        Task BeginValidationAsync();
+        ValueTask BeginValidationAsync();
 
-        Task EndValidationAsync(ValidationResult validationResult);
+        ValueTask EndValidationAsync(ValidationResult validationResult);
 
-        Task EndExecuteAsync(ExecutionResult executionResult);
+        ValueTask EndExecuteAsync(ExecutionResult executionResult);
 
-        Task BeginParseDocumentAsync();
+        ValueTask BeginParseDocumentAsync();
 
-        Task EndParseDocumentAsync(GraphQLDocument document);
+        ValueTask EndParseDocumentAsync(GraphQLDocument document);
 
         Resolver Resolver(Resolver next);
     }

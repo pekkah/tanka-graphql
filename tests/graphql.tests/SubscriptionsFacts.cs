@@ -46,12 +46,12 @@ namespace tanka.graphql.tests
             _messagesChannel = new BufferBlock<Message>();
 
             // resolvers
-            Task<IResolveResult> GetMessagesAsync(ResolverContext context)
+            ValueTask<IResolveResult> GetMessagesAsync(ResolverContext context)
             {
-                return Task.FromResult(As(messages));
+                return new ValueTask<IResolveResult>(As(messages));
             }
 
-            async Task<ISubscribeResult> OnMessageAdded(ResolverContext context, CancellationToken cancellationToken)
+            async ValueTask<ISubscribeResult> OnMessageAdded(ResolverContext context, CancellationToken cancellationToken)
             {
                 var reader = new BufferBlock<Message>();
                 var sub = _messagesChannel.LinkTo(reader, new DataflowLinkOptions
@@ -68,9 +68,9 @@ namespace tanka.graphql.tests
                 return Stream(reader);
             }
 
-            Task<IResolveResult> ResolveMessage(ResolverContext context)
+            ValueTask<IResolveResult> ResolveMessage(ResolverContext context)
             {
-                return Task.FromResult(As(context.ObjectValue));
+                return new ValueTask<IResolveResult>(As(context.ObjectValue));
             }
 
             var resolvers = new ResolverMap

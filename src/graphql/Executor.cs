@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GraphQLParser.AST;
+using Microsoft.Extensions.Logging;
 using tanka.graphql.execution;
 using tanka.graphql.type;
 using tanka.graphql.validation;
-using GraphQLParser.AST;
-using Microsoft.Extensions.Logging;
 
 namespace tanka.graphql
 {
@@ -22,8 +22,8 @@ namespace tanka.graphql
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static async Task<ExecutionResult> ExecuteAsync(
-            ExecutionOptions options, 
-            CancellationToken cancellationToken = default(CancellationToken))
+            ExecutionOptions options,
+            CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var extensions = new Extensions(options.Extensions);
@@ -33,15 +33,14 @@ namespace tanka.graphql
             using (logger.Begin(options.OperationName))
             {
                 var (queryContext, validationResult) = await BuildQueryContextAsync(
-                    options, 
-                    extensions, 
-                    logger,
-                    cancellationToken);
+                    options,
+                    extensions,
+                    logger);
 
                 if (!validationResult.IsValid)
                     return new ExecutionResult
                     {
-                        Errors = validationResult.Errors.Select(e =>e.ToError())
+                        Errors = validationResult.Errors.Select(e => e.ToError())
                     };
 
                 ExecutionResult executionResult;
@@ -70,25 +69,26 @@ namespace tanka.graphql
         ///     Execute subscription
         /// </summary>
         /// <param name="options"></param>
-        /// <param name="cancellationToken">Unsubscribe</param>
+        /// <param name="unsubscribe">Unsubscribe</param>
         /// <returns></returns>
         public static async Task<SubscriptionResult> SubscribeAsync(
-            ExecutionOptions options, 
-            CancellationToken cancellationToken = default(CancellationToken))
+            ExecutionOptions options,
+            CancellationToken unsubscribe)
         {
+            if (!unsubscribe.CanBeCanceled)
+                throw new InvalidOperationException("Unsubscribe token must be cancelable");
+
             var extensions = new Extensions(options.Extensions);
             await extensions.BeginExecuteAsync(options);
-            cancellationToken.ThrowIfCancellationRequested();
 
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
             using (logger.Begin(options.OperationName))
             {
                 var (queryContext, validationResult) = await BuildQueryContextAsync(
-                    options, 
-                    extensions, 
-                    logger,
-                    cancellationToken);
+                    options,
+                    extensions,
+                    logger);
 
                 if (!validationResult.IsValid)
                     return new SubscriptionResult
@@ -99,7 +99,7 @@ namespace tanka.graphql
                 switch (queryContext.OperationDefinition.Operation)
                 {
                     case OperationType.Subscription:
-                        return await Subscription.SubscribeAsync(queryContext, cancellationToken).ConfigureAwait(false);
+                        return await Subscription.SubscribeAsync(queryContext, unsubscribe).ConfigureAwait(false);
                     default:
                         throw new InvalidOperationException(
                             $"Operation type {queryContext.OperationDefinition.Operation} not supported. Did you mean to use {nameof(ExecuteAsync)}?");
@@ -110,11 +110,8 @@ namespace tanka.graphql
         private static async Task<(QueryContext queryContext, ValidationResult validationResult)>
             BuildQueryContextAsync(ExecutionOptions options,
                 Extensions extensions,
-                ILogger logger, 
-                CancellationToken cancellationToken)
+                ILogger logger)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             await extensions.BeginParseDocumentAsync();
             var document = options.Document;
             await extensions.EndParseDocumentAsync(document);
