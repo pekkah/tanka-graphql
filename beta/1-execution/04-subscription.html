@@ -183,12 +183,13 @@
                     }
                 }&quot;);
 
+            var cts = new CancellationTokenSource();
             /* When */
             var result = await Executor.SubscribeAsync(new ExecutionOptions()
             {
                 Schema = Schema,
                 Document = subscription
-            });
+            }, cts.Token);
 
             await Model.AddAsync(new EventsModel.NewEvent()
             {
@@ -199,7 +200,7 @@
             var ev = await result.Source.ReceiveAsync();
 
             // unsubscribe
-            result.Source.Complete();
+            cts.Cancel();
 
             /* Then */
             ev.ShouldMatchJson(
@@ -301,7 +302,7 @@
                 {
                     &quot;Query&quot;, new FieldResolverMap
                     {
-                        {&quot;events&quot;, context =&gt; Task.FromResult(Resolve.As(Model.Events))}
+                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
                     }
                 },
                 {
@@ -336,7 +337,7 @@
                                 var source = Model.Subscribe(unsubscribe);
                                 return Resolve.Stream(source);
                             },
-                            context =&gt; Task.FromResult(Resolve.As(context.ObjectValue))
+                            context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
                         }
                     }
                 }

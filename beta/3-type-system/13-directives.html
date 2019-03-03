@@ -233,7 +233,7 @@
                 {
                     query.Name, new FieldResolverMap
                     {
-                        {&quot;requiresAuthorize&quot;, context =&gt; Task.FromResult(Resolve.As(&quot;Hello World!&quot;))}
+                        {&quot;requiresAuthorize&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;Hello World!&quot;))}
                     }
                 }
             };
