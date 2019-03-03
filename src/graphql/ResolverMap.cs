@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using tanka.graphql.resolvers;
-using tanka.graphql.type;
 
 namespace tanka.graphql
 {

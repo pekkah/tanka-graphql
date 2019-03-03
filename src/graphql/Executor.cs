@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GraphQLParser.AST;
+using Microsoft.Extensions.Logging;
 using tanka.graphql.execution;
 using tanka.graphql.type;
 using tanka.graphql.validation;
-using GraphQLParser.AST;
-using Microsoft.Extensions.Logging;
 
 namespace tanka.graphql
 {
@@ -23,8 +22,8 @@ namespace tanka.graphql
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static async Task<ExecutionResult> ExecuteAsync(
-            ExecutionOptions options, 
-            CancellationToken cancellationToken = default(CancellationToken))
+            ExecutionOptions options,
+            CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var extensions = new Extensions(options.Extensions);
@@ -34,14 +33,14 @@ namespace tanka.graphql
             using (logger.Begin(options.OperationName))
             {
                 var (queryContext, validationResult) = await BuildQueryContextAsync(
-                    options, 
-                    extensions, 
+                    options,
+                    extensions,
                     logger);
 
                 if (!validationResult.IsValid)
                     return new ExecutionResult
                     {
-                        Errors = validationResult.Errors.Select(e =>e.ToError())
+                        Errors = validationResult.Errors.Select(e => e.ToError())
                     };
 
                 ExecutionResult executionResult;
@@ -73,11 +72,11 @@ namespace tanka.graphql
         /// <param name="unsubscribe">Unsubscribe</param>
         /// <returns></returns>
         public static async Task<SubscriptionResult> SubscribeAsync(
-            ExecutionOptions options, 
+            ExecutionOptions options,
             CancellationToken unsubscribe)
         {
             if (!unsubscribe.CanBeCanceled)
-                throw new InvalidOperationException($"Unsubscribe token must be cancelable");
+                throw new InvalidOperationException("Unsubscribe token must be cancelable");
 
             var extensions = new Extensions(options.Extensions);
             await extensions.BeginExecuteAsync(options);
@@ -87,8 +86,8 @@ namespace tanka.graphql
             using (logger.Begin(options.OperationName))
             {
                 var (queryContext, validationResult) = await BuildQueryContextAsync(
-                    options, 
-                    extensions, 
+                    options,
+                    extensions,
                     logger);
 
                 if (!validationResult.IsValid)
