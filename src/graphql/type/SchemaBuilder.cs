@@ -89,7 +89,7 @@ namespace tanka.graphql.type
                 new Meta(description, directives: directives),
                 interfaces);
 
-            _types.Add(name, definition);
+            Include(definition);
             return this;
         }
 
@@ -103,7 +103,7 @@ namespace tanka.graphql.type
                 name,
                 new Meta(description, directives: directives));
 
-            _types.Add(name, definition);
+            Include(definition);
             return this;
         }
 
@@ -114,7 +114,7 @@ namespace tanka.graphql.type
             IEnumerable<DirectiveInstance> directives = null)
         {
             definition = new InputObjectType(name, new Meta(description, directives: directives));
-            _types.Add(name, definition);
+            Include(definition);
             return this;
         }
 
@@ -147,7 +147,7 @@ namespace tanka.graphql.type
                 deprecationReason)[] values)
         {
             enumType = new EnumType(name, new EnumValues(values), new Meta(description, directives: directives));
-            _types.Add(name, enumType);
+            Include(enumType);
             return this;
         }
 
@@ -176,7 +176,7 @@ namespace tanka.graphql.type
             return this;
         }
 
-        public SchemaBuilder PredefinedScalar(string name, out ScalarType scalarType)
+        public SchemaBuilder GetScalar(string name, out ScalarType scalarType)
         {
             if (!_types.TryGetValue(name, out scalarType))
                 throw new ArgumentOutOfRangeException(
@@ -193,7 +193,7 @@ namespace tanka.graphql.type
             params (string Name, IType Type, object DefaultValue, string Description)[] args)
         {
             directiveType = new DirectiveType(name, locations, new Args(args));
-            _directives.Add(name, directiveType);
+            IncludeDirective(directiveType);
             return this;
         }
 
@@ -212,18 +212,26 @@ namespace tanka.graphql.type
             params ObjectType[] possibleTypes)
         {
             unionType = new UnionType(name, possibleTypes, new Meta(description, directives: directives));
-            _types.Add(name, unionType);
+            Include(unionType);
             return this;
         }
 
         public SchemaBuilder IncludeDirective(DirectiveType directiveType)
         {
+            if (_directives.ContainsKey(directiveType.Name))
+                throw new SchemaBuilderException(directiveType.Name,
+                    $"Cannot include directive '{directiveType.Name}'. Directive already known.");
+
             _directives.Add(directiveType.Name, directiveType);
             return this;
         }
 
         public SchemaBuilder Include(INamedType type)
         {
+            if (_types.ContainsKey(type.Name))
+                throw new SchemaBuilderException(type.Name,
+                    $"Cannot include type '{type.Name}'. Type already known.");
+
             _types.Add(type.Name, type);
             return this;
         }
@@ -232,7 +240,7 @@ namespace tanka.graphql.type
             string description = null, IEnumerable<DirectiveInstance> directives = null)
         {
             scalarType = new ScalarType(name, converter, new Meta(description, null, directives));
-            _types.Add(name, scalarType);
+            Include(scalarType);
             return this;
         }
     }
