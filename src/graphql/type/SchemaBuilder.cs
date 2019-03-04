@@ -1,9 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using tanka.graphql.resolvers;
 using tanka.graphql.type.converters;
 
 namespace tanka.graphql.type
 {
+    public class ResolverBuilder
+    {
+        public ResolverBuilder Use(IResolverMap resolverMap, ISubscriberMap subscriberMap)
+        {
+            return this;
+        }
+
+        public ResolverBuilder Of(ObjectType type, Func<(string fieldName, Resolver)> resolver)
+        {
+            return this;
+        }
+
+        public ResolverBuilder For(ObjectType type,
+            Func<(string FieldName, IField Field), Resolver> resolver)
+        {
+            return this;
+        }
+    }
+
     public class SchemaBuilder
     {
         private readonly Dictionary<string, DirectiveType> _directives = new Dictionary<string, DirectiveType>();

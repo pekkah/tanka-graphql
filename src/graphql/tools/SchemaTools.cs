@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using tanka.graphql.introspection;
+using tanka.graphql.resolvers;
 using tanka.graphql.type;
 
 namespace tanka.graphql.tools
@@ -99,6 +100,9 @@ namespace tanka.graphql.tools
         public static void BindResolvers(SchemaBuilder builder, IResolverMap resolvers, ISubscriberMap subscribers)
         {
             // builder.Resolvers(resolvers => resolvers.Use(resolvers, subscribers));
+            var resolverbuilder = new ResolverBuilder();
+
+            resolverbuilder.For(new ObjectType("_"), fieldDefinition => { return Resolve.PropertyOf<string>(s => s.Length); });
         }
     }
 }
