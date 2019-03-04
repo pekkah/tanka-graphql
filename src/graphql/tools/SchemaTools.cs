@@ -98,20 +98,7 @@ namespace tanka.graphql.tools
         /// <param name="subscribers"></param>
         public static void BindResolvers(SchemaBuilder builder, IResolverMap resolvers, ISubscriberMap subscribers)
         {
-            builder.Resolvers(resolvers => resolvers.Of(queryType).)
-
-
-            foreach (var type in builder.QueryTypes<ComplexType>())
-            foreach (var field in builder.GetFields(type.Name))
-            {
-                field.Value.Resolve = field.Value.Resolve ?? resolvers.GetResolver(type, field);
-
-                if (field.Value.Resolve == null)
-                    throw new InvalidOperationException($"Could not find resolver for {type.Name}:{field.Key}");
-
-                if (subscribers != null)
-                    field.Value.Subscribe = field.Value.Subscribe ?? subscribers.GetSubscriber(type, field);
-            }
+            // builder.Resolvers(resolvers => resolvers.Use(resolvers, subscribers));
         }
     }
 }
