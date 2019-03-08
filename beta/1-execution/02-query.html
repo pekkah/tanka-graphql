@@ -236,6 +236,7 @@
 
                 type Success {
                     id: ID!
+                    event: Event
                 }
 
                 type Failure {
@@ -283,7 +284,8 @@
                 {
                     &quot;Success&quot;, new FieldResolverMap
                     {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)}
+                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)},
+                        {&quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event)}
                     }
                 },
                 {
@@ -327,10 +329,11 @@
                                         new EventsModel.Failure(&quot;Payload should be given&quot;));
 
                                 var id = await Model.AddAsync(newEvent);
+                                var ev = Model.Events.Single(e =&gt; e.Id == id);
 
                                 return Resolve.As(
                                     context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
-                                    new EventsModel.Success(id));
+                                    new EventsModel.Success(id, ev));
                             }
                         }
                     }
