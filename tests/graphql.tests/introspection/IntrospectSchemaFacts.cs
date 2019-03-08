@@ -71,9 +71,7 @@ namespace tanka.graphql.tests.introspection
             builder.Subscription(out var subscription);
 
             _sourceSchema = builder.Build();
-            _introspectionSchema = Introspect.SchemaAsync(_sourceSchema)
-                .GetAwaiter()
-                .GetResult();
+            _introspectionSchema = Introspect.Schema(_sourceSchema);
         }
 
         private readonly ISchema _sourceSchema;

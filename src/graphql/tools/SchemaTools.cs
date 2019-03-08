@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using tanka.graphql.introspection;
-using tanka.graphql.resolvers;
+﻿using tanka.graphql.introspection;
 using tanka.graphql.type;
 
 namespace tanka.graphql.tools
@@ -11,98 +6,78 @@ namespace tanka.graphql.tools
     //todo(pekka): review API
     public static class SchemaTools
     {
-        /// <summary>
-        ///     Combine resolvers and subscribers with the schema
-        /// </summary>
-        /// <param name="schema"></param>
-        /// <param name="resolvers"></param>
-        /// <param name="subscribers"></param>
-        /// <param name="visitors">Visitors applied to schema after resolvers and subscribers have been set</param>
-        /// <returns></returns>
-        public static async Task<ISchema> MakeExecutableSchemaAsync(
-            ISchema schema,
+        public static ISchema MakeExecutableSchema(
+            SchemaBuilder builder,
             IResolverMap resolvers,
-            ISubscriberMap subscribers = null,
-            IEnumerable<SchemaVisitorFactory> visitors = null)
+            ISubscriberMap subscribers = null)
         {
-            BindResolvers(schema, resolvers, subscribers);
-
-            if (visitors != null)
-                foreach (var visitorFactory in visitors)
-                {
-                    var visitor = visitorFactory(schema, resolvers, subscribers);
-                    await visitor.VisitAsync();
-                }
-
-            return schema;
+            UseResolversAndSubscribers(builder, resolvers, subscribers);
+            return builder.Build();
         }
 
-        /// <summary>
-        ///     Combine resolvers and subscribers with the schema and add introspection types
-        /// </summary>
-        /// <param name="schema"></param>
-        /// <param name="resolvers"></param>
-        /// <param name="subscribers"></param>
-        /// <param name="visitors">Visitors applied to schema after resolvers and subscribers have been set</param>
-        /// <returns></returns>
-        public static async Task<ISchema> MakeExecutableSchemaWithIntrospection(
+        public static ISchema MakeExecutableSchema(
             ISchema schema,
             IResolverMap resolvers,
-            ISubscriberMap subscribers = null,
-            IEnumerable<SchemaVisitorFactory> visitors = null)
+            ISubscriberMap subscribers = null)
         {
-            var introspection = await Introspect.SchemaAsync(schema);
-            var executable = await MakeExecutableSchemaAsync(
-                schema,
+            return MakeExecutableSchema(
+                new SchemaBuilder(schema),
                 resolvers,
                 subscribers);
+        }
+
+        public static void UseResolversAndSubscribers(
+            SchemaBuilder builder,
+            IResolverMap resolvers,
+            ISubscriberMap subscribers = null)
+        {
+            foreach (var type in builder.VisitTypes<ObjectType>())
+                builder.Connections(connections =>
+                {
+                    foreach (var field in connections.VisitFields(type))
+                    {
+                        var resolver = resolvers.GetResolver(type.Name, field.Key);
+
+                        if (resolver != null)
+                            connections.GetResolver(type, field.Key)
+                                .Use(resolver);
+
+                        var subscriber = subscribers?.GetSubscriber(type.Name, field.Key);
+
+                        if (subscriber != null)
+                            connections.GetSubscriber(type, field.Key)
+                                .Use(subscriber);
+                    }
+                });
+        }
+
+        public static ISchema MakeExecutableSchemaWithIntrospection(
+            ISchema schema,
+            IResolverMap resolvers,
+            ISubscriberMap subscribers = null)
+        {
+            return MakeExecutableSchemaWithIntrospection(
+                new SchemaBuilder(schema),
+                resolvers,
+                subscribers);
+        }
+
+        public static ISchema MakeExecutableSchemaWithIntrospection(
+            SchemaBuilder builder,
+            IResolverMap resolvers,
+            ISubscriberMap subscribers = null)
+        {
+            UseResolversAndSubscribers(builder, resolvers, subscribers);
+
+            var schema = builder.Build();
+            var introspection = Introspect.Schema(schema);
 
             var withIntrospection = MergeTool
-                .MergeSchemas(executable, introspection);
-
-            if (visitors != null)
-                foreach (var visitorFactory in visitors)
-                {
-                    var visitor = visitorFactory(withIntrospection, resolvers, subscribers);
-                    await visitor.VisitAsync();
-                }
+                .MergeSchemas(
+                    schema,
+                    introspection);
 
             return withIntrospection;
-        }
-
-        /// <summary>
-        ///     Bind resolvers to fields of objects in the schema
-        /// </summary>
-        /// <param name="schema"></param>
-        /// <param name="resolvers"></param>
-        /// <param name="subscribers"></param>
-        public static void BindResolvers(ISchema schema, IResolverMap resolvers, ISubscriberMap subscribers)
-        {
-            foreach (var type in schema.QueryTypes<ComplexType>())
-            foreach (var field in schema.GetFields(type.Name))
-            {
-                field.Value.Resolve = field.Value.Resolve ?? resolvers.GetResolver(type, field);
-
-                if (field.Value.Resolve == null)
-                    throw new InvalidOperationException($"Could not find resolver for {type.Name}:{field.Key}");
-
-                if (subscribers != null)
-                    field.Value.Subscribe = field.Value.Subscribe ?? subscribers.GetSubscriber(type, field);
-            }
-        }
-
-        /// <summary>
-        ///     Bind resolvers to fields of <see cref="ObjectType"/> known by the schema builder
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="resolvers"></param>
-        /// <param name="subscribers"></param>
-        public static void BindResolvers(SchemaBuilder builder, IResolverMap resolvers, ISubscriberMap subscribers)
-        {
-            // builder.Resolvers(resolvers => resolvers.Use(resolvers, subscribers));
-            var resolverbuilder = new ResolverBuilder();
-
-            resolverbuilder.For(new ObjectType("_"), fieldDefinition => { return Resolve.PropertyOf<string>(s => s.Length); });
         }
     }
 }

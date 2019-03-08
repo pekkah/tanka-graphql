@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
@@ -11,6 +12,12 @@ namespace tanka.graphql.type
 
         private readonly Dictionary<string, Dictionary<string, InputObjectField>> _inputFields =
             new Dictionary<string, Dictionary<string, InputObjectField>>();
+
+        private readonly Dictionary<string, Dictionary<string, ResolverBuilder>> _resolvers = 
+            new Dictionary<string, Dictionary<string, ResolverBuilder>>();
+
+        private readonly Dictionary<string, Dictionary<string, SubscriberBuilder>> _subscribers = 
+            new Dictionary<string, Dictionary<string, SubscriberBuilder>>();
 
         public ConnectionBuilder(SchemaBuilder builder)
         {
@@ -24,6 +31,8 @@ namespace tanka.graphql.type
             string fieldName,
             IType to,
             string description = null,
+            Action<ResolverBuilder> resolve = null,
+            Action<SubscriberBuilder> subscribe = null,
             IEnumerable<DirectiveInstance> directives = null,
             params (string Name, IType Type, object DefaultValue, string Description)[] args)
         {
@@ -53,10 +62,57 @@ namespace tanka.graphql.type
                     $"Cannot add field '{fieldName}'. Type '{owner.Name}' already has field with same name.");
             }
 
-            _fields[owner.Name].Add(fieldName, new Field(to, new Args(args),
-                new Meta(description, directives: directives)));
+            
+            var field = new Field(to, new Args(args),
+                new Meta(description, directives: directives));
+
+            _fields[owner.Name].Add(fieldName, field);
+
+            if (resolve != null)
+            {
+                var resolver = Resolver(owner, fieldName);
+                resolve(resolver);
+            }
+
+            if (subscribe != null)
+            {
+                var subscriber = Subscriber(owner, fieldName);
+                subscribe(subscriber);
+            }
 
             return this;
+        }
+
+        private ResolverBuilder Resolver(ComplexType owner, string fieldName)
+        {
+            if (!_resolvers.ContainsKey(owner.Name))
+                _resolvers[owner.Name] = new Dictionary<string, ResolverBuilder>();
+
+            if (_resolvers[owner.Name].ContainsKey(fieldName))
+            {
+                throw new SchemaBuilderException(owner.Name,
+                    $"Cannot add resolver for '{fieldName}'. Resolver has been already created.");
+            }
+
+            var builder = new ResolverBuilder();
+            _resolvers[owner.Name].Add(fieldName, builder);
+            return builder;
+        }
+
+        private SubscriberBuilder Subscriber(ComplexType owner, string fieldName)
+        {
+            if (!_subscribers.ContainsKey(owner.Name))
+                _subscribers[owner.Name] = new Dictionary<string, SubscriberBuilder>();
+
+            if (_subscribers[owner.Name].ContainsKey(fieldName))
+            {
+                throw new SchemaBuilderException(owner.Name,
+                    $"Cannot add subscriber for '{fieldName}'. Subscriber has been already created.");
+            }
+
+            var builder = new SubscriberBuilder();
+            _subscribers[owner.Name].Add(fieldName, builder);
+            return builder;
         }
 
         public ConnectionBuilder InputField(
@@ -149,10 +205,17 @@ namespace tanka.graphql.type
             return this;
         }
 
-        public (Dictionary<string, Dictionary<string, IField>> Fields,
-            Dictionary<string, Dictionary<string, InputObjectField>> InputFields) Build()
+        public (
+            Dictionary<string, Dictionary<string, IField>> _fields, 
+            Dictionary<string, Dictionary<string, InputObjectField>> _inputFields, 
+            Dictionary<string, Dictionary<string, ResolverBuilder>> _resolvers, 
+            Dictionary<string, Dictionary<string, SubscriberBuilder>> _subscribers) Build()
         {
-            return (_fields, _inputFields);
+            return (
+                _fields, 
+                _inputFields,
+                _resolvers,
+                _subscribers);
         }
 
         public bool TryGetInputField(InputObjectType owner, string fieldName, out InputObjectField field)
@@ -163,6 +226,42 @@ namespace tanka.graphql.type
 
             field = null;
             return false;
+        }
+
+        public IEnumerable<KeyValuePair<string, IField>> VisitFields(ComplexType type)
+        {
+            return _fields[type.Name];
+        }
+
+        public ResolverBuilder GetResolver(ComplexType type, string fieldName)
+        {
+            if (_resolvers.TryGetValue(type.Name, out var fields))
+            {
+                if (fields.TryGetValue(fieldName, out var builder))
+                {
+                    return builder;
+                }
+            }
+
+            return Resolver(type, fieldName);
+        }
+
+        public SubscriberBuilder GetSubscriber(ComplexType type, string fieldName)
+        {
+            if (_subscribers.TryGetValue(type.Name, out var fields))
+            {
+                if (fields.TryGetValue(fieldName, out var builder))
+                {
+                    return builder;
+                }
+            }
+
+            return Subscriber(type, fieldName);
+        }
+
+        public void IncludeResolver(ResolverBuilder resolver)
+        {
+            
         }
     }
 }

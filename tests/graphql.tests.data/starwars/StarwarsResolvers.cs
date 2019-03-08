@@ -9,13 +9,13 @@ namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsResolvers
     {
-        public static ResolverMap BuildResolvers(Starwars starwars, ISchema schema)
+        public static ResolverMap BuildResolvers(Starwars starwars)
         {
             async ValueTask<IResolveResult> ResolveCharacter(ResolverContext context)
             {
                 var id = (string) context.Arguments["id"];
                 var character = await starwars.GetCharacter(id).ConfigureAwait(false);
-                return As(schema.GetNamedType<ObjectType>("Human"), character);
+                return As(context.Schema.GetNamedType<ObjectType>("Human"), character);
             }
 
             async ValueTask<IResolveResult> ResolveHuman(ResolverContext context)
@@ -31,13 +31,13 @@ namespace tanka.graphql.tests.data.starwars
                 var character = (Starwars.Character) context.ObjectValue;
                 var friends = character.GetFriends();
                 await Task.Delay(0).ConfigureAwait(false);
-                return As(friends.Select(c => As(schema.GetNamedType<ObjectType>("Human"), c)));
+                return As(friends.Select(c => As(context.Schema.GetNamedType<ObjectType>("Human"), c)));
             }
 
             async ValueTask<IResolveResult> ResolveCharacters(ResolverContext context)
             {
                 await Task.Delay(0).ConfigureAwait(false);
-                return As(starwars.Characters.Select(c => As(schema.GetNamedType<ObjectType>("Human"), c)));
+                return As(starwars.Characters.Select(c => As(context.Schema.GetNamedType<ObjectType>("Human"), c)));
             }
 
             async ValueTask<IResolveResult> AddHuman(ResolverContext context)

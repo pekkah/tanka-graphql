@@ -22,7 +22,7 @@ namespace tanka.graphql.tests
         {
             /* Given */
             var starwars = new Starwars();
-            var schema = await _fixture.MakeExecutableAsync(starwars);
+            var schema = _fixture.CreateSchema(starwars);
 
             /* When */
             var result = await ExecuteAsync(
@@ -516,7 +516,7 @@ namespace tanka.graphql.tests
 ";
 
 
-            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var executableSchema = _fixture.CreateSchema(starwars);
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
@@ -558,7 +558,7 @@ namespace tanka.graphql.tests
     }}
 }}";
 
-            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var executableSchema = _fixture.CreateSchema(starwars);
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
@@ -604,7 +604,7 @@ namespace tanka.graphql.tests
     }}
 }}";
 
-            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var executableSchema = _fixture.CreateSchema(starwars);
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
@@ -650,7 +650,7 @@ namespace tanka.graphql.tests
                     }}
                 }}";
 
-            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var executableSchema = _fixture.CreateSchema(starwars);
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
@@ -708,7 +708,7 @@ namespace tanka.graphql.tests
     }}
 }}";
 
-            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var executableSchema = _fixture.CreateSchema(starwars);
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
@@ -748,7 +748,7 @@ namespace tanka.graphql.tests
     }}
 }}";
 
-            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var executableSchema = _fixture.CreateSchema(starwars);
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
@@ -789,7 +789,7 @@ namespace tanka.graphql.tests
         }}
     }}
 }}";
-            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var executableSchema = _fixture.CreateSchema(starwars);
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,
@@ -861,7 +861,7 @@ fragment friendsAndFriends on Human {{
 ";
 
 
-            var executableSchema = await _fixture.MakeExecutableAsync(starwars).ConfigureAwait(false);
+            var executableSchema = _fixture.CreateSchema(starwars);
             var options = new ExecutionOptions
             {
                 Schema = executableSchema,

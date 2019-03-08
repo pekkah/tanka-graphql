@@ -442,7 +442,8 @@ namespace tanka.graphql.sdl
                 var args = Args(definition.Arguments);
                 var directives = Directives(definition.Directives);
 
-                _builder.Connections(connect => connect.Field(owner, name, type, default, directives, args.ToArray()));
+                _builder.Connections(connect => connect
+                    .Field(owner, name, type, default, null, null, directives, args.ToArray()));
             }
         }
     }

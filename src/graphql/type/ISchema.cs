@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
     public interface ISchema
     {
-        bool IsInitialized { get; }
-
         ObjectType Subscription { get; }
 
         ObjectType Query { get; }
@@ -31,5 +30,9 @@ namespace tanka.graphql.type
         InputObjectField GetInputField(string type, string name);
 
         IEnumerable<ObjectType> GetPossibleTypes(IAbstractType abstractType);
+
+        Resolver GetResolver(string type, string fieldName);
+
+        Subscriber GetSubscriber(string type, string fieldName);
     }
 }
