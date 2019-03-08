@@ -140,7 +140,7 @@ namespace tanka.graphql.type
 
             foreach (var field in fields)
             {
-                if (!_fields.ContainsKey(owner.Name))
+                if (!_inputFields.ContainsKey(owner.Name))
                     _inputFields[owner.Name] = new Dictionary<string, InputObjectField>();
 
                 _inputFields[owner.Name].Add(field.Key, field.Value);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using tanka.graphql.tests.data;
 using Xunit;
 
 namespace tanka.graphql.server.tests
@@ -105,6 +107,48 @@ namespace tanka.graphql.server.tests
         }
 
         [Fact]
+        public async Task Mutation()
+        {
+            /* Given */
+            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            var hubConnection = Connect();
+            await hubConnection.StartAsync();
+
+            /* When */
+            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
+            {
+                Query = @"
+                        mutation Add($event: InputEvent!) { 
+                            add(event: $event) {
+                                    type
+                                    message
+                                }
+                        }",
+                Variables = new Dictionary<string, object>()
+                {
+                    {"event", new Dictionary<string, object>()
+                    {
+                        {"type", "hello"},
+                        {"message", "world"}
+                    }}
+                }
+            }, cancellationToken: cts.Token);
+
+
+            /* Then */
+            var result = await reader.ReadAsync(cts.Token);
+
+            Assert.Contains(result.Data, kv =>
+            {
+                var (key, value) = kv;
+                return key == "add";
+            });
+
+            cts.Cancel();
+            await hubConnection.StopAsync();
+        }
+
+        [Fact]
         public async Task Subscribe()
         {
             /* Given */
@@ -116,12 +160,15 @@ namespace tanka.graphql.server.tests
             var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
             {
                     Query = @"
-subscription { 
-    helloEvents 
-}"
+                        subscription { 
+                            events {
+                                 type
+                                 message
+                            }
+                        }"
             }, cancellationToken: cts.Token);
 
-            await _eventManager.Hello("world");
+            await _eventManager.Add("hello", "world");
 
             /* Then */
             var result = await reader.ReadAsync(cts.Token);
@@ -129,7 +176,7 @@ subscription {
             Assert.Contains(result.Data, kv =>
             {
                 var (key, value) = kv;
-                return key == "helloEvents" && value.ToString() == "world";
+                return key == "events";
             });
 
             cts.Cancel();
@@ -148,12 +195,15 @@ subscription {
             var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
             {
                 Query = @"
-subscription { 
-    helloEvents 
-}"
+                    subscription { 
+                        events {
+                             type
+                             message
+                        }
+                    }"
             }, cancellationToken: cts.Token);
 
-            await _eventManager.Hello("world");
+            await _eventManager.Add("hello", "world");
 
             /* Then */
             var result = await reader.ReadAsync(cts.Token);
@@ -161,7 +211,7 @@ subscription {
             Assert.Contains(result.Data, kv =>
             {
                 var (key, value) = kv;
-                return key == "helloEvents" && value.ToString() == "world";
+                return key == "events";
             });
 
             cts.Cancel();

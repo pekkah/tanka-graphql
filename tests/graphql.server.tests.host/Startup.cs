@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using tanka.graphql.sdl;
 
 namespace graphql.server.tests.host
 {
@@ -20,28 +21,70 @@ namespace graphql.server.tests.host
         public void ConfigureServices(IServiceCollection services)
         {
             var eventManager = new EventManager();
-            var builder = new SchemaBuilder();
+            var sdl = @"
+                input InputEvent {
+                    type: String!
+                    message: String!
+                }
 
-            builder.Query(out var query);
-            builder.Subscription(out var subscription);
+                type Event {
+                    type: String!
+                    message: String!
+                }
 
-            builder.Connections(connect => connect
-                .Field(query, "hello", ScalarType.String)
-                .Field(subscription, "helloEvents", ScalarType.String));
+                type Query {
+                    hello: String!
+                }
+
+                type Mutation {
+                    add(event: InputEvent!): Event
+                }
+
+                type Subscription {
+                    events: Event!
+                }
+
+                schema {
+                    query: Query
+                    mutation: Mutation
+                }
+                ";
+
+            var schema = Sdl.Schema(Parser.ParseDocument(sdl));
 
             var resolvers = new ResolverMap
             {
                 {
-                    query.Name, new FieldResolverMap
+                    "Event", new FieldResolverMap()
+                    {
+                        {"type", Resolve.PropertyOf<Event>(ev => ev.Type)},
+                        {"message", Resolve.PropertyOf<Event>(ev => ev.Message)}
+                    }
+                },
+                {
+                    schema.Query.Name, new FieldResolverMap
                     {
                         {"hello", context => new ValueTask<IResolveResult>(Resolve.As("world"))}
                     }
                 },
                 {
-                    subscription.Name, new FieldResolverMap
+                    schema.Mutation.Name, new FieldResolverMap()
+                    {
+                        {"add", async context =>
+                            {
+                                var input = context.GetArgument<InputEvent>("event");
+                                var ev = await eventManager.Add(input.Type, input.Message);
+
+                                return Resolve.As(ev);
+                            }
+                        }
+                    }
+                },
+                {
+                    schema.Subscription.Name, new FieldResolverMap
                     {
                         {
-                            "helloEvents", (context,ct) =>
+                            "events", (context,ct) =>
                             {
                                 var events = eventManager.Subscribe(ct);
                                 return new ValueTask<ISubscribeResult>(Resolve.Stream(events));
@@ -52,8 +95,7 @@ namespace graphql.server.tests.host
                 }
             };
 
-            var executable = SchemaTools
-                .MakeExecutableSchemaWithIntrospection(builder.Build(), resolvers, resolvers).Result;
+            var executable = SchemaTools.MakeExecutableSchemaWithIntrospection(schema, resolvers, resolvers).Result;
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
 
@@ -73,23 +115,41 @@ namespace graphql.server.tests.host
         }
     }
 
+    public class Event
+    {
+        public string Type { get; set; }
+        public string Message { get; set; }
+    }
+
+    public class InputEvent
+    {
+        public string Type { get; set; }
+        public string Message { get; set; }
+    }
+
     public class EventManager
     {
-        private readonly BufferBlock<string> _buffer;
+        private readonly BufferBlock<Event> _buffer;
 
         public EventManager()
         {
-            _buffer = new BufferBlock<string>();
+            _buffer = new BufferBlock<Event>();
         }
 
-        public Task Hello(string message)
+        public async Task<Event> Add(string type, string message)
         {
-            return _buffer.SendAsync(message);
+            var ev = new Event()
+            {
+                Type = type,
+                Message = message
+            };
+            await _buffer.SendAsync(ev);
+            return ev;
         }
 
-        public ISourceBlock<string> Subscribe(CancellationToken cancellationToken)
+        public ISourceBlock<Event> Subscribe(CancellationToken cancellationToken)
         {
-            var targetBlock = new BufferBlock<string>();
+            var targetBlock = new BufferBlock<Event>();
 
             var sub = _buffer.LinkTo(targetBlock);
             cancellationToken.Register(() =>
