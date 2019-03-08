@@ -23,7 +23,7 @@
     "@types/node": "^11.10.5",
     "@types/react": "^16.8.7",
     "@types/react-dom": "^16.8.2",
-    "@types/react-redux": "^6.0.9",
+    "@types/react-redux": "^7.0.2",
     "create-react-app": "^2.1.8",
     "typescript": "^3.3.3333"
   },
