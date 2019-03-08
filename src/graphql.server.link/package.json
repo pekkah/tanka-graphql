@@ -27,9 +27,9 @@
     "@types/graphql": "^14.0.7",
     "@types/jest": "^24.0.9",
     "@types/zen-push": "^0.1.0",
-    "jest": "^24.1.0",
+    "jest": "^24.3.1",
     "prettier": "^1.16.4",
-    "rollup": "^1.4.1",
+    "rollup": "^1.6.0",
     "rollup-plugin-typescript2": "^0.19.3",
     "ts-jest": "^24.0.0",
     "tslint": "^5.13.1",
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@aspnet/signalr": "^1.1.2",
-    "apollo-link": "^1.2.8",
+    "apollo-link": "^1.2.9",
     "graphql": "^14.1.1",
     "zen-push": "^0.2.1"
   }
