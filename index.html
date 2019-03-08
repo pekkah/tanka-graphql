@@ -119,9 +119,6 @@
                                     <a class="nav-link" href="3-type-system/02-schema.html">Schema</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="3-type-system/03-descriptions.html">Descriptions</a>
-                                </li>
-                                <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/04-types.html">Types</a>
                                 </li>
                                 <li class="nav-item">
@@ -167,7 +164,7 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql" alt="Build Status" /></a></p>
+<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1&amp;branchName=master"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql?branchName=master" alt="Build Status" /></a></p>
 <h2 id="features">Features</h2>
 <ul>
 <li>Execute queries, mutations and subscriptions</li>
@@ -201,6 +198,26 @@ npm install @tanka/tanka-graphql-server-link
 <h2 id="sample">Sample</h2>
 <p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
 <h2 id="develop">Develop</h2>
+<h3 id="run-the-dev-harness">Run the dev harness</h3>
+<p>This repo includes a sample application which is used for testing
+and development of the SignalR client and the server.</p>
+<p>Open the <code>tanka-graphql.sln</code> and start the <code>graphql.samples.chat.web</code> project. This will start a simple chat server using the tanka.graphql.server.</p>
+<p>Start the client by following instructions below:</p>
+<pre><code class="lang-bash"># Install dependencies
+src\graphql.server.link&gt; yarn install
+
+# Link the server-link
+src\graphql.server.link&gt; yarn link
+
+# Watch for source changes and recompile the link
+src\graphql.server.link&gt; yarn watch
+
+# Use the linked server-link
+samples\graphql.samples.chat.ui&gt; yarn link @tanka/tanka-graphql-server-link
+
+# Watch for sources changes and recompile the sample
+samples\graphql.samples.chat.ui&gt; yarn start
+</code></pre>
 <h3 id="run-benchmarks">Run benchmarks</h3>
 <pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
 </code></pre>

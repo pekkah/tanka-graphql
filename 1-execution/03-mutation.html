@@ -119,9 +119,6 @@
                                     <a class="nav-link" href="3-type-system/02-schema.html">Schema</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="3-type-system/03-descriptions.html">Descriptions</a>
-                                </li>
-                                <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/04-types.html">Types</a>
                                 </li>
                                 <li class="nav-item">
@@ -182,6 +179,9 @@
                         __typename
                         ...on Success {
                             id
+                            event {
+                                payload
+                            }
                         }
                         
                         ...on Failure {
@@ -207,7 +207,10 @@
                   &quot;&quot;data&quot;&quot;: {
                     &quot;&quot;create&quot;&quot;: {
                       &quot;&quot;__typename&quot;&quot;: &quot;&quot;Success&quot;&quot;,
-                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;
+                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;,
+                      &quot;&quot;event&quot;&quot;: {
+                        &quot;&quot;payload&quot;&quot;: &quot;&quot;payload&quot;&quot;
+                      }
                     }
                   }
                 }&quot;);
@@ -267,6 +270,7 @@
 
                 type Success {
                     id: ID!
+                    event: Event
                 }
 
                 type Failure {
@@ -314,7 +318,8 @@
                 {
                     &quot;Success&quot;, new FieldResolverMap
                     {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)}
+                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)},
+                        {&quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event)}
                     }
                 },
                 {
@@ -341,7 +346,7 @@
                 {
                     &quot;Query&quot;, new FieldResolverMap
                     {
-                        {&quot;events&quot;, context =&gt; Task.FromResult(Resolve.As(Model.Events))}
+                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
                     }
                 },
                 {
@@ -358,10 +363,11 @@
                                         new EventsModel.Failure(&quot;Payload should be given&quot;));
 
                                 var id = await Model.AddAsync(newEvent);
+                                var ev = Model.Events.Single(e =&gt; e.Id == id);
 
                                 return Resolve.As(
                                     context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
-                                    new EventsModel.Success(id));
+                                    new EventsModel.Success(id, ev));
                             }
                         }
                     }
@@ -376,7 +382,7 @@
                                 var source = Model.Subscribe(unsubscribe);
                                 return Resolve.Stream(source);
                             },
-                            context =&gt; Task.FromResult(Resolve.As(context.ObjectValue))
+                            context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
                         }
                     }
                 }

@@ -119,9 +119,6 @@
                                     <a class="nav-link" href="3-type-system/02-schema.html">Schema</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="3-type-system/03-descriptions.html">Descriptions</a>
-                                </li>
-                                <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/04-types.html">Types</a>
                                 </li>
                                 <li class="nav-item">
@@ -236,7 +233,7 @@
                 {
                     query.Name, new FieldResolverMap
                     {
-                        {&quot;requiresAuthorize&quot;, context =&gt; Task.FromResult(Resolve.As(&quot;Hello World!&quot;))}
+                        {&quot;requiresAuthorize&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;Hello World!&quot;))}
                     }
                 }
             };
