@@ -78,20 +78,23 @@
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                            <a class="d-flex align-items-center text-muted" href="1-execution/01-validation.html">Execution</a>
+                            <a class="d-flex align-items-center text-muted" href="1-execution/01-resolvers.html">Execution</a>
                         </h6>
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/01-validation.html">Validation</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/02-query.html">Query</a>
+                                    <a class="nav-link" href="1-execution/01-resolvers.html">Resolvers</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="1-execution/03-mutation.html">Mutation</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/04-subscription.html">Subscription</a>
+                                    <a class="nav-link" href="1-execution/04-query.html">Query</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -218,13 +221,14 @@
         }
 </code></pre></p>
 <h3 id="creating-types">Creating types</h3>
-<p><pre><code class="language-csharp">        [Fact]
+<p><pre><code class="language-csharp">
+        [Fact]
         public void Create_Object()
         {
             /* Given */
             var builder = new SchemaBuilder();
             const string name = &quot;Object1&quot;;
-            
+
             /* When */
             builder.Object(
                 name: name,
@@ -251,7 +255,7 @@
             /* Given */
             var builder = new SchemaBuilder();
             const string name = &quot;Interface1&quot;;
-            
+
             /* When */
             builder.Interface(
                 name: name,
@@ -275,9 +279,9 @@
             var builder = new SchemaBuilder();
             builder.Object(&quot;Object1&quot;, out var object1);
             builder.Object(&quot;Object2&quot;, out var object2);
-            
+
             const string name = &quot;Union1&quot;;
-            
+
             /* When */
             builder.Union(
                 name: name,
@@ -287,7 +291,7 @@
                 {
                     /*directive*/
                 },
-                possibleTypes: new []{object1, object2});
+                possibleTypes: new[] {object1, object2});
 
             /* Then */
             Assert.Equal(name, union1.Name);
@@ -301,7 +305,7 @@
             /* Given */
             var builder = new SchemaBuilder();
             const string name = &quot;Enum1&quot;;
-            
+
             /* When */
             builder.Enum(
                 name: name,
@@ -311,11 +315,14 @@
                 {
                     /*directive*/
                 },
-                (value: &quot;VALUE1&quot;, 
-                 description: &quot;Description&quot;,
-                 directives: new DirectiveInstance[] { /*directive*/},
-                 deprecationReason: null)
-                );
+                (value: &quot;VALUE1&quot;,
+                    description: &quot;Description&quot;,
+                    directives: new DirectiveInstance[]
+                    {
+                        /*directive*/
+                    },
+                    deprecationReason: null)
+            );
 
             /* Then */
             Assert.Equal(name, enum1.Name);
@@ -329,7 +336,7 @@
             /* Given */
             var builder = new SchemaBuilder();
             const string name = &quot;Url&quot;;
-            
+
             /* When */
             builder.Scalar(
                 name: name,
@@ -353,7 +360,7 @@
             /* Given */
             var builder = new SchemaBuilder();
             const string name = &quot;InputObject1&quot;;
-            
+
             /* When */
             builder.InputObject(
                 name: name,
@@ -376,21 +383,21 @@
             /* Given */
             var builder = new SchemaBuilder();
             const string name = &quot;Deprecated&quot;;
-            
+
             /* When */
             builder.DirectiveType(
                 name: name,
                 out var object1,
-                locations: new []
+                locations: new[]
                 {
                     DirectiveLocation.FIELD
                 },
                 description: &quot;Description&quot;,
                 (Name: &quot;Reason&quot;,
-                 Type: ScalarType.String,
-                 DefaultValue: &quot;Deprecated&quot;,
-                 Description: &quot;Description&quot;)
-                );
+                    Type: ScalarType.String,
+                    DefaultValue: &quot;Deprecated&quot;,
+                    Description: &quot;Description&quot;)
+            );
 
             /* Then */
             Assert.Equal(name, object1.Name);
@@ -400,8 +407,7 @@
 <blockquote>
 <p>NotImplemented: future enhancement</p>
 </blockquote>
-<p><pre><code class="language-csharp">
-        [Fact]
+<p><pre><code class="language-csharp">        [Fact]
         public void Build_and_validate_schema()
         {
             /* Given */
@@ -429,7 +435,7 @@
             builder.Object(
                 name: &quot;Object1&quot;,
                 out var object1);
-            
+
             /* When */
             builder.Connections(connect =&gt;
             {
@@ -438,15 +444,17 @@
                     fieldName: &quot;field1&quot;,
                     to: ScalarType.Int,
                     description: &quot;Description&quot;,
+                    resolve: null,
+                    subscribe: null,
                     directives: new DirectiveInstance[]
                     {
                         /* directive */
                     },
                     (Name: &quot;arg1&quot;,
-                     Type: ScalarType.Boolean,
-                     DefaultValue: true,
-                     Description: &quot;Description&quot;)
-                    );
+                        Type: ScalarType.Boolean,
+                        DefaultValue: true,
+                        Description: &quot;Description&quot;)
+                );
             });
 
             /* Then */
@@ -473,14 +481,16 @@
                     fieldName: &quot;field1&quot;,
                     to: ScalarType.Int,
                     description: &quot;Description&quot;,
+                    resolve: null,
+                    subscribe: null,
                     directives: new DirectiveInstance[]
                     {
                         /* directive */
                     },
                     (Name: &quot;arg1&quot;,
-                     Type: ScalarType.Boolean,
-                     DefaultValue: true,
-                     Description: &quot;Description&quot;)
+                        Type: ScalarType.Boolean,
+                        DefaultValue: true,
+                        Description: &quot;Description&quot;)
                 );
             });
 
@@ -495,7 +505,7 @@
         public void Create_InputObject_field()
         {
             /* Given */
-            var builder = new SchemaBuilder();        
+            var builder = new SchemaBuilder();
             builder.InputObject(
                 name: &quot;Input1&quot;,
                 out var input1);
@@ -531,7 +541,7 @@
                 .Query(out var query)
                 .Connections(connect =&gt;
                     connect.Field(query, &quot;field1&quot;, ScalarType.String)
-                    )
+                )
                 .Build();
 
             /* When */
@@ -590,35 +600,31 @@
                 )
                 .Build();
 
-            var resolvers = new ResolverMap()
+            var resolvers = new ResolverMap
             {
                 {
-                    query1.Name, new FieldResolverMap()
+                    query1.Name, new FieldResolverMap
                     {
-                        { &quot;field1&quot;, async context =&gt;
+                        {
+                            &quot;field1&quot;, async context =&gt;
                             {
                                 await Task.Delay(1);
                                 return Resolve.As(1);
                             }
                         }
                     }
-
                 }
             };
 
             /* When */
-            var executableSchema = await SchemaTools.MakeExecutableSchemaAsync(
+            var executableSchema = SchemaTools.MakeExecutableSchema(
                 schema: schema1,
                 resolvers: resolvers,
-                subscribers: null,
-                visitors: new SchemaVisitorFactory[]
-                {
-                    /* schema visitor factory */
-                });
+                subscribers: null);
 
             /* Then */
             var result = await Executor.ExecuteAsync(
-                new ExecutionOptions()
+                new ExecutionOptions
                 {
                     Document = Parser.ParseDocument(@&quot;{ field1 }&quot;),
                     Schema = executableSchema

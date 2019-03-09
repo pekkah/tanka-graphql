@@ -78,20 +78,23 @@
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                            <a class="d-flex align-items-center text-muted" href="1-execution/01-validation.html">Execution</a>
+                            <a class="d-flex align-items-center text-muted" href="1-execution/01-resolvers.html">Execution</a>
                         </h6>
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/01-validation.html">Validation</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/02-query.html">Query</a>
+                                    <a class="nav-link" href="1-execution/01-resolvers.html">Resolvers</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="1-execution/03-mutation.html">Mutation</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/04-subscription.html">Subscription</a>
+                                    <a class="nav-link" href="1-execution/04-query.html">Query</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -209,7 +212,7 @@
             })</code></pre></p>
 <h3 id="create-custom-directive">Create custom directive</h3>
 <p>Create simple <code>DirectiveType</code> and apply instance of it to a field and modify resolver logic to execute custom logic if it has the directive present.</p>
-<p><pre><code class="language-csharp">        [Fact]
+<p><pre><code class="language-csharp">        [Fact(Skip = &quot;Revisit with SchemaBuilder syntax&quot;)]
         public async Task Authorize_field_directive()
         {
             /* Given */
@@ -244,13 +247,9 @@
             Func&lt;bool&gt; authorize = () =&gt; true;
 
             /* When */
-            var schema = await SchemaTools.MakeExecutableSchemaAsync(
+            var schema = SchemaTools.MakeExecutableSchema(
                 builder.Build(),
-                resolvers,
-                visitors: new SchemaVisitorFactory[]
-                {
-                    (s, _1, _2) =&gt; new Authorize(s, authorize)
-                });
+                resolvers);
 
             var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
@@ -262,39 +261,7 @@
             Assert.Equal(&quot;Hello World! authorize: True&quot;, result.Data[&quot;requiresAuthorize&quot;]);
         }
 </code></pre></p>
-<p><pre><code class="language-csharp">
-    public class Authorize : SchemaVisitorBase
-    {
-        private readonly Func&lt;bool&gt; _authorize;
-
-        public Authorize(ISchema schema, Func&lt;bool&gt; authorize) : base(schema)
-        {
-            _authorize = authorize;
-        }
-
-        protected override Task VisitObjectFieldAsync(ObjectType objectType,
-            KeyValuePair&lt;string, IField&gt; objectTypeField)
-        {
-            var authorizeDirective = objectTypeField.Value.GetDirective(&quot;authorize&quot;);
-
-            if (authorizeDirective != null)
-            {
-                var field = objectTypeField.Value;
-                var originalResolver = field.Resolve;
-
-                field.Resolve = async context =&gt;
-                {
-                    var result = await originalResolver(context);
-                    var value = $&quot;{result.Value} authorize: {_authorize()}&quot;;
-
-                    return Resolve.As(value);
-                };
-            }
-
-            return base.VisitObjectFieldAsync(objectType, objectTypeField);
-        }
-    }
-</code></pre></p>
+<p><pre><code class="language-csharp">tanka.graphql.tests.type.Authorize</code></pre></p>
                     
             </main>
         </div>

@@ -78,20 +78,23 @@
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                            <a class="d-flex align-items-center text-muted" href="1-execution/01-validation.html">Execution</a>
+                            <a class="d-flex align-items-center text-muted" href="1-execution/01-resolvers.html">Execution</a>
                         </h6>
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/01-validation.html">Validation</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/02-query.html">Query</a>
+                                    <a class="nav-link" href="1-execution/01-resolvers.html">Resolvers</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="1-execution/03-mutation.html">Mutation</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/04-subscription.html">Subscription</a>
+                                    <a class="nav-link" href="1-execution/04-query.html">Query</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -232,21 +235,18 @@
             builder.Subscription(out var subscription);
 
             _sourceSchema = builder.Build();
-            _introspectionSchema = Introspect.SchemaAsync(_sourceSchema)
-                .GetAwaiter()
-                .GetResult();
+            _introspectionSchema = Introspect.Schema(_sourceSchema);
         }
 </code></pre></p>
 <p>Combination of the source schema and the introspection schema can be used to provide the normal executable schema with introspection support.</p>
-<p><pre><code class="language-csharp">        public async Task&lt;ISchema&gt; MakeExecutableAsync(Starwars starwars)
+<p><pre><code class="language-csharp">
+        public ISchema CreateSchema(Starwars starwars)
         {
-            var schema = StarwarsSchema.BuildSchema();
-            ;
-
-            var resolvers = StarwarsResolvers.BuildResolvers(starwars, schema);
-            var executable = await MakeExecutableSchemaWithIntrospection(
-                schema, 
-                resolvers).ConfigureAwait(false);
+            var schema = StarwarsSchema.Create();
+            var resolvers = StarwarsResolvers.BuildResolvers(starwars);
+            var executable = SchemaTools.MakeExecutableSchemaWithIntrospection(
+                schema,
+                resolvers);
 
             return executable;
         }

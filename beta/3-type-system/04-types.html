@@ -78,20 +78,23 @@
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                            <a class="d-flex align-items-center text-muted" href="1-execution/01-validation.html">Execution</a>
+                            <a class="d-flex align-items-center text-muted" href="1-execution/01-resolvers.html">Execution</a>
                         </h6>
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/01-validation.html">Validation</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/02-query.html">Query</a>
+                                    <a class="nav-link" href="1-execution/01-resolvers.html">Resolvers</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="1-execution/03-mutation.html">Mutation</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/04-subscription.html">Subscription</a>
+                                    <a class="nav-link" href="1-execution/04-query.html">Query</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -180,6 +183,11 @@
 <li><code>InputObjectType</code></li>
 </ul>
 <p>These all exists in <code>tanka.graphql.type</code> namespace and implement <code>INamedType</code> interface</p>
+<p><pre><code class="language-csharp">    public interface INamedType: IType
+    {
+        string Name { get; }
+    }
+</code></pre></p>
 <h3 id="wrapping-types">Wrapping types</h3>
 <p>Wrapping types implement the <code>IWrappingType</code></p>
 <p><pre><code class="language-csharp">    public interface IWrappingType: IType
