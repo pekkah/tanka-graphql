@@ -262,7 +262,7 @@ namespace tanka.graphql.tests.type
                     to: ScalarType.Int,
                     description: "Description",
                     resolve: null,
-                    subscribe:null,
+                    subscribe: null,
                     directives: new DirectiveInstance[]
                     {
                         /* directive */
@@ -339,7 +339,7 @@ namespace tanka.graphql.tests.type
                     to: ScalarType.Int,
                     description: "Description",
                     resolve: null,
-                    subscribe:null,
+                    subscribe: null,
                     directives: new DirectiveInstance[]
                     {
                         /* directive */
@@ -373,7 +373,7 @@ namespace tanka.graphql.tests.type
                     to: ScalarType.Int,
                     description: "Description",
                     resolve: null,
-                    subscribe:null,
+                    subscribe: null,
                     directives: new DirectiveInstance[]
                     {
                         /* directive */
@@ -419,6 +419,28 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             Assert.Equal(query, sut.Query);
+        }
+
+        [Fact]
+        public async Task Create_Field_Resolver()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out var query)
+                .Connections(connections =>
+                {
+                    connections.Field(query, "field1", ScalarType.String,
+                        "test field",
+                        resolve => resolve.Use(context => new ValueTask<IResolveResult>(Resolve.As(42))));
+                });
+
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            var result = await sut.GetResolver(query.Name, "field1")(null);
+            Assert.Equal(42, result.Value);
         }
 
         [Fact]
@@ -574,28 +596,6 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             Assert.Equal("types", exception.ParamName);
-        }
-
-        [Fact]
-        public async Task Resolver()
-        {
-            /* Given */
-            var builder = new SchemaBuilder();
-            builder.Query(out var query)
-                .Connections(connections =>
-                {
-                    connections.Field(query, "field1", ScalarType.String,
-                        "test field",
-                        resolve => resolve.Use(context => new ValueTask<IResolveResult>(Resolve.As(42))));
-                });
-
-
-            /* When */
-            var sut = builder.Build();
-
-            /* Then */
-            var result = await sut.GetResolver(query.Name, "field1")(null);
-            Assert.Equal(42, result.Value);
         }
 
         [Fact]

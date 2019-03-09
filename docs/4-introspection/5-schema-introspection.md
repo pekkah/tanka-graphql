@@ -9,7 +9,7 @@ Create and introspect a schema
 
 Combination of the source schema and the introspection schema can be used to provide the normal executable schema with introspection support.
 
-[{tanka.graphql.tests.data.starwars.StarwarsFixture.MakeExecutableAsync}]
+[{tanka.graphql.tests.data.starwars.StarwarsFixture.CreateSchema}]
 
 ### Type Kinds
 
