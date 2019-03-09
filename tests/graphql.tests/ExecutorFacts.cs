@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -22,6 +23,7 @@ namespace tanka.graphql.tests
 
                 type Success {
                     id: ID!
+                    event: Event
                 }
 
                 type Failure {
@@ -68,7 +70,8 @@ namespace tanka.graphql.tests
                 {
                     "Success", new FieldResolverMap
                     {
-                        {"id", Resolve.PropertyOf<EventsModel.Success>(m => m.Id)}
+                        {"id", Resolve.PropertyOf<EventsModel.Success>(m => m.Id)},
+                        {"event", Resolve.PropertyOf<EventsModel.Success>(m => m.Event)}
                     }
                 },
                 {
@@ -112,10 +115,11 @@ namespace tanka.graphql.tests
                                         new EventsModel.Failure("Payload should be given"));
 
                                 var id = await Model.AddAsync(newEvent);
+                                var ev = Model.Events.Single(e => e.Id == id);
 
                                 return Resolve.As(
                                     context.Schema.GetNamedType<ObjectType>("Success"),
-                                    new EventsModel.Success(id));
+                                    new EventsModel.Success(id, ev));
                             }
                         }
                     }
@@ -173,6 +177,9 @@ namespace tanka.graphql.tests
                         __typename
                         ...on Success {
                             id
+                            event {
+                                payload
+                            }
                         }
                         
                         ...on Failure {
@@ -198,7 +205,10 @@ namespace tanka.graphql.tests
                   ""data"": {
                     ""create"": {
                       ""__typename"": ""Success"",
-                      ""id"": ""1""
+                      ""id"": ""1"",
+                      ""event"": {
+                        ""payload"": ""payload""
+                      }
                     }
                   }
                 }");

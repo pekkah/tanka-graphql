@@ -12,8 +12,6 @@ namespace tanka.graphql.type
         private readonly ConnectionBuilder _connections;
         private readonly Dictionary<string, DirectiveType> _directives = new Dictionary<string, DirectiveType>();
 
-        private readonly List<Action<SchemaBuilder>> _lateBuild = new List<Action<SchemaBuilder>>();
-
         private readonly Dictionary<string, INamedType> _types =
             new Dictionary<string, INamedType>();
 
@@ -172,9 +170,6 @@ namespace tanka.graphql.type
 
         public ISchema Build()
         {
-            foreach (var lateBuildAction in _lateBuild)
-                lateBuildAction(this);
-
             var (fields, inputFields, resolvers, subscribers) = _connections.Build();
             return new SchemaGraph(
                 _types,
@@ -189,12 +184,6 @@ namespace tanka.graphql.type
         {
             var schema = Build();
             return (schema, new NotImplementedException("todo"));
-        }
-
-        public SchemaBuilder LateBuild(Action<SchemaBuilder> lateBuild)
-        {
-            _lateBuild.Add(lateBuild);
-            return this;
         }
 
         public SchemaBuilder GetScalar(string name, out ScalarType scalarType)

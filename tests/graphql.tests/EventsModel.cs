@@ -53,12 +53,14 @@ namespace tanka.graphql.tests
 
         public class Success
         {
-            public Success(int id)
+            public Success(int id, Event ev)
             {
                 Id = id;
+                Event = ev;
             }
 
             public int Id { get; set; }
+            public Event Event { get; }
         }
 
         public class Failure

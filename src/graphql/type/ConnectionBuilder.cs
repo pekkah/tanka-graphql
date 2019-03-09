@@ -196,7 +196,7 @@ namespace tanka.graphql.type
 
             foreach (var field in fields)
             {
-                if (!_fields.ContainsKey(owner.Name))
+                if (!_inputFields.ContainsKey(owner.Name))
                     _inputFields[owner.Name] = new Dictionary<string, InputObjectField>();
 
                 _inputFields[owner.Name].Add(field.Key, field.Value);
@@ -230,6 +230,13 @@ namespace tanka.graphql.type
 
         public IEnumerable<KeyValuePair<string, IField>> VisitFields(ComplexType type)
         {
+            if (!_fields.ContainsKey(type.Name))
+            {
+                throw new SchemaBuilderException(
+                    type.Name,
+                    $"Cannot visit fields of type. No fields known.");
+            }
+
             return _fields[type.Name];
         }
 
@@ -257,11 +264,6 @@ namespace tanka.graphql.type
             }
 
             return Subscriber(type, fieldName);
-        }
-
-        public void IncludeResolver(ResolverBuilder resolver)
-        {
-            
         }
     }
 }
