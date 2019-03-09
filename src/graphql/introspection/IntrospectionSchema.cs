@@ -13,7 +13,7 @@ namespace tanka.graphql.introspection
         public const string TypeKindName = "__TypeKind";
         public const string TypeName = "__Type";
 
-        public static ISchema Build()
+        public static SchemaBuilder Create()
         {
             var builder = new SchemaBuilder();
 
@@ -104,7 +104,7 @@ namespace tanka.graphql.introspection
                     .Field(query, "__type", type,
                         args: ("name", ScalarType.NonNullString, default, default)));
 
-            return builder.Build();
+            return builder;
         }
     }
 }

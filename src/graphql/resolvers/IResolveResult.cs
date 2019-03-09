@@ -10,8 +10,6 @@ namespace tanka.graphql.resolvers
     {
         object Value { get; }
 
-        ObjectType ActualType { get; }
-
         Task<object> CompleteValueAsync(
             IExecutorContext executorContext,
             ObjectType objectType,

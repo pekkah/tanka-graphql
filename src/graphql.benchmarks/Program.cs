@@ -6,7 +6,15 @@ namespace tanka.graphql.benchmarks
     {
         private static void Main(string[] args)
         {
-            BenchmarkRunner.Run<Benchmarks>();
+            var runner = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly);
+
+            if (args.Length == 0)
+                runner.RunAll();
+            else
+            {
+                runner.Run(args);
+            }
+
         }
     }
 }

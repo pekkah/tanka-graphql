@@ -1,19 +1,19 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using tanka.graphql.resolvers;
 using tanka.graphql.type.converters;
 
 namespace tanka.graphql.type
 {
     public class SchemaBuilder
     {
+        private readonly ConnectionBuilder _connections;
         private readonly Dictionary<string, DirectiveType> _directives = new Dictionary<string, DirectiveType>();
-
-        private readonly List<Action<SchemaBuilder>> _lateBuild = new List<Action<SchemaBuilder>>();
 
         private readonly Dictionary<string, INamedType> _types =
             new Dictionary<string, INamedType>();
-
-        private readonly ConnectionBuilder _connections;
 
         public SchemaBuilder()
         {
@@ -28,12 +28,12 @@ namespace tanka.graphql.type
 
         public SchemaBuilder(ISchema from) : this()
         {
-            Import(@from);
+            Import(from);
         }
 
-        public SchemaBuilder Import(ISchema @from)
+        public SchemaBuilder Import(ISchema from)
         {
-            foreach (var namedType in @from.QueryTypes<INamedType>())
+            foreach (var namedType in from.QueryTypes<INamedType>())
             {
                 if (TryGetType<INamedType>(namedType.Name, out _))
                     continue;
@@ -42,15 +42,32 @@ namespace tanka.graphql.type
                 {
                     case ObjectType objectType:
                         Include(objectType);
-                        _connections.IncludeFields(objectType, @from.GetFields(objectType.Name));
+                        var fields = from.GetFields(objectType.Name).ToList();
+                        _connections.IncludeFields(objectType, fields);
+
+                        foreach (var field in fields)
+                        {
+                            var resolver = from.GetResolver(objectType.Name, field.Key);
+
+                            if (resolver != null)
+                                _connections.GetResolver(objectType, field.Key)
+                                    .Use(resolver);
+
+                            var subscriber = from.GetSubscriber(objectType.Name, field.Key);
+
+                            if (subscriber != null)
+                                _connections.GetSubscriber(objectType, field.Key)
+                                    .Use(subscriber);
+                        }
+
                         break;
                     case InterfaceType interfaceType:
                         Include(interfaceType);
-                        _connections.IncludeFields(interfaceType, @from.GetFields(interfaceType.Name));
+                        _connections.IncludeFields(interfaceType, from.GetFields(interfaceType.Name));
                         break;
                     case InputObjectType inputType:
                         Include(inputType);
-                        _connections.IncludeInputFields(inputType, @from.GetInputFields(inputType.Name));
+                        _connections.IncludeInputFields(inputType, from.GetInputFields(inputType.Name));
                         break;
                     default:
                         Include(namedType);
@@ -58,7 +75,7 @@ namespace tanka.graphql.type
                 }
             }
 
-            foreach (var directiveType in @from.QueryDirectives())
+            foreach (var directiveType in from.QueryDirectives())
             {
                 if (_directives.ContainsKey(directiveType.Name))
                     continue;
@@ -153,27 +170,20 @@ namespace tanka.graphql.type
 
         public ISchema Build()
         {
-            foreach (var lateBuildAction in _lateBuild) 
-                lateBuildAction(this);
-
-            var (fields, inputFields) = _connections.Build();
+            var (fields, inputFields, resolvers, subscribers) = _connections.Build();
             return new SchemaGraph(
                 _types,
                 fields,
                 inputFields,
-                _directives);
+                _directives,
+                BuildResolvers(resolvers),
+                BuildSubscribers(subscribers));
         }
 
         public (ISchema Schema, object ValidationResult) BuildAndValidate()
         {
             var schema = Build();
             return (schema, new NotImplementedException("todo"));
-        }
-
-        public SchemaBuilder LateBuild(Action<SchemaBuilder> lateBuild)
-        {
-            _lateBuild.Add(lateBuild);
-            return this;
         }
 
         public SchemaBuilder GetScalar(string name, out ScalarType scalarType)
@@ -242,6 +252,35 @@ namespace tanka.graphql.type
             scalarType = new ScalarType(name, converter, new Meta(description, null, directives));
             Include(scalarType);
             return this;
+        }
+
+        private Dictionary<string, Dictionary<string, Subscriber>> BuildSubscribers(
+            Dictionary<string, Dictionary<string, SubscriberBuilder>> subscribers)
+        {
+            var result = new Dictionary<string, Dictionary<string, Subscriber>>();
+
+            foreach (var type in subscribers)
+                result[type.Key] = type.Value.Select(f => (f.Key, f.Value.Build()))
+                    .ToDictionary(f => f.Key, f => f.Item2);
+
+            return result;
+        }
+
+        private Dictionary<string, Dictionary<string, Resolver>> BuildResolvers(
+            Dictionary<string, Dictionary<string, ResolverBuilder>> resolvers)
+        {
+            var result = new Dictionary<string, Dictionary<string, Resolver>>();
+
+            foreach (var type in resolvers)
+                result[type.Key] = type.Value.Select(f => (f.Key, f.Value.Build()))
+                    .ToDictionary(f => f.Key, f => f.Item2);
+
+            return result;
+        }
+
+        public IEnumerable<T> VisitTypes<T>() where T:INamedType
+        {
+            return _types.Values.OfType<T>();
         }
     }
 }

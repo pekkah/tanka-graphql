@@ -13,6 +13,9 @@ namespace tanka.graphql.sdl
         private readonly SchemaBuilder _builder;
         private readonly GraphQLDocument _document;
 
+        private readonly List<Action<SchemaBuilder>> _afterTypeDefinitions = new List<Action<SchemaBuilder>>();
+
+
         public SdlReader(GraphQLDocument document, SchemaBuilder builder = null)
         {
             _document = document;
@@ -48,6 +51,11 @@ namespace tanka.graphql.sdl
 
             foreach (var definition in definitions.OfType<GraphQLTypeExtensionDefinition>())
                 Extend(definition);
+
+            foreach (var action in _afterTypeDefinitions)
+            {
+                action(_builder);
+            }
 
             return _builder;
         }
@@ -277,7 +285,7 @@ namespace tanka.graphql.sdl
         protected InputObjectType InputObject(GraphQLInputObjectTypeDefinition definition)
         {
             _builder.InputObject(definition.Name.Value, out var inputObject);
-            _builder.LateBuild(builder =>
+            AfterTypeDefinitions(builder =>
             {
                 builder.Connections(connect =>
                 {
@@ -295,6 +303,11 @@ namespace tanka.graphql.sdl
             });
 
             return inputObject;
+        }
+
+        private void AfterTypeDefinitions(Action<SchemaBuilder> action)
+        {
+            _afterTypeDefinitions.Add(action);
         }
 
         protected InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions)
@@ -371,7 +384,7 @@ namespace tanka.graphql.sdl
             _builder.Interface(definition.Name.Value, out var interfaceType,
                 directives: directives);
 
-            _builder.LateBuild(_ => { Fields(interfaceType, definition.Fields); });
+            AfterTypeDefinitions(_ => { Fields(interfaceType, definition.Fields); });
 
             return interfaceType;
         }
@@ -385,14 +398,14 @@ namespace tanka.graphql.sdl
                 interfaces: interfaces,
                 directives: directives);
 
-            _builder.LateBuild(_ => { Fields(objectType, definition.Fields); });
+            AfterTypeDefinitions(_ => { Fields(objectType, definition.Fields); });
 
             return objectType;
         }
 
         protected void Extend(GraphQLTypeExtensionDefinition definition)
         {
-            _builder.LateBuild(_ =>
+            AfterTypeDefinitions(_ =>
             {
                 if (!_builder.TryGetType<ObjectType>(definition.Definition.Name.Value, out var type))
                     throw new InvalidOperationException(
@@ -442,7 +455,8 @@ namespace tanka.graphql.sdl
                 var args = Args(definition.Arguments);
                 var directives = Directives(definition.Directives);
 
-                _builder.Connections(connect => connect.Field(owner, name, type, default, directives, args.ToArray()));
+                _builder.Connections(connect => connect
+                    .Field(owner, name, type, default, null, null, directives, args.ToArray()));
             }
         }
     }

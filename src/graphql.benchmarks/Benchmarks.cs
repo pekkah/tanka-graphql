@@ -8,6 +8,7 @@ using BenchmarkDotNet.Attributes;
 using tanka.graphql.type;
 using tanka.graphql.validation;
 using GraphQLParser.AST;
+using tanka.graphql.resolvers;
 
 namespace tanka.graphql.benchmarks
 {
@@ -22,15 +23,24 @@ namespace tanka.graphql.benchmarks
         private GraphQLDocument _mutation;
         private GraphQLDocument _subscription;
         private IEnumerable<CombineRule> _defaultRulesMap;
+        private Resolver _resolverChain;
+        private Resolver _resolver;
 
         [GlobalSetup]
-        public async Task Setup()
+        public void Setup()
         {
-            _schema = await Utils.InitializeSchema();
+            _schema = Utils.InitializeSchema();
             _query = Utils.InitializeQuery();
             _mutation = Utils.InitializeMutation();
             _subscription = Utils.InitializeSubscription();
             _defaultRulesMap = ExecutionRules.All;
+            _resolverChain = new ResolverBuilder()
+                .Use((context, next) => next(context))
+                .Use((context, next) => next(context))
+                .Use(context => new ValueTask<IResolveResult>(Resolve.As(42)))
+                .Build();
+
+            _resolver = context => new ValueTask<IResolveResult>(Resolve.As(42));
         }
         
         [Benchmark]
@@ -139,6 +149,18 @@ namespace tanka.graphql.benchmarks
                 throw new InvalidOperationException(
                     $"Validation failed. {result}");
             }
+        }
+
+        [Benchmark]
+        public async Task ResolverChain()
+        {
+            var _ = await _resolverChain(null);
+        }
+
+        [Benchmark]
+        public async Task Resolver()
+        {
+            var _ = await _resolver(null);
         }
 
         private static void AssertResult(IEnumerable<Error> errors)

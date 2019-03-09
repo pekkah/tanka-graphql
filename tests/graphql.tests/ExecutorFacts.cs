@@ -141,12 +141,10 @@ namespace tanka.graphql.tests
             };
 
             var schema = graphql.sdl.Sdl.Schema(Parser.ParseDocument(Sdl));
-            Schema = SchemaTools.MakeExecutableSchemaAsync(
-                    schema,
-                    Resolvers,
-                    Resolvers)
-                //todo: non async
-                .GetAwaiter().GetResult();
+            Schema = SchemaTools.MakeExecutableSchema(
+                schema,
+                Resolvers,
+                Resolvers);
         }
 
         public ResolverMap Resolvers { get; set; }

@@ -56,7 +56,7 @@ namespace tanka.graphql.execution
                         argumentValues,
                         path);
 
-                var resolver = field.Resolve;
+                var resolver = schema.GetResolver(objectType.Name, fieldName);
 
                 if (resolver == null)
                     throw new GraphQLError($"Could not get resolver for {objectType.Name}.{fieldName}");

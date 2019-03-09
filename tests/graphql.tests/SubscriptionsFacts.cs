@@ -90,10 +90,10 @@ namespace tanka.graphql.tests
             };
 
             // make executable
-            _executable = SchemaTools.MakeExecutableSchemaAsync(
+            _executable = SchemaTools.MakeExecutableSchema(
                 schema,
                 resolvers,
-                resolvers).Result;
+                resolvers);
         }
 
         private readonly ISchema _executable;

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
     public class SchemaGraph : ISchema
     {
         private readonly Dictionary<string, DirectiveType> _directiveTypes;
+        private readonly Dictionary<string, Dictionary<string, Resolver>> _resolvers;
+        private readonly Dictionary<string, Dictionary<string, Subscriber>> _subscribers;
         private readonly Dictionary<string, Dictionary<string, IField>> _fields;
         private readonly Dictionary<string, Dictionary<string, InputObjectField>> _inputFields;
         private readonly Dictionary<string, INamedType> _types;
@@ -15,12 +18,16 @@ namespace tanka.graphql.type
             Dictionary<string, INamedType> types,
             Dictionary<string, Dictionary<string, IField>> fields,
             Dictionary<string, Dictionary<string, InputObjectField>> inputFields,
-            Dictionary<string, DirectiveType> directiveTypes)
+            Dictionary<string, DirectiveType> directiveTypes,
+            Dictionary<string, Dictionary<string, Resolver>> resolvers,
+            Dictionary<string, Dictionary<string, Subscriber>> subscribers)
         {
             _types = types;
             _fields = fields;
             _inputFields = inputFields;
             _directiveTypes = directiveTypes;
+            _resolvers = resolvers;
+            _subscribers = subscribers;
             Query = GetNamedType<ObjectType>("Query") ?? throw new ArgumentNullException(
                         nameof(types),
                         $"Could not find root type 'Query' from given types");
@@ -115,6 +122,24 @@ namespace tanka.graphql.type
         public IEnumerable<ObjectType> GetPossibleTypes(IAbstractType abstractType)
         {
             return QueryTypes<ObjectType>(abstractType.IsPossible);
+        }
+
+        public Resolver GetResolver(string type, string fieldName)
+        {
+            if (_resolvers.TryGetValue(type, out var fields))
+                if (fields.TryGetValue(fieldName, out var field))
+                    return field;
+
+            return null;
+        }
+
+        public Subscriber GetSubscriber(string type, string fieldName)
+        {
+            if (_subscribers.TryGetValue(type, out var fields))
+                if (fields.TryGetValue(fieldName, out var field))
+                    return field;
+
+            return null;
         }
 
         public T GetNamedType<T>(string name) where T : INamedType

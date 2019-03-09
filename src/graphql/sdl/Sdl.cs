@@ -1,4 +1,5 @@
-﻿using GraphQLParser.AST;
+﻿using System;
+using GraphQLParser.AST;
 using tanka.graphql.type;
 
 namespace tanka.graphql.sdl
@@ -9,6 +10,15 @@ namespace tanka.graphql.sdl
         {
             var reader = new SdlReader(document, builder);
             return reader.Read().Build();
+        }
+
+        public static void Import(GraphQLDocument document, SchemaBuilder builder)
+        {
+            if (document == null) throw new ArgumentNullException(nameof(document));
+            if (builder == null) throw new ArgumentNullException(nameof(builder));
+
+            var reader = new SdlReader(document, builder);
+            reader.Read();
         }
     }
 }

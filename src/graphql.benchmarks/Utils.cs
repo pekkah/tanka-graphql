@@ -10,7 +10,7 @@ namespace tanka.graphql.benchmarks
 {
     public static class Utils
     {
-        public static Task<ISchema> InitializeSchema()
+        public static ISchema InitializeSchema()
         {
             var builder = new SchemaBuilder();
             builder.Query(out var query)
@@ -50,8 +50,8 @@ namespace tanka.graphql.benchmarks
                 }
             };
 
-            var schema = SchemaTools.MakeExecutableSchemaAsync(
-                builder.Build(), 
+            var schema = SchemaTools.MakeExecutableSchema(
+                builder, 
                 resolvers,
                 resolvers);
 

@@ -4,7 +4,7 @@ namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsSchema
     {
-        public static ISchema BuildSchema()
+        public static SchemaBuilder Create()
         {
             var builder = new SchemaBuilder();
 
@@ -59,9 +59,7 @@ namespace tanka.graphql.tests.data.starwars
                     .Field(Mutation, "addHuman", Human,
                         args: ("human", HumanInput, default, default)));
 
-            var schema = builder.Build();
-
-            return schema;
+            return builder;
         }
     }
 }

@@ -12,6 +12,7 @@ Following types are supported:
 
 These all exists in `tanka.graphql.type` namespace and implement `INamedType` interface
 
+[{tanka.graphql.type.INamedType}]
 
 ### Wrapping types
 

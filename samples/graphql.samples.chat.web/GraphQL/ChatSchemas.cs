@@ -16,7 +16,7 @@ namespace tanka.graphql.samples.chat.web.GraphQL
             Chat = SchemaTools.MakeExecutableSchemaWithIntrospection(
                 schema,
                 resolvers,
-                resolvers).Result;
+                resolvers);
         }
 
         public Task<ISchema> FromIdlAsync()

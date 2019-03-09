@@ -138,7 +138,7 @@ namespace tanka.graphql.execution
                 coercedArgumentValues,
                 path);
 
-            var subscriber = field.Subscribe;
+            var subscriber = schema.GetSubscriber(subscriptionType.Name, fieldName);
 
             if (subscriber == null)
                 throw new GraphQLError(

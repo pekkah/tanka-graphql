@@ -50,7 +50,8 @@ namespace graphql.server.tests.host
                 }
                 ";
 
-            var schema = Sdl.Schema(Parser.ParseDocument(sdl));
+            var builder = new SchemaBuilder();
+            Sdl.Import(Parser.ParseDocument(sdl), builder);
 
             var resolvers = new ResolverMap
             {
@@ -62,13 +63,13 @@ namespace graphql.server.tests.host
                     }
                 },
                 {
-                    schema.Query.Name, new FieldResolverMap
+                    "Query", new FieldResolverMap
                     {
                         {"hello", context => new ValueTask<IResolveResult>(Resolve.As("world"))}
                     }
                 },
                 {
-                    schema.Mutation.Name, new FieldResolverMap()
+                    "Mutation", new FieldResolverMap()
                     {
                         {"add", async context =>
                             {
@@ -81,7 +82,7 @@ namespace graphql.server.tests.host
                     }
                 },
                 {
-                    schema.Subscription.Name, new FieldResolverMap
+                    "Subscription", new FieldResolverMap
                     {
                         {
                             "events", (context,ct) =>
@@ -95,7 +96,11 @@ namespace graphql.server.tests.host
                 }
             };
 
-            var executable = SchemaTools.MakeExecutableSchemaWithIntrospection(schema, resolvers, resolvers).Result;
+            var executable = SchemaTools.MakeExecutableSchemaWithIntrospection(
+                builder, 
+                resolvers, 
+                resolvers);
+
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
 

@@ -1,27 +1,24 @@
 using System;
-using System.Threading.Tasks;
+using tanka.graphql.tools;
 using tanka.graphql.type;
-using static tanka.graphql.tools.SchemaTools;
 
 namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsFixture : IDisposable
     {
-        public async Task<ISchema> MakeExecutableAsync(Starwars starwars)
-        {
-            var schema = StarwarsSchema.BuildSchema();
-            ;
-
-            var resolvers = StarwarsResolvers.BuildResolvers(starwars, schema);
-            var executable = await MakeExecutableSchemaWithIntrospection(
-                schema, 
-                resolvers).ConfigureAwait(false);
-
-            return executable;
-        }
-
         public void Dispose()
         {
+        }
+
+        public ISchema CreateSchema(Starwars starwars)
+        {
+            var schema = StarwarsSchema.Create();
+            var resolvers = StarwarsResolvers.BuildResolvers(starwars);
+            var executable = SchemaTools.MakeExecutableSchemaWithIntrospection(
+                schema,
+                resolvers);
+
+            return executable;
         }
     }
 }

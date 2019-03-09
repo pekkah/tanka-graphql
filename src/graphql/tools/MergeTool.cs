@@ -1,4 +1,5 @@
-﻿using tanka.graphql.type;
+﻿using System.Linq;
+using tanka.graphql.type;
 
 namespace tanka.graphql.tools
 {
@@ -16,11 +17,30 @@ namespace tanka.graphql.tools
                     var rightTypeFields = right.GetFields(rightType.Name);
 
                     foreach (var rightTypeField in rightTypeFields)
+                    {
                         builder.Connections(connect =>
                         {
-                            if (!connect.TryGetField(leftType, rightTypeField.Key, out _))
-                                connect.IncludeFields(leftType, new[] {rightTypeField});
+                            if (connect.TryGetField(leftType, rightTypeField.Key, out _)) 
+                                return;
+                            
+                            connect.IncludeFields(leftType, new[] {rightTypeField});
+
+                            var resolver = right.GetResolver(rightType.Name, rightTypeField.Key);
+
+                            if (resolver != null)
+                            {
+                                connect.GetResolver(leftType, rightTypeField.Key)
+                                    .Use(resolver);
+                            }
+
+                            var subscriber = right.GetSubscriber(rightType.Name, rightTypeField.Key);
+
+                            if (subscriber != null)
+                            {
+                                connect.GetSubscriber(leftType, rightTypeField.Key);
+                            }
                         });
+                    }
                 }
                 else if (builder.TryGetType<ScalarType>(rightType.Name, out _))
                 {
@@ -30,7 +50,29 @@ namespace tanka.graphql.tools
                 {
                     builder
                         .Include(rightType)
-                        .Connections(connect => connect.IncludeFields(rightType, right.GetFields(rightType.Name)));
+                        .Connections(connect =>
+                        {
+                            var fields = right.GetFields(rightType.Name).ToList();
+                            connect.IncludeFields(rightType, fields);
+
+                            foreach (var rightTypeField in fields)
+                            {
+                                var resolver = right.GetResolver(rightType.Name, rightTypeField.Key);
+
+                                if (resolver != null)
+                                {
+                                    connect.GetResolver(rightType, rightTypeField.Key)
+                                        .Use(resolver);
+                                }
+
+                                var subscriber = right.GetSubscriber(rightType.Name, rightTypeField.Key);
+
+                                if (subscriber != null)
+                                {
+                                    connect.GetSubscriber(rightType, rightTypeField.Key);
+                                }
+                            }
+                        });
                 }
 
             // todo: input objects

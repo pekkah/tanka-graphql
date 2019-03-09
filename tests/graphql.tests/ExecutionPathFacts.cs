@@ -62,10 +62,10 @@ namespace tanka.graphql.tests
                 }
             };
 
-            _schema = SchemaTools.MakeExecutableSchemaAsync(schema, resolvers);
+            _schema = SchemaTools.MakeExecutableSchema(schema, resolvers);
         }
 
-        private readonly Task<ISchema> _schema;
+        private readonly ISchema _schema;
 
         [Fact]
         public async Task Mutation_path_should_match()
@@ -91,7 +91,7 @@ mutation Root {
             /* When */
             var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
-                Schema = await _schema,
+                Schema = _schema,
                 Document = Parser.ParseDocument(query)
             });
 
@@ -144,7 +144,7 @@ mutation Root {
             /* When */
             var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
-                Schema = await _schema,
+                Schema = _schema,
                 Document = Parser.ParseDocument(query)
             });
 

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
@@ -9,11 +8,7 @@ namespace tanka.graphql.type
 
         IEnumerable<KeyValuePair<string, Argument>> Arguments { get; set; }
 
-        Meta Meta { get; set; } 
-
-        Resolver Resolve { get; set; }
-
-        Subscriber Subscribe {get; set; }
+        Meta Meta { get; set; }
 
         Argument GetArgument(string name);
 
