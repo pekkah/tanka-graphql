@@ -179,7 +179,9 @@ Task("Benchmarks")
 
 	  foreach(var benchmark in projectFiles)
 	  {
-		  var args = ProcessArgumentBuilder.FromString($"run --project {benchmark} --configuration release --framework netcoreapp22");
+		  var args = ProcessArgumentBuilder.FromString(
+        $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i --filter *");
+
 			var exitCode = StartProcess(
 			  "dotnet",
 			  new ProcessSettings() {
