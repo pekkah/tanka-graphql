@@ -35,6 +35,8 @@ Resolvers can be configured when creating fields. This configuration is used to 
 
 [{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Field_Resolver}]
 
+[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Field_Subscriber}]
+
 Resolver middlwares can be used to build an execution chain. 
 
 Middlwares are implemented as a delegate method taking in the context and delegate for the next middlware to execute. Last link in the chain is usually the actual resolver but chain can be also interrupted before it by returning a result from the middleware.
