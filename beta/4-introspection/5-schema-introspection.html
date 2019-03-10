@@ -234,8 +234,8 @@
             builder.Mutation(out var mutation);
             builder.Subscription(out var subscription);
 
-            _sourceSchema = builder.Build();
-            _introspectionSchema = Introspect.Schema(_sourceSchema);
+            var sourceSchema = builder.Build();
+            _introspectionSchema = Introspect.Schema(sourceSchema);
         }
 </code></pre></p>
 <p>Combination of the source schema and the introspection schema can be used to provide the normal executable schema with introspection support.</p>

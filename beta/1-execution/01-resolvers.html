@@ -245,7 +245,7 @@
 <pre><code class="language-csharp">    public delegate ValueTask&lt;ISubscribeResult&gt; SubscriberMiddleware(ResolverContext context, CancellationToken unsubscribe, Subscriber next);
 </code></pre></p>
 <h3 id="using-resolver-and-subscriber-maps">Using resolver and subscriber maps</h3>
-<p>In some cases it's useful to be able to built to resolvers separately from the schema building. For that purpose <code>SchemaTools</code> provide a method to bind resolvers to fields by using <code>IResolverMap</code> and <code>ISubscriberMap</code>.</p>
+<p>In some cases it's useful to be able to build the resolvers separately from the schema building. For that purpose <code>SchemaTools</code> provide a method to bind resolvers to fields by using <code>IResolverMap</code> and <code>ISubscriberMap</code>.</p>
 <p><pre><code class="language-csharp">
         [Fact]
         public async Task Make_executable_schema()

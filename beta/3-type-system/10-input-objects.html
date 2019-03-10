@@ -218,7 +218,10 @@
             };
 
             var actual =
-                (Dictionary&lt;string, object&gt;) Values.CoerceValue(schema, literalValue, input);
+                (Dictionary&lt;string, object&gt;) Values.CoerceValue(
+                    schema.GetInputFields, 
+                    literalValue, 
+                    input);
 
             /* Then */
             foreach (var expectedKv in literalValue)
