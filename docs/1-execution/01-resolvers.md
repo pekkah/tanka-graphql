@@ -51,7 +51,7 @@ Signature of the subscription middlware:
 
 ### Using resolver and subscriber maps
 
-In some cases it's useful to be able to built to resolvers separately from the schema building. For that purpose `SchemaTools` provide a method to bind resolvers to fields by using `IResolverMap` and `ISubscriberMap`.
+In some cases it's useful to be able to build the resolvers separately from the schema building. For that purpose `SchemaTools` provide a method to bind resolvers to fields by using `IResolverMap` and `ISubscriberMap`.
 
 [{tanka.graphql.tests.type.SchemaBuilderFacts.Make_executable_schema}]
 

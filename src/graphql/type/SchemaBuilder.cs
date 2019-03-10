@@ -207,7 +207,6 @@ namespace tanka.graphql.type
             return this;
         }
 
-        //todo: predefined is bit misleading term to use here
         public bool TryGetType<T>(string name, out T namedType)
             where T : INamedType
         {

@@ -52,7 +52,10 @@ namespace tanka.graphql.tests.type
             };
 
             var actual =
-                (Dictionary<string, object>) Values.CoerceValue(schema, literalValue, input);
+                (Dictionary<string, object>) Values.CoerceValue(
+                    schema.GetInputFields, 
+                    literalValue, 
+                    input);
 
             /* Then */
             foreach (var expectedKv in literalValue)

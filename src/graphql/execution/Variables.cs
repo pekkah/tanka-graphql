@@ -29,7 +29,6 @@ namespace tanka.graphql.execution
                 var hasValue = variableValues.ContainsKey(variableName);
                 var value = variableValues[variableName];
 
-                //todo(pekka): how to check if defaultValue exists
                 if (!hasValue && defaultValue != null) 
                     coercedValues[variableName] = defaultValue;
 
@@ -46,7 +45,7 @@ namespace tanka.graphql.execution
                         coercedValues[variableName] = null;
                     else
                         coercedValues[variableName] = Values.CoerceValue(
-                            schema,
+                            schema.GetInputFields,
                             value,
                             variableType);
                 }

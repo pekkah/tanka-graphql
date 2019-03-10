@@ -126,7 +126,7 @@ namespace tanka.graphql.introspection
                 {"name", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Key)},
                 {"description", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.Description)},
                 {"type", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.Type)},
-                {"defaultValue", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => null)}
+                {"defaultValue", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.DefaultValue)}
             };
             
             this[IntrospectionSchema.EnumValueName] = new FieldResolverMap()

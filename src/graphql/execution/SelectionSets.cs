@@ -197,7 +197,7 @@ namespace tanka.graphql.execution
             switch (argument.Value)
             {
                 case GraphQLScalarValue scalarValue:
-                    return (bool) Values.CoerceValue(schema, scalarValue, ScalarType.NonNullBoolean);
+                    return (bool) Values.CoerceValue(schema.GetInputFields, scalarValue, ScalarType.NonNullBoolean);
                 case GraphQLVariable variable:
                     var variableValue = coercedVariableValues[variable.Name.Value];
                     return (bool) variableValue;

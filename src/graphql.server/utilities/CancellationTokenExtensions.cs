@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace tanka.graphql.server.utilities
@@ -14,6 +15,12 @@ namespace tanka.graphql.server.utilities
         /// <returns></returns>
         public static async Task WhenCancelled(this CancellationToken cancellationToken)
         {
+            if (!cancellationToken.CanBeCanceled)
+            {
+                throw new InvalidOperationException(
+                    "WhenCancelled cannot be used on cancellationToken which can't be cancelled");
+            }
+
             var taskCompletionSource = new TaskCompletionSource<bool>();
 
             using (cancellationToken.Register(() => { taskCompletionSource.TrySetResult(true); }))
