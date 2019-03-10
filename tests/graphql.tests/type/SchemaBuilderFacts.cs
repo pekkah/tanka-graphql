@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using tanka.graphql.resolvers;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
@@ -441,6 +443,31 @@ namespace tanka.graphql.tests.type
             /* Then */
             var result = await sut.GetResolver(query.Name, "field1")(null);
             Assert.Equal(42, result.Value);
+        }
+
+        [Fact]
+        public async Task Create_Field_Subscriber()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out var query)
+                .Connections(connections =>
+                {
+                    connections.Field(query, "field1", ScalarType.String,
+                        "test field",
+                        resolve => resolve.Use(context => 
+                            new ValueTask<IResolveResult>(Resolve.As(42))),
+                        subscribe => subscribe.Use((context, unsubscribe) => 
+                            new ValueTask<ISubscribeResult>(Resolve.Stream(new BufferBlock<object>()))));
+                });
+
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            var result = await sut.GetSubscriber(query.Name, "field1")(null, CancellationToken.None);
+            Assert.NotNull(result.Reader);
         }
 
         [Fact]
