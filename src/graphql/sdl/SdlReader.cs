@@ -147,7 +147,6 @@ namespace tanka.graphql.sdl
 
             switch (definition)
             {
-                // so we have InputObject, Enum or Scalar
                 case GraphQLScalarTypeDefinition scalarTypeDefinition:
                     return Scalar(scalarTypeDefinition);
                 case GraphQLEnumTypeDefinition enumTypeDefinition:
@@ -156,7 +155,7 @@ namespace tanka.graphql.sdl
                     return InputObject(inputObjectTypeDefinition);
             }
 
-            //todo: we should not come here ever
+            // we should not come here ever
             return null;
         }
 
@@ -193,13 +192,10 @@ namespace tanka.graphql.sdl
 
             switch (definition)
             {
-                // so we have InputObject, Enum or Scalar
                 case GraphQLScalarTypeDefinition scalarTypeDefinition:
                     return Scalar(scalarTypeDefinition);
                 case GraphQLEnumTypeDefinition enumTypeDefinition:
                     return Enum(enumTypeDefinition);
-                case GraphQLInputObjectTypeDefinition inputObjectTypeDefinition:
-                    return InputObject(inputObjectTypeDefinition);
                 case GraphQLObjectTypeDefinition objectType:
                     return Object(objectType);
                 case GraphQLInterfaceTypeDefinition interfaceType:
@@ -208,7 +204,6 @@ namespace tanka.graphql.sdl
                     return Union(unionType);
             }
 
-            //todo: we should not come here ever
             return null;
         }
 
@@ -272,11 +267,17 @@ namespace tanka.graphql.sdl
                         null,
                         directiveType);
 
-                if (hasValue)
-                    arguments.Add(argument.Key,
-                        value == null
-                            ? new Argument(type, defaultValue)
-                            : new Argument(type, default /* Coerce value*/)); //todo: coerce default value
+                _builder.Connections(connect =>
+                {
+                    if (hasValue)
+                        arguments.Add(argument.Key,
+                            value == null
+                                ? new Argument(type, defaultValue)
+                                : new Argument(type, Values.CoerceValue(
+                                    connect.GetInputFields, 
+                                    value, 
+                                    type)));
+                });
             }
 
             yield return directiveType.CreateInstance(arguments);
@@ -285,21 +286,18 @@ namespace tanka.graphql.sdl
         protected InputObjectType InputObject(GraphQLInputObjectTypeDefinition definition)
         {
             _builder.InputObject(definition.Name.Value, out var inputObject);
-            AfterTypeDefinitions(builder =>
+            _builder.Connections(connect =>
             {
-                builder.Connections(connect =>
-                {
-                    var fields = InputValues(definition.Fields);
-                    foreach (var inputField in fields)
-                        connect.InputField(
-                            inputObject,
-                            inputField.Key,
-                            inputField.Value.Type,
-                            inputField.Value.DefaultValue,
-                            inputField.Value.Description,
-                            inputField.Value.Directives);
+                var fields = InputValues(definition.Fields);
+                foreach (var inputField in fields)
+                    connect.InputField(
+                        inputObject,
+                        inputField.Key,
+                        inputField.Value.Type,
+                        inputField.Value.DefaultValue,
+                        inputField.Value.Description,
+                        inputField.Value.Directives);
 
-                });
             });
 
             return inputObject;
@@ -326,16 +324,20 @@ namespace tanka.graphql.sdl
 
                 object defaultValue = default;
 
-                /* coercion requires schema
-                try
+                _builder.Connections(connect =>
                 {
-                    defaultValue = Values.CoerceValue(definition.DefaultValue, type);
-                }
-                catch (ValueCoercionException)
-                {
-                    defaultValue = null;
-                }
-                */
+                    try
+                    {
+                        defaultValue = Values.CoerceValue(
+                            connect.GetInputFields,
+                            definition.DefaultValue, 
+                            type);
+                    }
+                    catch (ValueCoercionException)
+                    {
+                        defaultValue = null;
+                    }
+                });
 
                 var directives = Directives(definition.Directives);
 

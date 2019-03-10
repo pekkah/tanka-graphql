@@ -42,10 +42,6 @@ namespace tanka.graphql.tools
                         });
                     }
                 }
-                else if (builder.TryGetType<ScalarType>(rightType.Name, out _))
-                {
-                    // noop
-                }
                 else
                 {
                     builder
@@ -75,7 +71,33 @@ namespace tanka.graphql.tools
                         });
                 }
 
-            // todo: input objects
+
+            foreach (var rightType in right.QueryTypes<InputObjectType>())
+            {
+                if (builder.TryGetType<InputObjectType>(rightType.Name, out var leftType))
+                {
+                    var rightTypeFields = right.GetInputFields(rightType.Name);
+
+                    foreach (var rightTypeField in rightTypeFields)
+                    {
+                        builder.Connections(connect =>
+                        {
+                            if (connect.TryGetInputField(leftType, rightTypeField.Key, out _)) 
+                                return;
+                            
+                            connect.IncludeInputFields(leftType, new[] {rightTypeField});
+                        });
+                    }
+                }
+            }
+
+            foreach (var rightType in right.QueryTypes<ScalarType>())
+            {
+                if (!builder.TryGetType<ScalarType>(rightType.Name, out _))
+                {
+                    builder.Include(rightType);
+                }
+            }
 
             return builder.Build();
         }

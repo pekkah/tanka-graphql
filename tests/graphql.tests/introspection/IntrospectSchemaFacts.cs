@@ -70,11 +70,10 @@ namespace tanka.graphql.tests.introspection
             builder.Mutation(out var mutation);
             builder.Subscription(out var subscription);
 
-            _sourceSchema = builder.Build();
-            _introspectionSchema = Introspect.Schema(_sourceSchema);
+            var sourceSchema = builder.Build();
+            _introspectionSchema = Introspect.Schema(sourceSchema);
         }
 
-        private readonly ISchema _sourceSchema;
         private readonly ISchema _introspectionSchema;
 
         public const string ObjectTypeName = "Object";
@@ -399,7 +398,6 @@ namespace tanka.graphql.tests.introspection
         }
 
         [Fact]
-        //todo(pekka): fix the defaultValue
         public async Task Type_InputObjectType_fields()
         {
             /* Given */
@@ -426,7 +424,7 @@ namespace tanka.graphql.tests.introspection
                         {
                           ""description"": ""Description"",
                           ""name"": ""field1"",
-                          ""defaultValue"": null,
+                          ""defaultValue"": ""True"",
                           ""type"": {
                             ""kind"": ""SCALAR"",
                             ""name"": ""Boolean""
@@ -598,7 +596,7 @@ namespace tanka.graphql.tests.introspection
                           ""args"": [
                             {
                               ""name"": ""arg1"",
-                              ""defaultValue"": null,
+                              ""defaultValue"": ""1"",
                               ""type"": {
                                 ""name"": ""Float""
                               },
