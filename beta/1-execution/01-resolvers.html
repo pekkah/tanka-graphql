@@ -210,6 +210,32 @@
             Assert.Equal(42, result.Value);
         }
 </code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Create_Field_Subscriber()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out var query)
+                .Connections(connections =&gt;
+                {
+                    connections.Field(query, &quot;field1&quot;, ScalarType.String,
+                        &quot;test field&quot;,
+                        resolve =&gt; resolve.Use(context =&gt; 
+                            new ValueTask&lt;IResolveResult&gt;(Resolve.As(42))),
+                        subscribe =&gt; subscribe.Use((context, unsubscribe) =&gt; 
+                            new ValueTask&lt;ISubscribeResult&gt;(Resolve.Stream(new BufferBlock&lt;object&gt;()))));
+                });
+
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            var result = await sut.GetSubscriber(query.Name, &quot;field1&quot;)(null, CancellationToken.None);
+            Assert.NotNull(result.Reader);
+        }
+</code></pre></p>
 <p>Resolver middlwares can be used to build an execution chain.</p>
 <p>Middlwares are implemented as a delegate method taking in the context and delegate for the next middlware to execute. Last link in the chain is usually the actual resolver but chain can be also interrupted before it by returning a result from the middleware.</p>
 <p>Signature of the value resolver middlware:
