@@ -186,6 +186,7 @@ Job=Core  Runtime=Core
 <th style="text-align: right;">Mean</th>
 <th style="text-align: right;">Error</th>
 <th style="text-align: right;">StdDev</th>
+<th style="text-align: right;">Median</th>
 <th style="text-align: right;">Gen 0/1k Op</th>
 <th style="text-align: right;">Gen 1/1k Op</th>
 <th style="text-align: right;">Gen 2/1k Op</th>
@@ -195,19 +196,21 @@ Job=Core  Runtime=Core
 <tbody>
 <tr>
 <td>Query_with_defaults</td>
-<td style="text-align: right;">49,616.69 ns</td>
-<td style="text-align: right;">1,450.2543 ns</td>
-<td style="text-align: right;">4,276.1077 ns</td>
+<td style="text-align: right;">42,573.94 ns</td>
+<td style="text-align: right;">1,718.5897 ns</td>
+<td style="text-align: right;">5,067.3006 ns</td>
+<td style="text-align: right;">40,463.76 ns</td>
 <td style="text-align: right;">2.4414</td>
 <td style="text-align: right;">0.7935</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">15584 B</td>
+<td style="text-align: right;">15564 B</td>
 </tr>
 <tr>
 <td>Query_without_validation</td>
-<td style="text-align: right;">16,561.09 ns</td>
-<td style="text-align: right;">329.9677 ns</td>
-<td style="text-align: right;">569.1781 ns</td>
+<td style="text-align: right;">16,067.39 ns</td>
+<td style="text-align: right;">308.6896 ns</td>
+<td style="text-align: right;">317.0015 ns</td>
+<td style="text-align: right;">16,022.96 ns</td>
 <td style="text-align: right;">0.7935</td>
 <td style="text-align: right;">0.3967</td>
 <td style="text-align: right;">-</td>
@@ -215,9 +218,10 @@ Job=Core  Runtime=Core
 </tr>
 <tr>
 <td>Mutation_with_defaults</td>
-<td style="text-align: right;">19,911.83 ns</td>
-<td style="text-align: right;">430.0631 ns</td>
-<td style="text-align: right;">402.2813 ns</td>
+<td style="text-align: right;">19,189.56 ns</td>
+<td style="text-align: right;">213.3644 ns</td>
+<td style="text-align: right;">199.5812 ns</td>
+<td style="text-align: right;">19,203.56 ns</td>
 <td style="text-align: right;">2.2278</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -225,9 +229,10 @@ Job=Core  Runtime=Core
 </tr>
 <tr>
 <td>Mutation_without_validation</td>
-<td style="text-align: right;">6,470.09 ns</td>
-<td style="text-align: right;">83.0689 ns</td>
-<td style="text-align: right;">69.3663 ns</td>
+<td style="text-align: right;">6,570.85 ns</td>
+<td style="text-align: right;">114.9781 ns</td>
+<td style="text-align: right;">107.5506 ns</td>
+<td style="text-align: right;">6,584.26 ns</td>
 <td style="text-align: right;">0.5569</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -235,39 +240,43 @@ Job=Core  Runtime=Core
 </tr>
 <tr>
 <td>Subscribe_with_defaults</td>
-<td style="text-align: right;">29,988.67 ns</td>
-<td style="text-align: right;">520.1641 ns</td>
-<td style="text-align: right;">486.5619 ns</td>
+<td style="text-align: right;">29,949.97 ns</td>
+<td style="text-align: right;">347.1295 ns</td>
+<td style="text-align: right;">271.0158 ns</td>
+<td style="text-align: right;">29,907.75 ns</td>
 <td style="text-align: right;">3.9673</td>
-<td style="text-align: right;">0.0916</td>
+<td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">21539 B</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
-<td style="text-align: right;">23,769.96 ns</td>
-<td style="text-align: right;">753.9864 ns</td>
-<td style="text-align: right;">2,223.1459 ns</td>
-<td style="text-align: right;">2.2278</td>
-<td style="text-align: right;">1.0071</td>
+<td style="text-align: right;">26,859.96 ns</td>
+<td style="text-align: right;">1,011.8199 ns</td>
+<td style="text-align: right;">2,903.1009 ns</td>
+<td style="text-align: right;">26,285.46 ns</td>
+<td style="text-align: right;">2.2888</td>
+<td style="text-align: right;">0.8850</td>
 <td style="text-align: right;">0.2441</td>
 <td style="text-align: right;">9745 B</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
-<td style="text-align: right;">85,738.03 ns</td>
-<td style="text-align: right;">1,712.3392 ns</td>
-<td style="text-align: right;">3,419.7263 ns</td>
+<td style="text-align: right;">82,722.62 ns</td>
+<td style="text-align: right;">1,457.9634 ns</td>
+<td style="text-align: right;">1,292.4466 ns</td>
+<td style="text-align: right;">82,538.02 ns</td>
 <td style="text-align: right;">3.7842</td>
 <td style="text-align: right;">0.9766</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">22195 B</td>
+<td style="text-align: right;">22191 B</td>
 </tr>
 <tr>
 <td>Validate_query_with_defaults</td>
-<td style="text-align: right;">8,738.72 ns</td>
-<td style="text-align: right;">51.6537 ns</td>
-<td style="text-align: right;">45.7897 ns</td>
+<td style="text-align: right;">8,727.03 ns</td>
+<td style="text-align: right;">171.8990 ns</td>
+<td style="text-align: right;">168.8278 ns</td>
+<td style="text-align: right;">8,727.11 ns</td>
 <td style="text-align: right;">1.6632</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -275,9 +284,10 @@ Job=Core  Runtime=Core
 </tr>
 <tr>
 <td>ResolverChain</td>
-<td style="text-align: right;">86.01 ns</td>
-<td style="text-align: right;">0.6501 ns</td>
-<td style="text-align: right;">0.6081 ns</td>
+<td style="text-align: right;">84.57 ns</td>
+<td style="text-align: right;">0.8639 ns</td>
+<td style="text-align: right;">0.8081 ns</td>
+<td style="text-align: right;">84.80 ns</td>
 <td style="text-align: right;">0.0085</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -285,9 +295,10 @@ Job=Core  Runtime=Core
 </tr>
 <tr>
 <td>Resolver</td>
-<td style="text-align: right;">65.28 ns</td>
-<td style="text-align: right;">0.3877 ns</td>
-<td style="text-align: right;">0.3437 ns</td>
+<td style="text-align: right;">70.61 ns</td>
+<td style="text-align: right;">1.3904 ns</td>
+<td style="text-align: right;">1.3006 ns</td>
+<td style="text-align: right;">70.55 ns</td>
 <td style="text-align: right;">0.0085</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
