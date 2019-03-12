@@ -5,11 +5,9 @@ namespace tanka.graphql.type
 {
     public class UnionType : ComplexType, INamedType, IDescribable, IAbstractType
     {
-        public UnionType(string name, IEnumerable<ObjectType> possibleTypes, Meta meta = null) :base(name)
+        public UnionType(string name, IEnumerable<ObjectType> possibleTypes, string description = null,
+            IEnumerable<DirectiveInstance> directives = null) : base(name, description, directives)
         {
-            //Name = name;
-            Meta = meta ?? new Meta();
-
             foreach (var possibleType in possibleTypes)
             {
                 if (PossibleTypes.ContainsKey(possibleType.Name))
@@ -21,11 +19,6 @@ namespace tanka.graphql.type
         }
 
         public Dictionary<string, ObjectType> PossibleTypes { get; } = new Dictionary<string, ObjectType>();
-
-        public Meta Meta { get; }
-        public string Description => Meta.Description;
-
-        //public string Name { get; }
 
         public bool IsPossible(ObjectType type)
         {

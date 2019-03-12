@@ -1,61 +1,27 @@
-﻿namespace tanka.graphql.type
+﻿using System.Collections.Generic;
+
+namespace tanka.graphql.type
 {
-    public abstract class ComplexType : INamedType
+    public abstract class ComplexType : INamedType, IDescribable, IHasDirectives
     {
-        protected ComplexType(string name)
+        private readonly DirectiveList _directives;
+
+        protected ComplexType(string name, string description, IEnumerable<DirectiveInstance> directives)
         {
             Name = name;
+            Description = description ?? string.Empty;
+            _directives = new DirectiveList(directives);
         }
 
-        /* private readonly Fields _fields = new Fields();
+        public string Description { get; }
 
-        public IEnumerable<KeyValuePair<string, IField>> Fields => _fields;
+        public IEnumerable<DirectiveInstance> Directives => _directives;
 
-        public IField GetField(string name)
+        public DirectiveInstance GetDirective(string name)
         {
-            if (!_fields.ContainsKey(name))
-                return null;
-
-            return _fields[name];
+            return _directives.GetDirective(name);
         }
 
-        public bool HasField(string name)
-        {
-            return _fields.ContainsKey(name);
-        }
-
-        protected void AddField(string name, IField field)
-        {
-            if (HasField(name))
-            {
-                throw new InvalidOperationException(
-                    $"Cannot add field to type '{Name}'. Field '{name}' already exists.");
-            }
-
-            if (field.Type.Unwrap() is SelfReferenceType)
-            {
-                var actualType = WrapIfRequired(field.Type, this);
-                _fields[name] = new SelfReferenceField(
-                    actualType, 
-                    new Args(field.Arguments), 
-                    field.Meta);
-
-                return;
-            }
-
-            if (field is SelfReferenceField selfReference)
-            {
-                var actualType = WrapIfRequired(selfReference.Type, this);
-                _fields[name] = new SelfReferenceField(
-                    actualType,
-                    new Args(field.Arguments),
-                    field.Meta);
-            }
-
-            _fields[name] = field;
-        }
-        
-        */
         public string Name { get; }
     }
 }

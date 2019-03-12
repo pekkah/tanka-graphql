@@ -105,7 +105,7 @@ namespace tanka.graphql.introspection
                 {"inputFields", Resolve.PropertyOf<InputObjectType>(t => source.GetInputFields(t.Name)
                     .Select(iof => new KeyValuePair<string, Argument>(
                         iof.Key, 
-                        new Argument(iof.Value.Type, iof.Value.DefaultValue, iof.Value.Meta))).ToList())},
+                        new Argument(iof.Value.Type, iof.Value.DefaultValue, iof.Value.Description))).ToList())},
 
                 // NON_NULL and LIST only
                 {"ofType", Resolve.PropertyOf<IWrappingType>(t => t.WrappedType)},
@@ -131,16 +131,16 @@ namespace tanka.graphql.introspection
             
             this[IntrospectionSchema.EnumValueName] = new FieldResolverMap()
             {
-                {"name", Resolve.PropertyOf<KeyValuePair<string, Meta>>(f => f.Key)},
-                {"description", Resolve.PropertyOf<KeyValuePair<string, Meta>>(f => f.Value.Description)},
-                {"isDeprecated", Resolve.PropertyOf<KeyValuePair<string, Meta>>(f => f.Value.IsDeprecated)},
-                {"deprecationReason", Resolve.PropertyOf<KeyValuePair<string, Meta>>(f => f.Value.DeprecationReason)},
+                {"name", Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Key)},
+                {"description", Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Value.Description)},
+                {"isDeprecated", Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Value.IsDeprecated)},
+                {"deprecationReason", Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Value.DeprecationReason)},
             };
         
             this["__Directive"] = new FieldResolverMap()
             {
                 {"name", Resolve.PropertyOf<DirectiveType>(d => d.Name)},
-                {"description", Resolve.PropertyOf<DirectiveType>(d => d.Meta.Description)},
+                {"description", Resolve.PropertyOf<DirectiveType>(d => d.Description)},
                 {"locations", Resolve.PropertyOf<DirectiveType>(d => LocationsOf(d.Locations))},
                 {"args", Resolve.PropertyOf<DirectiveType>(d => d.Arguments)},
             };        

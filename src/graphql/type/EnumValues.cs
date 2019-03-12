@@ -2,7 +2,7 @@
 
 namespace tanka.graphql.type
 {
-    public class EnumValues : Dictionary<string, Meta>
+    public class EnumValues : Dictionary<string, EnumValue>
     {
         public EnumValues(IEnumerable<string> values)
         {
@@ -11,15 +11,33 @@ namespace tanka.graphql.type
 
         public EnumValues(params (string value, string description, IEnumerable<DirectiveInstance> directives,  string deprecationReson)[] values)
         {
-            foreach (var (value, description, directives, deprecationReson) in values)
+            foreach (var (value, description, directives, deprecationReason) in values)
             {
-                Add(value, new Meta(description, deprecationReson, directives));
+                Add(value, new EnumValue(description, directives, deprecationReason));
             }
         }
 
         public void Add(string name, string description = null, string deprecationReason = null)
         {
-            Add(name, new Meta(description, deprecationReason));
+            Add(name, new EnumValue(description, deprecationReason: deprecationReason));
         }
+    }
+
+    public class EnumValue : IDescribable, IDeprecable
+    {
+        public EnumValue(string description, IEnumerable<DirectiveInstance> directives = null, string deprecationReason = null)
+        {
+            Description = description ?? string.Empty;
+            DeprecationReason = deprecationReason;
+            Directives = directives;
+        }
+
+        public string Description { get; }
+
+        public string DeprecationReason { get; }
+
+        public IEnumerable<DirectiveInstance> Directives { get; }
+
+        public bool IsDeprecated => !string.IsNullOrEmpty(DeprecationReason);
     }
 }

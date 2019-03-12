@@ -80,18 +80,16 @@ namespace tanka.graphql.type
             string name,
             IEnumerable<DirectiveLocation> locations,
             Args arguments = null,
-            Meta meta = null)
+            string description = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            Meta = meta ?? new Meta();
+            Description = description ?? string.Empty;
             _locations = locations?.ToList() ?? throw new ArgumentNullException(nameof(locations));
 
             if (arguments != null)
                 foreach (var argument in arguments)
                     _arguments[argument.Key] = argument.Value;
         }
-
-        public Meta Meta { get; }
 
         public IEnumerable<KeyValuePair<string, Argument>> Arguments => _arguments;
 
@@ -121,7 +119,7 @@ namespace tanka.graphql.type
             return new DirectiveInstance(this, arguments);
         }
 
-        public string Description => Meta.Description;
+        public string Description { get; }
     }
 
     public enum DirectiveLocation

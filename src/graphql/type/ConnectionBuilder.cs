@@ -64,7 +64,7 @@ namespace tanka.graphql.type
 
 
             var field = new Field(to, new Args(args),
-                new Meta(description, directives: directives));
+                description, directives);
 
             _fields[owner.Name].Add(fieldName, field);
 
@@ -113,7 +113,7 @@ namespace tanka.graphql.type
 
             _inputFields[owner.Name].Add(
                 fieldName,
-                new InputObjectField(to, new Meta(description, directives: directives), defaultValue));
+                new InputObjectField(to, description, defaultValue, directives));
 
             return this;
         }

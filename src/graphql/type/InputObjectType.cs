@@ -1,16 +1,26 @@
-﻿namespace tanka.graphql.type
+﻿using System.Collections.Generic;
+
+namespace tanka.graphql.type
 {
-    public class InputObjectType : INamedType, IDescribable
+    public class InputObjectType : INamedType, IDescribable, IHasDirectives
     {
-        public InputObjectType(string name, Meta meta = null)
+        private readonly DirectiveList _directives;
+
+        public InputObjectType(string name, string description = null, IEnumerable<DirectiveInstance> directives = null)
         {
             Name = name;
-            Meta = meta ?? new Meta(null);
+            Description = description ?? string.Empty;
+            _directives = new DirectiveList(directives);
         }
 
-        public Meta Meta { get; }
+        public string Description { get; }
 
-        public string Description => Meta.Description;
+        public IEnumerable<DirectiveInstance> Directives => _directives;
+
+        public DirectiveInstance GetDirective(string name)
+        {
+            return _directives.GetDirective(name);
+        }
 
         public string Name { get; }
 

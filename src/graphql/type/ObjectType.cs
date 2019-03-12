@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace tanka.graphql.type
 {
@@ -10,12 +9,11 @@ namespace tanka.graphql.type
 
         public ObjectType(
             string name,
-            Meta meta = null,
-            IEnumerable<InterfaceType> implements = null)
-        :base(name)
+            string description = null,
+            IEnumerable<InterfaceType> implements = null,
+            IEnumerable<DirectiveInstance> directives = null)
+            : base(name, description, directives)
         {
-            Meta = meta ?? new Meta();
-
             if (implements != null)
                 foreach (var interfaceType in implements)
                     _interfaces[interfaceType.Name] = interfaceType;
@@ -23,9 +21,13 @@ namespace tanka.graphql.type
 
         public IEnumerable<InterfaceType> Interfaces => _interfaces.Values;
 
-        public Meta Meta { get; }
-        
-        public string Description => Meta.Description;
+        public bool Equals(ObjectType other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(Name, other.Name);
+        }
+
 
         public bool Implements(InterfaceType interfaceType)
         {
@@ -37,18 +39,11 @@ namespace tanka.graphql.type
             return $"{Name}";
         }
 
-        public bool Equals(ObjectType other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Name, other.Name);
-        }
-
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((ObjectType) obj);
         }
 

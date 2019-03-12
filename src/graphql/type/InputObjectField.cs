@@ -4,35 +4,37 @@ using tanka.graphql.execution;
 
 namespace tanka.graphql.type
 {
-    public class InputObjectField : IDirectives, IDescribable
+    public class InputObjectField : IHasDirectives, IDescribable
     {
+        private readonly DirectiveList _directives;
+
         public InputObjectField(
             IType type,
-            Meta meta = null,
-            object defaultValue = null)
+            string description = null,
+            object defaultValue = null,
+            IEnumerable<DirectiveInstance> directives = null)
         {
             if (!TypeIs.IsInputType(type))
                 throw new ArgumentOutOfRangeException(
                     $" Type '{type}' is not valid input type");
 
             Type = type;
-            Meta = meta ?? new Meta();
+            Description = description ?? string.Empty;
             DefaultValue = defaultValue;
+            _directives = new DirectiveList(directives);
         }
 
         public object DefaultValue { get; set; }
 
-        public Meta Meta { get; set; }
-
         public IType Type { get; }
 
-        public string Description => Meta.Description;
+        public string Description { get; }
 
-        public IEnumerable<DirectiveInstance> Directives => Meta.Directives;
+        public IEnumerable<DirectiveInstance> Directives => _directives;
 
         public DirectiveInstance GetDirective(string name)
         {
-            return Meta.GetDirective(name);
+            return _directives.GetDirective(name);
         }
     }
 }

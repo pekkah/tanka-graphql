@@ -346,32 +346,37 @@ namespace tanka.graphql.sdl
                     case ScalarType scalarType:
                         fields[definition.Name.Value] = new InputObjectField(
                             scalarType,
-                            new Meta(directives: directives),
-                            defaultValue);
+                            string.Empty,
+                            defaultValue,
+                            directives);
                         break;
                     case EnumType enumType:
                         fields[definition.Name.Value] = new InputObjectField(
                             enumType,
-                            new Meta(directives: directives),
-                            defaultValue);
+                            string.Empty,
+                            defaultValue,
+                            directives);
                         break;
                     case InputObjectType inputObjectType:
                         fields[definition.Name.Value] = new InputObjectField(
                             inputObjectType,
-                            new Meta(directives: directives),
-                            defaultValue);
+                            string.Empty,
+                            defaultValue,
+                            directives);
                         break;
                     case NonNull nonNull:
                         fields[definition.Name.Value] = new InputObjectField(
                             nonNull,
-                            new Meta(directives: directives),
-                            defaultValue);
+                            string.Empty,
+                            defaultValue,
+                            directives);
                         break;
                     case List list:
                         fields[definition.Name.Value] = new InputObjectField(
                             list,
-                            new Meta(directives: directives),
-                            defaultValue);
+                            string.Empty,
+                            defaultValue,
+                            directives);
                         break;
                 }
             }

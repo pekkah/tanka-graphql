@@ -7,32 +7,40 @@ using tanka.graphql.type.converters;
 
 namespace tanka.graphql.type
 {
-    public class EnumType : INamedType, IValueConverter, IDescribable
+    public class EnumType : INamedType, IValueConverter, IDescribable, IHasDirectives
     {
         private readonly EnumValues _values = new EnumValues();
+        private readonly DirectiveList _directives;
 
         public EnumType(
             string name,
             EnumValues values,
-            Meta meta = null)
+            string description = null,
+            IEnumerable<DirectiveInstance> directives = null)
         {
             if (values == null) throw new ArgumentNullException(nameof(values));
 
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            Meta = meta ?? new Meta();
+            Description = description ?? string.Empty;
+            _directives = new DirectiveList(directives);
 
             foreach (var enumValue in values)
             {
-                var value = enumValue.Value ?? new Meta();
+                var value = enumValue.Value ?? new EnumValue(string.Empty);
                 _values[enumValue.Key.ToUpperInvariant()] = value;
             }
         }
 
-        public Meta Meta { get; set; }
+        public IEnumerable<KeyValuePair<string, EnumValue>> Values => _values;
 
-        public IEnumerable<KeyValuePair<string, Meta>> Values => _values;
+        public string Description { get; }
 
-        public string Description => Meta.Description;
+        public IEnumerable<DirectiveInstance> Directives => _directives;
+
+        public DirectiveInstance GetDirective(string name)
+        {
+            return _directives.GetDirective(name);
+        }
 
         public string Name { get; }
 

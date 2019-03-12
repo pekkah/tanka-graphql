@@ -9,16 +9,15 @@ namespace tanka.graphql.tests.descriptions
         public void Describe()
         {
             /* Given */
-            var meta = new Meta(
-                "Unique ID of the object");
+            var description = "Unique ID of the object";
 
             /* When */
             var field = new Field(
                 ScalarType.NonNullID,
-                meta: meta);
+                description: description);
 
             /* Then */
-            Assert.Equal(field.Meta.Description, meta.Description);
+            Assert.Equal(field.Description, description);
         }
 
         [Fact]
@@ -30,8 +29,7 @@ namespace tanka.graphql.tests.descriptions
                 ScalarType.NonNullID);
 
             /* Then */
-            Assert.NotNull(field.Meta);
-            Assert.Empty(field.Meta.Description);
+            Assert.Empty(field.Description);
         }
     }
 }
