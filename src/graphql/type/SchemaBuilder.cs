@@ -75,7 +75,7 @@ namespace tanka.graphql.type
                 }
             }
 
-            foreach (var directiveType in from.QueryDirectives())
+            foreach (var directiveType in from.QueryDirectiveTypes())
             {
                 if (_directives.ContainsKey(directiveType.Name))
                     continue;

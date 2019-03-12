@@ -23,7 +23,7 @@ namespace tanka.graphql.introspection
                 {"queryType", context => SyncWrap.Sync(source.Query)},
                 {"mutationType", context => SyncWrap.Sync(source.Mutation)},
                 {"subscriptionType", context => SyncWrap.Sync(source.Subscription)},
-                {"directives", context => SyncWrap.Sync(source.QueryDirectives())}
+                {"directives", context => SyncWrap.Sync(source.QueryDirectiveTypes())}
             };
         
             this[IntrospectionSchema.TypeName] = new FieldResolverMap()

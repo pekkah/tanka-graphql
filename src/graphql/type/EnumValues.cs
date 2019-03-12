@@ -22,22 +22,4 @@ namespace tanka.graphql.type
             Add(name, new EnumValue(description, deprecationReason: deprecationReason));
         }
     }
-
-    public class EnumValue : IDescribable, IDeprecable
-    {
-        public EnumValue(string description, IEnumerable<DirectiveInstance> directives = null, string deprecationReason = null)
-        {
-            Description = description ?? string.Empty;
-            DeprecationReason = deprecationReason;
-            Directives = directives;
-        }
-
-        public string Description { get; }
-
-        public string DeprecationReason { get; }
-
-        public IEnumerable<DirectiveInstance> Directives { get; }
-
-        public bool IsDeprecated => !string.IsNullOrEmpty(DeprecationReason);
-    }
 }
