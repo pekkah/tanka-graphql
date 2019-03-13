@@ -10,10 +10,9 @@ namespace tanka.graphql.sdl
 {
     public class SdlReader
     {
+        private readonly List<Action<SchemaBuilder>> _afterTypeDefinitions = new List<Action<SchemaBuilder>>();
         private readonly SchemaBuilder _builder;
         private readonly GraphQLDocument _document;
-
-        private readonly List<Action<SchemaBuilder>> _afterTypeDefinitions = new List<Action<SchemaBuilder>>();
 
 
         public SdlReader(GraphQLDocument document, SchemaBuilder builder = null)
@@ -44,18 +43,12 @@ namespace tanka.graphql.sdl
             foreach (var definition in definitions.OfType<GraphQLObjectTypeDefinition>())
                 Object(definition);
 
-            foreach (var definition in definitions.OfType<GraphQLUnionTypeDefinition>())
-            {
-                Union(definition);
-            }
+            foreach (var definition in definitions.OfType<GraphQLUnionTypeDefinition>()) Union(definition);
 
             foreach (var definition in definitions.OfType<GraphQLTypeExtensionDefinition>())
                 Extend(definition);
 
-            foreach (var action in _afterTypeDefinitions)
-            {
-                action(_builder);
-            }
+            foreach (var action in _afterTypeDefinitions) action(_builder);
 
             return _builder;
         }
@@ -99,16 +92,20 @@ namespace tanka.graphql.sdl
                 var type = InputType(definition.Type);
                 object defaultValue = null;
 
-                /* schema is required???
                 try
                 {
-                    defaultValue = Values.CoerceValue(definition.DefaultValue, type);
+                    _builder.Connections(connections =>
+                    {
+                        defaultValue = Values.CoerceValue(
+                            connections.GetInputFields,
+                            definition.DefaultValue,
+                            type);
+                    });
                 }
                 catch (Exception)
                 {
                     defaultValue = null;
                 }
-                */
 
                 yield return (definition.Name.Value, type, defaultValue, default);
             }
@@ -216,7 +213,7 @@ namespace tanka.graphql.sdl
 
             _builder.Enum(definition.Name.Value, out var enumType,
                 directives: directives,
-                description:null,
+                description: null,
                 values: values.ToArray());
 
             return enumType;
@@ -235,7 +232,7 @@ namespace tanka.graphql.sdl
         {
             var name = directiveDefinition.Name.Value;
 
-            _builder.TryGetType<DirectiveType>(name, out var directiveType);
+            _builder.TryGetDirective(name, out var directiveType);
 
             if (directiveType == null)
                 throw new GraphQLError(
@@ -273,8 +270,8 @@ namespace tanka.graphql.sdl
                             value == null
                                 ? defaultValue
                                 : Values.CoerceValue(
-                                    connect.GetInputFields, 
-                                    value, 
+                                    connect.GetInputFields,
+                                    value,
                                     type));
                 });
             }
@@ -296,15 +293,9 @@ namespace tanka.graphql.sdl
                         inputField.Value.DefaultValue,
                         inputField.Value.Description,
                         inputField.Value.Directives);
-
             });
 
             return inputObject;
-        }
-
-        private void AfterTypeDefinitions(Action<SchemaBuilder> action)
-        {
-            _afterTypeDefinitions.Add(action);
         }
 
         protected InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions)
@@ -329,7 +320,7 @@ namespace tanka.graphql.sdl
                     {
                         defaultValue = Values.CoerceValue(
                             connect.GetInputFields,
-                            definition.DefaultValue, 
+                            definition.DefaultValue,
                             type);
                     }
                     catch (ValueCoercionException)
@@ -419,6 +410,11 @@ namespace tanka.graphql.sdl
 
                 Fields(type, definition.Definition.Fields);
             });
+        }
+
+        private void AfterTypeDefinitions(Action<SchemaBuilder> action)
+        {
+            _afterTypeDefinitions.Add(action);
         }
 
         private IType Union(GraphQLUnionTypeDefinition definition)

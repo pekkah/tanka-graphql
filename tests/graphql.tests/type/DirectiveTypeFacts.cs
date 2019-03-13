@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using tanka.graphql.resolvers;
+using tanka.graphql.sdl;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
@@ -65,7 +66,7 @@ namespace tanka.graphql.tests.type
                     .Field(query, "requiresUser", ScalarType.String,
                         directives: new[]
                         {
-                            // this will use defaultvalues from DirectiveType
+                            // this will use defaultValue from DirectiveType
                             authorizeType.CreateInstance()
                         }));
 
@@ -96,6 +97,71 @@ namespace tanka.graphql.tests.type
                 {
                     // register directive visitor to be used when authorizeType.Name present
                     [authorizeType.Name] = AuthorizeVisitor(FetchUser)
+                });
+
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            {
+                Document = Parser.ParseDocument(@"{ requiresAdmin requiresUser }"),
+                Schema = schema
+            });
+
+            /* Then */
+            result.ShouldMatchJson(@"{
+                  ""data"": {
+                    ""requiresUser"": ""Hello User!"",
+                    ""requiresAdmin"": ""requires admin role. todo(pekka): should throw error or return error or??""
+                  }
+                }");
+        }
+
+        [Fact]
+        public async Task Authorize_field_directive_sdl()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+
+            Sdl.Import(Parser.ParseDocument(@"
+                directive @authorize(
+                    role: String =""user""
+                ) on FIELD_DEFINITION
+
+                type Query {
+                    requiresAdmin: String! @authorize(role:""admin"")
+                    requiresUser: String! @authorize
+                }
+
+                schema {
+                    query: Query
+                }
+                "), builder);
+
+            var resolvers = new ResolverMap
+            {
+                {
+                    "Query", new FieldResolverMap
+                    {
+                        {"requiresAdmin", context => new ValueTask<IResolveResult>(Resolve.As("Hello Admin!"))},
+                        {"requiresUser", context => new ValueTask<IResolveResult>(Resolve.As("Hello User!"))}
+                    }
+                }
+            };
+
+            // mock user and user store
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new []
+            {
+                new Claim("role", "user"),
+            }));
+
+            ClaimsPrincipal FetchUser(int id) => user;
+
+            /* When */
+            var schema = SchemaTools.MakeExecutableSchema(
+                builder,
+                resolvers,
+                directives: new Dictionary<string, CreateDirectiveVisitor>
+                {
+                    // register directive visitor to be used when authorizeType.Name present
+                    ["authorize"] = AuthorizeVisitor(FetchUser)
                 });
 
             var result = await Executor.ExecuteAsync(new ExecutionOptions

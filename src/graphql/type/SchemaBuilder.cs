@@ -283,5 +283,11 @@ namespace tanka.graphql.type
         {
             return _types.Values.OfType<T>();
         }
+
+        public SchemaBuilder TryGetDirective(string name, out DirectiveType directiveType)
+        {
+            _directives.TryGetValue(name, out directiveType);
+            return this;
+        }
     }
 }

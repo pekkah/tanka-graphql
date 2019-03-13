@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace tanka.graphql.type
 {
@@ -19,13 +20,26 @@ namespace tanka.graphql.type
 
         public T GetArgument<T>(string name)
         {
+            object rawValue = default;
+
             if (_arguments.ContainsKey(name))
             {
-                return (T) _arguments[name];
+                rawValue = _arguments[name];           
+            }
+            else
+            {
+
+                var argument = Type.GetArgument(name);
+                rawValue = argument?.DefaultValue;
             }
 
-            var argument = Type.GetArgument(name);
-            return (T)argument?.DefaultValue;
+            if (rawValue is T argAsType)
+                return argAsType;
+
+            //todo(pekka): should not depend directly on JSON.Net
+            var obj = JObject.FromObject(rawValue);
+
+            return obj.ToObject<T>();
         }
 
         public override string ToString()
