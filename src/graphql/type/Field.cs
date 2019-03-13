@@ -48,6 +48,11 @@ namespace tanka.graphql.type
             return _directives.GetDirective(name);
         }
 
+        public bool HasDirective(string name)
+        {
+            return _directives.HasDirective(name);
+        }
+
         public IType Type { get; set; }
 
         public IEnumerable<KeyValuePair<string, Argument>> Arguments

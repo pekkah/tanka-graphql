@@ -51,13 +51,13 @@ namespace tanka.graphql.type
 
                             if (resolver != null)
                                 _connections.GetResolver(objectType, field.Key)
-                                    .Use(resolver);
+                                    .Run(resolver);
 
                             var subscriber = from.GetSubscriber(objectType.Name, field.Key);
 
                             if (subscriber != null)
                                 _connections.GetSubscriber(objectType, field.Key)
-                                    .Use(subscriber);
+                                    .Run(subscriber);
                         }
 
                         break;

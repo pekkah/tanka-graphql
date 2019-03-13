@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
@@ -63,8 +64,12 @@ namespace tanka.graphql.type
                     $"Cannot add field '{fieldName}'. Type '{owner.Name}' already has field with same name.");
 
 
-            var field = new Field(to, new Args(args),
-                description, directives);
+            var field = new Field(
+                to,
+                new Args(args),
+                description,
+                null,
+                directives);
 
             _fields[owner.Name].Add(fieldName, field);
 
@@ -209,6 +214,40 @@ namespace tanka.graphql.type
                     return builder;
 
             return Subscriber(type, fieldName);
+        }
+
+        public ConnectionBuilder RemoveField(ComplexType complexType, string fieldName)
+        {
+            if (_fields.TryGetValue(complexType.Name, out var fields))
+                if (fields.ContainsKey(fieldName))
+                    fields.Remove(fieldName);
+
+            if (_resolvers.TryGetValue(complexType.Name, out var fieldResolvers))
+                if (fieldResolvers.TryGetValue(fieldName, out _))
+                    fieldResolvers.Remove(fieldName);
+
+            if (_subscribers.TryGetValue(complexType.Name, out var fieldSubscribers))
+                if (fieldSubscribers.TryGetValue(fieldName, out _))
+                    fieldSubscribers.Remove(fieldName);
+
+            return this;
+        }
+
+        public ConnectionBuilder IncludeResolver(ObjectType objectType, string fieldName, ResolverBuilder resolver)
+        {
+            if (_resolvers.TryGetValue(objectType.Name, out var fieldResolvers))
+                fieldResolvers.Add(fieldName, resolver);
+
+            return this;
+        }
+
+        public ConnectionBuilder IncludeSubscriber(ObjectType objectType, string fieldName,
+            SubscriberBuilder subscriber)
+        {
+            if (_subscribers.TryGetValue(objectType.Name, out var subscriberBuilders))
+                subscriberBuilders.Add(fieldName, subscriber);
+
+            return this;
         }
 
         private ResolverBuilder Resolver(ComplexType owner, string fieldName)

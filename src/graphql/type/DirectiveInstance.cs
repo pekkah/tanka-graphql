@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
@@ -6,26 +7,30 @@ namespace tanka.graphql.type
     {
         public DirectiveType Type { get; }
 
-        private readonly Dictionary<string, Argument> _arguments = new Dictionary<string, Argument>();
+        private readonly Dictionary<string, object> _arguments;
 
-        public DirectiveInstance(DirectiveType directiveType, Args arguments = null)
+        public DirectiveInstance(DirectiveType directiveType, Dictionary<string, object> argumentValues = null)
         {
-            Type = directiveType;
-
-            if (arguments != null)
-            {
-                foreach (var argument in arguments)
-                {
-                    _arguments[argument.Key] = argument.Value;
-                }
-            }
+            Type = directiveType ?? throw new ArgumentNullException(nameof(directiveType));
+            _arguments = argumentValues ?? new Dictionary<string, object>();
         }
 
         public string Name => Type.Name;
 
-        public Argument GetArgument(string name)
+        public T GetArgument<T>(string name)
         {
-            return _arguments.ContainsKey(name) ? _arguments[name] : null;
+            if (_arguments.ContainsKey(name))
+            {
+                return (T) _arguments[name];
+            }
+
+            var argument = Type.GetArgument(name);
+            return (T)argument?.DefaultValue;
+        }
+
+        public override string ToString()
+        {
+            return $"@{Name}";
         }
     }
 }

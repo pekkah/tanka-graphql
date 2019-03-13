@@ -31,5 +31,10 @@ namespace tanka.graphql.type
         {
             return GetEnumerator();
         }
+
+        public bool HasDirective(string name)
+        {
+            return _directives.ContainsKey(name);
+        }
     }
 }

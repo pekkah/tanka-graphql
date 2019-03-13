@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using tanka.graphql.resolvers;
+using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using Xunit;
@@ -10,7 +12,28 @@ namespace tanka.graphql.tests.type
 {
     public class DirectiveTypeFacts
     {
-        [Fact(Skip = "Revisit with SchemaBuilder syntax")]
+        public static CreateDirectiveVisitor AuthorizeVisitor(Func<int, ClaimsPrincipal> fetchUser)
+        {
+            return builder => new DirectiveVisitor
+            {
+                FieldDefinition = (directive, fieldDefinition) =>
+                {
+                    return fieldDefinition.WithResolver(resolver => resolver.Use((context, next) =>
+                    {
+                        var requiredRole = directive.GetArgument<string>("role");
+                        var user = fetchUser(42);
+                        
+                        if (!user.HasClaim("role", requiredRole))
+                            return new ValueTask<IResolveResult>(Resolve.As("requires admin role. " +
+                                                                            "todo(pekka): should throw error or return error or??"));
+
+                        return next(context);
+                    }).Run(fieldDefinition.Resolver));
+                }
+            };
+        }
+
+        [Fact]
         public async Task Authorize_field_directive()
         {
             /* Given */
@@ -19,6 +42,10 @@ namespace tanka.graphql.tests.type
                 new[]
                 {
                     DirectiveLocation.FIELD_DEFINITION
+                },
+                new Args
+                {
+                    {"role", ScalarType.NonNullString, "user", "Required role"}
                 });
 
             var builder = new SchemaBuilder();
@@ -26,9 +53,19 @@ namespace tanka.graphql.tests.type
 
             builder.Query(out var query)
                 .Connections(connect => connect
-                    .Field(query, "requiresAuthorize", ScalarType.NonNullString,
+                    .Field(query, "requiresAdmin", ScalarType.String,
                         directives: new[]
                         {
+                            authorizeType.CreateInstance(new Dictionary<string, object>
+                            {
+                                // this will override the default value of the DirectiveType
+                                ["role"] = "admin"
+                            })
+                        })
+                    .Field(query, "requiresUser", ScalarType.String,
+                        directives: new[]
+                        {
+                            // this will use defaultvalues from DirectiveType
                             authorizeType.CreateInstance()
                         }));
 
@@ -37,26 +74,43 @@ namespace tanka.graphql.tests.type
                 {
                     query.Name, new FieldResolverMap
                     {
-                        {"requiresAuthorize", context => new ValueTask<IResolveResult>(Resolve.As("Hello World!"))}
+                        {"requiresAdmin", context => new ValueTask<IResolveResult>(Resolve.As("Hello Admin!"))},
+                        {"requiresUser", context => new ValueTask<IResolveResult>(Resolve.As("Hello User!"))}
                     }
                 }
             };
 
-            Func<bool> authorize = () => true;
+            // mock user and user store
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new []
+            {
+                new Claim("role", "user"),
+            }));
+
+            ClaimsPrincipal FetchUser(int id) => user;
 
             /* When */
             var schema = SchemaTools.MakeExecutableSchema(
-                builder.Build(),
-                resolvers);
+                builder,
+                resolvers,
+                directives: new Dictionary<string, CreateDirectiveVisitor>
+                {
+                    // register directive visitor to be used when authorizeType.Name present
+                    [authorizeType.Name] = AuthorizeVisitor(FetchUser)
+                });
 
             var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
-                Document = Parser.ParseDocument(@"{ requiresAuthorize }"),
+                Document = Parser.ParseDocument(@"{ requiresAdmin requiresUser }"),
                 Schema = schema
             });
 
             /* Then */
-            Assert.Equal("Hello World! authorize: True", result.Data["requiresAuthorize"]);
+            result.ShouldMatchJson(@"{
+                  ""data"": {
+                    ""requiresUser"": ""Hello User!"",
+                    ""requiresAdmin"": ""requires admin role. todo(pekka): should throw error or return error or??""
+                  }
+                }");
         }
     }
 }

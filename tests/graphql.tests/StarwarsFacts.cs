@@ -773,7 +773,7 @@ namespace tanka.graphql.tests
                  }");
         }
 
-        [Fact(Skip = "Leia pops in so this test is bit fragile")]
+        [Fact]
         public async Task Query_characters_with_friends()
         {
             /* Given */

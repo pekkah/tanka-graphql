@@ -114,13 +114,15 @@ namespace tanka.graphql.type
             return _arguments.ContainsKey(name);
         }
 
-        public DirectiveInstance CreateInstance(Args arguments = null)
+        public DirectiveInstance CreateInstance(Dictionary<string, object> argumentValues = null)
         {
-            return new DirectiveInstance(this, arguments);
+            return new DirectiveInstance(this, argumentValues);
         }
 
         public string Description { get; }
     }
+
+    
 
     public enum DirectiveLocation
     {

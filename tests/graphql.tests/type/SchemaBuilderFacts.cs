@@ -433,7 +433,7 @@ namespace tanka.graphql.tests.type
                 {
                     connections.Field(query, "field1", ScalarType.String,
                         "test field",
-                        resolve => resolve.Use(context => new ValueTask<IResolveResult>(Resolve.As(42))));
+                        resolve => resolve.Run(context => new ValueTask<IResolveResult>(Resolve.As(42))));
                 });
 
 
@@ -455,9 +455,9 @@ namespace tanka.graphql.tests.type
                 {
                     connections.Field(query, "field1", ScalarType.String,
                         "test field",
-                        resolve => resolve.Use(context => 
+                        resolve => resolve.Run(context => 
                             new ValueTask<IResolveResult>(Resolve.As(42))),
-                        subscribe => subscribe.Use((context, unsubscribe) => 
+                        subscribe => subscribe.Run((context, unsubscribe) => 
                             new ValueTask<ISubscribeResult>(Resolve.Stream(new BufferBlock<object>()))));
                 });
 

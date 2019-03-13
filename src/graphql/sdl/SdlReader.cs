@@ -241,7 +241,7 @@ namespace tanka.graphql.sdl
                 throw new GraphQLError(
                     $"Could not find DirectiveType with name '{name}'");
 
-            var arguments = new Args();
+            var arguments = new Dictionary<string, object>();
             foreach (var argument in directiveType.Arguments)
             {
                 var type = argument.Value.Type;
@@ -255,8 +255,7 @@ namespace tanka.graphql.sdl
 
                 if (!hasValue && defaultValue != null)
                 {
-                    //todo: this needs it's own type
-                    arguments.Add(argument.Key, new Argument(type, defaultValue));
+                    arguments.Add(argument.Key, defaultValue);
                     continue;
                 }
 
@@ -272,11 +271,11 @@ namespace tanka.graphql.sdl
                     if (hasValue)
                         arguments.Add(argument.Key,
                             value == null
-                                ? new Argument(type, defaultValue)
-                                : new Argument(type, Values.CoerceValue(
+                                ? defaultValue
+                                : Values.CoerceValue(
                                     connect.GetInputFields, 
                                     value, 
-                                    type)));
+                                    type));
                 });
             }
 

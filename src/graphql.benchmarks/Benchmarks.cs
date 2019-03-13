@@ -37,7 +37,7 @@ namespace tanka.graphql.benchmarks
             _resolverChain = new ResolverBuilder()
                 .Use((context, next) => next(context))
                 .Use((context, next) => next(context))
-                .Use(context => new ValueTask<IResolveResult>(Resolve.As(42)))
+                .Run(context => new ValueTask<IResolveResult>(Resolve.As(42)))
                 .Build();
 
             _resolver = context => new ValueTask<IResolveResult>(Resolve.As(42));

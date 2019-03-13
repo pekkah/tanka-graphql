@@ -42,6 +42,11 @@ namespace tanka.graphql.type
             return _directives.GetDirective(name);
         }
 
+        public bool HasDirective(string name)
+        {
+            return _directives.HasDirective(name);
+        }
+
         public string Name { get; }
 
         public object Serialize(object value)

@@ -28,6 +28,11 @@ namespace tanka.graphql.type
             return _directives.GetDirective(name);
         }
 
+        public bool HasDirective(string name)
+        {
+            return _directives.HasDirective(name);
+        }
+
         [Obsolete]
         public static Argument Arg(IType type, object defaultValue = null, string description = null)
         {

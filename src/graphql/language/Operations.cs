@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using tanka.graphql.error;
 using GraphQLParser.AST;
+using tanka.graphql.error;
 
-namespace tanka.graphql.type
+namespace tanka.graphql.language
 {
     public static class Operations
     {

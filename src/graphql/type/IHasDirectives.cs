@@ -7,5 +7,7 @@ namespace tanka.graphql.type
         IEnumerable<DirectiveInstance> Directives { get; }
 
         DirectiveInstance GetDirective(string name);
+
+        bool HasDirective(string name);
     }
 }
