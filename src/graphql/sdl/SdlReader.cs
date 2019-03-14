@@ -87,6 +87,7 @@ namespace tanka.graphql.sdl
         protected IEnumerable<(string Name, IType Type, object DefaultValue, string Description)> Args(
             IEnumerable<GraphQLInputValueDefinition> definitions)
         {
+            var args = new List<(string Name, IType Type, object DefaultValue, string Description)>();
             foreach (var definition in definitions)
             {
                 var type = InputType(definition.Type);
@@ -107,8 +108,10 @@ namespace tanka.graphql.sdl
                     defaultValue = null;
                 }
 
-                yield return (definition.Name.Value, type, defaultValue, default);
+                args.Add((definition.Name.Value, type, defaultValue, default));
             }
+
+            return args;
         }
 
         protected IType InputType(GraphQLType typeDefinition)
