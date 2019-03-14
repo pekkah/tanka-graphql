@@ -5,7 +5,7 @@ using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
-    public interface ISchema
+    public interface ISchema : IHasDirectives
     {
         ObjectType Subscription { get; }
 
@@ -21,9 +21,9 @@ namespace tanka.graphql.type
 
         IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : INamedType;
 
-        DirectiveType GetDirective(string name);
+        DirectiveType GetDirectiveType(string name);
 
-        IQueryable<DirectiveType> QueryDirectives(Predicate<DirectiveType> filter = null);
+        IQueryable<DirectiveType> QueryDirectiveTypes(Predicate<DirectiveType> filter = null);
 
         IEnumerable<KeyValuePair<string, InputObjectField>> GetInputFields(string type);
 

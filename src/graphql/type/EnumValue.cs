@@ -2,19 +2,23 @@
 
 namespace tanka.graphql.type
 {
-    public abstract class ComplexType : INamedType, IDescribable, IHasDirectives
+    public class EnumValue : IDescribable, IDeprecable, IHasDirectives
     {
         private readonly DirectiveList _directives;
 
-        protected ComplexType(string name, string description, IEnumerable<DirectiveInstance> directives)
+        public EnumValue(string description, IEnumerable<DirectiveInstance> directives = null,
+            string deprecationReason = null)
         {
-            Name = name;
             Description = description ?? string.Empty;
+            DeprecationReason = deprecationReason;
             _directives = new DirectiveList(directives);
         }
 
-        public string Description { get; }
+        public string DeprecationReason { get; }
 
+        public bool IsDeprecated => !string.IsNullOrEmpty(DeprecationReason);
+
+        public string Description { get; }
         public IEnumerable<DirectiveInstance> Directives => _directives;
 
         public DirectiveInstance GetDirective(string name)
@@ -26,7 +30,5 @@ namespace tanka.graphql.type
         {
             return _directives.HasDirective(name);
         }
-
-        public string Name { get; }
     }
 }

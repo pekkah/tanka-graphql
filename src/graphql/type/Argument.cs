@@ -1,37 +1,44 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
-    public class Argument : IDescribable
+    public class Argument : IDescribable, IHasDirectives
     {
+        private readonly DirectiveList _directives;
+
+        public Argument(IType type, object defaultValue = null, string description = null,
+            IEnumerable<DirectiveInstance> directives = null)
+        {
+            Type = type ?? throw new ArgumentNullException(nameof(type));
+            DefaultValue = defaultValue;
+            Description = description ?? string.Empty;
+            _directives = new DirectiveList(directives);
+        }
+
         public IType Type { get; set; }
 
         public object DefaultValue { get; set; }
 
-        public Meta Meta { get; set; }
+        public string Description { get; }
+        public IEnumerable<DirectiveInstance> Directives => _directives;
 
-        public Argument(IType type, object defaultValue = null, Meta meta = null)
+        public DirectiveInstance GetDirective(string name)
         {
-            Type = type ?? throw new ArgumentNullException(nameof(type));
-            DefaultValue = defaultValue;
-            Meta = meta ?? new Meta();
+            return _directives.GetDirective(name);
+        }
+
+        public bool HasDirective(string name)
+        {
+            return _directives.HasDirective(name);
         }
 
         [Obsolete]
-        public Argument()
-        {
-            Meta = new Meta();
-        }
-
-        [Obsolete]
-        public static Argument Arg(IType type, object defaultValue = null, Meta meta = null)
+        public static Argument Arg(IType type, object defaultValue = null, string description = null)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
 
-            return new Argument(type, defaultValue, meta);
+            return new Argument(type, defaultValue, description);
         }
-
-        public string Description => Meta.Description;
     }
 }

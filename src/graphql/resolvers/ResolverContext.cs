@@ -52,6 +52,7 @@ namespace tanka.graphql.resolvers
             if (arg is T argAsType)
                 return argAsType;
 
+            //todo(pekka): should not depend directly on JSON.Net
             var obj = JObject.FromObject(arg);
 
             return obj.ToObject<T>();

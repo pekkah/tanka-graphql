@@ -2,10 +2,12 @@
 
 namespace tanka.graphql.type
 {
-    public interface IDirectives
+    public interface IHasDirectives
     {
         IEnumerable<DirectiveInstance> Directives { get; }
 
         DirectiveInstance GetDirective(string name);
+
+        bool HasDirective(string name);
     }
 }

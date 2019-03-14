@@ -3,19 +3,24 @@ using tanka.graphql.resolvers;
 
 namespace tanka.graphql.type
 {
-    public class Field : IField, IDescribable, IDeprecable
+    public class Field : IField, IDescribable, IDeprecable, IHasDirectives
     {
         private readonly Args _arguments = new Args();
+        private readonly DirectiveList _directives;
 
         public Field(
             IType type,
             Args arguments = null,
-            Meta meta = null,
-            object defaultValue = null)
+            string description = null,
+            object defaultValue = null,
+            IEnumerable<DirectiveInstance> directives = null,
+            string deprecationReason = null)
         {
             Type = type;
-            Meta = meta ?? new Meta();
+            Description = description ?? string.Empty;
             DefaultValue = defaultValue;
+            DeprecationReason = deprecationReason;
+            _directives = new DirectiveList(directives);
 
             if (arguments != null)
                 foreach (var argument in arguments)
@@ -24,17 +29,29 @@ namespace tanka.graphql.type
 
         public object DefaultValue { get; set; }
 
-        public string Description => Meta.Description;
-
-        public string DeprecationReason => Meta.DeprecationReason;
-
-        public bool IsDeprecated => Meta.IsDeprecated;
-
-        public Meta Meta { get; set; }
 
         public Resolver Resolve { get; set; }
 
         public Subscriber Subscribe { get; set; }
+
+        public string DeprecationReason { get; }
+
+        public bool IsDeprecated => !string.IsNullOrEmpty(DeprecationReason);
+
+        public string Description { get; }
+
+
+        public IEnumerable<DirectiveInstance> Directives => _directives;
+
+        public DirectiveInstance GetDirective(string name)
+        {
+            return _directives.GetDirective(name);
+        }
+
+        public bool HasDirective(string name)
+        {
+            return _directives.HasDirective(name);
+        }
 
         public IType Type { get; set; }
 
@@ -52,13 +69,6 @@ namespace tanka.graphql.type
                 foreach (var argument in value)
                     _arguments[argument.Key] = argument.Value;
             }
-        }
-
-        public IEnumerable<DirectiveInstance> Directives => Meta.Directives;
-
-        public DirectiveInstance GetDirective(string name)
-        {
-            return Meta.GetDirective(name);
         }
 
         public Argument GetArgument(string name)

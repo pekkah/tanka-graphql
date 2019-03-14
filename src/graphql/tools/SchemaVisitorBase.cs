@@ -18,7 +18,7 @@ namespace tanka.graphql.tools
         [Obsolete("Default will be the non async version")]
         public virtual async Task VisitAsync()
         {
-            foreach (var directiveType in Schema.QueryDirectives())
+            foreach (var directiveType in Schema.QueryDirectiveTypes())
             {
                 foreach (var argument in directiveType.Arguments) 
                     await VisitArgumentAsync(directiveType, argument);

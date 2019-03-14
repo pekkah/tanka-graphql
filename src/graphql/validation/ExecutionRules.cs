@@ -992,7 +992,7 @@ namespace tanka.graphql.validation
                 rule.EnterDirective += directive =>
                 {
                     var directiveName = directive.Name.Value;
-                    var directiveDefinition = context.Schema.GetDirective(directiveName);
+                    var directiveDefinition = context.Schema.GetDirectiveType(directiveName);
 
                     if (directiveDefinition == null)
                         context.Error(

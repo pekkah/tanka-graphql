@@ -30,7 +30,7 @@ namespace tanka.graphql.tools
                             if (resolver != null)
                             {
                                 connect.GetResolver(leftType, rightTypeField.Key)
-                                    .Use(resolver);
+                                    .Run(resolver);
                             }
 
                             var subscriber = right.GetSubscriber(rightType.Name, rightTypeField.Key);
@@ -58,7 +58,7 @@ namespace tanka.graphql.tools
                                 if (resolver != null)
                                 {
                                     connect.GetResolver(rightType, rightTypeField.Key)
-                                        .Use(resolver);
+                                        .Run(resolver);
                                 }
 
                                 var subscriber = right.GetSubscriber(rightType.Name, rightTypeField.Key);

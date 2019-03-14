@@ -34,6 +34,9 @@ namespace tanka.graphql.execution
 
         private static IDictionary<string, object> CoerceInputValue(Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, object value, InputObjectType input)
         {
+            if (value == null)
+                return null;
+
             var result = new Dictionary<string, object>();
 
             if (value is GraphQLObjectValue objectValue)

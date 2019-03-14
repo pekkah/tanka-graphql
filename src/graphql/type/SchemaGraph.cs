@@ -13,6 +13,7 @@ namespace tanka.graphql.type
         private readonly Dictionary<string, Dictionary<string, IField>> _fields;
         private readonly Dictionary<string, Dictionary<string, InputObjectField>> _inputFields;
         private readonly Dictionary<string, INamedType> _types;
+        private readonly DirectiveList _directives;
 
         public SchemaGraph(
             Dictionary<string, INamedType> types,
@@ -20,7 +21,8 @@ namespace tanka.graphql.type
             Dictionary<string, Dictionary<string, InputObjectField>> inputFields,
             Dictionary<string, DirectiveType> directiveTypes,
             Dictionary<string, Dictionary<string, Resolver>> resolvers,
-            Dictionary<string, Dictionary<string, Subscriber>> subscribers)
+            Dictionary<string, Dictionary<string, Subscriber>> subscribers,
+            IEnumerable<DirectiveInstance> directives = null)
         {
             _types = types;
             _fields = fields;
@@ -33,9 +35,8 @@ namespace tanka.graphql.type
                         $"Could not find root type 'Query' from given types");
             Mutation = GetNamedType<ObjectType>("Mutation");
             Subscription = GetNamedType<ObjectType>("Subscription");
+            _directives = new DirectiveList(directives);
         }
-
-        public bool IsInitialized { get; } = true;
 
         public ObjectType Subscription { get; }
 
@@ -85,7 +86,7 @@ namespace tanka.graphql.type
                 .AsQueryable();
         }
 
-        public DirectiveType GetDirective(string name)
+        public DirectiveType GetDirectiveType(string name)
         {
             if (_directiveTypes.TryGetValue(name, out var directive))
             {
@@ -95,7 +96,7 @@ namespace tanka.graphql.type
             return null;
         }
 
-        public IQueryable<DirectiveType> QueryDirectives(Predicate<DirectiveType> filter = null)
+        public IQueryable<DirectiveType> QueryDirectiveTypes(Predicate<DirectiveType> filter = null)
         {
             return _directiveTypes.Select(v => v.Value).AsQueryable();
         }
@@ -145,6 +146,18 @@ namespace tanka.graphql.type
         public T GetNamedType<T>(string name) where T : INamedType
         {
             return (T) GetNamedType(name);
+        }
+
+        public IEnumerable<DirectiveInstance> Directives => _directives;
+
+        public DirectiveInstance GetDirective(string name)
+        {
+            return _directives.GetDirective(name);
+        }
+
+        public bool HasDirective(string name)
+        {
+            return _directives.HasDirective(name);
         }
     }
 }

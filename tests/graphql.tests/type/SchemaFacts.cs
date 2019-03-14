@@ -28,7 +28,7 @@ namespace tanka.graphql.tests.type
             var directiveTypeName = DirectiveType.Include.Name;
 
             /* When */
-            var directiveType = Schema.GetDirective(directiveTypeName);
+            var directiveType = Schema.GetDirectiveType(directiveTypeName);
 
             /* Then */
             Assert.NotNull(directiveType);
@@ -117,7 +117,7 @@ namespace tanka.graphql.tests.type
             }
 
             /* When */
-            var directives = Schema.QueryDirectives(AppliesToField);
+            var directives = Schema.QueryDirectiveTypes(AppliesToField);
 
             /* Then */
             foreach (var directiveType in directives) Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
@@ -173,7 +173,7 @@ namespace tanka.graphql.tests.type
         {
             /* Given */ 
             /* When */
-            var directives = Schema.QueryDirectives();
+            var directives = Schema.QueryDirectiveTypes();
 
             /* Then */
             Assert.Single(directives, DirectiveType.Include);

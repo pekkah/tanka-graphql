@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using tanka.graphql.execution;
+using tanka.graphql.language;
 using tanka.graphql.type;
 using tanka.graphql.validation;
 

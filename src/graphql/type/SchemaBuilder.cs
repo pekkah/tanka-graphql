@@ -51,13 +51,13 @@ namespace tanka.graphql.type
 
                             if (resolver != null)
                                 _connections.GetResolver(objectType, field.Key)
-                                    .Use(resolver);
+                                    .Run(resolver);
 
                             var subscriber = from.GetSubscriber(objectType.Name, field.Key);
 
                             if (subscriber != null)
                                 _connections.GetSubscriber(objectType, field.Key)
-                                    .Use(subscriber);
+                                    .Run(subscriber);
                         }
 
                         break;
@@ -75,7 +75,7 @@ namespace tanka.graphql.type
                 }
             }
 
-            foreach (var directiveType in from.QueryDirectives())
+            foreach (var directiveType in from.QueryDirectiveTypes())
             {
                 if (_directives.ContainsKey(directiveType.Name))
                     continue;
@@ -103,8 +103,9 @@ namespace tanka.graphql.type
         {
             definition = new ObjectType(
                 name,
-                new Meta(description, directives: directives),
-                interfaces);
+                description, 
+                interfaces,
+                directives: directives);
 
             Include(definition);
             return this;
@@ -118,7 +119,8 @@ namespace tanka.graphql.type
         {
             definition = new InterfaceType(
                 name,
-                new Meta(description, directives: directives));
+                description, 
+                directives);
 
             Include(definition);
             return this;
@@ -130,7 +132,7 @@ namespace tanka.graphql.type
             string description = null,
             IEnumerable<DirectiveInstance> directives = null)
         {
-            definition = new InputObjectType(name, new Meta(description, directives: directives));
+            definition = new InputObjectType(name, description, directives);
             Include(definition);
             return this;
         }
@@ -163,7 +165,7 @@ namespace tanka.graphql.type
             params (string value, string description, IEnumerable<DirectiveInstance> directives, string
                 deprecationReason)[] values)
         {
-            enumType = new EnumType(name, new EnumValues(values), new Meta(description, directives: directives));
+            enumType = new EnumType(name, new EnumValues(values), description, directives);
             Include(enumType);
             return this;
         }
@@ -220,7 +222,7 @@ namespace tanka.graphql.type
             IEnumerable<DirectiveInstance> directives = null,
             params ObjectType[] possibleTypes)
         {
-            unionType = new UnionType(name, possibleTypes, new Meta(description, directives: directives));
+            unionType = new UnionType(name, possibleTypes, description, directives);
             Include(unionType);
             return this;
         }
@@ -248,7 +250,7 @@ namespace tanka.graphql.type
         public SchemaBuilder Scalar(string name, out ScalarType scalarType, IValueConverter converter,
             string description = null, IEnumerable<DirectiveInstance> directives = null)
         {
-            scalarType = new ScalarType(name, converter, new Meta(description, null, directives));
+            scalarType = new ScalarType(name, converter, description, directives);
             Include(scalarType);
             return this;
         }
@@ -280,6 +282,12 @@ namespace tanka.graphql.type
         public IEnumerable<T> VisitTypes<T>() where T:INamedType
         {
             return _types.Values.OfType<T>();
+        }
+
+        public SchemaBuilder TryGetDirective(string name, out DirectiveType directiveType)
+        {
+            _directives.TryGetValue(name, out directiveType);
+            return this;
         }
     }
 }

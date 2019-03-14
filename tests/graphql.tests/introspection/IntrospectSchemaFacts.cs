@@ -37,7 +37,7 @@ namespace tanka.graphql.tests.introspection
             var union = new UnionType(
                 "Union",
                 new[] {type1, type2},
-                new Meta("Description"));
+                "Description");
 
             builder.Include(union);
 
@@ -48,7 +48,7 @@ namespace tanka.graphql.tests.introspection
                     {"value1", "Description"},
                     {"value2", "Description", "Deprecated"}
                 },
-                new Meta("Description"));
+                "Description");
 
             builder.Include(enum1);
 

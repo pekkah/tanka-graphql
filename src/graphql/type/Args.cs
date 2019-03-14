@@ -9,9 +9,9 @@ namespace tanka.graphql.type
             
         }
 
-        public void Add(string key, IType type, object defaultValue = null, Meta meta = null)
+        public void Add(string key, IType type, object defaultValue = null, string description = null)
         {
-            Add(key, new Argument(type, defaultValue, meta));
+            Add(key, new Argument(type, defaultValue, description));
         }
 
         public Args(IEnumerable<KeyValuePair<string, Argument>> arguments)
@@ -26,7 +26,7 @@ namespace tanka.graphql.type
         {
             foreach (var (name, type, defaultValue, description) in args)
             {
-                Add(name, type, defaultValue, new Meta(description));
+                Add(name, type, defaultValue, description);
             }
         }
     }

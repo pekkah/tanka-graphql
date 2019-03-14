@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace tanka.graphql.type
 {
@@ -6,26 +8,43 @@ namespace tanka.graphql.type
     {
         public DirectiveType Type { get; }
 
-        private readonly Dictionary<string, Argument> _arguments = new Dictionary<string, Argument>();
+        private readonly Dictionary<string, object> _arguments;
 
-        public DirectiveInstance(DirectiveType directiveType, Args arguments = null)
+        public DirectiveInstance(DirectiveType directiveType, Dictionary<string, object> argumentValues = null)
         {
-            Type = directiveType;
-
-            if (arguments != null)
-            {
-                foreach (var argument in arguments)
-                {
-                    _arguments[argument.Key] = argument.Value;
-                }
-            }
+            Type = directiveType ?? throw new ArgumentNullException(nameof(directiveType));
+            _arguments = argumentValues ?? new Dictionary<string, object>();
         }
 
         public string Name => Type.Name;
 
-        public Argument GetArgument(string name)
+        public T GetArgument<T>(string name)
         {
-            return _arguments.ContainsKey(name) ? _arguments[name] : null;
+            object rawValue = default;
+
+            if (_arguments.ContainsKey(name))
+            {
+                rawValue = _arguments[name];           
+            }
+            else
+            {
+
+                var argument = Type.GetArgument(name);
+                rawValue = argument?.DefaultValue;
+            }
+
+            if (rawValue is T argAsType)
+                return argAsType;
+
+            //todo(pekka): should not depend directly on JSON.Net
+            var obj = JObject.FromObject(rawValue);
+
+            return obj.ToObject<T>();
+        }
+
+        public override string ToString()
+        {
+            return $"@{Name}";
         }
     }
 }

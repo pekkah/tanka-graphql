@@ -82,26 +82,6 @@ namespace tanka.graphql.resolvers
                     coercedVariableValues,
                     path).ConfigureAwait(false);
 
-            if (fieldType is NamedTypeReference typeReference)
-                throw new CompleteValueException(
-                    "NamedTypeReferences are not supported during execution. " +
-                    "Please heal schema before execution. Found TypeReference to " +
-                    $"'{typeReference.TypeName}.",
-                    selection);
-
-            if (fieldType is Lazy lazy)
-                return await CompleteValueAsync(
-                    executorContext,
-                    objectType,
-                    field,
-                    lazy.WrappedType,
-                    actualType,
-                    selection,
-                    fields,
-                    value,
-                    coercedVariableValues,
-                    path).ConfigureAwait(false);
-
             if (fieldType is NonNull nonNull)
             {
                 var innerType = nonNull.WrappedType;

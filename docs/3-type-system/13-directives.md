@@ -12,13 +12,17 @@ Following directives are provided as static properties of `DirectiveType`
 
 [{tanka.graphql.type.DirectiveType.Deprecated}]
 
+
+
 ### Create custom directive
 
 Create simple `DirectiveType` and apply instance of it to a field and modify resolver logic to execute custom logic if it has the directive present.
 
-[{tanka.graphql.tests.type.DirectiveTypeFacts.Authorize_field_directive}]
+This example will require a role from user when trying to resolve a field value
+[{tanka.graphql.tests.type.DirectiveTypeFacts.Authorize_field_directive_sdl}]
 
-[{tanka.graphql.tests.type.Authorize}]
+DirectiveVisitor applies the actual middleware to the resolver chain
+[{tanka.graphql.tests.type.DirectiveTypeFacts.AuthorizeVisitor}]
 
 
 
