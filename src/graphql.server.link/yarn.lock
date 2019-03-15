@@ -366,9 +366,9 @@
   integrity sha512-te5lMAWii1uEJ4FwLjzdlbw3+n0FZNOvFXHxQDKeT0dilh7HOzdMzV2TrJVUzq8ep7J4Na8OUYPRLSQkJHAlrg==
 
 "@types/zen-push@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@types/zen-push/-/zen-push-0.1.0.tgz#b37e7923cefa294c94b659e2bbbf31b7a108a4dd"
-  integrity sha512-tFY/LgXWJsKTf6sZrPoPWf3SZzqIA7FSr/xmhKMEHhCGCcGA0YZMl72gvsVrxJZA7QHHiOHSRfOf4+0pUCIA/Q==
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@types/zen-push/-/zen-push-0.1.1.tgz#a058a080d4488e4fa88492b2bb0c8447b5d272c0"
+  integrity sha512-lc6wO0vtv3LFNXj1U8cDrtB5hajXzXCWYO0cztPf5xzHKbciVPf5H5uccVLgApE1KlXb4z0X1bjvYkLwhXIQfA==
   dependencies:
     "@types/zen-observable" "*"
 
