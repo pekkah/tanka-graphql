@@ -212,56 +212,95 @@
             })</code></pre></p>
 <h3 id="create-custom-directive">Create custom directive</h3>
 <p>Create simple <code>DirectiveType</code> and apply instance of it to a field and modify resolver logic to execute custom logic if it has the directive present.</p>
-<p><pre><code class="language-csharp">        [Fact(Skip = &quot;Revisit with SchemaBuilder syntax&quot;)]
-        public async Task Authorize_field_directive()
+<p>This example will require a role from user when trying to resolve a field value
+<pre><code class="language-csharp">
+        [Fact]
+        public async Task Authorize_field_directive_sdl()
         {
             /* Given */
-            var authorizeType = new DirectiveType(
-                &quot;authorize&quot;,
-                new[]
-                {
-                    DirectiveLocation.FIELD_DEFINITION
-                });
-
             var builder = new SchemaBuilder();
-            builder.IncludeDirective(authorizeType);
 
-            builder.Query(out var query)
-                .Connections(connect =&gt; connect
-                    .Field(query, &quot;requiresAuthorize&quot;, ScalarType.NonNullString,
-                        directives: new[]
-                        {
-                            authorizeType.CreateInstance()
-                        }));
+            Sdl.Import(Parser.ParseDocument(@&quot;
+                directive @authorize(
+                    role: String =&quot;&quot;user&quot;&quot;
+                ) on FIELD_DEFINITION
+
+                type Query {
+                    requiresAdmin: String! @authorize(role:&quot;&quot;admin&quot;&quot;)
+                    requiresUser: String! @authorize
+                }
+
+                schema {
+                    query: Query
+                }
+                &quot;), builder);
 
             var resolvers = new ResolverMap
             {
                 {
-                    query.Name, new FieldResolverMap
+                    &quot;Query&quot;, new FieldResolverMap
                     {
-                        {&quot;requiresAuthorize&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;Hello World!&quot;))}
+                        {&quot;requiresAdmin&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;Hello Admin!&quot;))},
+                        {&quot;requiresUser&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;Hello User!&quot;))}
                     }
                 }
             };
 
-            Func&lt;bool&gt; authorize = () =&gt; true;
+            // mock user and user store
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new []
+            {
+                new Claim(&quot;role&quot;, &quot;user&quot;),
+            }));
+
+            ClaimsPrincipal FetchUser(int id) =&gt; user;
 
             /* When */
             var schema = SchemaTools.MakeExecutableSchema(
-                builder.Build(),
-                resolvers);
+                builder,
+                resolvers,
+                directives: new Dictionary&lt;string, CreateDirectiveVisitor&gt;
+                {
+                    // register directive visitor to be used when authorizeType.Name present
+                    [&quot;authorize&quot;] = AuthorizeVisitor(FetchUser)
+                });
 
             var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
-                Document = Parser.ParseDocument(@&quot;{ requiresAuthorize }&quot;),
+                Document = Parser.ParseDocument(@&quot;{ requiresAdmin requiresUser }&quot;),
                 Schema = schema
             });
 
             /* Then */
-            Assert.Equal(&quot;Hello World! authorize: True&quot;, result.Data[&quot;requiresAuthorize&quot;]);
+            result.ShouldMatchJson(@&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;requiresUser&quot;&quot;: &quot;&quot;Hello User!&quot;&quot;,
+                    &quot;&quot;requiresAdmin&quot;&quot;: &quot;&quot;requires admin role. todo(pekka): should throw error or return error or??&quot;&quot;
+                  }
+                }&quot;);
         }
 </code></pre></p>
-<p><pre><code class="language-csharp">tanka.graphql.tests.type.Authorize</code></pre></p>
+<p>DirectiveVisitor applies the actual middleware to the resolver chain
+<pre><code class="language-csharp">        public static CreateDirectiveVisitor AuthorizeVisitor(Func&lt;int, ClaimsPrincipal&gt; fetchUser)
+        {
+            return builder =&gt; new DirectiveVisitor
+            {
+                FieldDefinition = (directive, fieldDefinition) =&gt;
+                {
+                    return fieldDefinition.WithResolver(resolver =&gt; resolver.Use((context, next) =&gt;
+                    {
+                        var requiredRole = directive.GetArgument&lt;string&gt;(&quot;role&quot;);
+                        var user = fetchUser(42);
+                        
+                        if (!user.HasClaim(&quot;role&quot;, requiredRole))
+                            return new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;requires admin role. &quot; +
+                                                                            &quot;todo(pekka): should throw error or return error or??&quot;));
+
+                        return next(context);
+                    }).Run(fieldDefinition.Resolver));
+                }
+            };
+        }
+</code></pre></p>
                     
             </main>
         </div>

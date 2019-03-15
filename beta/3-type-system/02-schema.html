@@ -174,7 +174,7 @@
 <p><a href="https://facebook.github.io/graphql/June2018/#sec-Schema">Specification</a></p>
 </blockquote>
 <p>Schema is implemented as class <code>GraphSchema</code> and it implements the <code>ISchema</code> interface.</p>
-<p><pre><code class="language-csharp">    public interface ISchema
+<p><pre><code class="language-csharp">    public interface ISchema : IHasDirectives
     {
         ObjectType Subscription { get; }
 
@@ -190,9 +190,9 @@
 
         IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt; filter = null) where T : INamedType;
 
-        DirectiveType GetDirective(string name);
+        DirectiveType GetDirectiveType(string name);
 
-        IQueryable&lt;DirectiveType&gt; QueryDirectives(Predicate&lt;DirectiveType&gt; filter = null);
+        IQueryable&lt;DirectiveType&gt; QueryDirectiveTypes(Predicate&lt;DirectiveType&gt; filter = null);
 
         IEnumerable&lt;KeyValuePair&lt;string, InputObjectField&gt;&gt; GetInputFields(string type);
 
@@ -301,7 +301,7 @@
             var directiveTypeName = DirectiveType.Include.Name;
 
             /* When */
-            var directiveType = Schema.GetDirective(directiveTypeName);
+            var directiveType = Schema.GetDirectiveType(directiveTypeName);
 
             /* Then */
             Assert.NotNull(directiveType);
@@ -319,7 +319,7 @@
             }
 
             /* When */
-            var directives = Schema.QueryDirectives(AppliesToField);
+            var directives = Schema.QueryDirectiveTypes(AppliesToField);
 
             /* Then */
             foreach (var directiveType in directives) Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
@@ -397,7 +397,7 @@
         {
             /* Given */ 
             /* When */
-            var directives = Schema.QueryDirectives();
+            var directives = Schema.QueryDirectiveTypes();
 
             /* Then */
             Assert.Single(directives, DirectiveType.Include);
