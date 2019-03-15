@@ -4,7 +4,7 @@ import {
   ISubscription
 } from "@aspnet/signalr";
 
-import PushStream from "zen-push";
+import PushStream from "zen-push"
 
 import {ExecutionResult} from "./execution-result";
 
