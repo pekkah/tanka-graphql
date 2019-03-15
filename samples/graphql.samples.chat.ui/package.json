@@ -21,7 +21,7 @@
     "@types/graphql": "^14.0.7",
     "@types/jest": "^24.0.11",
     "@types/node": "^11.10.5",
-    "@types/react": "^16.8.7",
+    "@types/react": "^16.8.8",
     "@types/react-dom": "^16.8.2",
     "@types/react-redux": "^6.0.9",
     "create-react-app": "^2.1.8",
