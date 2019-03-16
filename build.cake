@@ -18,6 +18,7 @@ var packageFolders = GetFiles("./src/*/package.json")
 
 var version = "0.0.0-dev";
 var preRelease = true;
+var isMaster = false;
 
 Task("Default")
   .IsDependentOn("SetVersion")
@@ -155,7 +156,8 @@ Task("SetVersion")
         
         version = result.SemVer;
         preRelease = result.PreReleaseNumber.HasValue;
-        Information($"Version: {version}, FullSemVer: {result.FullSemVer}, PreRelease: {preRelease}");
+        isMaster = result.BranchName.Contains("master");
+        Information($"Branch: {result.BranchName}\nVersion: {version}\nFullSemVer: {result.FullSemVer}\nPreRelease: {preRelease}\nisMaster: {isMaster}");
         Information($"##vso[build.updatebuildnumber]{version}");
     });
 
@@ -182,20 +184,25 @@ Task("Benchmarks")
 	  foreach(var benchmark in projectFiles)
 	  {
 		  var args = ProcessArgumentBuilder.FromString(
-        $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i --filter *");
+        $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i");
 
-		var exitCode = StartProcess(
-			"dotnet",
-			new ProcessSettings() {
-			Arguments = args
-			}
-		);
+      if (isMaster)
+        args.Append("--filter *");
+      else
+        args.Append("--filter *default*");
 
-		if (exitCode != 0)
-		{
-			throw new Exception($"Failed to run benchmarks");
-		}
-	}
+      var exitCode = StartProcess(
+        "dotnet",
+        new ProcessSettings() {
+        Arguments = args
+        }
+      );
+
+      if (exitCode != 0)
+      {
+        throw new Exception($"Failed to run benchmarks");
+      }
+    }
    });
 
 Task("Docs")

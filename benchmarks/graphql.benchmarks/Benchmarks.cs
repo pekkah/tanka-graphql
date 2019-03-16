@@ -101,6 +101,7 @@ namespace tanka.graphql.benchmarks
             }, cts.Token);
 
             AssertResult(result.Errors);
+            cts.Cancel();
         }
 
         [Benchmark]
@@ -115,6 +116,7 @@ namespace tanka.graphql.benchmarks
             }, cts.Token);
 
             AssertResult(result.Errors);
+            cts.Cancel();
         }
 
         [Benchmark]
@@ -131,6 +133,7 @@ namespace tanka.graphql.benchmarks
 
             var value = result.Source.Receive();
             AssertResult(value.Errors);
+            cts.Cancel();
         }
         
         [Benchmark]
