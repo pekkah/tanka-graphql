@@ -10,12 +10,15 @@ var sln = Argument<string>("sln", "./tanka-graphql.sln");
 
 var netstandard20 = "netstandard2.0";
 var netcoreapp21 = "netcoreapp2.1";
-var projectFiles = GetFiles("./src/**/*.csproj").Select(f => f.FullPath);
+var projectFiles = GetFiles("./src/**/*.csproj")
+	.Select(f => f.FullPath);
+
 var packageFolders = GetFiles("./src/*/package.json")
                 .Select(f => f.GetDirectory().FullPath);
 
 var version = "0.0.0-dev";
 var preRelease = true;
+var isMaster = false;
 
 Task("Default")
   .IsDependentOn("SetVersion")
@@ -153,7 +156,8 @@ Task("SetVersion")
         
         version = result.SemVer;
         preRelease = result.PreReleaseNumber.HasValue;
-        Information($"Version: {version}, FullSemVer: {result.FullSemVer}, PreRelease: {preRelease}");
+        isMaster = result.BranchName.Contains("master");
+        Information($"Branch: {result.BranchName}\nVersion: {version}\nFullSemVer: {result.FullSemVer}\nPreRelease: {preRelease}\nisMaster: {isMaster}");
         Information($"##vso[build.updatebuildnumber]{version}");
     });
 
@@ -175,25 +179,30 @@ Task("Test")
 
 Task("Benchmarks")
   .Does(()=> {
-	  var projectFiles = GetFiles("./src/**/*Benchmarks.csproj");
+	  var projectFiles = GetFiles("./benchmarks/**/*Benchmarks.csproj");
 
 	  foreach(var benchmark in projectFiles)
 	  {
 		  var args = ProcessArgumentBuilder.FromString(
-        $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i --filter *");
+        $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i -m");
 
-			var exitCode = StartProcess(
-			  "dotnet",
-			  new ProcessSettings() {
-				Arguments = args
-			  }
-			);
+      if (isMaster)
+        args.Append("--filter *");
+      else
+        args.Append("--filter * --job short");
 
-			if (exitCode != 0)
-			{
-			  throw new Exception($"Failed to run benchmarks");
-			}
-		}
+      var exitCode = StartProcess(
+        "dotnet",
+        new ProcessSettings() {
+        Arguments = args
+        }
+      );
+
+      if (exitCode != 0)
+      {
+        throw new Exception($"Failed to run benchmarks");
+      }
+    }
    });
 
 Task("Docs")

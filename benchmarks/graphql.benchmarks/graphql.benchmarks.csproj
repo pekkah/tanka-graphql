@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\graphql\graphql.csproj" />
+    <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
   </ItemGroup>
 
 </Project>

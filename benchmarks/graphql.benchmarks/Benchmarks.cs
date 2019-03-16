@@ -12,10 +12,7 @@ using tanka.graphql.resolvers;
 
 namespace tanka.graphql.benchmarks
 {
-    [CoreJob]
-    //[ClrJob]
     [MarkdownExporterAttribute.GitHub()]
-    [MemoryDiagnoser]
     public class Benchmarks
     {
         private GraphQLDocument _query;
@@ -104,6 +101,7 @@ namespace tanka.graphql.benchmarks
             }, cts.Token);
 
             AssertResult(result.Errors);
+            cts.Cancel();
         }
 
         [Benchmark]
@@ -118,6 +116,7 @@ namespace tanka.graphql.benchmarks
             }, cts.Token);
 
             AssertResult(result.Errors);
+            cts.Cancel();
         }
 
         [Benchmark]
@@ -134,6 +133,7 @@ namespace tanka.graphql.benchmarks
 
             var value = result.Source.Receive();
             AssertResult(value.Errors);
+            cts.Cancel();
         }
         
         [Benchmark]
