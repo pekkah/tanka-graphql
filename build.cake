@@ -178,6 +178,7 @@ Task("Test")
     });
 
 Task("Benchmarks")
+  .IsDependentOn("SetVersion")
   .Does(()=> {
 	  var projectFiles = GetFiles("./benchmarks/**/*Benchmarks.csproj");
 
