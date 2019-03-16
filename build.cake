@@ -10,7 +10,9 @@ var sln = Argument<string>("sln", "./tanka-graphql.sln");
 
 var netstandard20 = "netstandard2.0";
 var netcoreapp21 = "netcoreapp2.1";
-var projectFiles = GetFiles("./src/**/*.csproj").Select(f => f.FullPath);
+var projectFiles = GetFiles("./src/**/*.csproj")
+	.Select(f => f.FullPath);
+
 var packageFolders = GetFiles("./src/*/package.json")
                 .Select(f => f.GetDirectory().FullPath);
 
@@ -175,25 +177,25 @@ Task("Test")
 
 Task("Benchmarks")
   .Does(()=> {
-	  var projectFiles = GetFiles("./src/**/*Benchmarks.csproj");
+	  var projectFiles = GetFiles("./benchmarks/**/*Benchmarks.csproj");
 
 	  foreach(var benchmark in projectFiles)
 	  {
 		  var args = ProcessArgumentBuilder.FromString(
         $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i --filter *");
 
-			var exitCode = StartProcess(
-			  "dotnet",
-			  new ProcessSettings() {
-				Arguments = args
-			  }
-			);
-
-			if (exitCode != 0)
-			{
-			  throw new Exception($"Failed to run benchmarks");
+		var exitCode = StartProcess(
+			"dotnet",
+			new ProcessSettings() {
+			Arguments = args
 			}
+		);
+
+		if (exitCode != 0)
+		{
+			throw new Exception($"Failed to run benchmarks");
 		}
+	}
    });
 
 Task("Docs")

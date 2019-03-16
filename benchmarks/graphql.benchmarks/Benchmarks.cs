@@ -12,10 +12,7 @@ using tanka.graphql.resolvers;
 
 namespace tanka.graphql.benchmarks
 {
-    [CoreJob]
-    //[ClrJob]
     [MarkdownExporterAttribute.GitHub()]
-    [MemoryDiagnoser]
     public class Benchmarks
     {
         private GraphQLDocument _query;
