@@ -42,10 +42,10 @@ Resolver middlwares can be used to build an execution chain.
 Middlwares are implemented as a delegate method taking in the context and delegate for the next middlware to execute. Last link in the chain is usually the actual resolver but chain can be also interrupted before it by returning a result from the middleware.
 
 Signature of the value resolver middlware:
-[{tanka.graphql.type.ResolverMiddleware}]
+[{tanka.graphql.resolvers.ResolverMiddleware}]
 
 Signature of the subscription middlware:
-[{tanka.graphql.type.SubscriberMiddleware}]
+[{tanka.graphql.resolvers.SubscriberMiddleware}]
 
 
 
