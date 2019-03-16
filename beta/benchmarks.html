@@ -32,6 +32,10 @@
             margin-bottom: 1rem;            
         }
 
+        .sidebar {
+            margin-bottom: 0.25rem;
+        }
+
         .sidebar .nav-link {
             display: block;
             padding: .25rem 1.5rem;
@@ -200,23 +204,23 @@ Runtime=Core
 <td>Query_with_defaults</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">43,627.55 ns</td>
-<td style="text-align: right;">836.792 ns</td>
-<td style="text-align: right;">1,058.2739 ns</td>
-<td style="text-align: right;">43,358.53 ns</td>
+<td style="text-align: right;">35,691.22 ns</td>
+<td style="text-align: right;">708.214 ns</td>
+<td style="text-align: right;">815.5807 ns</td>
+<td style="text-align: right;">35,634.08 ns</td>
 <td style="text-align: right;">2.4414</td>
 <td style="text-align: right;">0.7935</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">15561 B</td>
+<td style="text-align: right;">15562 B</td>
 </tr>
 <tr>
 <td>Query_without_validation</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">21,840.24 ns</td>
-<td style="text-align: right;">408.816 ns</td>
-<td style="text-align: right;">437.4284 ns</td>
-<td style="text-align: right;">21,768.09 ns</td>
+<td style="text-align: right;">19,437.75 ns</td>
+<td style="text-align: right;">405.942 ns</td>
+<td style="text-align: right;">1,196.9302 ns</td>
+<td style="text-align: right;">19,053.30 ns</td>
 <td style="text-align: right;">0.7935</td>
 <td style="text-align: right;">0.3967</td>
 <td style="text-align: right;">-</td>
@@ -226,10 +230,10 @@ Runtime=Core
 <td>Mutation_with_defaults</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">19,603.19 ns</td>
-<td style="text-align: right;">415.681 ns</td>
-<td style="text-align: right;">494.8386 ns</td>
-<td style="text-align: right;">19,557.59 ns</td>
+<td style="text-align: right;">18,932.50 ns</td>
+<td style="text-align: right;">374.387 ns</td>
+<td style="text-align: right;">384.4681 ns</td>
+<td style="text-align: right;">18,819.26 ns</td>
 <td style="text-align: right;">2.2278</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -239,10 +243,10 @@ Runtime=Core
 <td>Mutation_without_validation</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">6,624.13 ns</td>
-<td style="text-align: right;">131.972 ns</td>
-<td style="text-align: right;">254.2661 ns</td>
-<td style="text-align: right;">6,593.51 ns</td>
+<td style="text-align: right;">6,024.53 ns</td>
+<td style="text-align: right;">100.726 ns</td>
+<td style="text-align: right;">94.2191 ns</td>
+<td style="text-align: right;">6,033.83 ns</td>
 <td style="text-align: right;">0.5569</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -252,36 +256,36 @@ Runtime=Core
 <td>Subscribe_with_defaults</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">32,030.12 ns</td>
-<td style="text-align: right;">565.096 ns</td>
-<td style="text-align: right;">528.5907 ns</td>
-<td style="text-align: right;">31,964.11 ns</td>
-<td style="text-align: right;">4.0283</td>
-<td style="text-align: right;">0.9766</td>
-<td style="text-align: right;">-</td>
-<td style="text-align: right;">21539 B</td>
+<td style="text-align: right;">29,916.93 ns</td>
+<td style="text-align: right;">406.803 ns</td>
+<td style="text-align: right;">380.5242 ns</td>
+<td style="text-align: right;">29,787.15 ns</td>
+<td style="text-align: right;">3.9673</td>
+<td style="text-align: right;">0.0916</td>
+<td style="text-align: right;">0.0305</td>
+<td style="text-align: right;">21540 B</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">27,120.09 ns</td>
-<td style="text-align: right;">537.027 ns</td>
-<td style="text-align: right;">1,366.9058 ns</td>
-<td style="text-align: right;">27,056.92 ns</td>
-<td style="text-align: right;">2.1973</td>
+<td style="text-align: right;">27,600.31 ns</td>
+<td style="text-align: right;">556.060 ns</td>
+<td style="text-align: right;">1,613.2300 ns</td>
+<td style="text-align: right;">27,563.21 ns</td>
+<td style="text-align: right;">2.4109</td>
 <td style="text-align: right;">1.0376</td>
 <td style="text-align: right;">0.3052</td>
-<td style="text-align: right;">9745 B</td>
+<td style="text-align: right;">9746 B</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">71,402.46 ns</td>
-<td style="text-align: right;">1,025.925 ns</td>
-<td style="text-align: right;">800.9745 ns</td>
-<td style="text-align: right;">71,469.48 ns</td>
+<td style="text-align: right;">69,057.76 ns</td>
+<td style="text-align: right;">1,346.276 ns</td>
+<td style="text-align: right;">1,382.5260 ns</td>
+<td style="text-align: right;">68,617.83 ns</td>
 <td style="text-align: right;">3.7842</td>
 <td style="text-align: right;">0.9766</td>
 <td style="text-align: right;">-</td>
@@ -291,10 +295,10 @@ Runtime=Core
 <td>Validate_query_with_defaults</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">8,966.54 ns</td>
-<td style="text-align: right;">174.540 ns</td>
-<td style="text-align: right;">244.6813 ns</td>
-<td style="text-align: right;">8,949.16 ns</td>
+<td style="text-align: right;">8,016.37 ns</td>
+<td style="text-align: right;">155.387 ns</td>
+<td style="text-align: right;">178.9440 ns</td>
+<td style="text-align: right;">7,973.13 ns</td>
 <td style="text-align: right;">1.6632</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -304,10 +308,10 @@ Runtime=Core
 <td>ResolverChain</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">71.55 ns</td>
-<td style="text-align: right;">1.474 ns</td>
-<td style="text-align: right;">3.2352 ns</td>
-<td style="text-align: right;">70.34 ns</td>
+<td style="text-align: right;">69.86 ns</td>
+<td style="text-align: right;">1.208 ns</td>
+<td style="text-align: right;">1.1295 ns</td>
+<td style="text-align: right;">69.59 ns</td>
 <td style="text-align: right;">0.0085</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -317,10 +321,10 @@ Runtime=Core
 <td>Resolver</td>
 <td>Default</td>
 <td>InProcessEmitToolchain</td>
-<td style="text-align: right;">57.55 ns</td>
-<td style="text-align: right;">1.062 ns</td>
-<td style="text-align: right;">0.9418 ns</td>
-<td style="text-align: right;">57.76 ns</td>
+<td style="text-align: right;">56.95 ns</td>
+<td style="text-align: right;">1.115 ns</td>
+<td style="text-align: right;">1.0425 ns</td>
+<td style="text-align: right;">56.87 ns</td>
 <td style="text-align: right;">0.0085</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -330,23 +334,23 @@ Runtime=Core
 <td>Query_with_defaults</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">40,657.22 ns</td>
-<td style="text-align: right;">799.026 ns</td>
-<td style="text-align: right;">747.4090 ns</td>
-<td style="text-align: right;">40,489.58 ns</td>
+<td style="text-align: right;">38,629.95 ns</td>
+<td style="text-align: right;">768.793 ns</td>
+<td style="text-align: right;">1,998.1958 ns</td>
+<td style="text-align: right;">38,039.84 ns</td>
 <td style="text-align: right;">2.4414</td>
 <td style="text-align: right;">0.7935</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">15560 B</td>
+<td style="text-align: right;">15563 B</td>
 </tr>
 <tr>
 <td>Query_without_validation</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">20,145.94 ns</td>
-<td style="text-align: right;">399.295 ns</td>
-<td style="text-align: right;">656.0534 ns</td>
-<td style="text-align: right;">19,996.37 ns</td>
+<td style="text-align: right;">19,001.75 ns</td>
+<td style="text-align: right;">412.511 ns</td>
+<td style="text-align: right;">1,216.2977 ns</td>
+<td style="text-align: right;">18,759.38 ns</td>
 <td style="text-align: right;">0.7935</td>
 <td style="text-align: right;">0.3967</td>
 <td style="text-align: right;">-</td>
@@ -356,10 +360,10 @@ Runtime=Core
 <td>Mutation_with_defaults</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">19,298.71 ns</td>
-<td style="text-align: right;">567.240 ns</td>
-<td style="text-align: right;">502.8436 ns</td>
-<td style="text-align: right;">19,198.23 ns</td>
+<td style="text-align: right;">18,996.39 ns</td>
+<td style="text-align: right;">361.608 ns</td>
+<td style="text-align: right;">338.2486 ns</td>
+<td style="text-align: right;">19,027.01 ns</td>
 <td style="text-align: right;">2.2278</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -369,10 +373,10 @@ Runtime=Core
 <td>Mutation_without_validation</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">5,945.76 ns</td>
-<td style="text-align: right;">141.212 ns</td>
-<td style="text-align: right;">138.6891 ns</td>
-<td style="text-align: right;">5,914.07 ns</td>
+<td style="text-align: right;">5,722.85 ns</td>
+<td style="text-align: right;">113.763 ns</td>
+<td style="text-align: right;">116.8267 ns</td>
+<td style="text-align: right;">5,716.49 ns</td>
 <td style="text-align: right;">0.5569</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -382,10 +386,10 @@ Runtime=Core
 <td>Subscribe_with_defaults</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">30,117.54 ns</td>
-<td style="text-align: right;">625.239 ns</td>
-<td style="text-align: right;">642.0745 ns</td>
-<td style="text-align: right;">29,862.91 ns</td>
+<td style="text-align: right;">27,907.35 ns</td>
+<td style="text-align: right;">541.672 ns</td>
+<td style="text-align: right;">480.1782 ns</td>
+<td style="text-align: right;">27,962.18 ns</td>
 <td style="text-align: right;">3.9673</td>
 <td style="text-align: right;">1.0376</td>
 <td style="text-align: right;">-</td>
@@ -395,23 +399,23 @@ Runtime=Core
 <td>Subscribe_without_validation</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">21,152.55 ns</td>
-<td style="text-align: right;">418.777 ns</td>
-<td style="text-align: right;">874.1444 ns</td>
-<td style="text-align: right;">20,936.04 ns</td>
-<td style="text-align: right;">2.1973</td>
-<td style="text-align: right;">0.9766</td>
-<td style="text-align: right;">0.1221</td>
-<td style="text-align: right;">9745 B</td>
+<td style="text-align: right;">26,457.66 ns</td>
+<td style="text-align: right;">727.629 ns</td>
+<td style="text-align: right;">2,122.5288 ns</td>
+<td style="text-align: right;">26,313.96 ns</td>
+<td style="text-align: right;">2.3193</td>
+<td style="text-align: right;">0.9460</td>
+<td style="text-align: right;">0.3357</td>
+<td style="text-align: right;">9746 B</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">69,757.18 ns</td>
-<td style="text-align: right;">1,355.410 ns</td>
-<td style="text-align: right;">1,506.5349 ns</td>
-<td style="text-align: right;">70,204.36 ns</td>
+<td style="text-align: right;">67,145.77 ns</td>
+<td style="text-align: right;">1,319.576 ns</td>
+<td style="text-align: right;">1,849.8608 ns</td>
+<td style="text-align: right;">67,378.60 ns</td>
 <td style="text-align: right;">3.7842</td>
 <td style="text-align: right;">0.9766</td>
 <td style="text-align: right;">-</td>
@@ -421,10 +425,10 @@ Runtime=Core
 <td>Validate_query_with_defaults</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">8,461.09 ns</td>
-<td style="text-align: right;">167.281 ns</td>
-<td style="text-align: right;">297.3412 ns</td>
-<td style="text-align: right;">8,449.73 ns</td>
+<td style="text-align: right;">7,758.31 ns</td>
+<td style="text-align: right;">153.081 ns</td>
+<td style="text-align: right;">182.2319 ns</td>
+<td style="text-align: right;">7,727.75 ns</td>
 <td style="text-align: right;">1.6632</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -434,10 +438,10 @@ Runtime=Core
 <td>ResolverChain</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">73.41 ns</td>
-<td style="text-align: right;">1.515 ns</td>
-<td style="text-align: right;">2.9189 ns</td>
-<td style="text-align: right;">73.25 ns</td>
+<td style="text-align: right;">70.60 ns</td>
+<td style="text-align: right;">1.617 ns</td>
+<td style="text-align: right;">1.7971 ns</td>
+<td style="text-align: right;">70.16 ns</td>
 <td style="text-align: right;">0.0085</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -447,10 +451,10 @@ Runtime=Core
 <td>Resolver</td>
 <td>Core</td>
 <td>Default</td>
-<td style="text-align: right;">61.74 ns</td>
-<td style="text-align: right;">1.274 ns</td>
-<td style="text-align: right;">1.6566 ns</td>
-<td style="text-align: right;">61.83 ns</td>
+<td style="text-align: right;">55.91 ns</td>
+<td style="text-align: right;">1.029 ns</td>
+<td style="text-align: right;">0.9118 ns</td>
+<td style="text-align: right;">55.46 ns</td>
 <td style="text-align: right;">0.0085</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>

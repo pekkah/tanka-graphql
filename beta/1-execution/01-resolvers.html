@@ -32,6 +32,10 @@
             margin-bottom: 1rem;            
         }
 
+        .sidebar {
+            margin-bottom: 0.25rem;
+        }
+
         .sidebar .nav-link {
             display: block;
             padding: .25rem 1.5rem;
@@ -239,9 +243,11 @@
 <p>Resolver middlwares can be used to build an execution chain.</p>
 <p>Middlwares are implemented as a delegate method taking in the context and delegate for the next middlware to execute. Last link in the chain is usually the actual resolver but chain can be also interrupted before it by returning a result from the middleware.</p>
 <p>Signature of the value resolver middlware:
-<pre><code class="language-csharp">tanka.graphql.type.ResolverMiddleware</code></pre></p>
+<pre><code class="language-csharp">    public delegate ValueTask&lt;IResolveResult&gt; ResolverMiddleware(ResolverContext context, Resolver next);
+</code></pre></p>
 <p>Signature of the subscription middlware:
-<pre><code class="language-csharp">tanka.graphql.type.SubscriberMiddleware</code></pre></p>
+<pre><code class="language-csharp">    public delegate ValueTask&lt;ISubscribeResult&gt; SubscriberMiddleware(ResolverContext context, CancellationToken unsubscribe, Subscriber next);
+</code></pre></p>
 <h3 id="using-resolver-and-subscriber-maps">Using resolver and subscriber maps</h3>
 <p>In some cases it's useful to be able to build the resolvers separately from the schema building. For that purpose <code>SchemaTools</code> provide a method to bind resolvers to fields by using <code>IResolverMap</code> and <code>ISubscriberMap</code>.</p>
 <p><pre><code class="language-csharp">
