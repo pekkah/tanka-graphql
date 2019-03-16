@@ -5,6 +5,7 @@ using tanka.graphql.resolvers;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using GraphQLParser.AST;
+using tanka.graphql.sdl;
 
 namespace tanka.graphql.benchmarks
 {
@@ -13,34 +14,43 @@ namespace tanka.graphql.benchmarks
         public static ISchema InitializeSchema()
         {
             var builder = new SchemaBuilder();
-            builder.Query(out var query)
-                .Connections(connect => connect
-                .Field(query, "simple", ScalarType.String));
+            Sdl.Import(Parser.ParseDocument(
+                @"
+                    type Query {
+                        simple: String
+                    }
 
-            builder.Mutation(out var mutation)
-                .Connections(connect => connect
-                .Field(mutation, "simple", ScalarType.String));
+                    type Mutation {
+                        simple: String
+                    }
 
-            builder.Subscription(out var subscription)
-                .Connections(connect => connect
-                .Field(subscription, "simple", ScalarType.String));
+                    type Subscription {
+                        simple: String
+                    }
+
+                    schema {
+                        query: Query
+                        mutation: Mutation
+                        subscription: Subscription
+                    }
+                    "), builder);
 
             var resolvers = new ResolverMap
             {
                 {
-                    query.Name, new FieldResolverMap
+                    "Query", new FieldResolverMap
                     {
                         {"simple", context => new ValueTask<IResolveResult>(Resolve.As("value"))}
                     }
                 },
                 {
-                    mutation.Name, new FieldResolverMap
+                    "Mutation", new FieldResolverMap
                     {
                         {"simple", context => new ValueTask<IResolveResult>(Resolve.As("value"))}
                     }
                 },
                 {
-                    subscription.Name, new FieldResolverMap()
+                    "Subscription", new FieldResolverMap()
                     {
                         {
                             "simple", 
