@@ -189,7 +189,7 @@ Task("Benchmarks")
       if (isMaster)
         args.Append("--filter *");
       else
-        args.Append("--filter *default*");
+        args.Append("--filter * --job short");
 
       var exitCode = StartProcess(
         "dotnet",
