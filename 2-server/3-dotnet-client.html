@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Interfaces - tanka-graphql</title>
+    <title>Dotnet client - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -112,7 +112,7 @@
                                     <a class="nav-link" href="2-server/2-apollo-link.html">Apollo link</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="2-server/3-dotnet-client.html">Dotnet client</a>
+                                    <a class="nav-link active bg-light" href="2-server/3-dotnet-client.html">Dotnet client</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -138,7 +138,7 @@
                                     <a class="nav-link" href="3-type-system/06-objects.html">Objects</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active bg-light" href="3-type-system/07-interfaces.html">Interfaces</a>
+                                    <a class="nav-link" href="3-type-system/07-interfaces.html">Interfaces</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/08-unions.html">Unions</a>
@@ -173,55 +173,7 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="interfaces">Interfaces</h2>
-<blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Interfaces">Specification</a></p>
-</blockquote>
-<p>Interfaces are created as instances of <code>InterfaceType</code>.</p>
-<h3 id="creating-interface">Creating interface</h3>
-<p>Define with non-null scalar field</p>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public void Define_interface()
-        {
-            /* Given */
-            /* When */
-            _builder.Interface(&quot;NamedEntity&quot;, out var namedEntity)
-                .Connections(connect =&gt; connect
-                .Field(namedEntity, &quot;name&quot;, ScalarType.NonNullString));
-
-            var schema = _builder.Build();
-
-            /* Then */
-            var namedEntityFields = schema.GetFields(namedEntity.Name);
-            Assert.Equal(&quot;NamedEntity&quot;, namedEntity.Name);
-            Assert.Single(namedEntityFields, fk =&gt; fk.Key == &quot;name&quot;
-                                                    &amp;&amp; (NonNull) fk.Value.Type == ScalarType.NonNullString);
-        }
-</code></pre></p>
-<h3 id="implementing-interface">Implementing interface</h3>
-<p>Object implements interface</p>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public void Implement_interface()
-        {
-            /* Given */
-            _builder.Interface(&quot;NamedEntity&quot;, out var namedEntity)
-                .Connections(connect =&gt; connect
-                .Field(namedEntity, &quot;name&quot;, ScalarType.NonNullString));
-
-            _builder.Object(&quot;Person&quot;, out var person, interfaces: new []{namedEntity})
-                .Connections(connect =&gt; connect
-                .Field(person, &quot;name&quot;, ScalarType.NonNullString));
-
-            /* When */
-            //todo: interfaces should be behind a connection
-            var implements = person.Implements(namedEntity);
-
-            /* Then */
-            Assert.True(implements);
-        }
-</code></pre></p>
+                <p>Dotnet client is available at <a href="https://github.com/anttikajanus/tanka-graphql-net-client">https://github.com/anttikajanus/tanka-graphql-net-client</a></p>
                     
             </main>
         </div>

@@ -32,6 +32,10 @@
             margin-bottom: 1rem;            
         }
 
+        .sidebar {
+            margin-bottom: 0.25rem;
+        }
+
         .sidebar .nav-link {
             display: block;
             padding: .25rem 1.5rem;
@@ -78,20 +82,23 @@
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                            <a class="d-flex align-items-center text-muted" href="1-execution/01-validation.html">Execution</a>
+                            <a class="d-flex align-items-center text-muted" href="1-execution/01-resolvers.html">Execution</a>
                         </h6>
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/01-validation.html">Validation</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/02-query.html">Query</a>
+                                    <a class="nav-link" href="1-execution/01-resolvers.html">Resolvers</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="1-execution/03-mutation.html">Mutation</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/04-subscription.html">Subscription</a>
+                                    <a class="nav-link" href="1-execution/04-query.html">Query</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -103,6 +110,9 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="2-server/2-apollo-link.html">Apollo link</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="2-server/3-dotnet-client.html">Dotnet client</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -195,7 +205,7 @@
             var union = new UnionType(
                 &quot;Union&quot;,
                 new[] {type1, type2},
-                new Meta(&quot;Description&quot;));
+                &quot;Description&quot;);
 
             builder.Include(union);
 
@@ -206,7 +216,7 @@
                     {&quot;value1&quot;, &quot;Description&quot;},
                     {&quot;value2&quot;, &quot;Description&quot;, &quot;Deprecated&quot;}
                 },
-                new Meta(&quot;Description&quot;));
+                &quot;Description&quot;);
 
             builder.Include(enum1);
 
@@ -228,22 +238,19 @@
             builder.Mutation(out var mutation);
             builder.Subscription(out var subscription);
 
-            _sourceSchema = builder.Build();
-            _introspectionSchema = Introspect.SchemaAsync(_sourceSchema)
-                .GetAwaiter()
-                .GetResult();
+            var sourceSchema = builder.Build();
+            _introspectionSchema = Introspect.Schema(sourceSchema);
         }
 </code></pre></p>
 <p>Combination of the source schema and the introspection schema can be used to provide the normal executable schema with introspection support.</p>
-<p><pre><code class="language-csharp">        public async Task&lt;ISchema&gt; MakeExecutableAsync(Starwars starwars)
+<p><pre><code class="language-csharp">
+        public ISchema CreateSchema(Starwars starwars)
         {
-            var schema = StarwarsSchema.BuildSchema();
-            ;
-
-            var resolvers = StarwarsResolvers.BuildResolvers(starwars, schema);
-            var executable = await MakeExecutableSchemaWithIntrospection(
-                schema, 
-                resolvers).ConfigureAwait(false);
+            var schema = StarwarsSchema.Create();
+            var resolvers = StarwarsResolvers.BuildResolvers(starwars);
+            var executable = SchemaTools.MakeExecutableSchemaWithIntrospection(
+                schema,
+                resolvers);
 
             return executable;
         }
