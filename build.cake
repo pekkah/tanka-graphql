@@ -184,7 +184,7 @@ Task("Benchmarks")
 	  foreach(var benchmark in projectFiles)
 	  {
 		  var args = ProcessArgumentBuilder.FromString(
-        $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i");
+        $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i -m");
 
       if (isMaster)
         args.Append("--filter *");
