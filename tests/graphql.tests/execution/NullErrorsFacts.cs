@@ -1,34 +1,30 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using tanka.graphql.resolvers;
-using tanka.graphql.type;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
+using tanka.graphql.type;
 using Xunit;
-using static tanka.graphql.Executor;
-using static tanka.graphql.Parser;
-using static tanka.graphql.resolvers.Resolve;
-using static tanka.graphql.type.ScalarType;
 
-namespace tanka.graphql.tests
+namespace tanka.graphql.tests.execution
 {
-    public class ErrorsFacts
+    public class NullErrorsFacts
     {
-        public ErrorsFacts()
+        public NullErrorsFacts()
         {
             var builder = new SchemaBuilder();
             builder.Object("Nest", out var nested)
                 .Connections(connect => connect
-                .Field(nested, "nestedNonNull", NonNullString));
+                .Field(nested, "nestedNonNull", ScalarType.NonNullString));
 
             builder.Query(out var query)
                 .Connections(connect => connect
-                .Field(query, "nonNull", NonNullString)
+                .Field(query, "nonNull", ScalarType.NonNullString)
                 .Field(query, "nonNullNested", new NonNull(nested))
-                .Field(query, "nonNullListItem", new List(NonNullString))
-                .Field(query, "nonNullList", new NonNull(new List(String)))
+                .Field(query, "nonNullListItem", new List(ScalarType.NonNullString))
+                .Field(query, "nonNullList", new NonNull(new List(ScalarType.String)))
                 .Field(query, "nullableNested", nested)
-                .Field(query, "nullable", String));
+                .Field(query, "nullable", ScalarType.String));
 
 
             var nestedNonNullData = new Dictionary<string, string>
@@ -36,33 +32,30 @@ namespace tanka.graphql.tests
                 ["nestedNonNull"] = null
             };
 
-            _resolvers = new ResolverMap
+            IResolverMap resolvers = new ResolverMap
             {
                 ["Query"] = new FieldResolverMap
                 {
-                    {"nonNull", context => new ValueTask<IResolveResult>(As(null))},
-                    {"nonNullNested", context => new ValueTask<IResolveResult>(As(nestedNonNullData))},
-                    {"nonNullListItem", context => new ValueTask<IResolveResult>(As(new[] {"str", null, "str"}))},
-                    {"nonNullList", context => new ValueTask<IResolveResult>(As(null))},
-                    {"nullableNested", context => new ValueTask<IResolveResult>(As(nestedNonNullData))},
-                    {"nullable", context => new ValueTask<IResolveResult>(As("hello"))}
+                    {"nonNull", context => new ValueTask<IResolveResult>(Resolve.As(null))},
+                    {"nonNullNested", context => new ValueTask<IResolveResult>(Resolve.As(nestedNonNullData))},
+                    {"nonNullListItem", context => new ValueTask<IResolveResult>(Resolve.As(new[] {"str", null, "str"}))},
+                    {"nonNullList", context => new ValueTask<IResolveResult>(Resolve.As(null))},
+                    {"nullableNested", context => new ValueTask<IResolveResult>(Resolve.As(nestedNonNullData))},
+                    {"nullable", context => new ValueTask<IResolveResult>(Resolve.As("hello"))}
                 },
 
                 ["Nest"] = new FieldResolverMap
                 {
-                    {"nestedNonNull", PropertyOf<Dictionary<string, string>>(d => d["nestedNonNull"])}
+                    {"nestedNonNull", Resolve.PropertyOf<Dictionary<string, string>>(d => d["nestedNonNull"])}
                 }
             };
 
-            _schema = builder.Build();
-            _executable = SchemaTools.MakeExecutableSchema(
-                _schema,
-                _resolvers);
+            _schema = SchemaTools.MakeExecutableSchema(
+                builder,
+                resolvers);
         }
 
         private readonly ISchema _schema;
-        private readonly IResolverMap _resolvers;
-        private readonly ISchema _executable;
 
 
         [Fact]
@@ -77,10 +70,10 @@ namespace tanka.graphql.tests
 }";
 
             /* When */
-            var result = await ExecuteAsync(new ExecutionOptions
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
-                Schema = _executable,
-                Document =  ParseDocument(query)
+                Schema = _schema,
+                Document =  Parser.ParseDocument(query)
             }).ConfigureAwait(false);
 
 
@@ -131,10 +124,10 @@ namespace tanka.graphql.tests
 }";
 
             /* When */
-            var result = await ExecuteAsync(new ExecutionOptions
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
-                Schema = _executable,
-                Document =  ParseDocument(query)
+                Schema = _schema,
+                Document =  Parser.ParseDocument(query)
             }).ConfigureAwait(false);
 
 
@@ -175,10 +168,10 @@ namespace tanka.graphql.tests
 }";
 
             /* When */
-            var result = await ExecuteAsync(new ExecutionOptions
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
-                Schema = _executable,
-                Document =  ParseDocument(query)
+                Schema = _schema,
+                Document =  Parser.ParseDocument(query)
             }).ConfigureAwait(false);
 
 
@@ -216,10 +209,10 @@ namespace tanka.graphql.tests
 }";
 
             /* When */
-            var result = await ExecuteAsync(new ExecutionOptions
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
-                Schema = _executable,
-                Document =  ParseDocument(query)
+                Schema = _schema,
+                Document =  Parser.ParseDocument(query)
             }).ConfigureAwait(false);
 
 

@@ -23,11 +23,7 @@ namespace tanka.graphql.execution
             }
 
             if (fieldType is NonNull)
-                throw new GraphQLError($"Field '{objectType}.{fieldName}:{fieldType}' is non-null field and cannot be resolved as null.",
-                    new[] {fieldSelection}, 
-                    locations: new []{ fieldSelection.Location},
-                    originalError: error,
-                    path: path);
+                throw error;
 
             return completedValue;
         }
