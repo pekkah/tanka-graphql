@@ -55,6 +55,11 @@ namespace tanka.graphql.tests.execution
                         nonNullListWithNullItem: [String]!
                     }
 
+                    type CustomeErrorContainer {
+                        nonNullWithCustomError: String!
+                        nullableWithCustomError: String
+                    }
+
                     type Query {
                         container: Container
                     }
@@ -72,6 +77,11 @@ namespace tanka.graphql.tests.execution
                     {"nonNullListAsNull", Resolve.PropertyOf<Container>(c => c.NonNullList_AsNull)},
                     {"nonNullListWithNonNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem)},
                     {"nonNullListWithNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem)}
+                },
+                ["Container"] = new FieldResolverMap()
+                {
+                    {"nonNullWithCustomError", context => },
+                    {"nullableWithCustomError", context => },
                 },
                 ["Query"] = new FieldResolverMap()
                 {
