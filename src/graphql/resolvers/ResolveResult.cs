@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using tanka.graphql.execution;
@@ -84,44 +85,158 @@ namespace tanka.graphql.resolvers
 
             if (fieldType is NonNull nonNull)
             {
-                var innerType = nonNull.WrappedType;
-                var completedResult = await CompleteValueAsync(
-                    executorContext,
+                return await CompleteNonNullValueAsync(
+                    executorContext, 
                     objectType,
-                    field,
-                    innerType,
-                    actualType,
-                    selection,
+                    field, 
+                    actualType, 
+                    selection, 
                     fields,
-                    value,
-                    coercedVariableValues,
-                    path).ConfigureAwait(false);
-
-                if (completedResult == null)
-                    throw new CompleteValueException(
-                        $"Cannot complete value on non-null field '{selection.Name.Value}:{nonNull}'. " +
-                        "Completed value is null.");
-
-                return completedResult;
+                    value, 
+                    coercedVariableValues, 
+                    path, 
+                    nonNull);
             }
 
             if (value == null)
                 return null;
 
-
             if (fieldType is List listType)
             {
-                if (!(value is IEnumerable values))
-                    throw new CompleteValueException(
-                        $"Cannot complete value for list field '{selection.Name.Value}':'{fieldType}'. " +
-                        "Resolved value is not a collection");
+                return await CompleteListValueAsync(
+                    executorContext, 
+                    objectType,
+                    field, 
+                    fieldType, 
+                    actualType, 
+                    selection, 
+                    fields, 
+                    value, 
+                    coercedVariableValues, 
+                    path, 
+                    listType);
+            }
 
-                var innerType = listType.WrappedType;
-                var result = new List<object>();
-                int i = 0;
-                foreach (var resultItem in values)
+            if (fieldType is ScalarType scalarType) return scalarType.Serialize(value);
+
+            if (fieldType is EnumType enumType) return enumType.Serialize(value);
+
+            if (fieldType is ObjectType fieldObjectType)
+            {
+                return await CompleteObjectValueAsync(
+                    executorContext,
+                    fields, 
+                    value, 
+                    coercedVariableValues, 
+                    path, 
+                    fieldObjectType);
+            }
+
+            // interfaces and unions require ActualType
+            if (actualType == null)
+                throw new CompleteValueException(
+                    "Cannot complete value as interface or union. " +
+                    $"Actual type not given from resolver. Use {nameof(Resolve.As)} with type parameter");
+
+            if (fieldType is InterfaceType interfaceType)
+            {
+                return await CompleteInterfaceValueAsync(
+                    executorContext, 
+                    actualType, 
+                    fields, 
+                    value, 
+                    coercedVariableValues, 
+                    path, 
+                    interfaceType);
+            }
+
+            if (fieldType is UnionType unionType)
+            {
+                return await CompleteUnionValueAsync(
+                    executorContext,
+                    actualType, 
+                    fields, 
+                    value, 
+                    coercedVariableValues, 
+                    path, 
+                    unionType);
+            }
+
+            throw new CompleteValueException($"Cannot complete value for field {field}. No handling for the type {fieldType}.");
+        }
+
+        private static async Task<object> CompleteUnionValueAsync(IExecutorContext executorContext, ObjectType actualType, List<GraphQLFieldSelection> fields,
+            object value, Dictionary<string, object> coercedVariableValues, NodePath path, UnionType unionType)
+        {
+            if (!unionType.IsPossible(actualType))
+                throw new CompleteValueException(
+                    "Cannot complete value as union. " +
+                    $"Actual type {actualType.Name} is not possible for {unionType.Name}");
+
+            var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
+            var data = await SelectionSets.ExecuteSelectionSetAsync(
+                executorContext,
+                subSelectionSet,
+                actualType,
+                value,
+                coercedVariableValues,
+                path).ConfigureAwait(false);
+
+            return data;
+        }
+
+        private static async Task<object> CompleteInterfaceValueAsync(IExecutorContext executorContext, ObjectType actualType,
+            List<GraphQLFieldSelection> fields, object value, Dictionary<string, object> coercedVariableValues, NodePath path, InterfaceType interfaceType)
+        {
+            if (!actualType.Implements(interfaceType))
+                throw new CompleteValueException(
+                    "Cannot complete value as interface. " +
+                    $"Actual type {actualType.Name} does not implement {interfaceType.Name}");
+
+            var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
+            var data = await SelectionSets.ExecuteSelectionSetAsync(
+                executorContext,
+                subSelectionSet,
+                actualType,
+                value,
+                coercedVariableValues,
+                path).ConfigureAwait(false);
+
+            return data;
+        }
+
+        private static async Task<object> CompleteObjectValueAsync(IExecutorContext executorContext, List<GraphQLFieldSelection> fields, object value,
+            Dictionary<string, object> coercedVariableValues, NodePath path, ObjectType fieldObjectType)
+        {
+            var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
+            var data = await SelectionSets.ExecuteSelectionSetAsync(
+                executorContext,
+                subSelectionSet,
+                fieldObjectType,
+                value,
+                coercedVariableValues,
+                path).ConfigureAwait(false);
+
+            return data;
+        }
+
+        private async Task<object> CompleteListValueAsync(IExecutorContext executorContext, ObjectType objectType, IField field,
+            IType fieldType, ObjectType actualType, GraphQLFieldSelection selection, List<GraphQLFieldSelection> fields, object value,
+            Dictionary<string, object> coercedVariableValues, NodePath path, List listType)
+        {
+            if (!(value is IEnumerable values))
+                throw new CompleteValueException(
+                    $"Cannot complete value for list field '{selection.Name.Value}':'{fieldType}'. " +
+                    "Resolved value is not a collection");
+
+            var innerType = listType.WrappedType;
+            var result = new List<object>();
+            int i = 0;
+            foreach (var resultItem in values)
+            {
+                var itemPath = path.Fork().Append(i++);
+                try
                 {
-                    var itemPath = path.Fork().Append(i++);
                     var completedResultItem = await CompleteValueAsync(
                         executorContext,
                         objectType,
@@ -136,73 +251,52 @@ namespace tanka.graphql.resolvers
 
                     result.Add(completedResultItem);
                 }
+                catch (NullValueForNonNullException)
+                {
+                    if (innerType is NonNull)
+                    {
+                        throw;
+                    }
 
-                return result;
+                    result.Add(null);
+                }
             }
 
-            if (fieldType is ScalarType scalarType) return scalarType.Serialize(value);
+            return result;
+        }
 
-            if (fieldType is EnumType enumType) return enumType.Serialize(value);
+        private async Task<object> CompleteNonNullValueAsync(
+            IExecutorContext executorContext, 
+            ObjectType objectType, 
+            IField field,
+            ObjectType actualType, 
+            GraphQLFieldSelection selection, 
+            List<GraphQLFieldSelection> fields, 
+            object value, Dictionary<string, object> coercedVariableValues,
+            NodePath path,
+            NonNull nonNull)
+        {
+            var innerType = nonNull.WrappedType;
+            var completedResult = await CompleteValueAsync(
+                executorContext,
+                objectType,
+                field,
+                innerType,
+                actualType,
+                selection,
+                fields,
+                value,
+                coercedVariableValues,
+                path).ConfigureAwait(false);
 
-            if (fieldType is ObjectType fieldObjectType)
-            {
-                var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
-                var data = await SelectionSets.ExecuteSelectionSetAsync(
-                    executorContext,
-                    subSelectionSet,
-                    fieldObjectType,
-                    value,
-                    coercedVariableValues,
-                    path).ConfigureAwait(false);
+            if (completedResult == null)
+                throw new NullValueForNonNullException(
+                    objectType.Name,
+                    selection.Name.Value,
+                    path,
+                    selection);
 
-                return data;
-            }
-
-            // interfaces and unions require ActualType
-            if (actualType == null)
-                throw new CompleteValueException(
-                    "Cannot complete value as interface or union. " +
-                    $"Actual type not given from resolver. Use {nameof(Resolve.As)} with type parameter");
-
-            if (fieldType is InterfaceType interfaceType)
-            {
-                if (!actualType.Implements(interfaceType))
-                    throw new CompleteValueException(
-                        "Cannot complete value as interface. " +
-                        $"Actual type {actualType.Name} does not implement {interfaceType.Name}");
-
-                var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
-                var data = await SelectionSets.ExecuteSelectionSetAsync(
-                    executorContext,
-                    subSelectionSet,
-                    actualType,
-                    value,
-                    coercedVariableValues,
-                    path).ConfigureAwait(false);
-
-                return data;
-            }
-
-            if (fieldType is UnionType unionType)
-            {
-                if (!unionType.IsPossible(actualType))
-                    throw new CompleteValueException(
-                        "Cannot complete value as union. " +
-                        $"Actual type {actualType.Name} is not possible for {unionType.Name}");
-
-                var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
-                var data = await SelectionSets.ExecuteSelectionSetAsync(
-                    executorContext,
-                    subSelectionSet,
-                    actualType,
-                    value,
-                    coercedVariableValues,
-                    path).ConfigureAwait(false);
-
-                return data;
-            }
-
-            throw new CompleteValueException($"Cannot complete value for field {field}. No handling for the type {fieldType}.");
+            return completedResult;
         }
     }
 }

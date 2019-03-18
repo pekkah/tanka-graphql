@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using tanka.graphql.error;
 using tanka.graphql.type;
 using GraphQLParser.AST;
@@ -13,10 +14,10 @@ namespace tanka.graphql.execution
 
         IExecutionStrategy Strategy { get; }
 
-        IEnumerable<GraphQLError> FieldErrors { get; }
+        IEnumerable<Exception> FieldErrors { get; }
 
         Extensions Extensions { get; }
 
-        void AddError(GraphQLError error);
+        void AddError(Exception error);
     }
 }

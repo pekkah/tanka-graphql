@@ -79,36 +79,24 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(@"
-{
-  ""errors"": [
-     {
-      ""message"": ""Field 'Nest.nestedNonNull:String!' is non-null field and cannot be resolved as null. Cannot complete value on non-null field 'nestedNonNull:String!'. Completed value is null."",
-      ""locations"": [
-        {
-          ""end"": 50,
-          ""start"": 30
-        }
-      ],
-      ""path"": [
-        ""nonNullNested"",
-        ""nestedNonNull""
-      ]
-    },
-    {
-      ""message"": ""Field 'Query.nonNullNested:Nest!' is non-null field and cannot be resolved as null. Field 'Nest.nestedNonNull:String!' is non-null field and cannot be resolved as null."",
-      ""locations"": [
-        {
-          ""end"": 52,
-          ""start"": 7
-        }
-      ],
-      ""path"": [
-        ""nonNullNested""
-      ]
-    }
-  ],
-  ""data"": null
-}");
+                {
+                  ""data"": null,
+                  ""errors"": [
+                    {
+                      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
+                      ""locations"": [
+                        {
+                          ""end"": 50,
+                          ""start"": 30
+                        }
+                      ],
+                      ""path"": [
+                        ""nonNullNested"",
+                        ""nestedNonNull""
+                      ]
+                    }
+                  ]
+                }");
         }
 
         [Fact]
@@ -133,27 +121,27 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(@"
-{
-  ""errors"": [
-    {
-      ""message"": ""Field 'Nest.nestedNonNull:String!' is non-null field and cannot be resolved as null. Cannot complete value on non-null field 'nestedNonNull:String!'. Completed value is null."",
-      ""locations"": [
-        {
-          ""end"": 64,
-          ""start"": 45
-        }
-      ],
-      ""path"": [
-        ""nullableNested"",
-        ""nestedNonNull""
-      ]
-    }
-  ],
-  ""data"": {
-    ""nullable"": ""hello"",
-    ""nullableNested"": null
-  }
-}");
+                {
+                  ""data"": {
+                    ""nullableNested"": null,
+                    ""nullable"": ""hello""
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
+                      ""locations"": [
+                        {
+                          ""end"": 64,
+                          ""start"": 45
+                        }
+                      ],
+                      ""path"": [
+                        ""nullableNested"",
+                        ""nestedNonNull""
+                      ]
+                    }
+                  ]
+                }");
         }
 
         [Fact]
@@ -177,26 +165,26 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(@"
-{
-  ""errors"": [
-      {
-      ""message"": ""Field 'Nest.nestedNonNull:String!' is non-null field and cannot be resolved as null. Cannot complete value on non-null field 'nestedNonNull:String!'. Completed value is null."",
-      ""locations"": [
-        {
-          ""end"": 51,
-          ""start"": 31
-        }
-      ],
-      ""path"": [
-        ""nullableNested"",
-        ""nestedNonNull""
-      ]
-    }
-  ],
-  ""data"": {
-    ""nullableNested"": null
-  }
-}");
+                {
+                  ""data"": {
+                    ""nullableNested"": null
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
+                      ""locations"": [
+                        {
+                          ""end"": 51,
+                          ""start"": 31
+                        }
+                      ],
+                      ""path"": [
+                        ""nullableNested"",
+                        ""nestedNonNull""
+                      ]
+                    }
+                  ]
+                }");
         }
 
         [Fact]
@@ -218,23 +206,23 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(@"
-{
-  ""errors"": [
-    {
-      ""message"": ""Field 'Query.nonNull:String!' is non-null field and cannot be resolved as null. Cannot complete value on non-null field 'nonNull:String!'. Completed value is null."",
-      ""locations"": [
-        {
-          ""end"": 16,
-          ""start"": 7
-        }
-      ],
-      ""path"": [
-        ""nonNull""
-      ]
-    }
-  ],
-  ""data"": null
-}");
+                {
+                  ""data"": null,
+                  ""errors"": [
+                    {
+                      ""message"": ""Cannot return null for non-nullable field 'Query.nonNull'."",
+                      ""locations"": [
+                        {
+                          ""end"": 16,
+                          ""start"": 7
+                        }
+                      ],
+                      ""path"": [
+                        ""nonNull""
+                      ]
+                    }
+                  ]
+                }");
         }
     }
 }

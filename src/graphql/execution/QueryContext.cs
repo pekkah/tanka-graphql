@@ -9,7 +9,7 @@ namespace tanka.graphql.execution
 {
     public class QueryContext
     {
-        public QueryContext(Func<GraphQLError, Error> formatError,
+        public QueryContext(Func<Exception, Error> formatError,
             GraphQLDocument document,
             GraphQLOperationDefinition operation,
             ISchema schema,
@@ -26,7 +26,7 @@ namespace tanka.graphql.execution
             Extensions = extensions;
         }
 
-        public Func<GraphQLError, Error> FormatError { get; }
+        public Func<Exception, Error> FormatError { get; }
 
         public GraphQLDocument Document { get; }
 

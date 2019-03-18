@@ -17,7 +17,7 @@ namespace tanka.graphql
         /// <summary>
         ///     Function for formatting <see cref="GraphQLError" into <see cref="Error"/>/>
         /// </summary>
-        public Func<GraphQLError, Error> FormatError = DefaultFormatError;
+        public Func<Exception, Error> FormatError = DefaultFormatError;
 
         /// <summary>
         ///     Schema to execute against
@@ -53,17 +53,22 @@ namespace tanka.graphql
         /// </summary>
         public ICollection<IExtension> Extensions { get; set; } = new List<IExtension>();
 
-        private static Error DefaultFormatError(GraphQLError error)
+        private static Error DefaultFormatError(Exception error)
         {
             var message = error.Message;
 
             if (error.InnerException != null) message += $" {error.InnerException.Message}";
 
+            if (!(error is GraphQLError graphQLError))
+            {
+                return new Error(message);
+            }
+
             return new Error(message)
             {
-                Extensions = error.Extensions,
-                Locations = error.Locations,
-                Path = error.Path?.Segments.ToList()
+                Extensions = graphQLError.Extensions,
+                Locations = graphQLError.Locations,
+                Path = graphQLError.Path?.Segments.ToList()
             };
         }
     }

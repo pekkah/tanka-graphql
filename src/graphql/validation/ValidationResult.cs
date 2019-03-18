@@ -17,7 +17,7 @@ namespace tanka.graphql.validation
 
             if (!IsValid)
             {
-                builder.AppendLine("Errors:");
+                builder.AppendLine("ExecutionErrors:");
                 foreach (var validationError in Errors)
                 {
                     builder.AppendLine(validationError.ToString());
