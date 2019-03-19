@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using tanka.graphql.error;
-using tanka.graphql.type;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using tanka.graphql.error;
+using tanka.graphql.type;
 
 namespace tanka.graphql
 {
@@ -15,9 +15,9 @@ namespace tanka.graphql
     public class ExecutionOptions
     {
         /// <summary>
-        ///     Function for formatting <see cref="GraphQLError" into <see cref="Error"/>/>
+        ///     Function for formatting <see cref="GraphQLError" into <see cref="Error" />/>
         /// </summary>
-        public Func<GraphQLError, Error> FormatError = DefaultFormatError;
+        public Func<Exception, Error> FormatError = DefaultFormatError;
 
         /// <summary>
         ///     Schema to execute against
@@ -42,7 +42,7 @@ namespace tanka.graphql
         public object InitialValue { get; set; }
 
         /// <summary>
-        ///     Validate <see cref="Document"/> against <see cref="Schema"/>
+        ///     Validate <see cref="Document" /> against <see cref="Schema" />
         /// </summary>
         public bool Validate { get; set; } = true;
 
@@ -53,18 +53,26 @@ namespace tanka.graphql
         /// </summary>
         public ICollection<IExtension> Extensions { get; set; } = new List<IExtension>();
 
-        private static Error DefaultFormatError(GraphQLError error)
+        private static Error DefaultFormatError(Exception exception)
         {
-            var message = error.Message;
+            var message = exception.Message;
 
-            if (error.InnerException != null) message += $" {error.InnerException.Message}";
+            if (exception.InnerException != null) message += $" {exception.InnerException.Message}";
 
-            return new Error(message)
-            {
-                Extensions = error.Extensions,
-                Locations = error.Locations,
-                Path = error.Path?.Segments.ToList()
-            };
+            var error = new Error(message);
+            EnrichWithErrorCode(error, exception);
+            if (!(exception is GraphQLError graphQLError)) return error;
+
+            error.Locations = graphQLError.Locations;
+            error.Path = graphQLError.Path?.Segments.ToList();
+            return error;
+        }
+
+        private static void EnrichWithErrorCode(Error error, Exception exception)
+        {
+            error.Extend("code", exception.GetType().Name
+                .Replace("Exception", string.Empty)
+                .ToUpperInvariant());
         }
     }
 }

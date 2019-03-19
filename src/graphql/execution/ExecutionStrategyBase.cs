@@ -75,9 +75,9 @@ namespace tanka.graphql.execution
 
                 return completedValue;
             }
-            catch (GraphQLError e)
+            catch (Exception e)
             {
-                return Errors.HandleFieldError(
+                return ExecutionErrors.HandleFieldError(
                     context,
                     objectType,
                     fieldName,

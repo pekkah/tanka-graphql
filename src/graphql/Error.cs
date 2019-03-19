@@ -21,5 +21,13 @@ namespace tanka.graphql
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public Dictionary<string, object> Extensions { get; set; }
+
+        public void Extend(string key, object value)
+        {
+            if (Extensions == null)
+                Extensions = new Dictionary<string, object>();
+
+            Extensions[key] = value;
+        }
     }
 }

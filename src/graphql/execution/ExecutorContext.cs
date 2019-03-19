@@ -8,7 +8,7 @@ namespace tanka.graphql.execution
 {
     public class ExecutorContext : IExecutorContext
     {
-        private readonly List<GraphQLError> _errors;
+        private readonly List<Exception> _errors;
 
         public ExecutorContext(ISchema schema, GraphQLDocument document, Extensions extensions,
             IExecutionStrategy strategy)
@@ -17,7 +17,7 @@ namespace tanka.graphql.execution
             Document = document ?? throw new ArgumentNullException(nameof(document));
             Extensions = extensions ?? throw new ArgumentNullException(nameof(extensions));
             Strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
-            _errors = new List<GraphQLError>();
+            _errors = new List<Exception>();
         }
 
         public ISchema Schema { get; }
@@ -26,11 +26,11 @@ namespace tanka.graphql.execution
 
         public Extensions Extensions { get; }
 
-        public IEnumerable<GraphQLError> FieldErrors => _errors;
+        public IEnumerable<Exception> FieldErrors => _errors;
 
         public IExecutionStrategy Strategy { get; }
 
-        public void AddError(GraphQLError error)
+        public void AddError(Exception error)
         {
             if (_errors.Contains(error))
                 return;
