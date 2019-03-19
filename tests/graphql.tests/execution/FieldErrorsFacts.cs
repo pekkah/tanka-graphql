@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -15,9 +16,12 @@ namespace tanka.graphql.tests.execution
         public Query()
         {
             Container = new Container();
+            Custom = new CustomContainer();
         }
 
         public Container Container { get; }
+
+        public CustomContainer Custom { get; }
     }
 
     public class Container
@@ -34,6 +38,11 @@ namespace tanka.graphql.tests.execution
             null,
             "third"
         };
+    }
+
+    public class CustomContainer
+    {
+
     }
 
     public class FieldErrorsFacts
@@ -55,13 +64,16 @@ namespace tanka.graphql.tests.execution
                         nonNullListWithNullItem: [String]!
                     }
 
-                    type CustomeErrorContainer {
+                    type CustomErrorContainer {
                         nonNullWithCustomError: String!
                         nullableWithCustomError: String
+                        nonNullListWithCustomError: [String]!
+                        nonNullListItemWithCustomError: [String!]!
                     }
 
                     type Query {
                         container: Container
+                        custom: CustomErrorContainer
                     }
 
                     schema {
@@ -78,14 +90,17 @@ namespace tanka.graphql.tests.execution
                     {"nonNullListWithNonNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem)},
                     {"nonNullListWithNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem)}
                 },
-                ["Container"] = new FieldResolverMap()
+                ["CustomErrorContainer"] = new FieldResolverMap()
                 {
-                    {"nonNullWithCustomError", context => },
-                    {"nullableWithCustomError", context => },
+                    {"nonNullWithCustomError", context => throw new InvalidOperationException("error")},
+                    {"nullableWithCustomError", context => throw new InvalidOperationException("error")},
+                    {"nonNullListWithCustomError", context => throw new InvalidOperationException("error")},
+                    {"nonNullListItemWithCustomError", context => throw new InvalidOperationException("error")}
                 },
                 ["Query"] = new FieldResolverMap()
                 {
-                    {"container" , context => new ValueTask<IResolveResult>(Resolve.As(Query.Container))}
+                    {"container" , context => new ValueTask<IResolveResult>(Resolve.As(Query.Container))},
+                    {"custom", context=> new ValueTask<IResolveResult>(Resolve.As(Query.Custom))}
                 }
             };
 
@@ -116,7 +131,8 @@ namespace tanka.graphql.tests.execution
             });
 
             /* Then */
-            result.ShouldMatchJson(@"{
+            result.ShouldMatchJson(
+                @"{
                   ""data"": {
                     ""container"": null
                   },
@@ -132,7 +148,10 @@ namespace tanka.graphql.tests.execution
                       ""path"": [
                         ""container"",
                         ""nonNullWithNull""
-                      ]
+                      ],
+                      ""extensions"": {
+                        ""code"": ""NULLVALUEFORNONNULL""
+                      }
                     }
                   ]
                 }");
@@ -160,7 +179,8 @@ namespace tanka.graphql.tests.execution
             });
 
             /* Then */
-            result.ShouldMatchJson(@"{
+            result.ShouldMatchJson(
+                @"{
                   ""data"": {
                     ""container"": null
                   },
@@ -176,7 +196,10 @@ namespace tanka.graphql.tests.execution
                       ""path"": [
                         ""container"",
                         ""nonNullListAsNull""
-                      ]
+                      ],
+                      ""extensions"": {
+                        ""code"": ""NULLVALUEFORNONNULL""
+                      }
                     }
                   ]
                 }");
@@ -240,27 +263,147 @@ namespace tanka.graphql.tests.execution
             });
 
             /* Then */
-            result.ShouldMatchJson(@"{
-              ""data"": {
-                ""container"": null
-              },
-              ""errors"": [
-                {
-                  ""message"": ""Cannot return null for non-nullable field 'Container.nonNullListWithNonNullItem'."",
-                  ""locations"": [
+            result.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""container"": null
+                  },
+                  ""errors"": [
                     {
-                      ""end"": 123,
-                      ""start"": 75
+                      ""message"": ""Cannot return null for non-nullable field 'Container.nonNullListWithNonNullItem'."",
+                      ""locations"": [
+                        {
+                          ""end"": 123,
+                          ""start"": 75
+                        }
+                      ],
+                      ""path"": [
+                        ""container"",
+                        ""nonNullListWithNonNullItem"",
+                        1
+                      ],
+                      ""extensions"": {
+                        ""code"": ""NULLVALUEFORNONNULL""
+                      }
                     }
-                  ],
-                  ""path"": [
-                    ""container"",
-                    ""nonNullListWithNonNullItem"",
-                    1
                   ]
+                }");
+        }
+
+        [Fact]
+        public async Task Exception_thrown_by_NonNull_field()
+        {
+            /* Given */
+            var query = Parser.ParseDocument(
+                @"
+                {
+                    custom {
+                        nonNullWithCustomError
+                    }
                 }
-              ]
-            }");
+                ");
+
+
+            /* When */
+            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+            {
+                Schema = _schema,
+                Document = query
+            });
+
+            /* Then */
+            result.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""custom"": null
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""error"",
+                      ""extensions"": {
+                        ""code"": ""INVALIDOPERATION""
+                      }
+                    }
+                  ]
+                }");
+        }
+
+        [Fact]
+        public async Task Exception_thrown_by_nullable_field()
+        {
+            /* Given */
+            var query = Parser.ParseDocument(
+                @"
+                {
+                    custom {
+                        nullableWithCustomError
+                    }
+                }
+                ");
+
+
+            /* When */
+            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+            {
+                Schema = _schema,
+                Document = query
+            });
+
+            /* Then */
+            result.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""custom"": {
+                      ""nullableWithCustomError"": null
+                    }
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""error"",
+                      ""extensions"": {
+                        ""code"": ""INVALIDOPERATION""
+                      }
+                    }
+                  ]
+                }");
+        }
+
+        [Fact]
+        public async Task Exception_thrown_by_nonNullList_field()
+        {
+            /* Given */
+            var query = Parser.ParseDocument(
+                @"
+                {
+                    custom {
+                        nonNullListWithCustomError
+                    }
+                }
+                ");
+
+
+            /* When */
+            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+            {
+                Schema = _schema,
+                Document = query
+            });
+
+            /* Then */
+            result.ShouldMatchJson(
+                @"{
+                  ""data"": {
+                    ""custom"": null
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""error"",
+                      ""extensions"": {
+                        ""code"": ""INVALIDOPERATION""
+                      }
+                    }
+                  ]
+                }");
         }
     }
 }

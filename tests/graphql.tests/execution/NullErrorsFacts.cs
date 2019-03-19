@@ -93,7 +93,10 @@ namespace tanka.graphql.tests.execution
                       ""path"": [
                         ""nonNullNested"",
                         ""nestedNonNull""
-                      ]
+                      ],
+                      ""extensions"": {
+                        ""code"": ""NULLVALUEFORNONNULL""
+                      }
                     }
                   ]
                 }");
@@ -138,7 +141,10 @@ namespace tanka.graphql.tests.execution
                       ""path"": [
                         ""nullableNested"",
                         ""nestedNonNull""
-                      ]
+                      ],
+                      ""extensions"": {
+                        ""code"": ""NULLVALUEFORNONNULL""
+                      }
                     }
                   ]
                 }");
@@ -181,7 +187,10 @@ namespace tanka.graphql.tests.execution
                       ""path"": [
                         ""nullableNested"",
                         ""nestedNonNull""
-                      ]
+                      ],
+                      ""extensions"": {
+                        ""code"": ""NULLVALUEFORNONNULL""
+                      }
                     }
                   ]
                 }");
@@ -219,7 +228,10 @@ namespace tanka.graphql.tests.execution
                       ],
                       ""path"": [
                         ""nonNull""
-                      ]
+                      ],
+                      ""extensions"": {
+                        ""code"": ""NULLVALUEFORNONNULL""
+                      }
                     }
                   ]
                 }");

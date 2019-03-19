@@ -251,13 +251,14 @@ namespace tanka.graphql.resolvers
 
                     result.Add(completedResultItem);
                 }
-                catch (NullValueForNonNullException)
+                catch (Exception e)
                 {
                     if (innerType is NonNull)
                     {
                         throw;
                     }
 
+                    executorContext.AddError(e);
                     result.Add(null);
                 }
             }
