@@ -71,13 +71,13 @@ src\graphql.server.link> yarn link
 src\graphql.server.link> yarn watch
 
 # Install dependencies
-dev\graphql.samples.chat.ui> yarn install
+dev\graphql.dev.chat.ui> yarn install
 
 # Use the linked server-link
-dev\graphql.samples.chat.ui> yarn link @tanka/tanka-graphql-server-link
+dev\graphql.dev.chat.ui> yarn link @tanka/tanka-graphql-server-link
 
 # Watch for source changes and recompile the sample
-dev\graphql.samples.chat.ui> yarn start
+dev\graphql.dev.chat.ui> yarn start
 ```
 
 
