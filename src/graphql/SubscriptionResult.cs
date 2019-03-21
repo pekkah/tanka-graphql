@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks.Dataflow;
+using System.Threading.Channels;
 
 namespace tanka.graphql
 {
@@ -11,7 +11,7 @@ namespace tanka.graphql
     {
         private IEnumerable<Error> _errors;
 
-        public SubscriptionResult(ISourceBlock<ExecutionResult> source)
+        public SubscriptionResult(ChannelReader<ExecutionResult> source)
         {
             Source = source;
         }
@@ -20,10 +20,8 @@ namespace tanka.graphql
         {
         }
 
-        /// <summary>
-        ///     Source stream of <see cref="ExecutionResult"/>
-        /// </summary>
-        public ISourceBlock<ExecutionResult> Source { get; }
+        public ChannelReader<ExecutionResult> Source { get; }
+
 
         public IEnumerable<Error> Errors
         {

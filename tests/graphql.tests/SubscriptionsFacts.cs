@@ -130,7 +130,7 @@ subscription MessageAdded {
             /* Then */
             for (var i = 0; i < count; i++)
             {
-                var actualResult = await result.Source.ReceiveAsync(unsubscribe.Token).ConfigureAwait(false);
+                var actualResult = await result.Source.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
 
                 actualResult.ShouldMatchJson(@"{
     ""data"":{
@@ -168,7 +168,7 @@ subscription MessageAdded {
             }, unsubscribe.Token).ConfigureAwait(false);
 
             /* Then */
-            var actualResult = await result.Source.ReceiveAsync().ConfigureAwait(false);
+            var actualResult = await result.Source.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
             unsubscribe.Cancel();
 
             actualResult.ShouldMatchJson(@"{

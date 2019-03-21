@@ -63,7 +63,19 @@ namespace tanka.graphql.resolvers
 
         public static ISubscribeResult Stream(ISourceBlock<object> reader)
         {
-            return new SubscribeResult(reader);
+            var result =  new SubscribeResult();
+            var _ = Task.Run(async () =>
+            {
+                while (!reader.Completion.IsCompleted)
+                {
+                    var item = await reader.ReceiveAsync();
+                    await result.WriteAsync(item);
+                }
+
+                result.TryComplete();
+            });
+
+            return result;
         }
     }
 }

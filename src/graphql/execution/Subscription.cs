@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+using GraphQLParser.AST;
+using tanka.graphql.channels;
 using tanka.graphql.error;
 using tanka.graphql.resolvers;
-using GraphQLParser.AST;
 
 namespace tanka.graphql.execution
 {
@@ -72,24 +73,16 @@ namespace tanka.graphql.execution
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
             if (formatError == null) throw new ArgumentNullException(nameof(formatError));
 
-            var executorEventBlock = new TransformBlock<object, ExecutionResult>(evnt => ExecuteSubscriptionEventAsync(
+            var responseStream = Channel.CreateUnbounded<ExecutionResult>();
+            var reader = subscribeResult.GetReader();
+
+            // execute event
+            var _ = reader.Transform(responseStream, item => ExecuteSubscriptionEventAsync(
                 context,
                 subscription,
                 coercedVariableValues,
-                evnt,
+                item,
                 formatError));
-
-            var sourceStream = subscribeResult.Reader;
-            sourceStream.LinkTo(executorEventBlock, new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            });
-
-            var responseStream = new BufferBlock<ExecutionResult>();
-            executorEventBlock.LinkTo(responseStream, new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            });
 
             return new SubscriptionResult(responseStream);
         }
@@ -98,7 +91,7 @@ namespace tanka.graphql.execution
             IExecutorContext context,
             GraphQLOperationDefinition subscription,
             Dictionary<string, object> coercedVariableValues,
-            object initialValue, 
+            object initialValue,
             CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));

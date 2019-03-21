@@ -131,7 +131,7 @@ namespace tanka.graphql.benchmarks
 
             AssertResult(result.Errors);
 
-            var value = result.Source.Receive();
+            var value = await result.Source.ReadAsync(cts.Token);
             AssertResult(value.Errors);
             cts.Cancel();
         }

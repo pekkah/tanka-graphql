@@ -9,6 +9,7 @@ using tanka.graphql.server.utilities;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using tanka.graphql.channels;
 
 namespace tanka.graphql.server
 {
@@ -85,25 +86,16 @@ namespace tanka.graphql.server
 
             var result = await Executor.SubscribeAsync(options, cancellationToken);
             var channel = Channel.CreateUnbounded<ExecutionResult>();
+            var _= channel.Reader.Completion
+                .ContinueWith(
+                    __ => _logger?.Unsubscribed(
+                        options.OperationName, 
+                        options.VariableValues, 
+                        null), 
+                    cancellationToken);
 
-            var _ = Task.Run(async () =>
-            {
-                await cancellationToken.WhenCancelled();
-                channel.Writer.TryComplete();
-                _logger.Unsubscribed(options.OperationName, options.VariableValues, null);
-            });
 
-            var writer = new ActionBlock<ExecutionResult>(
-                executionResult => channel.Writer.WriteAsync(executionResult, cancellationToken),
-                new ExecutionDataflowBlockOptions
-                {
-                    EnsureOrdered = true
-                });
-
-            result.Source.LinkTo(writer, new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            });
+            var ___ = result.Source.Join(channel.Writer);
 
             _logger.Subscribed(options.OperationName, options.VariableValues, null);
             var stream = new QueryStream(channel);

@@ -1,15 +1,33 @@
 ﻿using System;
-using System.Threading.Tasks.Dataflow;
+using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace tanka.graphql.resolvers
 {
     public class SubscribeResult : ISubscribeResult
     {
-        public SubscribeResult(ISourceBlock<object> reader)
+        private readonly Channel<object> _channel;
+
+        public SubscribeResult()
         {
-            Reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            _channel = Channel.CreateUnbounded<object>();
         }
 
-        public ISourceBlock<object> Reader { get; set; }
+        public ChannelReader<object> GetReader()
+        {
+            return _channel.Reader;
+        }
+
+        public bool TryComplete(Exception error = null)
+        {
+            return _channel.Writer.TryComplete(error);
+        } 
+
+
+        public ValueTask WriteAsync<T>(T item, CancellationToken cancellationToken = default)
+        {
+            return _channel.Writer.WriteAsync(item, cancellationToken);
+        }
     }
 }
