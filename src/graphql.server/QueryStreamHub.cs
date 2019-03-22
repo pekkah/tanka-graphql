@@ -2,6 +2,7 @@
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using tanka.graphql.channels;
 
 namespace tanka.graphql.server
 {
@@ -15,12 +16,17 @@ namespace tanka.graphql.server
         }
 
         [HubMethodName("query")]
-        public async Task<ChannelReader<ExecutionResult>> QueryAsync(
+        public ChannelReader<ExecutionResult> QueryAsync(
             QueryRequest query,
             CancellationToken cancellationToken)
         {
-            var result = await _queryStreamService.QueryAsync(query, cancellationToken);
-            return result.Reader;
+            var channel = Channel.CreateUnbounded<ExecutionResult>();
+            var _ = Task.Run(async ()=>
+            {
+                var result = await _queryStreamService.QueryAsync(query, cancellationToken);
+                var __ = result.Reader.Join(channel.Writer);
+            }, CancellationToken.None);
+            return channel.Reader;
         }
     }
 }

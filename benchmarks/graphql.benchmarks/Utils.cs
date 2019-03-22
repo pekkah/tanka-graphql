@@ -8,10 +8,19 @@ using tanka.graphql.sdl;
 
 namespace tanka.graphql.benchmarks
 {
+    public class BufferedEventChannel : EventChannel<string>
+    {
+        public override void OnSubscribed(SubscribeResult subscription)
+        {
+            subscription.WriteAsync("value").AsTask().Wait();
+        }
+    }
+
     public static class Utils
     {
         public static ISchema InitializeSchema()
         {
+            var events = new BufferedEventChannel();
             var builder = new SchemaBuilder();
             Sdl.Import(Parser.ParseDocument(
                 @"
@@ -53,11 +62,7 @@ namespace tanka.graphql.benchmarks
                     {
                         {
                             "simple", 
-                            async (context, unsubscribe) =>
-                            {
-                                var stream = await SimpleValueBlock("value");
-                                return Resolve.Subscribe(stream, unsubscribe);
-                            }, 
+                            (context, unsubscribe) => ResolveSync.Subscribe(events, unsubscribe), 
                             context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))}
                     }
                 }
@@ -69,13 +74,6 @@ namespace tanka.graphql.benchmarks
                 resolvers);
 
             return schema;
-        }
-
-        private static async Task<EventChannel<string>> SimpleValueBlock(string value)
-        {
-            var target = new EventChannel<string>();
-            await target.WriteAsync(value);
-            return target;
         }
 
         public static GraphQLDocument InitializeQuery()

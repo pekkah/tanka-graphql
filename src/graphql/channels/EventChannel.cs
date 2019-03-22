@@ -19,10 +19,21 @@ namespace tanka.graphql.channels
             {
                 if (_subscriptions.TryRemove(unsubscribe, out var sub))
                 {
+                    OnUnsubscribing(subscription);
                     sub.TryComplete();
                 }
             });
+
+            OnSubscribed(subscription);
             return subscription;
+        }
+
+        public virtual void OnSubscribed(SubscribeResult subscription)
+        {
+        }
+
+        public virtual void OnUnsubscribing(SubscribeResult subscription)
+        {
         }
 
         public async ValueTask WriteAsync(T item)
