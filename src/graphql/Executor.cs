@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
@@ -79,7 +80,7 @@ namespace tanka.graphql
             if (!unsubscribe.CanBeCanceled)
                 throw new InvalidOperationException("Unsubscribe token must be cancelable");
 
-            var extensions = new Extensions(options.Extensions);
+            var extensions = new Extensions(Enumerable.Empty<IExtension>());
             await extensions.BeginExecuteAsync(options);
 
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
@@ -97,14 +98,21 @@ namespace tanka.graphql
                         Errors = validationResult.Errors.Select(e => new Error(e.Message))
                     };
 
+                SubscriptionResult subscriptionResult;
                 switch (queryContext.OperationDefinition.Operation)
                 {
                     case OperationType.Subscription:
-                        return await Subscription.SubscribeAsync(queryContext, unsubscribe).ConfigureAwait(false);
+                        subscriptionResult = await Subscription.SubscribeAsync(
+                            queryContext, 
+                            unsubscribe).ConfigureAwait(false);
+                        break;
                     default:
                         throw new InvalidOperationException(
                             $"Operation type {queryContext.OperationDefinition.Operation} not supported. Did you mean to use {nameof(ExecuteAsync)}?");
                 }
+
+                logger.ExecutionResult(subscriptionResult);
+                return subscriptionResult;
             }
         }
 

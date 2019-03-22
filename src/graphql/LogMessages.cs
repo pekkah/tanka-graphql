@@ -81,7 +81,7 @@ namespace tanka.graphql
                 ValidationResultDebugAction(logger, result, null);
         }
 
-        internal static void ExecutionResult(this ILogger logger, ExecutionResult result)
+        internal static void ExecutionResult(this ILogger logger, IExecutionResult result)
         {
             ExecutionResultAction(logger, result.Errors != null, null);
         }

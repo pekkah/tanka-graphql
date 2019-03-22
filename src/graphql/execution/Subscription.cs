@@ -161,11 +161,13 @@ namespace tanka.graphql.execution
                 coercedVariableValues,
                 path).ConfigureAwait(false);
 
-            return new ExecutionResult
+            var result = new ExecutionResult
             {
                 Errors = context.FieldErrors.Select(formatError).ToList(),
                 Data = data
             };
+
+            return result;
         }
     }
 }

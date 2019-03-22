@@ -11,7 +11,7 @@ namespace tanka.graphql
 
         ValueTask EndValidationAsync(ValidationResult validationResult);
 
-        ValueTask EndExecuteAsync(ExecutionResult executionResult);
+        ValueTask EndExecuteAsync(IExecutionResult executionResult);
 
         ValueTask BeginParseDocumentAsync();
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Channels;
+using Newtonsoft.Json;
 
 namespace tanka.graphql
 {
@@ -10,6 +11,7 @@ namespace tanka.graphql
     public class SubscriptionResult : IExecutionResult
     {
         private IEnumerable<Error> _errors;
+        private IDictionary<string, object> _extensions;
 
         public SubscriptionResult(ChannelReader<ExecutionResult> source)
         {
@@ -23,6 +25,23 @@ namespace tanka.graphql
         public ChannelReader<ExecutionResult> Source { get; }
 
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public IDictionary<string, object> Extensions
+        {
+            get => _extensions;
+            set
+            {
+                if (value != null && !value.Any())
+                {
+                    _extensions = null;
+                    return;
+                }
+
+                _extensions = value;
+            }
+        }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<Error> Errors
         {
             get => _errors;
