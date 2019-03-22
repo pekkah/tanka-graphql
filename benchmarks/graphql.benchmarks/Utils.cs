@@ -5,6 +5,7 @@ using tanka.graphql.resolvers;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using GraphQLParser.AST;
+using tanka.graphql.channels;
 using tanka.graphql.sdl;
 
 namespace tanka.graphql.benchmarks
@@ -54,7 +55,11 @@ namespace tanka.graphql.benchmarks
                     {
                         {
                             "simple", 
-                            (context, unsubscribe) => new ValueTask<ISubscribeResult>(Resolve.Stream(SimpleValueBlock("value"))), 
+                            async (context, unsubscribe) =>
+                            {
+                                var stream = await SimpleValueBlock("value");
+                                return Resolve.Subscribe(stream, unsubscribe);
+                            }, 
                             context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))}
                     }
                 }
@@ -68,10 +73,10 @@ namespace tanka.graphql.benchmarks
             return schema;
         }
 
-        private static ISourceBlock<object> SimpleValueBlock(string value)
+        private static async Task<EventChannel<string>> SimpleValueBlock(string value)
         {
-            var target = new BufferBlock<string>();
-            target.Post(value);
+            var target = new EventChannel<string>();
+            await target.WriteAsync(value);
             return target;
         }
 

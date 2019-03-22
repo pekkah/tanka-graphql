@@ -1,0 +1,36 @@
+﻿using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
+using tanka.graphql.resolvers;
+
+namespace tanka.graphql.channels
+{
+    public class EventChannel<T>
+    {
+        private readonly ConcurrentDictionary<CancellationToken, ISubscribeResult> 
+            _subscriptions = new ConcurrentDictionary<CancellationToken, ISubscribeResult>();
+
+        public ISubscribeResult Subscribe(CancellationToken unsubscribe)
+        {
+            var subscription = new SubscribeResult();
+            _subscriptions[unsubscribe] = subscription;
+
+            unsubscribe.Register(() =>
+            {
+                if (_subscriptions.TryRemove(unsubscribe, out var sub))
+                {
+                    sub.TryComplete();
+                }
+            });
+            return subscription;
+        }
+
+        public async ValueTask WriteAsync(T item)
+        {
+            foreach (var subscription in _subscriptions)
+            {
+                await subscription.Value.WriteAsync(item, subscription.Key);
+            }
+        }
+    }
+}
