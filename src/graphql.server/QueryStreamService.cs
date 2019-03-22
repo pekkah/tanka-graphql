@@ -68,7 +68,6 @@ namespace tanka.graphql.server
             CancellationToken cancellationToken)
         {
             var result = await Executor.ExecuteAsync(options);
-
             var channel = Channel.CreateBounded<ExecutionResult>(1);
             await channel.Writer.WriteAsync(result, cancellationToken);
             channel.Writer.TryComplete();
@@ -85,20 +84,16 @@ namespace tanka.graphql.server
                 throw new InvalidOperationException("Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
 
             var result = await Executor.SubscribeAsync(options, cancellationToken);
-            var channel = Channel.CreateUnbounded<ExecutionResult>();
-            var _= channel.Reader.Completion
-                .ContinueWith(
-                    __ => _logger?.Unsubscribed(
-                        options.OperationName, 
-                        options.VariableValues, 
-                        null), 
-                    cancellationToken);
-
-
-            var ___ = result.Source.Join(channel.Writer);
-
             _logger.Subscribed(options.OperationName, options.VariableValues, null);
-            var stream = new QueryStream(channel);
+
+            var _= result.Source.Completion.ContinueWith(
+                __ => _logger?.Unsubscribed(
+                    options.OperationName, 
+                    options.VariableValues, 
+                    null), 
+                cancellationToken);
+
+            var stream = new QueryStream(result.Source);
             return stream;
         }
     }

@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+﻿using System.Threading.Tasks;
 using tanka.graphql.resolvers;
 using tanka.graphql.tools;
 using tanka.graphql.type;

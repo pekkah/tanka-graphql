@@ -2,9 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using tanka.graphql.resolvers;
-using tanka.graphql.sdl;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
@@ -132,7 +130,7 @@ namespace tanka.graphql.tests
                             {
                                 await Task.Delay(0);
                                 var source = Model.Subscribe(unsubscribe);
-                                return Resolve.Stream(source);
+                                return source;
                             },
                             context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))
                         }

@@ -19,9 +19,8 @@ namespace tanka.graphql.server
             QueryRequest query,
             CancellationToken cancellationToken)
         {
-            var queryResult = await _queryStreamService.QueryAsync(query, cancellationToken);
-            var channel = queryResult.Channel;
-            return channel.Reader;
+            var result = await _queryStreamService.QueryAsync(query, cancellationToken);
+            return result.Reader;
         }
     }
 }
