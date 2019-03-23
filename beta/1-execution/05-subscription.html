@@ -207,7 +207,7 @@
                 Payload = &quot;payload1&quot;
             });
 
-            var ev = await result.Source.ReceiveAsync();
+            var ev = await result.Source.ReadAsync(cts.Token);
 
             // unsubscribe
             cts.Cancel();
@@ -348,7 +348,7 @@
                             {
                                 await Task.Delay(0);
                                 var source = Model.Subscribe(unsubscribe);
-                                return Resolve.Stream(source);
+                                return source;
                             },
                             context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
                         }
