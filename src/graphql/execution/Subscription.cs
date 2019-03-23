@@ -74,7 +74,7 @@ namespace tanka.graphql.execution
             if (formatError == null) throw new ArgumentNullException(nameof(formatError));
 
             var responseStream = Channel.CreateUnbounded<ExecutionResult>();
-            var reader = subscribeResult.GetReader();
+            var reader = subscribeResult.Reader;
 
             // execute event
             var _ = reader.Transform(responseStream, item => ExecuteSubscriptionEventAsync(

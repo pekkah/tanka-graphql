@@ -3,24 +3,15 @@ using tanka.graphql.resolvers;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using GraphQLParser.AST;
-using tanka.graphql.channels;
 using tanka.graphql.sdl;
 
 namespace tanka.graphql.benchmarks
 {
-    public class BufferedEventChannel : EventChannel<string>
-    {
-        public override void OnSubscribed(SubscribeResult subscription)
-        {
-            subscription.WriteAsync("value").AsTask().Wait();
-        }
-    }
-
     public static class Utils
     {
         public static ISchema InitializeSchema()
         {
-            var events = new BufferedEventChannel();
+            var events = new SingleValueEventChannel();
             var builder = new SchemaBuilder();
             Sdl.Import(Parser.ParseDocument(
                 @"

@@ -14,16 +14,12 @@ namespace tanka.graphql.resolvers
             _channel = Channel.CreateUnbounded<object>();
         }
 
-        public ChannelReader<object> GetReader()
-        {
-            return _channel.Reader;
-        }
+        public ChannelReader<object> Reader => _channel.Reader;
 
         public bool TryComplete(Exception error = null)
         {
             return _channel.Writer.TryComplete(error);
-        } 
-
+        }
 
         public ValueTask WriteAsync<T>(T item, CancellationToken cancellationToken = default)
         {

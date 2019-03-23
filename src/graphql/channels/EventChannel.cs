@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql.resolvers;
@@ -9,6 +10,8 @@ namespace tanka.graphql.channels
     {
         private readonly ConcurrentDictionary<CancellationToken, ISubscribeResult> 
             _subscriptions = new ConcurrentDictionary<CancellationToken, ISubscribeResult>();
+
+        protected IEnumerable<KeyValuePair<CancellationToken, ISubscribeResult>> Subscriptions => _subscriptions;
 
         public ISubscribeResult Subscribe(CancellationToken unsubscribe)
         {
@@ -36,7 +39,7 @@ namespace tanka.graphql.channels
         {
         }
 
-        public async ValueTask WriteAsync(T item)
+        public virtual async ValueTask WriteAsync(T item)
         {
             foreach (var subscription in _subscriptions)
             {

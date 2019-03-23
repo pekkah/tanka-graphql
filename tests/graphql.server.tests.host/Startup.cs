@@ -134,11 +134,15 @@ namespace graphql.server.tests.host
 
     public class EventManager
     {
-        private readonly EventChannel<Event> _channel;
+        private readonly PoliteEventChannel<Event> _channel;
 
         public EventManager()
         {
-            _channel = new EventChannel<Event>();
+            _channel = new PoliteEventChannel<Event>(new Event()
+            {
+                Type = "welcome",
+                Message = "Welcome"
+            });
         }
 
         public async Task<Event> Add(string type, string message)

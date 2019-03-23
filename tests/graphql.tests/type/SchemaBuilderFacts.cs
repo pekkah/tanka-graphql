@@ -467,7 +467,7 @@ namespace tanka.graphql.tests.type
 
             /* Then */
             var result = await sut.GetSubscriber(query.Name, "field1")(null, CancellationToken.None);
-            Assert.NotNull(result.GetReader());
+            Assert.NotNull(result.Reader);
         }
 
         [Fact]

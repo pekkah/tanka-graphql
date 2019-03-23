@@ -9,7 +9,7 @@ namespace tanka.graphql.resolvers
     {
         ValueTask WriteAsync<T>(T item, CancellationToken cancellationToken);
 
-        ChannelReader<object> GetReader();
+        ChannelReader<object> Reader { get; }
 
         bool TryComplete(Exception error = null);
     }
