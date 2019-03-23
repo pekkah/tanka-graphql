@@ -33,9 +33,10 @@ namespace tanka.graphql
             foreach (var extension in _scopes) await extension.EndValidationAsync(validationResult);
         }
 
-        public async Task EndExecuteAsync(ExecutionResult executionResult)
+        public async Task EndExecuteAsync(IExecutionResult executionResult)
         {
-            foreach (var extension in _scopes) await extension.EndExecuteAsync(executionResult);
+            foreach (var extension in _scopes) 
+                await extension.EndExecuteAsync(executionResult);
         }
 
         public Task BeginParseDocumentAsync()

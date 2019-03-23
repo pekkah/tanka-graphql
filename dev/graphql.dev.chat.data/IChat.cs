@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+using tanka.graphql.channels;
+using tanka.graphql.resolvers;
 using tanka.graphql.samples.chat.data.domain;
 
 namespace tanka.graphql.samples.chat.data
@@ -20,19 +22,19 @@ namespace tanka.graphql.samples.chat.data
             string id,
             string content);
 
-        Task<IDisposable> JoinAsync(ITargetBlock<Message> target);
+        ValueTask<ISubscribeResult> JoinAsync(CancellationToken unsubscribe);
     }
 
     public class Chat : IChat
     {
         private readonly Queue<Message> _messages = new Queue<Message>();
-        private readonly BroadcastBlock<Message> _messageStream;
+        private readonly EventChannel<Message> _messageStream;
 
         private int _lastId;
 
         public Chat()
         {
-            _messageStream = new BroadcastBlock<Message>(original => original);
+            _messageStream = new EventChannel<Message>();
         }
 
         public async Task<IEnumerable<Message>> GetMessagesAsync(int latest)
@@ -45,7 +47,6 @@ namespace tanka.graphql.samples.chat.data
             string fromId,
             string content)
         {
-            await Task.Delay(0);
             var from = await GetFromAsync(fromId);
             var message = new Message
             {
@@ -56,7 +57,7 @@ namespace tanka.graphql.samples.chat.data
             };
 
             _messages.Enqueue(message);
-            await _messageStream.SendAsync(message);
+            await _messageStream.WriteAsync(message);
             return message;
         }
 
@@ -72,14 +73,9 @@ namespace tanka.graphql.samples.chat.data
             return originalMessage;
         }
 
-        public Task<IDisposable> JoinAsync(ITargetBlock<Message> target)
+        public ValueTask<ISubscribeResult> JoinAsync(CancellationToken unsubscribe)
         {
-            var sub = _messageStream.LinkTo(target, new DataflowLinkOptions()
-            {
-                PropagateCompletion = true
-            });
-
-            return Task.FromResult(sub);
+            return new ValueTask<ISubscribeResult>(_messageStream.Subscribe(unsubscribe));
         }
 
         private async Task<From> GetFromAsync(string fromId)

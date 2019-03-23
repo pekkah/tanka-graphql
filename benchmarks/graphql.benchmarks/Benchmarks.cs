@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using BenchmarkDotNet.Attributes;
 using tanka.graphql.type;
 using tanka.graphql.validation;
@@ -131,7 +130,7 @@ namespace tanka.graphql.benchmarks
 
             AssertResult(result.Errors);
 
-            var value = result.Source.Receive();
+            var value = await result.Source.ReadAsync(cts.Token);
             AssertResult(value.Errors);
             cts.Cancel();
         }

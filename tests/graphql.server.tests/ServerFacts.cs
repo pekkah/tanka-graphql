@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using tanka.graphql.tests.data;
 using Xunit;
 
 namespace tanka.graphql.server.tests
@@ -43,32 +42,6 @@ namespace tanka.graphql.server.tests
         }
 
         [Fact]
-        public async Task Query()
-        {
-            /* Given */
-            var cts = new CancellationTokenSource();
-            var hubConnection = Connect();
-            await hubConnection.StartAsync();
-
-            /* When */
-            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
-            {
-                    Query = "{ hello }"
-            }, cancellationToken: cts.Token);
-
-            /* Then */
-            var result = await reader.ReadAsync(cts.Token);
-
-            Assert.Contains(result.Data, kv =>
-            {
-                var (key, value) = kv;
-                return key == "hello" && value.ToString() == "world";
-            });
-
-            await hubConnection.StopAsync();
-        }
-
-        [Fact]
         public async Task Multiple_Queries()
         {
             /* Given */
@@ -80,12 +53,12 @@ namespace tanka.graphql.server.tests
             var reader1 = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
             {
                 Query = "{ hello }"
-            }, cancellationToken: cts.Token);
+            }, cts.Token);
 
             var reader2 = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
             {
                 Query = "{ hello }"
-            }, cancellationToken: cts.Token);
+            }, cts.Token);
 
             /* Then */
             var result1 = await reader1.ReadAsync();
@@ -124,15 +97,17 @@ namespace tanka.graphql.server.tests
                                     message
                                 }
                         }",
-                Variables = new Dictionary<string, object>()
+                Variables = new Dictionary<string, object>
                 {
-                    {"event", new Dictionary<string, object>()
                     {
-                        {"type", "hello"},
-                        {"message", "world"}
-                    }}
+                        "event", new Dictionary<string, object>
+                        {
+                            {"type", "hello"},
+                            {"message", "world"}
+                        }
+                    }
                 }
-            }, cancellationToken: cts.Token);
+            }, cts.Token);
 
 
             /* Then */
@@ -149,16 +124,45 @@ namespace tanka.graphql.server.tests
         }
 
         [Fact]
-        public async Task Subscribe()
+        public async Task Query()
         {
             /* Given */
-            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            var cts = new CancellationTokenSource();
             var hubConnection = Connect();
             await hubConnection.StartAsync();
 
             /* When */
-            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
+            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
             {
+                Query = "{ hello }"
+            }, cts.Token);
+
+            /* Then */
+            var result = await reader.ReadAsync(cts.Token);
+
+            Assert.Contains(result.Data, kv =>
+            {
+                var (key, value) = kv;
+                return key == "hello" && value.ToString() == "world";
+            });
+
+            await hubConnection.StopAsync();
+        }
+
+        [Fact]
+        public async Task Subscribe()
+        {
+            /* Given */
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var hubConnection = Connect();
+            await hubConnection.StartAsync();
+
+            /* When */
+            // this wont block until the actual hub method execution has finished?
+            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>(
+                "Query",
+                new QueryRequest
+                {
                     Query = @"
                         subscription { 
                             events {
@@ -166,9 +170,7 @@ namespace tanka.graphql.server.tests
                                  message
                             }
                         }"
-            }, cancellationToken: cts.Token);
-
-            await _eventManager.Add("hello", "world");
+                }, cts.Token);
 
             /* Then */
             var result = await reader.ReadAsync(cts.Token);
@@ -201,9 +203,8 @@ namespace tanka.graphql.server.tests
                              message
                         }
                     }"
-            }, cancellationToken: cts.Token);
+            }, cts.Token);
 
-            await _eventManager.Add("hello", "world");
 
             /* Then */
             var result = await reader.ReadAsync(cts.Token);

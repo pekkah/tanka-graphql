@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -61,70 +60,6 @@ namespace tanka.graphql
 
                 _errors = value;
             }
-        }
-
-        public void AddExtension(string key, object value)
-        {
-            if (Extensions == null)
-            {
-                Extensions = new Dictionary<string, object>
-                {
-                    {key, value}
-                };
-                return;
-            }
-
-            Extensions[key] = value;
-        }
-
-        /// <summary>
-        ///     Select value from <see cref="Data" /> using path syntax
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public object Select(params object[] path)
-        {
-            var currentObject = Data;
-            object result = null;
-            foreach (var segment in path)
-            {
-                if (segment is string stringSegment)
-                {
-                    if (currentObject == null)
-                        return null;
-
-                    if (currentObject.ContainsKey(stringSegment))
-                        result = currentObject[stringSegment];
-                    else
-                        result = null;
-                }
-
-                if (segment is int intSegment)
-                {
-                    if (result is IEnumerable enumerable)
-                    {
-                        var count = 0;
-                        foreach (var elem in enumerable)
-                        {
-                            if (count == intSegment)
-                            {
-                                result = elem;
-                                break;
-                            }
-
-                            count++;
-                        }
-                    }
-                    else
-                    {
-                        result = null;
-                    }
-                }
-
-                if (result is IDictionary<string, object> child) currentObject = child;
-            }
-
-            return result;
         }
     }
 }

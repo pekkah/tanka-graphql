@@ -4,11 +4,11 @@ namespace tanka.graphql.server
 {
     public class QueryStream
     {
-        public QueryStream(Channel<ExecutionResult> channel)
+        public QueryStream(ChannelReader<ExecutionResult> reader)
         {
-            Channel = channel;
+            Reader = reader;
         }
 
-        public Channel<ExecutionResult> Channel { get; }
+        public ChannelReader<ExecutionResult> Reader { get; }
     }
 }

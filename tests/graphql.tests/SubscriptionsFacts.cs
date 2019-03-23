@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+using tanka.graphql.channels;
 using tanka.graphql.resolvers;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using Xunit;
-using static tanka.graphql.Executor;
-using static tanka.graphql.Parser;
-using static tanka.graphql.resolvers.Resolve;
 
 namespace tanka.graphql.tests
 {
@@ -43,34 +40,22 @@ namespace tanka.graphql.tests
 
             // data
             var messages = new List<Message>();
-            _messagesChannel = new BufferBlock<Message>();
+            _messagesChannel = new EventChannel<Message>();
 
             // resolvers
             ValueTask<IResolveResult> GetMessagesAsync(ResolverContext context)
             {
-                return new ValueTask<IResolveResult>(As(messages));
+                return ResolveSync.As(messages);
             }
 
-            async ValueTask<ISubscribeResult> OnMessageAdded(ResolverContext context, CancellationToken cancellationToken)
+            ValueTask<ISubscribeResult> OnMessageAdded(ResolverContext context, CancellationToken unsubscribe)
             {
-                var reader = new BufferBlock<Message>();
-                var sub = _messagesChannel.LinkTo(reader, new DataflowLinkOptions
-                {
-                    PropagateCompletion = true
-                });
-
-                cancellationToken.Register(() => sub.Dispose());
-
-                // noop
-                await Task.Delay(0).ConfigureAwait(false);
-
-                // return result
-                return Stream(reader);
+                return ResolveSync.Subscribe(_messagesChannel, unsubscribe);
             }
 
             ValueTask<IResolveResult> ResolveMessage(ResolverContext context)
             {
-                return new ValueTask<IResolveResult>(As(context.ObjectValue));
+                return ResolveSync.As(context.ObjectValue);
             }
 
             var resolvers = new ResolverMap
@@ -85,7 +70,7 @@ namespace tanka.graphql.tests
                 },
                 ["Message"] = new FieldResolverMap
                 {
-                    {"content", PropertyOf<Message>(r => r.Content)}
+                    {"content", Resolve.PropertyOf<Message>(r => r.Content)}
                 }
             };
 
@@ -97,7 +82,7 @@ namespace tanka.graphql.tests
         }
 
         private readonly ISchema _executable;
-        private readonly BufferBlock<Message> _messagesChannel;
+        private readonly EventChannel<Message> _messagesChannel;
 
         [Fact]
         public async Task Should_stream_a_lot()
@@ -106,39 +91,39 @@ namespace tanka.graphql.tests
             const int count = 10_000;
             var unsubscribe = new CancellationTokenSource(TimeSpan.FromMinutes(3));
 
+            var query = @"
+                subscription MessageAdded {
+                    messageAdded {
+                        content
+                    }
+                }
+                ";
+
+            /* When */
+            var result = await Executor.SubscribeAsync(new ExecutionOptions
+            {
+                Document = Parser.ParseDocument(query),
+                Schema = _executable
+            }, unsubscribe.Token).ConfigureAwait(false);
+
             for (var i = 0; i < count; i++)
             {
                 var expected = new Message {Content = i.ToString()};
-                await _messagesChannel.SendAsync(expected).ConfigureAwait(false);
+                await _messagesChannel.WriteAsync(expected);
             }
-
-            var query = @"
-subscription MessageAdded {
-    messageAdded {
-        content
-    }
-}
-";
-
-            /* When */
-            var result = await SubscribeAsync(new ExecutionOptions
-            {
-                Document = ParseDocument(query),
-                Schema = _executable
-            }, unsubscribe.Token).ConfigureAwait(false);
 
             /* Then */
             for (var i = 0; i < count; i++)
             {
-                var actualResult = await result.Source.ReceiveAsync(unsubscribe.Token).ConfigureAwait(false);
+                var actualResult = await result.Source.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
 
                 actualResult.ShouldMatchJson(@"{
-    ""data"":{
-        ""messageAdded"": {
-            ""content"": ""{counter}""
-        }
-    }
-}".Replace("{counter}", i.ToString()));
+                    ""data"":{
+                        ""messageAdded"": {
+                            ""content"": ""{counter}""
+                        }
+                    }
+                }".Replace("{counter}", i.ToString()));
             }
 
             unsubscribe.Cancel();
@@ -150,34 +135,35 @@ subscription MessageAdded {
             /* Given */
             var unsubscribe = new CancellationTokenSource();
             var expected = new Message {Content = "hello"};
-            await _messagesChannel.SendAsync(expected).ConfigureAwait(false);
 
             var query = @"
-subscription MessageAdded {
-    messageAdded {
-        content
-    }
-}
-";
+                subscription MessageAdded {
+                    messageAdded {
+                        content
+                    }
+                }
+                ";
 
             /* When */
-            var result = await SubscribeAsync(new ExecutionOptions
+            var result = await Executor.SubscribeAsync(new ExecutionOptions
             {
-                Document = ParseDocument(query),
+                Document = Parser.ParseDocument(query),
                 Schema = _executable
             }, unsubscribe.Token).ConfigureAwait(false);
 
+            await _messagesChannel.WriteAsync(expected);
+
             /* Then */
-            var actualResult = await result.Source.ReceiveAsync().ConfigureAwait(false);
+            var actualResult = await result.Source.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
             unsubscribe.Cancel();
 
             actualResult.ShouldMatchJson(@"{
-    ""data"":{
-        ""messageAdded"": {
-            ""content"": ""hello""
-        }
-    }
-}");
+                ""data"":{
+                    ""messageAdded"": {
+                        ""content"": ""hello""
+                    }
+                }
+            }");
         }
     }
 }

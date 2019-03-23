@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks.Dataflow;
+using System.Threading.Channels;
+using Newtonsoft.Json;
 
 namespace tanka.graphql
 {
@@ -10,8 +11,9 @@ namespace tanka.graphql
     public class SubscriptionResult : IExecutionResult
     {
         private IEnumerable<Error> _errors;
+        private IDictionary<string, object> _extensions;
 
-        public SubscriptionResult(ISourceBlock<ExecutionResult> source)
+        public SubscriptionResult(ChannelReader<ExecutionResult> source)
         {
             Source = source;
         }
@@ -20,11 +22,26 @@ namespace tanka.graphql
         {
         }
 
-        /// <summary>
-        ///     Source stream of <see cref="ExecutionResult"/>
-        /// </summary>
-        public ISourceBlock<ExecutionResult> Source { get; }
+        public ChannelReader<ExecutionResult> Source { get; }
 
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public IDictionary<string, object> Extensions
+        {
+            get => _extensions;
+            set
+            {
+                if (value != null && !value.Any())
+                {
+                    _extensions = null;
+                    return;
+                }
+
+                _extensions = value;
+            }
+        }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<Error> Errors
         {
             get => _errors;

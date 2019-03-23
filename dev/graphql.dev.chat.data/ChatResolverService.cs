@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using tanka.graphql.resolvers;
 using tanka.graphql.samples.chat.data.domain;
 
@@ -43,19 +42,14 @@ namespace tanka.graphql.samples.chat.data
             return Resolve.As(message);
         }
 
-        public async ValueTask<ISubscribeResult> StreamMessagesAsync(ResolverContext context, CancellationToken cancellationToken)
+        public ValueTask<ISubscribeResult> StreamMessagesAsync(ResolverContext context, CancellationToken unsubscribe)
         {
-            var target = new BufferBlock<Message>();
-            var subscription = await _chat.JoinAsync(target);
-            cancellationToken.Register(() => subscription.Dispose());
-
-            return Resolve.Stream(target);
+            return _chat.JoinAsync(unsubscribe);
         }
 
-        public async ValueTask<IResolveResult> ResolveMessageAsync(ResolverContext context)
+        public ValueTask<IResolveResult> ResolveMessageAsync(ResolverContext context)
         {
-            await Task.Delay(0);
-            return Resolve.As(context.ObjectValue);
+            return ResolveSync.As(context.ObjectValue);
         }
     }
 }

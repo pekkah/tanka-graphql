@@ -1,9 +1,16 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using System;
+using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace tanka.graphql.resolvers
 {
     public interface ISubscribeResult
     {
-        ISourceBlock<object> Reader { get; }
+        ValueTask WriteAsync<T>(T item, CancellationToken cancellationToken);
+
+        ChannelReader<object> Reader { get; }
+
+        bool TryComplete(Exception error = null);
     }
 }

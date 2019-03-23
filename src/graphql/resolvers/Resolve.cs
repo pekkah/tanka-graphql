@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+using tanka.graphql.channels;
 using tanka.graphql.type;
 
 namespace tanka.graphql.resolvers
@@ -29,12 +30,9 @@ namespace tanka.graphql.resolvers
         {
             return context =>
             {
-                var source = context.ObjectValue is T objectValue ? objectValue : default(T);
+                var source = context.ObjectValue is T objectValue ? objectValue : default;
 
-                if (source == null)
-                {
-                    return new ValueTask<IResolveResult>(As(null));
-                }
+                if (source == null) return new ValueTask<IResolveResult>(As(null));
 
                 var value = getValue(source);
                 return new ValueTask<IResolveResult>(As(value));
@@ -45,12 +43,9 @@ namespace tanka.graphql.resolvers
         {
             return context =>
             {
-                var source = context.ObjectValue is T objectValue ? objectValue : default(T);
+                var source = context.ObjectValue is T objectValue ? objectValue : default;
 
-                if (source == null)
-                {
-                    return new ValueTask<IResolveResult>(As(null));
-                }
+                if (source == null) return new ValueTask<IResolveResult>(As(null));
 
                 var values = getValue(source);
 
@@ -61,9 +56,9 @@ namespace tanka.graphql.resolvers
             };
         }
 
-        public static ISubscribeResult Stream(ISourceBlock<object> reader)
+        public static ISubscribeResult Subscribe<T>(EventChannel<T> eventChannel, CancellationToken unsubscribe)
         {
-            return new SubscribeResult(reader);
+            return eventChannel.Subscribe(unsubscribe);
         }
     }
 }

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+using tanka.graphql.channels;
+using tanka.graphql.resolvers;
 
 namespace tanka.graphql.tests
 {
@@ -21,8 +22,8 @@ namespace tanka.graphql.tests
 
         public List<Event> Events { get; set; }
 
-        public BroadcastBlock<Event> Broadcast { get; set; } =
-            new BroadcastBlock<Event>(ev => ev);
+        public EventChannel<Event> Broadcast { get; set; } =
+            new EventChannel<Event>();
 
         public int LastId { get; set; } = 0;
 
@@ -36,19 +37,14 @@ namespace tanka.graphql.tests
                 Payload = newEvent.Payload
             };
             Events.Add(ev);
-            await Broadcast.SendAsync(ev);
+            await Broadcast.WriteAsync(ev);
 
             return LastId;
         }
 
-        public ISourceBlock<object> Subscribe(CancellationToken unsubscribe)
+        public ISubscribeResult Subscribe(CancellationToken unsubscribe)
         {
-            var source = new BufferBlock<Event>();
-            var unlink = Broadcast.LinkTo(source);
-
-            unsubscribe.Register(() => unlink.Dispose());
-
-            return source;
+            return Broadcast.Subscribe(unsubscribe);
         }
 
         public class Success

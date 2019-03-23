@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+using tanka.graphql.channels;
 using tanka.graphql.resolvers;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
@@ -456,9 +456,9 @@ namespace tanka.graphql.tests.type
                     connections.Field(query, "field1", ScalarType.String,
                         "test field",
                         resolve => resolve.Run(context => 
-                            new ValueTask<IResolveResult>(Resolve.As(42))),
+                            ResolveSync.As(42)),
                         subscribe => subscribe.Run((context, unsubscribe) => 
-                            new ValueTask<ISubscribeResult>(Resolve.Stream(new BufferBlock<object>()))));
+                            ResolveSync.Subscribe(new EventChannel<object>(), unsubscribe)));
                 });
 
 

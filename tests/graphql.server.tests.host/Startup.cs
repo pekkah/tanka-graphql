@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using tanka.graphql;
 using tanka.graphql.resolvers;
 using tanka.graphql.server;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using tanka.graphql.channels;
 using tanka.graphql.sdl;
 
 namespace graphql.server.tests.host
@@ -88,7 +88,7 @@ namespace graphql.server.tests.host
                             "events", (context,ct) =>
                             {
                                 var events = eventManager.Subscribe(ct);
-                                return new ValueTask<ISubscribeResult>(Resolve.Stream(events));
+                                return new ValueTask<ISubscribeResult>(events);
                             },
                             context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))
                         }
@@ -134,11 +134,15 @@ namespace graphql.server.tests.host
 
     public class EventManager
     {
-        private readonly BufferBlock<Event> _buffer;
+        private readonly PoliteEventChannel<Event> _channel;
 
         public EventManager()
         {
-            _buffer = new BufferBlock<Event>();
+            _channel = new PoliteEventChannel<Event>(new Event()
+            {
+                Type = "welcome",
+                Message = "Welcome"
+            });
         }
 
         public async Task<Event> Add(string type, string message)
@@ -148,21 +152,13 @@ namespace graphql.server.tests.host
                 Type = type,
                 Message = message
             };
-            await _buffer.SendAsync(ev);
+            await _channel.WriteAsync(ev);
             return ev;
         }
 
-        public ISourceBlock<Event> Subscribe(CancellationToken cancellationToken)
+        public ISubscribeResult Subscribe(CancellationToken cancellationToken)
         {
-            var targetBlock = new BufferBlock<Event>();
-
-            var sub = _buffer.LinkTo(targetBlock);
-            cancellationToken.Register(() =>
-            {
-                sub.Dispose();
-            });
-
-            return targetBlock;
+            return _channel.Subscribe(cancellationToken);
         }
     }
 }

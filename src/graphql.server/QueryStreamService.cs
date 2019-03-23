@@ -9,6 +9,7 @@ using tanka.graphql.server.utilities;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using tanka.graphql.channels;
 
 namespace tanka.graphql.server
 {
@@ -67,7 +68,6 @@ namespace tanka.graphql.server
             CancellationToken cancellationToken)
         {
             var result = await Executor.ExecuteAsync(options);
-
             var channel = Channel.CreateBounded<ExecutionResult>(1);
             await channel.Writer.WriteAsync(result, cancellationToken);
             channel.Writer.TryComplete();
@@ -84,29 +84,16 @@ namespace tanka.graphql.server
                 throw new InvalidOperationException("Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
 
             var result = await Executor.SubscribeAsync(options, cancellationToken);
-            var channel = Channel.CreateUnbounded<ExecutionResult>();
-
-            var _ = Task.Run(async () =>
-            {
-                await cancellationToken.WhenCancelled();
-                channel.Writer.TryComplete();
-                _logger.Unsubscribed(options.OperationName, options.VariableValues, null);
-            });
-
-            var writer = new ActionBlock<ExecutionResult>(
-                executionResult => channel.Writer.WriteAsync(executionResult, cancellationToken),
-                new ExecutionDataflowBlockOptions
-                {
-                    EnsureOrdered = true
-                });
-
-            result.Source.LinkTo(writer, new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            });
-
             _logger.Subscribed(options.OperationName, options.VariableValues, null);
-            var stream = new QueryStream(channel);
+
+            var _= result.Source.Completion.ContinueWith(
+                __ => _logger?.Unsubscribed(
+                    options.OperationName, 
+                    options.VariableValues, 
+                    null), 
+                cancellationToken);
+
+            var stream = new QueryStream(result.Source);
             return stream;
         }
     }

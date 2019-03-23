@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+﻿using System.Threading.Tasks;
 using tanka.graphql.resolvers;
 using tanka.graphql.tools;
 using tanka.graphql.type;
@@ -13,6 +11,7 @@ namespace tanka.graphql.benchmarks
     {
         public static ISchema InitializeSchema()
         {
+            var events = new SingleValueEventChannel();
             var builder = new SchemaBuilder();
             Sdl.Import(Parser.ParseDocument(
                 @"
@@ -54,7 +53,7 @@ namespace tanka.graphql.benchmarks
                     {
                         {
                             "simple", 
-                            (context, unsubscribe) => new ValueTask<ISubscribeResult>(Resolve.Stream(SimpleValueBlock("value"))), 
+                            (context, unsubscribe) => ResolveSync.Subscribe(events, unsubscribe), 
                             context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))}
                     }
                 }
@@ -66,13 +65,6 @@ namespace tanka.graphql.benchmarks
                 resolvers);
 
             return schema;
-        }
-
-        private static ISourceBlock<object> SimpleValueBlock(string value)
-        {
-            var target = new BufferBlock<string>();
-            target.Post(value);
-            return target;
         }
 
         public static GraphQLDocument InitializeQuery()

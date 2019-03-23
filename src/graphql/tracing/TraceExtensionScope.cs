@@ -44,7 +44,7 @@ namespace tanka.graphql.tracing
             return default;
         }
 
-        public ValueTask EndExecuteAsync(ExecutionResult executionResult)
+        public ValueTask EndExecuteAsync(IExecutionResult executionResult)
         {
             _stopwatch.Stop();
 
