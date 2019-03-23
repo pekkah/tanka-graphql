@@ -77,7 +77,7 @@ namespace tanka.graphql.execution
             var reader = subscribeResult.Reader;
 
             // execute event
-            var _ = reader.Transform(responseStream, item => ExecuteSubscriptionEventAsync(
+            var _ = reader.TransformAndLinkTo(responseStream, item => ExecuteSubscriptionEventAsync(
                 context,
                 subscription,
                 coercedVariableValues,

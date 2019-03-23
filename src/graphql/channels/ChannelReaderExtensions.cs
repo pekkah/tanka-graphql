@@ -6,7 +6,7 @@ namespace tanka.graphql.channels
 {
     public static class ChannelReaderExtensions
     {
-        public static async Task Join<T>(
+        public static async Task LinkTo<T>(
             this ChannelReader<T> reader,
             ChannelWriter<T> writer)
         {
@@ -32,7 +32,7 @@ namespace tanka.graphql.channels
             }
         }
 
-        public static async Task Transform<TSource, TTarget>(
+        public static async Task TransformAndLinkTo<TSource, TTarget>(
             this ChannelReader<TSource> reader,
             ChannelWriter<TTarget> writer,
             Func<TSource, Task<TTarget>> transformAsync)
