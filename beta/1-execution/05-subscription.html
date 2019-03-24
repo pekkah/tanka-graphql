@@ -207,7 +207,7 @@
                 Payload = &quot;payload1&quot;
             });
 
-            var ev = await result.Source.ReadAsync(cts.Token);
+            var ev = await result.Source.Reader.ReadAsync(cts.Token);
 
             // unsubscribe
             cts.Cancel();
