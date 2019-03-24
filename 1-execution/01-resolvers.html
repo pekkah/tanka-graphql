@@ -226,9 +226,9 @@
                     connections.Field(query, &quot;field1&quot;, ScalarType.String,
                         &quot;test field&quot;,
                         resolve =&gt; resolve.Run(context =&gt; 
-                            new ValueTask&lt;IResolveResult&gt;(Resolve.As(42))),
+                            ResolveSync.As(42)),
                         subscribe =&gt; subscribe.Run((context, unsubscribe) =&gt; 
-                            new ValueTask&lt;ISubscribeResult&gt;(Resolve.Stream(new BufferBlock&lt;object&gt;()))));
+                            ResolveSync.Subscribe(new EventChannel&lt;object&gt;(), unsubscribe)));
                 });
 
 
