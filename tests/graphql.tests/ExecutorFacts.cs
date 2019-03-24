@@ -336,7 +336,7 @@ namespace tanka.graphql.tests
                 Payload = "payload1"
             });
 
-            var ev = await result.Source.ReadAsync(cts.Token);
+            var ev = await result.Source.Reader.ReadAsync(cts.Token);
 
             // unsubscribe
             cts.Cancel();

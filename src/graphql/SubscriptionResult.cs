@@ -13,7 +13,7 @@ namespace tanka.graphql
         private IEnumerable<Error> _errors;
         private IDictionary<string, object> _extensions;
 
-        public SubscriptionResult(ChannelReader<ExecutionResult> source)
+        public SubscriptionResult(Channel<ExecutionResult> source)
         {
             Source = source;
         }
@@ -22,7 +22,7 @@ namespace tanka.graphql
         {
         }
 
-        public ChannelReader<ExecutionResult> Source { get; }
+        public Channel<ExecutionResult> Source { get; }
 
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

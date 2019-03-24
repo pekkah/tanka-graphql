@@ -58,7 +58,8 @@ namespace tanka.graphql.validation
                                 "GraphQL execution will only consider the " +
                                 "executable definitions Operation and Fragment. " +
                                 "Type system definitions and extensions are not " +
-                                "executable, and are not considered during execution.",
+                                "executable, and are not considered during execution. " +
+                                $"Non executable definition kind: '{definition.Kind}.'",
                                 definition);
                     }
                 };
@@ -88,7 +89,8 @@ namespace tanka.graphql.validation
                     if (known.Contains(operationName))
                         context.Error(ValidationErrorCodes.R5211OperationNameUniqueness,
                             "Each named operation definition must be unique within a " +
-                            "document when referred to by its name.",
+                            "document when referred to by its name. " +
+                            $"Operation: '{operationName}'",
                             definition);
 
                     known.Add(operationName);
@@ -198,7 +200,8 @@ namespace tanka.graphql.validation
                             ValidationErrorCodes.R531FieldSelections,
                             "The target field of a field selection must be defined " +
                             "on the scoped type of the selection set. There are no " +
-                            "limitations on alias names.",
+                            "limitations on alias names. " +
+                            $"Field: '{fieldName}'",
                             selection);
                 };
             };
@@ -234,35 +237,40 @@ namespace tanka.graphql.validation
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Field selections on scalars or enums are never " +
-                                "allowed, because they are the leaf nodes of any GraphQL query.",
+                                "allowed, because they are the leaf nodes of any GraphQL query. " +
+                                $"Field: '{fieldName}'",
                                 selection);
 
                         if (selectionType is EnumType && hasSubSelection == true)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Field selections on scalars or enums are never " +
-                                "allowed, because they are the leaf nodes of any GraphQL query.",
+                                "allowed, because they are the leaf nodes of any GraphQL query. " +
+                                $"Field: '{fieldName}'",
                                 selection);
 
                         if (selectionType is ObjectType && hasSubSelection == null)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Leaf selections on objects, interfaces, and unions " +
-                                "without subfields are disallowed.",
+                                "without subfields are disallowed. " +
+                                $"Field: '{fieldName}'",
                                 selection);
 
                         if (selectionType is InterfaceType && hasSubSelection == null)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Leaf selections on objects, interfaces, and unions " +
-                                "without subfields are disallowed.",
+                                "without subfields are disallowed. " +
+                                $"Field: '{fieldName}'",
                                 selection);
 
                         if (selectionType is UnionType && hasSubSelection == null)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Leaf selections on objects, interfaces, and unions " +
-                                "without subfields are disallowed.",
+                                "without subfields are disallowed. " +
+                                $"Field: '{fieldName}'",
                                 selection);
                     }
                 };
@@ -286,7 +294,8 @@ namespace tanka.graphql.validation
                             ValidationErrorCodes.R541ArgumentNames,
                             "Every argument provided to a field or directive " +
                             "must be defined in the set of possible arguments of that " +
-                            "field or directive.",
+                            "field or directive. " +
+                            $"Argument: '{argument.Name.Value}'",
                             argument);
                 };
             };
@@ -337,7 +346,7 @@ namespace tanka.graphql.validation
                             "Arguments is required. An argument is required " +
                             "if the argument type is non‐null and does not have a default " +
                             "value. Otherwise, the argument is optional. " +
-                            $"Argument {argumentName} not given",
+                            $"Argument '{argumentName}' not given",
                             graphQLArguments);
 
                         return;
@@ -353,7 +362,7 @@ namespace tanka.graphql.validation
                             "Arguments is required. An argument is required " +
                             "if the argument type is non‐null and does not have a default " +
                             "value. Otherwise, the argument is optional. " +
-                            $"Value of argument {argumentName} cannot be null",
+                            $"Value of argument '{argumentName}' cannot be null",
                             graphQLArguments);
                 }
             }
@@ -405,7 +414,8 @@ namespace tanka.graphql.validation
                             ValidationErrorCodes.R542ArgumentUniqueness,
                             "Fields and directives treat arguments as a mapping of " +
                             "argument name to value. More than one argument with the same " +
-                            "name in an argument set is ambiguous and invalid.",
+                            "name in an argument set is ambiguous and invalid. " +
+                            $"Argument: '{argument.Name.Value}'",
                             argument);
 
                     knownArgs.Add(argument.Name.Value);
@@ -430,7 +440,8 @@ namespace tanka.graphql.validation
                         context.Error(
                             ValidationErrorCodes.R5511FragmentNameUniqueness,
                             "Fragment definitions are referenced in fragment spreads by name. To avoid " +
-                            "ambiguity, each fragment’s name must be unique within a document.",
+                            "ambiguity, each fragment’s name must be unique within a document. " +
+                            $"Fragment: '{fragment.Name.Value}'",
                             fragment);
 
                     knownFragments.Add(fragment.Name.Value);
@@ -455,7 +466,8 @@ namespace tanka.graphql.validation
                         context.Error(
                             ValidationErrorCodes.R5512FragmentSpreadTypeExistence,
                             "Fragments must be specified on types that exist in the schema. This " +
-                            "applies for both named and inline fragments. ",
+                            "applies for both named and inline fragments. " +
+                            $"Fragment: '{node.Name?.Value}'",
                             node);
                 };
                 rule.EnterInlineFragment += node =>
@@ -466,7 +478,7 @@ namespace tanka.graphql.validation
                         context.Error(
                             ValidationErrorCodes.R5512FragmentSpreadTypeExistence,
                             "Fragments must be specified on types that exist in the schema. This " +
-                            "applies for both named and inline fragments. ",
+                            "applies for both named and inline fragments.",
                             node);
                 };
             };
@@ -492,7 +504,8 @@ namespace tanka.graphql.validation
 
                     context.Error(
                         ValidationErrorCodes.R5513FragmentsOnCompositeTypes,
-                        "Fragments can only be declared on unions, interfaces, and objects",
+                        "Fragments can only be declared on unions, interfaces, and objects. " +
+                        $"Fragment: '{node.Name?.Value}'",
                         node);
                 };
                 rule.EnterInlineFragment += node =>
@@ -534,7 +547,8 @@ namespace tanka.graphql.validation
                         if (!fragmentSpreads.Contains(name))
                             context.Error(
                                 ValidationErrorCodes.R5514FragmentsMustBeUsed,
-                                "Defined fragments must be used within a document.",
+                                "Defined fragments must be used within a document. " +
+                                $"Fragment: '{name}'",
                                 fragment.Value);
                     }
                 };
@@ -690,7 +704,8 @@ namespace tanka.graphql.validation
                             "when the runtime object type matches the type condition. They " +
                             "also are spread within the context of a parent type. A fragment " +
                             "spread is only valid if its type condition could ever apply within " +
-                            "the parent type.",
+                            "the parent type. " +
+                            $"FragmentSpread: '{node.Name?.Value}'",
                             node);
                 };
 
@@ -813,7 +828,7 @@ namespace tanka.graphql.validation
                 string message
             )
             {
-                return $"Expected type {typeName}, found {valueName} " +
+                return $"Expected type '{typeName}', found '{valueName}' " +
                        message;
             }
 
@@ -823,8 +838,8 @@ namespace tanka.graphql.validation
                 string fieldTypeName
             )
             {
-                return $"Field {typeName}.{fieldName} of required type " +
-                       $"{fieldTypeName} was not provided.";
+                return $"Field '{typeName}.{fieldName}' of required type " +
+                       $"'{fieldTypeName}' was not provided.";
             }
 
             string UnknownFieldMessage(
@@ -833,7 +848,7 @@ namespace tanka.graphql.validation
                 string message
             )
             {
-                return $"Field {fieldName} is not defined by type {typeName} " +
+                return $"Field '{fieldName}' is not defined by type '{typeName}' " +
                        message;
             }
 
@@ -899,7 +914,8 @@ namespace tanka.graphql.validation
                             ValidationErrorCodes.R562InputObjectFieldNames,
                             "Every input field provided in an input object " +
                             "value must be defined in the set of possible fields of " +
-                            "that input object’s expected type.",
+                            "that input object’s expected type. " +
+                            $"Field: '{inputField.Name?.Value}'",
                             inputField);
                 };
             };
@@ -921,7 +937,8 @@ namespace tanka.graphql.validation
                                 ValidationErrorCodes.R563InputObjectFieldUniqueness,
                                 "Input objects must not contain more than one field " +
                                 "of the same name, otherwise an ambiguity would exist which " +
-                                "includes an ignored portion of syntax.",
+                                "includes an ignored portion of syntax. " +
+                                $"Field: '{name}'",
                                 fields.Where(f => f.Name.Value == name));
                     }
                 };
@@ -999,7 +1016,8 @@ namespace tanka.graphql.validation
                             ValidationErrorCodes.R57Directives,
                             "GraphQL servers define what directives they support. " +
                             "For each usage of a directive, the directive must be available " +
-                            "on that server.",
+                            "on that server. " +
+                            $"Directive: '{directiveName}'",
                             directive);
                 };
 
@@ -1056,7 +1074,8 @@ namespace tanka.graphql.validation
                                 "If any operation defines more than one " +
                                 "variable with the same name, it is ambiguous and " +
                                 "invalid. It is invalid even if the type of the " +
-                                "duplicate variable is the same.",
+                                "duplicate variable is the same. " +
+                                $"Variable: '{variableName}'",
                                 node);
 
                         knownVariables.Add(variableName);
@@ -1067,8 +1086,8 @@ namespace tanka.graphql.validation
                             context.Error(
                                 ValidationErrorCodes.R58Variables,
                                 "Variables can only be input types. Objects, unions, " +
-                                "and interfaces cannot be used as inputs.." +
-                                $"Given variable type is '{variableType}'",
+                                "and interfaces cannot be used as inputs.. " +
+                                $"Given type of '{variableName}' is '{variableType}'",
                                 node);
                     }
                 };
