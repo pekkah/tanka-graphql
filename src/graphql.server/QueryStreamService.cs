@@ -74,7 +74,7 @@ namespace tanka.graphql.server
             ExecutionOptions options,
             CancellationToken cancellationToken)
         {
-            var result = await Executor.ExecuteAsync(options);
+            var result = await Executor.ExecuteAsync(options, cancellationToken);
             var channel = Channel.CreateBounded<ExecutionResult>(1);
 
             await channel.Writer.WriteAsync(result, cancellationToken);
@@ -104,7 +104,7 @@ namespace tanka.graphql.server
                     null);
             });
 
-            if (result.Errors != null)
+            if (result.Errors != null && result.Errors.Any())
             {
                 var channel = Channel.CreateBounded<ExecutionResult>(1);
                 await channel.Writer.WriteAsync(new ExecutionResult
