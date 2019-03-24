@@ -39,7 +39,10 @@ namespace tanka.graphql.validation
 
             if (Nodes.Any())
             {
-                builder.Append(" at ");
+                if (!Message.EndsWith("."))
+                    builder.Append(". ");
+
+                builder.Append("At ");
 
                 foreach (var node in Nodes)
                 {
@@ -48,7 +51,7 @@ namespace tanka.graphql.validation
                 }
             }
 
-            return builder.ToString().TrimEnd(',');
+            return builder.ToString().Trim().TrimEnd(',');
         }
 
         public Error ToError()

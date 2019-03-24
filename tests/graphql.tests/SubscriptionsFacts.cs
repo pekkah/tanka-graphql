@@ -115,7 +115,7 @@ namespace tanka.graphql.tests
             /* Then */
             for (var i = 0; i < count; i++)
             {
-                var actualResult = await result.Source.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
+                var actualResult = await result.Source.Reader.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
 
                 actualResult.ShouldMatchJson(@"{
                     ""data"":{
@@ -154,7 +154,7 @@ namespace tanka.graphql.tests
             await _messagesChannel.WriteAsync(expected);
 
             /* Then */
-            var actualResult = await result.Source.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
+            var actualResult = await result.Source.Reader.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
             unsubscribe.Cancel();
 
             actualResult.ShouldMatchJson(@"{

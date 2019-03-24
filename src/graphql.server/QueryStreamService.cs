@@ -4,24 +4,21 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using tanka.graphql.server.utilities;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using tanka.graphql.channels;
 
 namespace tanka.graphql.server
 {
     public class QueryStreamService
     {
+        private readonly List<IExtension> _extensions;
         private readonly ILogger<QueryStreamService> _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly List<IExtension> _extensions;
         private readonly IOptionsMonitor<QueryStreamHubOptions> _optionsMonitor;
 
         public QueryStreamService(
-            IOptionsMonitor<QueryStreamHubOptions> optionsMonitor, 
+            IOptionsMonitor<QueryStreamHubOptions> optionsMonitor,
             ILoggerFactory loggerFactory,
             IEnumerable<IExtension> extensions)
         {
@@ -35,32 +32,42 @@ namespace tanka.graphql.server
             QueryRequest query,
             CancellationToken cancellationToken)
         {
-            _logger.Query(query);
-            var serviceOptions = _optionsMonitor.CurrentValue;
-            var document = await Parser.ParseDocumentAsync(query.Query);
-            var executionOptions = new ExecutionOptions
+            try
             {
-                Schema = serviceOptions.Schema,
-                Document = document,
-                OperationName = query.OperationName,
-                VariableValues = query.Variables,
-                InitialValue = null,
-                LoggerFactory = _loggerFactory,
-                Extensions = _extensions
-            };
+                _logger.Query(query);
+                var serviceOptions = _optionsMonitor.CurrentValue;
+                var document = await Parser.ParseDocumentAsync(query.Query);
+                var executionOptions = new ExecutionOptions
+                {
+                    Schema = serviceOptions.Schema,
+                    Document = document,
+                    OperationName = query.OperationName,
+                    VariableValues = query.Variables,
+                    InitialValue = null,
+                    LoggerFactory = _loggerFactory,
+                    Extensions = _extensions
+                };
 
-            // is subscription
-            if (document.Definitions.OfType<GraphQLOperationDefinition>()
-                .Any(op => op.Operation == OperationType.Subscription))
-                return await SubscribeAsync(
+                // is subscription
+                if (document.Definitions.OfType<GraphQLOperationDefinition>()
+                    .Any(op => op.Operation == OperationType.Subscription))
+                    return await SubscribeAsync(
+                        executionOptions,
+                        cancellationToken);
+
+
+                // is query or mutation
+                return await ExecuteAsync(
                     executionOptions,
                     cancellationToken);
-
-
-            // is query or mutation
-            return await ExecuteAsync(
-                executionOptions,
-                cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Failed to execute query '{query.Query}'. Error. '{e}'");
+                var channel = Channel.CreateBounded<ExecutionResult>(1);
+                channel.Writer.TryComplete(e);
+                return new QueryStream(channel);
+            }
         }
 
         private async Task<QueryStream> ExecuteAsync(
@@ -69,6 +76,7 @@ namespace tanka.graphql.server
         {
             var result = await Executor.ExecuteAsync(options);
             var channel = Channel.CreateBounded<ExecutionResult>(1);
+
             await channel.Writer.WriteAsync(result, cancellationToken);
             channel.Writer.TryComplete();
 
@@ -81,17 +89,37 @@ namespace tanka.graphql.server
             CancellationToken cancellationToken)
         {
             if (!cancellationToken.CanBeCanceled)
-                throw new InvalidOperationException("Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
+                throw new InvalidOperationException(
+                    "Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
 
-            var result = await Executor.SubscribeAsync(options, cancellationToken);
+            var unsubscribeSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var result = await Executor.SubscribeAsync(options, unsubscribeSource.Token);
             _logger.Subscribed(options.OperationName, options.VariableValues, null);
 
-            var _= result.Source.Completion.ContinueWith(
-                __ => _logger?.Unsubscribed(
-                    options.OperationName, 
-                    options.VariableValues, 
-                    null), 
-                cancellationToken);
+            unsubscribeSource.Token.Register(() =>
+            {
+                _logger?.Unsubscribed(
+                    options.OperationName,
+                    options.VariableValues,
+                    null);
+            });
+
+            if (result.Errors != null)
+            {
+                var channel = Channel.CreateBounded<ExecutionResult>(1);
+                await channel.Writer.WriteAsync(new ExecutionResult
+                {
+                    Errors = result.Errors,
+                    Extensions = result.Extensions
+                }, CancellationToken.None);
+
+                channel.Writer.TryComplete();
+
+                // unsubscribe
+                unsubscribeSource.Cancel();
+
+                return new QueryStream(channel.Reader);
+            }
 
             var stream = new QueryStream(result.Source);
             return stream;

@@ -43,6 +43,7 @@ namespace tanka.graphql
                     return new ExecutionResult
                     {
                         Errors = validationResult.Errors.Select(e => e.ToError())
+                            .ToList()
                     };
 
                 ExecutionResult executionResult;
@@ -95,7 +96,8 @@ namespace tanka.graphql
                 if (!validationResult.IsValid)
                     return new SubscriptionResult
                     {
-                        Errors = validationResult.Errors.Select(e => new Error(e.Message))
+                        Errors = validationResult.Errors.Select(e => e.ToError())
+                            .ToList()
                     };
 
                 SubscriptionResult subscriptionResult;
