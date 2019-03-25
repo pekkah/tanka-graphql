@@ -7314,7 +7314,7 @@ react-display-name@^0.2.3:
   resolved "https://registry.yarnpkg.com/react-display-name/-/react-display-name-0.2.4.tgz#e2a670b81d79a2204335510c01246f4c92ff12cf"
   integrity sha512-zvU6iouW+SWwHTyThwxGICjJYCMZFk/6r/+jmOdC7ntQoPlS/Pqb81MkxaMf2bHTSq9TN3K3zX2/ayMW/jCtyA==
 
-react-dom@^16.3.1:
+react-dom@^16.3.1, react-dom@^16.8.5:
   version "16.8.5"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.8.5.tgz#b3e37d152b49e07faaa8de41fdf562be3463335e"
   integrity sha512-VIEIvZLpFafsfu4kgmftP5L8j7P1f0YThfVTrANMhZUFMDOsA6e0kfR6wxw/8xxKs4NB59TZYbxNdPCDW34x4w==
@@ -7323,16 +7323,6 @@ react-dom@^16.3.1:
     object-assign "^4.1.1"
     prop-types "^15.6.2"
     scheduler "^0.13.5"
-
-react-dom@^16.8.4:
-  version "16.8.4"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.8.4.tgz#1061a8e01a2b3b0c8160037441c3bf00a0e3bc48"
-  integrity sha512-Ob2wK7XG2tUDt7ps7LtLzGYYB6DXMCLj0G5fO6WeEICtT4/HdpOi7W/xLzZnR6RCG1tYza60nMdqtxzA8FaPJQ==
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-    prop-types "^15.6.2"
-    scheduler "^0.13.4"
 
 react-error-overlay@^4.0.1:
   version "4.0.1"
@@ -8019,7 +8009,7 @@ sax@^1.2.1, sax@^1.2.4, sax@~1.2.1:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
-scheduler@^0.13.4, scheduler@^0.13.5:
+scheduler@^0.13.5:
   version "0.13.5"
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.13.5.tgz#b7226625167041298af3b98088a9dbbf6d7733a8"
   integrity sha512-K98vjkQX9OIt/riLhp6F+XtDPtMQhqNcf045vsh+pcuvHq+PHy1xCrH3pq1P40m6yR46lpVvVhKdEOtnimuUJw==
