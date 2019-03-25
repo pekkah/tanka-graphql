@@ -22,7 +22,7 @@
     "@types/jest": "^24.0.11",
     "@types/node": "^11.11.6",
     "@types/react": "^16.8.8",
-    "@types/react-dom": "^16.8.2",
+    "@types/react-dom": "^16.8.3",
     "@types/react-redux": "^6.0.9",
     "create-react-app": "^2.1.8",
     "typescript": "^3.3.4000"
