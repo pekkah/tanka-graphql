@@ -1,13 +1,29 @@
-﻿using System.Collections.Generic;
-using tanka.graphql.type;
+﻿using Newtonsoft.Json;
 
 namespace tanka.graphql.introspection
 {
-    public class IntrospectionParser
+    public static class IntrospectionParser
     {
-        public static __Type ParseTo(string introspectionResult)
+        public static IntrospectionResult Deserialize(string introspectionResult)
         {
+            var result = JsonConvert.DeserializeObject<IntrospectionExecutionResult>(introspectionResult);
 
+            return new IntrospectionResult
+            {
+                Schema = result.Data.Schema
+            };
         }
+    }
+
+    internal class IntrospectionExecutionResult
+    {
+        [JsonProperty("data")]
+        public IntrospectionExecutionResultData Data { get; set; }
+    }
+
+    internal class IntrospectionExecutionResultData
+    {
+        [JsonProperty("__schema")]
+        public __Schema Schema { get; set; }
     }
 }

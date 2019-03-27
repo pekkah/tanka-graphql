@@ -43,7 +43,8 @@ namespace tanka.graphql.sdl
             foreach (var definition in definitions.OfType<GraphQLObjectTypeDefinition>())
                 Object(definition);
 
-            foreach (var definition in definitions.OfType<GraphQLUnionTypeDefinition>()) Union(definition);
+            foreach (var definition in definitions.OfType<GraphQLUnionTypeDefinition>()) 
+                Union(definition);
 
             foreach (var definition in definitions.OfType<GraphQLTypeExtensionDefinition>())
                 Extend(definition);
@@ -56,12 +57,6 @@ namespace tanka.graphql.sdl
         protected ScalarType Scalar(GraphQLScalarTypeDefinition definition)
         {
             _builder.GetScalar(definition.Name.Value, out var scalar);
-
-            if (scalar == null)
-                throw new GraphQLError(
-                    $"Scalar type '{definition.Name.Value}' not known. Add it to the context before parsing.",
-                    definition);
-
             return scalar;
         }
 
@@ -163,13 +158,13 @@ namespace tanka.graphql.sdl
         {
             if (typeDefinition.Kind == ASTNodeKind.NonNullType)
             {
-                var innerType = InputType(((GraphQLNonNullType) typeDefinition).Type);
+                var innerType = OutputType(((GraphQLNonNullType) typeDefinition).Type);
                 return innerType != null ? new NonNull(innerType) : null;
             }
 
             if (typeDefinition.Kind == ASTNodeKind.ListType)
             {
-                var innerType = InputType(((GraphQLListType) typeDefinition).Type);
+                var innerType = OutputType(((GraphQLListType) typeDefinition).Type);
                 return innerType != null ? new List(innerType) : null;
             }
 
