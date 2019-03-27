@@ -138,23 +138,29 @@ namespace tanka.graphql.type
         }
 
         public SchemaBuilder Query(
-            out ObjectType query)
+            out ObjectType query,
+            string description = null,
+            IEnumerable<InterfaceType> interfaces = null)
         {
-            Object("Query", out query);
+            Object("Query", out query, description, interfaces);
             return this;
         }
 
         public SchemaBuilder Mutation(
-            out ObjectType mutation)
+            out ObjectType mutation,
+            string description = null,
+            IEnumerable<InterfaceType> interfaces = null)
         {
-            Object("Mutation", out mutation);
+            Object("Mutation", out mutation, description, interfaces);
             return this;
         }
 
         public SchemaBuilder Subscription(
-            out ObjectType subscription)
+            out ObjectType subscription,
+            string description = null,
+            IEnumerable<InterfaceType> interfaces = null)
         {
-            Object("Subscription", out subscription);
+            Object("Subscription", out subscription, description, interfaces);
             return this;
         }
 

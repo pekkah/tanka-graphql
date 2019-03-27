@@ -9,8 +9,8 @@ namespace tanka.graphql.introspection
             string introspectionResult)
         {
             var result = IntrospectionParser.Deserialize(introspectionResult);
-            var reader = new IntrospectionSchemaReader(builder);
-            reader.Read(result);
+            var reader = new IntrospectionSchemaReader(builder, result);
+            reader.Read();
 
             return builder;
         }
