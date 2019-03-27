@@ -20,7 +20,10 @@ namespace tanka.graphql.introspection
 
         public void Read()
         {
-            var types = _schema.Types;
+            var types = _schema.Types
+                .Distinct()
+                .ToList();
+
             var queryTypeName = _schema.QueryType?.Name;
             var mutationTypeName = _schema.MutationType?.Name;
             var subscriptionTypeName = _schema.SubscriptionType?.Name;
@@ -133,6 +136,9 @@ namespace tanka.graphql.introspection
 
         private EnumType Enum(__Type type)
         {
+            if (_builder.TryGetType<EnumType>(type.Name, out var enumType))
+                return enumType;
+
             var values =
                 type.EnumValues
                     .Select(v => (
@@ -144,7 +150,7 @@ namespace tanka.graphql.introspection
 
             _builder.Enum(
                 type.Name,
-                out var enumType,
+                out enumType,
                 type.Description,
                 null,
                 values);
@@ -154,7 +160,10 @@ namespace tanka.graphql.introspection
 
         private InputObjectType InputObject(__Type type)
         {
-            _builder.InputObject(type.Name, out var owner, type.Description, null);
+            if (_builder.TryGetType<InputObjectType>(type.Name, out var owner))
+                return owner;
+
+            _builder.InputObject(type.Name, out owner, type.Description, null);
 
             if (type.InputFields != null && type.InputFields.Any())
                 _builder.Connections(connect =>
@@ -199,7 +208,10 @@ namespace tanka.graphql.introspection
 
         private InterfaceType Interface(__Type type)
         {
-            _builder.Interface(type.Name, out var owner, type.Description, null);
+            if (_builder.TryGetType<InterfaceType>(type.Name, out var owner))
+                return owner;
+
+            _builder.Interface(type.Name, out owner, type.Description, null);
             if (type.Fields != null && type.Fields.Any())
                 _delayedActions.Add(() =>
                 {
@@ -233,10 +245,12 @@ namespace tanka.graphql.introspection
             bool isMutationType = false,
             bool isSubscriptionType = false)
         {
+            if (_builder.TryGetType<ObjectType>(type.Name, out var owner))
+                return owner;
+
             var interfaces = type.Interfaces?.Select(Interface)
                 .ToList();
 
-            ObjectType owner;
             if (isQueryType)
                 _builder.Query(
                     out owner,
@@ -289,13 +303,16 @@ namespace tanka.graphql.introspection
 
         private UnionType Union(__Type type)
         {
+            if (_builder.TryGetType<UnionType>(type.Name, out var unionType))
+                return unionType;
+
             var possibleTypes = type.PossibleTypes?
                 .Select(possibleType => (ObjectType) OutputType(ResolveActualType(possibleType)))
                 .ToArray();
 
             _builder.Union(
                 type.Name,
-                out var unionType,
+                out unionType,
                 type.Description,
                 possibleTypes: possibleTypes);
 

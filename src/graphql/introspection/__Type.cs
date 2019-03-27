@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace tanka.graphql.introspection
 {
@@ -15,8 +16,14 @@ namespace tanka.graphql.introspection
         public List<__Directive> Directives { get; set; }
     }
 
-    public class __Type
+    public class __Type : IEquatable<__Type>
     {
+        public override string ToString()
+        {
+            return $"{Kind} {Name}";
+        }
+
+
         public __TypeKind? Kind { get; set; }
 
         public string Name { get;set; }
@@ -34,6 +41,39 @@ namespace tanka.graphql.introspection
         public List<__InputValue> InputFields { get; set; }
 
         public __Type OfType { get; set; }
+
+        public bool Equals(__Type other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Kind == other.Kind && string.Equals(Name, other.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((__Type) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Kind.GetHashCode() * 397) ^ (Name != null ? Name.GetHashCode() : 0);
+            }
+        }
+
+        public static bool operator ==(__Type left, __Type right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(__Type left, __Type right)
+        {
+            return !Equals(left, right);
+        }
     }
 
     public class __Field
