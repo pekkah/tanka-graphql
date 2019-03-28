@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
-using tanka.graphql.error;
-using tanka.graphql.type;
+using System.Linq;
 using GraphQLParser.AST;
+using tanka.graphql.type;
 
 namespace tanka.graphql.execution
 {
     public class QueryContext
     {
-        public QueryContext(Func<Exception, Error> formatError,
+        public QueryContext(
+            Func<Exception, Error> formatError,
             GraphQLDocument document,
             GraphQLOperationDefinition operation,
             ISchema schema,
             Dictionary<string, object> coercedVariableValues,
-            object initialValue, 
+            object initialValue,
             Extensions extensions)
         {
             FormatError = formatError ?? throw new ArgumentNullException(nameof(formatError));
             Document = document ?? throw new ArgumentNullException(nameof(document));
             OperationDefinition = operation ?? throw new ArgumentNullException(nameof(operation));
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
-            CoercedVariableValues = coercedVariableValues ?? throw new ArgumentNullException(nameof(coercedVariableValues));
+            CoercedVariableValues =
+                coercedVariableValues ?? throw new ArgumentNullException(nameof(coercedVariableValues));
             InitialValue = initialValue;
             Extensions = extensions;
         }
@@ -40,7 +41,8 @@ namespace tanka.graphql.execution
 
         public Extensions Extensions { get; }
 
-        public void Deconstruct(out ISchema schema, out GraphQLDocument document, out GraphQLOperationDefinition operation, out object initialValue,
+        public void Deconstruct(out ISchema schema, out GraphQLDocument document,
+            out GraphQLOperationDefinition operation, out object initialValue,
             out Dictionary<string, object> coercedVariableValues)
         {
             schema = Schema;
@@ -57,7 +59,10 @@ namespace tanka.graphql.execution
                 Schema,
                 Document,
                 Extensions,
-                executionStrategy);
+                executionStrategy,
+                OperationDefinition,
+                Document.Definitions.OfType<GraphQLFragmentDefinition>()
+                    .ToDictionary(f => f.Name.Value, f => f));
         }
     }
 }

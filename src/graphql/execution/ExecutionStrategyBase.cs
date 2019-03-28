@@ -54,7 +54,8 @@ namespace tanka.graphql.execution
                         field,
                         fieldSelection,
                         argumentValues,
-                        path);
+                        path,
+                        context);
 
                 var resolver = schema.GetResolver(objectType.Name, fieldName);
 
@@ -118,8 +119,7 @@ namespace tanka.graphql.execution
                 throw new GraphQLError(
                     $"Object '{objectType.Name}' does not have field '{fieldName}'");
 
-            object responseValue = null;
-            responseValue = await ExecuteFieldAsync(
+            var responseValue = await ExecuteFieldAsync(
                 context,
                 objectType,
                 objectValue,

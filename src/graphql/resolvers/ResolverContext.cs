@@ -10,13 +10,14 @@ namespace tanka.graphql.resolvers
     public class ResolverContext
     {
         public ResolverContext(
-            ISchema schema, 
+            ISchema schema, //todo: remove and get from execution
             ObjectType objectType,
             object objectValue,
             IField field,
             GraphQLFieldSelection selection,
             Dictionary<string, object> arguments,
-            NodePath path)
+            NodePath path,
+            IExecutorContext executionContext)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             ObjectType = objectType ?? throw new ArgumentNullException(nameof(objectType));
@@ -25,6 +26,7 @@ namespace tanka.graphql.resolvers
             Selection = selection ?? throw new ArgumentNullException(nameof(selection));
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Path = path ?? throw new ArgumentNullException(nameof(path));
+            ExecutionContext = executionContext;
         }
 
         public ISchema Schema { get; }
@@ -38,7 +40,9 @@ namespace tanka.graphql.resolvers
         public GraphQLFieldSelection Selection { get; }
 
         public Dictionary<string, object> Arguments { get; }
+
         public NodePath Path { get; }
+        public IExecutorContext ExecutionContext { get; }
 
         public string FieldName => Selection.Name?.Value;
 

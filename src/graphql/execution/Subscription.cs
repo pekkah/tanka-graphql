@@ -129,7 +129,8 @@ namespace tanka.graphql.execution
                 field,
                 fieldSelection,
                 coercedArgumentValues,
-                path);
+                path,
+                context);
 
             var subscriber = schema.GetSubscriber(subscriptionType.Name, fieldName);
 
