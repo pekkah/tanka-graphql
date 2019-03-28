@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using tanka.graphql.type;
@@ -9,7 +10,7 @@ namespace tanka.graphql.introspection
     {
         private readonly SchemaBuilder _builder;
 
-        private readonly List<Action> _delayedActions = new List<Action>();
+        private readonly ConcurrentQueue<Action> _delayedActions = new ConcurrentQueue<Action>();
         private readonly __Schema _schema;
 
         public IntrospectionSchemaReader(SchemaBuilder builder, IntrospectionResult result)
@@ -50,7 +51,7 @@ namespace tanka.graphql.introspection
             foreach (var type in types.Where(t => t.Kind == __TypeKind.UNION))
                 Union(type);
 
-            foreach (var action in _delayedActions)
+            while(_delayedActions.TryDequeue(out var action))
                 action();
         }
 
@@ -213,7 +214,7 @@ namespace tanka.graphql.introspection
 
             _builder.Interface(type.Name, out owner, type.Description, null);
             if (type.Fields != null && type.Fields.Any())
-                _delayedActions.Add(() =>
+                _delayedActions.Enqueue(() =>
                 {
                     _builder.Connections(connect =>
                     {
@@ -274,7 +275,7 @@ namespace tanka.graphql.introspection
                     interfaces);
 
             if (type.Fields != null && type.Fields.Any())
-                _delayedActions.Add(() =>
+                _delayedActions.Enqueue(() =>
                 {
                     _builder.Connections(connect =>
                     {
