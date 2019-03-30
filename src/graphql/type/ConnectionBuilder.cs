@@ -198,7 +198,7 @@ namespace tanka.graphql.type
             return _fields[type.Name];
         }
 
-        public ResolverBuilder GetResolver(ComplexType type, string fieldName)
+        public ResolverBuilder GetOrAddResolver(ComplexType type, string fieldName)
         {
             if (_resolvers.TryGetValue(type.Name, out var fields))
                 if (fields.TryGetValue(fieldName, out var builder))

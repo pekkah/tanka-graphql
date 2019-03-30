@@ -29,7 +29,7 @@ namespace tanka.graphql.tools
 
                             if (resolver != null)
                             {
-                                connect.GetResolver(leftType, rightTypeField.Key)
+                                connect.GetOrAddResolver(leftType, rightTypeField.Key)
                                     .Run(resolver);
                             }
 
@@ -57,7 +57,7 @@ namespace tanka.graphql.tools
 
                                 if (resolver != null)
                                 {
-                                    connect.GetResolver(rightType, rightTypeField.Key)
+                                    connect.GetOrAddResolver(rightType, rightTypeField.Key)
                                         .Run(resolver);
                                 }
 

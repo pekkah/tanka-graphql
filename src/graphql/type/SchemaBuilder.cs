@@ -50,7 +50,7 @@ namespace tanka.graphql.type
                             var resolver = from.GetResolver(objectType.Name, field.Key);
 
                             if (resolver != null)
-                                _connections.GetResolver(objectType, field.Key)
+                                _connections.GetOrAddResolver(objectType, field.Key)
                                     .Run(resolver);
 
                             var subscriber = from.GetSubscriber(objectType.Name, field.Key);

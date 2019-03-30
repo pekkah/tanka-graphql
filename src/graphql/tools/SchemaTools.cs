@@ -49,7 +49,7 @@ namespace tanka.graphql.tools
                         var resolver = resolvers.GetResolver(type.Name, field.Key);
 
                         if (resolver != null)
-                            connections.GetResolver(type, field.Key)
+                            connections.GetOrAddResolver(type, field.Key)
                                 .Run(resolver);
 
                         var subscriber = subscribers?.GetSubscriber(type.Name, field.Key);
@@ -114,7 +114,7 @@ namespace tanka.graphql.tools
                         if (visitor.FieldDefinition == null)
                             continue;
 
-                        var resolver = connections.GetResolver(objectType, field.Key)?.Build();
+                        var resolver = connections.GetOrAddResolver(objectType, field.Key)?.Build();
                         var subscriber = connections.GetSubscriber(objectType, field.Key)?.Build();
                         var fieldDefinition = new DirectiveFieldVisitorContext(
                             field.Key,

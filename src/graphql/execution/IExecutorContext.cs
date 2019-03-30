@@ -20,6 +20,7 @@ namespace tanka.graphql.execution
         IEnumerable<Exception> FieldErrors { get; }
 
         IExecutionStrategy Strategy { get; }
+        IDictionary<string, object> CoercedVariableValues { get; }
 
         void AddError(Exception error);
     }

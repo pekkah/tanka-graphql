@@ -62,7 +62,8 @@ namespace tanka.graphql.execution
                 executionStrategy,
                 OperationDefinition,
                 Document.Definitions.OfType<GraphQLFragmentDefinition>()
-                    .ToDictionary(f => f.Name.Value, f => f));
+                    .ToDictionary(f => f.Name.Value, f => f),
+                CoercedVariableValues);
         }
     }
 }

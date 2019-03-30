@@ -9,13 +9,13 @@ namespace tanka.graphql.execution
     {
         private readonly List<Exception> _errors;
 
-        public ExecutorContext(
-            ISchema schema,
+        public ExecutorContext(ISchema schema,
             GraphQLDocument document,
             Extensions extensions,
             IExecutionStrategy strategy,
             GraphQLOperationDefinition operation,
-            IDictionary<string, GraphQLFragmentDefinition> fragments)
+            IDictionary<string, GraphQLFragmentDefinition> fragments, 
+            IDictionary<string, object> coercedVariableValues)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             Document = document ?? throw new ArgumentNullException(nameof(document));
@@ -23,11 +23,13 @@ namespace tanka.graphql.execution
             Strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
             Operation = operation;
             Fragments = fragments;
+            CoercedVariableValues = coercedVariableValues;
             _errors = new List<Exception>();
         }
 
         public GraphQLOperationDefinition Operation { get; }
         public IDictionary<string, GraphQLFragmentDefinition> Fragments { get; }
+        public IDictionary<string, object> CoercedVariableValues { get; }
 
         public ISchema Schema { get; }
 
