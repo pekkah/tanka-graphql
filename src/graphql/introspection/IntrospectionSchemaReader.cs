@@ -55,25 +55,28 @@ namespace tanka.graphql.introspection
                 action();
         }
 
-        protected IType InputType(__Type typeDefinition)
+        protected IType InputType(__Type typeReference)
         {
-            if (typeDefinition.Kind == __TypeKind.NON_NULL)
+            if (typeReference.Kind == __TypeKind.NON_NULL)
             {
-                var innerType = InputType(typeDefinition.OfType);
+                var innerType = InputType(typeReference.OfType);
                 return innerType != null ? new NonNull(innerType) : null;
             }
 
-            if (typeDefinition.Kind == __TypeKind.LIST)
+            if (typeReference.Kind == __TypeKind.LIST)
             {
-                var innerType = InputType(typeDefinition.OfType);
+                var innerType = InputType(typeReference.OfType);
                 return innerType != null ? new List(innerType) : null;
             }
 
-            var typeName = typeDefinition.Name;
+            var typeName = typeReference.Name;
 
             // is type already known by the builder?
             if (_builder.TryGetType<INamedType>(typeName, out var knownType))
                 return knownType;
+
+            // get the actual type
+            var typeDefinition = _schema.Types.Single(t => t.Name == typeReference.Name);
 
             // type is not known so we need to build it
             switch (typeDefinition.Kind)
@@ -90,25 +93,28 @@ namespace tanka.graphql.introspection
             return null;
         }
 
-        protected IType OutputType(__Type typeDefinition)
+        protected IType OutputType(__Type typeReference)
         {
-            if (typeDefinition.Kind == __TypeKind.NON_NULL)
+            if (typeReference.Kind == __TypeKind.NON_NULL)
             {
-                var innerType = OutputType(typeDefinition.OfType);
+                var innerType = OutputType(typeReference.OfType);
                 return innerType != null ? new NonNull(innerType) : null;
             }
 
-            if (typeDefinition.Kind == __TypeKind.LIST)
+            if (typeReference.Kind == __TypeKind.LIST)
             {
-                var innerType = OutputType(typeDefinition.OfType);
+                var innerType = OutputType(typeReference.OfType);
                 return innerType != null ? new List(innerType) : null;
             }
 
-            var typeName = typeDefinition.Name;
+            var typeName = typeReference.Name;
 
             // is type already known by the builder?
             if (_builder.TryGetType<INamedType>(typeName, out var knownType))
                 return knownType;
+
+            // get the actual type
+            var typeDefinition = _schema.Types.Single(t => t.Name == typeReference.Name);
 
             // type is not known so we need to build it
             switch (typeDefinition.Kind)
@@ -173,38 +179,12 @@ namespace tanka.graphql.introspection
                         connect.InputField(
                             owner,
                             field.Name,
-                            InputType(ResolveActualType(field.Type)),
+                            InputType(field.Type),
                             field.DefaultValue,
                             field.Description);
                 });
 
             return owner;
-        }
-
-        private __Type ResolveActualType(__Type referencedType)
-        {
-            if (referencedType.Kind == __TypeKind.NON_NULL)
-            {
-                return new __Type()
-                {
-                    Kind = __TypeKind.NON_NULL,
-                    OfType = ResolveActualType(referencedType.OfType)
-                };
-            }
-
-            if (referencedType.Kind == __TypeKind.LIST)
-            {
-                return new __Type()
-                {
-                    Kind = __TypeKind.LIST,
-                    OfType = ResolveActualType(referencedType.OfType)
-                };
-            }
-
-            if (referencedType.Kind == __TypeKind.SCALAR)
-                return referencedType;
-
-            return _schema.Types.Single(t => t.Name == referencedType.Name);
         }
 
         private InterfaceType Interface(__Type type)
@@ -223,7 +203,7 @@ namespace tanka.graphql.introspection
                             (string Name, IType Type, object DefaultValue, string Description)[] args = field.Args
                                 .Select(arg => (
                                     arg.Name,
-                                    InputType(ResolveActualType(arg.Type)),
+                                    InputType(arg.Type),
                                     (object) arg.DefaultValue,
                                     arg.Description))
                                 .ToArray();
@@ -231,7 +211,7 @@ namespace tanka.graphql.introspection
                             connect.Field(
                                 owner,
                                 field.Name,
-                                OutputType(ResolveActualType(field.Type)),
+                                OutputType(field.Type),
                                 field.Description,
                                 args: args);
                         }
@@ -284,7 +264,7 @@ namespace tanka.graphql.introspection
                             (string Name, IType Type, object DefaultValue, string Description)[] args = field.Args
                                 .Select(arg => (
                                     arg.Name,
-                                    InputType(ResolveActualType(arg.Type)),
+                                    InputType(arg.Type),
                                     (object) arg.DefaultValue,
                                     arg.Description))
                                 .ToArray();
@@ -292,7 +272,7 @@ namespace tanka.graphql.introspection
                             connect.Field(
                                 owner,
                                 field.Name,
-                                OutputType(ResolveActualType(field.Type)),
+                                OutputType(field.Type),
                                 field.Description,
                                 args: args);
                         }
@@ -308,7 +288,7 @@ namespace tanka.graphql.introspection
                 return unionType;
 
             var possibleTypes = type.PossibleTypes?
-                .Select(possibleType => (ObjectType) OutputType(ResolveActualType(possibleType)))
+                .Select(possibleType => (ObjectType) OutputType(possibleType))
                 .ToArray();
 
             _builder.Union(
