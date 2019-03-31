@@ -9,7 +9,7 @@ using Xunit;
 
 namespace tanka.graphql.tests.introspection
 {
-    public class ImportGitHubSchema
+    public class GitHubIntrospectionFacts
     {
         [Fact]
         public void Read_types()
