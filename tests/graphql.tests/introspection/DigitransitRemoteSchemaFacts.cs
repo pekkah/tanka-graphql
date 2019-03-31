@@ -93,8 +93,6 @@ namespace tanka.graphql.tests.introspection
                 .Scalar("Polyline", out _, new StringConverter())
                 .ImportIntrospectedSchema(GetDigitransitIntrospection());
 
-            var resultChannel = Channel.CreateBounded<ExecutionResult>(1);
-
             /* When */
             var schema = RemoteSchemaTools.MakeRemoteExecutable(
                 builder,
@@ -150,6 +148,120 @@ namespace tanka.graphql.tests.introspection
                 ]
               }
             }
+            ");
+        }
+
+        [Fact]
+        public async Task MakeRemoteExecutable_on_link_error()
+        {
+            /* Given */
+            var builder = new SchemaBuilder()
+                .Scalar("Long", out _, new StringConverter())
+                .Scalar("Lat", out _, new StringConverter())
+                .Scalar("Polyline", out _, new StringConverter())
+                .ImportIntrospectedSchema(GetDigitransitIntrospection());
+
+            /* When */
+            var schema = RemoteSchemaTools.MakeRemoteExecutable(
+                builder,
+                link: (document, variables, cancellationToken) => 
+                    throw new InvalidOperationException("error"));
+
+            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+            {
+                Schema = schema,
+                Document = Parser.ParseDocument(@"
+                    {
+                        feeds {
+                            feedId
+                        }
+                    }
+                    ")
+            });
+
+            /* Then */
+            result.ShouldMatchJson(@"
+                {
+                  ""data"": {
+                    ""feeds"": null
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""error"",
+                      ""extensions"": {
+                        ""code"": ""INVALIDOPERATION""
+                      }
+                    }
+                  ]
+                }
+            ");
+        }
+
+        [Fact]
+        public async Task MakeRemoteExecutable_on_link_graphql_error()
+        {
+            /* Given */
+            var builder = new SchemaBuilder()
+                .Scalar("Long", out _, new StringConverter())
+                .Scalar("Lat", out _, new StringConverter())
+                .Scalar("Polyline", out _, new StringConverter())
+                .ImportIntrospectedSchema(GetDigitransitIntrospection());
+
+            /* When */
+            var schema = RemoteSchemaTools.MakeRemoteExecutable(
+                builder,
+                link: async (document, variables, cancellationToken) =>
+                {
+                    var channel = Channel.CreateBounded<ExecutionResult>(1);
+                    var executionResult = new ExecutionResult()
+                    {
+                        Errors = new[]
+                        {
+                            new Error("failed to find..."),
+                        }
+                    };
+                    await channel.Writer.WriteAsync(executionResult, cancellationToken);
+                    channel.Writer.TryComplete();
+
+                    return channel;
+                });
+
+            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+            {
+                Schema = schema,
+                Document = Parser.ParseDocument(@"
+                    {
+                        feeds {
+                            feedId
+                        }
+                    }
+                    ")
+            });
+
+            /* Then */
+            result.ShouldMatchJson(@"
+                {
+                  ""data"": {
+                    ""feeds"": null
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""failed to find..."",
+                      ""locations"": [
+                        {
+                          ""end"": 137,
+                          ""start"": 47
+                        }
+                      ],
+                      ""path"": [
+                        ""feeds""
+                      ],
+                      ""extensions"": {
+                        ""code"": ""COMPLETEVALUE""
+                      }
+                    }
+                  ]
+                }
             ");
         }
 

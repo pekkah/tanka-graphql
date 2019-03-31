@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
 using tanka.graphql.execution;
@@ -28,6 +30,15 @@ namespace tanka.graphql.resolvers
             Dictionary<string, object> coercedVariableValues, 
             NodePath path)
         {
+            if (_result.Errors != null && _result.Errors.Any())
+            {
+                throw new CompleteValueException(
+                    _result.Errors.First().Message, 
+                    locations: new []{selection.Location},
+                    path: path,
+                    nodes: new [] { selection});
+            }
+
             if (_result.Data.ContainsKey(selection.Name.Value))
             {
                 return Task.FromResult(_result.Data[selection.Name.Value]);
