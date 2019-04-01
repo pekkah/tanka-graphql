@@ -56,7 +56,7 @@ namespace tanka.graphql.type
                             var subscriber = from.GetSubscriber(objectType.Name, field.Key);
 
                             if (subscriber != null)
-                                _connections.GetSubscriber(objectType, field.Key)
+                                _connections.GetOrAddSubscriber(objectType, field.Key)
                                     .Run(subscriber);
                         }
 

@@ -37,7 +37,7 @@ namespace tanka.graphql.tools
 
                             if (subscriber != null)
                             {
-                                connect.GetSubscriber(leftType, rightTypeField.Key);
+                                connect.GetOrAddSubscriber(leftType, rightTypeField.Key);
                             }
                         });
                     }
@@ -65,7 +65,7 @@ namespace tanka.graphql.tools
 
                                 if (subscriber != null)
                                 {
-                                    connect.GetSubscriber(rightType, rightTypeField.Key);
+                                    connect.GetOrAddSubscriber(rightType, rightTypeField.Key);
                                 }
                             }
                         });

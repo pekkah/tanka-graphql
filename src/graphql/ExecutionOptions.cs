@@ -57,14 +57,24 @@ namespace tanka.graphql
         {
             var message = exception.Message;
 
-            if (exception.InnerException != null) message += $" {exception.InnerException.Message}";
+            if (exception.InnerException != null) 
+                message += $" {exception.InnerException.Message}";
 
-            var error = new Error(message);
+            var error = new Error(message);          
             EnrichWithErrorCode(error, exception);
-            if (!(exception is GraphQLError graphQLError)) return error;
+            if (!(exception is GraphQLError graphQLError)) 
+                return error;
 
             error.Locations = graphQLError.Locations;
             error.Path = graphQLError.Path?.Segments.ToList();
+            if (graphQLError.Extensions != null)
+            {
+                foreach (var extension in graphQLError.Extensions)
+                {
+                    error.Extend(extension.Key, extension.Value);
+                }
+            }
+
             return error;
         }
 

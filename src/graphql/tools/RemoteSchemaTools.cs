@@ -1,21 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
+using Newtonsoft.Json.Linq;
 using tanka.graphql.channels;
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 
 namespace tanka.graphql.tools
 {
-    public delegate ValueTask<ChannelReader<ExecutionResult>> ExecutionResultLink(
-        GraphQLDocument document,
-        IDictionary<string, object> variables,
-        CancellationToken cancellationToken);
-
     public static class RemoteSchemaTools
     {
         public static ISchema MakeRemoteExecutable(
@@ -55,6 +51,48 @@ namespace tanka.graphql.tools
                     {
                         var resolver = connections.GetOrAddResolver(mutationType, field.Key);
                         resolver.Run(createResolver(link));
+                    }
+                });
+            }
+
+            foreach (var objectType in builder.VisitTypes<ObjectType>())
+            {
+                builder.Connections(connections =>
+                {
+                    foreach (var field in connections.VisitFields(objectType))
+                    {
+                        if(!connections.TrGetResolver(objectType, field.Key, out _))
+                        {
+                            var resolver = connections.GetOrAddResolver(objectType, field.Key);
+                            resolver.Run(context =>
+                            {
+                                object value = null;
+                                if (context.ObjectValue is JObject jObject)
+                                {
+                                    value = jObject[context.FieldName];
+                                }
+                                else if (context.ObjectValue is IDictionary<string, object> dictionary)
+                                {
+                                    value = dictionary[context.FieldName];
+                                }
+                                else if(context.ObjectValue is KeyValuePair<string, object> keyValue)
+                                {
+                                    value = keyValue.Value;
+                                }
+
+                                if (value is IDictionary<string, object>)
+                                {
+                                    return ResolveSync.As(value);
+                                }
+
+                                if (value is IEnumerable enumerable && !(value is string))
+                                {
+                                    return ResolveSync.As(enumerable);
+                                }
+
+                                return ResolveSync.As(value);
+                            });
+                        }
                     }
                 });
             }
@@ -107,7 +145,26 @@ namespace tanka.graphql.tools
                 {
                     if (reader.TryRead(out var executionResult))
                     {
-                        return new ExecutionResultResolveResult(executionResult);
+                        if (executionResult.Errors != null && executionResult.Errors.Any())
+                        {
+                            var first = executionResult.Errors.First();
+                            throw new CompleteValueException(
+                                $"{first.Message}",
+                                nodes:new []{ context.Selection},
+                                locations: new []{context.Selection.Location},
+                                path: context.Path,
+                                extensions: new Dictionary<string, object>()
+                                {
+                                    ["linkError"] = new
+                                    {
+                                        data = executionResult.Data,
+                                        errors = executionResult.Errors,
+                                        extensions = executionResult.Extensions
+                                    } 
+                                });
+                        }
+
+                        return new PreExecutedResolveResult(executionResult.Data);
                     }
                 }
 

@@ -191,9 +191,9 @@ namespace tanka.graphql.type
         public IEnumerable<KeyValuePair<string, IField>> VisitFields(ComplexType type)
         {
             if (!_fields.ContainsKey(type.Name))
-                throw new SchemaBuilderException(
-                    type.Name,
-                    "Cannot visit fields of type. No fields known.");
+            {
+                return Enumerable.Empty<KeyValuePair<string, IField>>();
+            }
 
             return _fields[type.Name];
         }
@@ -207,13 +207,37 @@ namespace tanka.graphql.type
             return Resolver(type, fieldName);
         }
 
-        public SubscriberBuilder GetSubscriber(ComplexType type, string fieldName)
+        public SubscriberBuilder GetOrAddSubscriber(ComplexType type, string fieldName)
         {
             if (_subscribers.TryGetValue(type.Name, out var fields))
                 if (fields.TryGetValue(fieldName, out var builder))
                     return builder;
 
             return Subscriber(type, fieldName);
+        }
+
+        public bool TrGetResolver(ComplexType type, string fieldName, out ResolverBuilder resolver)
+        {
+            if (_resolvers.TryGetValue(type.Name, out var fields))
+                if (fields.TryGetValue(fieldName, out resolver))
+                {
+                    return true;
+                }
+
+            resolver = null;
+            return false;
+        }
+
+        public bool TrGetSubscriber(ComplexType type, string fieldName, out SubscriberBuilder subscriber)
+        {
+            if (_subscribers.TryGetValue(type.Name, out var fields))
+                if (fields.TryGetValue(fieldName, out subscriber))
+                {
+                    return true;
+                }
+
+            subscriber = null;
+            return false;
         }
 
         public ConnectionBuilder RemoveField(ComplexType complexType, string fieldName)
