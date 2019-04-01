@@ -67,11 +67,7 @@ namespace tanka.graphql.tools
                             resolver.Run(context =>
                             {
                                 object value = null;
-                                if (context.ObjectValue is JObject jObject)
-                                {
-                                    value = jObject[context.FieldName];
-                                }
-                                else if (context.ObjectValue is IDictionary<string, object> dictionary)
+                                if (context.ObjectValue is IDictionary<string, object> dictionary)
                                 {
                                     value = dictionary[context.FieldName];
                                 }
@@ -133,7 +129,7 @@ namespace tanka.graphql.tools
             }
         }
 
-        private static Resolver DefaultCreateRemoteResolver(ExecutionResultLink link)
+        public static Resolver DefaultCreateRemoteResolver(ExecutionResultLink link)
         {
             return async context =>
             {
@@ -155,7 +151,7 @@ namespace tanka.graphql.tools
                                 path: context.Path,
                                 extensions: new Dictionary<string, object>()
                                 {
-                                    ["linkError"] = new
+                                    ["remoteError"] = new
                                     {
                                         data = executionResult.Data,
                                         errors = executionResult.Errors,

@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace tanka.graphql.server.utilities
+namespace tanka.graphql.requests
 {
     public static class VariableExtensions
     {

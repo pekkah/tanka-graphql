@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using tanka.graphql.samples.chat.web.GraphQL;
 using tanka.graphql.server.utilities;
 using Microsoft.AspNetCore.Mvc;
+using tanka.graphql.requests;
 using static tanka.graphql.Executor;
 using static tanka.graphql.Parser;
 

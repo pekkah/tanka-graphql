@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace tanka.graphql.server.utilities
+namespace tanka.graphql.requests
 {
-    internal class VariableConverter : JsonConverter
+    internal class NestedDictionaryConverter : JsonConverter
     {
         public override bool CanWrite => false;
 
