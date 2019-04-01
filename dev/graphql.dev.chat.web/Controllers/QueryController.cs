@@ -26,7 +26,7 @@ namespace tanka.graphql.samples.chat.web.Controllers
                 Document =  ParseDocument(request.Query),
                 Schema = _schemas.Chat,
                 OperationName = request.OperationName,
-                VariableValues = request.Variables?.ToVariableDictionary()
+                VariableValues = request.Variables?.ToNestedDictionary()
             });
 
             return Ok(result);

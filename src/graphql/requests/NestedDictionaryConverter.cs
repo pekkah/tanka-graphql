@@ -26,7 +26,7 @@ namespace tanka.graphql.requests
                 return new Dictionary<string, object>();
 
             var obj = JObject.Load(reader);
-            return obj.ToVariableDictionary();
+            return obj.ToNestedDictionary();
         }
     }
 }
