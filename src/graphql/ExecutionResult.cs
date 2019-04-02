@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using tanka.graphql.requests;
 
 namespace tanka.graphql
 {
@@ -14,6 +15,7 @@ namespace tanka.graphql
         private IEnumerable<Error> _errors;
         private IDictionary<string, object> _extensions;
 
+        [JsonConverter(typeof(NestedDictionaryConverter))]
         public IDictionary<string, object> Data
         {
             get => _data;

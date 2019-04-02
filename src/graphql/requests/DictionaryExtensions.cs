@@ -2,11 +2,11 @@
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace tanka.graphql.server.utilities
+namespace tanka.graphql.requests
 {
-    public static class VariableExtensions
+    public static class DictionaryExtensions
     {
-        public static Dictionary<string, object> ToVariableDictionary(this JObject json)
+        public static Dictionary<string, object> ToNestedDictionary(this JObject json)
         {
             var propertyValuePairs = json.ToObject<Dictionary<string, object>>();
             ProcessJObjectProperties(propertyValuePairs);
@@ -28,7 +28,7 @@ namespace tanka.graphql.server.utilities
                 select propertyName).ToList();
 
             objectPropertyNames.ForEach(propertyName =>
-                propertyValuePairs[propertyName] = ToVariableDictionary((JObject) propertyValuePairs[propertyName]));
+                propertyValuePairs[propertyName] = ToNestedDictionary((JObject) propertyValuePairs[propertyName]));
         }
 
         private static void ProcessJArrayProperties(IDictionary<string, object> propertyValuePairs)
@@ -48,7 +48,7 @@ namespace tanka.graphql.server.utilities
             switch (value)
             {
                 case JObject o:
-                    return ToVariableDictionary(o);
+                    return ToNestedDictionary(o);
                 case JArray array:
                     return ToArray(array);
             }

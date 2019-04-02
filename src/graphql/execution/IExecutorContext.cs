@@ -1,22 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using tanka.graphql.error;
-using tanka.graphql.type;
 using GraphQLParser.AST;
+using tanka.graphql.type;
 
 namespace tanka.graphql.execution
 {
     public interface IExecutorContext
     {
+        GraphQLOperationDefinition Operation { get; }
+
+        IDictionary<string, GraphQLFragmentDefinition> Fragments { get; }
+
         ISchema Schema { get; }
 
         GraphQLDocument Document { get; }
 
-        IExecutionStrategy Strategy { get; }
+        Extensions Extensions { get; }
 
         IEnumerable<Exception> FieldErrors { get; }
 
-        Extensions Extensions { get; }
+        IExecutionStrategy Strategy { get; }
+        IDictionary<string, object> CoercedVariableValues { get; }
 
         void AddError(Exception error);
     }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using tanka.graphql.requests;
 
 namespace tanka.graphql.server
 {

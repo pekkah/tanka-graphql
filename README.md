@@ -56,7 +56,7 @@ See [Sample](https://github.com/pekkah/tanka-graphql-samples)
 This repo includes a sample application which is used for testing
 and development of the SignalR client and the server.
 
-Open the `tanka-graphql.sln` and start the `graphql.samples.chat.web` project. This will start a simple chat server using the tanka.graphql.server.
+Open the `tanka-graphql.sln` and start the `graphql.dev.chat.web` project. This will start a simple chat server using the tanka.graphql.server.
 
 Start the client by following instructions below:
 

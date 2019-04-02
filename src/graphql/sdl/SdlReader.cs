@@ -43,7 +43,8 @@ namespace tanka.graphql.sdl
             foreach (var definition in definitions.OfType<GraphQLObjectTypeDefinition>())
                 Object(definition);
 
-            foreach (var definition in definitions.OfType<GraphQLUnionTypeDefinition>()) Union(definition);
+            foreach (var definition in definitions.OfType<GraphQLUnionTypeDefinition>())
+                Union(definition);
 
             foreach (var definition in definitions.OfType<GraphQLTypeExtensionDefinition>())
                 Extend(definition);
@@ -56,12 +57,6 @@ namespace tanka.graphql.sdl
         protected ScalarType Scalar(GraphQLScalarTypeDefinition definition)
         {
             _builder.GetScalar(definition.Name.Value, out var scalar);
-
-            if (scalar == null)
-                throw new GraphQLError(
-                    $"Scalar type '{definition.Name.Value}' not known. Add it to the context before parsing.",
-                    definition);
-
             return scalar;
         }
 
@@ -163,13 +158,13 @@ namespace tanka.graphql.sdl
         {
             if (typeDefinition.Kind == ASTNodeKind.NonNullType)
             {
-                var innerType = InputType(((GraphQLNonNullType) typeDefinition).Type);
+                var innerType = OutputType(((GraphQLNonNullType) typeDefinition).Type);
                 return innerType != null ? new NonNull(innerType) : null;
             }
 
             if (typeDefinition.Kind == ASTNodeKind.ListType)
             {
-                var innerType = InputType(((GraphQLListType) typeDefinition).Type);
+                var innerType = OutputType(((GraphQLListType) typeDefinition).Type);
                 return innerType != null ? new List(innerType) : null;
             }
 
@@ -284,7 +279,9 @@ namespace tanka.graphql.sdl
 
         protected InputObjectType InputObject(GraphQLInputObjectTypeDefinition definition)
         {
-            _builder.InputObject(definition.Name.Value, out var inputObject);
+            if (_builder.TryGetType<InputObjectType>(definition.Name.Value, out var inputObject)) return inputObject;
+
+            _builder.InputObject(definition.Name.Value, out inputObject);
             _builder.Connections(connect =>
             {
                 var fields = InputValues(definition.Fields);
@@ -379,9 +376,11 @@ namespace tanka.graphql.sdl
 
         protected InterfaceType Interface(GraphQLInterfaceTypeDefinition definition)
         {
+            if (_builder.TryGetType<InterfaceType>(definition.Name.Value, out var interfaceType)) return interfaceType;
+
             var directives = Directives(definition.Directives);
 
-            _builder.Interface(definition.Name.Value, out var interfaceType,
+            _builder.Interface(definition.Name.Value, out interfaceType,
                 directives: directives);
 
             AfterTypeDefinitions(_ => { Fields(interfaceType, definition.Fields); });
@@ -391,10 +390,12 @@ namespace tanka.graphql.sdl
 
         protected ObjectType Object(GraphQLObjectTypeDefinition definition)
         {
+            if (_builder.TryGetType<ObjectType>(definition.Name.Value, out var objectType)) return objectType;
+
             var directives = Directives(definition.Directives);
             var interfaces = Interfaces(definition.Interfaces);
 
-            _builder.Object(definition.Name.Value, out var objectType,
+            _builder.Object(definition.Name.Value, out objectType,
                 interfaces: interfaces,
                 directives: directives);
 
@@ -420,8 +421,10 @@ namespace tanka.graphql.sdl
             _afterTypeDefinitions.Add(action);
         }
 
-        private IType Union(GraphQLUnionTypeDefinition definition)
+        private UnionType Union(GraphQLUnionTypeDefinition definition)
         {
+            if (_builder.TryGetType<UnionType>(definition.Name.Value, out var unionType)) return unionType;
+
             var possibleTypes = new List<ObjectType>();
             foreach (var astType in definition.Types)
             {
@@ -430,7 +433,7 @@ namespace tanka.graphql.sdl
             }
 
             var directives = Directives(definition.Directives);
-            _builder.Union(definition.Name.Value, out var unionType, default, directives, possibleTypes.ToArray());
+            _builder.Union(definition.Name.Value, out unionType, default, directives, possibleTypes.ToArray());
             return unionType;
         }
 

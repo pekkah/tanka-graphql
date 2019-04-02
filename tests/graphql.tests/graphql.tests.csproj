@@ -13,6 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="digitransit.introspection" />
+    <None Remove="github.graphql" />
+    <None Remove="github.introspection" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
@@ -21,6 +27,16 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="digitransit.introspection" />
+    <EmbeddedResource Include="github.graphql" />
+    <EmbeddedResource Include="github.introspection" />
   </ItemGroup>
 
   <ItemGroup>

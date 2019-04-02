@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace tanka.graphql.server.utilities
+namespace tanka.graphql.requests
 {
-    internal class VariableConverter : JsonConverter
+    internal class NestedDictionaryConverter : JsonConverter
     {
         public override bool CanWrite => false;
 
@@ -26,7 +26,7 @@ namespace tanka.graphql.server.utilities
                 return new Dictionary<string, object>();
 
             var obj = JObject.Load(reader);
-            return obj.ToVariableDictionary();
+            return obj.ToNestedDictionary();
         }
     }
 }
