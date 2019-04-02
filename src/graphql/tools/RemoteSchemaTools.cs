@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Newtonsoft.Json.Linq;
 using tanka.graphql.channels;
+using tanka.graphql.links;
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 
