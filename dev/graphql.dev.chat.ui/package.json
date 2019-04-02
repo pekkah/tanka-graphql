@@ -4,10 +4,10 @@
   "private": true,
   "dependencies": {
     "@aspnet/signalr": "^1.1.2",
-    "graphql": "^14.1.1",
+    "graphql": "^14.2.1",
     "graphql-playground-react": "^1.7.20",
-    "react": "^16.8.5",
-    "react-dom": "^16.8.5",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "react-redux": "^5.0.7",
     "react-scripts-ts": "3.1.0"
   },
@@ -18,14 +18,14 @@
     "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
-    "@types/graphql": "^14.0.7",
+    "@types/graphql": "^14.2.0",
     "@types/jest": "^24.0.11",
-    "@types/node": "^11.11.6",
-    "@types/react": "^16.8.8",
+    "@types/node": "^11.13.0",
+    "@types/react": "^16.8.10",
     "@types/react-dom": "^16.8.3",
     "@types/react-redux": "^6.0.9",
     "create-react-app": "^2.1.8",
-    "typescript": "^3.3.4000"
+    "typescript": "^3.4.1"
   },
   "resolutions": {
     "graphql": "^14.0.2"
