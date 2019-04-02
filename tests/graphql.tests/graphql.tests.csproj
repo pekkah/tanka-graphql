@@ -8,15 +8,7 @@
     <AssemblyName>tanka.graphql.tests</AssemblyName>
 
     <RootNamespace>tanka.graphql.tests</RootNamespace>
-
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="digitransit.introspection" />
-    <None Remove="github.graphql" />
-    <None Remove="github.introspection" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
