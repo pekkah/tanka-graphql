@@ -4,13 +4,6 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyName>tanka.graphql.server</AssemblyName>
     <RootNamespace>tanka.graphql.server</RootNamespace>
-    <Copyright>Pekka Heikura</Copyright>
-    <PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
-    <Description>GraphQL server using SignalR</Description>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageTags>graphql,tanka-fw,signalr</PackageTags>
-    <Authors>Pekka Heikura</Authors>
   </PropertyGroup>
 
   <ItemGroup>
