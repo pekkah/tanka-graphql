@@ -56,6 +56,23 @@ namespace tanka.graphql.tools
                 });
             }
 
+            if (builder.TryGetType<ObjectType>("Subscription", out var subscriptionType))
+            {
+                builder.Connections(connections =>
+                {
+                    var fields = connections.VisitFields(subscriptionType);
+
+                    foreach (var field in fields)
+                    {
+                        if (!connections.TryGetSubscriber(subscriptionType, field.Key, out _))
+                        {
+                            var subscriber = connections.GetOrAddSubscriber(subscriptionType, field.Key);
+                            subscriber.Run(createSubscriber(link));
+                        }
+                    }
+                });
+            }
+
             foreach (var objectType in builder.VisitTypes<ObjectType>())
             {
                 builder.Connections(connections =>
@@ -65,36 +82,48 @@ namespace tanka.graphql.tools
                         if(!connections.TrGetResolver(objectType, field.Key, out _))
                         {
                             var resolver = connections.GetOrAddResolver(objectType, field.Key);
-                            resolver.Run(context =>
-                            {
-                                object value = null;
-                                if (context.ObjectValue is IDictionary<string, object> dictionary)
-                                {
-                                    value = dictionary[context.FieldName];
-                                }
-                                else if(context.ObjectValue is KeyValuePair<string, object> keyValue)
-                                {
-                                    value = keyValue.Value;
-                                }
-
-                                if (value is IDictionary<string, object>)
-                                {
-                                    return ResolveSync.As(value);
-                                }
-
-                                if (value is IEnumerable enumerable && !(value is string))
-                                {
-                                    return ResolveSync.As(enumerable);
-                                }
-
-                                return ResolveSync.As(value);
-                            });
+                            resolver.Run(DefaultDictionaryResolver());
                         }
                     }
                 });
             }
 
             return builder.Build();
+        }
+
+        private static Resolver DefaultDictionaryResolver()
+        {
+            return context =>
+            {
+                object value = null;
+                if (context.ObjectValue is IDictionary<string, object> dictionary)
+                {
+                    value = dictionary[context.FieldName];
+                }
+                else if(context.ObjectValue is KeyValuePair<string, object> keyValue)
+                {
+                    value = keyValue.Value;
+                }
+                else if (context.ObjectValue is ExecutionResult er)
+                {
+                    if (er.Data.ContainsKey(context.FieldName))
+                    {
+                        value = er.Data[context.FieldName];
+                    }
+                }
+
+                if (value is IDictionary<string, object>)
+                {
+                    return ResolveSync.As(value);
+                }
+
+                if (value is IEnumerable enumerable && !(value is string))
+                {
+                    return ResolveSync.As(enumerable);
+                }
+
+                return ResolveSync.As(value);
+            };
         }
 
         private static Subscriber DefaultCreateRemoteSubscriber(ExecutionResultLink link)
