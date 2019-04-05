@@ -190,6 +190,8 @@ namespace tanka.graphql.type
 
         public IEnumerable<KeyValuePair<string, IField>> VisitFields(ComplexType type)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
             if (!_fields.ContainsKey(type.Name))
             {
                 return Enumerable.Empty<KeyValuePair<string, IField>>();
@@ -228,7 +230,7 @@ namespace tanka.graphql.type
             return false;
         }
 
-        public bool TrGetSubscriber(ComplexType type, string fieldName, out SubscriberBuilder subscriber)
+        public bool TryGetSubscriber(ComplexType type, string fieldName, out SubscriberBuilder subscriber)
         {
             if (_subscribers.TryGetValue(type.Name, out var fields))
                 if (fields.TryGetValue(fieldName, out subscriber))

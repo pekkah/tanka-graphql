@@ -37,7 +37,8 @@ namespace tanka.graphql.tools
 
                             if (subscriber != null)
                             {
-                                connect.GetOrAddSubscriber(leftType, rightTypeField.Key);
+                                connect.GetOrAddSubscriber(leftType, rightTypeField.Key)
+                                    .Run(subscriber);
                             }
                         });
                     }
