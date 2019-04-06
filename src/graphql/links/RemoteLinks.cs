@@ -54,19 +54,18 @@ namespace tanka.graphql.links
         /// </summary>
         /// <param name="connectionBuilderFunc"></param>
         /// <returns></returns>
-        public static ExecutionResultLink Server(Action<HubConnectionBuilder> connectionBuilderFunc)
+        public static ExecutionResultLink Server(Func<HubConnection> connectionBuilderFunc)
         {
             if (connectionBuilderFunc == null) throw new ArgumentNullException(nameof(connectionBuilderFunc));
 
             return async (document, variables, cancellationToken) =>
             {
                 // note: builder only allows building one instance of connection
-                var connectionBuilder = new HubConnectionBuilder();
-                connectionBuilderFunc(connectionBuilder);
-
-                // build connection
-                var connection = connectionBuilder.Build();
-                await connection.StartAsync(cancellationToken);
+                var connection = connectionBuilderFunc();
+                
+                if (connection.State != HubConnectionState.Connected)
+                    throw new InvalidOperationException(
+                        $"Connection to server is disconnected.");
 
                 // stream query results
                 var channel = await connection.StreamQueryAsync(new QueryRequest
