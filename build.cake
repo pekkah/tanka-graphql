@@ -1,5 +1,5 @@
-#tool "nuget:?package=GitVersion.CommandLine&version=4.0.0"
-#addin "Cake.Npm"
+#tool nuget:?package=GitVersion.CommandLine&version=4.0.0
+#addin nuget:?package=Cake.Npm&version=0.16.0
 
 var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
