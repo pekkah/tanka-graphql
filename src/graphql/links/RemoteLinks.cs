@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
@@ -54,14 +55,14 @@ namespace tanka.graphql.links
         /// </summary>
         /// <param name="connectionBuilderFunc"></param>
         /// <returns></returns>
-        public static ExecutionResultLink Server(Func<HubConnection> connectionBuilderFunc)
+        public static ExecutionResultLink Server(Func<CancellationToken, Task<HubConnection>> connectionBuilderFunc)
         {
             if (connectionBuilderFunc == null) throw new ArgumentNullException(nameof(connectionBuilderFunc));
 
             return async (document, variables, cancellationToken) =>
             {
                 // note: builder only allows building one instance of connection
-                var connection = connectionBuilderFunc();
+                var connection = await connectionBuilderFunc(cancellationToken);
                 
                 if (connection.State != HubConnectionState.Connected)
                     throw new InvalidOperationException(
