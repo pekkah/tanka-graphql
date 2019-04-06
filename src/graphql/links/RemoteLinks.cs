@@ -50,17 +50,25 @@ namespace tanka.graphql.links
         }
 
         /// <summary>
-        ///     Link for tanka server using SignalR
+        ///     Link to tanka server using SignalR
         /// </summary>
-        /// <param name="connection">Hub connection to the server</param>
+        /// <param name="connectionBuilderFunc"></param>
         /// <returns></returns>
-        public static ExecutionResultLink Server(HubConnection connection)
+        public static ExecutionResultLink Server(Action<HubConnectionBuilder> connectionBuilderFunc)
         {
-            if (connection.State == HubConnectionState.Disconnected)
-                throw new InvalidOperationException("Connection is disconnected. Start it before using.");
+            if (connectionBuilderFunc == null) throw new ArgumentNullException(nameof(connectionBuilderFunc));
 
             return async (document, variables, cancellationToken) =>
             {
+                // note: builder only allows building one instance of connection
+                var connectionBuilder = new HubConnectionBuilder();
+                connectionBuilderFunc(connectionBuilder);
+
+                // build connection
+                var connection = connectionBuilder.Build();
+                await connection.StartAsync(cancellationToken);
+
+                // stream query results
                 var channel = await connection.StreamQueryAsync(new QueryRequest
                 {
                     Query = document.ToGraphQL(),
