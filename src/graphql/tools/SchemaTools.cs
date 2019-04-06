@@ -62,17 +62,6 @@ namespace tanka.graphql.tools
         }
 
         public static ISchema MakeExecutableSchemaWithIntrospection(
-            ISchema schema,
-            IResolverMap resolvers,
-            ISubscriberMap subscribers = null)
-        {
-            return MakeExecutableSchemaWithIntrospection(
-                new SchemaBuilder(schema),
-                resolvers,
-                subscribers);
-        }
-
-        public static ISchema MakeExecutableSchemaWithIntrospection(
             SchemaBuilder builder,
             IResolverMap resolvers,
             ISubscriberMap subscribers = null,
@@ -85,13 +74,10 @@ namespace tanka.graphql.tools
 
             var schema = builder.Build();
             var introspection = Introspect.Schema(schema);
-
-            var withIntrospection = MergeTool
-                .MergeSchemas(
-                    schema,
-                    introspection);
-
-            return withIntrospection;
+            
+            return new SchemaBuilder()
+                .Merge(schema, introspection)
+                .Build();
         }
 
         public static void UseDirectives(SchemaBuilder builder,

@@ -10,20 +10,15 @@ namespace tanka.graphql.samples.chat.web.GraphQL
     {
         public ChatSchemas(IChatResolverService resolverService)
         {
-            var schema = FromIdlAsync().Result;        
+            var builder = IdlSchema.Load();       
             var resolvers = new ChatResolvers(resolverService);
 
             Chat = SchemaTools.MakeExecutableSchemaWithIntrospection(
-                schema,
+                builder,
                 resolvers,
                 resolvers);
         }
-
-        public Task<ISchema> FromIdlAsync()
-        {
-            return IdlSchema.CreateAsync();
-        }
-
+        
         public ISchema Chat { get; set; }
     }
 }

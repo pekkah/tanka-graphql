@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using tanka.graphql.resolvers;
+using tanka.graphql.tools;
 using tanka.graphql.type.converters;
 
 namespace tanka.graphql.type
@@ -30,59 +31,10 @@ namespace tanka.graphql.type
         {
             Import(from);
         }
-
+        
         public SchemaBuilder Import(ISchema from)
         {
-            foreach (var namedType in from.QueryTypes<INamedType>())
-            {
-                if (TryGetType<INamedType>(namedType.Name, out _))
-                    continue;
-
-                switch (namedType)
-                {
-                    case ObjectType objectType:
-                        Include(objectType);
-                        var fields = from.GetFields(objectType.Name).ToList();
-                        _connections.IncludeFields(objectType, fields);
-
-                        foreach (var field in fields)
-                        {
-                            var resolver = from.GetResolver(objectType.Name, field.Key);
-
-                            if (resolver != null)
-                                _connections.GetOrAddResolver(objectType, field.Key)
-                                    .Run(resolver);
-
-                            var subscriber = from.GetSubscriber(objectType.Name, field.Key);
-
-                            if (subscriber != null)
-                                _connections.GetOrAddSubscriber(objectType, field.Key)
-                                    .Run(subscriber);
-                        }
-
-                        break;
-                    case InterfaceType interfaceType:
-                        Include(interfaceType);
-                        _connections.IncludeFields(interfaceType, from.GetFields(interfaceType.Name));
-                        break;
-                    case InputObjectType inputType:
-                        Include(inputType);
-                        _connections.IncludeInputFields(inputType, from.GetInputFields(inputType.Name));
-                        break;
-                    default:
-                        Include(namedType);
-                        break;
-                }
-            }
-
-            foreach (var directiveType in from.QueryDirectiveTypes())
-            {
-                if (_directives.ContainsKey(directiveType.Name))
-                    continue;
-
-                IncludeDirective(directiveType);
-            }
-
+            MergeTool.Schema(this, from);
             return this;
         }
 
