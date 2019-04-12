@@ -5,13 +5,20 @@ import { Session } from "graphql-playground-react/lib/state/sessions/reducers";
 import { TankaClient, TankaLink } from "@tanka/tanka-graphql-server-link";
 import { IHttpConnectionOptions, LogLevel } from "@aspnet/signalr";
 import { ISettings } from 'graphql-playground-react/lib/types';
+import { RetryLink } from "apollo-link-retry";
+import { ApolloLink } from 'apollo-link';
 
 var options: IHttpConnectionOptions = {
   logger: LogLevel.Information
 };
 
 var client = new TankaClient("https://localhost:5000/graphql", options);
-var link = new TankaLink(client);
+var tankaLink = new TankaLink(client);
+
+const link = ApolloLink.from([
+  new RetryLink(),
+  tankaLink
+]);
 
 var settings: ISettings  = {
   'editor.cursorShape': 'line', // possible values: 'line', 'block', 'underline'

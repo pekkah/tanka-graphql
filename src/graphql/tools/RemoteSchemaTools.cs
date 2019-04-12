@@ -131,8 +131,7 @@ namespace tanka.graphql.tools
                 else if (context.ObjectValue is KeyValuePair<string, object> keyValue)
                     value = keyValue.Value;
                 else if (context.ObjectValue is ExecutionResult er)
-                    if (er.Data.ContainsKey(context.FieldName))
-                        value = er.Data[context.FieldName];
+                    return new ValueTask<IResolveResult>(new PreExecutedResolveResult(er.Data));
 
                 if (value is IDictionary<string, object>) return ResolveSync.As(value);
 
