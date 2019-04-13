@@ -13,25 +13,33 @@ import {
 import { Request } from "./request";
 import { Subscription } from "./subscription";
 
+export class ClientOptions {
+  connection: IHttpConnectionOptions;
+  reconnectAttempts: number = 10;
+  reconnectInitialWaitMs: number = 1000;
+  reconnectAdditionalWaitMs: number = 500;
+}
+
 export class TankaClient {
+  private BACKGROUND_QUEUE_TIMER_MS = 1000;
   private hub: HubConnection;
   private connected: boolean = false;
   private connecting: boolean = false;
   private buffer: { sub: Subscription, op: Operation }[] = [];
   private backgroundQueueTimerId: NodeJS.Timeout;
+  private reconnectTimerId: NodeJS.Timeout;
 
-  constructor(private url: string, private options?: IHttpConnectionOptions) {
+  constructor(private url: string, private options: ClientOptions) {
     const builder = new HubConnectionBuilder();
 
-    if (options) {
-      builder.withUrl(url, options);
+    if (options && options.connection) {
+      builder.withUrl(url, options.connection);
     } else {
       builder.withUrl(url);
     }
 
     this.hub = builder.build();
-    this.hub.onclose(()=> this.onClosed);
-    this.backgroundQueueTimerId = setInterval(()=> this.processQueue(), 10000);
+    this.hub.onclose(() => this.onClosed);
   }
 
   public request(operation: Operation): Observable<FetchResult> {
@@ -65,12 +73,12 @@ export class TankaClient {
         const stream = this.hub.stream("query", new Request(operation));
         sub.subscribe(stream);
       }
-      catch(e) {
-        this.connected = false;
+      catch (e) {
+        this.onClosed(e);
         this.queue(sub, operation);
       }
     } else {
-      this.reconnect();
+      this.start(() => { });
       this.queue(sub, operation);
     }
 
@@ -91,21 +99,38 @@ export class TankaClient {
         const stream = this.hub.stream("query", new Request(op));
         sub.subscribe(stream);
       }
-      catch(e) {
-        this.connected = false;
+      catch (e) {
+        this.onClosed(e);
         this.queue(sub, op);
       }
     }
   }
 
   private reconnect() {
-    const timer = setInterval(()=> {
-      this.start(()=> clearInterval(timer));
-    }, 1000);
+    let count = 0;
+    this.reconnectTimerId = setInterval(() => {
+      this.start(() => {
+        clearInterval(this.reconnectTimerId);
+        console.log(`Connected`)
+      });
+
+      if (this.connected) {
+        return;
+      }
+
+      count++;
+      console.log(`Connection attempt #${count}`);
+
+      if (count >= this.options.reconnectAttempts) {
+        clearInterval(this.reconnectTimerId);
+        this.onClosed();
+      }
+    }, this.options.reconnectInitialWaitMs + (count * this.options.reconnectAdditionalWaitMs));
   }
 
   private start(callback: () => void) {
     if (this.connected) {
+      callback();
       return;
     }
 
@@ -117,7 +142,7 @@ export class TankaClient {
     return this.hub.start().then(() => {
       this.connected = true;
       this.connecting = false;
-      this.processQueue();
+      this.backgroundQueueTimerId = setInterval(() => this.processQueue(), this.BACKGROUND_QUEUE_TIMER_MS);
     })
       .catch(err => {
         this.connected = false;
@@ -129,12 +154,19 @@ export class TankaClient {
   private onClosed(error?: Error) {
     this.connected = false;
 
+    if (this.backgroundQueueTimerId) {
+      clearInterval(this.backgroundQueueTimerId);
+    }
+
     if (error) {
       console.log("Connection closed due to error", error);
       this.reconnect();
     }
     else {
       console.log("Connection closed.");
+      if (this.reconnectTimerId) {
+        clearInterval(this.reconnectTimerId);
+      }
     }
   }
 }

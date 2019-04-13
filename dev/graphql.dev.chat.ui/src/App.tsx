@@ -3,13 +3,19 @@ import { Provider } from "react-redux";
 import { store, Playground } from "graphql-playground-react";
 import { Session } from "graphql-playground-react/lib/state/sessions/reducers";
 import { TankaClient, TankaLink } from "@tanka/tanka-graphql-server-link";
-import { IHttpConnectionOptions, LogLevel } from "@aspnet/signalr";
+import { LogLevel } from "@aspnet/signalr";
 import { ISettings } from 'graphql-playground-react/lib/types';
 import { RetryLink } from "apollo-link-retry";
 import { ApolloLink } from 'apollo-link';
+import { ClientOptions } from '@tanka/tanka-graphql-server-link/dist/client';
 
-var options: IHttpConnectionOptions = {
-  logger: LogLevel.Information
+var options: ClientOptions = {
+  connection: {
+    logger: LogLevel.Information
+  },
+  reconnectAttempts: Infinity,
+  reconnectInitialWaitMs: 5000,
+  reconnectAdditionalWaitMs: 2000
 };
 
 var client = new TankaClient("https://localhost:5000/graphql", options);
