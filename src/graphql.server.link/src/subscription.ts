@@ -6,7 +6,7 @@ import {
 
 import PushStream from "zen-push"
 
-import {ExecutionResult} from "./execution-result";
+import { ExecutionResult } from "./execution-result";
 
 export class Subscription implements IStreamSubscriber<ExecutionResult> {
   public closed?: boolean;
@@ -26,7 +26,6 @@ export class Subscription implements IStreamSubscriber<ExecutionResult> {
   }
   public error(err: any): void {
     this.source.error(err);
-    this.closed = true;
   }
   public complete(): void {
     this.source.complete();
@@ -34,6 +33,14 @@ export class Subscription implements IStreamSubscriber<ExecutionResult> {
   }
 
   public dispose() {
-    this.sub.dispose();
+    if (this.sub) {
+      try {
+        this.sub.dispose();
+      } catch (e) {
+        // noop     
+      } finally {
+        this.sub = null;
+      }
+    }
   }
 }
