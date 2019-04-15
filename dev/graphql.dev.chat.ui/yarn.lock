@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@aspnet/signalr@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@aspnet/signalr/-/signalr-1.1.2.tgz#eb9cbc758ff5bfe9a2aba6669e05dfc25a6d783d"
-  integrity sha512-Xu2ndFTWYhyE+TOCK3LkPWGmc5xGLezBKgGEchyOA++alJ6fdWJ8P/Wsb4Mmd1buzcxGLlIyjpLfUP20rrCHIg==
+"@aspnet/signalr@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@aspnet/signalr/-/signalr-1.1.4.tgz#417cf808f4074a8aec45d27f03c4b8df9d96bb0b"
+  integrity sha512-Jp9nPc8hmmhbG9OKiHe2fOKskBHfg+3Y9foSKHxjgGtyI743hXjGFv3uFlUg503K9f8Ilu63gQt3fDkLICBRyg==
   dependencies:
     eventsource "^1.0.7"
     request "^2.88.0"
