@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace tanka.graphql.requests
 {
-    internal class NestedDictionaryConverter : JsonConverter
+    public class NestedDictionaryConverter : JsonConverter
     {
         public override bool CanWrite => false;
 

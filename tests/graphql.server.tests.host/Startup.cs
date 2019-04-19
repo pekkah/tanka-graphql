@@ -8,9 +8,12 @@ using tanka.graphql.type;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
 using tanka.graphql.channels;
 using tanka.graphql.sdl;
+using tanka.graphql.server.webSockets;
 
 namespace graphql.server.tests.host
 {
@@ -104,6 +107,17 @@ namespace graphql.server.tests.host
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
 
+            // web socket server
+            services.AddTransient<WebSocketConnection>();
+            services.AddTransient<WebSocketServer>();
+            services.AddSingleton<MessageServer>();
+            services.AddSingleton<ITextProtocolApplication>(provider => provider.GetRequiredService<MessageServer>());
+
+            services.AddWebSockets(options =>
+            {
+
+            });
+
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddQueryStreamHubWithTracing();
         }
@@ -112,6 +126,19 @@ namespace graphql.server.tests.host
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
+
+            app.UseWebSockets();
+            
+            app.Run((context) =>
+            {
+                if (context.WebSockets.IsWebSocketRequest)
+                {
+                    var server = context.RequestServices.GetRequiredService<WebSocketServer>();
+                    return server.ProcessRequestAsync(context, context.RequestAborted);
+                }
+
+                return Task.CompletedTask;
+            });
 
             app.UseSignalR(routes =>
             {
