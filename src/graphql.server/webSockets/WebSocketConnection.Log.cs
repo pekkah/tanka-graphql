@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace tanka.graphql.server.webSockets
 {
-    public partial class WebSocketsTransport
+    public partial class WebSocketConnection
     {
         private static class Log
         {

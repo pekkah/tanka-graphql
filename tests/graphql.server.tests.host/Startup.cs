@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql;
 using tanka.graphql.resolvers;
@@ -109,9 +110,6 @@ namespace graphql.server.tests.host
 
             // web socket server
             services.AddTransient<WebSocketConnection>();
-            services.AddTransient<WebSocketServer>();
-            services.AddSingleton<MessageServer>();
-            services.AddSingleton<ITextProtocolApplication>(provider => provider.GetRequiredService<MessageServer>());
 
             services.AddWebSockets(options =>
             {
@@ -122,6 +120,8 @@ namespace graphql.server.tests.host
                 .AddQueryStreamHubWithTracing();
         }
 
+        public static ConcurrentDictionary<string, WebSocketConnection> Connections { get; set; } = new ConcurrentDictionary<string, WebSocketConnection>();
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -129,15 +129,16 @@ namespace graphql.server.tests.host
 
             app.UseWebSockets();
             
-            app.Run((context) =>
+            app.Run(async (context) =>
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var server = context.RequestServices.GetRequiredService<WebSocketServer>();
-                    return server.ProcessRequestAsync(context, context.RequestAborted);
+                    var id = "1";
+                    var server = context.RequestServices.GetRequiredService<WebSocketConnection>();
+                    Connections.TryAdd(id, server);
+                    await server.ProcessRequestAsync(context);
+                    Connections.TryRemove(id, out _);
                 }
-
-                return Task.CompletedTask;
             });
 
             app.UseSignalR(routes =>
