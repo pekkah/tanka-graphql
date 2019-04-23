@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO.Pipelines;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -17,23 +17,18 @@ namespace tanka.graphql.server.tests.webSockets
 {
     public abstract class WebSocketFactsBase : IClassFixture<WebApplicationFactory<Startup>>
     {
-        protected MessageRecorder Application;
+        private HttpClient Client;
 
         protected WebApplicationFactory<Startup> Factory;
-        private HttpClient Client;
 
         protected WebSocketFactsBase(WebApplicationFactory<Startup> factory)
         {
-            Application = new MessageRecorder();
-            Factory = factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    services.AddSingleton<IDuplexPipe>(Application);
-                });
-            });
+            Factory = factory;
             Client = Factory.CreateClient();
+            Application = Factory.Server.Host.Services.GetRequiredService<WebSocketServer>();
         }
+
+        public WebSocketServer Application { get; set; }
 
         protected Task<WebSocket> ConnectAsync()
         {

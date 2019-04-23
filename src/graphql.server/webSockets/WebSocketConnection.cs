@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers;
 using System.IO.Pipelines;
 using System.Linq;
 using System.Net.WebSockets;
@@ -15,17 +14,21 @@ namespace tanka.graphql.server.webSockets
     {
         private readonly TimeSpan _closeTimeout;
         private readonly ILogger<WebSocketConnection> _logger;
+        private readonly Pipe _readPipe;
+        private readonly Pipe _writePipe;
         private volatile bool _aborted;
-        private Pipe _writePipe;
-        private Pipe _readPipe;
 
         public WebSocketConnection(ILoggerFactory loggerFactory)
         {
             _writePipe = new Pipe();
             _readPipe = new Pipe();
             _logger = loggerFactory.CreateLogger<WebSocketConnection>();
-            _closeTimeout = TimeSpan.FromSeconds(2);
+            _closeTimeout = TimeSpan.FromSeconds(5);
         }
+
+        public PipeReader Input => _readPipe.Reader;
+
+        public PipeWriter Output => _writePipe.Writer;
 
         public async Task ProcessRequestAsync(HttpContext context)
         {
@@ -62,7 +65,7 @@ namespace tanka.graphql.server.webSockets
                 // 2. Waiting for a websocket send to complete
 
                 // Cancel the application so that ReadAsync yields
-                _application.Input.CancelPendingRead();
+                _writePipe.Reader.CancelPendingRead();
 
                 using var delayCts = new CancellationTokenSource();
                 var resultTask = await Task.WhenAny(sending, Task.Delay(_closeTimeout, delayCts.Token));
@@ -101,7 +104,7 @@ namespace tanka.graphql.server.webSockets
                     socket.Abort();
 
                     // Cancel any pending flush so that we can quit
-                    _application.Output.CancelPendingFlush();
+                    _readPipe.Writer.CancelPendingFlush();
                 }
                 else
                 {
@@ -114,6 +117,7 @@ namespace tanka.graphql.server.webSockets
         {
             try
             {
+                var separator = Encoding.UTF8.GetBytes(new[] {'\n'});
                 while (!token.IsCancellationRequested)
                 {
                     // Do a 0 byte read so that idle connections don't allocate a buffer when waiting for a read
@@ -121,7 +125,7 @@ namespace tanka.graphql.server.webSockets
 
                     if (emptyReadResult.MessageType == WebSocketMessageType.Close) return;
 
-                    var memory = _application.Output.GetMemory();
+                    var memory = _readPipe.Writer.GetMemory();
                     var receiveResult = await socket.ReceiveAsync(memory, token);
 
                     // Need to check again for NetCoreApp2.2 because a close can happen between a 0-byte read and the actual read
@@ -133,16 +137,20 @@ namespace tanka.graphql.server.webSockets
                         receiveResult.Count,
                         receiveResult.EndOfMessage);
 
-                    _application.Output.Advance(receiveResult.Count);
+                    _readPipe.Writer.Advance(receiveResult.Count);
 
                     if (receiveResult.EndOfMessage)
                     {
-                        var flushResult = await _application.Output.FlushAsync();
-
-                        // We canceled in the middle of applying back pressure
-                        // or if the consumer is done
-                        if (flushResult.IsCanceled || flushResult.IsCompleted) break;
+                        var mem = _readPipe.Writer.GetMemory();
+                        separator.AsSpan().CopyTo(mem.Span);
+                        _readPipe.Writer.Advance(separator.Length);
                     }
+
+                    var flushResult = await _readPipe.Writer.FlushAsync();
+
+                    // We canceled in the middle of applying back pressure
+                    // or if the consumer is done
+                    if (flushResult.IsCanceled || flushResult.IsCompleted) break;
                 }
             }
             catch (WebSocketException ex) when (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
@@ -158,7 +166,7 @@ namespace tanka.graphql.server.webSockets
             {
                 if (!_aborted && !token.IsCancellationRequested)
                 {
-                    _application.Output.Complete(ex);
+                    _readPipe.Writer.Complete(ex);
 
                     // We re-throw here so we can communicate that there was an error when sending
                     // the close frame
@@ -168,7 +176,7 @@ namespace tanka.graphql.server.webSockets
             finally
             {
                 // We're done writing
-                _application.Output.Complete();
+                _readPipe.Writer.Complete();
             }
         }
 
@@ -180,7 +188,7 @@ namespace tanka.graphql.server.webSockets
             {
                 while (true)
                 {
-                    var result = await _application.Input.ReadAsync();
+                    var result = await _writePipe.Reader.ReadAsync();
                     var buffer = result.Buffer;
 
                     // Get a frame from the application
@@ -211,7 +219,7 @@ namespace tanka.graphql.server.webSockets
                     }
                     finally
                     {
-                        _application.Input.AdvanceTo(buffer.End);
+                        _writePipe.Reader.AdvanceTo(buffer.End);
                     }
                 }
             }
@@ -228,7 +236,7 @@ namespace tanka.graphql.server.webSockets
                         error != null ? WebSocketCloseStatus.InternalServerError : WebSocketCloseStatus.NormalClosure,
                         "", CancellationToken.None);
 
-                _application.Input.Complete();
+                _writePipe.Reader.Complete();
             }
         }
 
@@ -238,30 +246,5 @@ namespace tanka.graphql.server.webSockets
                      ws.State == WebSocketState.Closed ||
                      ws.State == WebSocketState.CloseSent);
         }
-
-        private ValueTask ProcessLine(ReadOnlySequence<byte> slice)
-        {
-            var message = GetUtf8String(slice);
-            return default;
-        }
-
-        private string GetUtf8String(ReadOnlySequence<byte> buffer)
-        {
-            if (buffer.IsSingleSegment) return Encoding.UTF8.GetString(buffer.First.Span);
-
-            return string.Create((int) buffer.Length, buffer, (span, sequence) =>
-            {
-                foreach (var segment in sequence)
-                {
-                    Encoding.UTF8.GetChars(segment.Span, span);
-
-                    span = span.Slice(segment.Length);
-                }
-            });
-        }
-
-        public PipeReader Input => _readPipe.Reader;
-
-        public PipeWriter Output => _writePipe.Writer;
     }
 }

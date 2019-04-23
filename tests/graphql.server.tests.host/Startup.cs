@@ -109,7 +109,7 @@ namespace graphql.server.tests.host
             services.AddSingleton(provider => eventManager);
 
             // web socket server
-            services.AddTransient<WebSocketConnection>();
+            services.AddSingleton<WebSocketServer>();
 
             services.AddWebSockets(options =>
             {
@@ -119,8 +119,6 @@ namespace graphql.server.tests.host
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddQueryStreamHubWithTracing();
         }
-
-        public static ConcurrentDictionary<string, WebSocketConnection> Connections { get; set; } = new ConcurrentDictionary<string, WebSocketConnection>();
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -133,11 +131,8 @@ namespace graphql.server.tests.host
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var id = "1";
-                    var server = context.RequestServices.GetRequiredService<WebSocketConnection>();
-                    Connections.TryAdd(id, server);
-                    await server.ProcessRequestAsync(context);
-                    Connections.TryRemove(id, out _);
+                    var connection = context.RequestServices.GetRequiredService<WebSocketServer>();
+                    await connection.ProcessRequestAsync(context);
                 }
             });
 
