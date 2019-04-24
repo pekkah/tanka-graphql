@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +34,7 @@ namespace tanka.graphql.server.tests.webSockets
             await socket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
             /* Then */
-            var actual = await Application.Clients.Single().Value.Input.ReadAsync();
+            var actual = await Sink.Input.ReadAsync();
             Assert.Equal(message, actual);
         }
 
@@ -46,7 +45,7 @@ namespace tanka.graphql.server.tests.webSockets
             using var socket = await ConnectAsync();
             const int messageCount = 3;
             var messages = new List<OperationMessage>();
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 var message = new OperationMessage
                 {
@@ -57,7 +56,7 @@ namespace tanka.graphql.server.tests.webSockets
             }
 
             /* When */
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 var bytes = SerializeMessage(messages[i]);
                 await socket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
@@ -65,9 +64,9 @@ namespace tanka.graphql.server.tests.webSockets
 
 
             /* Then */
-            for (int i = 0; i < 3; i++)
+            for (var i = 0; i < 3; i++)
             {
-                var actualMessage = await Application.Clients.Single().Value.Input.ReadAsync();
+                var actualMessage = await Sink.Input.ReadAsync();
                 Assert.Equal(messages[i], actualMessage);
             }
         }

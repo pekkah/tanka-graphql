@@ -10,15 +10,13 @@ using tanka.graphql.server.webSockets.dtos;
 
 namespace tanka.graphql.server.webSockets
 {
-    public class GraphQLServer
+    public class MessageServer
     {
-        private readonly IDuplexPipe _connection;
         private readonly Channel<OperationMessage> _readChannel;
         private readonly Channel<OperationMessage> _writeChannel;
 
-        public GraphQLServer(IDuplexPipe connection)
+        public MessageServer()
         {
-            _connection = connection;
             _readChannel = Channel.CreateUnbounded<OperationMessage>();
             _writeChannel = Channel.CreateUnbounded<OperationMessage>();
         }
@@ -37,14 +35,14 @@ namespace tanka.graphql.server.webSockets
             _readChannel.Writer.TryComplete(ex);
         }
 
-        public async Task RunAsync(CancellationToken token)
+        public virtual async Task RunAsync(IDuplexPipe connection, CancellationToken token)
         {
             var toConnection = WriteToConnection(
-                _connection.Output,
+                connection.Output,
                 token);
 
             var fromConnection = ReadFromConnection(
-                _connection.Input,
+                connection.Input,
                 _readChannel.Writer,
                 token);
 
@@ -61,19 +59,16 @@ namespace tanka.graphql.server.webSockets
             try
             {
                 var reader = _writeChannel.Reader;
-                output.OnReaderCompleted((err,state) =>
-                {
-                    _writeChannel.Writer.TryComplete(err);
-                }, null);
+                output.OnReaderCompleted((err, state) => { _writeChannel.Writer.TryComplete(err); }, null);
 
                 while (true)
                 {
                     if (!await reader.WaitToReadAsync(token))
                         break;
 
-                    if (!reader.TryRead(out var message)) 
+                    if (!reader.TryRead(out var message))
                         continue;
-                    
+
                     var memory = output.GetMemory();
                     var count = WriteOperationMessage(message, memory.Span);
                     output.Advance(count);

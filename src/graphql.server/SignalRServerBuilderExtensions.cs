@@ -56,7 +56,7 @@ namespace tanka.graphql.server
             var optionsBuilder = services.AddOptions<QueryStreamHubOptions>();
             configureOptions(optionsBuilder);
 
-            services.TryAddScoped<QueryStreamService>();
+            services.TryAddTransient<QueryStreamService>();
 
             return builder;
         }

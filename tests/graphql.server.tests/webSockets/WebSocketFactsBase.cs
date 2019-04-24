@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Mime;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -24,10 +22,16 @@ namespace tanka.graphql.server.tests.webSockets
 
         protected WebSocketFactsBase(WebApplicationFactory<Startup> factory)
         {
-            Factory = factory;
+            Sink = new MessageSinkProtocol();
+            Factory = factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services => { services.AddSingleton<IProtocolHandler>(Sink); });
+            });
             Client = Factory.CreateClient();
             Application = Factory.Server.Host.Services.GetRequiredService<WebSocketServer>();
         }
+
+        public MessageSinkProtocol Sink { get; set; }
 
         public WebSocketServer Application { get; set; }
 
