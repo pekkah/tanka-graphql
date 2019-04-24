@@ -35,7 +35,7 @@ namespace tanka.graphql.server.tests.webSockets
             await socket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
             /* Then */
-            var actual = await Application.Messages.Reader.ReadAsync();
+            var actual = await Application.Clients.Single().Value.Input.ReadAsync();
             Assert.Equal(message, actual);
         }
 
@@ -67,7 +67,7 @@ namespace tanka.graphql.server.tests.webSockets
             /* Then */
             for (int i = 0; i < 3; i++)
             {
-                var actualMessage = await Application.Messages.Reader.ReadAsync();
+                var actualMessage = await Application.Clients.Single().Value.Input.ReadAsync();
                 Assert.Equal(messages[i], actualMessage);
             }
         }

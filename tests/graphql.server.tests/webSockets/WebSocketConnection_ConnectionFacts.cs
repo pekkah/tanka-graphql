@@ -37,5 +37,17 @@ namespace tanka.graphql.server.tests.webSockets
             /* Then */
             Assert.Equal(WebSocketState.Closed, socket.State);
         }
+
+        [Fact]
+        public async Task Disconnect_with_dispose()
+        {
+            /* Given */
+            /* When */
+            var socket = await ConnectAsync();
+            socket.Dispose();
+
+            /* Then */
+            Assert.Equal(WebSocketState.Closed, socket.State);
+        }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Buffers;
+using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
 using System.Net.WebSockets;
@@ -47,7 +49,7 @@ namespace tanka.graphql.server.webSockets
             }
         }
 
-        private async Task ProcessSocketAsync(WebSocket socket, CancellationToken cancellationToken)
+        public async Task ProcessSocketAsync(WebSocket socket, CancellationToken cancellationToken)
         {
             // Begin sending and receiving. Receiving must be started first because ExecuteAsync enables SendAsync.
             var receiving = StartReceiving(socket, cancellationToken);
@@ -158,6 +160,11 @@ namespace tanka.graphql.server.webSockets
                 // Client has closed the WebSocket connection without completing the close handshake
                 Log.ClosedPrematurely(_logger, ex);
             }
+            catch (IOException ex)
+            {
+                // Client has closed the WebSocket connection without completing the close handshake
+                Log.ClosedPrematurely(_logger, ex);
+            }
             catch (OperationCanceledException)
             {
                 // Ignore aborts, don't treat them like transport errors
@@ -186,40 +193,45 @@ namespace tanka.graphql.server.webSockets
 
             try
             {
+                var reader = _writePipe.Reader;
                 while (true)
                 {
-                    var result = await _writePipe.Reader.ReadAsync();
+                    var result = await reader.ReadAsync();
                     var buffer = result.Buffer;
+                    SequencePosition? position = null;
 
-                    // Get a frame from the application
+                    if (result.IsCanceled)
+                        break;
 
-                    try
+                    do 
                     {
-                        if (result.IsCanceled) break;
+                        // Look for a EOL in the buffer
+                        position = buffer.PositionOf((byte)'\n');
 
-                        if (!buffer.IsEmpty)
-                            try
+                        if (position != null)
+                        {
+                            // Process the line
+                            var message = buffer.Slice(0, position.Value);
+                            if (WebSocketCanSend(socket))
+                                await socket.SendAsync(message, WebSocketMessageType.Text);
+                            else
                             {
-                                Log.SendPayload(_logger, buffer.Length);
-
-                                // apollo sub protocol uses json with text
-                                var webSocketMessageType = WebSocketMessageType.Text;
-
-                                if (WebSocketCanSend(socket))
-                                    await socket.SendAsync(buffer, webSocketMessageType);
-                                else
-                                    break;
-                            }
-                            catch (Exception ex)
-                            {
-                                if (!_aborted) Log.ErrorWritingFrame(_logger, ex);
                                 break;
                             }
-                        else if (result.IsCompleted) break;
+                
+                            // Skip the line + the \n character (basically position)
+                            buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
+                        }
                     }
-                    finally
+                    while (position != null);
+
+                    // Tell the PipeReader how much of the buffer we have consumed
+                    reader.AdvanceTo(buffer.Start, buffer.End);
+
+                    // Stop reading if there's no more data coming
+                    if (result.IsCompleted)
                     {
-                        _writePipe.Reader.AdvanceTo(buffer.End);
+                        break;
                     }
                 }
             }

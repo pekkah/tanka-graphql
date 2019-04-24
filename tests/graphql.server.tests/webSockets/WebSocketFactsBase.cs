@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Net.WebSockets;
@@ -30,14 +31,14 @@ namespace tanka.graphql.server.tests.webSockets
 
         public WebSocketServer Application { get; set; }
 
-        protected Task<WebSocket> ConnectAsync()
+        protected async Task<WebSocket> ConnectAsync()
         {
             var webSocketClient = Factory.Server.CreateWebSocketClient();
             webSocketClient.ConfigureRequest = request =>
             {
                 request.Headers.Add("Sec-WebSocket-Protocol", "graphql-ws");
             };
-            return webSocketClient.ConnectAsync(new Uri("http://localhost/graphql"), CancellationToken.None);
+            return await webSocketClient.ConnectAsync(new Uri("http://localhost/graphql"), CancellationToken.None);
         }
 
         protected OperationMessage DeserializeMessage(string json)
