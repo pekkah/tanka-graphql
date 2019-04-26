@@ -17,12 +17,12 @@ namespace tanka.graphql.server.webSockets
             Unsubscribe = cancellationTokenSource;
 
             // stream results to output
-            var _ = queryStream.Reader.TransformAndLinkTo(output, result => Task.FromResult(new OperationMessage()
+            var _ = queryStream.Reader.TransformAndLinkTo(output, result => new OperationMessage()
             {
                 Id = id,
                 Type = MessageType.GQL_DATA,
                 Payload = result,
-            }));
+            });
         }
 
         public QueryStream QueryStream { get; set; }

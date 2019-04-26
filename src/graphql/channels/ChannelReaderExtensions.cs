@@ -62,5 +62,36 @@ namespace tanka.graphql.channels
                 writer.TryComplete();
             }
         }
+
+        public static async Task TransformAndLinkTo<TSource, TTarget>(
+            this ChannelReader<TSource> reader,
+            ChannelWriter<TTarget> writer,
+            Func<TSource, TTarget> transform)
+        {
+            try
+            {
+                while (await reader.WaitToReadAsync())
+                while (reader.TryRead(out var evnt))
+                {
+                    var executionResult = transform(evnt);
+
+                    while (!writer.TryWrite(executionResult))
+                        if (!await writer.WaitToWriteAsync())
+                            return;
+                }
+
+                // Manifest any errors in the completion task
+                await reader.Completion;
+            }
+            catch (Exception ex)
+            {
+                writer.TryComplete(ex);
+            }
+            finally
+            {
+                // This will safely no-op if the catch block above ran.
+                writer.TryComplete();
+            }
+        }
     }
 }
