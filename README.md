@@ -10,6 +10,7 @@ Tanka GraphQL library
 * Validation (new implementation in v0.3.0)
 * SignalR hub for streaming queries, mutations and subscriptions
 * ApolloLink for the provided SignalR hub
+* Apollo GraphQL WebSockets (apollo-link-ws) compatible web socket server (since v0.8.0)
 
 
 ### Feeds
