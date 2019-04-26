@@ -1,13 +1,15 @@
-using tanka.graphql.samples.chat.data;
-using tanka.graphql.samples.chat.web.GraphQL;
-using tanka.graphql.server;
+using GraphQL.Server.Ui.Playground;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using tanka.graphql.samples.chat.data;
+using tanka.graphql.samples.chat.web.GraphQL;
+using tanka.graphql.server;
+using tanka.graphql.server.webSockets;
 
 namespace tanka.graphql.samples.chat.web
 {
@@ -30,10 +32,17 @@ namespace tanka.graphql.samples.chat.web
             services.AddSingleton<IChatResolverService, ChatResolverService>();
             services.AddSingleton<ChatSchemas>();
             services.AddSingleton(provider => provider.GetRequiredService<ChatSchemas>().Chat);
-            
+
+            // signalr server
             services.AddSignalR(options => options.EnableDetailedErrors = true)
                 // add GraphQL query streaming hub
                 .AddQueryStreamHubWithTracing();
+
+            // graphql-ws websocket server
+            // web socket server
+            services.AddSingleton<WebSocketServer>();
+            services.TryAddTransient<IProtocolHandler, GraphQLWSProtocol>();
+            services.TryAddTransient<IQueryStreamService, QueryStreamService>();
 
             // CORS is required for the graphql.samples.chat.ui React App
             services.AddCors(options =>
@@ -48,7 +57,7 @@ namespace tanka.graphql.samples.chat.web
                 });
             });
         }
-        
+
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -66,11 +75,29 @@ namespace tanka.graphql.samples.chat.web
             app.UseStaticFiles();
             app.UseWebSockets();
 
-
-            app.UseSignalR(routes =>
+            app.UseGraphQLPlayground(new GraphQLPlaygroundOptions()
             {
-                routes.MapHub<QueryStreamHub>(new PathString("/graphql"));
+                GraphQLEndPoint = "/api/graphql",
+                Path = "/ui"
             });
+
+            // signalr server
+            app.UseSignalR(routes => { routes.MapHub<QueryStreamHub>(new PathString("/graphql")); });
+
+            // websockets server
+            app.Use(next => context =>
+            {
+                if (context.Request.Path.StartsWithSegments("/api/graphql")
+                    && context.WebSockets.IsWebSocketRequest)
+                {
+                    var connection = context.RequestServices.GetRequiredService<WebSocketServer>();
+                    return connection.ProcessRequestAsync(context);
+                }
+
+                return next(context);
+            });
+
+            app.UseMvc();
         }
     }
 }

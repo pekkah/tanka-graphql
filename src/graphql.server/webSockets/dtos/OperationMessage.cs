@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using tanka.graphql.requests;
 
 namespace tanka.graphql.server.webSockets.dtos
@@ -25,7 +26,7 @@ namespace tanka.graphql.server.webSockets.dtos
         ///     Nullable payload
         /// </summary>
         [DataMember(Name = "payload")]
-        public object Payload { get; set; }
+        public JObject Payload { get; set; }
 
 
         /// <inheritdoc />
@@ -71,7 +72,7 @@ namespace tanka.graphql.server.webSockets.dtos
         }
     }
 
-    public class OperationMessagePayload: IEquatable<OperationMessagePayload>
+    public class OperationMessageQueryPayload: IEquatable<OperationMessageQueryPayload>
     {
         /// <summary>
         ///     Query, mutation or subscription document
@@ -89,7 +90,7 @@ namespace tanka.graphql.server.webSockets.dtos
         /// </summary>
         public string OperationName { get; set; }
 
-        public bool Equals(OperationMessagePayload other)
+        public bool Equals(OperationMessageQueryPayload other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -101,7 +102,7 @@ namespace tanka.graphql.server.webSockets.dtos
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((OperationMessagePayload) obj);
+            return Equals((OperationMessageQueryPayload) obj);
         }
 
         public override int GetHashCode()
@@ -115,12 +116,12 @@ namespace tanka.graphql.server.webSockets.dtos
             }
         }
 
-        public static bool operator ==(OperationMessagePayload left, OperationMessagePayload right)
+        public static bool operator ==(OperationMessageQueryPayload left, OperationMessageQueryPayload right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(OperationMessagePayload left, OperationMessagePayload right)
+        public static bool operator !=(OperationMessageQueryPayload left, OperationMessageQueryPayload right)
         {
             return !Equals(left, right);
         }
