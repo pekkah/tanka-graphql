@@ -40,7 +40,7 @@ namespace tanka.graphql.samples.chat.web
 
             // graphql-ws websocket server
             // web socket server
-            services.AddTankaWebSocketServer();
+            services.AddTankaWebSocketServerWithTracing();
 
             // CORS is required for the graphql.samples.chat.ui React App
             services.AddCors(options =>

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using tanka.graphql.server.webSockets.dtos;
 
 namespace tanka.graphql.server.webSockets
@@ -14,11 +15,17 @@ namespace tanka.graphql.server.webSockets
     {
         private readonly Channel<OperationMessage> _readChannel;
         private readonly Channel<OperationMessage> _writeChannel;
+        private readonly JsonSerializerSettings _settings;
 
         public MessageServer()
         {
             _readChannel = Channel.CreateUnbounded<OperationMessage>();
             _writeChannel = Channel.CreateUnbounded<OperationMessage>();
+            _settings = new JsonSerializerSettings()
+            {
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
         }
 
         public ChannelReader<OperationMessage> Input => _readChannel.Reader;
@@ -148,7 +155,7 @@ namespace tanka.graphql.server.webSockets
             }
         }
 
-        private static bool TryParseFrame(
+        private bool TryParseFrame(
             ReadOnlySequence<byte> buffer,
             out OperationMessage nextMessage,
             out SequencePosition consumedTo)
@@ -170,16 +177,16 @@ namespace tanka.graphql.server.webSockets
             return true;
         }
 
-        private static int WriteOperationMessage(OperationMessage message, Span<byte> span)
+        private  int WriteOperationMessage(OperationMessage message, Span<byte> span)
         {
-            var json = JsonConvert.SerializeObject(message);
+            var json = JsonConvert.SerializeObject(message, Formatting.None, _settings);
             json += '\n';
             return Encoding.UTF8.GetBytes(json, span);
         }
 
-        private static OperationMessage ReadOperationMessage(in ReadOnlySequence<byte> payload)
+        private OperationMessage ReadOperationMessage(in ReadOnlySequence<byte> payload)
         {
-            return JsonConvert.DeserializeObject<OperationMessage>(GetUtf8String(payload));
+            return JsonConvert.DeserializeObject<OperationMessage>(GetUtf8String(payload), _settings);
         }
 
         private static string GetUtf8String(ReadOnlySequence<byte> buffer)

@@ -3,7 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using tanka.graphql.channels;
 using tanka.graphql.requests;
 using tanka.graphql.server.webSockets.dtos;
@@ -14,10 +16,16 @@ namespace tanka.graphql.server.webSockets
     public class GraphQLWSProtocol : IProtocolHandler
     {
         private readonly IQueryStreamService _queryStreamService;
+        private JsonSerializer _serializer;
 
         public GraphQLWSProtocol(IQueryStreamService queryStreamService)
         {
             _queryStreamService = queryStreamService;
+            _serializer = JsonSerializer.CreateDefault(new JsonSerializerSettings()
+            {
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
         }
 
         protected ConcurrentDictionary<string, Subscription> Subscriptions { get; } =
@@ -95,7 +103,7 @@ namespace tanka.graphql.server.webSockets
                 return;
             }
 
-            var payload = context.Message.Payload.ToObject<OperationMessageQueryPayload>();
+            var payload = context.Message.Payload.ToObject<OperationMessageQueryPayload>(_serializer);
 
             var cts = new CancellationTokenSource();
             var queryStream = await _queryStreamService.QueryAsync(new QueryRequest
@@ -111,7 +119,7 @@ namespace tanka.graphql.server.webSockets
             {
                 Id = id,
                 Type = MessageType.GQL_DATA,
-                Payload = JObject.FromObject(result)
+                Payload = JObject.FromObject(result, _serializer)
             });
 
             // There might have been another start with the id between this and the contains
@@ -131,7 +139,7 @@ namespace tanka.graphql.server.webSockets
                     {
                         new Error(errorMessage)
                     }
-                })
+                }, JsonSerializer.Create())
             }, CancellationToken.None);
         }
 
