@@ -40,9 +40,7 @@ namespace tanka.graphql.samples.chat.web
 
             // graphql-ws websocket server
             // web socket server
-            services.AddSingleton<WebSocketServer>();
-            services.TryAddTransient<IProtocolHandler, GraphQLWSProtocol>();
-            services.TryAddTransient<IQueryStreamService, QueryStreamService>();
+            services.AddTankaWebSocketServer();
 
             // CORS is required for the graphql.samples.chat.ui React App
             services.AddCors(options =>
@@ -85,16 +83,9 @@ namespace tanka.graphql.samples.chat.web
             app.UseSignalR(routes => { routes.MapHub<QueryStreamHub>(new PathString("/graphql")); });
 
             // websockets server
-            app.Use(next => context =>
+            app.UseTankaWebSocketServer(new WebSocketServerOptions()
             {
-                if (context.Request.Path.StartsWithSegments("/api/graphql")
-                    && context.WebSockets.IsWebSocketRequest)
-                {
-                    var connection = context.RequestServices.GetRequiredService<WebSocketServer>();
-                    return connection.ProcessRequestAsync(context);
-                }
-
-                return next(context);
+                Path = "/api/graphql"
             });
 
             app.UseMvc();
