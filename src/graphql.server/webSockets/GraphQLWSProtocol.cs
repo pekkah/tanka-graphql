@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using tanka.graphql.channels;
@@ -70,7 +71,9 @@ namespace tanka.graphql.server.webSockets
 
             // unsubscribe the stream
             if (!subscription.Unsubscribe.IsCancellationRequested)
+            {
                 subscription.Unsubscribe.Cancel();
+            }
 
             // write complete
             return context.Output.WriteAsync(new OperationMessage
@@ -103,7 +106,8 @@ namespace tanka.graphql.server.webSockets
             }, cts.Token);
 
             // stream results to output
-            var _ = queryStream.Reader.TransformAndLinkTo(context.Output, result => new OperationMessage
+            var _ = queryStream.Reader.TransformAndWriteTo(
+                context.Output, result => new OperationMessage
             {
                 Id = id,
                 Type = MessageType.GQL_DATA,

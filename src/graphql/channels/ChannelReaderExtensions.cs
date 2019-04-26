@@ -93,5 +93,33 @@ namespace tanka.graphql.channels
                 writer.TryComplete();
             }
         }
+
+        /// <summary>
+        ///     Write data to writer but do not complete writer if reader completes
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TTarget"></typeparam>
+        /// <param name="reader"></param>
+        /// <param name="writer"></param>
+        /// <param name="transform"></param>
+        /// <returns></returns>
+        public static async Task TransformAndWriteTo<TSource, TTarget>(
+            this ChannelReader<TSource> reader,
+            ChannelWriter<TTarget> writer,
+            Func<TSource, TTarget> transform)
+        {
+            while (await reader.WaitToReadAsync())
+            while (reader.TryRead(out var evnt))
+            {
+                var executionResult = transform(evnt);
+
+                while (!writer.TryWrite(executionResult))
+                    if (!await writer.WaitToWriteAsync())
+                        return;
+            }
+
+            // Manifest any errors in the completion task
+            await reader.Completion;
+        }
     }
 }

@@ -43,7 +43,6 @@ namespace tanka.graphql.server.webSockets
 
             var fromConnection = ReadFromConnection(
                 connection.Input,
-                _readChannel.Writer,
                 token);
 
             await Task.WhenAll(
@@ -59,7 +58,10 @@ namespace tanka.graphql.server.webSockets
             try
             {
                 var reader = _writeChannel.Reader;
-                output.OnReaderCompleted((err, state) => { _writeChannel.Writer.TryComplete(err); }, null);
+                output.OnReaderCompleted((err, state) =>
+                {
+                    _writeChannel.Writer.TryComplete(err);
+                }, null);
 
                 while (true)
                 {
@@ -98,9 +100,12 @@ namespace tanka.graphql.server.webSockets
             }
         }
 
-        private static async Task ReadFromConnection(PipeReader reader, ChannelWriter<OperationMessage> writer,
+        private async Task ReadFromConnection(
+            PipeReader reader,
             CancellationToken token)
         {
+            var writer = _readChannel.Writer;
+
             try
             {
                 while (true)
