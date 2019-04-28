@@ -1,7 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,18 +13,33 @@ using tanka.graphql.server.webSockets.dtos;
 namespace tanka.graphql.server.webSockets
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public class GraphQLWSProtocolOptions
+    {
+        private static readonly Task<bool> True = Task.FromResult(true);
+
+        /// <summary>
+        ///     Method called when initialize message is received from client to validate
+        ///     the connectionParams
+        /// </summary>
+        /// <returns>true if connection accepted; otherwise false</returns>
+        public Func<MessageContext, Task<bool>> Initialize { get; set; } = context => True;
+    }
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class GraphQLWSProtocol : IProtocolHandler
     {
+        private readonly ConcurrentQueue<MessageContext> _initializationQueue = new ConcurrentQueue<MessageContext>();
+        private readonly GraphQLWSProtocolOptions _options;
         private readonly IQueryStreamService _queryStreamService;
         private readonly JsonSerializer _serializer;
-        private volatile bool _isInitialized = false;
-        private ConcurrentQueue<MessageContext> _initializationQueue = new ConcurrentQueue<MessageContext>();
+        private volatile bool _isInitialized;
 
 
-        public GraphQLWSProtocol(IQueryStreamService queryStreamService)
+        public GraphQLWSProtocol(IQueryStreamService queryStreamService, GraphQLWSProtocolOptions options)
         {
             _queryStreamService = queryStreamService;
-            _serializer = JsonSerializer.CreateDefault(new JsonSerializerSettings()
+            _options = options;
+            _serializer = JsonSerializer.CreateDefault(new JsonSerializerSettings
             {
                 MissingMemberHandling = MissingMemberHandling.Ignore,
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
@@ -37,13 +52,11 @@ namespace tanka.graphql.server.webSockets
         public ValueTask Handle(MessageContext context)
         {
             if (!_isInitialized)
-            {
                 return context.Message.Type switch
                     {
                     MessageType.GQL_CONNECTION_INIT => HandleInitAsync(context),
                     _ => QueueMessage(context),
                     };
-            }
 
             return context.Message.Type switch
                 {
@@ -55,17 +68,17 @@ namespace tanka.graphql.server.webSockets
                 };
         }
 
-        private ValueTask QueueMessage(MessageContext context)
-        {
-            _initializationQueue.Enqueue(context);
-            return default;
-        }
-
         public Subscription GetSubscription(string id)
         {
             if (Subscriptions.TryGetValue(id, out var sub))
                 return sub;
 
+            return default;
+        }
+
+        private ValueTask QueueMessage(MessageContext context)
+        {
+            _initializationQueue.Enqueue(context);
             return default;
         }
 
@@ -96,10 +109,7 @@ namespace tanka.graphql.server.webSockets
             Subscriptions.TryRemove(id, out _);
 
             // unsubscribe the stream
-            if (!subscription.Unsubscribe.IsCancellationRequested)
-            {
-                subscription.Unsubscribe.Cancel();
-            }
+            if (!subscription.Unsubscribe.IsCancellationRequested) subscription.Unsubscribe.Cancel();
 
             // write complete
             return context.Output.WriteAsync(new OperationMessage
@@ -134,11 +144,11 @@ namespace tanka.graphql.server.webSockets
             // stream results to output
             var _ = queryStream.Reader.TransformAndWriteTo(
                 context.Output, result => new OperationMessage
-            {
-                Id = id,
-                Type = MessageType.GQL_DATA,
-                Payload = JObject.FromObject(result, _serializer)
-            });
+                {
+                    Id = id,
+                    Type = MessageType.GQL_DATA,
+                    Payload = JObject.FromObject(result, _serializer)
+                });
 
             // There might have been another start with the id between this and the contains
             // check in the beginning. todo(pekka): refactor
@@ -163,20 +173,22 @@ namespace tanka.graphql.server.webSockets
 
         private async ValueTask HandleInitAsync(MessageContext context)
         {
-            await FlushInitializationQueue();
-            _isInitialized = true;
-            await context.Output.WriteAsync(new OperationMessage
+            var accepted = await _options.Initialize(context);
+
+            if (accepted)
             {
-                Type = MessageType.GQL_CONNECTION_ACK
-            });
+                await FlushInitializationQueue();
+                _isInitialized = true;
+                await context.Output.WriteAsync(new OperationMessage
+                {
+                    Type = MessageType.GQL_CONNECTION_ACK
+                });
+            }
         }
 
         private async ValueTask FlushInitializationQueue()
         {
-            while (_initializationQueue.TryDequeue(out var messageContext))
-            {
-                await Handle(messageContext);
-            }
+            while (_initializationQueue.TryDequeue(out var messageContext)) await Handle(messageContext);
         }
     }
 }
