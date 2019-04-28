@@ -16,7 +16,10 @@ namespace tanka.graphql.server.webSockets
     public class GraphQLWSProtocol : IProtocolHandler
     {
         private readonly IQueryStreamService _queryStreamService;
-        private JsonSerializer _serializer;
+        private readonly JsonSerializer _serializer;
+        private volatile bool _isInitialized = false;
+        private ConcurrentQueue<MessageContext> _initializationQueue = new ConcurrentQueue<MessageContext>();
+
 
         public GraphQLWSProtocol(IQueryStreamService queryStreamService)
         {
@@ -33,6 +36,15 @@ namespace tanka.graphql.server.webSockets
 
         public ValueTask Handle(MessageContext context)
         {
+            if (!_isInitialized)
+            {
+                return context.Message.Type switch
+                    {
+                    MessageType.GQL_CONNECTION_INIT => HandleInitAsync(context),
+                    _ => QueueMessage(context),
+                    };
+            }
+
             return context.Message.Type switch
                 {
                 MessageType.GQL_CONNECTION_INIT => HandleInitAsync(context),
@@ -41,6 +53,12 @@ namespace tanka.graphql.server.webSockets
                 MessageType.GQL_CONNECTION_TERMINATE => HandleTerminateAsync(context),
                 _ => HandleUnknownAsync(context),
                 };
+        }
+
+        private ValueTask QueueMessage(MessageContext context)
+        {
+            _initializationQueue.Enqueue(context);
+            return default;
         }
 
         public Subscription GetSubscription(string id)
@@ -143,12 +161,22 @@ namespace tanka.graphql.server.webSockets
             }, CancellationToken.None);
         }
 
-        private ValueTask HandleInitAsync(MessageContext context)
+        private async ValueTask HandleInitAsync(MessageContext context)
         {
-            return context.Output.WriteAsync(new OperationMessage
+            await FlushInitializationQueue();
+            _isInitialized = true;
+            await context.Output.WriteAsync(new OperationMessage
             {
                 Type = MessageType.GQL_CONNECTION_ACK
             });
+        }
+
+        private async ValueTask FlushInitializationQueue()
+        {
+            while (_initializationQueue.TryDequeue(out var messageContext))
+            {
+                await Handle(messageContext);
+            }
         }
     }
 }
