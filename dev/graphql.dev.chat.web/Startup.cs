@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -40,6 +41,10 @@ namespace tanka.graphql.samples.chat.web
 
             // graphql-ws websocket server
             // web socket server
+            services.AddWebSockets(options =>
+            {
+                options.AllowedOrigins.Add("https://localhost:5000");
+            });
             services.AddTankaWebSocketServerWithTracing();
 
             // CORS is required for the graphql.samples.chat.ui React App
