@@ -49,11 +49,11 @@ namespace tanka.graphql.server.tests.webSockets
 
                 return message;
             }
-            catch (WebSocketException wx)
+            catch (WebSocketException)
             {
                 throw;
             }
-            catch (Exception x)
+            catch (Exception)
             {
                 throw;
             }
