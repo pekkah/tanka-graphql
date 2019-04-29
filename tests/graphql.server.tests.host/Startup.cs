@@ -109,13 +109,7 @@ namespace graphql.server.tests.host
             services.AddSingleton(provider => eventManager);
 
             // web socket server
-            services.AddSingleton<WebSocketServer>();
-
-            services.AddWebSockets(options =>
-            {
-
-            });
-
+            services.AddTankaWebSocketServer();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddTankaServerHubWithTracing();
         }
@@ -126,15 +120,7 @@ namespace graphql.server.tests.host
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseWebSockets();
-            
-            app.Run(async (context) =>
-            {
-                if (context.WebSockets.IsWebSocketRequest)
-                {
-                    var connection = context.RequestServices.GetRequiredService<WebSocketServer>();
-                    await connection.ProcessRequestAsync(context);
-                }
-            });
+            app.UseTankaWebSocketServer();
 
             app.UseSignalR(routes =>
             {

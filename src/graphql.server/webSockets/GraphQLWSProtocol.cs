@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,27 +12,11 @@ using tanka.graphql.server.webSockets.dtos;
 namespace tanka.graphql.server.webSockets
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public class GraphQLWSProtocolOptions
-    {
-        private static readonly Task<bool> True = Task.FromResult(true);
-
-        /// <summary>
-        ///     Method called when initialize message is received from client to validate
-        ///     the connectionParams
-        /// </summary>
-        /// <returns>true if connection accepted; otherwise false</returns>
-        public Func<MessageContext, Task<bool>> Initialize { get; set; } = context => True;
-    }
-
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class GraphQLWSProtocol : IProtocolHandler
     {
-        private readonly ConcurrentQueue<MessageContext> _initializationQueue = new ConcurrentQueue<MessageContext>();
         private readonly GraphQLWSProtocolOptions _options;
         private readonly IQueryStreamService _queryStreamService;
         private readonly JsonSerializer _serializer;
-        private volatile bool _isInitialized;
-
 
         public GraphQLWSProtocol(IQueryStreamService queryStreamService, GraphQLWSProtocolOptions options)
         {
@@ -51,13 +34,6 @@ namespace tanka.graphql.server.webSockets
 
         public ValueTask Handle(MessageContext context)
         {
-            if (!_isInitialized)
-                return context.Message.Type switch
-                    {
-                    MessageType.GQL_CONNECTION_INIT => HandleInitAsync(context),
-                    _ => QueueMessage(context),
-                    };
-
             return context.Message.Type switch
                 {
                 MessageType.GQL_CONNECTION_INIT => HandleInitAsync(context),
@@ -75,13 +51,7 @@ namespace tanka.graphql.server.webSockets
 
             return default;
         }
-
-        private ValueTask QueueMessage(MessageContext context)
-        {
-            _initializationQueue.Enqueue(context);
-            return default;
-        }
-
+        
         private ValueTask HandleUnknownAsync(MessageContext context)
         {
             var message = context.Message;
@@ -177,18 +147,11 @@ namespace tanka.graphql.server.webSockets
 
             if (accepted)
             {
-                await FlushInitializationQueue();
-                _isInitialized = true;
                 await context.Output.WriteAsync(new OperationMessage
                 {
                     Type = MessageType.GQL_CONNECTION_ACK
                 });
             }
-        }
-
-        private async ValueTask FlushInitializationQueue()
-        {
-            while (_initializationQueue.TryDequeue(out var messageContext)) await Handle(messageContext);
         }
     }
 }

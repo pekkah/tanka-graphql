@@ -42,7 +42,7 @@ namespace tanka.graphql.server.tests.webSockets
             {
                 request.Headers.Add("Sec-WebSocket-Protocol", "graphql-ws");
             };
-            return await webSocketClient.ConnectAsync(new Uri("http://localhost/graphql"), CancellationToken.None);
+            return await webSocketClient.ConnectAsync(new Uri("http://localhost/api/graphql"), CancellationToken.None);
         }
 
         protected OperationMessage DeserializeMessage(string json)
