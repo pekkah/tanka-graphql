@@ -168,8 +168,7 @@ Task("Test")
       var settings = new DotNetCoreTestSettings()
       {
          ResultsDirectory = new DirectoryPath(artifactsDir),
-         Logger = "trx",
-		 Verbosity = DotNetCoreVerbosity.Diagnostic
+         Logger = "trx"
       };
 
       foreach(var file in projectFiles)
