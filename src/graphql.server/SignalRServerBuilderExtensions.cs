@@ -10,16 +10,16 @@ namespace tanka.graphql.server
 {
     public static class SignalRServerBuilderExtensions
     {
-        public static ISignalRServerBuilder AddQueryStreamHubWithTracing(
+        public static ISignalRServerBuilder AddTankaServerHubWithTracing(
             this ISignalRServerBuilder builder)
         {
             var services = builder.Services;
 
             // add tracing extension
-            services.AddQueryExtension<TraceExtension>();
+            services.AddTankaServerExecutionExtension<TraceExtension>();
 
             // default configuration
-            return AddQueryStreamHub(
+            return AddTankaServerHub(
                 builder);
         }
 
@@ -31,9 +31,9 @@ namespace tanka.graphql.server
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public static ISignalRServerBuilder AddQueryStreamHub(this ISignalRServerBuilder builder)
+        public static ISignalRServerBuilder AddTankaServerHub(this ISignalRServerBuilder builder)
         {
-            return AddQueryStreamHub(
+            return AddTankaServerHub(
                 builder,
                 optionsBuilder => optionsBuilder
                     .Configure<ISchema>((options, schema) => options.Schema = schema)
@@ -46,7 +46,7 @@ namespace tanka.graphql.server
         /// <param name="builder"></param>
         /// <param name="configureOptions"></param>
         /// <returns></returns>
-        public static ISignalRServerBuilder AddQueryStreamHub(
+        public static ISignalRServerBuilder AddTankaServerHub(
             this ISignalRServerBuilder builder,
             Action<OptionsBuilder<QueryStreamHubOptions>> configureOptions)
         {

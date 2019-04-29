@@ -117,7 +117,7 @@ namespace graphql.server.tests.host
             });
 
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddQueryStreamHubWithTracing();
+                .AddTankaServerHubWithTracing();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -7,7 +7,7 @@ namespace tanka.graphql.server
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddQueryExtension<TExtension>(this IServiceCollection services)
+        public static IServiceCollection AddTankaServerExecutionExtension<TExtension>(this IServiceCollection services)
             where TExtension: class, IExtension
         {
             services.TryAddSingleton<IExtension, TExtension>();
@@ -17,7 +17,7 @@ namespace tanka.graphql.server
 
         public static IServiceCollection AddTankaWebSocketServerWithTracing(this IServiceCollection services)
         {
-            services.AddQueryExtension<TraceExtension>();
+            services.AddTankaServerExecutionExtension<TraceExtension>();
             return AddTankaWebSocketServer(services);
         }
 

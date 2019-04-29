@@ -36,7 +36,7 @@ namespace tanka.graphql.samples.chat.web
             // signalr server
             services.AddSignalR(options => options.EnableDetailedErrors = true)
                 // add GraphQL query streaming hub
-                .AddQueryStreamHubWithTracing();
+                .AddTankaServerHubWithTracing();
 
             // graphql-ws websocket server
             // web socket server
