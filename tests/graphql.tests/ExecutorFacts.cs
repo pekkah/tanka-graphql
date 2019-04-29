@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -322,7 +323,8 @@ namespace tanka.graphql.tests
                     }
                 }");
 
-            var cts = new CancellationTokenSource();
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
             /* When */
             var result = await Executor.SubscribeAsync(new ExecutionOptions()
             {

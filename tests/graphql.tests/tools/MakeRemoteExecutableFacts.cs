@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql.links;
@@ -189,8 +190,10 @@ type Subscription {
                     }
                 });
 
-            var schema = MergeTool.MergeSchemas(schemaTwo, schemaOne);
-            var unsubscribe = new CancellationTokenSource();
+            var schema = new SchemaBuilder()
+                .Merge(schemaOne, schemaTwo)
+                .Build();
+            var unsubscribe = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
 
             /* When */

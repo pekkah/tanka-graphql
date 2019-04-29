@@ -89,7 +89,7 @@ namespace tanka.graphql.tests
         {
             /* Given */
             const int count = 10_000;
-            var unsubscribe = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+            var unsubscribe = new CancellationTokenSource(TimeSpan.FromMinutes(1));
 
             var query = @"
                 subscription MessageAdded {
@@ -133,7 +133,7 @@ namespace tanka.graphql.tests
         public async Task Should_subscribe()
         {
             /* Given */
-            var unsubscribe = new CancellationTokenSource();
+            var unsubscribe = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             var expected = new Message {Content = "hello"};
 
             var query = @"
