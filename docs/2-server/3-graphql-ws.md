@@ -36,15 +36,14 @@ app.UseTankaWebSocketServer(new WebSocketServerOptions()
 ### Configure protocol
 
 When `connection_init` message is received from client the protocol calls
-`Initialize` of the options to accept the connection. By default it accepts
-the connection and sends `connection_ack` message back to the client. In case
-the connection is not accepted then you're responsible for sending the error
-back to the client if required closing the connection by completing the output.
+`AcceptAsync` of the options to accept the connection. By default it accepts
+the connection and sends `connection_ack` message back to the client. You can 
+configure this behavior with your own logic.
 
 ```csharp
 services.AddTankaWebSocketServerWithTracing()
         .Configure<IAuthenticationServies>(
-            (options, authentication) => options.Initialize = async context =>
+            (options, authentication) => options.AcceptAsync = async context =>
             {
                 var token = context.Message.Payload.SelectToken("authToken");
                 
@@ -60,9 +59,17 @@ services.AddTankaWebSocketServerWithTracing()
                         Type = MessageType.GQL_CONNECTION_ERROR,
                         Id = context.Message.Id
                     });
+                    
+                    // complete the output forcing the server to disconnect
+                    context.Output.Complete();
                 }
-                
-                return isValid;
+                else 
+                {
+                    await context.Output.WriteAsync(new OperationMessage
+                    {
+                        Type = MessageType.GQL_CONNECTION_ACK
+                    });
+                }
             });
 ```
 

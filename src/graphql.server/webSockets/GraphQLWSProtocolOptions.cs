@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using tanka.graphql.server.webSockets.dtos;
 
 namespace tanka.graphql.server.webSockets
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class GraphQLWSProtocolOptions
     {
-        private static readonly Task<bool> True = Task.FromResult(true);
-
         /// <summary>
-        ///     Method called when initialize message is received from client to validate
+        ///     Method called when `connection_init` message is received from client to validate
         ///     the connectionParams
         /// </summary>
         /// <returns>true if connection accepted; otherwise false</returns>
-        public Func<MessageContext, Task<bool>> Initialize { get; set; } = context => True;
+        public Func<MessageContext, Task> AcceptAsync { get; set; } = async context =>
+        {
+            await context.Output.WriteAsync(new OperationMessage
+            {
+                Type = MessageType.GQL_CONNECTION_ACK
+            });
+        };
     }
 }
