@@ -9,9 +9,9 @@ namespace tanka.graphql.server
 {
     public class QueryStreamHub : Hub
     {
-        private readonly QueryStreamService _queryStreamService;
+        private readonly IQueryStreamService _queryStreamService;
 
-        public QueryStreamHub(QueryStreamService queryStreamService)
+        public QueryStreamHub(IQueryStreamService queryStreamService)
         {
             _queryStreamService = queryStreamService;
         }

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using tanka.graphql.samples.chat.web.GraphQL;
 using tanka.graphql.server.utilities;
@@ -12,10 +14,12 @@ namespace tanka.graphql.samples.chat.web.Controllers
     public class QueryController : Controller
     {
         private readonly ChatSchemas _schemas;
+        private readonly IEnumerable<IExtension> _extensions;
 
-        public QueryController(ChatSchemas schemas)
+        public QueryController(ChatSchemas schemas, IEnumerable<IExtension> extensions)
         {
             _schemas = schemas;
+            _extensions = extensions;
         }
 
         [HttpPost]
@@ -26,7 +30,8 @@ namespace tanka.graphql.samples.chat.web.Controllers
                 Document =  ParseDocument(request.Query),
                 Schema = _schemas.Chat,
                 OperationName = request.OperationName,
-                VariableValues = request.Variables?.ToNestedDictionary()
+                VariableValues = request.Variables?.ToNestedDictionary(),
+                Extensions = _extensions.ToList()
             });
 
             return Ok(result);

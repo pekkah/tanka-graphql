@@ -164,7 +164,7 @@ Task("SetVersion")
 Task("Test")
   .IsDependentOn("Build")
   .Does(()=> {
-      var projectFiles = GetFiles("./tests/**/*Tests.csproj");
+      var projectFiles = GetFiles("./tests/**/*tests.csproj");
       var settings = new DotNetCoreTestSettings()
       {
          ResultsDirectory = new DirectoryPath(artifactsDir),

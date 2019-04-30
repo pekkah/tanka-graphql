@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql.links;
@@ -79,7 +80,9 @@ namespace tanka.graphql.tests.tools
                     }
                 });
 
-            var schema = MergeTool.MergeSchemas(schemaTwo, schemaOne);
+            var schema = new SchemaBuilder()
+                .Merge(schemaOne, schemaTwo)
+                .Build();
 
             /* When */
             var result = await Executor.ExecuteAsync(new ExecutionOptions
@@ -189,8 +192,11 @@ type Subscription {
                     }
                 });
 
-            var schema = MergeTool.MergeSchemas(schemaTwo, schemaOne);
-            var unsubscribe = new CancellationTokenSource();
+            var schema = new SchemaBuilder()
+                .Merge(schemaOne, schemaTwo)
+                .Build();
+
+            var unsubscribe = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
 
             /* When */

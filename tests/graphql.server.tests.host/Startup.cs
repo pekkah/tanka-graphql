@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql;
 using tanka.graphql.resolvers;
@@ -8,9 +9,12 @@ using tanka.graphql.type;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
 using tanka.graphql.channels;
 using tanka.graphql.sdl;
+using tanka.graphql.server.webSockets;
 
 namespace graphql.server.tests.host
 {
@@ -104,14 +108,19 @@ namespace graphql.server.tests.host
             services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
 
+            // web socket server
+            services.AddTankaWebSocketServer();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddQueryStreamHubWithTracing();
+                .AddTankaServerHubWithTracing();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
+
+            app.UseWebSockets();
+            app.UseTankaWebSocketServer();
 
             app.UseSignalR(routes =>
             {

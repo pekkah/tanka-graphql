@@ -11,7 +11,7 @@ using tanka.graphql.requests;
 
 namespace tanka.graphql.server
 {
-    public class QueryStreamService
+    public class QueryStreamService : IQueryStreamService
     {
         private readonly List<IExtension> _extensions;
         private readonly ILogger<QueryStreamService> _logger;

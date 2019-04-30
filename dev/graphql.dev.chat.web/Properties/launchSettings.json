@@ -2,6 +2,8 @@
   "profiles": {
     "graphql.dev.chat.web": {
       "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "https://localhost:5000/ui",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

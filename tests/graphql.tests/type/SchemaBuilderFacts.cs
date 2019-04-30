@@ -603,7 +603,7 @@ namespace tanka.graphql.tests.type
                 .Build();
 
             /* When */
-            var schema = MergeTool.MergeSchemas(schema1, schema2);
+            var schema = new SchemaBuilder().Merge(schema1, schema2).Build();
 
             /* Then */
             var queryFields = schema.GetFields(query1.Name).ToList();
