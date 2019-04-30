@@ -124,7 +124,7 @@ namespace graphql.server.tests.host
 
             app.UseSignalR(routes =>
             {
-                routes.MapHub<QueryStreamHub>(new PathString("/graphql"));
+                routes.MapHub<ServerHub>(new PathString("/graphql"));
             });
         }
     }

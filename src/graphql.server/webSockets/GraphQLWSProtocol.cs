@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -18,10 +19,12 @@ namespace tanka.graphql.server.webSockets
         private readonly IQueryStreamService _queryStreamService;
         private readonly JsonSerializer _serializer;
 
-        public GraphQLWSProtocol(IQueryStreamService queryStreamService, GraphQLWSProtocolOptions options)
+        public GraphQLWSProtocol(
+            IQueryStreamService queryStreamService, 
+            IOptionsMonitor<GraphQLWSProtocolOptions> options)
         {
             _queryStreamService = queryStreamService;
-            _options = options;
+            _options = options.CurrentValue;
             _serializer = JsonSerializer.CreateDefault(new JsonSerializerSettings
             {
                 MissingMemberHandling = MissingMemberHandling.Ignore,

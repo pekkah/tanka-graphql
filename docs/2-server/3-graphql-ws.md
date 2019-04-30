@@ -1,10 +1,13 @@
 ## GraphQL WS
 
-Besides the SignalR based server Tanka also provides a graphql-ws protocol compatible websocket server. This server can be used with [apollo-link-ws](https://www.apollographql.com/docs/link/links/ws).
+Besides the SignalR based server Tanka also provides a graphql-ws protocol 
+compatible websocket server. This server can be used with 
+[apollo-link-ws](https://www.apollographql.com/docs/link/links/ws).
 
 ### Add required services
 
-This will add the required services and Apollo Tracing extension to execution pipeline.
+This will add the required services and Apollo Tracing extension to execution 
+pipeline.
 
 ```csharp
 services.AddTankaWebSocketServerWithTracing();
@@ -29,4 +32,38 @@ app.UseTankaWebSocketServer(new WebSocketServerOptions()
     Path = "/api/graphql"
 });
 ```
+
+### Configure protocol
+
+When `connection_init` message is received from client the protocol calls
+`Initialize` of the options to accept the connection. By default it accepts
+the connection and sends `connection_ack` message back to the client. In case
+the connection is not accepted then you're responsible for sending the error
+back to the client if required closing the connection by completing the output.
+
+```csharp
+services.AddTankaWebSocketServerWithTracing()
+        .Configure<IAuthenticationServies>(
+            (options, authentication) => options.Initialize = async context =>
+            {
+                var token = context.Message.Payload.SelectToken("authToken");
+                
+                // true when accepted; otherwise false
+                var isValid = await authentication.IsValidAsync(token);
+                
+                if (!isValid) 
+                {
+                    // you must decide what kind of message to send back to the client
+                    // in case the connection is not accepted.
+                    await context.Output.WriteAsync(new OperationMessage
+                    {
+                        Type = MessageType.GQL_CONNECTION_ERROR,
+                        Id = context.Message.Id
+                    });
+                }
+                
+                return isValid;
+            });
+```
+
 

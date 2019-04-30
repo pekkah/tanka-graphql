@@ -16,10 +16,10 @@ namespace tanka.graphql.server
         private readonly List<IExtension> _extensions;
         private readonly ILogger<QueryStreamService> _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IOptionsMonitor<QueryStreamHubOptions> _optionsMonitor;
+        private readonly IOptionsMonitor<ExecutionOptions> _optionsMonitor;
 
         public QueryStreamService(
-            IOptionsMonitor<QueryStreamHubOptions> optionsMonitor,
+            IOptionsMonitor<ExecutionOptions> optionsMonitor,
             ILoggerFactory loggerFactory,
             IEnumerable<IExtension> extensions)
         {
@@ -38,7 +38,7 @@ namespace tanka.graphql.server
                 _logger.Query(query);
                 var serviceOptions = _optionsMonitor.CurrentValue;
                 var document = await Parser.ParseDocumentAsync(query.Query);
-                var executionOptions = new ExecutionOptions
+                var executionOptions = new graphql.ExecutionOptions
                 {
                     Schema = serviceOptions.Schema,
                     Document = document,
@@ -72,7 +72,7 @@ namespace tanka.graphql.server
         }
 
         private async Task<QueryStream> ExecuteAsync(
-            ExecutionOptions options,
+            graphql.ExecutionOptions options,
             CancellationToken cancellationToken)
         {
             var result = await Executor.ExecuteAsync(options, cancellationToken);
@@ -86,7 +86,7 @@ namespace tanka.graphql.server
         }
 
         private async Task<QueryStream> SubscribeAsync(
-            ExecutionOptions options,
+            graphql.ExecutionOptions options,
             CancellationToken cancellationToken)
         {
             if (!cancellationToken.CanBeCanceled)

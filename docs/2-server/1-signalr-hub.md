@@ -1,21 +1,23 @@
-## Server
+## SignalR Hub
 
 Server is implemented as a SignalR Core Hub and it handles queries, mutations
 and subscriptions. This projects provides an Apollo Link implementation to be
 used with the provided hub.
 
-### GraphQL Query Streaming Hub
+### GraphQL Server Hub
 
 ```csharp
 // Configure Services
-services.AddSignalR()
+services.AddSignalR(options => options.EnableDetailedErrors = true)
     // add GraphQL query streaming hub
-    .AddQueryStreamHub();
+    .AddTankaServerHubWithTracing();
 
 // Configure App
-app.UseSignalR(routes =>
-{
-    routes.MapHub<QueryStreamHub>(new PathString("/graphql"));
-});
+app.UseSignalR(routes => routes.MapTankaServerHub("/graphql"));
 
+// or with options
+app.UseSignalR(routes => routes.MapTankaServerHub("/graphql", options => 
+{
+    // configure signalr hub options
+}));
 ```
