@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Apollo link - tanka-graphql</title>
+    <title>Dotnet client - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -112,13 +112,13 @@
                                     <a class="nav-link" href="2-server/1-signalr-hub.html">Signalr hub</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active bg-light" href="2-server/2-apollo-link.html">Apollo link</a>
+                                    <a class="nav-link" href="2-server/2-apollo-link.html">Apollo link</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="2-server/3-graphql-ws.html">Graphql ws</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="2-server/9-dotnet-client.html">Dotnet client</a>
+                                    <a class="nav-link active bg-light" href="2-server/9-dotnet-client.html">Dotnet client</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -179,34 +179,7 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="apollo-link">Apollo link</h2>
-<pre><code class="lang-js">import { ApolloClient } from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { onError } from 'apollo-link-error';
-import { ApolloLink } from 'apollo-link';
-import { TankaLink, TankaClient } from '@tanka/graphql-server-link';
-
-const serverClient = new TankaClient(&quot;/graphql&quot;);
-const serverLink = new TankaLink(serverClient);
-
-const client = new ApolloClient({
-  connectToDevTools: true,
-  link: ApolloLink.from([
-    onError(({ graphQLErrors, networkError }) =&gt; {
-      if (graphQLErrors)
-        graphQLErrors.map(({ message, locations, path }) =&gt;
-          console.log(
-            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-          ),
-        );
-      if (networkError) console.log(`[Network error]: ${networkError}`);
-    }),
-    serverLink
-  ]),
-  cache: new InMemoryCache()
-});
-export default client;
-</code></pre>
+                <p>Dotnet client is available at <a href="https://github.com/anttikajanus/tanka-graphql-net-client">https://github.com/anttikajanus/tanka-graphql-net-client</a></p>
                     
             </main>
         </div>
