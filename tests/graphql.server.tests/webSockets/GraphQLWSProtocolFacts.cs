@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using tanka.graphql.server.webSockets;
@@ -14,11 +15,11 @@ namespace tanka.graphql.server.tests.webSockets
 {
     public class GraphQLWSProtocolFacts
     {
-        private GraphQLWSProtocolOptions _options;
+        private IOptions<GraphQLWSProtocolOptions> _options;
 
         public GraphQLWSProtocolFacts()
         {
-            _options = new GraphQLWSProtocolOptions();
+            _options = Options.Create(new GraphQLWSProtocolOptions());
         }
 
         protected ValueTask<OperationMessage> ReadWithTimeout(

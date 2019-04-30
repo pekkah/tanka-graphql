@@ -2,7 +2,7 @@
 
 namespace tanka.graphql.server
 {
-    public class QueryStreamHubOptions
+    public class ExecutionOptions
     {
         public ISchema Schema { get; set; }
     }

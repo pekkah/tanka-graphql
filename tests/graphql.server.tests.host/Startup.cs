@@ -109,6 +109,9 @@ namespace graphql.server.tests.host
             services.AddSingleton(provider => eventManager);
 
             // web socket server
+            services.AddTankaExecutionOptions()
+                .Configure<ISchema>((options, schema) => options.Schema = schema);
+
             services.AddTankaWebSocketServer();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddTankaServerHubWithTracing();
@@ -124,7 +127,7 @@ namespace graphql.server.tests.host
 
             app.UseSignalR(routes =>
             {
-                routes.MapHub<QueryStreamHub>(new PathString("/graphql"));
+                routes.MapHub<ServerHub>(new PathString("/graphql"));
             });
         }
     }

@@ -117,7 +117,7 @@ namespace tanka.graphql.tests.tools
                 ");
         }
 
-        [Fact]
+        [Fact(Skip = "test has issues as nothing is pushing the values into the stream")]
         public async Task Subscriptions()
         {
             /* Given */

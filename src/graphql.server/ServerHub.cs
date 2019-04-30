@@ -7,11 +7,11 @@ using tanka.graphql.requests;
 
 namespace tanka.graphql.server
 {
-    public class QueryStreamHub : Hub
+    public class ServerHub : Hub
     {
         private readonly IQueryStreamService _queryStreamService;
 
-        public QueryStreamHub(IQueryStreamService queryStreamService)
+        public ServerHub(IQueryStreamService queryStreamService)
         {
             _queryStreamService = queryStreamService;
         }

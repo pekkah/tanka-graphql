@@ -11,6 +11,7 @@ using tanka.graphql.samples.chat.data;
 using tanka.graphql.samples.chat.web.GraphQL;
 using tanka.graphql.server;
 using tanka.graphql.server.webSockets;
+using tanka.graphql.type;
 
 namespace tanka.graphql.samples.chat.web
 {
@@ -34,6 +35,13 @@ namespace tanka.graphql.samples.chat.web
             services.AddSingleton<ChatSchemas>();
             services.AddSingleton(provider => provider.GetRequiredService<ChatSchemas>().Chat);
 
+            // configure execution options
+            services.AddTankaExecutionOptions()
+                .Configure<ISchema>((options, schema) =>
+                {
+                    options.Schema = schema;
+                });
+
             // signalr server
             services.AddSignalR(options => options.EnableDetailedErrors = true)
                 // add GraphQL query streaming hub
@@ -44,6 +52,7 @@ namespace tanka.graphql.samples.chat.web
             services.AddWebSockets(options =>
             {
                 options.AllowedOrigins.Add("https://localhost:5000");
+                options.AllowedOrigins.Add("https://localhost:3000");
             });
             services.AddTankaWebSocketServerWithTracing();
 
@@ -84,14 +93,14 @@ namespace tanka.graphql.samples.chat.web
                 Path = "/ui"
             });
 
-            // signalr server
-            app.UseSignalR(routes => { routes.MapHub<QueryStreamHub>(new PathString("/graphql")); });
-
             // websockets server
             app.UseTankaWebSocketServer(new WebSocketServerOptions()
             {
                 Path = "/api/graphql"
             });
+
+            // signalr server
+            app.UseSignalR(routes => routes.MapTankaServerHub("/graphql"));
 
             app.UseMvc();
         }
