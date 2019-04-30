@@ -76,7 +76,7 @@ namespace tanka.graphql.server.webSockets
             var id = context.Message.Id;
             var subscription = GetSubscription(id);
 
-            if (subscription.Equals(default))
+            if (subscription.Equals(default(Subscription)))
                 return default;
 
             Subscriptions.TryRemove(id, out _);
@@ -113,10 +113,11 @@ namespace tanka.graphql.server.webSockets
                 Query = payload.Query,
                 Variables = payload.Variables
             }, cts.Token);
-
-            // attach completed handler
-            var xx = queryStream.Reader.Completion.ContinueWith(result =>
-                HandleStopAsync(context), CancellationToken.None);
+            
+            
+            // There might have been another start with the id between this and the contains
+            // check in the beginning. todo(pekka): refactor
+            Subscriptions.TryAdd(id, new Subscription(id, queryStream, context.Output, cts));
 
             // stream results to output
             var _ = queryStream.Reader.TransformAndWriteTo(
@@ -127,9 +128,9 @@ namespace tanka.graphql.server.webSockets
                     Payload = JObject.FromObject(result, _serializer)
                 });
 
-            // There might have been another start with the id between this and the contains
-            // check in the beginning. todo(pekka): refactor
-            Subscriptions.TryAdd(id, new Subscription(id, queryStream, context.Output, cts));
+            // attach completed handler
+            var xx = queryStream.Reader.Completion.ContinueWith(result =>
+                HandleStopAsync(context), CancellationToken.None);
         }
 
         private static async Task WriteError(MessageContext context, string errorMessage)
