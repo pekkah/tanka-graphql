@@ -21,10 +21,10 @@ namespace tanka.graphql.server.webSockets
 
         public GraphQLWSProtocol(
             IQueryStreamService queryStreamService, 
-            IOptionsMonitor<GraphQLWSProtocolOptions> options)
+            IOptions<GraphQLWSProtocolOptions> options)
         {
             _queryStreamService = queryStreamService;
-            _options = options.CurrentValue;
+            _options = options.Value;
             _serializer = JsonSerializer.CreateDefault(new JsonSerializerSettings
             {
                 MissingMemberHandling = MissingMemberHandling.Ignore,

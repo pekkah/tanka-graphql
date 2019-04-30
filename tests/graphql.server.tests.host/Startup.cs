@@ -109,6 +109,9 @@ namespace graphql.server.tests.host
             services.AddSingleton(provider => eventManager);
 
             // web socket server
+            services.AddTankaExecutionOptions()
+                .Configure<ISchema>((options, schema) => options.Schema = schema);
+
             services.AddTankaWebSocketServer();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddTankaServerHubWithTracing();
