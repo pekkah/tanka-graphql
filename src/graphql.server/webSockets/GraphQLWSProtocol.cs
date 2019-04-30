@@ -20,7 +20,7 @@ namespace tanka.graphql.server.webSockets
         private readonly JsonSerializer _serializer;
 
         public GraphQLWSProtocol(
-            IQueryStreamService queryStreamService, 
+            IQueryStreamService queryStreamService,
             IOptions<GraphQLWSProtocolOptions> options)
         {
             _queryStreamService = queryStreamService;
@@ -54,7 +54,7 @@ namespace tanka.graphql.server.webSockets
 
             return default;
         }
-        
+
         private ValueTask HandleUnknownAsync(MessageContext context)
         {
             var message = context.Message;
@@ -82,14 +82,14 @@ namespace tanka.graphql.server.webSockets
             Subscriptions.TryRemove(id, out _);
 
             // unsubscribe the stream
-            if (!subscription.Unsubscribe.IsCancellationRequested) subscription.Unsubscribe.Cancel();
+            if (!subscription.Unsubscribe.IsCancellationRequested)
+                subscription.Unsubscribe.Cancel();
 
-            // write complete
             return context.Output.WriteAsync(new OperationMessage
             {
                 Type = MessageType.GQL_COMPLETE,
                 Id = id
-            });
+            }, CancellationToken.None);
         }
 
         private async ValueTask HandleStartAsync(MessageContext context)
@@ -113,6 +113,10 @@ namespace tanka.graphql.server.webSockets
                 Query = payload.Query,
                 Variables = payload.Variables
             }, cts.Token);
+
+            // attach completed handler
+            var xx = queryStream.Reader.Completion.ContinueWith(result =>
+                HandleStopAsync(context), CancellationToken.None);
 
             // stream results to output
             var _ = queryStream.Reader.TransformAndWriteTo(
@@ -149,12 +153,10 @@ namespace tanka.graphql.server.webSockets
             var accepted = await _options.Initialize(context);
 
             if (accepted)
-            {
                 await context.Output.WriteAsync(new OperationMessage
                 {
                     Type = MessageType.GQL_CONNECTION_ACK
                 });
-            }
         }
     }
 }
