@@ -151,13 +151,7 @@ namespace tanka.graphql.server.webSockets
 
         private async ValueTask HandleInitAsync(MessageContext context)
         {
-            var accepted = await _options.Initialize(context);
-
-            if (accepted)
-                await context.Output.WriteAsync(new OperationMessage
-                {
-                    Type = MessageType.GQL_CONNECTION_ACK
-                });
+            await _options.AcceptAsync(context);
         }
     }
 }
