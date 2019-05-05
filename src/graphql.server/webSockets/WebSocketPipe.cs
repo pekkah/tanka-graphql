@@ -12,19 +12,19 @@ using Microsoft.Extensions.Logging;
 
 namespace tanka.graphql.server.webSockets
 {
-    public partial class WebSocketConnection : IDuplexPipe
+    public partial class WebSocketPipe : IDuplexPipe
     {
         private readonly TimeSpan _closeTimeout;
-        private readonly ILogger<WebSocketConnection> _logger;
+        private readonly ILogger<WebSocketPipe> _logger;
         private readonly Pipe _readPipe;
         private readonly Pipe _writePipe;
         private volatile bool _aborted;
 
-        public WebSocketConnection(ILoggerFactory loggerFactory)
+        public WebSocketPipe(ILoggerFactory loggerFactory)
         {
             _writePipe = new Pipe();
             _readPipe = new Pipe();
-            _logger = loggerFactory.CreateLogger<WebSocketConnection>();
+            _logger = loggerFactory.CreateLogger<WebSocketPipe>();
             _closeTimeout = TimeSpan.FromSeconds(5);
         }
 
@@ -120,7 +120,7 @@ namespace tanka.graphql.server.webSockets
             try
             {
                 var separator = Encoding.UTF8.GetBytes(new[] {'\n'});
-                while (!token.IsCancellationRequested)
+                while (true)
                 {
                     // Do a 0 byte read so that idle connections don't allocate a buffer when waiting for a read
                     var emptyReadResult = await socket.ReceiveAsync(Memory<byte>.Empty, token);
