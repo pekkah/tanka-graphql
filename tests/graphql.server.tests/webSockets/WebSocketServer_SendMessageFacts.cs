@@ -21,44 +21,6 @@ namespace tanka.graphql.server.tests.webSockets
         {
         }
 
-        protected async Task<string> ReadMessage(WebSocket socket)
-        {
-            string message;
-            var buffer = new byte[1024 * 4];
-            var segment = new ArraySegment<byte>(buffer);
-
-            using var memoryStream = new MemoryStream();
-            try
-            {
-                WebSocketReceiveResult receiveResult;
-
-                do
-                {
-                    receiveResult = await socket.ReceiveAsync(segment, CancellationToken.None);
-
-                    if (receiveResult.CloseStatus.HasValue)
-                        break;
-
-                    if (receiveResult.Count == 0)
-                        continue;
-
-                    await memoryStream.WriteAsync(segment.Array, segment.Offset, receiveResult.Count);
-                } while (!receiveResult.EndOfMessage || memoryStream.Length == 0);
-
-                message = Encoding.UTF8.GetString(memoryStream.ToArray());
-
-                return message;
-            }
-            catch (WebSocketException)
-            {
-                throw;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         [Fact]
         public async Task SendOneMessage()
         {

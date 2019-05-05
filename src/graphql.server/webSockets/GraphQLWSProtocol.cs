@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,13 +18,16 @@ namespace tanka.graphql.server.webSockets
     {
         private readonly GraphQLWSProtocolOptions _options;
         private readonly IQueryStreamService _queryStreamService;
+        private readonly ILogger<GraphQLWSProtocol> _logger;
         private readonly JsonSerializer _serializer;
 
         public GraphQLWSProtocol(
             IQueryStreamService queryStreamService,
-            IOptions<GraphQLWSProtocolOptions> options)
+            IOptions<GraphQLWSProtocolOptions> options,
+            ILogger<GraphQLWSProtocol> logger)
         {
             _queryStreamService = queryStreamService;
+            _logger = logger;
             _options = options.Value;
             _serializer = JsonSerializer.CreateDefault(new JsonSerializerSettings
             {
@@ -37,6 +41,10 @@ namespace tanka.graphql.server.webSockets
 
         public ValueTask Handle(MessageContext context)
         {
+            _logger.LogInformation("Handling message: {id}:{type}", 
+                context.Message.Id,
+                context.Message.Type);
+
             return context.Message.Type switch
                 {
                 MessageType.GQL_CONNECTION_INIT => HandleInitAsync(context),
@@ -57,6 +65,9 @@ namespace tanka.graphql.server.webSockets
 
         private ValueTask HandleUnknownAsync(MessageContext context)
         {
+            _logger.LogError("Unknown message received of type: {type}",
+                context.Message.Type);
+
             var message = context.Message;
             return context.Output.WriteAsync(new OperationMessage
             {
@@ -67,6 +78,7 @@ namespace tanka.graphql.server.webSockets
 
         private ValueTask HandleTerminateAsync(MessageContext context)
         {
+            _logger.LogInformation("Terminate message received");
             context.Output.TryComplete();
             return default;
         }
@@ -79,6 +91,7 @@ namespace tanka.graphql.server.webSockets
             if (subscription.Equals(default(Subscription)))
                 return default;
 
+            _logger.LogInformation("Stop: {id}", id);
             Subscriptions.TryRemove(id, out _);
 
             // unsubscribe the stream
@@ -95,6 +108,9 @@ namespace tanka.graphql.server.webSockets
         private async ValueTask HandleStartAsync(MessageContext context)
         {
             var id = context.Message.Id;
+            _logger.LogInformation(
+                "Start: {id}",
+                id);
 
             if (string.IsNullOrEmpty(id)) await WriteError(context, "Message.Id is required");
 
@@ -128,13 +144,17 @@ namespace tanka.graphql.server.webSockets
                     Payload = JObject.FromObject(result, _serializer)
                 });
 
-            // attach completed handler
-            var xx = queryStream.Reader.Completion.ContinueWith(result =>
-                HandleStopAsync(context), CancellationToken.None);
+            // stop on completion
+            var __ = Task.Factory.StartNew(async () =>
+            {
+                await queryStream.Reader.Completion;
+                await HandleStopAsync(context);
+            }, CancellationToken.None);
         }
 
-        private static async Task WriteError(MessageContext context, string errorMessage)
+        private async Task WriteError(MessageContext context, string errorMessage)
         {
+            _logger.LogError("{message}", errorMessage);
             await context.Output.WriteAsync(new OperationMessage
             {
                 Type = MessageType.GQL_CONNECTION_ERROR,
@@ -151,6 +171,7 @@ namespace tanka.graphql.server.webSockets
 
         private async ValueTask HandleInitAsync(MessageContext context)
         {
+            _logger.LogInformation("Init");
             await _options.AcceptAsync(context);
         }
     }

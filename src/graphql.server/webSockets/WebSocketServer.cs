@@ -10,7 +10,7 @@ namespace tanka.graphql.server.webSockets
     public class WebSocketServer
     {
         private readonly ILoggerFactory _loggerFactory;
-        private ILogger<WebSocketServer> _logger;
+        private readonly ILogger<WebSocketServer> _logger;
 
         public WebSocketServer(
             ILoggerFactory loggerFactory)
@@ -25,13 +25,13 @@ namespace tanka.graphql.server.webSockets
         public async Task ProcessRequestAsync(HttpContext context)
         {
             MessageServer messageServer = null;
-            var scope = context.RequestServices.GetRequiredService<IServiceScopeFactory>()
-                .CreateScope();
 
             try
             {
-                var connection = new WebSocketConnection(_loggerFactory);
-                var protocol = scope.ServiceProvider.GetRequiredService<IProtocolHandler>();
+                _logger.LogInformation($"Processing WebSocket: {context.TraceIdentifier}");
+                var connection = new WebSocketPipe(_loggerFactory);
+                var protocol = context.RequestServices
+                    .GetRequiredService<IProtocolHandler>();
 
                 messageServer = new SubscriptionServer(protocol);
 
@@ -44,6 +44,7 @@ namespace tanka.graphql.server.webSockets
             catch (Exception e)
             {
                 messageServer?.Complete(e);
+                _logger.LogError(e, $"Processing websocket failed: {context.TraceIdentifier}");
                 throw;
             }
             finally
@@ -53,13 +54,8 @@ namespace tanka.graphql.server.webSockets
                     s.Complete();
                     await s.Completion;
                 }
-
-                scope.Dispose();
+                _logger.LogInformation($"Processing websocket finished: {context.TraceIdentifier}");
             }
         }
-    }
-
-    public interface ISubscriptionServerFactory
-    {
     }
 }
