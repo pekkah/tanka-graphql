@@ -25,7 +25,7 @@ namespace tanka.graphql
         /// <returns></returns>
         public static Task<GraphQLDocument> ParseDocumentAsync(string document)
         {
-            return Task.Run(() =>
+            return Task.Factory.StartNew(() =>
             {
                 var lexer = new Lexer();
                 var parser = new GraphQLParser.Parser(lexer);

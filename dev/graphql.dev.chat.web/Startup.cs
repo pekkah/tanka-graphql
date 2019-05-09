@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using GraphQL.Server.Ui.Playground;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,7 +40,7 @@ namespace tanka.graphql.samples.chat.web
             services.AddTankaExecutionOptions()
                 .Configure<ISchema>((options, schema) =>
                 {
-                    options.Schema = schema;
+                    options.GetSchema = query => new ValueTask<ISchema>(schema);
                 });
 
             // signalr server

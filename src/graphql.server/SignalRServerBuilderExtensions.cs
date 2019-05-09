@@ -32,7 +32,7 @@ namespace tanka.graphql.server
             var services = builder.Services;
 
             services.AddSignalR();
-            services.TryAddTransient<IQueryStreamService, QueryStreamService>();
+            services.TryAddScoped<IQueryStreamService, QueryStreamService>();
 
             return builder;
         }

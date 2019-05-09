@@ -18,15 +18,18 @@ namespace tanka.graphql.server.webSockets
     {
         private readonly GraphQLWSProtocolOptions _options;
         private readonly IQueryStreamService _queryStreamService;
+        private readonly IMessageContextAccessor _messageContextAccessor;
         private readonly ILogger<GraphQLWSProtocol> _logger;
         private readonly JsonSerializer _serializer;
 
         public GraphQLWSProtocol(
             IQueryStreamService queryStreamService,
             IOptions<GraphQLWSProtocolOptions> options,
+            IMessageContextAccessor messageContextAccessor,
             ILogger<GraphQLWSProtocol> logger)
         {
             _queryStreamService = queryStreamService;
+            _messageContextAccessor = messageContextAccessor;
             _logger = logger;
             _options = options.Value;
             _serializer = JsonSerializer.CreateDefault(new JsonSerializerSettings
@@ -45,6 +48,7 @@ namespace tanka.graphql.server.webSockets
                 context.Message.Id,
                 context.Message.Type);
 
+            _messageContextAccessor.Context = context;
             return context.Message.Type switch
                 {
                 MessageType.GQL_CONNECTION_INIT => HandleInitAsync(context),
