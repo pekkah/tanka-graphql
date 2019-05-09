@@ -211,7 +211,7 @@ app.UseTankaWebSocketServer(new WebSocketServerOptions()
 the connection and sends <code>connection_ack</code> message back to the client. You can
 configure this behavior with your own logic.</p>
 <pre><code class="lang-csharp">services.AddTankaWebSocketServerWithTracing()
-        .Configure&lt;IAuthenticationServies&gt;(
+        .Configure&lt;IAuthenticationService&gt;(
             (options, authentication) =&gt; options.AcceptAsync = async context =&gt;
             {
                 var token = context.Message.Payload.SelectToken(&quot;authToken&quot;);
