@@ -35,8 +35,9 @@ namespace tanka.graphql.server
         public static OptionsBuilder<GraphQLWSProtocolOptions> AddTankaWebSocketServer(this IServiceCollection services)
         {
             services.AddSingleton<WebSocketServer>();
-            services.TryAddTransient<IProtocolHandler, GraphQLWSProtocol>();
-            services.TryAddTransient<IQueryStreamService, QueryStreamService>();
+            services.TryAddScoped<IProtocolHandler, GraphQLWSProtocol>();
+            services.TryAddScoped<IQueryStreamService, QueryStreamService>();
+            services.TryAddScoped<IMessageContextAccessor, MessageContextAccessor>();
 
             return services.AddOptions<GraphQLWSProtocolOptions>();
         }

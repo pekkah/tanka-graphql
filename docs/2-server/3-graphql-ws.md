@@ -42,7 +42,7 @@ configure this behavior with your own logic.
 
 ```csharp
 services.AddTankaWebSocketServerWithTracing()
-        .Configure<IAuthenticationServies>(
+        .Configure<IAuthenticationService>(
             (options, authentication) => options.AcceptAsync = async context =>
             {
                 var token = context.Message.Payload.SelectToken("authToken");

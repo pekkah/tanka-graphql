@@ -24,8 +24,6 @@ namespace tanka.graphql.server.webSockets
 
         public async Task ProcessRequestAsync(HttpContext context)
         {
-            MessageServer messageServer = null;
-
             try
             {
                 _logger.LogInformation($"Processing WebSocket: {context.TraceIdentifier}");
@@ -33,7 +31,7 @@ namespace tanka.graphql.server.webSockets
                 var protocol = context.RequestServices
                     .GetRequiredService<IProtocolHandler>();
 
-                messageServer = new SubscriptionServer(protocol);
+                MessageServer messageServer = new SubscriptionServer(protocol);
 
                 Clients.TryAdd(context.Connection, messageServer);
                 var run = messageServer.RunAsync(connection, context.RequestAborted);
@@ -43,7 +41,6 @@ namespace tanka.graphql.server.webSockets
             }
             catch (Exception e)
             {
-                messageServer?.Complete(e);
                 _logger.LogError(e, $"Processing websocket failed: {context.TraceIdentifier}");
                 throw;
             }

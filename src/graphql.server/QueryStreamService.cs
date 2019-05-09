@@ -37,10 +37,11 @@ namespace tanka.graphql.server
             {
                 _logger.Query(query);
                 var serviceOptions = _optionsMonitor.CurrentValue;
-                var document = await Parser.ParseDocumentAsync(query.Query);
+                var document = Parser.ParseDocument(query.Query);
+                var schema = await serviceOptions.GetSchema(query);
                 var executionOptions = new graphql.ExecutionOptions
                 {
-                    Schema = serviceOptions.Schema,
+                    Schema = schema,
                     Document = document,
                     OperationName = query.OperationName,
                     VariableValues = query.Variables,

@@ -18,11 +18,13 @@ namespace tanka.graphql.server.tests.webSockets
     {
         private IOptions<GraphQLWSProtocolOptions> _options;
         private NullLogger<GraphQLWSProtocol> _logger;
+        private MessageContextAccessor _accessor;
 
         public GraphQLWSProtocolFacts()
         {
             _options = Options.Create(new GraphQLWSProtocolOptions());
             _logger = new NullLogger<GraphQLWSProtocol>();
+            _accessor = new MessageContextAccessor();
         }
 
         protected ValueTask<OperationMessage> ReadWithTimeout(
@@ -34,13 +36,18 @@ namespace tanka.graphql.server.tests.webSockets
             return channel.Reader.ReadAsync(cts.Token);
         }
 
+        public GraphQLWSProtocol CreateSut(IQueryStreamService queryStreamService)
+        {
+            return new GraphQLWSProtocol(queryStreamService, _options, _accessor, _logger);
+        }
+
         [Fact]
         public async Task Unknown()
         {
             /* Given */
             var channel = Channel.CreateUnbounded<OperationMessage>();
             var queryStreamService = Substitute.For<IQueryStreamService>();
-            var sut = new GraphQLWSProtocol(queryStreamService, _options, _logger);
+            var sut = CreateSut(queryStreamService);
 
             var message = new OperationMessage
             {
@@ -66,7 +73,7 @@ namespace tanka.graphql.server.tests.webSockets
             /* Given */
             var channel = Channel.CreateUnbounded<OperationMessage>();
             var queryStreamService = Substitute.For<IQueryStreamService>();
-            var sut = new GraphQLWSProtocol(queryStreamService, _options, _logger);
+            var sut = CreateSut(queryStreamService);
 
             var message = new OperationMessage
             {
@@ -92,7 +99,7 @@ namespace tanka.graphql.server.tests.webSockets
             /* Given */
             var channel = Channel.CreateUnbounded<OperationMessage>();
             var queryStreamService = Substitute.For<IQueryStreamService>();
-            var sut = new GraphQLWSProtocol(queryStreamService, _options, _logger);
+            var sut = CreateSut(queryStreamService);
 
             var message = new OperationMessage
             {
@@ -120,7 +127,7 @@ namespace tanka.graphql.server.tests.webSockets
                 .ReturnsForAnyArgs(new QueryStream(queryStream));
 
 
-            var sut = new GraphQLWSProtocol(queryStreamService, _options, _logger);
+            var sut = CreateSut(queryStreamService);
 
             var message = new OperationMessage
             {
@@ -150,7 +157,7 @@ namespace tanka.graphql.server.tests.webSockets
             queryStreamService.QueryAsync(null, default)
                 .ReturnsForAnyArgs(new QueryStream(queryStream));
 
-            var sut = new GraphQLWSProtocol(queryStreamService, _options, _logger);
+            var sut = CreateSut(queryStreamService);
             var message = new OperationMessage
             {
                 Id = "1",
