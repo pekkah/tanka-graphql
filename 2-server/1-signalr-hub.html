@@ -102,9 +102,12 @@
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                            <a class="d-flex align-items-center text-muted" href="2-server/1-signalr-hub.html">Server</a>
+                            <a class="d-flex align-items-center text-muted" href="2-server/0-common.html">Server</a>
                         </h6>
                             <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="2-server/0-common.html">Common</a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link active bg-light" href="2-server/1-signalr-hub.html">Signalr hub</a>
                                 </li>
@@ -112,7 +115,10 @@
                                     <a class="nav-link" href="2-server/2-apollo-link.html">Apollo link</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="2-server/3-dotnet-client.html">Dotnet client</a>
+                                    <a class="nav-link" href="2-server/3-graphql-ws.html">Graphql ws</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="2-server/9-dotnet-client.html">Dotnet client</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -173,22 +179,24 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="server">Server</h2>
+                <h2 id="signalr-hub">SignalR Hub</h2>
 <p>Server is implemented as a SignalR Core Hub and it handles queries, mutations
 and subscriptions. This projects provides an Apollo Link implementation to be
 used with the provided hub.</p>
-<h3 id="graphql-query-streaming-hub">GraphQL Query Streaming Hub</h3>
+<h3 id="graphql-server-hub">GraphQL Server Hub</h3>
 <pre><code class="lang-csharp">// Configure Services
-services.AddSignalR()
+services.AddSignalR(options =&gt; options.EnableDetailedErrors = true)
     // add GraphQL query streaming hub
-    .AddQueryStreamHub();
+    .AddTankaServerHubWithTracing();
 
 // Configure App
-app.UseSignalR(routes =&gt;
-{
-    routes.MapHub&lt;QueryStreamHub&gt;(new PathString(&quot;/graphql&quot;));
-});
+app.UseSignalR(routes =&gt; routes.MapTankaServerHub(&quot;/graphql&quot;));
 
+// or with options
+app.UseSignalR(routes =&gt; routes.MapTankaServerHub(&quot;/graphql&quot;, options =&gt; 
+{
+    // configure signalr hub options
+}));
 </code></pre>
                     
             </main>
