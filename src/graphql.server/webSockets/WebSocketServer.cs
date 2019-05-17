@@ -19,8 +19,8 @@ namespace tanka.graphql.server.webSockets
             _logger = loggerFactory.CreateLogger<WebSocketServer>();
         }
 
-        public ConcurrentDictionary<ConnectionInfo, MessageServer> Clients { get; } =
-            new ConcurrentDictionary<ConnectionInfo, MessageServer>();
+        public ConcurrentDictionary<string, MessageServer> Clients { get; } =
+            new ConcurrentDictionary<string, MessageServer>();
 
         public async Task ProcessRequestAsync(HttpContext context)
         {
@@ -31,12 +31,11 @@ namespace tanka.graphql.server.webSockets
                 var protocol = context.RequestServices
                     .GetRequiredService<IProtocolHandler>();
 
-                MessageServer messageServer = new SubscriptionServer(protocol);
+                var messageServer = new SubscriptionServer(protocol);
 
-                Clients.TryAdd(context.Connection, messageServer);
+                Clients.TryAdd(context.TraceIdentifier, messageServer);
                 var run = messageServer.RunAsync(connection, context.RequestAborted);
                 await connection.ProcessRequestAsync(context);
-                messageServer.Complete();
                 await run;
             }
             catch (Exception e)
@@ -46,7 +45,7 @@ namespace tanka.graphql.server.webSockets
             }
             finally
             {
-                if (Clients.TryRemove(context.Connection, out var s))
+                if (Clients.TryRemove(context.TraceIdentifier, out var s))
                 {
                     s.Complete();
                     await s.Completion;

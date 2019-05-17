@@ -1,7 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -9,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using tanka.graphql.channels;
 using tanka.graphql.requests;
+using tanka.graphql.resolvers;
 using tanka.graphql.server.webSockets.dtos;
 
 namespace tanka.graphql.server.webSockets
@@ -16,10 +19,10 @@ namespace tanka.graphql.server.webSockets
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class GraphQLWSProtocol : IProtocolHandler
     {
+        private readonly ILogger<GraphQLWSProtocol> _logger;
+        private readonly IMessageContextAccessor _messageContextAccessor;
         private readonly GraphQLWSProtocolOptions _options;
         private readonly IQueryStreamService _queryStreamService;
-        private readonly IMessageContextAccessor _messageContextAccessor;
-        private readonly ILogger<GraphQLWSProtocol> _logger;
         private readonly JsonSerializer _serializer;
 
         public GraphQLWSProtocol(
@@ -44,7 +47,7 @@ namespace tanka.graphql.server.webSockets
 
         public ValueTask Handle(MessageContext context)
         {
-            _logger.LogInformation("Handling message: {id}:{type}", 
+            _logger.LogInformation("Handling message: {id}:{type}",
                 context.Message.Id,
                 context.Message.Type);
 
@@ -87,26 +90,21 @@ namespace tanka.graphql.server.webSockets
             return default;
         }
 
-        private ValueTask HandleStopAsync(MessageContext context)
+        private async ValueTask HandleStopAsync(MessageContext context)
         {
             var id = context.Message.Id;
             var subscription = GetSubscription(id);
 
             if (subscription.Equals(default(Subscription)))
-                return default;
-
-            _logger.LogInformation("Stop: {id}", id);
-            Subscriptions.TryRemove(id, out _);
+                return;
 
             // unsubscribe the stream
             if (!subscription.Unsubscribe.IsCancellationRequested)
                 subscription.Unsubscribe.Cancel();
 
-            return context.Output.WriteAsync(new OperationMessage
-            {
-                Type = MessageType.GQL_COMPLETE,
-                Id = id
-            }, CancellationToken.None);
+            Subscriptions.TryRemove(id, out _);
+
+            await subscription.QueryStream.Reader.Completion;
         }
 
         private async ValueTask HandleStartAsync(MessageContext context)
@@ -116,7 +114,11 @@ namespace tanka.graphql.server.webSockets
                 "Start: {id}",
                 id);
 
-            if (string.IsNullOrEmpty(id)) await WriteError(context, "Message.Id is required");
+            if (string.IsNullOrEmpty(id))
+            {
+                await WriteError(context, "Message.Id is required");
+                return;
+            }
 
             if (Subscriptions.ContainsKey(id))
             {
@@ -124,21 +126,23 @@ namespace tanka.graphql.server.webSockets
                 return;
             }
 
-            var payload = context.Message.Payload.ToObject<OperationMessageQueryPayload>(_serializer);
+            var payload = context
+                .Message
+                .Payload
+                .ToObject<OperationMessageQueryPayload>(_serializer);
 
-            var cts = new CancellationTokenSource();
-            var queryStream = await _queryStreamService.QueryAsync(new QueryRequest
+            using var logScope = _logger.BeginScope("Query: '{operationName}'", payload.OperationName);
+
+            var document = Parser.ParseDocument(payload.Query);
+            var unsubscribeSource = new CancellationTokenSource();
+            var queryStream = await _queryStreamService.QueryAsync(new Query
             {
                 OperationName = payload.OperationName,
-                Query = payload.Query,
+                Document = document,
                 Variables = payload.Variables
-            }, cts.Token);
-            
-            
-            // There might have been another start with the id between this and the contains
-            // check in the beginning. todo(pekka): refactor
-            Subscriptions.TryAdd(id, new Subscription(id, queryStream, context.Output, cts));
+            }, unsubscribeSource.Token);
 
+            // transform to output
             // stream results to output
             var _ = queryStream.Reader.TransformAndWriteTo(
                 context.Output, result => new OperationMessage
@@ -148,12 +152,69 @@ namespace tanka.graphql.server.webSockets
                     Payload = JObject.FromObject(result, _serializer)
                 });
 
-            // stop on completion
-            var __ = Task.Factory.StartNew(async () =>
+            // has mutation or query
+            var hasMutationOrQuery = document.Definitions.OfType<GraphQLOperationDefinition>()
+                .Any(op => op.Operation != OperationType.Subscription);
+
+            if (hasMutationOrQuery)
+            {
+                // no need to setup subscription as query or mutation will finish 
+                // after execution
+                await ExecuteQueryOrMutationStream(context, queryStream);
+                return;
+            }
+
+            // execute subscription
+            await ExecuteSubscriptionStream(context, queryStream, unsubscribeSource);
+        }
+
+        private async ValueTask ExecuteSubscriptionStream(
+            MessageContext context, 
+            QueryStream queryStream,
+            CancellationTokenSource unsubscribeSource)
+        {
+            _logger.LogInformation("Executing subscription stream");
+            var id = context.Message.Id;
+            // There might have been another start with the id between this and the contains
+            // check in the beginning. todo(pekka): refactor
+            var sub = new Subscription(id, queryStream, context.Output, unsubscribeSource);
+            if(!Subscriptions.TryAdd(id, sub))
+            {
+                sub.Unsubscribe.Cancel();
+                await WriteError(context, $"Subscription with id '{id}' already exists");
+                return;
+            }
+
+            var _ = Task.Run(async () =>
             {
                 await queryStream.Reader.Completion;
-                await HandleStopAsync(context);
-            }, CancellationToken.None);
+                _logger.LogInformation("Stop: '{id}'", id);
+                Subscriptions.TryRemove(id, out sub);
+                await context.Output.WriteAsync(new OperationMessage
+                {
+                    Type = MessageType.GQL_COMPLETE,
+                    Id = id
+                }, CancellationToken.None);
+                _logger.LogInformation("Query '{id}' completed", id);
+            });
+        }
+
+        private ValueTask ExecuteQueryOrMutationStream(MessageContext context, QueryStream queryStream)
+        {
+            _logger.LogInformation("Executing query or mutation stream");
+            var id = context.Message.Id;
+            var __ = queryStream.Reader.Completion.ContinueWith(async result =>
+            {
+                _logger.LogInformation("Stop: '{id}'", id);
+                await context.Output.WriteAsync(new OperationMessage
+                {
+                    Type = MessageType.GQL_COMPLETE,
+                    Id = id
+                }, CancellationToken.None);
+                _logger.LogInformation("Query '{id}' completed", id);
+            }, TaskContinuationOptions.LongRunning);
+
+            return default;
         }
 
         private async Task WriteError(MessageContext context, string errorMessage)
@@ -169,13 +230,17 @@ namespace tanka.graphql.server.webSockets
                     {
                         new Error(errorMessage)
                     }
-                }, JsonSerializer.Create())
+                }, _serializer)
             }, CancellationToken.None);
         }
 
         private async ValueTask HandleInitAsync(MessageContext context)
         {
-            _logger.LogInformation("Init");
+            _logger.LogInformation("Init: {payload}", context
+                .Message
+                .Payload
+                ?.ToString());
+
             await _options.AcceptAsync(context);
         }
     }

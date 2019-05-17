@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using tanka.graphql.language;
 using tanka.graphql.requests;
 
 namespace tanka.graphql.server
@@ -31,9 +32,9 @@ namespace tanka.graphql.server
                 default(EventId),
                 "Unsubscribed '{OperationName}'");
 
-        internal static void Query(this ILogger logger, QueryRequest query)
+        internal static void Query(this ILogger logger, Query query)
         {
-            QueryAction(logger, query.OperationName, query.Query, null);
+            QueryAction(logger, query.OperationName, query.Document.ToGraphQL(), null);
         }
 
         internal static void Executed(this ILogger logger, string operationName, Dictionary<string, object> variables,
