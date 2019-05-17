@@ -7,7 +7,7 @@ namespace tanka.graphql.server
     public interface IQueryStreamService
     {
         Task<QueryStream> QueryAsync(
-            QueryRequest query,
+            Query query,
             CancellationToken cancellationToken);
     }
 }

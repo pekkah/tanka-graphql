@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using tanka.graphql.language;
 using tanka.graphql.requests;
 
 namespace tanka.graphql.server
@@ -30,14 +31,14 @@ namespace tanka.graphql.server
         }
 
         public async Task<QueryStream> QueryAsync(
-            QueryRequest query,
+            Query query,
             CancellationToken cancellationToken)
         {
             try
             {
                 _logger.Query(query);
                 var serviceOptions = _optionsMonitor.CurrentValue;
-                var document = Parser.ParseDocument(query.Query);
+                var document = query.Document;
                 var schema = await serviceOptions.GetSchema(query);
                 var executionOptions = new graphql.ExecutionOptions
                 {
@@ -65,7 +66,7 @@ namespace tanka.graphql.server
             }
             catch (Exception e)
             {
-                _logger.LogError($"Failed to execute query '{query.Query}'. Error. '{e}'");
+                _logger.LogError($"Failed to execute query '{query.Document.ToGraphQL()}'. Error. '{e}'");
                 var channel = Channel.CreateBounded<ExecutionResult>(1);
                 channel.Writer.TryComplete(e);
                 return new QueryStream(channel);

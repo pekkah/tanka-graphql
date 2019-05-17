@@ -154,8 +154,13 @@ namespace tanka.graphql.server.tests.webSockets
             var queryStreamService = Substitute.For<IQueryStreamService>();
 
             var queryStream = Channel.CreateUnbounded<ExecutionResult>();
+            var queryResult = new QueryStream(queryStream);
             queryStreamService.QueryAsync(null, default)
-                .ReturnsForAnyArgs(new QueryStream(queryStream));
+                .ReturnsForAnyArgs(ci =>
+                {
+                    ci.Arg<CancellationToken>().Register(() => queryStream.Writer.Complete());
+                    return queryResult;
+                });
 
             var sut = CreateSut(queryStreamService);
             var message = new OperationMessage

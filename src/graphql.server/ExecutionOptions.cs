@@ -7,8 +7,6 @@ namespace tanka.graphql.server
 {
     public class ExecutionOptions
     {
-        public Func<QueryRequest, ValueTask<ISchema>> GetSchema { get; set; }
-
-        //public ISchema Schema { get; set; }
+        public Func<Query, ValueTask<ISchema>> GetSchema { get; set; }
     }
 }

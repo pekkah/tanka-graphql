@@ -24,7 +24,13 @@ namespace tanka.graphql.server
             var channel = Channel.CreateUnbounded<ExecutionResult>();
             var _ = Task.Run(async ()=>
             {
-                var result = await _queryStreamService.QueryAsync(query, cancellationToken);
+                var result = await _queryStreamService.QueryAsync(new Query()
+                {
+                    Document = Parser.ParseDocument(query.Query),
+                    OperationName = query.OperationName,
+                    Extensions = query.Extensions,
+                    Variables = query.Variables
+                }, cancellationToken);
                 var __ = result.Reader.LinkTo(channel.Writer);
             }, CancellationToken.None);
             return channel.Reader;
