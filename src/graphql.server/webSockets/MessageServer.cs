@@ -78,8 +78,7 @@ namespace tanka.graphql.server.webSockets
                     if (!reader.TryRead(out var message))
                         continue;
 
-                    var memory = output.GetMemory();
-                    var count = WriteOperationMessage(message, memory.Span);
+                    var count = WriteOperationMessage(message, output);
                     output.Advance(count);
 
                     // apply back-pressure etc
@@ -177,16 +176,20 @@ namespace tanka.graphql.server.webSockets
             return true;
         }
 
-        private  int WriteOperationMessage(OperationMessage message, Span<byte> span)
+        private  int WriteOperationMessage(OperationMessage message, PipeWriter output)
         {
             var json = JsonConvert.SerializeObject(message, Formatting.None, _settings);
             json += '\n';
-            return Encoding.UTF8.GetBytes(json, span);
+            var count = Encoding.UTF8.GetByteCount(json);
+            var memory = output.GetMemory(sizeHint: count);
+            return Encoding.UTF8.GetBytes(json, memory.Span);
         }
 
         private OperationMessage ReadOperationMessage(in ReadOnlySequence<byte> payload)
         {
-            return JsonConvert.DeserializeObject<OperationMessage>(GetUtf8String(payload), _settings);
+            return JsonConvert.DeserializeObject<OperationMessage>(
+                GetUtf8String(payload), 
+                _settings);
         }
 
         private static string GetUtf8String(ReadOnlySequence<byte> buffer)
