@@ -3,6 +3,7 @@ using GraphQL.Server.Ui.Playground;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
@@ -101,7 +102,10 @@ namespace tanka.graphql.samples.chat.web
             });
 
             // signalr server
-            app.UseSignalR(routes => routes.MapTankaServerHub("/graphql"));
+            app.UseSignalR(routes => routes.MapTankaServerHub("/graphql", options =>
+                {
+                    options.Transports = HttpTransportType.ServerSentEvents;
+                }));
 
             app.UseMvc();
         }
