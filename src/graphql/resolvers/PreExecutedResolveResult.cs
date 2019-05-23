@@ -17,14 +17,13 @@ namespace tanka.graphql.resolvers
 
         public object Value => _data;
 
-        public Task<object> CompleteValueAsync(
-            IExecutorContext executorContext,
+        public Task<object> CompleteValueAsync(IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
             IType fieldType,
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
-            Dictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             NodePath path)
         {
             var value = _data[selection.Name.Value];

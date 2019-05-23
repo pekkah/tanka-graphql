@@ -15,7 +15,7 @@ namespace tanka.graphql.execution
             GraphQLSelectionSet selectionSet,
             ObjectType objectType,
             object objectValue,
-            Dictionary<string, object> coercedVariableValues, 
+            IReadOnlyDictionary<string, object> coercedVariableValues, 
             NodePath path)
         {
             var groupedFieldSet = CollectFields(
@@ -59,7 +59,7 @@ namespace tanka.graphql.execution
             GraphQLDocument document,
             ObjectType objectType,
             GraphQLSelectionSet selectionSet,
-            Dictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             List<string> visitedFragments = null)
         {
             if (visitedFragments == null)
@@ -163,7 +163,7 @@ namespace tanka.graphql.execution
         }
 
         private static bool IncludeSelection(GraphQLDirective includeDirective,
-            Dictionary<string, object> coercedVariableValues, ISchema schema, ObjectType objectType, ASTNode selection)
+            IReadOnlyDictionary<string, object> coercedVariableValues, ISchema schema, ObjectType objectType, ASTNode selection)
         {
             if (includeDirective == null)
                 return true;
@@ -173,7 +173,7 @@ namespace tanka.graphql.execution
         }
 
         private static bool SkipSelection(GraphQLDirective skipDirective,
-            Dictionary<string, object> coercedVariableValues, ISchema schema, ObjectType objectType, ASTNode selection)
+            IReadOnlyDictionary<string, object> coercedVariableValues, ISchema schema, ObjectType objectType, ASTNode selection)
         {
             if (skipDirective == null)
                 return false;
@@ -185,7 +185,7 @@ namespace tanka.graphql.execution
         private static bool GetIfArgumentValue(
             ISchema schema,
             GraphQLDirective directive,
-            Dictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             GraphQLArgument argument)
         {
             if (directive == null) throw new ArgumentNullException(nameof(directive));

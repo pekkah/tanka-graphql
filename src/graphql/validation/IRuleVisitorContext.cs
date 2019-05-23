@@ -10,7 +10,7 @@ namespace tanka.graphql.validation
 
         GraphQLDocument Document { get; }
 
-        IDictionary<string, object> VariableValues { get; }
+        IReadOnlyDictionary<string, object> VariableValues { get; }
 
         TypeTracker Tracker { get; }
 

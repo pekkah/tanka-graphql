@@ -42,15 +42,27 @@ configure this behavior with your own logic.
 
 ```csharp
 services.AddTankaWebSocketServerWithTracing()
-        .Configure<IAuthenticationService>(
-            (options, authentication) => options.AcceptAsync = async context =>
+        .Configure<IHttpContextAccessor>(
+            (
+            options, 
+            accessor
+            ) => options.AcceptAsync = async context =>
             {
-                var token = context.Message.Payload.SelectToken("authToken");
-                
-                // true when accepted; otherwise false
-                var isValid = await authentication.IsValidAsync(token);
-                
-                if (!isValid) 
+                var succeeded = await AuthorizeHelper.AuthorizeAsync(
+                    accessor.HttpContext,
+                    new List<IAuthorizeData>()
+                    {
+                        new AuthorizeAttribute("authorize")
+                    });
+
+                if (succeeded)
+                {
+                    await context.Output.WriteAsync(new OperationMessage
+                    {
+                        Type = MessageType.GQL_CONNECTION_ACK
+                    });
+                }
+                else
                 {
                     // you must decide what kind of message to send back to the client
                     // in case the connection is not accepted.
@@ -59,16 +71,9 @@ services.AddTankaWebSocketServerWithTracing()
                         Type = MessageType.GQL_CONNECTION_ERROR,
                         Id = context.Message.Id
                     });
-                    
+
                     // complete the output forcing the server to disconnect
                     context.Output.Complete();
-                }
-                else 
-                {
-                    await context.Output.WriteAsync(new OperationMessage
-                    {
-                        Type = MessageType.GQL_CONNECTION_ACK
-                    });
                 }
             });
 ```

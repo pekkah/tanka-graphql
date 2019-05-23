@@ -13,7 +13,7 @@ namespace tanka.graphql.execution
             GraphQLDocument document,
             GraphQLOperationDefinition operation,
             ISchema schema,
-            Dictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             object initialValue,
             Extensions extensions)
         {
@@ -35,7 +35,7 @@ namespace tanka.graphql.execution
 
         public ISchema Schema { get; }
 
-        public Dictionary<string, object> CoercedVariableValues { get; }
+        public IReadOnlyDictionary<string, object> CoercedVariableValues { get; }
 
         public object InitialValue { get; }
 
@@ -43,7 +43,7 @@ namespace tanka.graphql.execution
 
         public void Deconstruct(out ISchema schema, out GraphQLDocument document,
             out GraphQLOperationDefinition operation, out object initialValue,
-            out Dictionary<string, object> coercedVariableValues)
+            out IReadOnlyDictionary<string, object> coercedVariableValues)
         {
             schema = Schema;
             document = Document;

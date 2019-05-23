@@ -43,7 +43,7 @@ namespace tanka.graphql.links
         public static ExecutionResultLink Http(
             string url,
             Func<HttpClient> createClient = null,
-            Func<(GraphQLDocument Document, IDictionary<string, object> Variables, string Url),
+            Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
                 HttpRequestMessage> transformRequest = null,
             Func<HttpResponseMessage, ValueTask<ExecutionResult>> transformResponse = null)
         {
@@ -60,7 +60,7 @@ namespace tanka.graphql.links
         /// </summary>
         /// <param name="connectionBuilderFunc">Must return new connection each call</param>
         /// <returns></returns>
-        public static ExecutionResultLink Server(Func<CancellationToken, Task<HubConnection>> connectionBuilderFunc)
+        public static ExecutionResultLink SignalR(Func<CancellationToken, Task<HubConnection>> connectionBuilderFunc)
         {
             if (connectionBuilderFunc == null) throw new ArgumentNullException(nameof(connectionBuilderFunc));
 
@@ -74,18 +74,21 @@ namespace tanka.graphql.links
                 var reader = await connection.StreamQueryAsync(new QueryRequest
                 {
                     Query = document.ToGraphQL(),
-                    Variables = variables != null ? new Dictionary<string, object>(variables) : null
+                    Variables = variables?.ToDictionary(kv => kv.Key, kv => kv.Value)
                 }, cancellationToken);
 
                 // stop when done
                 var isSubscription = document.Definitions.OfType<GraphQLOperationDefinition>()
                     .Any(op => op.Operation == OperationType.Subscription);
 
-                var _ = Task.Factory.StartNew(async () =>
+                _ = Task.Factory.StartNew(async () =>
                 {
                     await reader.Completion;
                     await connection.StopAsync(CancellationToken.None);
-                }, isSubscription ? TaskCreationOptions.LongRunning : TaskCreationOptions.None);
+                }, isSubscription ? TaskCreationOptions.LongRunning : TaskCreationOptions.None)
+                    .Unwrap()
+                    .ContinueWith(result => throw new InvalidOperationException(
+                        $"Error when completing signalR connection.", result.Exception), TaskContinuationOptions.OnlyOnFaulted);
 
                 // data channel
                 return reader;

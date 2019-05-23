@@ -8,6 +8,6 @@ namespace tanka.graphql.links
 {
     public delegate ValueTask<ChannelReader<ExecutionResult>> ExecutionResultLink(
         GraphQLDocument document,
-        IDictionary<string, object> variables,
+        IReadOnlyDictionary<string, object> variables,
         CancellationToken cancellationToken);
 }

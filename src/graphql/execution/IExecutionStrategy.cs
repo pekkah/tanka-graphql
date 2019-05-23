@@ -10,6 +10,6 @@ namespace tanka.graphql.execution
         Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
-            Dictionary<string, object> coercedVariableValues, NodePath path);
+            IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path);
     }
 }

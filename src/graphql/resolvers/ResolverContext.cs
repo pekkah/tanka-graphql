@@ -15,7 +15,7 @@ namespace tanka.graphql.resolvers
             object objectValue,
             IField field,
             GraphQLFieldSelection selection,
-            Dictionary<string, object> arguments,
+            IReadOnlyDictionary<string, object> arguments,
             NodePath path,
             IExecutorContext executionContext)
         {
@@ -39,7 +39,7 @@ namespace tanka.graphql.resolvers
 
         public GraphQLFieldSelection Selection { get; }
 
-        public Dictionary<string, object> Arguments { get; }
+        public IReadOnlyDictionary<string, object> Arguments { get; }
 
         public NodePath Path { get; }
         public IExecutorContext ExecutionContext { get; }

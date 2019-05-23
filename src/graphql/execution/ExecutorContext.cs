@@ -15,7 +15,7 @@ namespace tanka.graphql.execution
             IExecutionStrategy strategy,
             GraphQLOperationDefinition operation,
             IDictionary<string, GraphQLFragmentDefinition> fragments, 
-            IDictionary<string, object> coercedVariableValues)
+            IReadOnlyDictionary<string, object> coercedVariableValues)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             Document = document ?? throw new ArgumentNullException(nameof(document));
@@ -29,7 +29,7 @@ namespace tanka.graphql.execution
 
         public GraphQLOperationDefinition Operation { get; }
         public IDictionary<string, GraphQLFragmentDefinition> Fragments { get; }
-        public IDictionary<string, object> CoercedVariableValues { get; }
+        public IReadOnlyDictionary<string, object> CoercedVariableValues { get; }
 
         public ISchema Schema { get; }
 
