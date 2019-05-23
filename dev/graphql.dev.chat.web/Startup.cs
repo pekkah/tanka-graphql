@@ -37,7 +37,7 @@ namespace tanka.graphql.samples.chat.web
             services.AddSingleton(provider => provider.GetRequiredService<ChatSchemas>().Chat);
 
             // configure execution options
-            services.AddTankaExecutionOptions()
+            services.AddTankaSchemaOptions()
                 .Configure<ISchema>((options, schema) =>
                 {
                     options.GetSchema = query => new ValueTask<ISchema>(schema);

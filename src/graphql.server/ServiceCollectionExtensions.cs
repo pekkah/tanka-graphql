@@ -10,10 +10,10 @@ namespace tanka.graphql.server
 {
     public static class ServiceCollectionExtensions
     {
-        public static OptionsBuilder<ExecutionOptions> AddTankaExecutionOptions(
+        public static OptionsBuilder<SchemaOptions> AddTankaSchemaOptions(
             this IServiceCollection services)
         {
-            var optionsBuilder = services.AddOptions<ExecutionOptions>();
+            var optionsBuilder = services.AddOptions<SchemaOptions>();
             return optionsBuilder;
         }
 
