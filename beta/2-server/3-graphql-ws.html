@@ -211,15 +211,27 @@ app.UseTankaWebSocketServer(new WebSocketServerOptions()
 the connection and sends <code>connection_ack</code> message back to the client. You can
 configure this behavior with your own logic.</p>
 <pre><code class="lang-csharp">services.AddTankaWebSocketServerWithTracing()
-        .Configure&lt;IAuthenticationService&gt;(
-            (options, authentication) =&gt; options.AcceptAsync = async context =&gt;
+        .Configure&lt;IHttpContextAccessor&gt;(
+            (
+            options, 
+            accessor
+            ) =&gt; options.AcceptAsync = async context =&gt;
             {
-                var token = context.Message.Payload.SelectToken(&quot;authToken&quot;);
-                
-                // true when accepted; otherwise false
-                var isValid = await authentication.IsValidAsync(token);
-                
-                if (!isValid) 
+                var succeeded = await AuthorizeHelper.AuthorizeAsync(
+                    accessor.HttpContext,
+                    new List&lt;IAuthorizeData&gt;()
+                    {
+                        new AuthorizeAttribute(&quot;authorize&quot;)
+                    });
+
+                if (succeeded)
+                {
+                    await context.Output.WriteAsync(new OperationMessage
+                    {
+                        Type = MessageType.GQL_CONNECTION_ACK
+                    });
+                }
+                else
                 {
                     // you must decide what kind of message to send back to the client
                     // in case the connection is not accepted.
@@ -228,16 +240,9 @@ configure this behavior with your own logic.</p>
                         Type = MessageType.GQL_CONNECTION_ERROR,
                         Id = context.Message.Id
                     });
-                    
+
                     // complete the output forcing the server to disconnect
                     context.Output.Complete();
-                }
-                else 
-                {
-                    await context.Output.WriteAsync(new OperationMessage
-                    {
-                        Type = MessageType.GQL_CONNECTION_ACK
-                    });
                 }
             });
 </code></pre>

@@ -182,13 +182,15 @@
                 <h2 id="common-options">Common options</h2>
 <p>Tanka provides SignalR hub and websockets server. Both of these use
 same underlying services for query execution.</p>
-<h3 id="configure-execution-options">Configure execution options</h3>
-<p>Use <code>ISchema</code> from services</p>
-<pre><code class="lang-csharp">// configure options to use schema from
-services.AddTankaExecutionOptions()
+<h3 id="configure-schema">Configure schema</h3>
+<p>Use <code>ISchema</code> from services. <code>GetSchema</code> returns a <code>ValueTask&lt;ISchema&gt;</code>
+for async initialization. It's recommended not to return new schema
+for every call as <code>GetSchema</code> is called for every execution.</p>
+<pre><code class="lang-csharp">// configure options to use schema from services
+services.AddTankaSchemaOptions()
         .Configure&lt;ISchema&gt;((options, schema) =&gt;
         {
-            options.Schema = schema;
+            options.GetSchema = query =&gt; new ValueTask&lt;ISchema&gt;(schema);
         });
 </code></pre>
                     
