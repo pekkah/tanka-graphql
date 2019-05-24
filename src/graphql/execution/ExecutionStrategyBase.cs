@@ -11,11 +11,10 @@ namespace tanka.graphql.execution
 {
     public abstract class ExecutionStrategyBase : IExecutionStrategy
     {
-        public abstract Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
-            IExecutorContext context,
+        public abstract Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
-            Dictionary<string, object> coercedVariableValues, 
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             NodePath path);
 
         public async Task<object> ExecuteFieldAsync(
@@ -24,7 +23,7 @@ namespace tanka.graphql.execution
             object objectValue,
             List<GraphQLFieldSelection> fields,
             IType fieldType,
-            Dictionary<string, object> coercedVariableValues, 
+            IReadOnlyDictionary<string, object> coercedVariableValues, 
             NodePath path)
         {
             if (objectType == null) throw new ArgumentNullException(nameof(objectType));
@@ -94,7 +93,7 @@ namespace tanka.graphql.execution
             IExecutorContext context,
             ObjectType objectType,
             object objectValue,
-            Dictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             KeyValuePair<string, List<GraphQLFieldSelection>> fieldGroup, 
             NodePath path)
         {

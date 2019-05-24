@@ -14,7 +14,7 @@ namespace tanka.graphql.validation
             IEnumerable<CombineRule> rules,
             ISchema schema,
             GraphQLDocument document,
-            Dictionary<string, object> variableValues = null)
+            IReadOnlyDictionary<string, object> variableValues = null)
         {
             Schema = schema;
             Document = document;
@@ -24,7 +24,7 @@ namespace tanka.graphql.validation
 
         public GraphQLDocument Document { get; }
 
-        public IDictionary<string, object> VariableValues { get; }
+        public IReadOnlyDictionary<string, object> VariableValues { get; }
 
         public TypeTracker Tracker { get; protected set; }
 

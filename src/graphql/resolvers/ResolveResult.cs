@@ -41,7 +41,7 @@ namespace tanka.graphql.resolvers
             IType fieldType,
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
-            Dictionary<string, object> coercedVariableValues, 
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             NodePath path)
         {
             object completedValue = null;
@@ -69,7 +69,7 @@ namespace tanka.graphql.resolvers
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
             object value,
-            Dictionary<string, object> coercedVariableValues, 
+            IReadOnlyDictionary<string, object> coercedVariableValues, 
             NodePath path)
         {
             if (value is IResolveResult resolveResult)
@@ -166,7 +166,7 @@ namespace tanka.graphql.resolvers
         }
 
         private static async Task<object> CompleteUnionValueAsync(IExecutorContext executorContext, ObjectType actualType, List<GraphQLFieldSelection> fields,
-            object value, Dictionary<string, object> coercedVariableValues, NodePath path, UnionType unionType)
+            object value, IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path, UnionType unionType)
         {
             if (!unionType.IsPossible(actualType))
                 throw new CompleteValueException(
@@ -186,7 +186,7 @@ namespace tanka.graphql.resolvers
         }
 
         private static async Task<object> CompleteInterfaceValueAsync(IExecutorContext executorContext, ObjectType actualType,
-            List<GraphQLFieldSelection> fields, object value, Dictionary<string, object> coercedVariableValues, NodePath path, InterfaceType interfaceType)
+            List<GraphQLFieldSelection> fields, object value, IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path, InterfaceType interfaceType)
         {
             if (!actualType.Implements(interfaceType))
                 throw new CompleteValueException(
@@ -206,7 +206,7 @@ namespace tanka.graphql.resolvers
         }
 
         private static async Task<object> CompleteObjectValueAsync(IExecutorContext executorContext, List<GraphQLFieldSelection> fields, object value,
-            Dictionary<string, object> coercedVariableValues, NodePath path, ObjectType fieldObjectType)
+            IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path, ObjectType fieldObjectType)
         {
             var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
             var data = await SelectionSets.ExecuteSelectionSetAsync(
@@ -222,7 +222,7 @@ namespace tanka.graphql.resolvers
 
         private async Task<object> CompleteListValueAsync(IExecutorContext executorContext, ObjectType objectType, IField field,
             IType fieldType, ObjectType actualType, GraphQLFieldSelection selection, List<GraphQLFieldSelection> fields, object value,
-            Dictionary<string, object> coercedVariableValues, NodePath path, List listType)
+            IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path, List listType)
         {
             if (!(value is IEnumerable values))
                 throw new CompleteValueException(
@@ -273,7 +273,7 @@ namespace tanka.graphql.resolvers
             ObjectType actualType, 
             GraphQLFieldSelection selection, 
             List<GraphQLFieldSelection> fields, 
-            object value, Dictionary<string, object> coercedVariableValues,
+            object value, IReadOnlyDictionary<string, object> coercedVariableValues,
             NodePath path,
             NonNull nonNull)
         {

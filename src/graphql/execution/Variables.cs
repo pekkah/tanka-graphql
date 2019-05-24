@@ -7,8 +7,10 @@ namespace tanka.graphql.execution
 {
     public static class Variables
     {
-        public static Dictionary<string, object> CoerceVariableValues(ISchema schema,
-            GraphQLOperationDefinition operation, Dictionary<string, object> variableValues)
+        public static IReadOnlyDictionary<string, object> CoerceVariableValues(
+            ISchema schema,
+            GraphQLOperationDefinition operation, 
+            Dictionary<string, object> variableValues)
         {
             var coercedValues = new Dictionary<string, object>();
             var variableDefinitions = operation.VariableDefinitions;

@@ -64,7 +64,7 @@ namespace tanka.graphql.execution
             IExecutorContext context,
             ISubscribeResult subscribeResult,
             GraphQLOperationDefinition subscription,
-            Dictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             Func<Exception, Error> formatError, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
@@ -90,7 +90,7 @@ namespace tanka.graphql.execution
         public static async Task<ISubscribeResult> CreateSourceEventStreamAsync(
             IExecutorContext context,
             GraphQLOperationDefinition subscription,
-            Dictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             object initialValue,
             CancellationToken cancellationToken)
         {
@@ -147,7 +147,7 @@ namespace tanka.graphql.execution
         private static async Task<ExecutionResult> ExecuteSubscriptionEventAsync(
             IExecutorContext context,
             GraphQLOperationDefinition subscription,
-            Dictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             object evnt,
             Func<Exception, Error> formatError)
         {

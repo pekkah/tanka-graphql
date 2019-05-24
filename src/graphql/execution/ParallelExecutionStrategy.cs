@@ -8,11 +8,10 @@ namespace tanka.graphql.execution
 {
     public class ParallelExecutionStrategy : ExecutionStrategyBase
     {
-        public override async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
-            IExecutorContext context,
+        public override async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
-            Dictionary<string, object> coercedVariableValues, 
+            IReadOnlyDictionary<string, object> coercedVariableValues,
             NodePath path)
         {
             var data = new ConcurrentDictionary<string, object>();

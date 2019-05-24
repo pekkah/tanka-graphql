@@ -10,7 +10,7 @@ namespace tanka.graphql.validation
             IEnumerable<CombineRule> rules,
             ISchema schema,
             GraphQLDocument document,
-            Dictionary<string, object> variableValues = null)
+            IReadOnlyDictionary<string, object> variableValues = null)
         {
             var visitor = new RulesWalker(
                 rules,

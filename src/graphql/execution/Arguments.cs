@@ -8,11 +8,11 @@ namespace tanka.graphql.execution
 {
     public static class Arguments
     {
-        public static Dictionary<string, object> CoerceArgumentValues(
+        public static IReadOnlyDictionary<string, object> CoerceArgumentValues(
             ISchema schema,
             ObjectType objectType,
             GraphQLFieldSelection field, 
-            Dictionary<string, object> coercedVariableValues)
+            IReadOnlyDictionary<string, object> coercedVariableValues)
         {
             var coercedValues = new Dictionary<string, object>();
 

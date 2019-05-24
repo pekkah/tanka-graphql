@@ -109,7 +109,7 @@ namespace graphql.server.tests.host
             services.AddSingleton(provider => eventManager);
 
             // web socket server
-            services.AddTankaExecutionOptions()
+            services.AddTankaSchemaOptions()
                 .Configure<ISchema>((options, schema) => options.GetSchema = query => new ValueTask<ISchema>(schema));
 
             services.AddTankaWebSocketServer();

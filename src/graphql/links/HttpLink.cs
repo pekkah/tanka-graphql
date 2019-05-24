@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -16,15 +17,14 @@ namespace tanka.graphql.links
     public class HttpLink
     {
         private readonly string _url;
-        private Func<(GraphQLDocument Document, IDictionary<string, object> Variables, string Url), HttpRequestMessage> _transformRequest;
-        private Func<HttpResponseMessage, ValueTask<ExecutionResult>> _transformResponse;
+        private Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url), HttpRequestMessage> _transformRequest;
+        private readonly Func<HttpResponseMessage, ValueTask<ExecutionResult>> _transformResponse;
         private readonly HttpClient _client;
 
         public HttpLink(
             string url,
             Func<HttpClient> createClient = null,
-            Func<(GraphQLDocument Document, IDictionary<string, object> Variables, string Url),
-                HttpRequestMessage> transformRequest = null,
+            Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url), HttpRequestMessage> transformRequest = null,
             Func<HttpResponseMessage, ValueTask<ExecutionResult>> transformResponse = null)
         {
             if (createClient == null)
@@ -40,17 +40,16 @@ namespace tanka.graphql.links
             _client = createClient();
             _transformRequest = transformRequest;
             _transformResponse = transformResponse;
-
         }
 
-        private HttpRequestMessage DefaultTransformRequest(
-            (GraphQLDocument Document, IDictionary<string, object> Variables, string Url) operation)
+        public static HttpRequestMessage DefaultTransformRequest(
+            (GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url) operation)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, operation.Url);
             var query = new QueryRequest()
             {
                 Query = operation.Document.ToGraphQL(),
-                Variables = operation.Variables != null ? new Dictionary<string, object>(operation.Variables) : null
+                Variables = operation.Variables?.ToDictionary(kv => kv.Key, kv => kv.Value)
             };
             var json = JsonConvert.SerializeObject(query);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -58,13 +57,13 @@ namespace tanka.graphql.links
             return request;
         }
 
-        private async ValueTask<ExecutionResult> DefaultTransformResponse(HttpResponseMessage response)
+        public static async ValueTask<ExecutionResult> DefaultTransformResponse(HttpResponseMessage response)
         {
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ExecutionResult>(json);
         }
 
-        public async ValueTask<ChannelReader<ExecutionResult>> Execute(GraphQLDocument document, IDictionary<string, object> variables, CancellationToken cancellationToken)
+        public async ValueTask<ChannelReader<ExecutionResult>> Execute(GraphQLDocument document, IReadOnlyDictionary<string, object> variables, CancellationToken cancellationToken)
         {
             var request = _transformRequest((document, variables, _url));
             var response = await _client.SendAsync(request, cancellationToken);

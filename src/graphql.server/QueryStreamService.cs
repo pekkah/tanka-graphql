@@ -17,10 +17,10 @@ namespace tanka.graphql.server
         private readonly List<IExtension> _extensions;
         private readonly ILogger<QueryStreamService> _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IOptionsMonitor<ExecutionOptions> _optionsMonitor;
+        private readonly IOptionsMonitor<SchemaOptions> _optionsMonitor;
 
         public QueryStreamService(
-            IOptionsMonitor<ExecutionOptions> optionsMonitor,
+            IOptionsMonitor<SchemaOptions> optionsMonitor,
             ILoggerFactory loggerFactory,
             IEnumerable<IExtension> extensions)
         {
