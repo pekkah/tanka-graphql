@@ -48,7 +48,7 @@ namespace tanka.graphql.tests.type
             var literalValue = new Dictionary<string, object>
             {
                 ["a"] = "abc",
-                ["b"] = 123L
+                ["b"] = 123
             };
 
             var actual =

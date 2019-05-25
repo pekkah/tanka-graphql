@@ -29,7 +29,7 @@ namespace tanka.graphql.type
 
         public static ScalarType Int = new ScalarType(
             "Int",
-            new LongConverter(),
+            new IntConverter(),
             "The `Int` scalar type represents non-fractional signed whole numeric values");
 
         public static NonNull NonNullBoolean = new NonNull(Boolean);

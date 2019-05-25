@@ -16,7 +16,7 @@ namespace tanka.graphql.tests.type
         [Theory]
         [InlineData(123, 123)]
         [InlineData("123", 123)]
-        public void ParseValue(object input, long expected)
+        public void ParseValue(object input, int expected)
         {
             /* Given */
             /* When */
@@ -28,7 +28,7 @@ namespace tanka.graphql.tests.type
 
         [Theory]
         [InlineData("123", 123)]
-        public void ParseLiteral(string input, long expected)
+        public void ParseLiteral(string input, int expected)
         {
             /* Given */
             var astValue = new GraphQLScalarValue(ASTNodeKind.IntValue)
@@ -47,7 +47,7 @@ namespace tanka.graphql.tests.type
         [Theory]
         [InlineData(123, 123)]
         [InlineData("123", 123)]
-        public void Serialize(object input, long expected)
+        public void Serialize(object input, int expected)
         {
             /* Given */
             /* When */
