@@ -144,19 +144,17 @@ namespace tanka.graphql
                 options.InitialValue,
                 extensions);
 
-            logger.Validate(options.Validate);
-            var validationResult = new ValidationResult();
-            if (options.Validate)
+            logger.Validate(options.Validate != null);
+            var validationResult = ValidationResult.Success;
+            if (options.Validate != null)
             {
                 await extensions.BeginValidationAsync();
-                validationResult = Validator.Validate(
-                    ExecutionRules.All,
+                validationResult = await options.Validate(
                     options.Schema,
                     document,
                     coercedVariableValues);
 
                 logger.ValidationResult(validationResult);
-
                 await extensions.EndValidationAsync(validationResult);
             }
 

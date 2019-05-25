@@ -58,7 +58,7 @@ namespace tanka.graphql.benchmarks
             {
                 Document = _query,
                 Schema = _schema,
-                Validate = false
+                Validate = null
             });
 
             AssertResult(result.Errors);
@@ -83,7 +83,7 @@ namespace tanka.graphql.benchmarks
             {
                 Document = _mutation,
                 Schema = _schema,
-                Validate = false
+                Validate = null
             });
 
             AssertResult(result.Errors);
@@ -111,7 +111,7 @@ namespace tanka.graphql.benchmarks
             {
                 Document = _subscription,
                 Schema = _schema,
-                Validate = false
+                Validate = null
             }, cts.Token);
 
             AssertResult(result.Errors);

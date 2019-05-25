@@ -6,6 +6,8 @@ namespace tanka.graphql.validation
 {
     public class ValidationResult
     {
+        public static ValidationResult Success => new ValidationResult();
+
         public bool IsValid => !Errors.Any();
 
         public IEnumerable<ValidationError> Errors { get; set; } = new ValidationError[0];

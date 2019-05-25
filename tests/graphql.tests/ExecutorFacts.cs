@@ -194,8 +194,7 @@ namespace tanka.graphql.tests
             {
                 Schema = Schema,
                 Document = mutation,
-                VariableValues = variables,
-                Validate = false //todo
+                VariableValues = variables
             });
 
             /* Then */
@@ -238,8 +237,7 @@ namespace tanka.graphql.tests
             {
                 Schema = Schema,
                 Document = mutation,
-                VariableValues = variables,
-                Validate = false //todo
+                VariableValues = variables
             });
 
             /* Then */
