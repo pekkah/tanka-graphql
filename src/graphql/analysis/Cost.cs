@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using GraphQLParser.AST;
 using tanka.graphql.type;
 using tanka.graphql.validation;
 
@@ -12,13 +13,19 @@ namespace tanka.graphql.analysis
             {
                 DirectiveLocation.FIELD_DEFINITION
             },
-            new Args()
+            new Args
             {
                 {"complexity", ScalarType.NonNullInt}
             });
 
 
-        public static CombineRule Cost(uint maxCost, uint defaultFieldCost = 1)
+        public static CombineRule Cost(
+            uint maxCost,
+            uint defaultFieldComplexity = 1,
+            bool addExtensionData = false,
+            Action<(IRuleVisitorContext Context, GraphQLOperationDefinition Operation, uint Cost, uint MaxCost)>
+                onCalculated = null
+        )
         {
             return (context, rule) =>
             {
@@ -36,19 +43,29 @@ namespace tanka.graphql.analysis
                         if (costDirective != null)
                         {
                             var complexity = costDirective.GetArgument<int>("complexity");
-                            cost += (uint)complexity;
+                            cost += (uint) complexity;
                         }
                         else
                         {
-                            cost += defaultFieldCost;
-                        } 
+                            cost += defaultFieldComplexity;
+                        }
                     }
                 };
                 rule.LeaveOperationDefinition += node =>
                 {
+                    onCalculated?.Invoke((context, node, cost, maxCost));
+
+                    if (addExtensionData)
+                        context.Extensions.Set("cost", new
+                        {
+                            Cost = cost,
+                            MaxCost = maxCost
+                        });
+
+
                     if (cost > maxCost)
                         context.Error(
-                            "MAX_COST", 
+                            "MAX_COST",
                             $"Query cost '{cost}' is too high. Max allowed: '{maxCost}'",
                             node);
                 };

@@ -12,6 +12,8 @@ namespace tanka.graphql.validation
 
         public IEnumerable<ValidationError> Errors { get; set; } = new ValidationError[0];
 
+        public IReadOnlyDictionary<string, object> Extensions { get; set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();

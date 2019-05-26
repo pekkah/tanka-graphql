@@ -99,7 +99,7 @@ namespace tanka.graphql.tests.analysis
             /* When */
             var result = Validate(
                 document,
-                Analyze.Cost(0, defaultFieldCost:0));
+                Analyze.Cost(0, defaultFieldComplexity:0));
 
             /* Then */
             Assert.False(result.IsValid);
@@ -120,7 +120,7 @@ namespace tanka.graphql.tests.analysis
             /* When */
             var result = Validate(
                 document,
-                Analyze.Cost(1, defaultFieldCost:0));
+                Analyze.Cost(1, defaultFieldComplexity:0));
 
             /* Then */
             Assert.True(result.IsValid);

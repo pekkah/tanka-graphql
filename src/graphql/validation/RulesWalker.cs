@@ -28,6 +28,8 @@ namespace tanka.graphql.validation
 
         public TypeTracker Tracker { get; protected set; }
 
+        public ExtensionData Extensions { get; } = new ExtensionData();
+
         public ISchema Schema { get; }
 
         public void Error(string code, string message, params ASTNode[] nodes)
@@ -392,7 +394,8 @@ namespace tanka.graphql.validation
         {
             return new ValidationResult
             {
-                Errors = _errors
+                Errors = _errors,
+                Extensions = Extensions.Data
             };
         }
     }
