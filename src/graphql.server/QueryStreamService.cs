@@ -38,9 +38,9 @@ namespace tanka.graphql.server
             try
             {
                 _logger.Query(query);
-                var serviceOptions = _optionsMonitor.CurrentValue;
+                var schemaOptions = _optionsMonitor.CurrentValue;
                 var document = query.Document;
-                var schema = await serviceOptions.GetSchema(query);
+                var schema = await schemaOptions.GetSchema(query);
                 var executionOptions = new ExecutionOptions
                 {
                     Schema = schema,
@@ -51,7 +51,7 @@ namespace tanka.graphql.server
                     LoggerFactory = _loggerFactory,
                     Extensions = _extensions,
                     Validate = (s, d, v) => ExecutionOptions.DefaultValidate(
-                        serviceOptions.ValidationRules,
+                        schemaOptions.ValidationRules,
                         s,
                         d,
                         v)

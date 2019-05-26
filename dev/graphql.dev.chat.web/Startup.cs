@@ -48,7 +48,7 @@ namespace tanka.graphql.samples.chat.web
                         .Concat(new[]
                         {
                             Analyze.Cost(100, 1, addExtensionData: true)
-                        });
+                        }).ToArray();
 
                     options.GetSchema = query => new ValueTask<ISchema>(schema);
                 });

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using tanka.graphql.requests;
 using tanka.graphql.type;
@@ -11,6 +11,6 @@ namespace tanka.graphql.server
     {
         public Func<Query, ValueTask<ISchema>> GetSchema { get; set; }
 
-        public IEnumerable<CombineRule> ValidationRules { get; set; }
+        public CombineRule[] ValidationRules { get; set; } = ExecutionRules.All.ToArray();
     }
 }
