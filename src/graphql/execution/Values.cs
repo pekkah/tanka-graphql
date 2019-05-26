@@ -129,7 +129,7 @@ namespace tanka.graphql.execution
                     coercedListValues.Add(coercedValue);
                 }
 
-                return coercedListValues;
+                return coercedListValues.ToArray();
             }
 
             if (value is IEnumerable values)
@@ -140,11 +140,11 @@ namespace tanka.graphql.execution
                     coercedListValues.Add(coercedValue);
                 }
 
-                return coercedListValues;
+                return coercedListValues.ToArray();
             }
 
             coercedListValues.Add(CoerceValue(getInputObjectFields, value, listWrappedType));
-            return coercedListValues;
+            return coercedListValues.ToArray();
         }
     }
 }

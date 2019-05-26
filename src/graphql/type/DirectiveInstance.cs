@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
@@ -32,6 +33,9 @@ namespace tanka.graphql.type
                 var argument = Type.GetArgument(name);
                 rawValue = argument?.DefaultValue;
             }
+
+            if (rawValue == null || rawValue.Equals(default(T)))
+                return default(T);
 
             if (rawValue is T argAsType)
                 return argAsType;

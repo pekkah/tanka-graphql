@@ -265,12 +265,12 @@ namespace tanka.graphql.sdl
                 {
                     if (hasValue)
                         arguments.Add(argument.Key,
-                            value == null
-                                ? defaultValue
-                                : Values.CoerceValue(
-                                    connect.GetInputFields,
-                                    value,
-                                    type));
+                                value == null
+                                    ? defaultValue
+                                    : Values.CoerceValue(
+                                        connect.GetInputFields,
+                                        value,
+                                        type));
                 });
             }
 

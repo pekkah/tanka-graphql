@@ -22,6 +22,7 @@ namespace tanka.graphql.tests.analysis
                 type Query {
                     default: Int
                     withCost: Int @cost(complexity: 1)
+                    withMultiplier(count: Int!): Int @cost(complexity: 2, multipliers: [""count""])
                 }
                 ";
 
@@ -46,6 +47,48 @@ namespace tanka.graphql.tests.analysis
                 Schema,
                 document,
                 variables);
+        }
+
+        [Fact]
+        public void Cost_above_max_cost_with_costDirective()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                    withCost
+                }");
+
+            /* When */
+            var result = Validate(
+                document,
+                Analyze.Cost(0, 0));
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == "MAX_COST");
+        }
+
+        [Fact]
+        public void Cost_above_max_cost_with_costDirective_and_multiplier()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                    withMultiplier(count: 5)
+                }");
+
+            /* When */
+            var result = Validate(
+                document,
+                Analyze.Cost(5, 0));
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == "MAX_COST");
         }
 
         [Fact]
@@ -88,27 +131,6 @@ namespace tanka.graphql.tests.analysis
         }
 
         [Fact]
-        public void Cost_above_max_cost_with_costDirective()
-        {
-            /* Given */
-            var document = Parser.ParseDocument(
-                @"{
-                    withCost
-                }");
-
-            /* When */
-            var result = Validate(
-                document,
-                Analyze.Cost(0, defaultFieldComplexity:0));
-
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error => error.Code == "MAX_COST");
-        }
-
-        [Fact]
         public void Cost_below_max_cost_with_with_costDirective()
         {
             /* Given */
@@ -120,7 +142,25 @@ namespace tanka.graphql.tests.analysis
             /* When */
             var result = Validate(
                 document,
-                Analyze.Cost(1, defaultFieldComplexity:0));
+                Analyze.Cost(1, 0));
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Cost_below_max_cost_with_with_costDirective_and_multiplier()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"{
+                    withMultiplier
+                }");
+
+            /* When */
+            var result = Validate(
+                document,
+                Analyze.Cost(3, 0));
 
             /* Then */
             Assert.True(result.IsValid);

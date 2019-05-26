@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using GraphQLParser.AST;
+using tanka.graphql.execution;
 using tanka.graphql.type;
 using tanka.graphql.validation;
 
@@ -15,7 +18,8 @@ namespace tanka.graphql.analysis
             },
             new Args
             {
-                {"complexity", ScalarType.NonNullInt}
+                {"complexity", ScalarType.NonNullInt},
+                {"multipliers", new List(ScalarType.NonNullString)}
             });
 
 
@@ -43,6 +47,31 @@ namespace tanka.graphql.analysis
                         if (costDirective != null)
                         {
                             var complexity = costDirective.GetArgument<int>("complexity");
+                            var multipliers = costDirective.GetArgument<IEnumerable<object>>("multipliers");
+
+                            if (multipliers != null)
+                                foreach (var multiplier in multipliers)
+                                {
+                                    var multiplierName = multiplier.ToString();
+                                    var multiplierArgDef = field.GetArgument(multiplierName);
+
+                                    if (multiplierArgDef == null)
+                                        continue;
+
+                                    var multiplierArg =
+                                        node.Arguments.SingleOrDefault(a => a.Name.Value == multiplierName);
+
+                                    if (multiplierArg == null)
+                                        continue;
+
+                                    var multiplierValue = (int) Values.CoerceValue(
+                                        context.Schema.GetInputFields,
+                                        multiplierArg.Value,
+                                        multiplierArgDef.Type);
+
+                                    complexity *= multiplierValue;
+                                }
+
                             cost += (uint) complexity;
                         }
                         else
