@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using tanka.graphql.execution;
-using tanka.graphql.type;
 using GraphQLParser.AST;
 using Newtonsoft.Json.Linq;
+using tanka.graphql.execution;
+using tanka.graphql.type;
 
 namespace tanka.graphql.resolvers
 {
@@ -29,6 +29,8 @@ namespace tanka.graphql.resolvers
             ExecutionContext = executionContext;
         }
 
+        public IDictionary<object, object> Items { get; } = new Dictionary<object, object>();
+
         public ISchema Schema { get; }
 
         public ObjectType ObjectType { get; }
@@ -42,6 +44,7 @@ namespace tanka.graphql.resolvers
         public IReadOnlyDictionary<string, object> Arguments { get; }
 
         public NodePath Path { get; }
+
         public IExecutorContext ExecutionContext { get; }
 
         public string FieldName => Selection.Name?.Value;
@@ -49,7 +52,7 @@ namespace tanka.graphql.resolvers
         public T GetArgument<T>(string name)
         {
             if (!Arguments.ContainsKey(name))
-                return default(T);
+                return default;
 
             var arg = Arguments[name];
 
