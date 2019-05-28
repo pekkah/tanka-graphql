@@ -4,14 +4,14 @@ using GraphQLParser.AST;
 
 namespace tanka.graphql.type.converters
 {
-    public class LongConverter : IValueConverter
+    public class IntConverter : IValueConverter
     {
         public object Serialize(object value)
         {
             if (value == null)
                 return null;
 
-            return Convert.ToInt64(value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToInt32(value, NumberFormatInfo.InvariantInfo);
         }
 
         public object ParseValue(object input)
@@ -19,7 +19,7 @@ namespace tanka.graphql.type.converters
             if (input == null)
                 return null;
 
-            return Convert.ToInt64(input, NumberFormatInfo.InvariantInfo);
+            return Convert.ToInt32(input, NumberFormatInfo.InvariantInfo);
         }
 
         public object ParseLiteral(GraphQLScalarValue input)
@@ -34,11 +34,11 @@ namespace tanka.graphql.type.converters
                 if (input.Value == null)
                     return null;
 
-                return Convert.ToInt64(input.Value);
+                return Convert.ToInt32(input.Value);
             }
 
             throw new FormatException(
-                $"Cannot coerce Long value from '{input.Kind}'");
+                $"Cannot coerce Int value from '{input.Kind}'");
         }
     }
 }

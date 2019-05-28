@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using GraphQL.Server.Ui.Playground;
 using Microsoft.AspNetCore.Builder;
@@ -9,11 +10,13 @@ using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using tanka.graphql.analysis;
 using tanka.graphql.samples.chat.data;
 using tanka.graphql.samples.chat.web.GraphQL;
 using tanka.graphql.server;
 using tanka.graphql.server.webSockets;
 using tanka.graphql.type;
+using tanka.graphql.validation;
 
 namespace tanka.graphql.samples.chat.web
 {
@@ -41,6 +44,12 @@ namespace tanka.graphql.samples.chat.web
             services.AddTankaSchemaOptions()
                 .Configure<ISchema>((options, schema) =>
                 {
+                    options.ValidationRules = ExecutionRules.All
+                        .Concat(new[]
+                        {
+                            CostAnalyzer.MaxCost(maxCost: 100, defaultFieldComplexity: 1, addExtensionData: true)
+                        }).ToArray();
+
                     options.GetSchema = query => new ValueTask<ISchema>(schema);
                 });
 

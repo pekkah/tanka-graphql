@@ -14,6 +14,8 @@ namespace tanka.graphql.validation
 
         TypeTracker Tracker { get; }
 
+        ExtensionData Extensions { get; }
+
         void Error(string code, string message, params ASTNode[] nodes);
 
         void Error(string code, string message, ASTNode node);

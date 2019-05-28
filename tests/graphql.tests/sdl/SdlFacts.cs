@@ -179,7 +179,7 @@ namespace tanka.graphql.tests.sdl
                 }
                 ";
 
-            var jediPowerLevel = new ScalarType("JediPowerLevel", new LongConverter());
+            var jediPowerLevel = new ScalarType("JediPowerLevel", new IntConverter());
             var jediTrickLevel = new ScalarType("JediTrickLevel", new DoubleConverter());
 
             var document = Parser.ParseDocument(idl);

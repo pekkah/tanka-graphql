@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using tanka.graphql.language;
 using tanka.graphql.requests;
+using tanka.graphql.validation;
 
 namespace tanka.graphql.server
 {
@@ -37,10 +38,10 @@ namespace tanka.graphql.server
             try
             {
                 _logger.Query(query);
-                var serviceOptions = _optionsMonitor.CurrentValue;
+                var schemaOptions = _optionsMonitor.CurrentValue;
                 var document = query.Document;
-                var schema = await serviceOptions.GetSchema(query);
-                var executionOptions = new graphql.ExecutionOptions
+                var schema = await schemaOptions.GetSchema(query);
+                var executionOptions = new ExecutionOptions
                 {
                     Schema = schema,
                     Document = document,
@@ -48,7 +49,12 @@ namespace tanka.graphql.server
                     VariableValues = query.Variables,
                     InitialValue = null,
                     LoggerFactory = _loggerFactory,
-                    Extensions = _extensions
+                    Extensions = _extensions,
+                    Validate = (s, d, v) => ExecutionOptions.DefaultValidate(
+                        schemaOptions.ValidationRules,
+                        s,
+                        d,
+                        v)
                 };
 
                 // is subscription

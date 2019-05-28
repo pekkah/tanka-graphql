@@ -27,57 +27,72 @@ namespace tanka.graphql.execution
             {
                 var argumentDefinition = argumentDefinitionPair.Value;
                 var argumentName = argumentDefinitionPair.Key;
-                var argumentType = argumentDefinition.Type;
-                var defaultValue = argumentDefinition.DefaultValue;
-
                 var argument = argumentValues.SingleOrDefault(a => a.Name.Value == argumentName);
-                var argumentValue = argument?.Value;
-                var hasValue = argumentValue != null;
-                object value = null;
-
-                if (argumentValue is GraphQLVariable variable)
-                {
-                    var variableName = variable.Name.Value;
-                    hasValue = coercedVariableValues.ContainsKey(variableName);
-                    if (hasValue)
-                        value = coercedVariableValues[variableName];
-                }
-                else
-                {
-                    value = argumentValue;
-                }
-
-                if (!hasValue) coercedValues[argumentName] = defaultValue;
-
-                if (argumentType is NonNull && (!hasValue || value == null))
-                    throw new ValueCoercionException(
-                        $"Argument {argumentName} is non-null but no value could be coerced",
-                        null,
-                        argumentType);
-
-                if (hasValue)
-                {
-                    if (value == null)
-                    {
-                        coercedValues[argumentName] = null;
-                    }
-                    else if (argumentValue is GraphQLVariable)
-                    {
-                        coercedValues[argumentName] = value;
-                    }
-                    else
-                    {
-                        var coercedValue = Values.CoerceValue(
-                            schema.GetInputFields,
-                            value,
-                            argumentType);
-
-                        coercedValues[argumentName] = coercedValue;
-                    }
-                }
+                coercedValues[argumentName] = CoerceArgumentValue(
+                    schema,
+                    coercedVariableValues, 
+                    argumentName,
+                    argumentDefinition,
+                    argument);
             }
 
             return coercedValues;
+        }
+
+        public static object CoerceArgumentValue(
+            ISchema schema, 
+            IReadOnlyDictionary<string, object> coercedVariableValues,
+            string argumentName,
+            Argument argumentDefinition, 
+            GraphQLArgument argument)
+        {
+            
+            var argumentType = argumentDefinition.Type;
+            var defaultValue = argumentDefinition.DefaultValue;
+            var argumentValue = argument?.Value;
+
+            var hasValue = argumentValue != null;
+            object value = null;
+
+            if (argumentValue is GraphQLVariable variable)
+            {
+                var variableName = variable.Name.Value;
+                hasValue = coercedVariableValues.ContainsKey(variableName);
+                if (hasValue)
+                    value = coercedVariableValues[variableName];
+            }
+            else
+            {
+                value = argumentValue;
+            }
+
+            if (argumentType is NonNull && (!hasValue || value == null))
+                throw new ValueCoercionException(
+                    $"Argument '{argumentName}' is non-null but no value could be coerced",
+                    null,
+                    argumentType);
+
+            if (hasValue)
+            {
+                if (value == null)
+                {
+                    return null;
+                }
+
+                if (argumentValue is GraphQLVariable)
+                {
+                    return value;
+                }
+
+                var coercedValue = Values.CoerceValue(
+                    schema.GetInputFields,
+                    value,
+                    argumentType);
+
+                return coercedValue;
+            }
+
+            return defaultValue;
         }
     }
 }

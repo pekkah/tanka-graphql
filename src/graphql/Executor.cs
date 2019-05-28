@@ -43,7 +43,8 @@ namespace tanka.graphql
                     return new ExecutionResult
                     {
                         Errors = validationResult.Errors.Select(e => e.ToError())
-                            .ToList()
+                            .ToList(),
+                        Extensions = validationResult.Extensions.ToDictionary(kv => kv.Key, kv => kv.Value)
                     };
 
                 ExecutionResult executionResult;
@@ -60,6 +61,11 @@ namespace tanka.graphql
                     default:
                         throw new InvalidOperationException(
                             $"Operation type {queryContext.OperationDefinition.Operation} not supported.");
+                }
+
+                foreach (var validationExtension in validationResult.Extensions)
+                {
+                    executionResult.AddExtension(validationExtension.Key, validationExtension.Value);
                 }
 
                 logger.ExecutionResult(executionResult);
@@ -97,7 +103,8 @@ namespace tanka.graphql
                     return new SubscriptionResult
                     {
                         Errors = validationResult.Errors.Select(e => e.ToError())
-                            .ToList()
+                            .ToList(),
+                        Extensions = validationResult.Extensions.ToDictionary(kv => kv.Key, kv => kv.Value)
                     };
 
                 SubscriptionResult subscriptionResult;
@@ -111,6 +118,11 @@ namespace tanka.graphql
                     default:
                         throw new InvalidOperationException(
                             $"Operation type {queryContext.OperationDefinition.Operation} not supported. Did you mean to use {nameof(ExecuteAsync)}?");
+                }
+
+                foreach (var validationExtension in validationResult.Extensions)
+                {
+                    subscriptionResult.AddExtension(validationExtension.Key, validationExtension.Value);
                 }
 
                 logger.ExecutionResult(subscriptionResult);
@@ -144,19 +156,17 @@ namespace tanka.graphql
                 options.InitialValue,
                 extensions);
 
-            logger.Validate(options.Validate);
-            var validationResult = new ValidationResult();
-            if (options.Validate)
+            logger.Validate(options.Validate != null);
+            var validationResult = ValidationResult.Success;
+            if (options.Validate != null)
             {
                 await extensions.BeginValidationAsync();
-                validationResult = Validator.Validate(
-                    ExecutionRules.All,
+                validationResult = await options.Validate(
                     options.Schema,
                     document,
                     coercedVariableValues);
 
                 logger.ValidationResult(validationResult);
-
                 await extensions.EndValidationAsync(validationResult);
             }
 
