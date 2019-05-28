@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Types - tanka-graphql</title>
+    <title>Query cost limit - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -121,7 +121,7 @@
                                     <a class="nav-link" href="2-server/3-graphql-ws.html">Graphql ws</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="2-server/5-query-cost-limit.html">Query cost limit</a>
+                                    <a class="nav-link active bg-light" href="2-server/5-query-cost-limit.html">Query cost limit</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="2-server/9-dotnet-client.html">Dotnet client</a>
@@ -141,7 +141,7 @@
                                     <a class="nav-link" href="3-type-system/02-schema.html">Schema</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active bg-light" href="3-type-system/04-types.html">Types</a>
+                                    <a class="nav-link" href="3-type-system/04-types.html">Types</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/05-scalars.html">Scalars</a>
@@ -185,134 +185,29 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="types">Types</h2>
-<blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Types">Specification</a></p>
-</blockquote>
-<p>Following types are supported:</p>
-<ul>
-<li><code>ScalarType</code></li>
-<li><code>ObjectType</code></li>
-<li><code>InterfaceType</code></li>
-<li><code>UnionType</code></li>
-<li><code>EnumType</code></li>
-<li><code>InputObjectType</code></li>
-</ul>
-<p>These all exists in <code>tanka.graphql.type</code> namespace and implement <code>INamedType</code> interface</p>
-<p><pre><code class="language-csharp">    public interface INamedType: IType
+                <h2 id="query-cost-limit">Query Cost Limit</h2>
+<p>GraphQL has some unique characteristics which open services
+for various types of attacks. Common attach is to overwhelm
+the service with resource heavy queries. Common way to counter
+this type of attack is to limit the query cost based on complexity.</p>
+<h2 id="query-cost-analysis">Query Cost Analysis</h2>
+<p>See the detailed explanation and schema configuration in
+<a href="1-execution/07-query-cost-analysis.html">Query Cost Analysis</a>.</p>
+<h2 id="usage-with-server">Usage with server</h2>
+<p>Add cost limiting validation rule to options</p>
+<pre><code class="lang-csharp">services.AddTankaSchemaOptions()
+    .Configure(options =&gt;
     {
-        string Name { get; }
-    }
-</code></pre></p>
-<h3 id="wrapping-types">Wrapping types</h3>
-<p>Wrapping types implement the <code>IWrappingType</code></p>
-<p><pre><code class="language-csharp">    public interface IWrappingType: IType
-    {
-        IType WrappedType { get; }
-    }
-</code></pre></p>
-<p>Two built-in implementations are provided</p>
-<ul>
-<li><code>List</code></li>
-<li><code>NonNull</code></li>
-</ul>
-<h3 id="input-and-output-types">Input and output types</h3>
-<p>Is input type?</p>
-<p><pre><code class="language-csharp">        [Theory]
-        [MemberData(nameof(ValidInputTypes))]
-        public void IsInputType(INamedType type)
-        {
-            /* Given */
-            /* When */
-            var isInput = TypeIs.IsInputType(type);
-            var isInputAsNonNull = TypeIs.IsInputType(
-                new NonNull(type));
-            var isInputAsList = TypeIs.IsInputType(
-                new List(type));
-
-            /* Then */
-            Assert.True(isInput);
-            Assert.True(isInputAsNonNull);
-            Assert.True(isInputAsList);
-        }
-</code></pre></p>
-<p><pre><code class="language-csharp">
-        public static IEnumerable&lt;object[]&gt; ValidInputTypes
-        {
-            get
+        options.ValidationRules = ExecutionRules.All
+            .Concat(new[]
             {
-                foreach (var scalarType in ScalarType.Standard)
-                {
-                    yield return new object[] {scalarType};
-                }
-
-                yield return new object[]
-                {
-                    new EnumType(&quot;Enum&quot;,
-                        new EnumValues())
-                };
-
-                yield return new object[]
-                {
-                    new InputObjectType(&quot;Input&quot;)
-                };
-            }
-        }
-</code></pre></p>
-<p>Is output type?</p>
-<p><pre><code class="language-csharp">
-        [Theory]      
-        [MemberData(nameof(ValidOutputTypes))]
-        public void IsOutputType(INamedType type)
-        {
-            /* Given */
-            /* When */
-            var isOutput = TypeIs.IsOutputType(type);
-            var isOutputAsNonNull = TypeIs.IsOutputType(
-                new NonNull(type));
-            var isOutputAsList = TypeIs.IsOutputType(
-                new List(type));
-
-            /* Then */
-            Assert.True(isOutput);
-            Assert.True(isOutputAsNonNull);
-            Assert.True(isOutputAsList);
-        }
-</code></pre></p>
-<p><pre><code class="language-csharp">
-        public static IEnumerable&lt;object[]&gt; ValidOutputTypes
-        {
-            get
-            {
-                foreach (var scalarType in ScalarType.Standard)
-                {
-                    yield return new object[] {scalarType};
-                }
-
-                yield return new object[]
-                {
-                    new ObjectType(&quot;Object&quot;), 
-                };
-
-                yield return new object[]
-                {
-                    new InterfaceType(&quot;Interface&quot;), 
-                };
-
-                yield return new object[]
-                {
-                    new UnionType(&quot;Union&quot;,
-                        Enumerable.Empty&lt;ObjectType&gt;()), 
-                };
-
-                yield return new object[]
-                {
-                    new EnumType(&quot;Enum&quot;,
-                        new EnumValues())
-                };
-            }
-        }
-</code></pre></p>
+                CostAnalyzer.MaxCost(
+                    maxCost: 100, 
+                    defaultFieldComplexity: 1
+                )
+            }).ToArray();
+    });
+</code></pre>
                     
             </main>
         </div>

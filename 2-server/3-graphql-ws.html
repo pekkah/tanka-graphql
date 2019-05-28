@@ -100,6 +100,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="1-execution/07-query-cost-analysis.html">Query cost analysis</a>
+                                </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                             <a class="d-flex align-items-center text-muted" href="2-server/0-common.html">Server</a>
@@ -116,6 +119,9 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link active bg-light" href="2-server/3-graphql-ws.html">Graphql ws</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="2-server/5-query-cost-limit.html">Query cost limit</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="2-server/9-dotnet-client.html">Dotnet client</a>
@@ -211,15 +217,27 @@ app.UseTankaWebSocketServer(new WebSocketServerOptions()
 the connection and sends <code>connection_ack</code> message back to the client. You can
 configure this behavior with your own logic.</p>
 <pre><code class="lang-csharp">services.AddTankaWebSocketServerWithTracing()
-        .Configure&lt;IAuthenticationService&gt;(
-            (options, authentication) =&gt; options.AcceptAsync = async context =&gt;
+        .Configure&lt;IHttpContextAccessor&gt;(
+            (
+            options, 
+            accessor
+            ) =&gt; options.AcceptAsync = async context =&gt;
             {
-                var token = context.Message.Payload.SelectToken(&quot;authToken&quot;);
-                
-                // true when accepted; otherwise false
-                var isValid = await authentication.IsValidAsync(token);
-                
-                if (!isValid) 
+                var succeeded = await AuthorizeHelper.AuthorizeAsync(
+                    accessor.HttpContext,
+                    new List&lt;IAuthorizeData&gt;()
+                    {
+                        new AuthorizeAttribute(&quot;authorize&quot;)
+                    });
+
+                if (succeeded)
+                {
+                    await context.Output.WriteAsync(new OperationMessage
+                    {
+                        Type = MessageType.GQL_CONNECTION_ACK
+                    });
+                }
+                else
                 {
                     // you must decide what kind of message to send back to the client
                     // in case the connection is not accepted.
@@ -228,16 +246,9 @@ configure this behavior with your own logic.</p>
                         Type = MessageType.GQL_CONNECTION_ERROR,
                         Id = context.Message.Id
                     });
-                    
+
                     // complete the output forcing the server to disconnect
                     context.Output.Complete();
-                }
-                else 
-                {
-                    await context.Output.WriteAsync(new OperationMessage
-                    {
-                        Type = MessageType.GQL_CONNECTION_ACK
-                    });
                 }
             });
 </code></pre>
