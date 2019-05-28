@@ -15,7 +15,7 @@ namespace tanka.graphql.samples.chat.web.GraphQL
             var resolvers = new ChatResolvers(resolverService);
 
             // add cost directive support to schema
-            builder.IncludeDirective(Analyze.CostDirective);
+            builder.IncludeDirective(CostAnalyzer.CostDirective);
 
             // build  executable schema
             Chat = SchemaTools.MakeExecutableSchemaWithIntrospection(

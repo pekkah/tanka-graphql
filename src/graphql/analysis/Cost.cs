@@ -8,7 +8,7 @@ using tanka.graphql.validation;
 
 namespace tanka.graphql.analysis
 {
-    public static class Analyze
+    public static class CostAnalyzer
     {
         public static DirectiveType CostDirective = new DirectiveType(
             "cost",
@@ -23,7 +23,7 @@ namespace tanka.graphql.analysis
             });
 
 
-        public static CombineRule Cost(
+        public static CombineRule MaxCost(
             uint maxCost,
             uint defaultFieldComplexity = 1,
             bool addExtensionData = false,
@@ -64,10 +64,12 @@ namespace tanka.graphql.analysis
                                     if (multiplierArg == null)
                                         continue;
 
-                                    var multiplierValue = (int) Values.CoerceValue(
-                                        context.Schema.GetInputFields,
-                                        multiplierArg.Value,
-                                        multiplierArgDef.Type);
+                                    var multiplierValue = (int) Arguments.CoerceArgumentValue(
+                                        context.Schema,
+                                        context.VariableValues,
+                                        multiplierName,
+                                        multiplierArgDef,
+                                        multiplierArg);
 
                                     complexity *= multiplierValue;
                                 }

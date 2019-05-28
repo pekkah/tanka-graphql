@@ -47,7 +47,7 @@ namespace tanka.graphql.samples.chat.web
                     options.ValidationRules = ExecutionRules.All
                         .Concat(new[]
                         {
-                            Analyze.Cost(100, 1, addExtensionData: true)
+                            CostAnalyzer.MaxCost(maxCost: 100, defaultFieldComplexity: 1, addExtensionData: true)
                         }).ToArray();
 
                     options.GetSchema = query => new ValueTask<ISchema>(schema);

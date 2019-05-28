@@ -27,7 +27,7 @@ namespace tanka.graphql.tests.analysis
                 ";
 
             Schema = new SchemaBuilder()
-                .IncludeDirective(Analyze.CostDirective)
+                .IncludeDirective(CostAnalyzer.CostDirective)
                 .Sdl(sdl)
                 .Build();
         }
@@ -61,7 +61,10 @@ namespace tanka.graphql.tests.analysis
             /* When */
             var result = Validate(
                 document,
-                Analyze.Cost(0, 0));
+                CostAnalyzer.MaxCost(
+                    maxCost: 0, 
+                    defaultFieldComplexity: 0)
+                );
 
             /* Then */
             Assert.False(result.IsValid);
@@ -82,7 +85,10 @@ namespace tanka.graphql.tests.analysis
             /* When */
             var result = Validate(
                 document,
-                Analyze.Cost(5, 0));
+                CostAnalyzer.MaxCost(
+                    maxCost: 5, 
+                    defaultFieldComplexity: 0)
+                );
 
             /* Then */
             Assert.False(result.IsValid);
@@ -92,7 +98,7 @@ namespace tanka.graphql.tests.analysis
         }
 
         [Fact]
-        public void Cost_above_max_cost_with_defaultCost()
+        public void Cost_above_max_cost_with_defaultComplexity()
         {
             /* Given */
             var document = Parser.ParseDocument(
@@ -103,7 +109,10 @@ namespace tanka.graphql.tests.analysis
             /* When */
             var result = Validate(
                 document,
-                Analyze.Cost(0));
+                CostAnalyzer.MaxCost(
+                    maxCost: 0,
+                    defaultFieldComplexity: 1)
+                );
 
             /* Then */
             Assert.False(result.IsValid);
@@ -113,7 +122,7 @@ namespace tanka.graphql.tests.analysis
         }
 
         [Fact]
-        public void Cost_below_max_cost_with_defaultCost()
+        public void Cost_below_max_cost_with_defaultComplexity()
         {
             /* Given */
             var document = Parser.ParseDocument(
@@ -124,7 +133,10 @@ namespace tanka.graphql.tests.analysis
             /* When */
             var result = Validate(
                 document,
-                Analyze.Cost(1));
+                CostAnalyzer.MaxCost(
+                    maxCost: 1,
+                    defaultFieldComplexity: 1)
+                );
 
             /* Then */
             Assert.True(result.IsValid);
@@ -142,7 +154,10 @@ namespace tanka.graphql.tests.analysis
             /* When */
             var result = Validate(
                 document,
-                Analyze.Cost(1, 0));
+                CostAnalyzer.MaxCost(
+                    maxCost: 1, 
+                    defaultFieldComplexity: 0)
+                );
 
             /* Then */
             Assert.True(result.IsValid);
@@ -160,7 +175,10 @@ namespace tanka.graphql.tests.analysis
             /* When */
             var result = Validate(
                 document,
-                Analyze.Cost(3, 0));
+                CostAnalyzer.MaxCost(
+                    maxCost: 3, 
+                    defaultFieldComplexity: 0)
+                );
 
             /* Then */
             Assert.True(result.IsValid);
