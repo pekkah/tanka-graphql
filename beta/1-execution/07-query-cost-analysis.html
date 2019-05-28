@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Types - tanka-graphql</title>
+    <title>Query cost analysis - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -101,7 +101,7 @@
                                     <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="1-execution/07-query-cost-analysis.html">Query cost analysis</a>
+                                    <a class="nav-link active bg-light" href="1-execution/07-query-cost-analysis.html">Query cost analysis</a>
                                 </li>
                             </ul>
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -141,7 +141,7 @@
                                     <a class="nav-link" href="3-type-system/02-schema.html">Schema</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active bg-light" href="3-type-system/04-types.html">Types</a>
+                                    <a class="nav-link" href="3-type-system/04-types.html">Types</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="3-type-system/05-scalars.html">Scalars</a>
@@ -185,132 +185,114 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="types">Types</h2>
-<blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Types">Specification</a></p>
-</blockquote>
-<p>Following types are supported:</p>
-<ul>
-<li><code>ScalarType</code></li>
-<li><code>ObjectType</code></li>
-<li><code>InterfaceType</code></li>
-<li><code>UnionType</code></li>
-<li><code>EnumType</code></li>
-<li><code>InputObjectType</code></li>
-</ul>
-<p>These all exists in <code>tanka.graphql.type</code> namespace and implement <code>INamedType</code> interface</p>
-<p><pre><code class="language-csharp">    public interface INamedType: IType
-    {
-        string Name { get; }
-    }
-</code></pre></p>
-<h3 id="wrapping-types">Wrapping types</h3>
-<p>Wrapping types implement the <code>IWrappingType</code></p>
-<p><pre><code class="language-csharp">    public interface IWrappingType: IType
-    {
-        IType WrappedType { get; }
-    }
-</code></pre></p>
-<p>Two built-in implementations are provided</p>
-<ul>
-<li><code>List</code></li>
-<li><code>NonNull</code></li>
-</ul>
-<h3 id="input-and-output-types">Input and output types</h3>
-<p>Is input type?</p>
-<p><pre><code class="language-csharp">        [Theory]
-        [MemberData(nameof(ValidInputTypes))]
-        public void IsInputType(INamedType type)
+                <h2 id="query-cost-analysis">Query Cost Analysis</h2>
+<p>Query cost analysis can be used to limit the complexity of the executed queries and
+to protect the service against various attacks (DoS etc).</p>
+<p>Cost of the query is defined by calculating complexity value for each field and
+setting a maximum allowed cost. Complexity can be set by setting a default field complexity
+which will be used for all fields in a query and/or by using <code>@cost</code> directive on the schema.</p>
+<h2 id="example">Example</h2>
+<p>Example schema has few fields with and without set complexity.</p>
+<p><pre><code class="language-csharp">        public CostFacts()
         {
-            /* Given */
-            /* When */
-            var isInput = TypeIs.IsInputType(type);
-            var isInputAsNonNull = TypeIs.IsInputType(
-                new NonNull(type));
-            var isInputAsList = TypeIs.IsInputType(
-                new List(type));
-
-            /* Then */
-            Assert.True(isInput);
-            Assert.True(isInputAsNonNull);
-            Assert.True(isInputAsList);
-        }
-</code></pre></p>
-<p><pre><code class="language-csharp">
-        public static IEnumerable&lt;object[]&gt; ValidInputTypes
-        {
-            get
-            {
-                foreach (var scalarType in ScalarType.Standard)
-                {
-                    yield return new object[] {scalarType};
+            var sdl =
+                @&quot;
+                schema {
+                    query: Query
                 }
 
-                yield return new object[]
-                {
-                    new EnumType(&quot;Enum&quot;,
-                        new EnumValues())
-                };
+                type Query {
+                    default: Int
+                    withCost: Int @cost(complexity: 1)
+                    withMultiplier(count: Int!): Int @cost(complexity: 2, multipliers: [&quot;&quot;count&quot;&quot;])
+                }
+                &quot;;
 
-                yield return new object[]
-                {
-                    new InputObjectType(&quot;Input&quot;)
-                };
-            }
+            Schema = new SchemaBuilder()
+                .IncludeDirective(CostAnalyzer.CostDirective)
+                .Sdl(sdl)
+                .Build();
         }
 </code></pre></p>
-<p>Is output type?</p>
+<h3 id="default-field-complexity">Default field complexity</h3>
+<p>Default field complexity will be used when <code>@cost</code> directive is not present in the field.</p>
 <p><pre><code class="language-csharp">
-        [Theory]      
-        [MemberData(nameof(ValidOutputTypes))]
-        public void IsOutputType(INamedType type)
+        [Fact]
+        public void Cost_above_max_cost_with_defaultComplexity()
         {
             /* Given */
+            var document = Parser.ParseDocument(
+                @&quot;{
+                    default
+                }&quot;);
+
             /* When */
-            var isOutput = TypeIs.IsOutputType(type);
-            var isOutputAsNonNull = TypeIs.IsOutputType(
-                new NonNull(type));
-            var isOutputAsList = TypeIs.IsOutputType(
-                new List(type));
+            var result = Validate(
+                document,
+                CostAnalyzer.MaxCost(
+                    maxCost: 0,
+                    defaultFieldComplexity: 1)
+                );
 
             /* Then */
-            Assert.True(isOutput);
-            Assert.True(isOutputAsNonNull);
-            Assert.True(isOutputAsList);
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error =&gt; error.Code == &quot;MAX_COST&quot;);
         }
 </code></pre></p>
+<h3 id="cost-directive">Cost Directive</h3>
+<p>Complexity of field is set with <code>@cost</code> directive.</p>
 <p><pre><code class="language-csharp">
-        public static IEnumerable&lt;object[]&gt; ValidOutputTypes
+        [Fact]
+        public void Cost_above_max_cost_with_costDirective()
         {
-            get
-            {
-                foreach (var scalarType in ScalarType.Standard)
-                {
-                    yield return new object[] {scalarType};
-                }
+            /* Given */
+            var document = Parser.ParseDocument(
+                @&quot;{
+                    withCost
+                }&quot;);
 
-                yield return new object[]
-                {
-                    new ObjectType(&quot;Object&quot;), 
-                };
+            /* When */
+            var result = Validate(
+                document,
+                CostAnalyzer.MaxCost(
+                    maxCost: 0, 
+                    defaultFieldComplexity: 0)
+                );
 
-                yield return new object[]
-                {
-                    new InterfaceType(&quot;Interface&quot;), 
-                };
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error =&gt; error.Code == &quot;MAX_COST&quot;);
+        }
+</code></pre></p>
+<p>In some cases the complexity of the field is related to its arguments. In these cases
+value of the argument can be used as mulpliplier for the complexity.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Cost_above_max_cost_with_costDirective_and_multiplier()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @&quot;{
+                    withMultiplier(count: 5)
+                }&quot;);
 
-                yield return new object[]
-                {
-                    new UnionType(&quot;Union&quot;,
-                        Enumerable.Empty&lt;ObjectType&gt;()), 
-                };
+            /* When */
+            var result = Validate(
+                document,
+                CostAnalyzer.MaxCost(
+                    maxCost: 5, 
+                    defaultFieldComplexity: 0)
+                );
 
-                yield return new object[]
-                {
-                    new EnumType(&quot;Enum&quot;,
-                        new EnumValues())
-                };
-            }
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error =&gt; error.Code == &quot;MAX_COST&quot;);
         }
 </code></pre></p>
                     
