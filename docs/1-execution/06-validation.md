@@ -15,7 +15,6 @@ Execution
 [{tanka.graphql.validation.ExecutionRules.All}]
 
 Rules not implemented
-[{tanka.graphql.tests.validation.ValidatorFacts.Rule_532_Field_Selection_Merging}]
 [{tanka.graphql.tests.validation.ValidatorFacts.Rule_572_DirectivesAreInValidLocations_valid1}]
 [{tanka.graphql.tests.validation.ValidatorFacts.Rule_583_AllVariableUsesDefined}]
 [{tanka.graphql.tests.validation.ValidatorFacts.Rule_584_AllVariablesUsed_valid1}]
