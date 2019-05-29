@@ -208,6 +208,26 @@ namespace tanka.graphql.validation
         }
 
         /// <summary>
+        ///     If multiple field selections with the same response names are
+        ///     encountered during execution, the field and arguments to execute and
+        ///     the resulting value should be unambiguous. Therefore any two field
+        ///     selections which might both be encountered for the same object are
+        ///     only valid if they are equivalent.
+        /// </summary>
+        /// <returns></returns>
+        public static CombineRule R532FieldSelectionMerging()
+        {
+            return (context, rule) =>
+            {
+                var validator = new FieldSelectionMergingValidator(context);
+                rule.EnterSelectionSet += selectionSet =>
+                {
+                    validator.Validate(selectionSet);
+                };
+            };
+        }
+
+        /// <summary>
         ///     For each selection in the document
         ///     Let selectionType be the result type of selection
         ///     If selectionType is a scalar or enum:

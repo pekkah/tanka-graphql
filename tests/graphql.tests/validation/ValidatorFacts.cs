@@ -537,10 +537,193 @@ namespace tanka.graphql.tests.validation
                              .Any(n => n.Name.Value == "barkVolume"));
         }
 
-        [Fact(Skip = "Not implemented")]
-        public void Rule_532_Field_Selection_Merging()
+        [Fact]
+        public void Rule_532_Field_Selection_Merging_valid1()
         {
-            //todo
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                fragment mergeIdenticalFields on Dog {
+                  name
+                  name
+                }
+
+                fragment mergeIdenticalAliasesAndFields on Dog {
+                  otherName: name
+                  otherName: name
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R532FieldSelectionMerging());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_532_Field_Selection_Merging_valid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                fragment mergeIdenticalFieldsWithIdenticalArgs on Dog {
+                  doesKnowCommand(dogCommand: SIT)
+                  doesKnowCommand(dogCommand: SIT)
+                }
+
+                fragment mergeIdenticalFieldsWithIdenticalValues on Dog {
+                  doesKnowCommand(dogCommand: $dogCommand)
+                  doesKnowCommand(dogCommand: $dogCommand)
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R532FieldSelectionMerging(),
+                new Dictionary<string, object>()
+                {
+                    ["dogCommand"] = "SIT"
+                });
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_532_Field_Selection_Merging_valid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                fragment safeDifferingFields on Pet {
+                  ... on Dog {
+                    volume: barkVolume
+                  }
+                  ... on Cat {
+                    volume: meowVolume
+                  }
+                }
+
+                fragment safeDifferingArgs on Pet {
+                  ... on Dog {
+                    doesKnowCommand(dogCommand: SIT)
+                  }
+                  ... on Cat {
+                    doesKnowCommand(catCommand: JUMP)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R532FieldSelectionMerging());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_532_Field_Selection_Merging_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                fragment conflictingBecauseAlias on Dog {
+                  name: nickname
+                  name
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R532FieldSelectionMerging());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R532FieldSelectionMerging 
+                         && error.Nodes.OfType<GraphQLFieldSelection>()
+                             .Any(n => n.Name.Value == "name"));
+        }
+        
+        [Fact]
+        public void Rule_532_Field_Selection_Merging_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                fragment conflictingArgsOnValues on Dog {
+                  doesKnowCommand(dogCommand: SIT)
+                  doesKnowCommand(dogCommand: HEEL)
+                }
+
+                fragment conflictingArgsValueAndVar on Dog {
+                  doesKnowCommand(dogCommand: SIT)
+                  doesKnowCommand(dogCommand: $dogCommand)
+                }
+
+                fragment conflictingArgsWithVars on Dog {
+                  doesKnowCommand(dogCommand: $varOne)
+                  doesKnowCommand(dogCommand: $varTwo)
+                }
+
+                fragment differingArgs on Dog {
+                  doesKnowCommand(dogCommand: SIT)
+                  doesKnowCommand
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R532FieldSelectionMerging(),
+                new Dictionary<string, object>()
+                {
+                    ["dogCommand"] = "HEEL",
+                    ["varOne"] = "SIT",
+                    ["varTwo"] = "HEEL"
+                });
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.All(
+                result.Errors,
+                error => Assert.True(error.Code == ValidationErrorCodes.R532FieldSelectionMerging));
+        }
+
+        [Fact]
+        public void Rule_532_Field_Selection_Merging_invalid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                fragment conflictingDifferingResponses on Pet {
+                  ... on Dog {
+                    someValue: nickname
+                  }
+                  ... on Cat {
+                    someValue: meowVolume
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R532FieldSelectionMerging());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.All(
+                result.Errors,
+                error => Assert.True(error.Code == ValidationErrorCodes.R532FieldSelectionMerging));
         }
 
         [Fact]
