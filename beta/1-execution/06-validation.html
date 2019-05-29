@@ -213,33 +213,28 @@
             R511ExecutableDefinitions(),
             R5211OperationNameUniqueness(),
             R5221LoneAnonymousOperation(),
+            R5231SingleRootField(),
+            R561ValuesOfCorrectType(),
+            R5513FragmentsOnCompositeTypes(),
+            R533LeafFieldSelections(),
+            R531FieldSelections(),
             R5511FragmentNameUniqueness(),
             R5512FragmentSpreadTypeExistence(),
-            R5513FragmentsOnCompositeTypes(),
             R5514FragmentsMustBeUsed(),
             R5522FragmentSpreadsMustNotFormCycles(),
             R5523FragmentSpreadIsPossible(),
-            R5231SingleRootField(),
-            R531FieldSelections(),
-            R533LeafFieldSelections(),
             R541ArgumentNames(),
             R542ArgumentUniqueness(),
             R5421RequiredArguments(),
-            R561ValuesOfCorrectType(),
             R562InputObjectFieldNames(),
             R563InputObjectFieldUniqueness(),
             R564InputObjectRequiredFields(),
             R57Directives(),
-            R58Variables()
+            R58Variables(),
+            R532FieldSelectionMerging()
         }</code></pre></p>
 <p>Rules not implemented
-<pre><code class="language-csharp">
-        [Fact(Skip = &quot;Not implemented&quot;)]
-        public void Rule_532_Field_Selection_Merging()
-        {
-            //todo
-        }
-</code></pre>
+<pre><code class="language-csharp">tanka.graphql.tests.validation.ValidatorFacts.Rule_532_Field_Selection_Merging</code></pre>
 <pre><code class="language-csharp">
         [Fact(Skip = &quot;TODO: 5.7.2&quot;)]
         public void Rule_572_DirectivesAreInValidLocations_valid1()
