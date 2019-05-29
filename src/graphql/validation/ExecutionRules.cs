@@ -15,24 +15,25 @@ namespace tanka.graphql.validation
             R511ExecutableDefinitions(),
             R5211OperationNameUniqueness(),
             R5221LoneAnonymousOperation(),
+            R5231SingleRootField(),
+            R561ValuesOfCorrectType(),
+            R5513FragmentsOnCompositeTypes(),
+            R533LeafFieldSelections(),
+            R531FieldSelections(),
             R5511FragmentNameUniqueness(),
             R5512FragmentSpreadTypeExistence(),
-            R5513FragmentsOnCompositeTypes(),
             R5514FragmentsMustBeUsed(),
             R5522FragmentSpreadsMustNotFormCycles(),
             R5523FragmentSpreadIsPossible(),
-            R5231SingleRootField(),
-            R531FieldSelections(),
-            R533LeafFieldSelections(),
             R541ArgumentNames(),
             R542ArgumentUniqueness(),
             R5421RequiredArguments(),
-            R561ValuesOfCorrectType(),
             R562InputObjectFieldNames(),
             R563InputObjectFieldUniqueness(),
             R564InputObjectRequiredFields(),
             R57Directives(),
-            R58Variables()
+            R58Variables(),
+            R532FieldSelectionMerging()
         };
 
 

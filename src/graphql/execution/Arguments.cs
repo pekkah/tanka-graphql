@@ -56,12 +56,11 @@ namespace tanka.graphql.execution
 
             if (argumentValue is GraphQLVariable variable)
             {
-                var variableName = variable.Name.Value;
-
                 if (coercedVariableValues == null)
                     hasValue = false;
                 else
                 {
+                    var variableName = variable.Name.Value;
                     hasValue = coercedVariableValues.ContainsKey(variableName);
                     if (hasValue)
                         value = coercedVariableValues[variableName];
