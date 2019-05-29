@@ -43,5 +43,7 @@
         public const string R57Directives = "5.7 Directives";
 
         public const string R58Variables = "5.8 Variables";
+
+        public const string R532FieldSelectionMerging = "5.3.2 Field Selection Merging";
     }
 }
