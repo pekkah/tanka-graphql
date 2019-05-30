@@ -1701,14 +1701,14 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                ExecutionRules.R57Directives());
+                ExecutionRules.R571And573Directives());
 
             /* Then */
             Assert.True(result.IsValid);
         }
 
         [Fact]
-        public void Rule_57_DirectivesAreDefined_invalid1()
+        public void Rule_571_DirectivesAreDefined_invalid1()
         {
             /* Given */
             var document = Parser.ParseDocument(
@@ -1720,18 +1720,36 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                ExecutionRules.R57Directives());
+                ExecutionRules.R571And573Directives());
 
             /* Then */
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == ValidationErrorCodes.R57Directives);
+                error => error.Code == ValidationErrorCodes.R571DirectivesAreDefined);
         }
 
-        [Fact(Skip = "TODO: 5.7.2")]
-        public void Rule_572_DirectivesAreInValidLocations_valid1()
+        [Fact]
+        public void Rule_572_DirectivesAreInValidLocations_invalid1()
         {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query @skip(if: $foo) {
+                  field
+                }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R572DirectivesAreInValidLocations());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R572DirectivesAreInValidLocations);
         }
 
         [Fact]
@@ -1752,7 +1770,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                ExecutionRules.R57Directives());
+                ExecutionRules.R571And573Directives());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -1771,13 +1789,13 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                ExecutionRules.R57Directives());
+                ExecutionRules.R571And573Directives());
 
             /* Then */
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == ValidationErrorCodes.R57Directives);
+                error => error.Code == ValidationErrorCodes.R573DirectivesAreUniquePerLocation);
         }
 
         [Fact]

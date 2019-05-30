@@ -40,7 +40,11 @@
 
         public const string R564InputObjectRequiredFields = "5.6.4 Input Object Required Fields";
 
-        public const string R57Directives = "5.7 Directives";
+        public const string R571DirectivesAreDefined = "5.7.1 Directives Are Defined";
+
+        public const string R572DirectivesAreInValidLocations = "5.7.2 Directives Are In Valid Locations";
+
+        public const string R573DirectivesAreUniquePerLocation = "5.7.3 Directives Are Unique Per Location";
 
         public const string R58Variables = "5.8 Variables";
 

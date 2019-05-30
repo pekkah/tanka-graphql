@@ -31,7 +31,7 @@ namespace tanka.graphql.validation
             R562InputObjectFieldNames(),
             R563InputObjectFieldUniqueness(),
             R564InputObjectRequiredFields(),
-            R57Directives(),
+            R571And573Directives(),
             R58Variables(),
             R532FieldSelectionMerging()
         };
@@ -1020,10 +1020,10 @@ namespace tanka.graphql.validation
         }
 
         /// <summary>
-        ///     5.7.1, 5.73
+        ///     5.7.1, 5.7.3
         /// </summary>
         /// <returns></returns>
-        public static CombineRule R57Directives()
+        public static CombineRule R571And573Directives()
         {
             return (context, rule) =>
             {
@@ -1034,7 +1034,7 @@ namespace tanka.graphql.validation
 
                     if (directiveDefinition == null)
                         context.Error(
-                            ValidationErrorCodes.R57Directives,
+                            ValidationErrorCodes.R571DirectivesAreDefined,
                             "GraphQL servers define what directives they support. " +
                             "For each usage of a directive, the directive must be available " +
                             "on that server. " +
@@ -1058,7 +1058,7 @@ namespace tanka.graphql.validation
                 {
                     if (knownDirectives.Contains(directive.Name.Value))
                         context.Error(
-                            ValidationErrorCodes.R57Directives,
+                            ValidationErrorCodes.R573DirectivesAreUniquePerLocation,
                             "For each usage of a directive, the directive must be used in a " +
                             "location that the server has declared support for. " +
                             $"Directive '{directive.Name.Value}' is used multiple times on same location",
@@ -1067,6 +1067,17 @@ namespace tanka.graphql.validation
                     knownDirectives.Add(directive.Name.Value);
                 }
             }
+        }
+
+        public static CombineRule R572DirectivesAreInValidLocations()
+        {
+            return (context, rule) => 
+            { 
+                rule.EnterDirective += node =>
+                {
+
+                }
+            };
         }
 
         /// <summary>
