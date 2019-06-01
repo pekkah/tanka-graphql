@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using GraphQLParser.AST;
 using tanka.graphql.language;
 using tanka.graphql.type;
@@ -345,10 +346,7 @@ namespace tanka.graphql.validation
 
         public override ASTNode BeginVisitNode(ASTNode node)
         {
-            {
-                Tracker.EnterNode?.Invoke(node);
-            }
-
+            Tracker.EnterNode?.Invoke(node);
             return base.BeginVisitNode(node);
         }
 
@@ -384,6 +382,155 @@ namespace tanka.graphql.validation
                 Errors = _errors,
                 Extensions = Extensions.Data
             };
+        }
+
+        public List<VariableUsage> GetVariables(
+            ASTNode rootNode)
+        {
+            var usages = new List<VariableUsage>();
+
+            var visitor = new RulesWalker(new CombineRule[]
+                {
+                    (context, rule) =>
+                    {
+                        rule.EnterVariable += node =>
+                        {
+                            usages.Add(new VariableUsage()
+                            {
+                                Node = node,
+                                Type = context.Tracker.GetCurrentType()
+                            });
+                        };
+                    }
+                },
+                Schema,
+                Document,
+                VariableValues);
+
+
+            visitor.BeginVisitNode(rootNode);
+
+            return usages;
+        }
+
+
+        private readonly Dictionary<GraphQLOperationDefinition, List<VariableUsage>> _variables 
+        = new Dictionary<GraphQLOperationDefinition, List<VariableUsage>>();
+        
+        public IEnumerable<VariableUsage> GetRecursiveVariables(
+            GraphQLOperationDefinition operation)
+        {
+            if (_variables.TryGetValue(operation, out var results))
+            {
+                return results;
+            }
+
+            var usages = GetVariables(operation);
+
+            foreach (var fragment in GetRecursivelyReferencedFragments(operation))
+            {
+                usages.AddRange(GetVariables(fragment));
+            }
+
+            _variables[operation] = usages;
+
+            return usages;
+        }
+
+        public GraphQLFragmentDefinition GetFragment(string name)
+        {
+            return Document.Definitions.OfType<GraphQLFragmentDefinition>()
+                .SingleOrDefault(f => f.Name.Value == name);
+        }
+
+        public List<GraphQLFragmentSpread> GetFragmentSpreads(GraphQLSelectionSet node)
+        {
+            var spreads = new List<GraphQLFragmentSpread>();
+
+            var setsToVisit = new Stack<GraphQLSelectionSet>(new[] { node });
+
+            while (setsToVisit.Count > 0)
+            {
+                var set = setsToVisit.Pop();
+
+                foreach (var selection in set.Selections)
+                {
+                    switch (selection)
+                    {
+                        case GraphQLFragmentSpread spread:
+                            spreads.Add(spread);
+                            break;
+                        case GraphQLInlineFragment inlineFragment:
+                        {
+                            if (inlineFragment.SelectionSet != null)
+                                setsToVisit.Push(inlineFragment.SelectionSet);
+                            break;
+                        }
+
+                        case GraphQLOperationDefinition operationDefinition:
+                        {
+                            if (operationDefinition.SelectionSet != null)
+                                setsToVisit.Push(operationDefinition.SelectionSet);
+                            break;
+                        }
+
+                        case GraphQLFieldSelection fieldSelection:
+                        {
+                            if (fieldSelection.SelectionSet != null)
+                            {
+                                setsToVisit.Push(fieldSelection.SelectionSet);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return spreads;
+        }
+
+        private readonly Dictionary<GraphQLOperationDefinition, List<GraphQLFragmentDefinition>> _fragments = 
+            new Dictionary<GraphQLOperationDefinition, List<GraphQLFragmentDefinition>>();
+
+        public IEnumerable<GraphQLFragmentDefinition> GetRecursivelyReferencedFragments(
+            GraphQLOperationDefinition operation)
+        {
+            if (_fragments.TryGetValue(operation, out var results))
+            {
+                return results;
+            }
+
+            var fragments = new List<GraphQLFragmentDefinition>();
+            var nodesToVisit = new Stack<GraphQLSelectionSet>(new[]
+            {
+                operation.SelectionSet
+            });
+            var collectedNames = new Dictionary<string, bool>();
+
+            while (nodesToVisit.Count > 0)
+            {
+                var node = nodesToVisit.Pop();
+
+                foreach (var spread in GetFragmentSpreads(node))
+                {
+                    var fragName = spread.Name.Value;
+                    if (!collectedNames.ContainsKey(fragName))
+                    {
+                        collectedNames[fragName] = true;
+
+                        var fragment = GetFragment(fragName);
+                        if (fragment != null)
+                        {
+                            fragments.Add(fragment);
+                            nodesToVisit.Push(fragment.SelectionSet);
+                        }
+                    }
+                }
+            }
+
+            _fragments[operation] = fragments;
+
+            return fragments;
         }
     }
 }

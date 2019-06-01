@@ -12,6 +12,8 @@
 
         public const string R531FieldSelections = "5.3.1 Field Selections on Objects, Interfaces, and Unions Types";
 
+        public const string R532FieldSelectionMerging = "5.3.2 Field Selection Merging";
+
         public const string R533LeafFieldSelections = "5.3.3 Leaf Field Selections";
 
         public const string R541ArgumentNames = "5.4.1 Argument Names";
@@ -46,8 +48,13 @@
 
         public const string R573DirectivesAreUniquePerLocation = "5.7.3 Directives Are Unique Per Location";
 
-        public const string R58Variables = "5.8 Variables";
+        public static string R581VariableUniqueness = "5.8.1 Variable Uniqueness";
+       
+        public const string R582VariablesAreInputTypes = "5.8.2 Variables Are Input Types";
 
-        public const string R532FieldSelectionMerging = "5.3.2 Field Selection Merging";
+        public const string R583AllVariablesUsed = "5.8.3 All Variable Uses Defined";
+
+        public const string R584AllVariablesUsed = "5.8.4 All Variables Used";
+
     }
 }

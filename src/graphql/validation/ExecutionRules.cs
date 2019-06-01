@@ -33,7 +33,7 @@ namespace tanka.graphql.validation
             R564InputObjectRequiredFields(),
             R571And573Directives(),
             R572DirectivesAreInValidLocations(),
-            R58Variables(),
+            R581And582Variables(),
             R532FieldSelectionMerging()
         };
 
@@ -1176,7 +1176,7 @@ namespace tanka.graphql.validation
         ///     5.8.1, 5.8.2
         /// </summary>
         /// <returns></returns>
-        public static CombineRule R58Variables()
+        public static CombineRule R581And582Variables()
         {
             return (context, rule) =>
             {
@@ -1194,7 +1194,7 @@ namespace tanka.graphql.validation
                         // 5.8.1 Variable Uniqueness
                         if (knownVariables.Contains(variableName))
                             context.Error(
-                                ValidationErrorCodes.R58Variables,
+                                ValidationErrorCodes.R581VariableUniqueness,
                                 "If any operation defines more than one " +
                                 "variable with the same name, it is ambiguous and " +
                                 "invalid. It is invalid even if the type of the " +
@@ -1208,11 +1208,49 @@ namespace tanka.graphql.validation
                         var variableType = Ast.TypeFromAst(context.Schema, variableUsage.Type);
                         if (!TypeIs.IsInputType(variableType))
                             context.Error(
-                                ValidationErrorCodes.R58Variables,
+                                ValidationErrorCodes.R582VariablesAreInputTypes,
                                 "Variables can only be input types. Objects, unions, " +
                                 "and interfaces cannot be used as inputs.. " +
                                 $"Given type of '{variableName}' is '{variableType}'",
                                 node);
+                    }
+                };
+            };
+        }
+
+        public static CombineRule R584AllVariablesUsed()
+        {
+            return (context, rule) =>
+            {
+                var variableDefinitions = new List<GraphQLVariableDefinition>();
+
+                rule.EnterVariableDefinition += node => variableDefinitions.Add(node);
+                rule.EnterOperationDefinition += node =>
+                {
+                    variableDefinitions.Clear();
+                };
+                rule.LeaveOperationDefinition += node =>
+                {
+                    var usages = context.GetRecursiveVariables(node)
+                        .Select(usage => usage.Node.Name.Value)
+                        .ToList();
+
+                    foreach (var variableDefinition in variableDefinitions)
+                    {
+                        var variableName = variableDefinition.Variable.Name.Value;
+
+                        if (!usages.Contains(variableName))
+                        {
+                            context.Error(
+                                ValidationErrorCodes.R584AllVariablesUsed,
+                                $"All variables defined by an operation " +
+                                $"must be used in that operation or a fragment " +
+                                $"transitively included by that operation. Unused " +
+                                $"variables cause a validation error. " +
+                                $"Variable: '{variableName}' is not used.",
+                                variableDefinition
+                                );
+                        }
                     }
                 };
             };
