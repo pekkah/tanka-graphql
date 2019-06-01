@@ -229,15 +229,31 @@
             R562InputObjectFieldNames(),
             R563InputObjectFieldUniqueness(),
             R564InputObjectRequiredFields(),
-            R57Directives(),
+            R571And573Directives(),
+            R572DirectivesAreInValidLocations(),
             R58Variables(),
             R532FieldSelectionMerging()
         }</code></pre></p>
 <p>Rules not implemented
 <pre><code class="language-csharp">
-        [Fact(Skip = &quot;TODO: 5.7.2&quot;)]
+        [Fact]
         public void Rule_572_DirectivesAreInValidLocations_valid1()
         {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @&quot;
+                query {
+                  field @skip(if: $foo)
+                }
+                 &quot;);
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R572DirectivesAreInValidLocations());
+
+            /* Then */
+            Assert.True(result.IsValid);
         }
 </code></pre>
 <pre><code class="language-csharp">
