@@ -55,16 +55,11 @@ namespace tanka.graphql.validation
 
         public override void Visit(GraphQLDocument document)
         {
-            {
-                Tracker.EnterDocument?.Invoke(document);
-            }
+            Tracker.EnterDocument?.Invoke(document);
 
             base.Visit(document);
-
-
-            {
-                Tracker.LeaveDocument?.Invoke(document);
-            }
+            
+            Tracker.LeaveDocument?.Invoke(document);
         }
 
         public override GraphQLName BeginVisitAlias(GraphQLName alias)
@@ -97,17 +92,11 @@ namespace tanka.graphql.validation
 
         public override GraphQLDirective BeginVisitDirective(GraphQLDirective directive)
         {
-            {
-                Tracker.EnterDirective?.Invoke(directive);
-            }
-
+            Tracker.EnterDirective?.Invoke(directive);
+            
             var _ = base.BeginVisitDirective(directive);
 
-
-            {
-                Tracker.LeaveDirective?.Invoke(directive);
-            }
-
+            Tracker.LeaveDirective?.Invoke(_);
             return _;
         }
 
@@ -130,9 +119,7 @@ namespace tanka.graphql.validation
         public override GraphQLFieldSelection BeginVisitFieldSelection(
             GraphQLFieldSelection selection)
         {
-            {
-                Tracker.EnterFieldSelection?.Invoke(selection);
-            }
+            Tracker.EnterFieldSelection?.Invoke(selection);
 
             return base.BeginVisitFieldSelection(selection);
         }

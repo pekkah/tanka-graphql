@@ -31,7 +31,8 @@ namespace tanka.graphql.validation
             R562InputObjectFieldNames(),
             R563InputObjectFieldUniqueness(),
             R564InputObjectRequiredFields(),
-            R57Directives(),
+            R571And573Directives(),
+            R572DirectivesAreInValidLocations(),
             R58Variables(),
             R532FieldSelectionMerging()
         };
@@ -1020,10 +1021,10 @@ namespace tanka.graphql.validation
         }
 
         /// <summary>
-        ///     5.7.1, 5.73
+        ///     5.7.1, 5.7.3
         /// </summary>
         /// <returns></returns>
-        public static CombineRule R57Directives()
+        public static CombineRule R571And573Directives()
         {
             return (context, rule) =>
             {
@@ -1034,7 +1035,7 @@ namespace tanka.graphql.validation
 
                     if (directiveDefinition == null)
                         context.Error(
-                            ValidationErrorCodes.R57Directives,
+                            ValidationErrorCodes.R571DirectivesAreDefined,
                             "GraphQL servers define what directives they support. " +
                             "For each usage of a directive, the directive must be available " +
                             "on that server. " +
@@ -1058,7 +1059,7 @@ namespace tanka.graphql.validation
                 {
                     if (knownDirectives.Contains(directive.Name.Value))
                         context.Error(
-                            ValidationErrorCodes.R57Directives,
+                            ValidationErrorCodes.R573DirectivesAreUniquePerLocation,
                             "For each usage of a directive, the directive must be used in a " +
                             "location that the server has declared support for. " +
                             $"Directive '{directive.Name.Value}' is used multiple times on same location",
@@ -1066,6 +1067,108 @@ namespace tanka.graphql.validation
 
                     knownDirectives.Add(directive.Name.Value);
                 }
+            }
+        }
+
+        public static CombineRule R572DirectivesAreInValidLocations()
+        {
+            return (context, rule) =>
+            {
+                rule.EnterOperationDefinition += node => CheckDirectives(context, node, node.Directives);
+                rule.EnterFieldSelection += node => CheckDirectives(context, node, node.Directives);
+                rule.EnterFragmentDefinition += node => CheckDirectives(context, node, node.Directives);
+                rule.EnterFragmentSpread += node => CheckDirectives(context, node, node.Directives);
+                rule.EnterInlineFragment += node => CheckDirectives(context, node, node.Directives);
+            };
+
+            // 5.7.2
+            void CheckDirectives(
+                IRuleVisitorContext context,
+                ASTNode node,
+                IEnumerable<GraphQLDirective> directives)
+            {
+                var currentLocation = GetLocation(node);
+                foreach (var directive in directives)
+                {
+                    var directiveType = context.Schema.GetDirectiveType(
+                        directive.Name.Value);
+
+                    var validLocations = directiveType.Locations
+                        .ToArray();
+
+                    if (!validLocations.Contains(currentLocation))
+                    {
+                        context.Error(
+                            ValidationErrorCodes.R572DirectivesAreInValidLocations,
+                            $"GraphQL servers define what directives they support " +
+                            $"and where they support them. For each usage of a directive, " +
+                            $"the directive must be used in a location that the server has " +
+                            $"declared support for. " +
+                            $"Directive '{directive.Name.Value}' is in invalid location " +
+                            $"'{currentLocation}'. Valid locations: '{string.Join(",", validLocations)}'",
+                            directive);
+                    }
+                }
+            }
+
+            DirectiveLocation GetLocation(ASTNode appliedTo)
+            {
+                switch (appliedTo.Kind)
+                {
+                    case ASTNodeKind.OperationDefinition:
+                        switch (((GraphQLOperationDefinition) appliedTo).Operation)
+                        {
+                            case OperationType.Query:
+                                return DirectiveLocation.QUERY;
+                            case OperationType.Mutation:
+                                return DirectiveLocation.MUTATION;
+                            case OperationType.Subscription:
+                                return DirectiveLocation.SUBSCRIPTION;
+                        }
+
+                        break;
+                    case ASTNodeKind.Field:
+                        return DirectiveLocation.FIELD;
+                    case ASTNodeKind.FragmentSpread:
+                        return DirectiveLocation.FRAGMENT_SPREAD;
+                    case ASTNodeKind.InlineFragment:
+                        return DirectiveLocation.INLINE_FRAGMENT;
+                    case ASTNodeKind.FragmentDefinition:
+                        return DirectiveLocation.FRAGMENT_DEFINITION;
+                    case ASTNodeKind.VariableDefinition:
+                        throw new InvalidOperationException($"Not supported");
+                    case ASTNodeKind.SchemaDefinition:
+                        //case ASTNodeKind.SCHEMA_EXTENSION:
+                        return DirectiveLocation.SCHEMA;
+                    case ASTNodeKind.ScalarTypeDefinition:
+                        //case ASTNodeKind.SCALAR_TYPE_EXTENSION:
+                        return DirectiveLocation.SCALAR;
+                    case ASTNodeKind.ObjectTypeDefinition:
+                        //case ASTNodeKind.OBJECT_TYPE_EXTENSION:
+                        return DirectiveLocation.OBJECT;
+                    case ASTNodeKind.FieldDefinition:
+                        return DirectiveLocation.FIELD_DEFINITION;
+                    case ASTNodeKind.InterfaceTypeDefinition:
+                        //case ASTNodeKind.INTERFACE_TYPE_EXTENSION:
+                        return DirectiveLocation.INTERFACE;
+                    case ASTNodeKind.UnionTypeDefinition:
+                        //case ASTNodeKind.UNION_TYPE_EXTENSION:
+                        return DirectiveLocation.UNION;
+                    case ASTNodeKind.EnumTypeDefinition:
+                        //case ASTNodeKind.ENUM_TYPE_EXTENSION:
+                        return DirectiveLocation.ENUM;
+                    case ASTNodeKind.EnumValueDefinition:
+                        return DirectiveLocation.ENUM_VALUE;
+                    case ASTNodeKind.InputObjectTypeDefinition:
+                        //case ASTNodeKind.INPUT_OBJECT_TYPE_EXTENSION:
+                        return DirectiveLocation.INPUT_OBJECT;
+                    case ASTNodeKind.Argument:
+                        return DirectiveLocation.ARGUMENT_DEFINITION; //todo: is this correct?
+                    case ASTNodeKind.InputValueDefinition:
+                        return DirectiveLocation.INPUT_FIELD_DEFINITION;
+                }
+
+                throw new InvalidOperationException($"Not supported location: {appliedTo.Kind}");
             }
         }
 

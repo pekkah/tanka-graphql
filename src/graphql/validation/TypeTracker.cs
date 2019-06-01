@@ -50,7 +50,10 @@ namespace tanka.graphql.validation
                 _typeStack.Push(TypeIs.IsOutputType(fieldType) ? fieldType : null);
             };
 
-            EnterDirective = directive => { _directive = schema.GetDirectiveType(directive.Name.Value); };
+            EnterDirective = directive =>
+            {
+                _directive = schema.GetDirectiveType(directive.Name.Value);
+            };
 
             EnterOperationDefinition = definition =>
             {
