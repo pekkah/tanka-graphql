@@ -1730,6 +1730,26 @@ namespace tanka.graphql.tests.validation
         }
 
         [Fact]
+        public void Rule_572_DirectivesAreInValidLocations_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query {
+                  field @skip(if: $foo)
+                }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R572DirectivesAreInValidLocations());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
         public void Rule_572_DirectivesAreInValidLocations_invalid1()
         {
             /* Given */
