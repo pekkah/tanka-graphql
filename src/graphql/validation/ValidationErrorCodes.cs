@@ -56,5 +56,6 @@
 
         public const string R584AllVariablesUsed = "5.8.4 All Variables Used";
 
+        public const string R585AllVariableUsagesAreAllowed = "5.8.5 All Variable Usages Are Allowed";
     }
 }

@@ -256,27 +256,18 @@ namespace tanka.graphql.validation
 
         public override GraphQLVariable BeginVisitVariable(GraphQLVariable variable)
         {
-            {
-                Tracker.EnterVariable?.Invoke(variable);
-            }
-
+            Tracker.EnterVariable?.Invoke(variable);
             return base.BeginVisitVariable(variable);
         }
 
         public override GraphQLVariableDefinition BeginVisitVariableDefinition(
             GraphQLVariableDefinition node)
         {
-            {
-                Tracker.EnterVariableDefinition?.Invoke(node);
-            }
-
+            Tracker.EnterVariableDefinition?.Invoke(node);
+            
             var _ = base.BeginVisitVariableDefinition(node);
 
-
-            {
-                Tracker.LeaveVariableDefinition?.Invoke(node);
-            }
-
+            Tracker.LeaveVariableDefinition?.Invoke(node);
             return _;
         }
 
@@ -301,10 +292,7 @@ namespace tanka.graphql.validation
 
         public override GraphQLVariable EndVisitVariable(GraphQLVariable variable)
         {
-            {
-                Tracker.EnterVariable?.Invoke(variable);
-            }
-
+            Tracker.LeaveVariable?.Invoke(variable);
             return base.EndVisitVariable(variable);
         }
 
@@ -398,7 +386,8 @@ namespace tanka.graphql.validation
                             usages.Add(new VariableUsage()
                             {
                                 Node = node,
-                                Type = context.Tracker.GetCurrentType()
+                                Type = context.Tracker.GetInputType(),
+                                DefaultValue = context.Tracker.GetDefaultValue()
                             });
                         };
                     }

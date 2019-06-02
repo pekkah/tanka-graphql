@@ -1938,10 +1938,14 @@ namespace tanka.graphql.tests.validation
                          && error.Message.StartsWith("Variables can only be input types. Objects, unions,"));
         }
 
-        [Fact(Skip = "TODO")]
+        [Fact(Skip = "todo")]
         public void Rule_583_AllVariableUsesDefined_valid1()
         {
-            
+        }
+
+        [Fact(Skip = "todo")]
+        public void Rule_583_AllVariableUsesDefined_invalid1()
+        {
         }
 
         [Fact]
@@ -2062,9 +2066,29 @@ namespace tanka.graphql.tests.validation
             Assert.True(result.IsValid);
         }
 
-        [Fact(Skip = "TODO")]
-        public void Rule_585_AllVariableUsagesAreAllowed_valid1()
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_invalid1()
         {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query intCannotGoIntoBoolean($intArg: Int) {
+                  arguments {
+                    booleanArgField(booleanArg: $intArg)
+                  }
+                }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
         }
     }
 }

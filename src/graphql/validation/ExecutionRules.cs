@@ -1182,10 +1182,10 @@ namespace tanka.graphql.validation
             {
                 rule.EnterOperationDefinition += node =>
                 {
-                    var knownVariables = new List<string>();
                     if (node.VariableDefinitions == null)
                         return;
 
+                    var knownVariables = new List<string>();
                     foreach (var variableUsage in node.VariableDefinitions)
                     {
                         var variable = variableUsage.Variable;
@@ -1254,6 +1254,131 @@ namespace tanka.graphql.validation
                     }
                 };
             };
+        }
+
+        public static CombineRule R585AllVariableUsagesAreAllowed()
+        {
+            return (context, rule) =>
+            {
+                var variableDefinitions = new Dictionary<string, GraphQLVariableDefinition>();
+
+                rule.EnterVariableDefinition += node => 
+                    variableDefinitions[node.Variable.Name.Value] = node;
+                rule.EnterOperationDefinition += node =>
+                {
+                    variableDefinitions.Clear();
+                };
+                rule.LeaveOperationDefinition += node =>
+                {
+                    var usages = context.GetRecursiveVariables(node);
+
+                    foreach (var usage in usages)
+                    {
+                        var variableName = usage.Node.Name.Value;
+
+                        if (!variableDefinitions.TryGetValue(variableName, out var variableDefinition))
+                        {
+                            return;
+                        }
+
+                        var variableType = Ast.TypeFromAst(context.Schema, variableDefinition.Type);
+                        if (variableType != null && !AllowedVariableUsage(
+                                context.Schema,
+                                variableType,
+                                variableDefinition.DefaultValue,
+                                usage.Type,
+                                usage.DefaultValue))
+                        {
+                            context.Error(
+                                ValidationErrorCodes.R585AllVariableUsagesAreAllowed,
+                                $"Variable usages must be compatible with the arguments they are passed to. " +
+                                $"Variable '{variableName}' of type '{variableType}' used in " +
+                                $"position expecting type '{usage.Type}'");
+                        }
+                    }
+                };
+            };
+
+            bool AllowedVariableUsage(
+                ISchema schema,
+                IType varType,
+                object varDefaultValue,
+                IType locationType,
+                object locationDefaultValue
+                )
+            {
+                if (locationType is NonNull nonNullLocationType && !(varType is NonNull)) 
+                {
+                    bool hasNonNullVariableDefaultValue = varDefaultValue != null;
+                    bool hasLocationDefaultValue = locationDefaultValue != null;
+
+                    if (!hasNonNullVariableDefaultValue && !hasLocationDefaultValue) {
+                        return false;
+                    }
+
+                    var nullableLocationType = nonNullLocationType.WrappedType;
+                    return IsTypeSubTypeOf(schema, varType, nullableLocationType);
+                }
+
+                return IsTypeSubTypeOf(schema, varType, locationType);
+            }
+
+            //todo: Move to TypeIs
+            bool IsTypeSubTypeOf(
+                ISchema schema,
+                IType maybeSubType,
+                IType superType
+            )
+            {
+                // Equivalent type is a valid subtype
+                if (Equals(maybeSubType, superType)) {
+                    return true;
+                }
+
+                // If superType is non-null, maybeSubType must also be non-null.
+                if (superType is NonNull nonNullSuperType) {
+                    if (maybeSubType is NonNull nonNullMaybeSubType) {
+                        return IsTypeSubTypeOf(
+                            schema, 
+                            nonNullMaybeSubType.WrappedType, 
+                            nonNullSuperType.WrappedType);
+                    }
+                    return false;
+                }
+
+                if (maybeSubType is NonNull nonNullMaybeSubType2) {
+                    // If superType is nullable, maybeSubType may be non-null or nullable.
+                    return IsTypeSubTypeOf(schema, nonNullMaybeSubType2.WrappedType, superType);
+                }
+
+                // If superType type is a list, maybeSubType type must also be a list.
+                if (superType is List listSuperType) {
+                    if (maybeSubType is List listMaybeSubType) {
+                        return IsTypeSubTypeOf(
+                            schema, 
+                            listMaybeSubType.WrappedType, 
+                            listSuperType.WrappedType);
+                    }
+                    return false;
+                }
+
+                if (maybeSubType is List) {
+                    // If superType is not a list, maybeSubType must also be not a list.
+                    return false;
+                }
+
+                // If superType type is an abstract type, maybeSubType type may be a currently
+                // possible object type.
+                if (superType is IAbstractType abstractSuperType &&
+                    maybeSubType is ObjectType objectMaybeSubType &&
+                    abstractSuperType.IsPossible(objectMaybeSubType)) 
+                {
+                    return true;
+                }
+
+                // Otherwise, the child type is not a valid subtype of the parent type.
+                return false;
+            }
         }
     }
 }
