@@ -8,5 +8,7 @@ namespace tanka.graphql.validation
         public GraphQLVariable Node;
 
         public IType Type;
+
+        public object DefaultValue;
     }
 }

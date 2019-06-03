@@ -1841,7 +1841,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                ExecutionRules.R58Variables());
+                ExecutionRules.R581And582Variables());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -1862,13 +1862,13 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                ExecutionRules.R58Variables());
+                ExecutionRules.R581And582Variables());
 
             /* Then */
             Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == ValidationErrorCodes.R58Variables);
+                error => error.Code == ValidationErrorCodes.R581VariableUniqueness);
         }
 
         [Fact]
@@ -1896,7 +1896,7 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                ExecutionRules.R58Variables());
+                ExecutionRules.R581And582Variables());
 
             /* Then */
             Assert.True(result.IsValid);
@@ -1927,31 +1927,309 @@ namespace tanka.graphql.tests.validation
             /* When */
             var result = Validate(
                 document,
-                ExecutionRules.R58Variables());
+                ExecutionRules.R581And582Variables());
 
             /* Then */
             Assert.False(result.IsValid);
             Assert.Equal(4, result.Errors.Count());
             Assert.Contains(
                 result.Errors,
-                error => error.Code == ValidationErrorCodes.R58Variables
+                error => error.Code == ValidationErrorCodes.R582VariablesAreInputTypes
                          && error.Message.StartsWith("Variables can only be input types. Objects, unions,"));
         }
 
-        [Fact(Skip = "TODO")]
-        public void Rule_583_AllVariableUsesDefined()
+        [Fact(Skip = "todo")]
+        public void Rule_583_AllVariableUsesDefined_valid1()
         {
-
         }
 
-        [Fact(Skip = "TODO")]
+        [Fact(Skip = "todo")]
+        public void Rule_583_AllVariableUsesDefined_invalid1()
+        {
+        }
+
+        [Fact]
+        public void Rule_584_AllVariablesUsed_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query variableUnused($atOtherHomes: Boolean) {
+                  dog {
+                    isHousetrained
+                  }
+                }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R584AllVariablesUsed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R584AllVariablesUsed
+                         && error.Message.Contains("atOtherHomes"));
+        }
+
+        [Fact]
+        public void Rule_584_AllVariablesUsed_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query variableNotUsedWithinFragment($atOtherHomes: Boolean) {
+                  dog {
+                    ...isHousetrainedWithoutVariableFragment
+                  }
+                }
+
+                fragment isHousetrainedWithoutVariableFragment on Dog {
+                  isHousetrained
+                }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R584AllVariablesUsed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R584AllVariablesUsed
+                         && error.Message.Contains("atOtherHomes"));
+        }
+
+        [Fact]
+        public void Rule_584_AllVariablesUsed_invalid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query queryWithUsedVar($atOtherHomes: Boolean) {
+                  dog {
+                    ...isHousetrainedFragment
+                  }
+                }
+
+                query queryWithExtraVar($atOtherHomes: Boolean, $extra: Int) {
+                  dog {
+                    ...isHousetrainedFragment
+                  }
+                }
+
+                fragment isHousetrainedFragment on Dog {
+                  isHousetrained(atOtherHomes: $atOtherHomes)
+                }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R584AllVariablesUsed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R584AllVariablesUsed
+                         && error.Message.Contains("extra"));
+        }
+
+        [Fact]
         public void Rule_584_AllVariablesUsed_valid1()
         {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query variableUsedInFragment($atOtherHomes: Boolean) {
+                  dog {
+                    ...isHousetrainedFragment
+                  }
+                }
+
+                fragment isHousetrainedFragment on Dog {
+                  isHousetrained(atOtherHomes: $atOtherHomes)
+                }
+                 ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R584AllVariablesUsed());
+
+            /* Then */
+            Assert.True(result.IsValid);
         }
 
-        [Fact(Skip = "TODO")]
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query intCannotGoIntoBoolean($intArg: Int) {
+                  arguments {
+                    booleanArgField(booleanArg: $intArg)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query booleanListCannotGoIntoBoolean($booleanListArg: [Boolean]) {
+                  arguments {
+                    booleanArgField(booleanArg: $booleanListArg)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_invalid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query booleanArgQuery($booleanArg: Boolean) {
+                  arguments {
+                    nonNullBooleanArgField(nonNullBooleanArg: $booleanArg)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+        }
+
+        [Fact]
         public void Rule_585_AllVariableUsagesAreAllowed_valid1()
         {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query nonNullListToList($nonNullBooleanList: [Boolean]!) {
+                  arguments {
+                    booleanListArgField(booleanListArg: $nonNullBooleanList)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_invalid4()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query listToNonNullList($booleanList: [Boolean]) {
+                  arguments {
+                    nonNullBooleanListField(nonNullBooleanListArg: $booleanList)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_valid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query booleanArgQueryWithDefault($booleanArg: Boolean) {
+                  arguments {
+                    optionalNonNullBooleanArgField(optionalBooleanArg: $booleanArg)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_valid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query booleanArgQueryWithDefault($booleanArg: Boolean = true) {
+                  arguments {
+                    nonNullBooleanArgField(nonNullBooleanArg: $booleanArg)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.True(result.IsValid);
         }
     }
 }

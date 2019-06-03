@@ -13,28 +13,41 @@ namespace tanka.graphql.validation
         public static IEnumerable<CombineRule> All = new[]
         {
             R511ExecutableDefinitions(),
+            
             R5211OperationNameUniqueness(),
             R5221LoneAnonymousOperation(),
             R5231SingleRootField(),
-            R561ValuesOfCorrectType(),
-            R5513FragmentsOnCompositeTypes(),
-            R533LeafFieldSelections(),
+            
             R531FieldSelections(),
-            R5511FragmentNameUniqueness(),
-            R5512FragmentSpreadTypeExistence(),
-            R5514FragmentsMustBeUsed(),
-            R5522FragmentSpreadsMustNotFormCycles(),
-            R5523FragmentSpreadIsPossible(),
+            R532FieldSelectionMerging(),
+            R533LeafFieldSelections(),
+
             R541ArgumentNames(),
             R542ArgumentUniqueness(),
             R5421RequiredArguments(),
+
+            R5511FragmentNameUniqueness(),
+            R5512FragmentSpreadTypeExistence(),
+            R5513FragmentsOnCompositeTypes(),
+            R5514FragmentsMustBeUsed(),
+
+            //todo: 5.5.2.1 Fragment spread target defined
+            R5522FragmentSpreadsMustNotFormCycles(),
+            R5523FragmentSpreadIsPossible(),
+
+            R561ValuesOfCorrectType(),
             R562InputObjectFieldNames(),
             R563InputObjectFieldUniqueness(),
             R564InputObjectRequiredFields(),
+            
             R571And573Directives(),
             R572DirectivesAreInValidLocations(),
-            R58Variables(),
-            R532FieldSelectionMerging()
+
+            R581And582Variables(),
+            //todo: 5.8.3 All Variable Uses Defined
+            R584AllVariablesUsed(),
+            R585AllVariableUsagesAreAllowed(),
+            
         };
 
 
@@ -1176,16 +1189,16 @@ namespace tanka.graphql.validation
         ///     5.8.1, 5.8.2
         /// </summary>
         /// <returns></returns>
-        public static CombineRule R58Variables()
+        public static CombineRule R581And582Variables()
         {
             return (context, rule) =>
             {
                 rule.EnterOperationDefinition += node =>
                 {
-                    var knownVariables = new List<string>();
                     if (node.VariableDefinitions == null)
                         return;
 
+                    var knownVariables = new List<string>();
                     foreach (var variableUsage in node.VariableDefinitions)
                     {
                         var variable = variableUsage.Variable;
@@ -1194,7 +1207,7 @@ namespace tanka.graphql.validation
                         // 5.8.1 Variable Uniqueness
                         if (knownVariables.Contains(variableName))
                             context.Error(
-                                ValidationErrorCodes.R58Variables,
+                                ValidationErrorCodes.R581VariableUniqueness,
                                 "If any operation defines more than one " +
                                 "variable with the same name, it is ambiguous and " +
                                 "invalid. It is invalid even if the type of the " +
@@ -1208,7 +1221,7 @@ namespace tanka.graphql.validation
                         var variableType = Ast.TypeFromAst(context.Schema, variableUsage.Type);
                         if (!TypeIs.IsInputType(variableType))
                             context.Error(
-                                ValidationErrorCodes.R58Variables,
+                                ValidationErrorCodes.R582VariablesAreInputTypes,
                                 "Variables can only be input types. Objects, unions, " +
                                 "and interfaces cannot be used as inputs.. " +
                                 $"Given type of '{variableName}' is '{variableType}'",
@@ -1216,6 +1229,169 @@ namespace tanka.graphql.validation
                     }
                 };
             };
+        }
+
+        public static CombineRule R584AllVariablesUsed()
+        {
+            return (context, rule) =>
+            {
+                var variableDefinitions = new List<GraphQLVariableDefinition>();
+
+                rule.EnterVariableDefinition += node => variableDefinitions.Add(node);
+                rule.EnterOperationDefinition += node =>
+                {
+                    variableDefinitions.Clear();
+                };
+                rule.LeaveOperationDefinition += node =>
+                {
+                    var usages = context.GetRecursiveVariables(node)
+                        .Select(usage => usage.Node.Name.Value)
+                        .ToList();
+
+                    foreach (var variableDefinition in variableDefinitions)
+                    {
+                        var variableName = variableDefinition.Variable.Name.Value;
+
+                        if (!usages.Contains(variableName))
+                        {
+                            context.Error(
+                                ValidationErrorCodes.R584AllVariablesUsed,
+                                $"All variables defined by an operation " +
+                                $"must be used in that operation or a fragment " +
+                                $"transitively included by that operation. Unused " +
+                                $"variables cause a validation error. " +
+                                $"Variable: '{variableName}' is not used.",
+                                variableDefinition
+                                );
+                        }
+                    }
+                };
+            };
+        }
+
+        public static CombineRule R585AllVariableUsagesAreAllowed()
+        {
+            return (context, rule) =>
+            {
+                var variableDefinitions = new Dictionary<string, GraphQLVariableDefinition>();
+
+                rule.EnterVariableDefinition += node => 
+                    variableDefinitions[node.Variable.Name.Value] = node;
+                rule.EnterOperationDefinition += node =>
+                {
+                    variableDefinitions.Clear();
+                };
+                rule.LeaveOperationDefinition += node =>
+                {
+                    var usages = context.GetRecursiveVariables(node);
+
+                    foreach (var usage in usages)
+                    {
+                        var variableName = usage.Node.Name.Value;
+
+                        if (!variableDefinitions.TryGetValue(variableName, out var variableDefinition))
+                        {
+                            return;
+                        }
+
+                        var variableType = Ast.TypeFromAst(context.Schema, variableDefinition.Type);
+                        if (variableType != null && !AllowedVariableUsage(
+                                context.Schema,
+                                variableType,
+                                variableDefinition.DefaultValue,
+                                usage.Type,
+                                usage.DefaultValue))
+                        {
+                            context.Error(
+                                ValidationErrorCodes.R585AllVariableUsagesAreAllowed,
+                                $"Variable usages must be compatible with the arguments they are passed to. " +
+                                $"Variable '{variableName}' of type '{variableType}' used in " +
+                                $"position expecting type '{usage.Type}'");
+                        }
+                    }
+                };
+            };
+
+            bool AllowedVariableUsage(
+                ISchema schema,
+                IType varType,
+                object varDefaultValue,
+                IType locationType,
+                object locationDefaultValue
+                )
+            {
+                if (locationType is NonNull nonNullLocationType && !(varType is NonNull)) 
+                {
+                    bool hasNonNullVariableDefaultValue = varDefaultValue != null;
+                    bool hasLocationDefaultValue = locationDefaultValue != null;
+
+                    if (!hasNonNullVariableDefaultValue && !hasLocationDefaultValue) {
+                        return false;
+                    }
+
+                    var nullableLocationType = nonNullLocationType.WrappedType;
+                    return IsTypeSubTypeOf(schema, varType, nullableLocationType);
+                }
+
+                return IsTypeSubTypeOf(schema, varType, locationType);
+            }
+
+            //todo: Move to TypeIs
+            bool IsTypeSubTypeOf(
+                ISchema schema,
+                IType maybeSubType,
+                IType superType
+            )
+            {
+                // Equivalent type is a valid subtype
+                if (Equals(maybeSubType, superType)) {
+                    return true;
+                }
+
+                // If superType is non-null, maybeSubType must also be non-null.
+                if (superType is NonNull nonNullSuperType) {
+                    if (maybeSubType is NonNull nonNullMaybeSubType) {
+                        return IsTypeSubTypeOf(
+                            schema, 
+                            nonNullMaybeSubType.WrappedType, 
+                            nonNullSuperType.WrappedType);
+                    }
+                    return false;
+                }
+
+                if (maybeSubType is NonNull nonNullMaybeSubType2) {
+                    // If superType is nullable, maybeSubType may be non-null or nullable.
+                    return IsTypeSubTypeOf(schema, nonNullMaybeSubType2.WrappedType, superType);
+                }
+
+                // If superType type is a list, maybeSubType type must also be a list.
+                if (superType is List listSuperType) {
+                    if (maybeSubType is List listMaybeSubType) {
+                        return IsTypeSubTypeOf(
+                            schema, 
+                            listMaybeSubType.WrappedType, 
+                            listSuperType.WrappedType);
+                    }
+                    return false;
+                }
+
+                if (maybeSubType is List) {
+                    // If superType is not a list, maybeSubType must also be not a list.
+                    return false;
+                }
+
+                // If superType type is an abstract type, maybeSubType type may be a currently
+                // possible object type.
+                if (superType is IAbstractType abstractSuperType &&
+                    maybeSubType is ObjectType objectMaybeSubType &&
+                    abstractSuperType.IsPossible(objectMaybeSubType)) 
+                {
+                    return true;
+                }
+
+                // Otherwise, the child type is not a valid subtype of the parent type.
+                return false;
+            }
         }
     }
 }

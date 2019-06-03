@@ -63,10 +63,11 @@ namespace tanka.graphql
                             $"Operation type {queryContext.OperationDefinition.Operation} not supported.");
                 }
 
-                foreach (var validationExtension in validationResult.Extensions)
-                {
-                    executionResult.AddExtension(validationExtension.Key, validationExtension.Value);
-                }
+                if (validationResult.Extensions != null)
+                    foreach (var validationExtension in validationResult.Extensions)
+                    {
+                        executionResult.AddExtension(validationExtension.Key, validationExtension.Value);
+                    }
 
                 logger.ExecutionResult(executionResult);
                 await extensions.EndExecuteAsync(executionResult);
@@ -120,10 +121,12 @@ namespace tanka.graphql
                             $"Operation type {queryContext.OperationDefinition.Operation} not supported. Did you mean to use {nameof(ExecuteAsync)}?");
                 }
 
-                foreach (var validationExtension in validationResult.Extensions)
-                {
-                    subscriptionResult.AddExtension(validationExtension.Key, validationExtension.Value);
-                }
+                //todo: this looks ugly
+                if (validationResult.Extensions != null)
+                    foreach (var validationExtension in validationResult.Extensions)
+                    {
+                        subscriptionResult.AddExtension(validationExtension.Key, validationExtension.Value);
+                    }
 
                 logger.ExecutionResult(subscriptionResult);
                 return subscriptionResult;
