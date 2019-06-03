@@ -13,28 +13,41 @@ namespace tanka.graphql.validation
         public static IEnumerable<CombineRule> All = new[]
         {
             R511ExecutableDefinitions(),
+            
             R5211OperationNameUniqueness(),
             R5221LoneAnonymousOperation(),
             R5231SingleRootField(),
-            R561ValuesOfCorrectType(),
-            R5513FragmentsOnCompositeTypes(),
-            R533LeafFieldSelections(),
+            
             R531FieldSelections(),
-            R5511FragmentNameUniqueness(),
-            R5512FragmentSpreadTypeExistence(),
-            R5514FragmentsMustBeUsed(),
-            R5522FragmentSpreadsMustNotFormCycles(),
-            R5523FragmentSpreadIsPossible(),
+            R532FieldSelectionMerging(),
+            R533LeafFieldSelections(),
+
             R541ArgumentNames(),
             R542ArgumentUniqueness(),
             R5421RequiredArguments(),
+
+            R5511FragmentNameUniqueness(),
+            R5512FragmentSpreadTypeExistence(),
+            R5513FragmentsOnCompositeTypes(),
+            R5514FragmentsMustBeUsed(),
+
+            //todo: 5.5.2.1 Fragment spread target defined
+            R5522FragmentSpreadsMustNotFormCycles(),
+            R5523FragmentSpreadIsPossible(),
+
+            R561ValuesOfCorrectType(),
             R562InputObjectFieldNames(),
             R563InputObjectFieldUniqueness(),
             R564InputObjectRequiredFields(),
+            
             R571And573Directives(),
             R572DirectivesAreInValidLocations(),
+
             R581And582Variables(),
-            R532FieldSelectionMerging()
+            //todo: 5.8.3 All Variable Uses Defined
+            R584AllVariablesUsed(),
+            R585AllVariableUsagesAreAllowed(),
+            
         };
 
 

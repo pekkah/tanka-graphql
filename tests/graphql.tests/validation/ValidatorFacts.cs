@@ -2077,7 +2077,7 @@ namespace tanka.graphql.tests.validation
                     booleanArgField(booleanArg: $intArg)
                   }
                 }
-                 ");
+                ");
 
             /* When */
             var result = Validate(
@@ -2089,6 +2089,147 @@ namespace tanka.graphql.tests.validation
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query booleanListCannotGoIntoBoolean($booleanListArg: [Boolean]) {
+                  arguments {
+                    booleanArgField(booleanArg: $booleanListArg)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_invalid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query booleanArgQuery($booleanArg: Boolean) {
+                  arguments {
+                    nonNullBooleanArgField(nonNullBooleanArg: $booleanArg)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query nonNullListToList($nonNullBooleanList: [Boolean]!) {
+                  arguments {
+                    booleanListArgField(booleanListArg: $nonNullBooleanList)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_invalid4()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query listToNonNullList($booleanList: [Boolean]) {
+                  arguments {
+                    nonNullBooleanListField(nonNullBooleanListArg: $booleanList)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_valid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query booleanArgQueryWithDefault($booleanArg: Boolean) {
+                  arguments {
+                    optionalNonNullBooleanArgField(optionalBooleanArg: $booleanArg)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void Rule_585_AllVariableUsagesAreAllowed_valid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                query booleanArgQueryWithDefault($booleanArg: Boolean = true) {
+                  arguments {
+                    nonNullBooleanArgField(nonNullBooleanArg: $booleanArg)
+                  }
+                }
+                ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+            /* Then */
+            Assert.True(result.IsValid);
         }
     }
 }
