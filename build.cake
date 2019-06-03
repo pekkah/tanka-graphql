@@ -18,7 +18,7 @@ var packageFolders = GetFiles("./src/*/package.json")
 
 var version = "0.0.0-dev";
 var preRelease = true;
-var isMaster = false;
+var isMasterOrTag = false;
 
 Task("Default")
   .IsDependentOn("SetVersion")
@@ -156,8 +156,8 @@ Task("SetVersion")
         
         version = result.SemVer;
         preRelease = result.PreReleaseNumber.HasValue;
-        isMaster = result.BranchName.Contains("master");
-        Information($"Branch: {result.BranchName}\nVersion: {version}\nFullSemVer: {result.FullSemVer}\nPreRelease: {preRelease}\nisMaster: {isMaster}");
+        isMasterOrTag = result.BranchName.Contains("master") || result.BranchName.Contains("tags");
+        Information($"Branch: {result.BranchName}\nVersion: {version}\nFullSemVer: {result.FullSemVer}\nPreRelease: {preRelease}\nisMasterOrTag: {isMasterOrTag}");
         Information($"##vso[build.updatebuildnumber]{version}");
     });
 
@@ -187,7 +187,7 @@ Task("Benchmarks")
 		  var args = ProcessArgumentBuilder.FromString(
         $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i -m");
 
-      if (isMaster)
+      if (isMasterOrTag)
         args.Append("--filter *");
       else
         args.Append("--filter * --job short");
