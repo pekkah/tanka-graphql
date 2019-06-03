@@ -207,74 +207,46 @@
         }
 </code></pre></p>
 <h3 id="rules">Rules</h3>
-<p>Execution</p>
+<p>All execution rules</p>
 <p><pre><code class="language-csharp">All = new[]
         {
             R511ExecutableDefinitions(),
+            
             R5211OperationNameUniqueness(),
             R5221LoneAnonymousOperation(),
             R5231SingleRootField(),
-            R561ValuesOfCorrectType(),
-            R5513FragmentsOnCompositeTypes(),
-            R533LeafFieldSelections(),
+            
             R531FieldSelections(),
-            R5511FragmentNameUniqueness(),
-            R5512FragmentSpreadTypeExistence(),
-            R5514FragmentsMustBeUsed(),
-            R5522FragmentSpreadsMustNotFormCycles(),
-            R5523FragmentSpreadIsPossible(),
+            R532FieldSelectionMerging(),
+            R533LeafFieldSelections(),
+
             R541ArgumentNames(),
             R542ArgumentUniqueness(),
             R5421RequiredArguments(),
+
+            R5511FragmentNameUniqueness(),
+            R5512FragmentSpreadTypeExistence(),
+            R5513FragmentsOnCompositeTypes(),
+            R5514FragmentsMustBeUsed(),
+
+            //todo: 5.5.2.1 Fragment spread target defined
+            R5522FragmentSpreadsMustNotFormCycles(),
+            R5523FragmentSpreadIsPossible(),
+
+            R561ValuesOfCorrectType(),
             R562InputObjectFieldNames(),
             R563InputObjectFieldUniqueness(),
             R564InputObjectRequiredFields(),
+            
             R571And573Directives(),
             R572DirectivesAreInValidLocations(),
-            R58Variables(),
-            R532FieldSelectionMerging()
+
+            R581And582Variables(),
+            //todo: 5.8.3 All Variable Uses Defined
+            R584AllVariablesUsed(),
+            R585AllVariableUsagesAreAllowed(),
+            
         }</code></pre></p>
-<p>Rules not implemented
-<pre><code class="language-csharp">
-        [Fact]
-        public void Rule_572_DirectivesAreInValidLocations_valid1()
-        {
-            /* Given */
-            var document = Parser.ParseDocument(
-                @&quot;
-                query {
-                  field @skip(if: $foo)
-                }
-                 &quot;);
-
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R572DirectivesAreInValidLocations());
-
-            /* Then */
-            Assert.True(result.IsValid);
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact(Skip = &quot;TODO&quot;)]
-        public void Rule_583_AllVariableUsesDefined()
-        {
-
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact(Skip = &quot;TODO&quot;)]
-        public void Rule_584_AllVariablesUsed_valid1()
-        {
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact(Skip = &quot;TODO&quot;)]
-        public void Rule_585_AllVariableUsagesAreAllowed_valid1()
-        {
-        }
-</code></pre></p>
                     
             </main>
         </div>
