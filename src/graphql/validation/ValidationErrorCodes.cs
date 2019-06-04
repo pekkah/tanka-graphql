@@ -30,6 +30,8 @@
 
         public const string R5514FragmentsMustBeUsed = "5.5.1.4 Fragments Must Be Used";
 
+        public const string R5521FragmentSpreadTargetDefined = "5.5.2.1 Fragment Spread Target Defined";
+
         public const string R5522FragmentSpreadsMustNotFormCycles = "5.5.2.2 Fragment spreads must not form cycles";
 
         public const string R5523FragmentSpreadIsPossible = "5.5.2.3 Fragment spread is possible";

@@ -590,6 +590,26 @@ namespace tanka.graphql.validation
             };
         }
 
+        public static CombineRule R5521FragmentSpreadTargetDefined()
+        {
+            return (context, rule) =>
+            {
+                rule.EnterFragmentSpread += node =>
+                {
+                    var fragment = context.GetFragment(node.Name.Value);
+
+                    if (fragment == null)
+                    {
+                        context.Error(
+                            ValidationErrorCodes.R5521FragmentSpreadTargetDefined,
+                            $"Named fragment spreads must refer to fragments " +
+                            $"defined within the document. " +
+                            $"Fragment '{node.Name.Value}' not found");
+                    }
+                };
+            };
+        }
+
         public static CombineRule R5522FragmentSpreadsMustNotFormCycles()
         {
             return (context, rule) =>
