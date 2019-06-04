@@ -1294,6 +1294,59 @@ namespace tanka.graphql.tests.validation
         }
 
         [Fact]
+        public void Rule_5521_FragmentSpreadTargetDefined_invalid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                {
+                  dog {
+                    ...undefinedFragment
+                  }
+                }
+                "
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5521FragmentSpreadTargetDefined());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Contains(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R5521FragmentSpreadTargetDefined);
+        }
+
+        [Fact]
+        public void Rule_5521_FragmentSpreadTargetDefined_valid1()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+                {
+                    dog   {
+                    ...nameFragment
+                    }
+                }
+
+                fragment nameFragment on Dog {
+                  name
+                }
+                "
+            );
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R5521FragmentSpreadTargetDefined());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
         public void Rule_5522_FragmentSpreadsMustNotFormCycles_invalid1()
         {
             /* Given */

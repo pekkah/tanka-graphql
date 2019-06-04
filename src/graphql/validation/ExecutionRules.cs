@@ -31,7 +31,7 @@ namespace tanka.graphql.validation
             R5513FragmentsOnCompositeTypes(),
             R5514FragmentsMustBeUsed(),
 
-            //todo: 5.5.2.1 Fragment spread target defined
+            R5521FragmentSpreadTargetDefined(),
             R5522FragmentSpreadsMustNotFormCycles(),
             R5523FragmentSpreadIsPossible(),
 
@@ -585,6 +585,26 @@ namespace tanka.graphql.validation
                                 "Defined fragments must be used within a document. " +
                                 $"Fragment: '{name}'",
                                 fragment.Value);
+                    }
+                };
+            };
+        }
+
+        public static CombineRule R5521FragmentSpreadTargetDefined()
+        {
+            return (context, rule) =>
+            {
+                rule.EnterFragmentSpread += node =>
+                {
+                    var fragment = context.GetFragment(node.Name.Value);
+
+                    if (fragment == null)
+                    {
+                        context.Error(
+                            ValidationErrorCodes.R5521FragmentSpreadTargetDefined,
+                            $"Named fragment spreads must refer to fragments " +
+                            $"defined within the document. " +
+                            $"Fragment '{node.Name.Value}' not found");
                     }
                 };
             };
