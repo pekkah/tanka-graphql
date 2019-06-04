@@ -31,7 +31,7 @@ namespace tanka.graphql.validation
             R5513FragmentsOnCompositeTypes(),
             R5514FragmentsMustBeUsed(),
 
-            //todo: 5.5.2.1 Fragment spread target defined
+            R5521FragmentSpreadTargetDefined(),
             R5522FragmentSpreadsMustNotFormCycles(),
             R5523FragmentSpreadIsPossible(),
 
