@@ -207,64 +207,46 @@
         }
 </code></pre></p>
 <h3 id="rules">Rules</h3>
-<p>Execution</p>
+<p>All execution rules</p>
 <p><pre><code class="language-csharp">All = new[]
         {
             R511ExecutableDefinitions(),
+            
             R5211OperationNameUniqueness(),
             R5221LoneAnonymousOperation(),
+            R5231SingleRootField(),
+            
+            R531FieldSelections(),
+            R532FieldSelectionMerging(),
+            R533LeafFieldSelections(),
+
+            R541ArgumentNames(),
+            R542ArgumentUniqueness(),
+            R5421RequiredArguments(),
+
             R5511FragmentNameUniqueness(),
             R5512FragmentSpreadTypeExistence(),
             R5513FragmentsOnCompositeTypes(),
             R5514FragmentsMustBeUsed(),
+
+            R5521FragmentSpreadTargetDefined(),
             R5522FragmentSpreadsMustNotFormCycles(),
             R5523FragmentSpreadIsPossible(),
-            R5231SingleRootField(),
-            R531FieldSelections(),
-            R533LeafFieldSelections(),
-            R541ArgumentNames(),
-            R542ArgumentUniqueness(),
-            R5421RequiredArguments(),
+
             R561ValuesOfCorrectType(),
             R562InputObjectFieldNames(),
             R563InputObjectFieldUniqueness(),
             R564InputObjectRequiredFields(),
-            R57Directives(),
-            R58Variables()
-        }</code></pre></p>
-<p>Rules not implemented
-<pre><code class="language-csharp">
-        [Fact(Skip = &quot;Not implemented&quot;)]
-        public void Rule_532_Field_Selection_Merging()
-        {
-            //todo
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact(Skip = &quot;TODO: 5.7.2&quot;)]
-        public void Rule_572_DirectivesAreInValidLocations_valid1()
-        {
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact(Skip = &quot;TODO&quot;)]
-        public void Rule_583_AllVariableUsesDefined()
-        {
+            
+            R571And573Directives(),
+            R572DirectivesAreInValidLocations(),
 
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact(Skip = &quot;TODO&quot;)]
-        public void Rule_584_AllVariablesUsed_valid1()
-        {
-        }
-</code></pre>
-<pre><code class="language-csharp">
-        [Fact(Skip = &quot;TODO&quot;)]
-        public void Rule_585_AllVariableUsagesAreAllowed_valid1()
-        {
-        }
-</code></pre></p>
+            R581And582Variables(),
+            //todo: 5.8.3 All Variable Uses Defined
+            R584AllVariablesUsed(),
+            R585AllVariableUsagesAreAllowed(),
+            
+        }</code></pre></p>
                     
             </main>
         </div>
