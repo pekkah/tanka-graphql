@@ -13,18 +13,21 @@ using tanka.graphql.requests;
 
 namespace tanka.graphql.links
 {
-
     public class HttpLink
     {
-        private readonly string _url;
-        private Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url), HttpRequestMessage> _transformRequest;
-        private readonly Func<HttpResponseMessage, ValueTask<ExecutionResult>> _transformResponse;
         private readonly HttpClient _client;
+        private readonly Func<HttpResponseMessage, ValueTask<ExecutionResult>> _transformResponse;
+        private readonly string _url;
+
+        private readonly
+            Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
+                HttpRequestMessage> _transformRequest;
 
         public HttpLink(
             string url,
             Func<HttpClient> createClient = null,
-            Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url), HttpRequestMessage> transformRequest = null,
+            Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
+                HttpRequestMessage> transformRequest = null,
             Func<HttpResponseMessage, ValueTask<ExecutionResult>> transformResponse = null)
         {
             if (createClient == null)
@@ -46,7 +49,7 @@ namespace tanka.graphql.links
             (GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url) operation)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, operation.Url);
-            var query = new QueryRequest()
+            var query = new QueryRequest
             {
                 Query = operation.Document.ToGraphQL(),
                 Variables = operation.Variables?.ToDictionary(kv => kv.Key, kv => kv.Value)
@@ -59,17 +62,29 @@ namespace tanka.graphql.links
 
         public static async ValueTask<ExecutionResult> DefaultTransformResponse(HttpResponseMessage response)
         {
+            response.EnsureSuccessStatusCode();
+
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ExecutionResult>(json);
         }
 
-        public async ValueTask<ChannelReader<ExecutionResult>> Execute(GraphQLDocument document, IReadOnlyDictionary<string, object> variables, CancellationToken cancellationToken)
+        public async ValueTask<ChannelReader<ExecutionResult>> Execute(GraphQLDocument document,
+            IReadOnlyDictionary<string, object> variables, CancellationToken cancellationToken)
         {
             var request = _transformRequest((document, variables, _url));
+
+            if (request == null)
+                throw new InvalidOperationException(
+                    "Executing HttpLink failed. Transform request resulted in null request.");
+
             var response = await _client.SendAsync(request, cancellationToken);
             var result = await _transformResponse(response);
-
             var channel = Channel.CreateBounded<ExecutionResult>(1);
+
+            if (result == null)
+                throw new InvalidOperationException(
+                    "Executing HttpLink failed. Transform response resulted in null result.");
+
             await channel.Writer.WriteAsync(result, cancellationToken);
             channel.Writer.TryComplete();
 
