@@ -44,7 +44,15 @@ namespace tanka.graphql.introspection
                 null,
                 cancellationToken);
 
+            if (channel == null)
+                throw new InvalidOperationException(
+                    $"Failed to execute introspection query. Link returned a null channel.");
+
             var result = await channel.ReadAsync(cancellationToken);
+
+            if (result == null)
+                throw new InvalidOperationException(
+                        $"Failed to execute introspection query. Link channel read result is null");
 
             if (result.Errors != null && result.Errors.Any())
                 throw new InvalidOperationException(
