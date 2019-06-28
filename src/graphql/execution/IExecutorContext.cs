@@ -15,7 +15,7 @@ namespace tanka.graphql.execution
 
         GraphQLDocument Document { get; }
 
-        Extensions Extensions { get; }
+        ExtensionsRunner ExtensionsRunner { get; }
 
         IEnumerable<Exception> FieldErrors { get; }
 

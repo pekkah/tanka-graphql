@@ -10,12 +10,12 @@ namespace tanka.graphql
     {
         public static async Task<(QueryContext queryContext, ValidationResult validationResult)>
             BuildQueryContextAsync(ExecutionOptions options,
-                Extensions extensions,
+                ExtensionsRunner extensionsRunner,
                 ILogger logger)
         {
-            await extensions.BeginParseDocumentAsync();
+            await extensionsRunner.BeginParseDocumentAsync();
             var document = options.Document;
-            await extensions.EndParseDocumentAsync(document);
+            await extensionsRunner.EndParseDocumentAsync(document);
 
             var operation = Operations.GetOperation(document, options.OperationName);
             logger.Operation(operation);
@@ -32,20 +32,20 @@ namespace tanka.graphql
                 options.Schema,
                 coercedVariableValues,
                 options.InitialValue,
-                extensions);
+                extensionsRunner);
 
             logger.Validate(options.Validate != null);
             var validationResult = ValidationResult.Success;
             if (options.Validate != null)
             {
-                await extensions.BeginValidationAsync();
+                await extensionsRunner.BeginValidationAsync();
                 validationResult = await options.Validate(
                     options.Schema,
                     document,
                     coercedVariableValues);
 
                 logger.ValidationResult(validationResult);
-                await extensions.EndValidationAsync(validationResult);
+                await extensionsRunner.EndValidationAsync(validationResult);
             }
 
             return (queryContext, validationResult);

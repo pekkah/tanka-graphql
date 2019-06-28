@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using tanka.graphql.analysis;
+using tanka.graphql.extensions.analysis;
 using tanka.graphql.samples.chat.data;
 using tanka.graphql.samples.chat.web.GraphQL;
 using tanka.graphql.server;

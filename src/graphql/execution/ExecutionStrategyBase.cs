@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.error;
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 using GraphQLParser.AST;
@@ -61,7 +60,7 @@ namespace tanka.graphql.execution
                 if (resolver == null)
                     throw new GraphQLError($"Could not get resolver for {objectType.Name}.{fieldName}");
 
-                resolver = context.Extensions.Resolver(resolverContext, resolver);
+                resolver = context.ExtensionsRunner.Resolver(resolverContext, resolver);
                 var result = await resolver(resolverContext).ConfigureAwait(false);
                 completedValue = await result.CompleteValueAsync(
                     context,

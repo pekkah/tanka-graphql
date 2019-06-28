@@ -11,7 +11,7 @@ namespace tanka.graphql.execution
 
         public ExecutorContext(ISchema schema,
             GraphQLDocument document,
-            Extensions extensions,
+            ExtensionsRunner extensionsRunner,
             IExecutionStrategy strategy,
             GraphQLOperationDefinition operation,
             IDictionary<string, GraphQLFragmentDefinition> fragments, 
@@ -19,7 +19,7 @@ namespace tanka.graphql.execution
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             Document = document ?? throw new ArgumentNullException(nameof(document));
-            Extensions = extensions ?? throw new ArgumentNullException(nameof(extensions));
+            ExtensionsRunner = extensionsRunner ?? throw new ArgumentNullException(nameof(extensionsRunner));
             Strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
             Operation = operation;
             Fragments = fragments;
@@ -35,7 +35,7 @@ namespace tanka.graphql.execution
 
         public GraphQLDocument Document { get; }
 
-        public Extensions Extensions { get; }
+        public ExtensionsRunner ExtensionsRunner { get; }
 
         public IEnumerable<Exception> FieldErrors => _errors;
 

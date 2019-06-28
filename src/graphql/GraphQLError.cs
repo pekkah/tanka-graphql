@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using tanka.graphql.execution;
 using GraphQLParser;
 using GraphQLParser.AST;
+using tanka.graphql.execution;
 
-namespace tanka.graphql.error
+namespace tanka.graphql
 {
     public class GraphQLError : Exception
     {

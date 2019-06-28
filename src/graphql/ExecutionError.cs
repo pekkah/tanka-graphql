@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 
 namespace tanka.graphql
 {
-    public class Error
+    public class ExecutionError
     {
-        public Error(string message)
+        public ExecutionError(string message)
         {
             Message = message;
         }

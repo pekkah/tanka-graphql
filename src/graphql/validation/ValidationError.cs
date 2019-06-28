@@ -54,9 +54,9 @@ namespace tanka.graphql.validation
             return builder.ToString().Trim().TrimEnd(',');
         }
 
-        public Error ToError()
+        public ExecutionError ToError()
         {
-            return new Error(ToString())
+            return new ExecutionError(ToString())
             {
                 Locations = Nodes.Select(n => n.Location).ToList(),
                 Extensions = new Dictionary<string, object>

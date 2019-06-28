@@ -6,7 +6,6 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
 using tanka.graphql.channels;
-using tanka.graphql.error;
 using tanka.graphql.resolvers;
 
 namespace tanka.graphql.execution
@@ -65,7 +64,7 @@ namespace tanka.graphql.execution
             ISubscribeResult subscribeResult,
             GraphQLOperationDefinition subscription,
             IReadOnlyDictionary<string, object> coercedVariableValues,
-            Func<Exception, Error> formatError, CancellationToken cancellationToken)
+            Func<Exception, ExecutionError> formatError, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (subscribeResult == null) throw new ArgumentNullException(nameof(subscribeResult));
@@ -149,7 +148,7 @@ namespace tanka.graphql.execution
             GraphQLOperationDefinition subscription,
             IReadOnlyDictionary<string, object> coercedVariableValues,
             object evnt,
-            Func<Exception, Error> formatError)
+            Func<Exception, ExecutionError> formatError)
         {
             var subscriptionType = context.Schema.Subscription;
             var selectionSet = subscription.SelectionSet;

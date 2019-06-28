@@ -1,5 +1,4 @@
-﻿using tanka.graphql.error;
-using GraphQLParser.AST;
+﻿using GraphQLParser.AST;
 
 namespace tanka.graphql.type
 {

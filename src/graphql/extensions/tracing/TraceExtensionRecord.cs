@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace tanka.graphql.tracing
+namespace tanka.graphql.extensions.tracing
 {
     public class TraceExtensionRecord
     {

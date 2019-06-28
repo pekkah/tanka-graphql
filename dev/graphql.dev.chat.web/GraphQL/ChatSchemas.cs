@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using tanka.graphql.analysis;
+using tanka.graphql.extensions.analysis;
 using tanka.graphql.samples.chat.data;
 using tanka.graphql.samples.chat.data.idl;
 using tanka.graphql.tools;

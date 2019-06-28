@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.error;
 
 namespace tanka.graphql.language
 {

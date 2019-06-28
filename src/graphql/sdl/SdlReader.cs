@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.error;
 using tanka.graphql.execution;
 using tanka.graphql.type;
 

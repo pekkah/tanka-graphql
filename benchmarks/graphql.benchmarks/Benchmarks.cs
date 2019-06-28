@@ -162,7 +162,7 @@ namespace tanka.graphql.benchmarks
             var _ = await _resolver(null);
         }
 
-        private static void AssertResult(IEnumerable<Error> errors)
+        private static void AssertResult(IEnumerable<ExecutionError> errors)
         {
             if (errors != null && errors.Any())
             {

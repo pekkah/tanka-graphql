@@ -195,7 +195,7 @@ namespace tanka.graphql.tests.tools
                     {
                         Errors = new[]
                         {
-                            new Error("failed to find...")
+                            new ExecutionError("failed to find...")
                         }
                     };
                     await channel.Writer.WriteAsync(executionResult, cancellationToken);
