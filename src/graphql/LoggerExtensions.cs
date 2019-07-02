@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace tanka.graphql
 {
-    internal static class ExecutorLogger
+    internal static class LoggerExtensions
     {
         private static readonly Func<ILogger, string, IDisposable> BeginAction = LoggerMessage
             .DefineScope<string>("Executing '{OperationName}'");
@@ -22,12 +22,6 @@ namespace tanka.graphql
                 default(EventId),
                 "Executing operation '{OperationType} {Name}'"
             );
-
-        private static readonly Action<ILogger, Exception> SchemaNotInitializedAction = LoggerMessage
-            .Define(
-                LogLevel.Warning,
-                default(EventId),
-                "Initializing schema. It's recommended that you initialize the schema before execution.");
 
         private static readonly Action<ILogger, bool, Exception> ValidateAction = LoggerMessage
             .Define<bool>(
@@ -50,11 +44,6 @@ namespace tanka.graphql
         internal static IDisposable Begin(this ILogger logger, string operationName)
         {
             return BeginAction(logger, operationName);
-        }
-
-        internal static void SchemaNotInitialized(this ILogger logger)
-        {
-            SchemaNotInitializedAction(logger, null);
         }
 
         internal static void Operation(this ILogger logger, GraphQLOperationDefinition operation)

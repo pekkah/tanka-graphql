@@ -6,7 +6,7 @@ using tanka.graphql.execution;
 using tanka.graphql.type;
 using tanka.graphql.validation;
 
-namespace tanka.graphql.analysis
+namespace tanka.graphql.extensions.analysis
 {
     public static class CostAnalyzer
     {

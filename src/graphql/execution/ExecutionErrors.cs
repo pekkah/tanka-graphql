@@ -2,7 +2,6 @@
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 using GraphQLParser.AST;
-using tanka.graphql.error;
 
 namespace tanka.graphql.execution
 {

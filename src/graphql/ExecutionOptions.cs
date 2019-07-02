@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using tanka.graphql.error;
 using tanka.graphql.type;
 using tanka.graphql.validation;
 
@@ -17,9 +16,9 @@ namespace tanka.graphql
     public class ExecutionOptions
     {
         /// <summary>
-        ///     Function for formatting <see cref="GraphQLError"/> into <see cref="Error" />/>
+        ///     Function for formatting <see cref="QueryExecutionException"/> into <see cref="ExecutionError" />/>
         /// </summary>
-        public Func<Exception, Error> FormatError = DefaultFormatError;
+        public Func<Exception, ExecutionError> FormatError = DefaultFormatError;
 
         public Func<ISchema, GraphQLDocument, IReadOnlyDictionary<string, object>, ValueTask<ValidationResult>>
             Validate = (schema, document, variableValues) =>
@@ -69,20 +68,21 @@ namespace tanka.graphql
             return new ValueTask<ValidationResult>(result);
         }
 
-        public static Error DefaultFormatError(Exception exception)
+        public static ExecutionError DefaultFormatError(Exception exception)
         {
             var message = exception.Message;
 
             if (exception.InnerException != null)
                 message += $" {exception.InnerException.Message}";
 
-            var error = new Error(message);
+            var error = new ExecutionError(message);
             EnrichWithErrorCode(error, exception);
-            if (!(exception is GraphQLError graphQLError))
+            if (!(exception is QueryExecutionException graphQLError))
                 return error;
 
-            error.Locations = graphQLError.Locations;
+            error.Locations = graphQLError.Nodes?.Select(n => n.Location).ToList();
             error.Path = graphQLError.Path?.Segments.ToList();
+
             if (graphQLError.Extensions != null)
                 foreach (var extension in graphQLError.Extensions)
                     error.Extend(extension.Key, extension.Value);
@@ -90,7 +90,7 @@ namespace tanka.graphql
             return error;
         }
 
-        public static void EnrichWithErrorCode(Error error, Exception exception)
+        public static void EnrichWithErrorCode(ExecutionError error, Exception exception)
         {
             error.Extend("code", exception.GetType().Name
                 .Replace("Exception", string.Empty)

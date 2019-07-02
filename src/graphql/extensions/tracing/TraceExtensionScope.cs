@@ -7,7 +7,7 @@ using GraphQLParser.AST;
 using tanka.graphql.resolvers;
 using tanka.graphql.validation;
 
-namespace tanka.graphql.tracing
+namespace tanka.graphql.extensions.tracing
 {
     public class TraceExtensionScope : IExtensionScope
     {

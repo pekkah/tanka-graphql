@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using tanka.graphql.error;
 using tanka.graphql.type;
 using GraphQLParser.AST;
 

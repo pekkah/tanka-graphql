@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace tanka.graphql.tracing
+namespace tanka.graphql.extensions.tracing
 {
     public class TraceExtension : IExtension
     {

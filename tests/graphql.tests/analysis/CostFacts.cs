@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GraphQLParser.AST;
-using tanka.graphql.analysis;
+using tanka.graphql.extensions.analysis;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.validation;

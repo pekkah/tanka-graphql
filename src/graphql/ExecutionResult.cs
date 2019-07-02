@@ -13,7 +13,7 @@ namespace tanka.graphql
     public class ExecutionResult : IExecutionResult
     {
         private IDictionary<string, object> _data;
-        private IEnumerable<Error> _errors;
+        private IEnumerable<ExecutionError> _errors;
         private IDictionary<string, object> _extensions;
 
         [JsonConverter(typeof(NestedDictionaryConverter))]
@@ -52,7 +52,7 @@ namespace tanka.graphql
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         [DataMember(Name = "errors")]
-        public IEnumerable<Error> Errors
+        public IEnumerable<ExecutionError> Errors
         {
             get => _errors;
             set

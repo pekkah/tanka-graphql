@@ -7,12 +7,12 @@ using tanka.graphql.validation;
 
 namespace tanka.graphql
 {
-    public class Extensions
+    public class ExtensionsRunner
     {
         private readonly List<IExtension> _extensions = new List<IExtension>();
         private readonly List<IExtensionScope> _scopes = new List<IExtensionScope>();
 
-        public Extensions(IEnumerable<IExtension> extensions)
+        public ExtensionsRunner(IEnumerable<IExtension> extensions)
         {
             _extensions.AddRange(extensions.Reverse());
         }

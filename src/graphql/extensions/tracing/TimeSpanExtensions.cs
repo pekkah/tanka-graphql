@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace tanka.graphql.tracing
+namespace tanka.graphql.extensions.tracing
 {
     internal static class TimeSpanExtensions
     {

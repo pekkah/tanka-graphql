@@ -21,7 +21,7 @@ namespace tanka.graphql.channels
 
         public override void OnUnsubscribing(SubscribeResult subscription)
         {
-            if (!_byeItem.Equals(default))
+            if (!_byeItem.Equals(default(T)))
                 subscription.WriteAsync(_byeItem);
         }
     }

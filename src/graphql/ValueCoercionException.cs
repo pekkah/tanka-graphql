@@ -1,7 +1,7 @@
 ﻿using System;
 using tanka.graphql.type;
 
-namespace tanka.graphql.error
+namespace tanka.graphql
 {
     public class ValueCoercionException : Exception
     {

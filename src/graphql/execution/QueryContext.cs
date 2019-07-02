@@ -9,13 +9,13 @@ namespace tanka.graphql.execution
     public class QueryContext
     {
         public QueryContext(
-            Func<Exception, Error> formatError,
+            Func<Exception, ExecutionError> formatError,
             GraphQLDocument document,
             GraphQLOperationDefinition operation,
             ISchema schema,
             IReadOnlyDictionary<string, object> coercedVariableValues,
             object initialValue,
-            Extensions extensions)
+            ExtensionsRunner extensionsRunner)
         {
             FormatError = formatError ?? throw new ArgumentNullException(nameof(formatError));
             Document = document ?? throw new ArgumentNullException(nameof(document));
@@ -24,10 +24,10 @@ namespace tanka.graphql.execution
             CoercedVariableValues =
                 coercedVariableValues ?? throw new ArgumentNullException(nameof(coercedVariableValues));
             InitialValue = initialValue;
-            Extensions = extensions;
+            ExtensionsRunner = extensionsRunner;
         }
 
-        public Func<Exception, Error> FormatError { get; }
+        public Func<Exception, ExecutionError> FormatError { get; }
 
         public GraphQLDocument Document { get; }
 
@@ -39,7 +39,7 @@ namespace tanka.graphql.execution
 
         public object InitialValue { get; }
 
-        public Extensions Extensions { get; }
+        public ExtensionsRunner ExtensionsRunner { get; }
 
         public void Deconstruct(out ISchema schema, out GraphQLDocument document,
             out GraphQLOperationDefinition operation, out object initialValue,
@@ -58,7 +58,7 @@ namespace tanka.graphql.execution
             return new ExecutorContext(
                 Schema,
                 Document,
-                Extensions,
+                ExtensionsRunner,
                 executionStrategy,
                 OperationDefinition,
                 Document.Definitions.OfType<GraphQLFragmentDefinition>()

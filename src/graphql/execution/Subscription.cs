@@ -6,7 +6,6 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
 using tanka.graphql.channels;
-using tanka.graphql.error;
 using tanka.graphql.resolvers;
 
 namespace tanka.graphql.execution
@@ -22,8 +21,9 @@ namespace tanka.graphql.execution
             var (schema, _, operation, initialValue, coercedVariableValues) = context;
 
             if (schema.Subscription == null)
-                throw new GraphQLError(
-                    "Schema does not support subscriptions. Subscription type is null");
+                throw new QueryExecutionException(
+                    "Schema does not support subscriptions. Subscription type is null",
+                    path: new NodePath());
 
             var executionContext = context.BuildExecutorContext(new ParallelExecutionStrategy());
 
@@ -46,7 +46,7 @@ namespace tanka.graphql.execution
 
                 return responseStream;
             }
-            catch (GraphQLError e)
+            catch (QueryExecutionException e)
             {
                 executionContext.AddError(e);
             }
@@ -65,7 +65,7 @@ namespace tanka.graphql.execution
             ISubscribeResult subscribeResult,
             GraphQLOperationDefinition subscription,
             IReadOnlyDictionary<string, object> coercedVariableValues,
-            Func<Exception, Error> formatError, CancellationToken cancellationToken)
+            Func<Exception, ExecutionError> formatError, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (subscribeResult == null) throw new ArgumentNullException(nameof(subscribeResult));
@@ -135,8 +135,9 @@ namespace tanka.graphql.execution
             var subscriber = schema.GetSubscriber(subscriptionType.Name, fieldName);
 
             if (subscriber == null)
-                throw new GraphQLError(
-                    $"Could not subscribe. Field '{subscriptionType}:{fieldName}' does not have subscriber");
+                throw new QueryExecutionException(
+                    $"Could not subscribe. Field '{subscriptionType}:{fieldName}' does not have subscriber",
+                    path);
 
             var subscribeResult = await subscriber(resolveContext, cancellationToken)
                 .ConfigureAwait(false);
@@ -149,7 +150,7 @@ namespace tanka.graphql.execution
             GraphQLOperationDefinition subscription,
             IReadOnlyDictionary<string, object> coercedVariableValues,
             object evnt,
-            Func<Exception, Error> formatError)
+            Func<Exception, ExecutionError> formatError)
         {
             var subscriptionType = context.Schema.Subscription;
             var selectionSet = subscription.SelectionSet;

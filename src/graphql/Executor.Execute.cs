@@ -23,7 +23,7 @@ namespace tanka.graphql
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var extensions = new Extensions(options.Extensions);
+            var extensions = new ExtensionsRunner(options.Extensions);
             await extensions.BeginExecuteAsync(options);
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 

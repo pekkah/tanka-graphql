@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using tanka.graphql.error;
 using tanka.graphql.type;
 using GraphQLParser.AST;
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.error;
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 using GraphQLParser.AST;
@@ -59,9 +58,11 @@ namespace tanka.graphql.execution
                 var resolver = schema.GetResolver(objectType.Name, fieldName);
 
                 if (resolver == null)
-                    throw new GraphQLError($"Could not get resolver for {objectType.Name}.{fieldName}");
+                    throw new QueryExecutionException(
+                        $"Could not get resolver for {objectType.Name}.{fieldName}",
+                        path);
 
-                resolver = context.Extensions.Resolver(resolverContext, resolver);
+                resolver = context.ExtensionsRunner.Resolver(resolverContext, resolver);
                 var result = await resolver(resolverContext).ConfigureAwait(false);
                 completedValue = await result.CompleteValueAsync(
                     context,
@@ -115,8 +116,9 @@ namespace tanka.graphql.execution
                 .Type;
 
             if (fieldType == null)
-                throw new GraphQLError(
-                    $"Object '{objectType.Name}' does not have field '{fieldName}'");
+                throw new QueryExecutionException(
+                    $"Object '{objectType.Name}' does not have field '{fieldName}'",
+                    path);
 
             var responseValue = await ExecuteFieldAsync(
                 context,

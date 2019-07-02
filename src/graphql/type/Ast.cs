@@ -1,5 +1,5 @@
-﻿using tanka.graphql.error;
-using GraphQLParser.AST;
+﻿using GraphQLParser.AST;
+using tanka.graphql.language;
 
 namespace tanka.graphql.type
 {
@@ -28,7 +28,7 @@ namespace tanka.graphql.type
                 return schema.GetNamedType(namedType.Name.Value);
             }
 
-            throw new GraphQLError(
+            throw new DocumentException(
                 $"Unexpected type kind: {type.Kind}");
         }
     }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.error;
 using tanka.graphql.type;
 using GraphQLParser.AST;
 using static tanka.graphql.type.Ast;
@@ -190,9 +189,6 @@ namespace tanka.graphql.execution
         {
             if (directive == null) throw new ArgumentNullException(nameof(directive));
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
-            if (argument == null)
-                throw new GraphQLError(
-                    "Directive is missing argument which is required", directive);
 
             switch (argument.Value)
             {

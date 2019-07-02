@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using tanka.graphql.extensions.tracing;
 using tanka.graphql.server.webSockets;
-using tanka.graphql.tracing;
 
 namespace tanka.graphql.server
 {

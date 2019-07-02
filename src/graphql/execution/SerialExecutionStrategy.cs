@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using tanka.graphql.error;
 using tanka.graphql.type;
 using GraphQLParser.AST;
 
@@ -33,7 +32,7 @@ namespace tanka.graphql.execution
 
                     responseMap[responseKey] = result;
                 }
-                catch (GraphQLError e)
+                catch (QueryExecutionException e)
                 {
                     responseMap[responseKey] = null;
                     context.AddError(e);
