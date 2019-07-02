@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
 using tanka.graphql.execution;
+using tanka.graphql.language;
 using tanka.graphql.type;
 
 namespace tanka.graphql.sdl
@@ -232,8 +233,9 @@ namespace tanka.graphql.sdl
             _builder.TryGetDirective(name, out var directiveType);
 
             if (directiveType == null)
-                throw new GraphQLError(
-                    $"Could not find DirectiveType with name '{name}'");
+                throw new DocumentException(
+                    $"Could not find DirectiveType with name '{name}'",
+                    directiveDefinition);
 
             var arguments = new Dictionary<string, object>();
             foreach (var argument in directiveType.Arguments)
@@ -306,7 +308,7 @@ namespace tanka.graphql.sdl
                 var type = InputType(definition.Type);
 
                 if (!TypeIs.IsInputType(type))
-                    throw new GraphQLError(
+                    throw new DocumentException(
                         "Type of input value definition is not valid input value type. " +
                         $"Definition: '{definition.Name.Value}' Type: {definition.Type.Kind}",
                         definition);

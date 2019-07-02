@@ -16,7 +16,7 @@ namespace tanka.graphql
     public class ExecutionOptions
     {
         /// <summary>
-        ///     Function for formatting <see cref="GraphQLError"/> into <see cref="ExecutionError" />/>
+        ///     Function for formatting <see cref="QueryExecutionException"/> into <see cref="ExecutionError" />/>
         /// </summary>
         public Func<Exception, ExecutionError> FormatError = DefaultFormatError;
 
@@ -77,11 +77,12 @@ namespace tanka.graphql
 
             var error = new ExecutionError(message);
             EnrichWithErrorCode(error, exception);
-            if (!(exception is GraphQLError graphQLError))
+            if (!(exception is QueryExecutionException graphQLError))
                 return error;
 
-            error.Locations = graphQLError.Locations;
+            error.Locations = graphQLError.Nodes?.Select(n => n.Location).ToList();
             error.Path = graphQLError.Path?.Segments.ToList();
+
             if (graphQLError.Extensions != null)
                 foreach (var extension in graphQLError.Extensions)
                     error.Extend(extension.Key, extension.Value);

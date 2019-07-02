@@ -10,14 +10,15 @@ namespace tanka.graphql.execution
         {
             var (schema, _, operation, initialValue, coercedVariableValues) = context;
             var executionContext = context.BuildExecutorContext(new SerialExecutionStrategy());
+            var path = new NodePath();
 
             var mutationType = schema.Mutation;
             if (mutationType == null)
-                throw new GraphQLError(
-                    "Schema does not support mutations. Mutation type is null.");
+                throw new QueryExecutionException(
+                    "Schema does not support mutations. Mutation type is null.",
+                    path);
 
             var selectionSet = operation.SelectionSet;
-            var path = new NodePath();
             var data = await SelectionSets.ExecuteSelectionSetAsync(
                 executionContext,
                 selectionSet,

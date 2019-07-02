@@ -92,10 +92,9 @@ namespace tanka.graphql.tools
                         if (executionResult.Errors != null && executionResult.Errors.Any())
                         {
                             var first = executionResult.Errors.First();
-                            throw new CompleteValueException(
+                            throw new QueryExecutionException(
                                 $"{first.Message}",
-                                new[] {context.Selection},
-                                locations: new[] {context.Selection.Location},
+                                null,
                                 path: context.Path,
                                 extensions: new Dictionary<string, object>
                                 {
@@ -105,14 +104,18 @@ namespace tanka.graphql.tools
                                         errors = executionResult.Errors,
                                         extensions = executionResult.Extensions
                                     }
-                                });
+                                }, 
+                                context.Selection);
                         }
 
                         return new PreExecutedResolveResult(executionResult.Data);
                     }
 
-                //todo
-                return null;
+                throw new QueryExecutionException(
+                    "Could not get result from remote. " +
+                    "Link channel was closed before result could be read.", 
+                    context.Path,
+                    context.Selection);
             };
 
             GraphQLDocument CreateDocument(ResolverContext context)

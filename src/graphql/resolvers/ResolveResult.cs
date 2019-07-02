@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using tanka.graphql.execution;
 using tanka.graphql.type;
@@ -136,7 +137,9 @@ namespace tanka.graphql.resolvers
             if (actualType == null)
                 throw new CompleteValueException(
                     "Cannot complete value as interface or union. " +
-                    $"Actual type not given from resolver. Use {nameof(Resolve.As)} with type parameter");
+                    $"Actual type not given from resolver. Use {nameof(Resolve.As)} with type parameter",
+                    path,
+                    fields.First());
 
             if (fieldType is InterfaceType interfaceType)
             {
@@ -162,7 +165,10 @@ namespace tanka.graphql.resolvers
                     unionType);
             }
 
-            throw new CompleteValueException($"Cannot complete value for field {field}. No handling for the type {fieldType}.");
+            throw new CompleteValueException(
+                $"Cannot complete value for field {field}. No handling for the type {fieldType}.",
+                path,
+                fields.First());
         }
 
         private static async Task<object> CompleteUnionValueAsync(IExecutorContext executorContext, ObjectType actualType, List<GraphQLFieldSelection> fields,
@@ -171,7 +177,9 @@ namespace tanka.graphql.resolvers
             if (!unionType.IsPossible(actualType))
                 throw new CompleteValueException(
                     "Cannot complete value as union. " +
-                    $"Actual type {actualType.Name} is not possible for {unionType.Name}");
+                    $"Actual type {actualType.Name} is not possible for {unionType.Name}",
+                    path,
+                    fields.First());
 
             var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
             var data = await SelectionSets.ExecuteSelectionSetAsync(
@@ -191,7 +199,9 @@ namespace tanka.graphql.resolvers
             if (!actualType.Implements(interfaceType))
                 throw new CompleteValueException(
                     "Cannot complete value as interface. " +
-                    $"Actual type {actualType.Name} does not implement {interfaceType.Name}");
+                    $"Actual type {actualType.Name} does not implement {interfaceType.Name}",
+                    path,
+                    fields.First());
 
             var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
             var data = await SelectionSets.ExecuteSelectionSetAsync(
@@ -227,7 +237,9 @@ namespace tanka.graphql.resolvers
             if (!(value is IEnumerable values))
                 throw new CompleteValueException(
                     $"Cannot complete value for list field '{selection.Name.Value}':'{fieldType}'. " +
-                    "Resolved value is not a collection");
+                    "Resolved value is not a collection",
+                    path,
+                    selection);
 
             var innerType = listType.WrappedType;
             var result = new List<object>();

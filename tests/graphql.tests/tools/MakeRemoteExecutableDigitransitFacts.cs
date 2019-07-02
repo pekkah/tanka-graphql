@@ -235,7 +235,7 @@ namespace tanka.graphql.tests.tools
                         ""feeds""
                       ],
                       ""extensions"": {
-                        ""code"": ""COMPLETEVALUE"",
+                        ""code"": ""QUERYEXECUTION"",
                         ""remoteError"": {
                           ""data"": null,
                           ""errors"": [

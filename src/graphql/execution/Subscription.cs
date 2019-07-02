@@ -21,8 +21,9 @@ namespace tanka.graphql.execution
             var (schema, _, operation, initialValue, coercedVariableValues) = context;
 
             if (schema.Subscription == null)
-                throw new GraphQLError(
-                    "Schema does not support subscriptions. Subscription type is null");
+                throw new QueryExecutionException(
+                    "Schema does not support subscriptions. Subscription type is null",
+                    path: new NodePath());
 
             var executionContext = context.BuildExecutorContext(new ParallelExecutionStrategy());
 
@@ -45,7 +46,7 @@ namespace tanka.graphql.execution
 
                 return responseStream;
             }
-            catch (GraphQLError e)
+            catch (QueryExecutionException e)
             {
                 executionContext.AddError(e);
             }
@@ -134,8 +135,9 @@ namespace tanka.graphql.execution
             var subscriber = schema.GetSubscriber(subscriptionType.Name, fieldName);
 
             if (subscriber == null)
-                throw new GraphQLError(
-                    $"Could not subscribe. Field '{subscriptionType}:{fieldName}' does not have subscriber");
+                throw new QueryExecutionException(
+                    $"Could not subscribe. Field '{subscriptionType}:{fieldName}' does not have subscriber",
+                    path);
 
             var subscribeResult = await subscriber(resolveContext, cancellationToken)
                 .ConfigureAwait(false);

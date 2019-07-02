@@ -32,7 +32,7 @@ namespace tanka.graphql.execution
 
                     responseMap[responseKey] = result;
                 }
-                catch (GraphQLError e)
+                catch (QueryExecutionException e)
                 {
                     responseMap[responseKey] = null;
                     context.AddError(e);
