@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql.channels;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
@@ -637,8 +638,7 @@ namespace tanka.graphql.tests.type
                 .Build();
 
             /* When */
-            var schema = new SchemaBuilder(existingSchema)
-                /* Or: .Import(existingSchema) */
+            var schema = new SchemaBuilder().Import(existingSchema)
                 .Connections(connect => connect
                     .Field(query, "field2", ScalarType.Int)
                 )

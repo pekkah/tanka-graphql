@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GraphQLParser.AST;
 using tanka.graphql.extensions.analysis;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.validation;
@@ -27,7 +28,7 @@ namespace tanka.graphql.tests.analysis
                 ";
 
             Schema = new SchemaBuilder()
-                .IncludeDirective(CostAnalyzer.CostDirective)
+                .Include(CostAnalyzer.CostDirective)
                 .Sdl(sdl)
                 .Build();
         }

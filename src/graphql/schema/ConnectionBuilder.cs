@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using tanka.graphql.resolvers;
+using tanka.graphql.type;
 
-namespace tanka.graphql.type
+namespace tanka.graphql.schema
 {
     public class ConnectionBuilder
     {

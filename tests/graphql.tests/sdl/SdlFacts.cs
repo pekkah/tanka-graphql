@@ -1,5 +1,6 @@
 using System.Linq;
 using GraphQLParser.AST;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.type.converters;

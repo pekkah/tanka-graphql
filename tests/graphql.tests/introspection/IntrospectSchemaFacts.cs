@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using tanka.graphql.introspection;
+using tanka.graphql.schema;
 using tanka.graphql.tests.data;
 using tanka.graphql.type;
 using Xunit;

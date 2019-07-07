@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Linq;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.tools
 {
     public static class MergeTool
     {
-        [Obsolete("Use MergeTool.Schema")]
-        public static ISchema MergeSchemas(
-            ISchema left,
-            ISchema right)
-        {
-            var builder = new SchemaBuilder(left);
-            Schema(builder, right);
-            return builder.Build();
-        }
-
         public static void Schemas(SchemaBuilder target, params ISchema[] schemas)
         {
             foreach (var right in schemas) Schema(target, right);
@@ -37,7 +28,7 @@ namespace tanka.graphql.tools
                 if (leftDirective != null)
                     continue;
 
-                target.IncludeDirective(directiveType);
+                target.Include(directiveType);
             }
         }
 

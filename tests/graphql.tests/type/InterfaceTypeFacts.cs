@@ -1,4 +1,5 @@
-﻿using tanka.graphql.type;
+﻿using tanka.graphql.schema;
+using tanka.graphql.type;
 using Xunit;
 
 namespace tanka.graphql.tests.type

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
 using tanka.graphql.channels;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.server.webSockets;
 

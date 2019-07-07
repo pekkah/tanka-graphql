@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using tanka.graphql.introspection;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 using Xunit;
 

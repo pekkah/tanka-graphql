@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace tanka.graphql.type
+namespace tanka.graphql.schema
 {
     public class SchemaBuilderException : Exception
     {

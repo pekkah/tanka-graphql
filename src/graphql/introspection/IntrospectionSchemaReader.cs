@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.introspection
@@ -136,8 +137,7 @@ namespace tanka.graphql.introspection
 
         private IType Scalar(__Type type)
         {
-            // throws if scalar not found
-            _builder.GetScalar(type.Name, out var scalar);
+            _builder.TryGetType<ScalarType>(type.Name, out var scalar);
             return scalar;
         }
 

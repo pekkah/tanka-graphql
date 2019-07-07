@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using tanka.graphql.introspection;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.tools
@@ -31,7 +32,7 @@ namespace tanka.graphql.tools
             ISubscriberMap subscribers = null)
         {
             return MakeExecutableSchema(
-                new SchemaBuilder(schema),
+                new SchemaBuilder().Import(schema),
                 resolvers,
                 subscribers);
         }
@@ -41,7 +42,7 @@ namespace tanka.graphql.tools
             IResolverMap resolvers,
             ISubscriberMap subscribers = null)
         {
-            foreach (var type in builder.VisitTypes<ObjectType>())
+            foreach (var type in builder.StreamTypes<ObjectType>())
                 builder.Connections(connections =>
                 {
                     foreach (var field in connections.VisitFields(type))
@@ -86,7 +87,7 @@ namespace tanka.graphql.tools
             if (directiveFactories == null) throw new ArgumentNullException(nameof(directiveFactories));
 
             foreach (var (directiveName, visitor) in directiveFactories.Select(d => (d.Key, d.Value(builder))))
-            foreach (var objectType in builder.VisitTypes<ObjectType>())
+            foreach (var objectType in builder.StreamTypes<ObjectType>())
                 builder.Connections(connections =>
                 {
                     var fields = connections.VisitFields(objectType)

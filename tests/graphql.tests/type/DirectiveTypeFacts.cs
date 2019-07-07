@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
@@ -50,7 +51,7 @@ namespace tanka.graphql.tests.type
                 });
 
             var builder = new SchemaBuilder();
-            builder.IncludeDirective(authorizeType);
+            builder.Include(authorizeType);
 
             builder.Query(out var query)
                 .Connections(connect => connect

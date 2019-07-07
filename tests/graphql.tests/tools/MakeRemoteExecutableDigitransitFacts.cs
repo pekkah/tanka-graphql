@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using tanka.graphql.introspection;
 using tanka.graphql.language;
 using tanka.graphql.links;
+using tanka.graphql.schema;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;

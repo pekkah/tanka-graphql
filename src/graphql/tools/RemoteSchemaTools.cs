@@ -8,6 +8,7 @@ using GraphQLParser.AST;
 using tanka.graphql.channels;
 using tanka.graphql.links;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.tools
@@ -64,7 +65,7 @@ namespace tanka.graphql.tools
                         }
                 });
 
-            foreach (var objectType in builder.VisitTypes<ObjectType>())
+            foreach (var objectType in builder.StreamTypes<ObjectType>())
                 builder.Connections(connections =>
                 {
                     foreach (var field in connections.VisitFields(objectType))

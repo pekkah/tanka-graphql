@@ -2,6 +2,7 @@
 using GraphQLParser.AST;
 using tanka.graphql.execution;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 using Xunit;
 

@@ -4,6 +4,7 @@ using System.Linq;
 using GraphQLParser.AST;
 using tanka.graphql.execution;
 using tanka.graphql.language;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.sdl
@@ -56,7 +57,13 @@ namespace tanka.graphql.sdl
 
         protected ScalarType Scalar(GraphQLScalarTypeDefinition definition)
         {
-            _builder.GetScalar(definition.Name.Value, out var scalar);
+            if (!_builder.TryGetType<ScalarType>(definition.Name.Value, out var scalar))
+            {
+                throw new ArgumentOutOfRangeException(
+                    $"Could not find scalar '{definition.Name.Value}' from known types. " +
+                    "Scalars require a value converter to function and cannot be created from SDL.");
+            }
+
             return scalar;
         }
 
@@ -444,9 +451,7 @@ namespace tanka.graphql.sdl
 
             foreach (var namedType in definitions)
             {
-                var type = OutputType(namedType) as InterfaceType;
-
-                if (type == null)
+                if (!(OutputType(namedType) is InterfaceType type))
                     continue;
 
                 interfaces.Add(type);

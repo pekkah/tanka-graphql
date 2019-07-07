@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace tanka.graphql.type
 {
-    public class DirectiveType : IDescribable, INamedType //todo(pekka): should not be named type
+    public class DirectiveType : IDescribable, IType
     {
         /// <summary>
         ///     Introspection does not yet use this if found

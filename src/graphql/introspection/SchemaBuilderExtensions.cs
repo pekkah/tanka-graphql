@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using tanka.graphql.links;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.introspection
