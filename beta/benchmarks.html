@@ -201,6 +201,7 @@ Toolchain=InProcessEmitToolchain
 <th style="text-align: right;">Mean</th>
 <th style="text-align: right;">Error</th>
 <th style="text-align: right;">StdDev</th>
+<th style="text-align: right;">Median</th>
 <th style="text-align: right;">Gen 0</th>
 <th style="text-align: right;">Gen 1</th>
 <th style="text-align: right;">Gen 2</th>
@@ -210,19 +211,21 @@ Toolchain=InProcessEmitToolchain
 <tbody>
 <tr>
 <td>Query_with_defaults</td>
-<td style="text-align: right;">62,057.04 ns</td>
-<td style="text-align: right;">1,233.0542 ns</td>
-<td style="text-align: right;">1,514.3013 ns</td>
+<td style="text-align: right;">70,431.40 ns</td>
+<td style="text-align: right;">1,367.8271 ns</td>
+<td style="text-align: right;">1,679.8146 ns</td>
+<td style="text-align: right;">70,495.64 ns</td>
 <td style="text-align: right;">3.6621</td>
 <td style="text-align: right;">1.2207</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">23311 B</td>
+<td style="text-align: right;">23334 B</td>
 </tr>
 <tr>
 <td>Query_without_validation</td>
-<td style="text-align: right;">18,905.81 ns</td>
-<td style="text-align: right;">337.2705 ns</td>
-<td style="text-align: right;">298.9815 ns</td>
+<td style="text-align: right;">21,378.31 ns</td>
+<td style="text-align: right;">528.1418 ns</td>
+<td style="text-align: right;">468.1839 ns</td>
+<td style="text-align: right;">21,289.01 ns</td>
 <td style="text-align: right;">0.8850</td>
 <td style="text-align: right;">0.4272</td>
 <td style="text-align: right;">-</td>
@@ -230,9 +233,10 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Mutation_with_defaults</td>
-<td style="text-align: right;">32,365.83 ns</td>
-<td style="text-align: right;">456.7141 ns</td>
-<td style="text-align: right;">427.2107 ns</td>
+<td style="text-align: right;">33,720.31 ns</td>
+<td style="text-align: right;">667.8216 ns</td>
+<td style="text-align: right;">1,204.2202 ns</td>
+<td style="text-align: right;">33,257.34 ns</td>
 <td style="text-align: right;">3.4790</td>
 <td style="text-align: right;">0.0610</td>
 <td style="text-align: right;">-</td>
@@ -240,9 +244,10 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Mutation_without_validation</td>
-<td style="text-align: right;">6,967.01 ns</td>
-<td style="text-align: right;">137.8564 ns</td>
-<td style="text-align: right;">135.3934 ns</td>
+<td style="text-align: right;">7,305.02 ns</td>
+<td style="text-align: right;">62.6660 ns</td>
+<td style="text-align: right;">55.5518 ns</td>
+<td style="text-align: right;">7,309.66 ns</td>
 <td style="text-align: right;">0.6180</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -250,19 +255,21 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Subscribe_with_defaults</td>
-<td style="text-align: right;">60,772.74 ns</td>
-<td style="text-align: right;">1,164.6091 ns</td>
-<td style="text-align: right;">1,386.3843 ns</td>
+<td style="text-align: right;">60,912.92 ns</td>
+<td style="text-align: right;">1,206.6346 ns</td>
+<td style="text-align: right;">1,436.4127 ns</td>
+<td style="text-align: right;">60,204.22 ns</td>
 <td style="text-align: right;">4.7607</td>
 <td style="text-align: right;">1.2207</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">29259 B</td>
+<td style="text-align: right;">29260 B</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
-<td style="text-align: right;">17,797.58 ns</td>
-<td style="text-align: right;">354.6634 ns</td>
-<td style="text-align: right;">785.9097 ns</td>
+<td style="text-align: right;">17,404.23 ns</td>
+<td style="text-align: right;">338.5673 ns</td>
+<td style="text-align: right;">403.0403 ns</td>
+<td style="text-align: right;">17,381.47 ns</td>
 <td style="text-align: right;">1.7090</td>
 <td style="text-align: right;">0.8545</td>
 <td style="text-align: right;">-</td>
@@ -270,19 +277,21 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
-<td style="text-align: right;">97,767.22 ns</td>
-<td style="text-align: right;">1,938.8616 ns</td>
-<td style="text-align: right;">3,292.3342 ns</td>
-<td style="text-align: right;">4.6387</td>
-<td style="text-align: right;">1.0986</td>
+<td style="text-align: right;">94,245.32 ns</td>
+<td style="text-align: right;">1,873.0779 ns</td>
+<td style="text-align: right;">4,189.4070 ns</td>
+<td style="text-align: right;">92,790.34 ns</td>
+<td style="text-align: right;">4.7607</td>
+<td style="text-align: right;">1.2207</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">29488 B</td>
+<td style="text-align: right;">29497 B</td>
 </tr>
 <tr>
 <td>Validate_query_with_defaults</td>
-<td style="text-align: right;">16,963.84 ns</td>
-<td style="text-align: right;">146.8517 ns</td>
-<td style="text-align: right;">122.6278 ns</td>
+<td style="text-align: right;">17,923.90 ns</td>
+<td style="text-align: right;">346.6426 ns</td>
+<td style="text-align: right;">425.7083 ns</td>
+<td style="text-align: right;">17,816.56 ns</td>
 <td style="text-align: right;">2.8381</td>
 <td style="text-align: right;">0.0916</td>
 <td style="text-align: right;">-</td>
@@ -290,9 +299,10 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>ResolverChain</td>
-<td style="text-align: right;">70.30 ns</td>
-<td style="text-align: right;">0.8976 ns</td>
-<td style="text-align: right;">0.7495 ns</td>
+<td style="text-align: right;">85.48 ns</td>
+<td style="text-align: right;">0.9840 ns</td>
+<td style="text-align: right;">0.9205 ns</td>
+<td style="text-align: right;">85.54 ns</td>
 <td style="text-align: right;">0.0087</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -300,9 +310,10 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Resolver</td>
-<td style="text-align: right;">58.92 ns</td>
-<td style="text-align: right;">1.0854 ns</td>
-<td style="text-align: right;">1.0153 ns</td>
+<td style="text-align: right;">63.18 ns</td>
+<td style="text-align: right;">0.7705 ns</td>
+<td style="text-align: right;">0.6830 ns</td>
+<td style="text-align: right;">62.93 ns</td>
 <td style="text-align: right;">0.0087</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
