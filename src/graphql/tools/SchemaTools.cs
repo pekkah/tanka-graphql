@@ -42,10 +42,10 @@ namespace tanka.graphql.tools
             IResolverMap resolvers,
             ISubscriberMap subscribers = null)
         {
-            foreach (var type in builder.StreamTypes<ObjectType>())
+            foreach (var type in builder.GetTypes<ObjectType>())
                 builder.Connections(connections =>
                 {
-                    foreach (var field in connections.VisitFields(type))
+                    foreach (var field in connections.GetFields(type))
                     {
                         var resolver = resolvers.GetResolver(type.Name, field.Key);
 
@@ -87,10 +87,10 @@ namespace tanka.graphql.tools
             if (directiveFactories == null) throw new ArgumentNullException(nameof(directiveFactories));
 
             foreach (var (directiveName, visitor) in directiveFactories.Select(d => (d.Key, d.Value(builder))))
-            foreach (var objectType in builder.StreamTypes<ObjectType>())
+            foreach (var objectType in builder.GetTypes<ObjectType>())
                 builder.Connections(connections =>
                 {
-                    var fields = connections.VisitFields(objectType)
+                    var fields = connections.GetFields(objectType)
                         .Where(field => field.Value.HasDirective(directiveName))
                         .ToList();
 

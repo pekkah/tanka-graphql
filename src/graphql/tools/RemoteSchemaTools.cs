@@ -31,7 +31,7 @@ namespace tanka.graphql.tools
             if (builder.TryGetType<ObjectType>("Query", out var queryType))
                 builder.Connections(connections =>
                 {
-                    var fields = connections.VisitFields(queryType);
+                    var fields = connections.GetFields(queryType);
 
                     foreach (var field in fields)
                     {
@@ -43,7 +43,7 @@ namespace tanka.graphql.tools
             if (builder.TryGetType<ObjectType>("Mutation", out var mutationType))
                 builder.Connections(connections =>
                 {
-                    var fields = connections.VisitFields(mutationType);
+                    var fields = connections.GetFields(mutationType);
 
                     foreach (var field in fields)
                     {
@@ -55,7 +55,7 @@ namespace tanka.graphql.tools
             if (builder.TryGetType<ObjectType>("Subscription", out var subscriptionType))
                 builder.Connections(connections =>
                 {
-                    var fields = connections.VisitFields(subscriptionType);
+                    var fields = connections.GetFields(subscriptionType);
 
                     foreach (var field in fields)
                         if (!connections.TryGetSubscriber(subscriptionType, field.Key, out _))
@@ -65,11 +65,11 @@ namespace tanka.graphql.tools
                         }
                 });
 
-            foreach (var objectType in builder.StreamTypes<ObjectType>())
+            foreach (var objectType in builder.GetTypes<ObjectType>())
                 builder.Connections(connections =>
                 {
-                    foreach (var field in connections.VisitFields(objectType))
-                        if (!connections.TrGetResolver(objectType, field.Key, out _))
+                    foreach (var field in connections.GetFields(objectType))
+                        if (!connections.TryGetResolver(objectType, field.Key, out _))
                         {
                             var resolver = connections.GetOrAddResolver(objectType, field.Key);
                             resolver.Run(DefaultDictionaryResolver());

@@ -114,10 +114,10 @@ namespace tanka.graphql.schema
         }
 
         public SchemaBuilder Scalar(
-            string name, 
-            out ScalarType scalarType, 
+            string name,
+            out ScalarType scalarType,
             IValueConverter converter,
-            string description = null, 
+            string description = null,
             IEnumerable<DirectiveInstance> directives = null)
         {
             scalarType = new ScalarType(name, converter, description, directives);

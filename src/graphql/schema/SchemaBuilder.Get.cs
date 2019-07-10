@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using tanka.graphql.type;
 
@@ -7,7 +6,7 @@ namespace tanka.graphql.schema
 {
     public partial class SchemaBuilder
     {
-        public IEnumerable<T> StreamTypes<T>() where T : INamedType
+        public IEnumerable<T> GetTypes<T>() where T : INamedType
         {
             return _types.Values.OfType<T>();
         }
