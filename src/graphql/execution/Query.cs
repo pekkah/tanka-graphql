@@ -30,7 +30,6 @@ namespace tanka.graphql.execution
                     selectionSet,
                     queryType,
                     initialValue,
-                    coercedVariableValues,
                     path).ConfigureAwait(false);
             }
             catch (QueryExecutionException e)

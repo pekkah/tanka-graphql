@@ -24,7 +24,6 @@ namespace tanka.graphql.execution
                 selectionSet,
                 mutationType,
                 initialValue,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
 

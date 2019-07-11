@@ -11,7 +11,6 @@ namespace tanka.graphql.execution
         public override async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
             NodePath path)
         {
             var data = new ConcurrentDictionary<string, object>();
@@ -25,7 +24,6 @@ namespace tanka.graphql.execution
                         context,
                         objectType,
                         objectValue,
-                        coercedVariableValues,
                         fieldGroup,
                         path.Fork()).ConfigureAwait(false);
 

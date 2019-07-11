@@ -160,7 +160,6 @@ namespace tanka.graphql.execution
                 selectionSet,
                 subscriptionType,
                 evnt,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
             var result = new ExecutionResult

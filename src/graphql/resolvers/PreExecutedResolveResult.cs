@@ -23,7 +23,6 @@ namespace tanka.graphql.resolvers
             IType fieldType,
             GraphQLFieldSelection selection,
             List<GraphQLFieldSelection> fields,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
             NodePath path)
         {
             var value = _data[selection.Name.Value];
@@ -35,7 +34,6 @@ namespace tanka.graphql.resolvers
                 fieldType,
                 selection,
                 fields,
-                coercedVariableValues,
                 path);
         }
     }

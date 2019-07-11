@@ -10,11 +10,11 @@ namespace tanka.graphql.execution
 {
     public static class SelectionSets
     {
-        public static async Task<IDictionary<string, object>> ExecuteSelectionSetAsync(IExecutorContext executorContext,
+        public static async Task<IDictionary<string, object>> ExecuteSelectionSetAsync(
+            IExecutorContext executorContext,
             GraphQLSelectionSet selectionSet,
             ObjectType objectType,
             object objectValue,
-            IReadOnlyDictionary<string, object> coercedVariableValues, 
             NodePath path)
         {
             var groupedFieldSet = CollectFields(
@@ -22,14 +22,13 @@ namespace tanka.graphql.execution
                 executorContext.Document,
                 objectType,
                 selectionSet,
-                coercedVariableValues);
+                executorContext.CoercedVariableValues);
 
             var resultMap = await executorContext.Strategy.ExecuteGroupedFieldSetAsync(
                 executorContext,
                 groupedFieldSet,
                 objectType,
                 objectValue,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
             return resultMap;

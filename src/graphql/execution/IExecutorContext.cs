@@ -9,8 +9,6 @@ namespace tanka.graphql.execution
     {
         GraphQLOperationDefinition Operation { get; }
 
-        IDictionary<string, GraphQLFragmentDefinition> Fragments { get; }
-
         ISchema Schema { get; }
 
         GraphQLDocument Document { get; }

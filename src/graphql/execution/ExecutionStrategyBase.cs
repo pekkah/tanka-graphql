@@ -13,7 +13,6 @@ namespace tanka.graphql.execution
         public abstract Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(IExecutorContext context,
             Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
             NodePath path);
 
         public async Task<object> ExecuteFieldAsync(
@@ -22,13 +21,11 @@ namespace tanka.graphql.execution
             object objectValue,
             List<GraphQLFieldSelection> fields,
             IType fieldType,
-            IReadOnlyDictionary<string, object> coercedVariableValues, 
             NodePath path)
         {
             if (objectType == null) throw new ArgumentNullException(nameof(objectType));
             if (fields == null) throw new ArgumentNullException(nameof(fields));
             if (fieldType == null) throw new ArgumentNullException(nameof(fieldType));
-            if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
 
             var schema = context.Schema;
             var fieldSelection = fields.First();
@@ -40,7 +37,7 @@ namespace tanka.graphql.execution
                 schema,
                 objectType,
                 fieldSelection,
-                coercedVariableValues);
+                context.CoercedVariableValues);
 
             try
             {
@@ -71,7 +68,6 @@ namespace tanka.graphql.execution
                     fieldType,
                     fieldSelection,
                     fields,
-                    coercedVariableValues,
                     path).ConfigureAwait(false);
 
                 return completedValue;
@@ -94,7 +90,6 @@ namespace tanka.graphql.execution
             IExecutorContext context,
             ObjectType objectType,
             object objectValue,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
             KeyValuePair<string, List<GraphQLFieldSelection>> fieldGroup, 
             NodePath path)
         {
@@ -126,7 +121,6 @@ namespace tanka.graphql.execution
                 objectValue,
                 fields,
                 fieldType,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
             return responseValue;
