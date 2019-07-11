@@ -22,7 +22,7 @@ namespace tanka.graphql
             if (!unsubscribe.CanBeCanceled)
                 throw new InvalidOperationException("Unsubscribe token must be cancelable");
 
-            var extensions = new ExtensionsRunner(Enumerable.Empty<IExtension>());
+            var extensions = new ExtensionsRunner(Enumerable.Empty<IExecutorExtension>());
             await extensions.BeginExecuteAsync(options);
 
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);

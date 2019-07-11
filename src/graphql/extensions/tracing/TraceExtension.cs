@@ -2,7 +2,7 @@
 
 namespace tanka.graphql.extensions.tracing
 {
-    public class TraceExtension : IExtension
+    public class TraceExtension : IExecutorExtension
     {
         public Task<IExtensionScope> BeginExecuteAsync(ExecutionOptions options)
         {

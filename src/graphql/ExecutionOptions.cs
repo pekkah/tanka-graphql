@@ -51,7 +51,7 @@ namespace tanka.graphql
         /// <summary>
         ///     Execution extensions
         /// </summary>
-        public ICollection<IExtension> Extensions { get; set; } = new List<IExtension>();
+        public ICollection<IExecutorExtension> Extensions { get; set; } = new List<IExecutorExtension>();
 
         public static ValueTask<ValidationResult> DefaultValidate(
             IEnumerable<CombineRule> rules, 

@@ -2,7 +2,7 @@
 
 namespace tanka.graphql
 {
-    public interface IExtension
+    public interface IExecutorExtension
     {
         //todo: change to ValueTask ?
         Task<IExtensionScope> BeginExecuteAsync(ExecutionOptions options);

@@ -9,10 +9,10 @@ namespace tanka.graphql
 {
     public class ExtensionsRunner
     {
-        private readonly List<IExtension> _extensions = new List<IExtension>();
+        private readonly List<IExecutorExtension> _extensions = new List<IExecutorExtension>();
         private readonly List<IExtensionScope> _scopes = new List<IExtensionScope>();
 
-        public ExtensionsRunner(IEnumerable<IExtension> extensions)
+        public ExtensionsRunner(IEnumerable<IExecutorExtension> extensions)
         {
             _extensions.AddRange(extensions.Reverse());
         }

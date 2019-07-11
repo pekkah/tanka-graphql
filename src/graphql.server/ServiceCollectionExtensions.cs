@@ -19,9 +19,9 @@ namespace tanka.graphql.server
 
 
         public static IServiceCollection AddTankaServerExecutionExtension<TExtension>(this IServiceCollection services)
-            where TExtension: class, IExtension
+            where TExtension: class, IExecutorExtension
         {
-            services.TryAddSingleton<IExtension, TExtension>();
+            services.TryAddSingleton<IExecutorExtension, TExtension>();
 
             return services;
         }

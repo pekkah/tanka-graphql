@@ -22,7 +22,7 @@ namespace tanka.graphql.channels
             {
                 if (_subscriptions.TryRemove(unsubscribe, out var sub))
                 {
-                    OnUnsubscribing(subscription);
+                    OnUnsubscribing(sub);
                     sub.TryComplete();
                 }
             });
@@ -31,11 +31,11 @@ namespace tanka.graphql.channels
             return subscription;
         }
 
-        public virtual void OnSubscribed(SubscribeResult subscription)
+        public virtual void OnSubscribed(ISubscribeResult subscription)
         {
         }
 
-        public virtual void OnUnsubscribing(SubscribeResult subscription)
+        public virtual void OnUnsubscribing(ISubscribeResult subscription)
         {
         }
 
