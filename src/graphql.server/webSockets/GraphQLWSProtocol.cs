@@ -150,7 +150,8 @@ namespace tanka.graphql.server.webSockets
                     Id = id,
                     Type = MessageType.GQL_DATA,
                     Payload = JObject.FromObject(result, _serializer)
-                });
+                },
+                completeOnReaderCompletion: false);
 
             // has mutation or query
             var hasMutationOrQuery = document.Definitions.OfType<GraphQLOperationDefinition>()

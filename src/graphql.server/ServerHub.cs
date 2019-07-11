@@ -31,7 +31,7 @@ namespace tanka.graphql.server
                     Extensions = query.Extensions,
                     Variables = query.Variables
                 }, cancellationToken);
-                var __ = result.Reader.LinkTo(channel.Writer);
+                var __ = result.Reader.WriteTo(channel.Writer);
             }, CancellationToken.None);
             return channel.Reader;
         }
