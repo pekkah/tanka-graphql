@@ -10,13 +10,12 @@ namespace tanka.graphql.resolvers
     {
         object Value { get; }
 
-        Task<object> CompleteValueAsync(
-            IExecutorContext executorContext,
+        Task<object> CompleteValueAsync(IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
             IType fieldType,
             GraphQLFieldSelection selection,
-            List<GraphQLFieldSelection> fields,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             NodePath path);
     }
 }

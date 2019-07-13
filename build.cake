@@ -7,6 +7,7 @@ var artifactsDir = Directory(Argument<string>("artifactsDir", "./artifacts"));
 var publishDir = Directory(Argument<string>("publishDir", "./publish"));
 var runtime = Argument<string>("runtime", "win-x64");
 var sln = Argument<string>("sln", "./tanka-graphql.sln");
+var fullBenchmarks = Argument<bool>("fullBenchmarks", false);
 
 var netstandard20 = "netstandard2.0";
 var netcoreapp21 = "netcoreapp2.1";
@@ -187,7 +188,7 @@ Task("Benchmarks")
 		  var args = ProcessArgumentBuilder.FromString(
         $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i -m");
 
-      if (isMasterOrTag)
+      if (isMasterOrTag || fullBenchmarks)
         args.Append("--filter *");
       else
         args.Append("--filter * --job short");

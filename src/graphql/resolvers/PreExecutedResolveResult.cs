@@ -22,7 +22,7 @@ namespace tanka.graphql.resolvers
             IField field,
             IType fieldType,
             GraphQLFieldSelection selection,
-            List<GraphQLFieldSelection> fields,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             NodePath path)
         {
             var value = _data[selection.Name.Value];

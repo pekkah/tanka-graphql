@@ -10,7 +10,7 @@ namespace tanka.graphql.execution
     {
         public override async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
             IExecutorContext context,
-            Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
+            IReadOnlyDictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
             NodePath path)
         {
@@ -26,7 +26,7 @@ namespace tanka.graphql.execution
                         context,
                         objectType,
                         objectValue,
-                        fieldGroup,
+                        new KeyValuePair<string, IReadOnlyCollection<GraphQLFieldSelection>>(fieldGroup.Key, fieldGroup.Value), 
                         path.Fork()).ConfigureAwait(false);
 
                     responseMap[responseKey] = result;

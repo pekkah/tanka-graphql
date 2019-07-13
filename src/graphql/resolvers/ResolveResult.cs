@@ -36,13 +36,12 @@ namespace tanka.graphql.resolvers
 
         public ObjectType ActualType { get; set; }
 
-        public virtual async Task<object> CompleteValueAsync(
-            IExecutorContext executorContext,
+        public virtual async Task<object> CompleteValueAsync(IExecutorContext executorContext,
             ObjectType objectType,
             IField field,
             IType fieldType,
             GraphQLFieldSelection selection,
-            List<GraphQLFieldSelection> fields,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             NodePath path)
         {
             object completedValue = null;
@@ -67,7 +66,7 @@ namespace tanka.graphql.resolvers
             IType fieldType,
             ObjectType actualType,
             GraphQLFieldSelection selection,
-            List<GraphQLFieldSelection> fields,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             object value,
             NodePath path)
         {
@@ -166,7 +165,7 @@ namespace tanka.graphql.resolvers
         private static async Task<object> CompleteUnionValueAsync(
             IExecutorContext executorContext, 
             ObjectType actualType, 
-            List<GraphQLFieldSelection> fields,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             object value,
             NodePath path, 
             UnionType unionType)
@@ -192,7 +191,7 @@ namespace tanka.graphql.resolvers
         private static async Task<object> CompleteInterfaceValueAsync(
             IExecutorContext executorContext, 
             ObjectType actualType,
-            List<GraphQLFieldSelection> fields,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             object value, 
             NodePath path, 
             InterfaceType interfaceType)
@@ -217,7 +216,7 @@ namespace tanka.graphql.resolvers
 
         private static async Task<object> CompleteObjectValueAsync(
             IExecutorContext executorContext, 
-            List<GraphQLFieldSelection> fields, 
+            IReadOnlyCollection<GraphQLFieldSelection> fields, 
             object value,
             NodePath path, 
             ObjectType fieldObjectType)
@@ -240,7 +239,7 @@ namespace tanka.graphql.resolvers
             IType fieldType, 
             ObjectType actualType, 
             GraphQLFieldSelection selection, 
-            List<GraphQLFieldSelection> fields,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             object value,
             NodePath path, 
             List listType)
@@ -294,7 +293,7 @@ namespace tanka.graphql.resolvers
             IField field,
             ObjectType actualType, 
             GraphQLFieldSelection selection, 
-            List<GraphQLFieldSelection> fields, 
+            IReadOnlyCollection<GraphQLFieldSelection> fields, 
             object value,
             NodePath path,
             NonNull nonNull)

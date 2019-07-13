@@ -35,7 +35,7 @@ namespace tanka.graphql.execution
         }
 
 
-        public static GraphQLSelectionSet MergeSelectionSets(List<GraphQLFieldSelection> fields)
+        public static GraphQLSelectionSet MergeSelectionSets(IReadOnlyCollection<GraphQLFieldSelection> fields)
         {
             var selectionSet = new List<ASTNode>();
             foreach (var field in fields)
@@ -52,7 +52,7 @@ namespace tanka.graphql.execution
             };
         }
 
-        public static Dictionary<string, List<GraphQLFieldSelection>> CollectFields(
+        public static IReadOnlyDictionary<string, List<GraphQLFieldSelection>> CollectFields(
             ISchema schema,
             GraphQLDocument document,
             ObjectType objectType,

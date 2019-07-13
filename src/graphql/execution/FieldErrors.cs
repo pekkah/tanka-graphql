@@ -1,13 +1,12 @@
 ﻿using System;
-using tanka.graphql.resolvers;
-using tanka.graphql.type;
 using GraphQLParser.AST;
+using tanka.graphql.type;
 
 namespace tanka.graphql.execution
 {
-    public static class ExecutionErrors
+    public static class FieldErrors
     {
-        public static object HandleFieldError(
+        public static object Handle(
             IExecutorContext context,
             ObjectType objectType,
             string fieldName,
