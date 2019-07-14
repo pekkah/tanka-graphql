@@ -7,6 +7,9 @@ using tanka.graphql.type;
 
 namespace tanka.graphql.introspection
 {
+    /// <summary>
+    ///     Read types from <see cref="IntrospectionResult" /> into <see cref="SchemaBuilder" />
+    /// </summary>
     public class IntrospectionSchemaReader
     {
         private readonly SchemaBuilder _builder;
@@ -14,6 +17,11 @@ namespace tanka.graphql.introspection
         private readonly ConcurrentQueue<Action> _delayedActions = new ConcurrentQueue<Action>();
         private readonly __Schema _schema;
 
+        /// <summary>
+        ///     Create reader
+        /// </summary>
+        /// <param name="builder">Write types to builder</param>
+        /// <param name="result">Introspection result to use as source</param>
         public IntrospectionSchemaReader(SchemaBuilder builder, IntrospectionResult result)
         {
             _builder = builder;
@@ -52,7 +60,7 @@ namespace tanka.graphql.introspection
             foreach (var type in types.Where(t => t.Kind == __TypeKind.UNION))
                 Union(type);
 
-            while(_delayedActions.TryDequeue(out var action))
+            while (_delayedActions.TryDequeue(out var action))
                 action();
         }
 
@@ -170,7 +178,7 @@ namespace tanka.graphql.introspection
             if (_builder.TryGetType<InputObjectType>(type.Name, out var owner))
                 return owner;
 
-            _builder.InputObject(type.Name, out owner, type.Description, null);
+            _builder.InputObject(type.Name, out owner, type.Description);
 
             if (type.InputFields != null && type.InputFields.Any())
                 _builder.Connections(connect =>
@@ -192,7 +200,7 @@ namespace tanka.graphql.introspection
             if (_builder.TryGetType<InterfaceType>(type.Name, out var owner))
                 return owner;
 
-            _builder.Interface(type.Name, out owner, type.Description, null);
+            _builder.Interface(type.Name, out owner, type.Description);
             if (type.Fields != null && type.Fields.Any())
                 _delayedActions.Enqueue(() =>
                 {

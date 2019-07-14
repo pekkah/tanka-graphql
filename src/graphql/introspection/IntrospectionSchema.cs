@@ -23,9 +23,9 @@ namespace tanka.graphql.introspection
             var typeList = new List(new NonNull(type));
 
             builder.Enum(TypeKindName, out var typeKind,
-                description: null,
-                directives: null,
-    (__TypeKind.SCALAR.ToString(), default, null, null),
+                null,
+                null,
+                (__TypeKind.SCALAR.ToString(), default, null, null),
                 (__TypeKind.OBJECT.ToString(), default, null, null),
                 (__TypeKind.ENUM.ToString(), default, null, null),
                 (__TypeKind.INPUT_OBJECT.ToString(), default, null, null),
