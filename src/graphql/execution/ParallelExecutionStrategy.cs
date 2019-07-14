@@ -1,43 +1,37 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
 using tanka.graphql.type;
 
 namespace tanka.graphql.execution
 {
-    public class ParallelExecutionStrategy : ExecutionStrategyBase
+    public class ParallelExecutionStrategy : IExecutionStrategy
     {
-        public override async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
+        public async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
             IExecutorContext context,
             IReadOnlyDictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType,
             object objectValue,
             NodePath path)
         {
-            var data = new ConcurrentDictionary<string, object>();
-            var tasks = new ConcurrentBag<Task>();
+            var tasks = new Dictionary<string, Task<object>>();
             foreach (var fieldGroup in groupedFieldSet)
             {
-                var executionTask = Task.Run(async () =>
-                {
-                    var responseKey = fieldGroup.Key;
-                    var result = await ExecuteFieldGroupAsync(
-                        context,
-                        objectType,
-                        objectValue,
-                        //todo: following is dirty
-                        new KeyValuePair<string, IReadOnlyCollection<GraphQLFieldSelection>>(fieldGroup.Key, fieldGroup.Value), 
-                        path.Fork()).ConfigureAwait(false);
+                var executionTask = FieldGroups.ExecuteFieldGroupAsync(
+                    context,
+                    objectType,
+                    objectValue,
+                    //todo: following is dirty
+                    new KeyValuePair<string, IReadOnlyCollection<GraphQLFieldSelection>>(fieldGroup.Key,
+                        fieldGroup.Value),
+                    path.Fork());
 
-                    data[responseKey] = result;
-                });
-
-                tasks.Add(executionTask);
+                tasks.Add(fieldGroup.Key, executionTask);
             }
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-            return data;
+            await Task.WhenAll(tasks.Values).ConfigureAwait(false);
+            return tasks.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
         }
     }
 }

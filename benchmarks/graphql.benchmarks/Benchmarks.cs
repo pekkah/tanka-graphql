@@ -136,7 +136,7 @@ namespace tanka.graphql.benchmarks
         }
         
         [Benchmark]
-        public void Validate_query_with_defaults()
+        public void Validate_with_defaults()
         {
             var result = Validator.Validate(
                 _defaultRulesMap,
@@ -151,15 +151,21 @@ namespace tanka.graphql.benchmarks
         }
 
         [Benchmark]
-        public async Task ResolverChain()
+        public void Validate_100times_with_defaults()
         {
-            var _ = await _resolverChain(null);
-        }
+            for (int i = 0; i < 100; i++)
+            {
+                var result = Validator.Validate(
+                    _defaultRulesMap,
+                    _schema,
+                    _query);
 
-        [Benchmark]
-        public async Task Resolver()
-        {
-            var _ = await _resolver(null);
+                if (!result.IsValid)
+                {
+                    throw new InvalidOperationException(
+                        $"Validation failed. {result}");
+                }
+            }
         }
 
         private static void AssertResult(IEnumerable<ExecutionError> errors)

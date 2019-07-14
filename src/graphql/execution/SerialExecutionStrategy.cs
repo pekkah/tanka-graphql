@@ -6,9 +6,9 @@ using GraphQLParser.AST;
 
 namespace tanka.graphql.execution
 {
-    public class SerialExecutionStrategy : ExecutionStrategyBase
+    public class SerialExecutionStrategy : IExecutionStrategy
     {
-        public override async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
+        public async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
             IExecutorContext context,
             IReadOnlyDictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
             ObjectType objectType, object objectValue,
@@ -22,7 +22,7 @@ namespace tanka.graphql.execution
 
                 try
                 {
-                    var result = await ExecuteFieldGroupAsync(
+                    var result = await FieldGroups.ExecuteFieldGroupAsync(
                         context,
                         objectType,
                         objectValue,

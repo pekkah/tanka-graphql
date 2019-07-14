@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.dotMemoryUnit;
 using tanka.graphql.resolvers;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using Xunit;
+using Xunit.Abstractions;
+
+[assembly: DotMemoryUnit(FailIfRunWithoutSupport = false, SavingStrategy = SavingStrategy.OnAnyFail, Directory = @"c:\temp\Assembly")]
 
 namespace tanka.graphql.tests
 {
@@ -61,8 +65,10 @@ namespace tanka.graphql.tests
                 }
                 ";
 
-        public ExecutorFacts()
+        public ExecutorFacts(ITestOutputHelper atr)
         {
+            DotMemoryUnitTestOutput.SetOutputMethod(atr.WriteLine);
+
             Model = new EventsModel();
             Resolvers = new ResolverMap
             {
@@ -252,6 +258,7 @@ namespace tanka.graphql.tests
                 }");
         }
 
+        [AssertTraffic(Namespaces = new []{"tanka.*"}, AllocatedObjectsCount = 0)]
         [Fact]
         public async Task Query()
         {

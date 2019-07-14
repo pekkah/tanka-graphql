@@ -8,15 +8,9 @@ using GraphQLParser.AST;
 
 namespace tanka.graphql.execution
 {
-    public abstract class ExecutionStrategyBase : IExecutionStrategy
+    public static class FieldGroups
     {
-        public abstract Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
-            IExecutorContext context,
-            IReadOnlyDictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
-            ObjectType objectType, object objectValue,
-            NodePath path);
-
-        public async Task<object> ExecuteFieldAsync(
+        public static async Task<object> ExecuteFieldAsync(
             IExecutorContext context,
             ObjectType objectType,
             object objectValue,
@@ -87,7 +81,7 @@ namespace tanka.graphql.execution
             }
         }
 
-        protected async Task<object> ExecuteFieldGroupAsync(
+        public static async Task<object> ExecuteFieldGroupAsync(
             IExecutorContext context,
             ObjectType objectType,
             object objectValue,
