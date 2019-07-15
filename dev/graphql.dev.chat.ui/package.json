@@ -26,7 +26,7 @@
     "@types/react-dom": "^16.8.4",
     "@types/react-redux": "^6.0.9",
     "create-react-app": "^3.0.1",
-    "typescript": "^3.5.2"
+    "typescript": "^3.5.3"
   },
   "resolutions": {
     "graphql": "^14.0.2"
