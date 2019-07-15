@@ -510,13 +510,13 @@ namespace tanka.graphql.validation
         private bool DoTypesConflict(IType type1, IType type2)
         {
             if (type1 is List type1List)
-                return !(type2 is List type2List) || DoTypesConflict(type1List.WrappedType, type2List.WrappedType);
+                return !(type2 is List type2List) || DoTypesConflict(type1List.OfType, type2List.OfType);
 
             if (type2 is List) return true;
 
             if (type1 is NonNull type1NonNull)
                 return !(type2 is NonNull type2NonNull) ||
-                       DoTypesConflict(type1NonNull.WrappedType, type2NonNull.WrappedType);
+                       DoTypesConflict(type1NonNull.OfType, type2NonNull.OfType);
 
             if (type2 is NonNull) return true;
 

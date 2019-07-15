@@ -6,14 +6,14 @@ namespace tanka.graphql.type
     {
         public NonNull(IType wrappedType)
         {
-            WrappedType = wrappedType;
+            OfType = wrappedType;
         }
 
-        public IType WrappedType { get; }
+        public IType OfType { get; }
 
         public override string ToString()
         {
-            return $"{WrappedType}!";
+            return $"{OfType}!";
         }
 
         public override bool Equals(object obj)
@@ -28,12 +28,12 @@ namespace tanka.graphql.type
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Equals(WrappedType, other.WrappedType);
+            return Equals(OfType, other.OfType);
         }
 
         public override int GetHashCode()
         {
-            return (WrappedType != null ? WrappedType.GetHashCode() : 0);
+            return (OfType != null ? OfType.GetHashCode() : 0);
         }
 
         public static bool operator ==(NonNull left, NonNull right)

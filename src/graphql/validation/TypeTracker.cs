@@ -132,7 +132,7 @@ namespace tanka.graphql.validation
             EnterListValue = node =>
             {
                 var listType = GetNullableType(GetInputType());
-                var itemType = listType is List list ? list.WrappedType : listType;
+                var itemType = listType is List list ? list.OfType : listType;
 
                 // List positions never have a default value
                 _defaultValueStack.Push(null);
@@ -280,7 +280,7 @@ namespace tanka.graphql.validation
         public IType GetNullableType(IType type)
         {
             if (type is NonNull nonNull)
-                return nonNull.WrappedType;
+                return nonNull.OfType;
 
             return null;
         }

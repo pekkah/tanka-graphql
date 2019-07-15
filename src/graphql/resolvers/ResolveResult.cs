@@ -251,7 +251,7 @@ namespace tanka.graphql.resolvers
                     path,
                     selection);
 
-            var innerType = listType.WrappedType;
+            var innerType = listType.OfType;
             var result = new List<object>();
             int i = 0;
             foreach (var resultItem in values)
@@ -298,7 +298,7 @@ namespace tanka.graphql.resolvers
             NodePath path,
             NonNull nonNull)
         {
-            var innerType = nonNull.WrappedType;
+            var innerType = nonNull.OfType;
             var completedResult = await CompleteValueAsync(
                 executorContext,
                 objectType,

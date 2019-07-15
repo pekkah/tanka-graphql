@@ -109,7 +109,7 @@ namespace tanka.graphql.introspection
                 },
 
                 // NON_NULL and LIST only
-                {"ofType", Resolve.PropertyOf<IWrappingType>(t => t.WrappedType)}
+                {"ofType", Resolve.PropertyOf<IWrappingType>(t => t.OfType)}
             };
 
             this[IntrospectionSchema.FieldName] = new FieldResolverMap

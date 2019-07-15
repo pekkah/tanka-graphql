@@ -9,7 +9,7 @@ namespace tanka.graphql.execution
         {
             if (type is IWrappingType wrappingType)
             {
-                return IsInputType(wrappingType.WrappedType);
+                return IsInputType(wrappingType.OfType);
             }
 
             if (type is ScalarType)
@@ -34,7 +34,7 @@ namespace tanka.graphql.execution
         {
             if (type is IWrappingType wrappingType)
             {
-                return IsOutputType(wrappingType.WrappedType);
+                return IsOutputType(wrappingType.OfType);
             }
 
             if (type is ScalarType)

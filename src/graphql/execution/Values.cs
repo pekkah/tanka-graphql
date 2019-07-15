@@ -17,7 +17,7 @@ namespace tanka.graphql.execution
         {
             if (valueType is NonNull nonNull) return CoerceNonNullValue(getInputObjectFields, value, nonNull);
 
-            if (valueType is List list) return CoerceListValues(getInputObjectFields, list.WrappedType, value);
+            if (valueType is List list) return CoerceListValues(getInputObjectFields, list.OfType, value);
 
             if (valueType is ScalarType scalar) return CoerceScalarValue(value, scalar);
 
@@ -92,7 +92,7 @@ namespace tanka.graphql.execution
 
         private static object CoerceNonNullValue(Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, object value, NonNull nonNull)
         {
-            var coercedValue = CoerceValue(getInputObjectFields, value, nonNull.WrappedType);
+            var coercedValue = CoerceValue(getInputObjectFields, value, nonNull.OfType);
             if (coercedValue == null)
                 throw new ValueCoercionException("Coerced value is null", 
                     value,
