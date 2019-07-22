@@ -119,9 +119,8 @@ namespace tanka.graphql.tests.type
         public async Task Authorize_field_directive_sdl()
         {
             /* Given */
-            var builder = new SchemaBuilder();
-
-            Sdl.Import(Parser.ParseDocument(@"
+            var builder = new SchemaBuilder()
+                .Sdl(Parser.ParseDocument(@"
                 directive @authorize(
                     role: String =""user""
                 ) on FIELD_DEFINITION
@@ -134,7 +133,7 @@ namespace tanka.graphql.tests.type
                 schema {
                     query: Query
                 }
-                "), builder);
+                "));
 
             var resolvers = new ResolverMap
             {

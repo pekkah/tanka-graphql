@@ -48,15 +48,15 @@ namespace tanka.graphql.tests.execution
 
     public class FieldErrorsFacts
     {
-        private ISchema _schema;
+        private readonly ISchema _schema;
 
         public Query Query { get; }
 
         public FieldErrorsFacts()
         {
             Query = new Query();
-            var builder = new SchemaBuilder();
-            Sdl.Import(Parser.ParseDocument(
+            var builder = new SchemaBuilder()
+                .Sdl(Parser.ParseDocument(
                 @"
                     type Container {
                         nonNullWithNull: String!
@@ -80,7 +80,7 @@ namespace tanka.graphql.tests.execution
                     schema {
                         query : Query
                     }
-                "), builder);
+                "));
 
             var resolvers = new ResolverMap()
             {

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using Xunit;
 
@@ -27,7 +28,8 @@ namespace tanka.graphql.tests.sdl
             var sdl = GetGitHubSchema();
 
             /* When */
-            var schema = Sdl.Schema(Parser.ParseDocument(sdl));
+            var schema = new SchemaBuilder().Sdl(Parser.ParseDocument(sdl))
+                .Build();
 
             /* Then */
             Assert.NotNull(schema);

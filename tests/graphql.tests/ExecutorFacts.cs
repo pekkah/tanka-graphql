@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.dotMemoryUnit;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
+using tanka.graphql.sdl;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
@@ -145,9 +147,8 @@ namespace tanka.graphql.tests
                 }
             };
 
-            var schema = graphql.sdl.Sdl.Schema(Parser.ParseDocument(Sdl));
             Schema = SchemaTools.MakeExecutableSchema(
-                schema,
+                new SchemaBuilder().Sdl(Parser.ParseDocument(Sdl)),
                 Resolvers,
                 Resolvers);
         }

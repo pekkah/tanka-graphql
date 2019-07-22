@@ -4,7 +4,8 @@ Defining `Schema` in IDL/SDL can greatly speed up and simplify code base.
 
 ### Load schema from SDL
 
-`Sdl` class provides static methods for parsing types from SDL definitions. 
+`SchemaBuilder` class has an extension method for loading types from SDL strings
+or GraphQL documents.
 
 Schema
 

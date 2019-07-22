@@ -13,8 +13,8 @@ namespace tanka.graphql.benchmarks
         public static ISchema InitializeSchema()
         {
             var events = new SingleValueEventChannel();
-            var builder = new SchemaBuilder();
-            Sdl.Import(Parser.ParseDocument(
+            var builder = new SchemaBuilder()
+                .Sdl(Parser.ParseDocument(
                 @"
                     type Query {
                         simple: String
@@ -33,7 +33,7 @@ namespace tanka.graphql.benchmarks
                         mutation: Mutation
                         subscription: Subscription
                     }
-                    "), builder);
+                    "));
 
             var resolvers = new ResolverMap
             {
