@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using tanka.graphql.directives;
 using tanka.graphql.resolvers;
 using tanka.graphql.schema;
 using tanka.graphql.sdl;

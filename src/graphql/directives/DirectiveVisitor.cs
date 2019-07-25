@@ -1,4 +1,4 @@
-﻿namespace tanka.graphql.tools
+﻿namespace tanka.graphql.directives
 {
     public class DirectiveVisitor
     {

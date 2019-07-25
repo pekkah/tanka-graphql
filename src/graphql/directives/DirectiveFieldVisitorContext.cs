@@ -2,7 +2,7 @@
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 
-namespace tanka.graphql.tools
+namespace tanka.graphql.directives
 {
     public class DirectiveFieldVisitorContext: IEquatable<DirectiveFieldVisitorContext>
     {
