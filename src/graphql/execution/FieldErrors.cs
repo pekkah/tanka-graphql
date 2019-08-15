@@ -16,6 +16,15 @@ namespace tanka.graphql.execution
             Exception error,
             NodePath path)
         {
+            if (!(error is QueryExecutionException))
+            {
+                error = new QueryExecutionException(
+                    "",
+                    error,
+                    path,
+                    fieldSelection);
+            }
+
             if (fieldType is NonNull)
                 throw error;
 

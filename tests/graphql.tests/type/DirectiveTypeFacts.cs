@@ -27,8 +27,9 @@ namespace tanka.graphql.tests.type
                         var user = fetchUser(42);
                         
                         if (!user.HasClaim("role", requiredRole))
-                            return new ValueTask<IResolveResult>(Resolve.As("requires admin role. " +
-                                                                            "todo(pekka): should throw error or return error or??"));
+                            throw new Exception(
+                                "requires admin role. "
+                            );
 
                         return next(context);
                     }).Run(fieldDefinition.Resolver));
@@ -108,12 +109,32 @@ namespace tanka.graphql.tests.type
             });
 
             /* Then */
-            result.ShouldMatchJson(@"{
+            result.ShouldMatchJson(
+                @"
+                  {
                   ""data"": {
-                    ""requiresUser"": ""Hello User!"",
-                    ""requiresAdmin"": ""requires admin role. todo(pekka): should throw error or return error or??""
-                  }
-                }");
+                    ""requiresAdmin"": null,
+                    ""requiresUser"": ""Hello User!""
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""requires admin role. "",
+                      ""locations"": [
+                        {
+                          ""end"": 28,
+                          ""start"": 2
+                        }
+                      ],
+                      ""path"": [
+                        ""requiresAdmin""
+                      ],
+                      ""extensions"": {
+                        ""code"": ""EXCEPTION""
+                      }
+                    }
+                  ]
+                }
+                ");
         }
 
         [Fact]
@@ -127,8 +148,8 @@ namespace tanka.graphql.tests.type
                 ) on FIELD_DEFINITION
 
                 type Query {
-                    requiresAdmin: String! @authorize(role:""admin"")
-                    requiresUser: String! @authorize
+                    requiresAdmin: String @authorize(role:""admin"")
+                    requiresUser: String @authorize
                 }
 
                 schema {
@@ -172,12 +193,31 @@ namespace tanka.graphql.tests.type
             });
 
             /* Then */
-            result.ShouldMatchJson(@"{
+            result.ShouldMatchJson(@"
+                  {
                   ""data"": {
-                    ""requiresUser"": ""Hello User!"",
-                    ""requiresAdmin"": ""requires admin role. todo(pekka): should throw error or return error or??""
-                  }
-                }");
+                    ""requiresAdmin"": null,
+                    ""requiresUser"": ""Hello User!""
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""requires admin role. "",
+                      ""locations"": [
+                        {
+                          ""end"": 28,
+                          ""start"": 2
+                        }
+                      ],
+                      ""path"": [
+                        ""requiresAdmin""
+                      ],
+                      ""extensions"": {
+                        ""code"": ""EXCEPTION""
+                      }
+                    }
+                  ]
+                }
+                ");
         }
     }
 }

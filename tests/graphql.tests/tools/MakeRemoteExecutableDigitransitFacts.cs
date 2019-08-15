@@ -167,6 +167,15 @@ namespace tanka.graphql.tests.tools
                   ""errors"": [
                     {
                       ""message"": ""error"",
+                      ""locations"": [
+                        {
+                          ""end"": 137,
+                          ""start"": 47
+                        }
+                      ],
+                      ""path"": [
+                        ""feeds""
+                      ],
                       ""extensions"": {
                         ""code"": ""INVALIDOPERATION""
                       }

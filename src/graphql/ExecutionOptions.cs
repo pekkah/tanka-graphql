@@ -15,14 +15,25 @@ namespace tanka.graphql
     /// </summary>
     public class ExecutionOptions
     {
-        /// <summary>
-        ///     Function for formatting <see cref="QueryExecutionException"/> into <see cref="ExecutionError" />/>
-        /// </summary>
-        public Func<Exception, ExecutionError> FormatError = DefaultFormatError;
-
-        public Func<ISchema, GraphQLDocument, IReadOnlyDictionary<string, object>, ValueTask<ValidationResult>>
+        public ExecutionOptions()
+        {
+            FormatError = DefaultFormatError;
             Validate = (schema, document, variableValues) =>
                 DefaultValidate(ExecutionRules.All, schema, document, variableValues);
+        }
+
+        /// <summary>
+        ///     Function for formatting <see cref="QueryExecutionException" /> into <see cref="ExecutionError" />/>
+        /// </summary>
+        public Func<Exception, ExecutionError> FormatError { get; set; }
+
+        public bool IncludeExceptionDetails { get; set; } = false;
+
+        /// <summary>
+        ///     Query validator function
+        /// </summary>
+        public Func<ISchema, GraphQLDocument, IReadOnlyDictionary<string, object>, ValueTask<ValidationResult>>
+            Validate { get; set; }
 
         /// <summary>
         ///     Schema to execute against
@@ -53,8 +64,8 @@ namespace tanka.graphql
         /// </summary>
         public ICollection<IExecutorExtension> Extensions { get; set; } = new List<IExecutorExtension>();
 
-        public static ValueTask<ValidationResult> DefaultValidate(
-            IEnumerable<CombineRule> rules, 
+        public ValueTask<ValidationResult> DefaultValidate(
+            IEnumerable<CombineRule> rules,
             ISchema schema,
             GraphQLDocument document,
             IReadOnlyDictionary<string, object> variableValues = null)
@@ -68,15 +79,17 @@ namespace tanka.graphql
             return new ValueTask<ValidationResult>(result);
         }
 
-        public static ExecutionError DefaultFormatError(Exception exception)
+        public ExecutionError DefaultFormatError(Exception exception)
         {
-            var message = exception.Message;
-
-            if (exception.InnerException != null)
-                message += $" {exception.InnerException.Message}";
-
+            var rootCause = exception.GetBaseException();
+            var message = rootCause.Message;
             var error = new ExecutionError(message);
-            EnrichWithErrorCode(error, exception);
+
+            EnrichWithErrorCode(error, rootCause);
+
+            if (IncludeExceptionDetails)
+                EnrichWithStackTrace(error, rootCause);
+
             if (!(exception is QueryExecutionException graphQLError))
                 return error;
 
@@ -90,11 +103,19 @@ namespace tanka.graphql
             return error;
         }
 
-        public static void EnrichWithErrorCode(ExecutionError error, Exception exception)
+        public static void EnrichWithErrorCode(ExecutionError error, Exception rootCause)
         {
-            error.Extend("code", exception.GetType().Name
-                .Replace("Exception", string.Empty)
-                .ToUpperInvariant());
+            var code = rootCause.GetType().Name;
+
+            if (code != "Exception")
+                code = code.Replace("Exception", string.Empty);
+
+            error.Extend("code", code.ToUpperInvariant());
+        }
+
+        public static void EnrichWithStackTrace(ExecutionError error, Exception exception)
+        {
+            error.Extend("stacktrace", exception.ToString());
         }
     }
 }

@@ -314,19 +314,31 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(
-                @"{
+                @"
+                {
                   ""data"": {
                     ""custom"": null
                   },
                   ""errors"": [
                     {
                       ""message"": ""error"",
+                      ""locations"": [
+                        {
+                          ""end"": 116,
+                          ""start"": 72
+                        }
+                      ],
+                      ""path"": [
+                        ""custom"",
+                        ""nonNullWithCustomError""
+                      ],
                       ""extensions"": {
                         ""code"": ""INVALIDOPERATION""
                       }
                     }
                   ]
-                }");
+                }
+                ");
         }
 
         [Fact]
@@ -352,7 +364,8 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(
-                @"{
+                @"
+                {
                   ""data"": {
                     ""custom"": {
                       ""nullableWithCustomError"": null
@@ -361,12 +374,23 @@ namespace tanka.graphql.tests.execution
                   ""errors"": [
                     {
                       ""message"": ""error"",
+                      ""locations"": [
+                        {
+                          ""end"": 117,
+                          ""start"": 72
+                        }
+                      ],
+                      ""path"": [
+                        ""custom"",
+                        ""nullableWithCustomError""
+                      ],
                       ""extensions"": {
                         ""code"": ""INVALIDOPERATION""
                       }
                     }
                   ]
-                }");
+                }
+                ");
         }
 
         [Fact]
@@ -392,19 +416,31 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(
-                @"{
+                @"
+                {
                   ""data"": {
                     ""custom"": null
                   },
                   ""errors"": [
                     {
                       ""message"": ""error"",
+                      ""locations"": [
+                        {
+                          ""end"": 120,
+                          ""start"": 72
+                        }
+                      ],
+                      ""path"": [
+                        ""custom"",
+                        ""nonNullListWithCustomError""
+                      ],
                       ""extensions"": {
                         ""code"": ""INVALIDOPERATION""
                       }
                     }
                   ]
-                }");
+                }
+                ");
         }
     }
 }

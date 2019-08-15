@@ -74,24 +74,7 @@
             <nav class="col-12 col-md-3 col-xl-2 sidebar">
                 <div class="sidebar-sticky">
                     {{#each Toc}}
-                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                            <a class="d-flex align-items-center text-muted" href="{{ Href }}">{{DisplayName}}</a>
-                        </h6>
-                        {{#if HasPages}}
-                            <ul class="nav flex-column">
-                            {{#each Pages}}
-                                {{#if IsActive}}
-                                <li class="nav-item">
-                                    <a class="nav-link active bg-light" href="{{ Href}}">{{DisplayName}}</a>
-                                </li>
-                                {{else}}
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ Href }}">{{DisplayName}}</a>
-                                </li>
-                                {{/if}}
-                                {{/each}}
-                            </ul>
-                        {{/if}}
+                       {{> category }}
                     {{/each}}
                 </div>
             </nav>
