@@ -17,7 +17,7 @@ namespace tanka.graphql
     {
         public ExecutionOptions()
         {
-            FormatError = DefaultFormatError;
+            FormatError = exception => DefaultFormatError(this, exception);
             Validate = (schema, document, variableValues) =>
                 DefaultValidate(ExecutionRules.All, schema, document, variableValues);
         }
@@ -64,7 +64,7 @@ namespace tanka.graphql
         /// </summary>
         public ICollection<IExecutorExtension> Extensions { get; set; } = new List<IExecutorExtension>();
 
-        public ValueTask<ValidationResult> DefaultValidate(
+        public static ValueTask<ValidationResult> DefaultValidate(
             IEnumerable<CombineRule> rules,
             ISchema schema,
             GraphQLDocument document,
@@ -79,7 +79,7 @@ namespace tanka.graphql
             return new ValueTask<ValidationResult>(result);
         }
 
-        public ExecutionError DefaultFormatError(Exception exception)
+        public static ExecutionError DefaultFormatError(ExecutionOptions options, Exception exception)
         {
             var rootCause = exception.GetBaseException();
             var message = rootCause.Message;
@@ -87,7 +87,7 @@ namespace tanka.graphql
 
             EnrichWithErrorCode(error, rootCause);
 
-            if (IncludeExceptionDetails)
+            if (options.IncludeExceptionDetails)
                 EnrichWithStackTrace(error, rootCause);
 
             if (!(exception is QueryExecutionException graphQLError))
