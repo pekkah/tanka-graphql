@@ -208,20 +208,20 @@ namespace tanka.graphql.introspection
                     {
                         foreach (var field in type.Fields)
                         {
-                            (string Name, IType Type, object DefaultValue, string Description)[] args = field.Args
-                                .Select(arg => (
-                                    arg.Name,
-                                    InputType(arg.Type),
-                                    (object) arg.DefaultValue,
-                                    arg.Description))
-                                .ToArray();
-
                             connect.Field(
                                 owner,
                                 field.Name,
                                 OutputType(field.Type),
                                 field.Description,
-                                args: args);
+                                args: args => field.Args
+                                    .ForEach(a => args.Arg(
+                                        a.Name, 
+                                        InputType(a.Type), 
+                                        a.DefaultValue, 
+                                        a.Description
+                                        )
+                                    )
+                                );
                         }
                     });
                 });
@@ -269,20 +269,19 @@ namespace tanka.graphql.introspection
                     {
                         foreach (var field in type.Fields)
                         {
-                            (string Name, IType Type, object DefaultValue, string Description)[] args = field.Args
-                                .Select(arg => (
-                                    arg.Name,
-                                    InputType(arg.Type),
-                                    (object) arg.DefaultValue,
-                                    arg.Description))
-                                .ToArray();
-
                             connect.Field(
                                 owner,
                                 field.Name,
                                 OutputType(field.Type),
                                 field.Description,
-                                args: args);
+                                args: args => field.Args
+                                    .ForEach(a => args.Arg(
+                                            a.Name, 
+                                            InputType(a.Type), 
+                                            a.DefaultValue, 
+                                            a.Description
+                                        )
+                                    ));
                         }
                     });
                 });

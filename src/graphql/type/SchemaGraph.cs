@@ -7,21 +7,21 @@ namespace tanka.graphql.type
 {
     public class SchemaGraph : ISchema
     {
-        private readonly Dictionary<string, DirectiveType> _directiveTypes;
-        private readonly Dictionary<string, Dictionary<string, Resolver>> _resolvers;
-        private readonly Dictionary<string, Dictionary<string, Subscriber>> _subscribers;
-        private readonly Dictionary<string, Dictionary<string, IField>> _fields;
-        private readonly Dictionary<string, Dictionary<string, InputObjectField>> _inputFields;
-        private readonly Dictionary<string, INamedType> _types;
+        private readonly IReadOnlyDictionary<string, DirectiveType> _directiveTypes;
+        private readonly IReadOnlyDictionary<string, Dictionary<string, Resolver>> _resolvers;
+        private readonly IReadOnlyDictionary<string, Dictionary<string, Subscriber>> _subscribers;
+        private readonly IReadOnlyDictionary<string, Dictionary<string, IField>> _fields;
+        private readonly IReadOnlyDictionary<string, Dictionary<string, InputObjectField>> _inputFields;
+        private readonly IReadOnlyDictionary<string, INamedType> _types;
         private readonly DirectiveList _directives;
 
         public SchemaGraph(
-            Dictionary<string, INamedType> types,
-            Dictionary<string, Dictionary<string, IField>> fields,
-            Dictionary<string, Dictionary<string, InputObjectField>> inputFields,
-            Dictionary<string, DirectiveType> directiveTypes,
-            Dictionary<string, Dictionary<string, Resolver>> resolvers,
-            Dictionary<string, Dictionary<string, Subscriber>> subscribers,
+            IReadOnlyDictionary<string, INamedType> types,
+            IReadOnlyDictionary<string, Dictionary<string, IField>> fields,
+            IReadOnlyDictionary<string, Dictionary<string, InputObjectField>> inputFields,
+            IReadOnlyDictionary<string, DirectiveType> directiveTypes,
+            IReadOnlyDictionary<string, Dictionary<string, Resolver>> resolvers,
+            IReadOnlyDictionary<string, Dictionary<string, Subscriber>> subscribers,
             IEnumerable<DirectiveInstance> directives = null)
         {
             _types = types;

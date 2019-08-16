@@ -34,7 +34,7 @@ namespace tanka.graphql.schema
             Action<ResolverBuilder> resolve = null,
             Action<SubscriberBuilder> subscribe = null,
             IEnumerable<DirectiveInstance> directives = null,
-            params (string Name, IType Type, object DefaultValue, string Description)[] args)
+            Action<ArgsBuilder> args = null)
         {
             if (owner == null) throw new ArgumentNullException(nameof(owner));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
@@ -56,10 +56,12 @@ namespace tanka.graphql.schema
                 throw new SchemaBuilderException(owner.Name,
                     $"Cannot add field '{fieldName}'. Type '{owner.Name}' already has field with same name.");
 
+            var argsBuilder = new ArgsBuilder();
+            args?.Invoke(argsBuilder);
 
             var field = new Field(
                 to,
-                new Args(args),
+                argsBuilder.Build(),
                 description,
                 null,
                 directives);
@@ -80,7 +82,7 @@ namespace tanka.graphql.schema
 
             return this;
         }
-
+        
         public ConnectionBuilder InputField(
             InputObjectType owner,
             string fieldName,

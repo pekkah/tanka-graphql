@@ -70,11 +70,11 @@ namespace tanka.graphql.introspection
                     .Field(type, "name", ScalarType.String)
                     .Field(type, "description", ScalarType.String)
                     .Field(type, "fields", fieldList,
-                        args: ("includeDeprecated", ScalarType.Boolean, false, default))
+                        args: args => args.Arg("includeDeprecated", ScalarType.Boolean, false, default))
                     .Field(type, "interfaces", typeList)
                     .Field(type, "possibleTypes", typeList)
                     .Field(type, "enumValues", enumValueList,
-                        args: ("includeDeprecated", ScalarType.Boolean, false, default))
+                        args: args => args.Arg("includeDeprecated", ScalarType.Boolean, false, default))
                     .Field(type, "inputFields", inputValueList)
                     .Field(type, "ofType", type));
 
@@ -103,7 +103,7 @@ namespace tanka.graphql.introspection
                 .Connections(connect => connect
                     .Field(query, "__schema", schema)
                     .Field(query, "__type", type,
-                        args: ("name", ScalarType.NonNullString, default, default)));
+                        args: args => args.Arg("name", ScalarType.NonNullString, default, default)));
 
             return builder;
         }

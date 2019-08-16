@@ -26,8 +26,8 @@ namespace tanka.graphql.schema
             return (schema, new NotImplementedException("todo"));
         }
 
-        private Dictionary<string, Dictionary<string, Subscriber>> BuildSubscribers(
-            Dictionary<string, Dictionary<string, SubscriberBuilder>> subscribers)
+        private IReadOnlyDictionary<string, Dictionary<string, Subscriber>> BuildSubscribers(
+            IReadOnlyDictionary<string, Dictionary<string, SubscriberBuilder>> subscribers)
         {
             var result = new Dictionary<string, Dictionary<string, Subscriber>>();
 
@@ -38,8 +38,8 @@ namespace tanka.graphql.schema
             return result;
         }
 
-        private Dictionary<string, Dictionary<string, Resolver>> BuildResolvers(
-            Dictionary<string, Dictionary<string, ResolverBuilder>> resolvers)
+        private IReadOnlyDictionary<string, Dictionary<string, Resolver>> BuildResolvers(
+            IReadOnlyDictionary<string, Dictionary<string, ResolverBuilder>> resolvers)
         {
             var result = new Dictionary<string, Dictionary<string, Resolver>>();
 

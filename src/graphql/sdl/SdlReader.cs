@@ -466,11 +466,20 @@ namespace tanka.graphql.sdl
             {
                 var type = OutputType(definition.Type);
                 var name = definition.Name.Value;
-                var args = Args(definition.Arguments);
+                var args = Args(definition.Arguments).ToList();
                 var directives = Directives(definition.Directives);
 
                 _builder.Connections(connect => connect
-                    .Field(owner, name, type, default, null, null, directives, args.ToArray()));
+                    .Field(
+                        owner, 
+                        name, 
+                        type, 
+                        default, 
+                        null, 
+                        null, 
+                        directives, 
+                        args: argsBuilder => args.ForEach(a => 
+                            argsBuilder.Arg(a.Name, a.Type, a.DefaultValue, a.Description))));
             }
         }
     }

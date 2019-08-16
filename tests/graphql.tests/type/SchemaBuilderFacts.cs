@@ -270,10 +270,11 @@ namespace tanka.graphql.tests.type
                     {
                         /* directive */
                     },
-                    (Name: "arg1",
-                        Type: ScalarType.Boolean,
-                        DefaultValue: true,
-                        Description: "Description")
+                    args => args.Arg(
+                        name: "arg1",
+                        type: ScalarType.Boolean,
+                        defaultValue: true,
+                        description: "Description")
                 );
             });
 
@@ -347,10 +348,11 @@ namespace tanka.graphql.tests.type
                     {
                         /* directive */
                     },
-                    (Name: "arg1",
-                        Type: ScalarType.Boolean,
-                        DefaultValue: true,
-                        Description: "Description")
+                    args => args.Arg(
+                        name: "arg1",
+                        type: ScalarType.Boolean,
+                        defaultValue: true,
+                        description: "Description")
                 );
             });
 
@@ -381,10 +383,11 @@ namespace tanka.graphql.tests.type
                     {
                         /* directive */
                     },
-                    (Name: "arg1",
-                        Type: ScalarType.Boolean,
-                        DefaultValue: true,
-                        Description: "Description")
+                    args => args.Arg(
+                        name: "arg1",
+                        type: ScalarType.Boolean,
+                        defaultValue: true,
+                        description: "Description")
                 );
             }));
 
