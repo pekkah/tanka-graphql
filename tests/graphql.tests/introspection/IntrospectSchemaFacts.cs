@@ -47,7 +47,7 @@ namespace tanka.graphql.tests.introspection
                 new EnumValues
                 {
                     {"value1", "Description"},
-                    {"value2", "Description", "Deprecated"}
+                    {"value2", "Description", null, "Deprecated"}
                 },
                 "Description");
 

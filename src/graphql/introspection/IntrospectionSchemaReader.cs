@@ -154,21 +154,17 @@ namespace tanka.graphql.introspection
             if (_builder.TryGetType<EnumType>(type.Name, out var enumType))
                 return enumType;
 
-            var values =
-                type.EnumValues
-                    .Select(v => (
-                        v.Name,
-                        v.Description,
-                        default(IEnumerable<DirectiveInstance>),
-                        v.DeprecationReason))
-                    .ToArray();
-
             _builder.Enum(
                 type.Name,
                 out enumType,
                 type.Description,
-                null,
-                values);
+                values => type.EnumValues
+                    .ForEach(v => values.Value(
+                        v.Name,
+                        v.Description,
+                        Enumerable.Empty<DirectiveInstance>(),
+                        v.DeprecationReason))
+                );
 
             return enumType;
         }

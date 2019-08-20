@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using tanka.graphql.language;
 using tanka.graphql.resolvers;
 using tanka.graphql.type;
 
@@ -32,16 +33,20 @@ namespace tanka.graphql.schema
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
 
-            if (!_fields.ContainsKey(type.Name)) return Enumerable.Empty<KeyValuePair<string, IField>>();
+            if (!_fields.TryGetValue(type.Name, out var fields))
+                return Enumerable.Empty<KeyValuePair<string, IField>>();
 
-            return _fields[type.Name];
+            return fields;
         }
 
-        public IEnumerable<KeyValuePair<string, InputObjectField>> GetInputFields(string type)
+        public IEnumerable<KeyValuePair<string, InputObjectField>> GetInputFields(InputObjectType type)
         {
-            if (_inputFields.TryGetValue(type, out var fields)) return fields;
+            if (type == null) throw new ArgumentNullException(nameof(type));
 
-            return Enumerable.Empty<KeyValuePair<string, InputObjectField>>();
+            if (!_inputFields.TryGetValue(type.Name, out var fields))
+                return Enumerable.Empty<KeyValuePair<string, InputObjectField>>();
+
+            return fields;
         }
 
         public ResolverBuilder GetOrAddResolver(ComplexType type, string fieldName)
@@ -80,6 +85,15 @@ namespace tanka.graphql.schema
 
             subscriber = null;
             return false;
+        }
+
+        internal IEnumerable<KeyValuePair<string, InputObjectField>> GetInputFields(string type)
+        {
+            if (Builder.TryGetType<InputObjectType>(type, out var inputType))
+                return GetInputFields(inputType);
+
+            throw new DocumentException(
+                $"Input type '{type}' is not known by the builder.");
         }
     }
 }

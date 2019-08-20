@@ -4,7 +4,7 @@ namespace tanka.graphql.schema
 {
     public partial class ConnectionBuilder
     {
-        public ConnectionBuilder RemoveField(ComplexType complexType, string fieldName)
+        public ConnectionBuilder Remove(ComplexType complexType, string fieldName)
         {
             if (_fields.TryGetValue(complexType.Name, out var fields))
                 if (fields.ContainsKey(fieldName))
@@ -21,7 +21,7 @@ namespace tanka.graphql.schema
             return this;
         }
 
-        public ConnectionBuilder RemoveField(InputObjectType inputObject, string fieldName)
+        public ConnectionBuilder Remove(InputObjectType inputObject, string fieldName)
         {
             if (_inputFields.TryGetValue(inputObject.Name, out var fields))
                 if (fields.ContainsKey(fieldName))

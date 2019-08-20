@@ -49,7 +49,7 @@ namespace tanka.graphql.tools
                         if (connect.TryGetInputField(leftType, rightTypeField.Key, out _))
                             return;
 
-                        connect.IncludeInputFields(leftType, new[] {rightTypeField});
+                        connect.Include(leftType, new[] {rightTypeField});
                     });
             }
             else
@@ -59,7 +59,7 @@ namespace tanka.graphql.tools
                     .Connections(connect =>
                     {
                         var fields = right.GetInputFields(rightType.Name).ToList();
-                        connect.IncludeInputFields(rightType, fields);
+                        connect.Include(rightType, fields);
                     });
             }
         }
@@ -76,7 +76,7 @@ namespace tanka.graphql.tools
                         if (connect.TryGetField(leftType, rightTypeField.Key, out _))
                             return;
 
-                        connect.IncludeFields(leftType, new[] {rightTypeField});
+                        connect.Include(leftType, new[] {rightTypeField});
 
                         var resolver = right.GetResolver(rightType.Name, rightTypeField.Key);
 
@@ -98,7 +98,7 @@ namespace tanka.graphql.tools
                     .Connections(connect =>
                     {
                         var fields = right.GetFields(rightType.Name).ToList();
-                        connect.IncludeFields(rightType, fields);
+                        connect.Include(rightType, fields);
 
                         foreach (var rightTypeField in fields)
                         {

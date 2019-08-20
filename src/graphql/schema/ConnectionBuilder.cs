@@ -82,7 +82,7 @@ namespace tanka.graphql.schema
 
             return this;
         }
-        
+
         public ConnectionBuilder InputField(
             InputObjectType owner,
             string fieldName,

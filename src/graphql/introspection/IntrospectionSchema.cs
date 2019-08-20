@@ -24,15 +24,15 @@ namespace tanka.graphql.introspection
 
             builder.Enum(TypeKindName, out var typeKind,
                 null,
-                null,
-                (__TypeKind.SCALAR.ToString(), default, null, null),
-                (__TypeKind.OBJECT.ToString(), default, null, null),
-                (__TypeKind.ENUM.ToString(), default, null, null),
-                (__TypeKind.INPUT_OBJECT.ToString(), default, null, null),
-                (__TypeKind.INTERFACE.ToString(), default, null, null),
-                (__TypeKind.LIST.ToString(), default, null, null),
-                (__TypeKind.NON_NULL.ToString(), default, null, null),
-                (__TypeKind.UNION.ToString(), default, null, null));
+                values => 
+                values.Value(__TypeKind.SCALAR.ToString(), default, null, null)
+                .Value(__TypeKind.OBJECT.ToString(), default, null, null)
+                .Value(__TypeKind.ENUM.ToString(), default, null, null)
+                .Value(__TypeKind.INPUT_OBJECT.ToString(), default, null, null)
+                .Value(__TypeKind.INTERFACE.ToString(), default, null, null)
+                .Value(__TypeKind.LIST.ToString(), default, null, null)
+                .Value(__TypeKind.NON_NULL.ToString(), default, null, null)
+                .Value(__TypeKind.UNION.ToString(), default, null, null));
 
             builder.Object(InputValueName, out var inputValue)
                 .Connections(connect => connect
@@ -80,9 +80,14 @@ namespace tanka.graphql.introspection
 
             builder.Enum("__DirectiveLocation", out var directiveLocation,
                 directives: null,
-                values: Enum.GetNames(typeof(__DirectiveLocation))
-                    .Select(loc => (loc, string.Empty, Enumerable.Empty<DirectiveInstance>(), string.Empty))
-                    .ToArray());
+                values: values => Enum.GetNames(typeof(__DirectiveLocation))
+                    .ToList()
+                    .ForEach(v => values
+                        .Value(
+                            v, 
+                            string.Empty, 
+                            Enumerable.Empty<DirectiveInstance>(), 
+                            null)));
 
             builder.Object("__Directive", out var directive)
                 .Connections(connect => connect

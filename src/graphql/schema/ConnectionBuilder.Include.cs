@@ -7,7 +7,7 @@ namespace tanka.graphql.schema
 {
     public partial class ConnectionBuilder
     {
-        public ConnectionBuilder IncludeFields(
+        public ConnectionBuilder Include(
             ComplexType owner,
             IEnumerable<KeyValuePair<string, IField>> fields)
         {
@@ -24,7 +24,7 @@ namespace tanka.graphql.schema
             return this;
         }
 
-        public ConnectionBuilder IncludeInputFields(
+        public ConnectionBuilder Include(
             InputObjectType owner,
             IEnumerable<KeyValuePair<string, InputObjectField>> fields)
         {
@@ -40,7 +40,7 @@ namespace tanka.graphql.schema
             return this;
         }
 
-        public ConnectionBuilder IncludeResolver(
+        public ConnectionBuilder Include(
             ObjectType objectType,
             string fieldName,
             ResolverBuilder resolver)
@@ -54,7 +54,7 @@ namespace tanka.graphql.schema
             return this;
         }
 
-        public ConnectionBuilder IncludeSubscriber(
+        public ConnectionBuilder Include(
             ObjectType objectType,
             string fieldName,
             SubscriberBuilder subscriber)

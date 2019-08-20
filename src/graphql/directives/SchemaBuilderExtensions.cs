@@ -48,19 +48,19 @@ namespace tanka.graphql.directives
                         // field removed
                         if (maybeSameField == null)
                         {
-                            connections.RemoveField(objectType, field.Key);
+                            connections.Remove(objectType, field.Key);
                             continue;
                         }
 
                         // changed so remove and add
-                        connections.RemoveField(objectType, field.Key);
-                        connections.IncludeFields(objectType, new[]
+                        connections.Remove(objectType, field.Key);
+                        connections.Include(objectType, new[]
                         {
                             new KeyValuePair<string, IField>(maybeSameField.Name, maybeSameField.Field)
                         });
-                        connections.IncludeResolver(objectType, maybeSameField.Name,
+                        connections.Include(objectType, maybeSameField.Name,
                             new ResolverBuilder(maybeSameField.Resolver));
-                        connections.IncludeSubscriber(objectType, maybeSameField.Name,
+                        connections.Include(objectType, maybeSameField.Name,
                             new SubscriberBuilder(maybeSameField.Subscriber));
                     }
                 });

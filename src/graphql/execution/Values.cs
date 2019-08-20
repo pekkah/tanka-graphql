@@ -2,9 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using tanka.graphql.type;
 using GraphQLParser.AST;
+using tanka.graphql.type;
 
 namespace tanka.graphql.execution
 {
@@ -31,7 +30,9 @@ namespace tanka.graphql.execution
                 valueType);
         }
 
-        private static IDictionary<string, object> CoerceInputValue(Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, object value, InputObjectType input)
+        private static IDictionary<string, object> CoerceInputValue(
+            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, object value,
+            InputObjectType input)
         {
             if (value == null)
                 return null;
@@ -39,9 +40,7 @@ namespace tanka.graphql.execution
             var result = new Dictionary<string, object>();
 
             if (value is GraphQLObjectValue objectValue)
-            {
                 return CoerceInputValueAst(getInputObjectFields, input, objectValue, result);
-            }
 
             if (value is IDictionary<string, object> dictionaryValues)
             {
@@ -54,10 +53,7 @@ namespace tanka.graphql.execution
 
                     object astValue = null;
 
-                    if (dictionaryValues.ContainsKey(fieldName))
-                    {
-                        astValue = dictionaryValues[fieldName];
-                    }
+                    if (dictionaryValues.ContainsKey(fieldName)) astValue = dictionaryValues[fieldName];
 
                     var coercedFieldValue = CoerceValue(getInputObjectFields, astValue, fieldType);
 
@@ -69,8 +65,8 @@ namespace tanka.graphql.execution
         }
 
         private static IDictionary<string, object> CoerceInputValueAst(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, 
-            InputObjectType input, 
+            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
+            InputObjectType input,
             GraphQLObjectValue graphQLObjectValue,
             Dictionary<string, object> result)
         {
@@ -90,11 +86,13 @@ namespace tanka.graphql.execution
             return result;
         }
 
-        private static object CoerceNonNullValue(Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, object value, NonNull nonNull)
+        private static object CoerceNonNullValue(
+            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, object value,
+            NonNull nonNull)
         {
             var coercedValue = CoerceValue(getInputObjectFields, value, nonNull.OfType);
             if (coercedValue == null)
-                throw new ValueCoercionException("Coerced value is null", 
+                throw new ValueCoercionException("Coerced value is null",
                     value,
                     nonNull);
 
@@ -103,7 +101,7 @@ namespace tanka.graphql.execution
 
         private static object CoerceEnumValue(object value, EnumType enumType1)
         {
-            if (value is GraphQLScalarValue astValue) 
+            if (value is GraphQLScalarValue astValue)
                 return enumType1.ParseLiteral(astValue);
 
             return enumType1.ParseValue(value);
@@ -111,13 +109,15 @@ namespace tanka.graphql.execution
 
         private static object CoerceScalarValue(object value, ScalarType scalarType)
         {
-            if (value is GraphQLScalarValue astValue) 
+            if (value is GraphQLScalarValue astValue)
                 return scalarType.ParseLiteral(astValue);
 
             return scalarType.ParseValue(value);
         }
 
-        private static object CoerceListValues(Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, IType listWrappedType, object value)
+        private static object CoerceListValues(
+            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
+            IType listWrappedType, object value)
         {
             var coercedListValues = new List<object>();
             if (value is GraphQLListValue listValue)

@@ -107,10 +107,11 @@ namespace tanka.graphql.tests.type
                     DirectiveLocation.FIELD
                 },
                 description: "Description",
-                (Name: "Reason",
-                    Type: ScalarType.String,
-                    DefaultValue: "Deprecated",
-                    Description: "Description")
+                args => args.Arg(
+                    name: "Reason",
+                    type: ScalarType.String,
+                    defaultValue: "Deprecated",
+                    description: "Description")
             );
 
             /* Then */
@@ -129,17 +130,19 @@ namespace tanka.graphql.tests.type
                 name: name,
                 enumType: out var enum1,
                 description: "Description",
+                values =>
+                    values.Value(
+                        value: "VALUE1",
+                        description: "Description",
+                        directives: new DirectiveInstance[]
+                        {
+                            /*directive*/
+                        },
+                        deprecationReason: null),
                 directives: new DirectiveInstance[]
                 {
                     /*directive*/
-                },
-                (value: "VALUE1",
-                    description: "Description",
-                    directives: new DirectiveInstance[]
-                    {
-                        /*directive*/
-                    },
-                    deprecationReason: null)
+                }
             );
 
             /* Then */

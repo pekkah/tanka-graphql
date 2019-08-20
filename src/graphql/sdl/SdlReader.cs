@@ -74,14 +74,14 @@ namespace tanka.graphql.sdl
                     (DirectiveLocation) System.Enum.Parse(typeof(DirectiveLocation), location.Value))
                 .ToList();
 
-            var args = Args(definition.Arguments);
+            var args = Args(definition.Arguments).ToList();
 
             _builder.DirectiveType(
                 definition.Name.Value,
                 out var directiveType,
                 locations,
                 null,
-                args.ToArray());
+                argsBuilder => args.ForEach(a => argsBuilder.Arg(a.Name, a.Type, a.DefaultValue, a.Description)));
 
             return directiveType;
         }
@@ -211,15 +211,18 @@ namespace tanka.graphql.sdl
 
         protected EnumType Enum(GraphQLEnumTypeDefinition definition)
         {
-            var values = definition.Values.Select(value =>
-                (value.Name.Value, string.Empty, Directives(definition.Directives), string.Empty));
-
             var directives = Directives(definition.Directives);
 
             _builder.Enum(definition.Name.Value, out var enumType,
                 directives: directives,
                 description: null,
-                values: values.ToArray());
+                values: values => 
+                    definition.Values.ToList()
+                        .ForEach(value => values.Value(
+                            value.Name.Value,
+                            string.Empty,
+                            Directives(value.Directives),
+                            null)));
 
             return enumType;
         }

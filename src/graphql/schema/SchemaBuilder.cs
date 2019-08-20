@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using tanka.graphql.type;
 using tanka.graphql.type.converters;
 
@@ -80,11 +81,17 @@ namespace tanka.graphql.schema
         public SchemaBuilder Enum(string name,
             out EnumType enumType,
             string description = null,
-            IEnumerable<DirectiveInstance> directives = null,
-            params (string value, string description, IEnumerable<DirectiveInstance> directives, string
-                deprecationReason)[] values)
+            Action<EnumValuesBuilder> values = null,
+            IEnumerable<DirectiveInstance> directives = null)
         {
-            enumType = new EnumType(name, new EnumValues(values), description, directives);
+            var valuesBuilder = new EnumValuesBuilder();
+            values?.Invoke(valuesBuilder);
+            enumType = new EnumType(
+                name,
+                valuesBuilder.Build(),
+                description,
+                directives);
+
             Include(enumType);
             return this;
         }
@@ -94,9 +101,11 @@ namespace tanka.graphql.schema
             out DirectiveType directiveType,
             IEnumerable<DirectiveLocation> locations,
             string description = null,
-            params (string Name, IType Type, object DefaultValue, string Description)[] args)
+            Action<ArgsBuilder> args = null)
         {
-            directiveType = new DirectiveType(name, locations, new Args(args));
+            var argsBuilder = new ArgsBuilder();
+            args?.Invoke(argsBuilder);
+            directiveType = new DirectiveType(name, locations, argsBuilder.Build());
             Include(directiveType);
             return this;
         }
