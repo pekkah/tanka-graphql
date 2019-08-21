@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Subscription - tanka-graphql</title>
+    <title>Graphql ws - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -93,7 +93,7 @@
             <a class="nav-link" href="1-execution/04-query.html">Query</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="1-execution/05-subscription.html">Subscription</a>
+            <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
@@ -132,7 +132,7 @@
 </h6>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link" href="2-server/2-graphql-ws/3-graphql-ws.html">Graphql ws</a>
+            <a class="nav-link active bg-light" href="2-server/2-graphql-ws/3-graphql-ws.html">Graphql ws</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -208,196 +208,73 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="subscription">Subscription</h2>
-<blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Subscription">Specification</a></p>
-</blockquote>
-<h3 id="execution">Execution</h3>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public async Task Subscription()
-        {
-            /* Given */
-            var subscription = Parser.ParseDocument(
-                @&quot;subscription {
-                    events {
-                        __typename
-                        id
-                        type
-                        payload
-                    }
-                }&quot;);
+                <h2 id="graphql-ws">GraphQL WS</h2>
+<p>Besides the SignalR based server Tanka also provides a graphql-ws protocol
+compatible websocket server. This server can be used with
+<a href="https://www.apollographql.com/docs/link/links/ws">apollo-link-ws</a>.</p>
+<h3 id="add-required-services">Add required services</h3>
+<p>This will add the required services and Apollo Tracing extension to execution
+pipeline.</p>
+<pre><code class="lang-csharp">services.AddTankaWebSocketServerWithTracing();
 
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+// or without the tracing extension
+services.AddTankaWebSocketServer();
 
-            /* When */
-            var result = await Executor.SubscribeAsync(new ExecutionOptions()
+// you might also need to configure the websockets
+services.AddWebSockets(options =&gt;
+{
+    options.AllowedOrigins.Add(&quot;https://localhost:5000&quot;);
+});
+</code></pre>
+<h3 id="add-middleware-to-app-pipeline">Add middleware to app pipeline</h3>
+<pre><code class="lang-csharp">// websockets server
+app.UseWebSockets();
+app.UseTankaWebSocketServer(new WebSocketServerOptions()
+{
+    Path = &quot;/api/graphql&quot;
+});
+</code></pre>
+<h3 id="configure-protocol">Configure protocol</h3>
+<p>When <code>connection_init</code> message is received from client the protocol calls
+<code>AcceptAsync</code> of the options to accept the connection. By default it accepts
+the connection and sends <code>connection_ack</code> message back to the client. You can
+configure this behavior with your own logic.</p>
+<pre><code class="lang-csharp">services.AddTankaWebSocketServerWithTracing()
+        .Configure&lt;IHttpContextAccessor&gt;(
+            (
+            options, 
+            accessor
+            ) =&gt; options.AcceptAsync = async context =&gt;
             {
-                Schema = Schema,
-                Document = subscription
-            }, cts.Token);
+                var succeeded = await AuthorizeHelper.AuthorizeAsync(
+                    accessor.HttpContext,
+                    new List&lt;IAuthorizeData&gt;()
+                    {
+                        new AuthorizeAttribute(&quot;authorize&quot;)
+                    });
 
-            await Model.AddAsync(new EventsModel.NewEvent()
-            {
-                Type = EventsModel.EventType.DELETE,
-                Payload = &quot;payload1&quot;
+                if (succeeded)
+                {
+                    await context.Output.WriteAsync(new OperationMessage
+                    {
+                        Type = MessageType.GQL_CONNECTION_ACK
+                    });
+                }
+                else
+                {
+                    // you must decide what kind of message to send back to the client
+                    // in case the connection is not accepted.
+                    await context.Output.WriteAsync(new OperationMessage
+                    {
+                        Type = MessageType.GQL_CONNECTION_ERROR,
+                        Id = context.Message.Id
+                    });
+
+                    // complete the output forcing the server to disconnect
+                    context.Output.Complete();
+                }
             });
-
-            var ev = await result.Source.Reader.ReadAsync(cts.Token);
-
-            // unsubscribe
-            cts.Cancel();
-
-            /* Then */
-            ev.ShouldMatchJson(
-                @&quot;{
-                  &quot;&quot;data&quot;&quot;: {
-                    &quot;&quot;events&quot;&quot;: {
-                      &quot;&quot;type&quot;&quot;: &quot;&quot;DELETE&quot;&quot;,
-                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;,
-                      &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                      &quot;&quot;payload&quot;&quot;: &quot;&quot;payload1&quot;&quot;
-                    }
-                  }
-                }&quot;);
-        }
-</code></pre></p>
-<h3 id="example">Example</h3>
-<p>These are the schema and resolvers used in the above section.</p>
-<p>Schema
-<pre><code class="language-csharp">Sdl = @&quot;
-                enum EventType {
-                    INSERT
-                    UPDATE
-                    DELETE
-                }
-
-                type Success {
-                    id: ID!
-                    event: Event
-                }
-
-                type Failure {
-                    message: String!
-                }
-
-                union Result = Success | Failure
-
-                type Event {
-                    id: ID!
-                    type: EventType!
-                    payload: String
-                }
-
-                input NewEvent {
-                    type: String!
-                    payload: String
-                }
-
-                type Query {
-                    events: [Event!]
-                }
-
-                type Mutation {
-                    create(event: NewEvent!): Result
-                }
-
-                type Subscription {
-                    events: Event!
-                }
-
-                schema {
-                    query: Query
-                    mutation: Mutation
-                    subscription: Subscription
-                }
-                &quot;</code></pre></p>
-<p>Initialization</p>
-<p><pre><code class="language-csharp">
-        public ExecutorFacts(ITestOutputHelper atr)
-        {
-            Model = new EventsModel();
-            Resolvers = new ResolverMap
-            {
-                {
-                    &quot;Success&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)},
-                        {&quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event)}
-                    }
-                },
-                {
-                    &quot;Failure&quot;, new FieldResolverMap
-                    {
-                        {&quot;message&quot;, Resolve.PropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message)}
-                    }
-                },
-                {
-                    &quot;Event&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload)}
-                    }
-                },
-                {
-                    &quot;NewEvent&quot;, new FieldResolverMap
-                    {
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload)}
-                    }
-                },
-                {
-                    &quot;Query&quot;, new FieldResolverMap
-                    {
-                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
-                    }
-                },
-                {
-                    &quot;Mutation&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;create&quot;, async context =&gt;
-                            {
-                                var newEvent = context.GetArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
-
-                                if (newEvent.Payload == null)
-                                    return Resolve.As(
-                                        context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Failure&quot;),
-                                        new EventsModel.Failure(&quot;Payload should be given&quot;));
-
-                                var id = await Model.AddAsync(newEvent);
-                                var ev = Model.Events.Single(e =&gt; e.Id == id);
-
-                                return Resolve.As(
-                                    context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
-                                    new EventsModel.Success(id, ev));
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;Subscription&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;events&quot;, async (context, unsubscribe) =&gt;
-                            {
-                                await Task.Delay(0);
-                                var source = Model.Subscribe(unsubscribe);
-                                return source;
-                            },
-                            context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
-                        }
-                    }
-                }
-            };
-
-            Schema = SchemaTools.MakeExecutableSchema(
-                new SchemaBuilder().Sdl(Parser.ParseDocument(Sdl)),
-                Resolvers,
-                Resolvers);
-        }
-</code></pre></p>
+</code></pre>
                     
             </main>
         </div>

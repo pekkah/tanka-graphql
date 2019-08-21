@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Subscription - tanka-graphql</title>
+    <title>Directives - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -93,7 +93,7 @@
             <a class="nav-link" href="1-execution/04-query.html">Query</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="1-execution/05-subscription.html">Subscription</a>
+            <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
@@ -201,201 +201,162 @@
             <a class="nav-link" href="7-type-system/12-non-null.html">Non null</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="7-type-system/13-directives.html">Directives</a>
+            <a class="nav-link active bg-light" href="7-type-system/13-directives.html">Directives</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="subscription">Subscription</h2>
+                <h2 id="directives">Directives</h2>
 <blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Subscription">Specification</a></p>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-System.Directives">Specification</a></p>
 </blockquote>
-<h3 id="execution">Execution</h3>
-<p><pre><code class="language-csharp">
+<p>Directives are created as instance of <code>DirectiveType</code>. When adding to target instance of <code>DirectiveInstance</code> is used. It contains a reference back to the original type.</p>
+<p>Following directives are provided as static properties of <code>DirectiveType</code></p>
+<p><pre><code class="language-csharp">Skip = new DirectiveType(
+            &quot;skip&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args
+            {
+                {&quot;if&quot;, ScalarType.NonNullBoolean}
+            })</code></pre></p>
+<p><pre><code class="language-csharp">Include = new DirectiveType(
+            &quot;include&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args()
+            {
+                {&quot;if&quot;, ScalarType.NonNullBoolean}
+            })</code></pre></p>
+<p><pre><code class="language-csharp">Deprecated = new DirectiveType(
+            &quot;deprecated&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD_DEFINITION,
+                DirectiveLocation.ENUM_VALUE
+            },
+            new Args()
+            {
+                {&quot;reason&quot;, ScalarType.String}
+            })</code></pre></p>
+<h3 id="create-custom-directive">Create custom directive</h3>
+<p>Create simple <code>DirectiveType</code> and apply instance of it to a field and modify resolver logic to execute custom logic if it has the directive present.</p>
+<p>This example will require a role from user when trying to resolve a field value
+<pre><code class="language-csharp">
         [Fact]
-        public async Task Subscription()
+        public async Task Authorize_field_directive_sdl()
         {
             /* Given */
-            var subscription = Parser.ParseDocument(
-                @&quot;subscription {
-                    events {
-                        __typename
-                        id
-                        type
-                        payload
-                    }
-                }&quot;);
-
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
-            /* When */
-            var result = await Executor.SubscribeAsync(new ExecutionOptions()
-            {
-                Schema = Schema,
-                Document = subscription
-            }, cts.Token);
-
-            await Model.AddAsync(new EventsModel.NewEvent()
-            {
-                Type = EventsModel.EventType.DELETE,
-                Payload = &quot;payload1&quot;
-            });
-
-            var ev = await result.Source.Reader.ReadAsync(cts.Token);
-
-            // unsubscribe
-            cts.Cancel();
-
-            /* Then */
-            ev.ShouldMatchJson(
-                @&quot;{
-                  &quot;&quot;data&quot;&quot;: {
-                    &quot;&quot;events&quot;&quot;: {
-                      &quot;&quot;type&quot;&quot;: &quot;&quot;DELETE&quot;&quot;,
-                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;,
-                      &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                      &quot;&quot;payload&quot;&quot;: &quot;&quot;payload1&quot;&quot;
-                    }
-                  }
-                }&quot;);
-        }
-</code></pre></p>
-<h3 id="example">Example</h3>
-<p>These are the schema and resolvers used in the above section.</p>
-<p>Schema
-<pre><code class="language-csharp">Sdl = @&quot;
-                enum EventType {
-                    INSERT
-                    UPDATE
-                    DELETE
-                }
-
-                type Success {
-                    id: ID!
-                    event: Event
-                }
-
-                type Failure {
-                    message: String!
-                }
-
-                union Result = Success | Failure
-
-                type Event {
-                    id: ID!
-                    type: EventType!
-                    payload: String
-                }
-
-                input NewEvent {
-                    type: String!
-                    payload: String
-                }
+            var builder = new SchemaBuilder()
+                .Sdl(Parser.ParseDocument(@&quot;
+                directive @authorize(
+                    role: String =&quot;&quot;user&quot;&quot;
+                ) on FIELD_DEFINITION
 
                 type Query {
-                    events: [Event!]
-                }
-
-                type Mutation {
-                    create(event: NewEvent!): Result
-                }
-
-                type Subscription {
-                    events: Event!
+                    requiresAdmin: String @authorize(role:&quot;&quot;admin&quot;&quot;)
+                    requiresUser: String @authorize
                 }
 
                 schema {
                     query: Query
-                    mutation: Mutation
-                    subscription: Subscription
                 }
-                &quot;</code></pre></p>
-<p>Initialization</p>
-<p><pre><code class="language-csharp">
-        public ExecutorFacts(ITestOutputHelper atr)
-        {
-            Model = new EventsModel();
-            Resolvers = new ResolverMap
+                &quot;));
+
+            var resolvers = new ResolverMap
             {
-                {
-                    &quot;Success&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)},
-                        {&quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event)}
-                    }
-                },
-                {
-                    &quot;Failure&quot;, new FieldResolverMap
-                    {
-                        {&quot;message&quot;, Resolve.PropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message)}
-                    }
-                },
-                {
-                    &quot;Event&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload)}
-                    }
-                },
-                {
-                    &quot;NewEvent&quot;, new FieldResolverMap
-                    {
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload)}
-                    }
-                },
                 {
                     &quot;Query&quot;, new FieldResolverMap
                     {
-                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
-                    }
-                },
-                {
-                    &quot;Mutation&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;create&quot;, async context =&gt;
-                            {
-                                var newEvent = context.GetArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
-
-                                if (newEvent.Payload == null)
-                                    return Resolve.As(
-                                        context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Failure&quot;),
-                                        new EventsModel.Failure(&quot;Payload should be given&quot;));
-
-                                var id = await Model.AddAsync(newEvent);
-                                var ev = Model.Events.Single(e =&gt; e.Id == id);
-
-                                return Resolve.As(
-                                    context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
-                                    new EventsModel.Success(id, ev));
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;Subscription&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;events&quot;, async (context, unsubscribe) =&gt;
-                            {
-                                await Task.Delay(0);
-                                var source = Model.Subscribe(unsubscribe);
-                                return source;
-                            },
-                            context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
-                        }
+                        {&quot;requiresAdmin&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;Hello Admin!&quot;))},
+                        {&quot;requiresUser&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;Hello User!&quot;))}
                     }
                 }
             };
 
-            Schema = SchemaTools.MakeExecutableSchema(
-                new SchemaBuilder().Sdl(Parser.ParseDocument(Sdl)),
-                Resolvers,
-                Resolvers);
+            // mock user and user store
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new []
+            {
+                new Claim(&quot;role&quot;, &quot;user&quot;),
+            }));
+
+            ClaimsPrincipal FetchUser(int id) =&gt; user;
+
+            /* When */
+            var schema = SchemaTools.MakeExecutableSchema(
+                builder,
+                resolvers,
+                directives: new Dictionary&lt;string, CreateDirectiveVisitor&gt;
+                {
+                    // register directive visitor to be used when authorizeType.Name present
+                    [&quot;authorize&quot;] = AuthorizeVisitor(FetchUser)
+                });
+
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            {
+                Document = Parser.ParseDocument(@&quot;{ requiresAdmin requiresUser }&quot;),
+                Schema = schema
+            });
+
+            /* Then */
+            result.ShouldMatchJson(@&quot;
+                  {
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;requiresAdmin&quot;&quot;: null,
+                    &quot;&quot;requiresUser&quot;&quot;: &quot;&quot;Hello User!&quot;&quot;
+                  },
+                  &quot;&quot;errors&quot;&quot;: [
+                    {
+                      &quot;&quot;message&quot;&quot;: &quot;&quot;requires admin role. &quot;&quot;,
+                      &quot;&quot;locations&quot;&quot;: [
+                        {
+                          &quot;&quot;end&quot;&quot;: 28,
+                          &quot;&quot;start&quot;&quot;: 2
+                        }
+                      ],
+                      &quot;&quot;path&quot;&quot;: [
+                        &quot;&quot;requiresAdmin&quot;&quot;
+                      ],
+                      &quot;&quot;extensions&quot;&quot;: {
+                        &quot;&quot;code&quot;&quot;: &quot;&quot;EXCEPTION&quot;&quot;
+                      }
+                    }
+                  ]
+                }
+                &quot;);
+        }
+</code></pre></p>
+<p>DirectiveVisitor applies the actual middleware to the resolver chain
+<pre><code class="language-csharp">        public static CreateDirectiveVisitor AuthorizeVisitor(Func&lt;int, ClaimsPrincipal&gt; fetchUser)
+        {
+            return builder =&gt; new DirectiveVisitor
+            {
+                FieldDefinition = (directive, fieldDefinition) =&gt;
+                {
+                    return fieldDefinition.WithResolver(resolver =&gt; resolver.Use((context, next) =&gt;
+                    {
+                        var requiredRole = directive.GetArgument&lt;string&gt;(&quot;role&quot;);
+                        var user = fetchUser(42);
+                        
+                        if (!user.HasClaim(&quot;role&quot;, requiredRole))
+                            throw new Exception(
+                                &quot;requires admin role. &quot;
+                            );
+
+                        return next(context);
+                    }).Run(fieldDefinition.Resolver));
+                }
+            };
         }
 </code></pre></p>
                     

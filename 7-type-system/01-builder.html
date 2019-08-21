@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/tanka-graphql/">
+    <title>Builder - tanka-graphql</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="prism.css" />
+    <style>
+        body {
+            height: 100%;
+            width: 100%;         
+        }
+
+        a {
+            color: rgba(0,0,0,.65);
+        }
+
+        a:hover {
+            color: rgba(8, 8, 8, 0.65);
+        }
+
+        blockquote {
+            border: 1px solid rgba(94, 94, 94, 0.65);
+            border-left: 5px solid rgba(94, 94, 94, 0.65);
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;            
+        }
+
+        .sidebar {
+            margin-bottom: 1rem;
+        }
+
+        .sidebar .nav-link {
+            display: block;
+            padding: .25rem 1.5rem;
+            font-size: 90%;
+            color: rgba(0,0,0,.65);
+        }
+
+        .sidebar .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .content h1,
+        .content h2,
+        .content h3,
+        .content h4,
+        .content h5,
+        .content h6 {
+            font-weight: 300;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Tanka GraphQL</a>
+        <ul class="navbar-nav px-3">
+            <li class="nav-item text-nowrap">
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
+            </li>
+        </ul>
+    </nav>
+    <div class="container-fluid">
+        <div class="row flex-xl-nowrap">
+            <nav class="col-12 col-md-3 col-xl-2 sidebar">
+                <div class="sidebar-sticky">
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="benchmarks.html">Benchmarks</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="1-execution/01-resolvers.html">Execution</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="1-execution/01-resolvers.html">Resolvers</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="1-execution/03-mutation.html">Mutation</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="1-execution/04-query.html">Query</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="2-server/0-common.html">Server</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="2-server/0-common.html">Common</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="2-server/1-tracing.html">Tracing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="2-server/2-query-cost-limit.html">Query cost limit</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="2-server/1-signalR/1-signalr-hub.html">SignalR</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="2-server/1-signalR/1-signalr-hub.html">Signalr hub</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="2-server/1-signalR/2-apollo-link.html">Apollo link</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="2-server/2-graphql-ws/3-graphql-ws.html">Graphql ws</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="2-server/2-graphql-ws/3-graphql-ws.html">Graphql ws</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul></ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="5-extensions/5-query-cost-analysis.html">Extensions</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="5-extensions/5-query-cost-analysis.html">Query cost analysis</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="5-extensions/9-dotnet-client.html">Dotnet client</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="6-introspection/4-type-name-introspection.html">Introspection</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="6-introspection/4-type-name-introspection.html">Type name introspection</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="6-introspection/5-schema-introspection.html">Schema introspection</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="7-type-system/00-SDL.html">Type system</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/00-SDL.html">SDL</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active bg-light" href="7-type-system/01-builder.html">Builder</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/02-schema.html">Schema</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/04-types.html">Types</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/05-scalars.html">Scalars</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/06-objects.html">Objects</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/07-interfaces.html">Interfaces</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/08-unions.html">Unions</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/09-enums.html">Enums</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/10-input-objects.html">Input objects</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/11-list.html">List</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/12-non-null.html">Non null</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="7-type-system/13-directives.html">Directives</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul></ul>                </div>
+            </nav>
+            <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
+                <h2 id="schema-builder">Schema Builder</h2>
+<p><code>SchemaBuilder</code> is the recommended way of creating <code>ISchema</code>s. It provides methods to create types and connect them to each other with fields.</p>
+<h3 id="creating-root-types">Creating Root Types</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Query()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out var query);
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            Assert.Equal(query, sut.Query);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Mutation()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out _);
+            builder.Mutation(out var mutation);
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            Assert.Equal(mutation, sut.Mutation);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Subscription()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out _);
+            builder.Mutation(out _);
+            builder.Subscription(out var subscription);
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            Assert.Equal(subscription, sut.Subscription);
+        }
+</code></pre></p>
+<h3 id="creating-types">Creating types</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Object()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Object1&quot;;
+
+            /* When */
+            builder.Object(
+                name: name,
+                out var object1,
+                description: &quot;Description&quot;,
+                interfaces: new InterfaceType[]
+                {
+                    /*interfaceType*/
+                },
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, object1.Name);
+            Assert.True(builder.TryGetType&lt;ObjectType&gt;(object1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Interface()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Interface1&quot;;
+
+            /* When */
+            builder.Interface(
+                name: name,
+                out var interface1,
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, interface1.Name);
+            Assert.True(builder.TryGetType&lt;InterfaceType&gt;(interface1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Union()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Object(&quot;Object1&quot;, out var object1);
+            builder.Object(&quot;Object2&quot;, out var object2);
+
+            const string name = &quot;Union1&quot;;
+
+            /* When */
+            builder.Union(
+                name: name,
+                out var union1,
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                },
+                possibleTypes: new[] {object1, object2});
+
+            /* Then */
+            Assert.Equal(name, union1.Name);
+            Assert.True(builder.TryGetType&lt;UnionType&gt;(union1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Enum()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Enum1&quot;;
+
+            /* When */
+            builder.Enum(
+                name: name,
+                enumType: out var enum1,
+                description: &quot;Description&quot;,
+                values =&gt;
+                    values.Value(
+                        value: &quot;VALUE1&quot;,
+                        description: &quot;Description&quot;,
+                        directives: new DirectiveInstance[]
+                        {
+                            /*directive*/
+                        },
+                        deprecationReason: null),
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                }
+            );
+
+            /* Then */
+            Assert.Equal(name, enum1.Name);
+            Assert.True(builder.TryGetType&lt;EnumType&gt;(enum1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Scalar()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Url&quot;;
+
+            /* When */
+            builder.Scalar(
+                name: name,
+                out var url,
+                converter: new StringConverter(),
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, url.Name);
+            Assert.True(builder.TryGetType&lt;ScalarType&gt;(url.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_InputObject()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;InputObject1&quot;;
+
+            /* When */
+            builder.InputObject(
+                name: name,
+                out var object1,
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, object1.Name);
+            Assert.True(builder.TryGetType&lt;InputObjectType&gt;(object1.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_DirectiveType()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Deprecated&quot;;
+
+            /* When */
+            builder.DirectiveType(
+                name: name,
+                out var object1,
+                locations: new[]
+                {
+                    DirectiveLocation.FIELD
+                },
+                description: &quot;Description&quot;,
+                args =&gt; args.Arg(
+                    name: &quot;Reason&quot;,
+                    type: ScalarType.String,
+                    defaultValue: &quot;Deprecated&quot;,
+                    description: &quot;Description&quot;)
+            );
+
+            /* Then */
+            Assert.Equal(name, object1.Name);
+        }
+</code></pre></p>
+<h3 id="build-and-validate-schema">Build and validate schema</h3>
+<blockquote>
+<p>NotImplemented: future enhancement</p>
+</blockquote>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Build_and_validate_schema()
+        {
+            /* Given */
+            var builder = new SchemaBuilder()
+                // query is required to build schema
+                .Query(out _);
+
+            /* When */
+            var (schema, validationResult) = builder.BuildAndValidate();
+
+            /* Then */
+            Assert.IsAssignableFrom&lt;ISchema&gt;(schema);
+            Assert.IsType&lt;SchemaGraph&gt;(schema);
+            Assert.NotNull(schema.Query);
+            Assert.IsType&lt;NotImplementedException&gt;(validationResult);
+        }
+</code></pre></p>
+<h3 id="connecting-types-using-fields">Connecting types using fields</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Object_field()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Object(
+                name: &quot;Object1&quot;,
+                out var object1);
+
+            /* When */
+            builder.Connections(connect =&gt;
+            {
+                connect.Field(
+                    owner: object1,
+                    fieldName: &quot;field1&quot;,
+                    to: ScalarType.Int,
+                    description: &quot;Description&quot;,
+                    resolve: null,
+                    subscribe: null,
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    },
+                    args =&gt; args.Arg(
+                        name: &quot;arg1&quot;,
+                        type: ScalarType.Boolean,
+                        defaultValue: true,
+                        description: &quot;Description&quot;)
+                );
+            });
+
+            /* Then */
+            var isDefined = false;
+            builder.Connections(connect =&gt; isDefined = connect.TryGetField(object1, &quot;field1&quot;, out _));
+            Assert.True(isDefined);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_Interface_field()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Interface(
+                name: &quot;Interface1&quot;,
+                out var interface1);
+
+            /* When */
+            builder.Connections(connect =&gt;
+            {
+                connect.Field(
+                    owner: interface1,
+                    fieldName: &quot;field1&quot;,
+                    to: ScalarType.Int,
+                    description: &quot;Description&quot;,
+                    resolve: null,
+                    subscribe: null,
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    },
+                    args =&gt; args.Arg(
+                        name: &quot;arg1&quot;,
+                        type: ScalarType.Boolean,
+                        defaultValue: true,
+                        description: &quot;Description&quot;)
+                );
+            });
+
+            /* Then */
+            var isDefined = false;
+            builder.Connections(connect =&gt; isDefined = connect.TryGetField(interface1, &quot;field1&quot;, out _));
+            Assert.True(isDefined);
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Create_InputObject_field()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.InputObject(
+                name: &quot;Input1&quot;,
+                out var input1);
+
+            /* When */
+            builder.Connections(connect =&gt; connect
+                .InputField(
+                    owner: input1,
+                    fieldName: &quot;field1&quot;,
+                    to: ScalarType.NonNullBoolean,
+                    defaultValue: true,
+                    description: &quot;Descriptipn&quot;,
+                    directives: new DirectiveInstance[]
+                    {
+                        /* directive */
+                    })
+            );
+
+
+            /* Then */
+            var isDefined = false;
+            builder.Connections(connect =&gt; isDefined = connect.TryGetInputField(input1, &quot;field1&quot;, out _));
+            Assert.True(isDefined);
+        }
+</code></pre></p>
+<h3 id="configuring-new-schema-based-on-existing-schema">Configuring new schema based on existing schema</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Use_existing_schema()
+        {
+            /* Given */
+            var existingSchema = new SchemaBuilder()
+                .Query(out var query)
+                .Connections(connect =&gt;
+                    connect.Field(query, &quot;field1&quot;, ScalarType.String)
+                )
+                .Build();
+
+            /* When */
+            var schema = new SchemaBuilder().Import(existingSchema)
+                .Connections(connect =&gt; connect
+                    .Field(query, &quot;field2&quot;, ScalarType.Int)
+                )
+                .Build();
+
+            /* Then */
+            var queryFields = schema.GetFields(query.Name).ToList();
+            Assert.Single(queryFields, f =&gt; f.Key == &quot;field1&quot;);
+            Assert.Single(queryFields, f =&gt; f.Key == &quot;field2&quot;);
+        }
+</code></pre></p>
+<h3 id="merging-schemas">Merging schemas</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Merge_schemas()
+        {
+            /* Given */
+            var schema1 = new SchemaBuilder()
+                .Query(out var query1)
+                .Connections(connect =&gt;
+                    connect.Field(query1, &quot;field1&quot;, ScalarType.String)
+                )
+                .Build();
+
+            var schema2 = new SchemaBuilder()
+                .Query(out var query2)
+                .Connections(connect =&gt;
+                    connect.Field(query2, &quot;field2&quot;, ScalarType.Int)
+                )
+                .Build();
+
+            /* When */
+            var schema = new SchemaBuilder().Merge(schema1, schema2).Build();
+
+            /* Then */
+            var queryFields = schema.GetFields(query1.Name).ToList();
+            Assert.Single(queryFields, f =&gt; f.Key == &quot;field1&quot;);
+            Assert.Single(queryFields, f =&gt; f.Key == &quot;field2&quot;);
+        }
+</code></pre></p>
+<h3 id="making-executable-schema">Making executable schema</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Make_executable_schema()
+        {
+            /* Given */
+            var schema1 = new SchemaBuilder()
+                .Query(out var query1)
+                .Connections(connect =&gt;
+                    connect.Field(query1, &quot;field1&quot;, ScalarType.Int)
+                )
+                .Build();
+
+            var resolvers = new ResolverMap
+            {
+                {
+                    query1.Name, new FieldResolverMap
+                    {
+                        {
+                            &quot;field1&quot;, async context =&gt;
+                            {
+                                await Task.Delay(1);
+                                return Resolve.As(1);
+                            }
+                        }
+                    }
+                }
+            };
+
+            /* When */
+            var executableSchema = SchemaTools.MakeExecutableSchema(
+                schema: schema1,
+                resolvers: resolvers,
+                subscribers: null);
+
+            /* Then */
+            var result = await Executor.ExecuteAsync(
+                new ExecutionOptions
+                {
+                    Document = Parser.ParseDocument(@&quot;{ field1 }&quot;),
+                    Schema = executableSchema
+                });
+
+            result.ShouldMatchJson(
+                @&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;field1&quot;&quot;: 1
+                  }
+                }&quot;);
+        }
+</code></pre></p>
+<h3 id="special-cases">Special cases</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Build_with_circular_reference_between_two_objects()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+
+            /* When */
+            var schema = builder
+                .Object(&quot;Object1&quot;, out var obj1)
+                .Object(&quot;Object2&quot;, out var obj2)
+                .Connections(connect =&gt; connect
+                    .Field(obj1, &quot;obj1-obj2&quot;, obj2)
+                    .Field(obj2, &quot;obj2-obj1&quot;, obj1)
+                    .Field(obj1, &quot;scalar&quot;, ScalarType.Int))
+                .Query(out var query)
+                .Connections(connect =&gt; connect
+                    .Field(query, &quot;query-obj1&quot;, obj1))
+                .Build();
+
+            /* Then */
+            var object1 = schema.GetNamedType&lt;ObjectType&gt;(obj1.Name);
+            var object1ToObject2 = schema.GetField(object1.Name, &quot;obj1-obj2&quot;);
+
+            var object2 = schema.GetNamedType&lt;ObjectType&gt;(obj2.Name);
+            var object2ToObject1 = schema.GetField(object2.Name, &quot;obj2-obj1&quot;);
+
+            Assert.Equal(object1, object2ToObject1.Type);
+            Assert.Equal(object2, object1ToObject2.Type);
+        }
+</code></pre></p>
+                    
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="prism.js"></script>
+</body>
+</html>

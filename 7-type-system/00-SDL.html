@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Subscription - tanka-graphql</title>
+    <title>SDL - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -93,7 +93,7 @@
             <a class="nav-link" href="1-execution/04-query.html">Query</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="1-execution/05-subscription.html">Subscription</a>
+            <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
@@ -165,7 +165,7 @@
 </h6>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link" href="7-type-system/00-SDL.html">SDL</a>
+            <a class="nav-link active bg-light" href="7-type-system/00-SDL.html">SDL</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="7-type-system/01-builder.html">Builder</a>
@@ -208,194 +208,183 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="subscription">Subscription</h2>
-<blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Subscription">Specification</a></p>
-</blockquote>
-<h3 id="execution">Execution</h3>
+                <h2 id="schema-definition-language">Schema Definition Language</h2>
+<p>Defining <code>Schema</code> in IDL/SDL can greatly speed up and simplify code base.</p>
+<h3 id="load-schema-from-sdl">Load schema from SDL</h3>
+<p><code>SchemaBuilder</code> class has an extension method for loading types from SDL strings
+or GraphQL documents.</p>
+<p>Schema</p>
 <p><pre><code class="language-csharp">
         [Fact]
-        public async Task Subscription()
+        public void Parse_Document_as_Schema()
         {
             /* Given */
-            var subscription = Parser.ParseDocument(
-                @&quot;subscription {
-                    events {
-                        __typename
-                        id
-                        type
-                        payload
-                    }
-                }&quot;);
-
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
-            /* When */
-            var result = await Executor.SubscribeAsync(new ExecutionOptions()
-            {
-                Schema = Schema,
-                Document = subscription
-            }, cts.Token);
-
-            await Model.AddAsync(new EventsModel.NewEvent()
-            {
-                Type = EventsModel.EventType.DELETE,
-                Payload = &quot;payload1&quot;
-            });
-
-            var ev = await result.Source.Reader.ReadAsync(cts.Token);
-
-            // unsubscribe
-            cts.Cancel();
-
-            /* Then */
-            ev.ShouldMatchJson(
-                @&quot;{
-                  &quot;&quot;data&quot;&quot;: {
-                    &quot;&quot;events&quot;&quot;: {
-                      &quot;&quot;type&quot;&quot;: &quot;&quot;DELETE&quot;&quot;,
-                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;,
-                      &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                      &quot;&quot;payload&quot;&quot;: &quot;&quot;payload1&quot;&quot;
-                    }
-                  }
-                }&quot;);
-        }
-</code></pre></p>
-<h3 id="example">Example</h3>
-<p>These are the schema and resolvers used in the above section.</p>
-<p>Schema
-<pre><code class="language-csharp">Sdl = @&quot;
-                enum EventType {
-                    INSERT
-                    UPDATE
-                    DELETE
-                }
-
-                type Success {
-                    id: ID!
-                    event: Event
-                }
-
-                type Failure {
-                    message: String!
-                }
-
-                union Result = Success | Failure
-
-                type Event {
-                    id: ID!
-                    type: EventType!
-                    payload: String
-                }
-
-                input NewEvent {
-                    type: String!
-                    payload: String
-                }
-
+            var idl = @&quot;
                 type Query {
-                    events: [Event!]
                 }
 
                 type Mutation {
-                    create(event: NewEvent!): Result
                 }
 
                 type Subscription {
-                    events: Event!
+
                 }
 
                 schema {
-                    query: Query
-                    mutation: Mutation
-                    subscription: Subscription
-                }
-                &quot;</code></pre></p>
-<p>Initialization</p>
+                  query: Query
+                  mutation: Mutation
+                  subscription: Subscription
+                }&quot;;
+
+            var document = Parser.ParseDocument(idl);
+
+            /* When */
+            var actual = new SchemaBuilder().Sdl(document)
+                .Build();
+
+            /* Then */
+            Assert.NotNull(actual);
+            Assert.NotNull(actual.Query);
+            Assert.NotNull(actual.Mutation);
+            Assert.NotNull(actual.Subscription);
+        }
+</code></pre></p>
+<p>Types</p>
 <p><pre><code class="language-csharp">
-        public ExecutorFacts(ITestOutputHelper atr)
+        [Fact]
+        public void Parse_Document_with_types()
         {
-            Model = new EventsModel();
-            Resolvers = new ResolverMap
-            {
-                {
-                    &quot;Success&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)},
-                        {&quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event)}
-                    }
-                },
-                {
-                    &quot;Failure&quot;, new FieldResolverMap
-                    {
-                        {&quot;message&quot;, Resolve.PropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message)}
-                    }
-                },
-                {
-                    &quot;Event&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload)}
-                    }
-                },
-                {
-                    &quot;NewEvent&quot;, new FieldResolverMap
-                    {
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload)}
-                    }
-                },
-                {
-                    &quot;Query&quot;, new FieldResolverMap
-                    {
-                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
-                    }
-                },
-                {
-                    &quot;Mutation&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;create&quot;, async context =&gt;
-                            {
-                                var newEvent = context.GetArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
+            /* Given */
+            var idl = @&quot;
+                scalar JediPowerLevel
+                scalar JediTrickLevel
 
-                                if (newEvent.Payload == null)
-                                    return Resolve.As(
-                                        context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Failure&quot;),
-                                        new EventsModel.Failure(&quot;Payload should be given&quot;));
+                enum Episode { NEWHOPE, EMPIRE, JEDI }
 
-                                var id = await Model.AddAsync(newEvent);
-                                var ev = Model.Events.Single(e =&gt; e.Id == id);
-
-                                return Resolve.As(
-                                    context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
-                                    new EventsModel.Success(id, ev));
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;Subscription&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;events&quot;, async (context, unsubscribe) =&gt;
-                            {
-                                await Task.Delay(0);
-                                var source = Model.Subscribe(unsubscribe);
-                                return source;
-                            },
-                            context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
-                        }
-                    }
+                interface Character {
+                  id: String!
+                  name: String
+                  friends: [Character]
+                  appearsIn: [Episode]
                 }
-            };
 
-            Schema = SchemaTools.MakeExecutableSchema(
-                new SchemaBuilder().Sdl(Parser.ParseDocument(Sdl)),
-                Resolvers,
-                Resolvers);
+                type Human implements Character {
+                  id: String!
+                  name: String
+                  friends: [Character]
+                  appearsIn: [Episode]
+                  homePlanet: String
+                }
+
+                type Droid implements Character {
+                  id: String!
+                  name: String
+                  friends: [Character]
+                  appearsIn: [Episode]
+                  primaryFunction: String
+                }
+
+                input JediPowerInput {
+                    power: String
+                    level: JediPowerLevel
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                &quot;;
+
+            var jediPowerLevel = new ScalarType(&quot;JediPowerLevel&quot;, new IntConverter());
+            var jediTrickLevel = new ScalarType(&quot;JediTrickLevel&quot;, new DoubleConverter());
+
+            var document = Parser.ParseDocument(idl);
+            var reader = new SdlReader(document, new SchemaBuilder()
+                .Include(jediPowerLevel)
+                .Include(jediTrickLevel));
+
+            /* When */
+            var schema = reader.Read().Build();
+            var actual = schema.QueryTypes&lt;INamedType&gt;();
+
+            /* Then */
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Episode&quot; &amp;&amp; type is EnumType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Character&quot; &amp;&amp; type is InterfaceType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Human&quot; &amp;&amp; type is ObjectType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Droid&quot; &amp;&amp; type is ObjectType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;JediPowerInput&quot; &amp;&amp; type is InputObjectType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;JediPowerLevel&quot; &amp;&amp; type.GetType() == typeof(ScalarType));
+            Assert.Contains(actual, type =&gt; type.Name == &quot;JediTrickLevel&quot; &amp;&amp; type.GetType() == typeof(ScalarType));
+
+            var jediPowerInput = (InputObjectType) actual.Single(t =&gt; t.Name == &quot;JediPowerInput&quot;);
+            var level = schema.GetInputField(jediPowerInput.Name, &quot;level&quot;);
+            Assert.Equal(jediPowerLevel, level.Type);
+        }
+</code></pre></p>
+<p>Custom scalars</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Parse_custom_scalar()
+        {
+            /* Given */
+            var idl = @&quot;
+                scalar Url
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                &quot;;
+            var urlScalar = new ScalarType(&quot;Url&quot;, new StringConverter());
+            var document = Parser.ParseDocument(idl);
+            var reader = new SdlReader(document, new SchemaBuilder()
+                .Include(urlScalar));
+
+
+            /* When */
+            var actual = reader.Read().Build().GetNamedType&lt;ScalarType&gt;(&quot;Url&quot;);
+
+            /* Then */
+            Assert.Equal(&quot;Url&quot;, actual.Name);
+            Assert.Equal(urlScalar, actual);
+        }
+</code></pre></p>
+<p>Types can be extended</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Parse_ObjectType_with_extension()
+        {
+            /* Given */
+            var idl = @&quot;
+                extend type Human {
+                    second: Boolean
+                }
+
+                type Human {
+                    first: Int
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                &quot;;
+
+            var document = Parser.ParseDocument(idl);
+
+            /* When */
+            var actual = new SchemaBuilder().Sdl(document).Build();
+
+            /* Then */
+            var human = actual.GetNamedType&lt;ObjectType&gt;(&quot;Human&quot;);
+            var humanFields = actual.GetFields(human.Name);
+
+            Assert.NotNull(human);
+            Assert.Equal(&quot;Human&quot;, human.Name);
+            Assert.Single(humanFields, f =&gt; f.Key == &quot;first&quot;);
+            Assert.Single(humanFields, f =&gt; f.Key == &quot;second&quot;);
         }
 </code></pre></p>
                     

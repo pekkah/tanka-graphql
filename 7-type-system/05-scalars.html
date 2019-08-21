@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Subscription - tanka-graphql</title>
+    <title>Scalars - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -93,7 +93,7 @@
             <a class="nav-link" href="1-execution/04-query.html">Query</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="1-execution/05-subscription.html">Subscription</a>
+            <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
@@ -177,7 +177,7 @@
             <a class="nav-link" href="7-type-system/04-types.html">Types</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="7-type-system/05-scalars.html">Scalars</a>
+            <a class="nav-link active bg-light" href="7-type-system/05-scalars.html">Scalars</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="7-type-system/06-objects.html">Objects</a>
@@ -208,195 +208,81 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="subscription">Subscription</h2>
+                <h2 id="scalars">Scalars</h2>
 <blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Subscription">Specification</a></p>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Scalars">Specification</a></p>
 </blockquote>
-<h3 id="execution">Execution</h3>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public async Task Subscription()
+<p>Scalars are created as instances of <code>ScalarType</code>.</p>
+<h3 id="built-in">Built-in</h3>
+<p>These are provided as static properties on <code>ScalarType</code>.</p>
+<ul>
+<li><code>ScalarType.Boolean</code></li>
+<li><code>ScalarType.Int</code></li>
+<li><code>ScalarType.ID</code></li>
+<li><code>ScalarType.Float</code></li>
+<li><code>ScalarType.String</code></li>
+</ul>
+<p>In addition following non-null instances are provided for convenience.</p>
+<ul>
+<li><code>ScalarType.NonNullBoolean</code></li>
+<li><code>ScalarType.NonNullInt</code></li>
+<li><code>ScalarType.NonNullID</code></li>
+<li><code>ScalarType.NonNullFloat</code></li>
+<li><code>ScalarType.NonNullString</code></li>
+</ul>
+<p>Also standard collection is provided</p>
+<p><pre><code class="language-csharp">Standard = new[]
         {
-            /* Given */
-            var subscription = Parser.ParseDocument(
-                @&quot;subscription {
-                    events {
-                        __typename
-                        id
-                        type
-                        payload
-                    }
-                }&quot;);
-
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
-            /* When */
-            var result = await Executor.SubscribeAsync(new ExecutionOptions()
-            {
-                Schema = Schema,
-                Document = subscription
-            }, cts.Token);
-
-            await Model.AddAsync(new EventsModel.NewEvent()
-            {
-                Type = EventsModel.EventType.DELETE,
-                Payload = &quot;payload1&quot;
-            });
-
-            var ev = await result.Source.Reader.ReadAsync(cts.Token);
-
-            // unsubscribe
-            cts.Cancel();
-
-            /* Then */
-            ev.ShouldMatchJson(
-                @&quot;{
-                  &quot;&quot;data&quot;&quot;: {
-                    &quot;&quot;events&quot;&quot;: {
-                      &quot;&quot;type&quot;&quot;: &quot;&quot;DELETE&quot;&quot;,
-                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;,
-                      &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                      &quot;&quot;payload&quot;&quot;: &quot;&quot;payload1&quot;&quot;
-                    }
-                  }
-                }&quot;);
-        }
-</code></pre></p>
-<h3 id="example">Example</h3>
-<p>These are the schema and resolvers used in the above section.</p>
-<p>Schema
-<pre><code class="language-csharp">Sdl = @&quot;
-                enum EventType {
-                    INSERT
-                    UPDATE
-                    DELETE
-                }
-
-                type Success {
-                    id: ID!
-                    event: Event
-                }
-
-                type Failure {
-                    message: String!
-                }
-
-                union Result = Success | Failure
-
-                type Event {
-                    id: ID!
-                    type: EventType!
-                    payload: String
-                }
-
-                input NewEvent {
-                    type: String!
-                    payload: String
-                }
-
-                type Query {
-                    events: [Event!]
-                }
-
-                type Mutation {
-                    create(event: NewEvent!): Result
-                }
-
-                type Subscription {
-                    events: Event!
-                }
-
-                schema {
-                    query: Query
-                    mutation: Mutation
-                    subscription: Subscription
-                }
-                &quot;</code></pre></p>
-<p>Initialization</p>
-<p><pre><code class="language-csharp">
-        public ExecutorFacts(ITestOutputHelper atr)
+            String,
+            Int,
+            Float,
+            Boolean,
+            ID
+        }</code></pre></p>
+<h3 id="custom-scalars">Custom scalars</h3>
+<p>Create instance of <code>ScalarType</code> and provide name, value converter and metadata.</p>
+<h4 id="example">Example:</h4>
+<p>Scalar:
+<pre><code class="language-csharp">ID = new ScalarType(
+            &quot;ID&quot;,
+            new IdConverter(),
+            &quot;The ID scalar type represents a unique identifier, often used to refetch an object&quot; +
+            &quot; or as the key for a cache. The ID type is serialized in the same way as a String; &quot; +
+            &quot;however, it is not intended to be human‐readable. While it is often numeric, it &quot; +
+            &quot;should always serialize as a String.&quot;)</code></pre></p>
+<p>Converter:
+<pre><code class="language-csharp">    public class IdConverter : IValueConverter
+    {
+        public object Serialize(object value)
         {
-            Model = new EventsModel();
-            Resolvers = new ResolverMap
-            {
-                {
-                    &quot;Success&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)},
-                        {&quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event)}
-                    }
-                },
-                {
-                    &quot;Failure&quot;, new FieldResolverMap
-                    {
-                        {&quot;message&quot;, Resolve.PropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message)}
-                    }
-                },
-                {
-                    &quot;Event&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload)}
-                    }
-                },
-                {
-                    &quot;NewEvent&quot;, new FieldResolverMap
-                    {
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload)}
-                    }
-                },
-                {
-                    &quot;Query&quot;, new FieldResolverMap
-                    {
-                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
-                    }
-                },
-                {
-                    &quot;Mutation&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;create&quot;, async context =&gt;
-                            {
-                                var newEvent = context.GetArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
+            if (value == null)
+                return null;
 
-                                if (newEvent.Payload == null)
-                                    return Resolve.As(
-                                        context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Failure&quot;),
-                                        new EventsModel.Failure(&quot;Payload should be given&quot;));
-
-                                var id = await Model.AddAsync(newEvent);
-                                var ev = Model.Events.Single(e =&gt; e.Id == id);
-
-                                return Resolve.As(
-                                    context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
-                                    new EventsModel.Success(id, ev));
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;Subscription&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;events&quot;, async (context, unsubscribe) =&gt;
-                            {
-                                await Task.Delay(0);
-                                var source = Model.Subscribe(unsubscribe);
-                                return source;
-                            },
-                            context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
-                        }
-                    }
-                }
-            };
-
-            Schema = SchemaTools.MakeExecutableSchema(
-                new SchemaBuilder().Sdl(Parser.ParseDocument(Sdl)),
-                Resolvers,
-                Resolvers);
+            return Convert.ToString(value, CultureInfo.InvariantCulture);
         }
+
+        public object ParseValue(object input)
+        {
+            if (input == null)
+                return null;
+
+            return Convert.ToString(input, CultureInfo.InvariantCulture);
+        }
+
+        public object ParseLiteral(GraphQLScalarValue input)
+        {
+            if (input.Kind == ASTNodeKind.NullValue)
+            {
+                return null;
+            }
+
+            if (input.Kind == ASTNodeKind.StringValue) 
+                return input.Value;
+
+            throw new FormatException(
+                $&quot;Cannot coerce Long value from '{input.Kind}'&quot;);
+        }
+    }
 </code></pre></p>
                     
             </main>

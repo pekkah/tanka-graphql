@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Subscription - tanka-graphql</title>
+    <title>Enums - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -93,7 +93,7 @@
             <a class="nav-link" href="1-execution/04-query.html">Query</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="1-execution/05-subscription.html">Subscription</a>
+            <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
@@ -189,7 +189,7 @@
             <a class="nav-link" href="7-type-system/08-unions.html">Unions</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="7-type-system/09-enums.html">Enums</a>
+            <a class="nav-link active bg-light" href="7-type-system/09-enums.html">Enums</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="7-type-system/10-input-objects.html">Input objects</a>
@@ -208,194 +208,108 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="subscription">Subscription</h2>
+                <h2 id="enums">Enums</h2>
 <blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Subscription">Specification</a></p>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Enums">Specification</a></p>
 </blockquote>
-<h3 id="execution">Execution</h3>
+<p>Enums are created as instances of <code>EnumType</code>.</p>
+<h3 id="creating-enum">Creating enum</h3>
+<p>Direction enum</p>
 <p><pre><code class="language-csharp">
         [Fact]
-        public async Task Subscription()
+        public void Define_enum()
         {
             /* Given */
-            var subscription = Parser.ParseDocument(
-                @&quot;subscription {
-                    events {
-                        __typename
-                        id
-                        type
-                        payload
-                    }
-                }&quot;);
-
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
             /* When */
-            var result = await Executor.SubscribeAsync(new ExecutionOptions()
-            {
-                Schema = Schema,
-                Document = subscription
-            }, cts.Token);
-
-            await Model.AddAsync(new EventsModel.NewEvent()
-            {
-                Type = EventsModel.EventType.DELETE,
-                Payload = &quot;payload1&quot;
-            });
-
-            var ev = await result.Source.Reader.ReadAsync(cts.Token);
-
-            // unsubscribe
-            cts.Cancel();
+            var Enum = new EnumType(
+                &quot;Direction&quot;,
+                new EnumValues
+                {
+                    &quot;NORTH&quot;,
+                    &quot;EAST&quot;,
+                    &quot;SOUTH&quot;,
+                    &quot;WEST&quot;
+                });
 
             /* Then */
-            ev.ShouldMatchJson(
-                @&quot;{
-                  &quot;&quot;data&quot;&quot;: {
-                    &quot;&quot;events&quot;&quot;: {
-                      &quot;&quot;type&quot;&quot;: &quot;&quot;DELETE&quot;&quot;,
-                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;,
-                      &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                      &quot;&quot;payload&quot;&quot;: &quot;&quot;payload1&quot;&quot;
-                    }
-                  }
-                }&quot;);
+            Assert.True(Enum.Contains(&quot;NORTH&quot;));
+            Assert.True(Enum.Contains(&quot;EAST&quot;));
+            Assert.True(Enum.Contains(&quot;SOUTH&quot;));
+            Assert.True(Enum.Contains(&quot;WEST&quot;));
         }
 </code></pre></p>
-<h3 id="example">Example</h3>
-<p>These are the schema and resolvers used in the above section.</p>
-<p>Schema
-<pre><code class="language-csharp">Sdl = @&quot;
-                enum EventType {
-                    INSERT
-                    UPDATE
-                    DELETE
-                }
-
-                type Success {
-                    id: ID!
-                    event: Event
-                }
-
-                type Failure {
-                    message: String!
-                }
-
-                union Result = Success | Failure
-
-                type Event {
-                    id: ID!
-                    type: EventType!
-                    payload: String
-                }
-
-                input NewEvent {
-                    type: String!
-                    payload: String
-                }
-
-                type Query {
-                    events: [Event!]
-                }
-
-                type Mutation {
-                    create(event: NewEvent!): Result
-                }
-
-                type Subscription {
-                    events: Event!
-                }
-
-                schema {
-                    query: Query
-                    mutation: Mutation
-                    subscription: Subscription
-                }
-                &quot;</code></pre></p>
-<p>Initialization</p>
-<p><pre><code class="language-csharp">
-        public ExecutorFacts(ITestOutputHelper atr)
+<h3 id="serialization">Serialization</h3>
+<p>From input value</p>
+<p><pre><code class="language-csharp">        [Theory]
+        [InlineData(&quot;success&quot;, &quot;SUCCESS&quot;)]
+        [InlineData(&quot;FAILURE&quot;, &quot;FAILURE&quot;)]
+        [InlineData(&quot;Inconclusive&quot;, &quot;INCONCLUSIVE&quot;)]
+        public void ParseValue(object input, string expected)
         {
-            Model = new EventsModel();
-            Resolvers = new ResolverMap
+            /* Given */
+            var Enum = new EnumType(&quot;TestResult&quot;, new EnumValues
             {
-                {
-                    &quot;Success&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)},
-                        {&quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event)}
-                    }
-                },
-                {
-                    &quot;Failure&quot;, new FieldResolverMap
-                    {
-                        {&quot;message&quot;, Resolve.PropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message)}
-                    }
-                },
-                {
-                    &quot;Event&quot;, new FieldResolverMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload)}
-                    }
-                },
-                {
-                    &quot;NewEvent&quot;, new FieldResolverMap
-                    {
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload)}
-                    }
-                },
-                {
-                    &quot;Query&quot;, new FieldResolverMap
-                    {
-                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
-                    }
-                },
-                {
-                    &quot;Mutation&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;create&quot;, async context =&gt;
-                            {
-                                var newEvent = context.GetArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
+                [&quot;SUCCESS&quot;] = null,
+                [&quot;FAILURE&quot;] = null,
+                [&quot;INCONCLUSIVE&quot;] = null
+            });
 
-                                if (newEvent.Payload == null)
-                                    return Resolve.As(
-                                        context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Failure&quot;),
-                                        new EventsModel.Failure(&quot;Payload should be given&quot;));
+            /* When */
+            var actual = Enum.ParseValue(input);
 
-                                var id = await Model.AddAsync(newEvent);
-                                var ev = Model.Events.Single(e =&gt; e.Id == id);
-
-                                return Resolve.As(
-                                    context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
-                                    new EventsModel.Success(id, ev));
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;Subscription&quot;, new FieldResolverMap
-                    {
-                        {
-                            &quot;events&quot;, async (context, unsubscribe) =&gt;
-                            {
-                                await Task.Delay(0);
-                                var source = Model.Subscribe(unsubscribe);
-                                return source;
-                            },
-                            context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
-                        }
-                    }
-                }
+            /* Then */
+            Assert.Equal(expected, actual);
+        }
+</code></pre></p>
+<p>From AST node value</p>
+<p><pre><code class="language-csharp">
+        [Theory]
+        [InlineData(&quot;success&quot;, &quot;SUCCESS&quot;)]
+        [InlineData(&quot;FAILURE&quot;, &quot;FAILURE&quot;)]
+        [InlineData(&quot;Inconclusive&quot;, &quot;INCONCLUSIVE&quot;)]
+        public void ParseLiteral(string input, string expected)
+        {
+            /* Given */
+            var astValue = new GraphQLScalarValue(ASTNodeKind.EnumValue)
+            {
+                Value = input
             };
 
-            Schema = SchemaTools.MakeExecutableSchema(
-                new SchemaBuilder().Sdl(Parser.ParseDocument(Sdl)),
-                Resolvers,
-                Resolvers);
+            var Enum = new EnumType(&quot;TestResult&quot;, new EnumValues
+            {
+                [&quot;SUCCESS&quot;] = null,
+                [&quot;FAILURE&quot;] = null,
+                [&quot;INCONCLUSIVE&quot;] = null
+            });
+
+            /* When */
+            var actual = Enum.ParseLiteral(astValue);
+
+            /* Then */
+            Assert.Equal(expected, actual);
+        }
+</code></pre></p>
+<p>Serialize</p>
+<p><pre><code class="language-csharp">
+        [Theory]
+        [InlineData(&quot;success&quot;, &quot;SUCCESS&quot;)]
+        [InlineData(&quot;FAILURE&quot;, &quot;FAILURE&quot;)]
+        [InlineData(&quot;Inconclusive&quot;, &quot;INCONCLUSIVE&quot;)]
+        public void Serialize(object input, string expected)
+        {
+            /* Given */
+            var Enum = new EnumType(&quot;TestResult&quot;, new EnumValues
+            {
+                [&quot;SUCCESS&quot;] = null,
+                [&quot;FAILURE&quot;] = null,
+                [&quot;INCONCLUSIVE&quot;] = null
+            });
+
+            /* When */
+            var actual = Enum.Serialize(input);
+
+            /* Then */
+            Assert.Equal(expected, actual);
         }
 </code></pre></p>
                     
