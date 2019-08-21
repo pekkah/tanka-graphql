@@ -3,36 +3,18 @@ using System.Collections.Generic;
 
 namespace tanka.graphql.introspection
 {
-    public class __Schema
-    {
-        public List<__Type> Types { get; set; }
-
-        public __Type QueryType { get; set; }
-
-        public __Type MutationType { get; set; }
-
-        public __Type SubscriptionType { get; set; }
-
-        public List<__Directive> Directives { get; set; }
-    }
-
+    // ReSharper disable once InconsistentNaming
     public class __Type : IEquatable<__Type>
     {
-        public override string ToString()
-        {
-            return $"{Kind} {Name}";
-        }
-
-
         public __TypeKind? Kind { get; set; }
 
-        public string Name { get;set; }
+        public string Name { get; set; }
 
         public string Description { get; set; }
 
-        public List<__Field> Fields { get;set; }
+        public List<__Field> Fields { get; set; }
 
-        public List<__Type> Interfaces { get;set; }
+        public List<__Type> Interfaces { get; set; }
 
         public List<__Type> PossibleTypes { get; set; }
 
@@ -49,11 +31,16 @@ namespace tanka.graphql.introspection
             return Kind == other.Kind && string.Equals(Name, other.Name);
         }
 
+        public override string ToString()
+        {
+            return $"{Kind} {Name}";
+        }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((__Type) obj);
         }
 
@@ -74,53 +61,5 @@ namespace tanka.graphql.introspection
         {
             return !Equals(left, right);
         }
-    }
-
-    public class __Field
-    {
-        public string Name { get;set; }
-
-        public string Description { get; set; }
-
-        public List<__InputValue> Args { get; set; }
-
-        public __Type Type { get; set; }
-
-        public bool IsDeprecated { get; set; }
-
-        public string DeprecationReason { get; set; }
-    }
-
-    public class __EnumValue
-    {
-        public string Name { get;set; }
-
-        public string Description { get; set; }
-
-        public bool IsDeprecated { get; set; }
-
-        public string DeprecationReason { get; set; }
-    }
-
-    public class __InputValue
-    {
-        public string Name { get;set; }
-
-        public string Description { get; set; }
-
-        public __Type Type { get; set; }
-
-        public string DefaultValue { get; set; }
-    }
-
-    public class __Directive
-    {
-        public string Name { get;set; }
-
-        public string Description { get; set; }
-
-        public List<__DirectiveLocation> Locations { get; set; }
-
-        public List<__InputValue> Args { get; set; }
     }
 }

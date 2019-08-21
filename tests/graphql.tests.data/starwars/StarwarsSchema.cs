@@ -1,3 +1,4 @@
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.tests.data.starwars
@@ -44,9 +45,9 @@ namespace tanka.graphql.tests.data.starwars
             builder.Query(out var Query)
                 .Connections(connect => connect
                     .Field(Query, "human", Human,
-                        args: ("id", ScalarType.NonNullString, default, default))
+                        args: args => args.Arg("id", ScalarType.NonNullString, default, default))
                     .Field(Query, "character", Character,
-                        args: ("id", ScalarType.NonNullString, default, default))
+                        args: args => args.Arg("id", ScalarType.NonNullString, default, default))
                     .Field(Query, "characters", CharacterList));
 
 
@@ -57,7 +58,7 @@ namespace tanka.graphql.tests.data.starwars
             builder.Mutation(out var Mutation)
                 .Connections(connect => connect
                     .Field(Mutation, "addHuman", Human,
-                        args: ("human", HumanInput, default, default)));
+                        args: args => args.Arg("human", HumanInput, default, default)));
 
             return builder;
         }

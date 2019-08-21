@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using tanka.graphql.tracing;
+using tanka.graphql.extensions.tracing;
 
 namespace tanka.graphql.server
 {

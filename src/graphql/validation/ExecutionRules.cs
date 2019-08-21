@@ -1349,7 +1349,7 @@ namespace tanka.graphql.validation
                         return false;
                     }
 
-                    var nullableLocationType = nonNullLocationType.WrappedType;
+                    var nullableLocationType = nonNullLocationType.OfType;
                     return IsTypeSubTypeOf(schema, varType, nullableLocationType);
                 }
 
@@ -1373,15 +1373,15 @@ namespace tanka.graphql.validation
                     if (maybeSubType is NonNull nonNullMaybeSubType) {
                         return IsTypeSubTypeOf(
                             schema, 
-                            nonNullMaybeSubType.WrappedType, 
-                            nonNullSuperType.WrappedType);
+                            nonNullMaybeSubType.OfType, 
+                            nonNullSuperType.OfType);
                     }
                     return false;
                 }
 
                 if (maybeSubType is NonNull nonNullMaybeSubType2) {
                     // If superType is nullable, maybeSubType may be non-null or nullable.
-                    return IsTypeSubTypeOf(schema, nonNullMaybeSubType2.WrappedType, superType);
+                    return IsTypeSubTypeOf(schema, nonNullMaybeSubType2.OfType, superType);
                 }
 
                 // If superType type is a list, maybeSubType type must also be a list.
@@ -1389,8 +1389,8 @@ namespace tanka.graphql.validation
                     if (maybeSubType is List listMaybeSubType) {
                         return IsTypeSubTypeOf(
                             schema, 
-                            listMaybeSubType.WrappedType, 
-                            listSuperType.WrappedType);
+                            listMaybeSubType.OfType, 
+                            listSuperType.OfType);
                     }
                     return false;
                 }

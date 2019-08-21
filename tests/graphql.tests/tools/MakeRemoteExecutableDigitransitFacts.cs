@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using tanka.graphql.introspection;
 using tanka.graphql.language;
 using tanka.graphql.links;
+using tanka.graphql.schema;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
@@ -166,6 +167,15 @@ namespace tanka.graphql.tests.tools
                   ""errors"": [
                     {
                       ""message"": ""error"",
+                      ""locations"": [
+                        {
+                          ""end"": 137,
+                          ""start"": 47
+                        }
+                      ],
+                      ""path"": [
+                        ""feeds""
+                      ],
                       ""extensions"": {
                         ""code"": ""INVALIDOPERATION""
                       }
@@ -195,7 +205,7 @@ namespace tanka.graphql.tests.tools
                     {
                         Errors = new[]
                         {
-                            new Error("failed to find...")
+                            new ExecutionError("failed to find...")
                         }
                     };
                     await channel.Writer.WriteAsync(executionResult, cancellationToken);
@@ -235,7 +245,7 @@ namespace tanka.graphql.tests.tools
                         ""feeds""
                       ],
                       ""extensions"": {
-                        ""code"": ""COMPLETEVALUE"",
+                        ""code"": ""QUERYEXECUTION"",
                         ""remoteError"": {
                           ""data"": null,
                           ""errors"": [

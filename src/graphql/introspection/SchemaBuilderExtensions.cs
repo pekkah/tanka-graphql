@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using tanka.graphql.links;
-using tanka.graphql.type;
+using tanka.graphql.schema;
 
 namespace tanka.graphql.introspection
 {
@@ -25,7 +25,7 @@ namespace tanka.graphql.introspection
         }
 
         /// <summary>
-        ///     Execute <see cref="Introspect.DefaultQuery"/> on link
+        ///     Execute <see cref="Introspect.DefaultQuery" /> on link
         ///     and import the schema
         /// </summary>
         /// <param name="builder"></param>
@@ -46,13 +46,13 @@ namespace tanka.graphql.introspection
 
             if (channel == null)
                 throw new InvalidOperationException(
-                    $"Failed to execute introspection query. Link returned a null channel.");
+                    "Failed to execute introspection query. Link returned a null channel.");
 
             var result = await channel.ReadAsync(cancellationToken);
 
             if (result == null)
                 throw new InvalidOperationException(
-                        $"Failed to execute introspection query. Link channel read result is null");
+                    "Failed to execute introspection query. Link channel read result is null");
 
             if (result.Errors != null && result.Errors.Any())
                 throw new InvalidOperationException(

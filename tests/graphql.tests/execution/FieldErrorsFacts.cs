@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
@@ -47,15 +48,15 @@ namespace tanka.graphql.tests.execution
 
     public class FieldErrorsFacts
     {
-        private ISchema _schema;
+        private readonly ISchema _schema;
 
         public Query Query { get; }
 
         public FieldErrorsFacts()
         {
             Query = new Query();
-            var builder = new SchemaBuilder();
-            Sdl.Import(Parser.ParseDocument(
+            var builder = new SchemaBuilder()
+                .Sdl(Parser.ParseDocument(
                 @"
                     type Container {
                         nonNullWithNull: String!
@@ -79,7 +80,7 @@ namespace tanka.graphql.tests.execution
                     schema {
                         query : Query
                     }
-                "), builder);
+                "));
 
             var resolvers = new ResolverMap()
             {
@@ -313,19 +314,31 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(
-                @"{
+                @"
+                {
                   ""data"": {
                     ""custom"": null
                   },
                   ""errors"": [
                     {
                       ""message"": ""error"",
+                      ""locations"": [
+                        {
+                          ""end"": 116,
+                          ""start"": 72
+                        }
+                      ],
+                      ""path"": [
+                        ""custom"",
+                        ""nonNullWithCustomError""
+                      ],
                       ""extensions"": {
                         ""code"": ""INVALIDOPERATION""
                       }
                     }
                   ]
-                }");
+                }
+                ");
         }
 
         [Fact]
@@ -351,7 +364,8 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(
-                @"{
+                @"
+                {
                   ""data"": {
                     ""custom"": {
                       ""nullableWithCustomError"": null
@@ -360,12 +374,23 @@ namespace tanka.graphql.tests.execution
                   ""errors"": [
                     {
                       ""message"": ""error"",
+                      ""locations"": [
+                        {
+                          ""end"": 117,
+                          ""start"": 72
+                        }
+                      ],
+                      ""path"": [
+                        ""custom"",
+                        ""nullableWithCustomError""
+                      ],
                       ""extensions"": {
                         ""code"": ""INVALIDOPERATION""
                       }
                     }
                   ]
-                }");
+                }
+                ");
         }
 
         [Fact]
@@ -391,19 +416,31 @@ namespace tanka.graphql.tests.execution
 
             /* Then */
             result.ShouldMatchJson(
-                @"{
+                @"
+                {
                   ""data"": {
                     ""custom"": null
                   },
                   ""errors"": [
                     {
                       ""message"": ""error"",
+                      ""locations"": [
+                        {
+                          ""end"": 120,
+                          ""start"": 72
+                        }
+                      ],
+                      ""path"": [
+                        ""custom"",
+                        ""nonNullListWithCustomError""
+                      ],
                       ""extensions"": {
                         ""code"": ""INVALIDOPERATION""
                       }
                     }
                   ]
-                }");
+                }
+                ");
         }
     }
 }

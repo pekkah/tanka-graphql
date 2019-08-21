@@ -2,10 +2,14 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.introspection
 {
+    /// <summary>
+    ///     Read types from <see cref="IntrospectionResult" /> into <see cref="SchemaBuilder" />
+    /// </summary>
     public class IntrospectionSchemaReader
     {
         private readonly SchemaBuilder _builder;
@@ -13,6 +17,11 @@ namespace tanka.graphql.introspection
         private readonly ConcurrentQueue<Action> _delayedActions = new ConcurrentQueue<Action>();
         private readonly __Schema _schema;
 
+        /// <summary>
+        ///     Create reader
+        /// </summary>
+        /// <param name="builder">Write types to builder</param>
+        /// <param name="result">Introspection result to use as source</param>
         public IntrospectionSchemaReader(SchemaBuilder builder, IntrospectionResult result)
         {
             _builder = builder;
@@ -51,7 +60,7 @@ namespace tanka.graphql.introspection
             foreach (var type in types.Where(t => t.Kind == __TypeKind.UNION))
                 Union(type);
 
-            while(_delayedActions.TryDequeue(out var action))
+            while (_delayedActions.TryDequeue(out var action))
                 action();
         }
 
@@ -136,8 +145,7 @@ namespace tanka.graphql.introspection
 
         private IType Scalar(__Type type)
         {
-            // throws if scalar not found
-            _builder.GetScalar(type.Name, out var scalar);
+            _builder.TryGetType<ScalarType>(type.Name, out var scalar);
             return scalar;
         }
 
@@ -146,21 +154,17 @@ namespace tanka.graphql.introspection
             if (_builder.TryGetType<EnumType>(type.Name, out var enumType))
                 return enumType;
 
-            var values =
-                type.EnumValues
-                    .Select(v => (
-                        v.Name,
-                        v.Description,
-                        default(IEnumerable<DirectiveInstance>),
-                        v.DeprecationReason))
-                    .ToArray();
-
             _builder.Enum(
                 type.Name,
                 out enumType,
                 type.Description,
-                null,
-                values);
+                values => type.EnumValues
+                    .ForEach(v => values.Value(
+                        v.Name,
+                        v.Description,
+                        Enumerable.Empty<DirectiveInstance>(),
+                        v.DeprecationReason))
+                );
 
             return enumType;
         }
@@ -170,7 +174,7 @@ namespace tanka.graphql.introspection
             if (_builder.TryGetType<InputObjectType>(type.Name, out var owner))
                 return owner;
 
-            _builder.InputObject(type.Name, out owner, type.Description, null);
+            _builder.InputObject(type.Name, out owner, type.Description);
 
             if (type.InputFields != null && type.InputFields.Any())
                 _builder.Connections(connect =>
@@ -192,7 +196,7 @@ namespace tanka.graphql.introspection
             if (_builder.TryGetType<InterfaceType>(type.Name, out var owner))
                 return owner;
 
-            _builder.Interface(type.Name, out owner, type.Description, null);
+            _builder.Interface(type.Name, out owner, type.Description);
             if (type.Fields != null && type.Fields.Any())
                 _delayedActions.Enqueue(() =>
                 {
@@ -200,20 +204,20 @@ namespace tanka.graphql.introspection
                     {
                         foreach (var field in type.Fields)
                         {
-                            (string Name, IType Type, object DefaultValue, string Description)[] args = field.Args
-                                .Select(arg => (
-                                    arg.Name,
-                                    InputType(arg.Type),
-                                    (object) arg.DefaultValue,
-                                    arg.Description))
-                                .ToArray();
-
                             connect.Field(
                                 owner,
                                 field.Name,
                                 OutputType(field.Type),
                                 field.Description,
-                                args: args);
+                                args: args => field.Args
+                                    .ForEach(a => args.Arg(
+                                        a.Name, 
+                                        InputType(a.Type), 
+                                        a.DefaultValue, 
+                                        a.Description
+                                        )
+                                    )
+                                );
                         }
                     });
                 });
@@ -261,20 +265,19 @@ namespace tanka.graphql.introspection
                     {
                         foreach (var field in type.Fields)
                         {
-                            (string Name, IType Type, object DefaultValue, string Description)[] args = field.Args
-                                .Select(arg => (
-                                    arg.Name,
-                                    InputType(arg.Type),
-                                    (object) arg.DefaultValue,
-                                    arg.Description))
-                                .ToArray();
-
                             connect.Field(
                                 owner,
                                 field.Name,
                                 OutputType(field.Type),
                                 field.Description,
-                                args: args);
+                                args: args => field.Args
+                                    .ForEach(a => args.Arg(
+                                            a.Name, 
+                                            InputType(a.Type), 
+                                            a.DefaultValue, 
+                                            a.Description
+                                        )
+                                    ));
                         }
                     });
                 });

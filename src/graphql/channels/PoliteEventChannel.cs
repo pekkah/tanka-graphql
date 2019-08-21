@@ -1,4 +1,5 @@
-﻿using tanka.graphql.resolvers;
+﻿using System.Threading;
+using tanka.graphql.resolvers;
 
 namespace tanka.graphql.channels
 {
@@ -12,17 +13,17 @@ namespace tanka.graphql.channels
             _welcomeItem = welcomeItem;
             _byeItem = byeItem;
         }
-
-
-        public override void OnSubscribed(SubscribeResult subscription)
+        
+        public override void OnSubscribed(ISubscribeResult subscription)
         {
-            subscription.WriteAsync(_welcomeItem);
+            if (!_welcomeItem.Equals(default(T)))
+                subscription.WriteAsync(_welcomeItem, CancellationToken.None);
         }
 
-        public override void OnUnsubscribing(SubscribeResult subscription)
+        public override void OnUnsubscribing(ISubscribeResult subscription)
         {
-            if (!_byeItem.Equals(default))
-                subscription.WriteAsync(_byeItem);
+            if (!_byeItem.Equals(default(T)))
+                subscription.WriteAsync(_byeItem, CancellationToken.None);
         }
     }
 }

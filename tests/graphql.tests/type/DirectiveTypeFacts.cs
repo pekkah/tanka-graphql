@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using tanka.graphql.directives;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
@@ -25,8 +27,9 @@ namespace tanka.graphql.tests.type
                         var user = fetchUser(42);
                         
                         if (!user.HasClaim("role", requiredRole))
-                            return new ValueTask<IResolveResult>(Resolve.As("requires admin role. " +
-                                                                            "todo(pekka): should throw error or return error or??"));
+                            throw new Exception(
+                                "requires admin role. "
+                            );
 
                         return next(context);
                     }).Run(fieldDefinition.Resolver));
@@ -50,7 +53,7 @@ namespace tanka.graphql.tests.type
                 });
 
             var builder = new SchemaBuilder();
-            builder.IncludeDirective(authorizeType);
+            builder.Include(authorizeType);
 
             builder.Query(out var query)
                 .Connections(connect => connect
@@ -106,34 +109,53 @@ namespace tanka.graphql.tests.type
             });
 
             /* Then */
-            result.ShouldMatchJson(@"{
+            result.ShouldMatchJson(
+                @"
+                  {
                   ""data"": {
-                    ""requiresUser"": ""Hello User!"",
-                    ""requiresAdmin"": ""requires admin role. todo(pekka): should throw error or return error or??""
-                  }
-                }");
+                    ""requiresAdmin"": null,
+                    ""requiresUser"": ""Hello User!""
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""requires admin role. "",
+                      ""locations"": [
+                        {
+                          ""end"": 28,
+                          ""start"": 2
+                        }
+                      ],
+                      ""path"": [
+                        ""requiresAdmin""
+                      ],
+                      ""extensions"": {
+                        ""code"": ""EXCEPTION""
+                      }
+                    }
+                  ]
+                }
+                ");
         }
 
         [Fact]
         public async Task Authorize_field_directive_sdl()
         {
             /* Given */
-            var builder = new SchemaBuilder();
-
-            Sdl.Import(Parser.ParseDocument(@"
+            var builder = new SchemaBuilder()
+                .Sdl(Parser.ParseDocument(@"
                 directive @authorize(
                     role: String =""user""
                 ) on FIELD_DEFINITION
 
                 type Query {
-                    requiresAdmin: String! @authorize(role:""admin"")
-                    requiresUser: String! @authorize
+                    requiresAdmin: String @authorize(role:""admin"")
+                    requiresUser: String @authorize
                 }
 
                 schema {
                     query: Query
                 }
-                "), builder);
+                "));
 
             var resolvers = new ResolverMap
             {
@@ -171,12 +193,31 @@ namespace tanka.graphql.tests.type
             });
 
             /* Then */
-            result.ShouldMatchJson(@"{
+            result.ShouldMatchJson(@"
+                  {
                   ""data"": {
-                    ""requiresUser"": ""Hello User!"",
-                    ""requiresAdmin"": ""requires admin role. todo(pekka): should throw error or return error or??""
-                  }
-                }");
+                    ""requiresAdmin"": null,
+                    ""requiresUser"": ""Hello User!""
+                  },
+                  ""errors"": [
+                    {
+                      ""message"": ""requires admin role. "",
+                      ""locations"": [
+                        {
+                          ""end"": 28,
+                          ""start"": 2
+                        }
+                      ],
+                      ""path"": [
+                        ""requiresAdmin""
+                      ],
+                      ""extensions"": {
+                        ""code"": ""EXCEPTION""
+                      }
+                    }
+                  ]
+                }
+                ");
         }
     }
 }

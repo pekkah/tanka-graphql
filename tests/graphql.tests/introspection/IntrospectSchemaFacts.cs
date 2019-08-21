@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using tanka.graphql.introspection;
+using tanka.graphql.schema;
 using tanka.graphql.tests.data;
 using tanka.graphql.type;
 using Xunit;
@@ -26,7 +27,7 @@ namespace tanka.graphql.tests.introspection
                 .Connections(connect => connect
                     .Field(type1, ScalarFieldName, ScalarType.NonNullInt,
                         "Description",
-                        args: ("arg1", ScalarType.Float, 1d, "Description")));
+                        args: args => args.Arg("arg1", ScalarType.Float, 1d, "Description")));
 
             builder.Object($"{ObjectTypeName}2", out var type2,
                     "Description")
@@ -46,7 +47,7 @@ namespace tanka.graphql.tests.introspection
                 new EnumValues
                 {
                     {"value1", "Description"},
-                    {"value2", "Description", "Deprecated"}
+                    {"value2", "Description", null, "Deprecated"}
                 },
                 "Description");
 
@@ -65,7 +66,7 @@ namespace tanka.graphql.tests.introspection
                     .Field(query, "listOfObjects", new List(type2))
                     .Field(query, "nonNullObject", new NonNull(type1))
                     .Field(query, "inputObjectArg", ScalarType.NonNullBoolean,
-                        args: ("arg1", inputObject, default, "With inputObject arg")));
+                        args: args => args.Arg("arg1", inputObject, default, "With inputObject arg")));
 
             builder.Mutation(out var mutation);
             builder.Subscription(out var subscription);

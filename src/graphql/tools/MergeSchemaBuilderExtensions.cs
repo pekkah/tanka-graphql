@@ -1,4 +1,5 @@
-﻿using tanka.graphql.type;
+﻿using tanka.graphql.schema;
+using tanka.graphql.type;
 
 namespace tanka.graphql.tools
 {

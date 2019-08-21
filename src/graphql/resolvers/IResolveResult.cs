@@ -15,8 +15,7 @@ namespace tanka.graphql.resolvers
             IField field,
             IType fieldType,
             GraphQLFieldSelection selection,
-            List<GraphQLFieldSelection> fields,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             NodePath path);
     }
 }

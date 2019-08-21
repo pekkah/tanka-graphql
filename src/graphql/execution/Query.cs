@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.error;
 
 namespace tanka.graphql.execution
 {
@@ -12,28 +11,28 @@ namespace tanka.graphql.execution
         {
             var (schema, _, operation, initialValue, coercedVariableValues) = context;
             var queryType = schema.Query;
+            var path = new NodePath();
 
             if (queryType == null)
-                throw new GraphQLError(
-                    "Schema does not support queries. Query type is null.");
+                throw new QueryExecutionException(
+                    "Schema does not support queries. Query type is null.",
+                    path);
 
             var selectionSet = operation.SelectionSet;
             var executionContext = context.BuildExecutorContext(new ParallelExecutionStrategy());
 
-            IDictionary<string, object> data = null;
+            IDictionary<string, object> data;
 
             try
             {
-                var path = new NodePath();
                 data = await SelectionSets.ExecuteSelectionSetAsync(
                     executionContext,
                     selectionSet,
                     queryType,
                     initialValue,
-                    coercedVariableValues,
                     path).ConfigureAwait(false);
             }
-            catch (GraphQLError e)
+            catch (QueryExecutionException e)
             {
                 executionContext.AddError(e);
                 data = null;

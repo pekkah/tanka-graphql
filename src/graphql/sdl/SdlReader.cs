@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.error;
 using tanka.graphql.execution;
+using tanka.graphql.language;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.sdl
@@ -56,7 +57,13 @@ namespace tanka.graphql.sdl
 
         protected ScalarType Scalar(GraphQLScalarTypeDefinition definition)
         {
-            _builder.GetScalar(definition.Name.Value, out var scalar);
+            if (!_builder.TryGetType<ScalarType>(definition.Name.Value, out var scalar))
+            {
+                throw new ArgumentOutOfRangeException(
+                    $"Could not find scalar '{definition.Name.Value}' from known types. " +
+                    "Scalars require a value converter to function and cannot be created from SDL.");
+            }
+
             return scalar;
         }
 
@@ -67,14 +74,14 @@ namespace tanka.graphql.sdl
                     (DirectiveLocation) System.Enum.Parse(typeof(DirectiveLocation), location.Value))
                 .ToList();
 
-            var args = Args(definition.Arguments);
+            var args = Args(definition.Arguments).ToList();
 
             _builder.DirectiveType(
                 definition.Name.Value,
                 out var directiveType,
                 locations,
                 null,
-                args.ToArray());
+                argsBuilder => args.ForEach(a => argsBuilder.Arg(a.Name, a.Type, a.DefaultValue, a.Description)));
 
             return directiveType;
         }
@@ -204,15 +211,18 @@ namespace tanka.graphql.sdl
 
         protected EnumType Enum(GraphQLEnumTypeDefinition definition)
         {
-            var values = definition.Values.Select(value =>
-                (value.Name.Value, string.Empty, Directives(definition.Directives), string.Empty));
-
             var directives = Directives(definition.Directives);
 
             _builder.Enum(definition.Name.Value, out var enumType,
                 directives: directives,
                 description: null,
-                values: values.ToArray());
+                values: values => 
+                    definition.Values.ToList()
+                        .ForEach(value => values.Value(
+                            value.Name.Value,
+                            string.Empty,
+                            Directives(value.Directives),
+                            null)));
 
             return enumType;
         }
@@ -233,8 +243,9 @@ namespace tanka.graphql.sdl
             _builder.TryGetDirective(name, out var directiveType);
 
             if (directiveType == null)
-                throw new GraphQLError(
-                    $"Could not find DirectiveType with name '{name}'");
+                throw new DocumentException(
+                    $"Could not find DirectiveType with name '{name}'",
+                    directiveDefinition);
 
             var arguments = new Dictionary<string, object>();
             foreach (var argument in directiveType.Arguments)
@@ -307,7 +318,7 @@ namespace tanka.graphql.sdl
                 var type = InputType(definition.Type);
 
                 if (!TypeIs.IsInputType(type))
-                    throw new GraphQLError(
+                    throw new DocumentException(
                         "Type of input value definition is not valid input value type. " +
                         $"Definition: '{definition.Name.Value}' Type: {definition.Type.Kind}",
                         definition);
@@ -443,9 +454,7 @@ namespace tanka.graphql.sdl
 
             foreach (var namedType in definitions)
             {
-                var type = OutputType(namedType) as InterfaceType;
-
-                if (type == null)
+                if (!(OutputType(namedType) is InterfaceType type))
                     continue;
 
                 interfaces.Add(type);
@@ -460,11 +469,20 @@ namespace tanka.graphql.sdl
             {
                 var type = OutputType(definition.Type);
                 var name = definition.Name.Value;
-                var args = Args(definition.Arguments);
+                var args = Args(definition.Arguments).ToList();
                 var directives = Directives(definition.Directives);
 
                 _builder.Connections(connect => connect
-                    .Field(owner, name, type, default, null, null, directives, args.ToArray()));
+                    .Field(
+                        owner, 
+                        name, 
+                        type, 
+                        default, 
+                        null, 
+                        null, 
+                        directives, 
+                        args: argsBuilder => args.ForEach(a => 
+                            argsBuilder.Arg(a.Name, a.Type, a.DefaultValue, a.Description))));
             }
         }
     }

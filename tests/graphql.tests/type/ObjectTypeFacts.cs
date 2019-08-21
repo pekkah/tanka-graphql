@@ -1,4 +1,5 @@
-﻿using tanka.graphql.type;
+﻿using tanka.graphql.schema;
+using tanka.graphql.type;
 using Xunit;
 
 namespace tanka.graphql.tests.type
@@ -39,7 +40,14 @@ namespace tanka.graphql.tests.type
             _builder.Object("Person", out var person)
                 .Connections(connect => connect
                     .Field(person, "phoneNumber", ScalarType.NonNullString,
-                        args: ("primary", ScalarType.Boolean, default, default)));
+                        args: args => args.Arg(
+                            "primary", 
+                            ScalarType.Boolean, 
+                            default, 
+                            default
+                            )
+                        )
+                );
 
             var schema = _builder.Build();
 

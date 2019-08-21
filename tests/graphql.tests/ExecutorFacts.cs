@@ -4,10 +4,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
+using tanka.graphql.sdl;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace tanka.graphql.tests
 {
@@ -61,7 +64,7 @@ namespace tanka.graphql.tests
                 }
                 ";
 
-        public ExecutorFacts()
+        public ExecutorFacts(ITestOutputHelper atr)
         {
             Model = new EventsModel();
             Resolvers = new ResolverMap
@@ -139,9 +142,8 @@ namespace tanka.graphql.tests
                 }
             };
 
-            var schema = graphql.sdl.Sdl.Schema(Parser.ParseDocument(Sdl));
             Schema = SchemaTools.MakeExecutableSchema(
-                schema,
+                new SchemaBuilder().Sdl(Parser.ParseDocument(Sdl)),
                 Resolvers,
                 Resolvers);
         }

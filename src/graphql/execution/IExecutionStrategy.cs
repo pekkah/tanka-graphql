@@ -7,9 +7,11 @@ namespace tanka.graphql.execution
 {
     public interface IExecutionStrategy
     {
-        Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(IExecutorContext context,
-            Dictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
-            ObjectType objectType, object objectValue,
-            IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path);
+        Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
+            IExecutorContext context,
+            IReadOnlyDictionary<string, List<GraphQLFieldSelection>> groupedFieldSet,
+            ObjectType objectType, 
+            object objectValue, 
+            NodePath path);
     }
 }

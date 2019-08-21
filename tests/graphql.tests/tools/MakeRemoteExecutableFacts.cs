@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql.links;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
@@ -117,7 +118,7 @@ namespace tanka.graphql.tests.tools
                 ");
         }
 
-        [Fact(Skip = "test has issues as nothing is pushing the values into the stream")]
+        [Fact(Skip = "Test is flaky. Starts failing randomly.")]
         public async Task Subscriptions()
         {
             /* Given */
@@ -158,9 +159,9 @@ namespace tanka.graphql.tests.tools
 
                     }
 
-type Subscription {
+                    type Subscription {
 
-}
+                    }
                     "
                 );
 

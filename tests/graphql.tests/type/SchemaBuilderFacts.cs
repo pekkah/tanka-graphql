@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql.channels;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.tests.data;
 using tanka.graphql.tools;
 using tanka.graphql.type;
@@ -106,10 +107,11 @@ namespace tanka.graphql.tests.type
                     DirectiveLocation.FIELD
                 },
                 description: "Description",
-                (Name: "Reason",
-                    Type: ScalarType.String,
-                    DefaultValue: "Deprecated",
-                    Description: "Description")
+                args => args.Arg(
+                    name: "Reason",
+                    type: ScalarType.String,
+                    defaultValue: "Deprecated",
+                    description: "Description")
             );
 
             /* Then */
@@ -128,17 +130,19 @@ namespace tanka.graphql.tests.type
                 name: name,
                 enumType: out var enum1,
                 description: "Description",
+                values =>
+                    values.Value(
+                        value: "VALUE1",
+                        description: "Description",
+                        directives: new DirectiveInstance[]
+                        {
+                            /*directive*/
+                        },
+                        deprecationReason: null),
                 directives: new DirectiveInstance[]
                 {
                     /*directive*/
-                },
-                (value: "VALUE1",
-                    description: "Description",
-                    directives: new DirectiveInstance[]
-                    {
-                        /*directive*/
-                    },
-                    deprecationReason: null)
+                }
             );
 
             /* Then */
@@ -269,10 +273,11 @@ namespace tanka.graphql.tests.type
                     {
                         /* directive */
                     },
-                    (Name: "arg1",
-                        Type: ScalarType.Boolean,
-                        DefaultValue: true,
-                        Description: "Description")
+                    args => args.Arg(
+                        name: "arg1",
+                        type: ScalarType.Boolean,
+                        defaultValue: true,
+                        description: "Description")
                 );
             });
 
@@ -346,10 +351,11 @@ namespace tanka.graphql.tests.type
                     {
                         /* directive */
                     },
-                    (Name: "arg1",
-                        Type: ScalarType.Boolean,
-                        DefaultValue: true,
-                        Description: "Description")
+                    args => args.Arg(
+                        name: "arg1",
+                        type: ScalarType.Boolean,
+                        defaultValue: true,
+                        description: "Description")
                 );
             });
 
@@ -380,10 +386,11 @@ namespace tanka.graphql.tests.type
                     {
                         /* directive */
                     },
-                    (Name: "arg1",
-                        Type: ScalarType.Boolean,
-                        DefaultValue: true,
-                        Description: "Description")
+                    args => args.Arg(
+                        name: "arg1",
+                        type: ScalarType.Boolean,
+                        defaultValue: true,
+                        description: "Description")
                 );
             }));
 
@@ -637,8 +644,7 @@ namespace tanka.graphql.tests.type
                 .Build();
 
             /* When */
-            var schema = new SchemaBuilder(existingSchema)
-                /* Or: .Import(existingSchema) */
+            var schema = new SchemaBuilder().Import(existingSchema)
                 .Connections(connect => connect
                     .Field(query, "field2", ScalarType.Int)
                 )

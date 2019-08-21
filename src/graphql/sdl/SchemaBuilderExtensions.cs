@@ -1,4 +1,5 @@
 ﻿using GraphQLParser.AST;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.sdl

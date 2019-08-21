@@ -10,7 +10,7 @@ namespace tanka.graphql
     /// </summary>
     public class SubscriptionResult : IExecutionResult
     {
-        private IEnumerable<Error> _errors;
+        private IEnumerable<ExecutionError> _errors;
         private IDictionary<string, object> _extensions;
 
         public SubscriptionResult(Channel<ExecutionResult> source)
@@ -42,7 +42,7 @@ namespace tanka.graphql
         }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public IEnumerable<Error> Errors
+        public IEnumerable<ExecutionError> Errors
         {
             get => _errors;
             set

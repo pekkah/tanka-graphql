@@ -15,7 +15,7 @@ namespace tanka.graphql.server
 {
     public class QueryStreamService : IQueryStreamService
     {
-        private readonly List<IExtension> _extensions;
+        private readonly List<IExecutorExtension> _extensions;
         private readonly ILogger<QueryStreamService> _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IOptionsMonitor<SchemaOptions> _optionsMonitor;
@@ -23,7 +23,7 @@ namespace tanka.graphql.server
         public QueryStreamService(
             IOptionsMonitor<SchemaOptions> optionsMonitor,
             ILoggerFactory loggerFactory,
-            IEnumerable<IExtension> extensions)
+            IEnumerable<IExecutorExtension> extensions)
         {
             _optionsMonitor = optionsMonitor;
             _loggerFactory = loggerFactory;

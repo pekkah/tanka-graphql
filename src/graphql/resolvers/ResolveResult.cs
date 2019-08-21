@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using tanka.graphql.execution;
 using tanka.graphql.type;
@@ -40,8 +41,7 @@ namespace tanka.graphql.resolvers
             IField field,
             IType fieldType,
             GraphQLFieldSelection selection,
-            List<GraphQLFieldSelection> fields,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             NodePath path)
         {
             object completedValue = null;
@@ -55,7 +55,6 @@ namespace tanka.graphql.resolvers
                 selection,
                 fields,
                 Value,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
             return completedValue;
@@ -67,9 +66,8 @@ namespace tanka.graphql.resolvers
             IType fieldType,
             ObjectType actualType,
             GraphQLFieldSelection selection,
-            List<GraphQLFieldSelection> fields,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             object value,
-            IReadOnlyDictionary<string, object> coercedVariableValues, 
             NodePath path)
         {
             if (value is IResolveResult resolveResult)
@@ -80,7 +78,6 @@ namespace tanka.graphql.resolvers
                     fieldType,
                     selection,
                     fields,
-                    coercedVariableValues,
                     path).ConfigureAwait(false);
 
             if (fieldType is NonNull nonNull)
@@ -92,8 +89,7 @@ namespace tanka.graphql.resolvers
                     actualType, 
                     selection, 
                     fields,
-                    value, 
-                    coercedVariableValues, 
+                    value,
                     path, 
                     nonNull);
             }
@@ -111,8 +107,7 @@ namespace tanka.graphql.resolvers
                     actualType, 
                     selection, 
                     fields, 
-                    value, 
-                    coercedVariableValues, 
+                    value,
                     path, 
                     listType);
             }
@@ -127,7 +122,6 @@ namespace tanka.graphql.resolvers
                     executorContext,
                     fields, 
                     value, 
-                    coercedVariableValues, 
                     path, 
                     fieldObjectType);
             }
@@ -136,7 +130,9 @@ namespace tanka.graphql.resolvers
             if (actualType == null)
                 throw new CompleteValueException(
                     "Cannot complete value as interface or union. " +
-                    $"Actual type not given from resolver. Use {nameof(Resolve.As)} with type parameter");
+                    $"Actual type not given from resolver. Use {nameof(Resolve.As)} with type parameter",
+                    path,
+                    fields.First());
 
             if (fieldType is InterfaceType interfaceType)
             {
@@ -144,8 +140,7 @@ namespace tanka.graphql.resolvers
                     executorContext, 
                     actualType, 
                     fields, 
-                    value, 
-                    coercedVariableValues, 
+                    value,
                     path, 
                     interfaceType);
             }
@@ -157,21 +152,30 @@ namespace tanka.graphql.resolvers
                     actualType, 
                     fields, 
                     value, 
-                    coercedVariableValues, 
                     path, 
                     unionType);
             }
 
-            throw new CompleteValueException($"Cannot complete value for field {field}. No handling for the type {fieldType}.");
+            throw new CompleteValueException(
+                $"Cannot complete value for field {field}. No handling for the type {fieldType}.",
+                path,
+                fields.First());
         }
 
-        private static async Task<object> CompleteUnionValueAsync(IExecutorContext executorContext, ObjectType actualType, List<GraphQLFieldSelection> fields,
-            object value, IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path, UnionType unionType)
+        private static async Task<object> CompleteUnionValueAsync(
+            IExecutorContext executorContext, 
+            ObjectType actualType, 
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
+            object value,
+            NodePath path, 
+            UnionType unionType)
         {
             if (!unionType.IsPossible(actualType))
                 throw new CompleteValueException(
                     "Cannot complete value as union. " +
-                    $"Actual type {actualType.Name} is not possible for {unionType.Name}");
+                    $"Actual type {actualType.Name} is not possible for {unionType.Name}",
+                    path,
+                    fields.First());
 
             var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
             var data = await SelectionSets.ExecuteSelectionSetAsync(
@@ -179,19 +183,25 @@ namespace tanka.graphql.resolvers
                 subSelectionSet,
                 actualType,
                 value,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
             return data;
         }
 
-        private static async Task<object> CompleteInterfaceValueAsync(IExecutorContext executorContext, ObjectType actualType,
-            List<GraphQLFieldSelection> fields, object value, IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path, InterfaceType interfaceType)
+        private static async Task<object> CompleteInterfaceValueAsync(
+            IExecutorContext executorContext, 
+            ObjectType actualType,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
+            object value, 
+            NodePath path, 
+            InterfaceType interfaceType)
         {
             if (!actualType.Implements(interfaceType))
                 throw new CompleteValueException(
                     "Cannot complete value as interface. " +
-                    $"Actual type {actualType.Name} does not implement {interfaceType.Name}");
+                    $"Actual type {actualType.Name} does not implement {interfaceType.Name}",
+                    path,
+                    fields.First());
 
             var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
             var data = await SelectionSets.ExecuteSelectionSetAsync(
@@ -199,14 +209,17 @@ namespace tanka.graphql.resolvers
                 subSelectionSet,
                 actualType,
                 value,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
             return data;
         }
 
-        private static async Task<object> CompleteObjectValueAsync(IExecutorContext executorContext, List<GraphQLFieldSelection> fields, object value,
-            IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path, ObjectType fieldObjectType)
+        private static async Task<object> CompleteObjectValueAsync(
+            IExecutorContext executorContext, 
+            IReadOnlyCollection<GraphQLFieldSelection> fields, 
+            object value,
+            NodePath path, 
+            ObjectType fieldObjectType)
         {
             var subSelectionSet = SelectionSets.MergeSelectionSets(fields);
             var data = await SelectionSets.ExecuteSelectionSetAsync(
@@ -214,22 +227,31 @@ namespace tanka.graphql.resolvers
                 subSelectionSet,
                 fieldObjectType,
                 value,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
             return data;
         }
 
-        private async Task<object> CompleteListValueAsync(IExecutorContext executorContext, ObjectType objectType, IField field,
-            IType fieldType, ObjectType actualType, GraphQLFieldSelection selection, List<GraphQLFieldSelection> fields, object value,
-            IReadOnlyDictionary<string, object> coercedVariableValues, NodePath path, List listType)
+        private async Task<object> CompleteListValueAsync(
+            IExecutorContext executorContext, 
+            ObjectType objectType, 
+            IField field,
+            IType fieldType, 
+            ObjectType actualType, 
+            GraphQLFieldSelection selection, 
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
+            object value,
+            NodePath path, 
+            List listType)
         {
             if (!(value is IEnumerable values))
                 throw new CompleteValueException(
                     $"Cannot complete value for list field '{selection.Name.Value}':'{fieldType}'. " +
-                    "Resolved value is not a collection");
+                    "Resolved value is not a collection",
+                    path,
+                    selection);
 
-            var innerType = listType.WrappedType;
+            var innerType = listType.OfType;
             var result = new List<object>();
             int i = 0;
             foreach (var resultItem in values)
@@ -246,7 +268,6 @@ namespace tanka.graphql.resolvers
                         selection,
                         fields,
                         resultItem,
-                        coercedVariableValues,
                         itemPath).ConfigureAwait(false);
 
                     result.Add(completedResultItem);
@@ -272,12 +293,12 @@ namespace tanka.graphql.resolvers
             IField field,
             ObjectType actualType, 
             GraphQLFieldSelection selection, 
-            List<GraphQLFieldSelection> fields, 
-            object value, IReadOnlyDictionary<string, object> coercedVariableValues,
+            IReadOnlyCollection<GraphQLFieldSelection> fields, 
+            object value,
             NodePath path,
             NonNull nonNull)
         {
-            var innerType = nonNull.WrappedType;
+            var innerType = nonNull.OfType;
             var completedResult = await CompleteValueAsync(
                 executorContext,
                 objectType,
@@ -287,7 +308,6 @@ namespace tanka.graphql.resolvers
                 selection,
                 fields,
                 value,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
             if (completedResult == null)

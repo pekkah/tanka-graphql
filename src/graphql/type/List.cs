@@ -4,16 +4,16 @@ namespace tanka.graphql.type
 {
     public class List : IWrappingType, IEquatable<List>
     {
-        public IType WrappedType { get; }
+        public IType OfType { get; }
 
         public List(IType wrappedType)
         {
-            WrappedType = wrappedType ?? throw new ArgumentNullException(nameof(wrappedType));
+            OfType = wrappedType ?? throw new ArgumentNullException(nameof(wrappedType));
         }
 
         public override string ToString()
         {
-            return $"[{WrappedType}]";
+            return $"[{OfType}]";
         }
 
         public override bool Equals(object obj)
@@ -28,12 +28,12 @@ namespace tanka.graphql.type
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Equals(WrappedType, other.WrappedType);
+            return Equals(OfType, other.OfType);
         }
 
         public override int GetHashCode()
         {
-            return (WrappedType != null ? WrappedType.GetHashCode() : 0);
+            return (OfType != null ? OfType.GetHashCode() : 0);
         }
 
         public static bool operator ==(List left, List right)

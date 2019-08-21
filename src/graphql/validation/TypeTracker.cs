@@ -15,7 +15,7 @@ namespace tanka.graphql.validation
 
         private readonly Stack<IType> _inputTypeStack = new Stack<IType>();
 
-        private readonly Stack<ComplexType> _parentTypeStack = new Stack<ComplexType>();
+        private readonly Stack<INamedType> _parentTypeStack = new Stack<INamedType>();
 
         private readonly Stack<IType> _typeStack = new Stack<IType>();
         private Argument _argument;
@@ -29,7 +29,7 @@ namespace tanka.graphql.validation
             EnterSelectionSet = selectionSet =>
             {
                 var namedType = GetNamedType(GetCurrentType());
-                var complexType = namedType as ComplexType;
+                var complexType = namedType as INamedType;
                 _parentTypeStack.Push(complexType);
             };
 
@@ -132,7 +132,7 @@ namespace tanka.graphql.validation
             EnterListValue = node =>
             {
                 var listType = GetNullableType(GetInputType());
-                var itemType = listType is List list ? list.WrappedType : listType;
+                var itemType = listType is List list ? list.OfType : listType;
 
                 // List positions never have a default value
                 _defaultValueStack.Push(null);
@@ -218,9 +218,9 @@ namespace tanka.graphql.validation
             return _typeStack.Peek();
         }
 
-        public ComplexType GetParentType()
+        public INamedType GetParentType()
         {
-            if (_typeStack.Count == 0)
+            if (_parentTypeStack.Count == 0)
                 return null;
 
             return _parentTypeStack.Peek();
@@ -229,7 +229,7 @@ namespace tanka.graphql.validation
         //todo: originally returns an input type
         public IType GetInputType()
         {
-            if (_typeStack.Count == 0)
+            if (_inputTypeStack.Count == 0)
                 return null;
 
             return _inputTypeStack.Peek();
@@ -280,7 +280,7 @@ namespace tanka.graphql.validation
         public IType GetNullableType(IType type)
         {
             if (type is NonNull nonNull)
-                return nonNull.WrappedType;
+                return nonNull.OfType;
 
             return null;
         }

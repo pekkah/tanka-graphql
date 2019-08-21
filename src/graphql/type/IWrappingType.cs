@@ -2,6 +2,6 @@
 {
     public interface IWrappingType: IType
     {
-        IType WrappedType { get; }
+        IType OfType { get; }
     }
 }

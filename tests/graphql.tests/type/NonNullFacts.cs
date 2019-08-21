@@ -15,7 +15,7 @@ namespace tanka.graphql.tests.type
             var nonNull = new NonNull(itemType);
 
             /* Then */
-            Assert.Equal(itemType, nonNull.WrappedType);
+            Assert.Equal(itemType, nonNull.OfType);
         }
     }
 }

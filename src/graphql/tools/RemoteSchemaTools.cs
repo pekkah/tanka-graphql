@@ -8,6 +8,7 @@ using GraphQLParser.AST;
 using tanka.graphql.channels;
 using tanka.graphql.links;
 using tanka.graphql.resolvers;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.tools
@@ -30,7 +31,7 @@ namespace tanka.graphql.tools
             if (builder.TryGetType<ObjectType>("Query", out var queryType))
                 builder.Connections(connections =>
                 {
-                    var fields = connections.VisitFields(queryType);
+                    var fields = connections.GetFields(queryType);
 
                     foreach (var field in fields)
                     {
@@ -42,7 +43,7 @@ namespace tanka.graphql.tools
             if (builder.TryGetType<ObjectType>("Mutation", out var mutationType))
                 builder.Connections(connections =>
                 {
-                    var fields = connections.VisitFields(mutationType);
+                    var fields = connections.GetFields(mutationType);
 
                     foreach (var field in fields)
                     {
@@ -54,7 +55,7 @@ namespace tanka.graphql.tools
             if (builder.TryGetType<ObjectType>("Subscription", out var subscriptionType))
                 builder.Connections(connections =>
                 {
-                    var fields = connections.VisitFields(subscriptionType);
+                    var fields = connections.GetFields(subscriptionType);
 
                     foreach (var field in fields)
                         if (!connections.TryGetSubscriber(subscriptionType, field.Key, out _))
@@ -64,11 +65,11 @@ namespace tanka.graphql.tools
                         }
                 });
 
-            foreach (var objectType in builder.VisitTypes<ObjectType>())
+            foreach (var objectType in builder.GetTypes<ObjectType>())
                 builder.Connections(connections =>
                 {
-                    foreach (var field in connections.VisitFields(objectType))
-                        if (!connections.TrGetResolver(objectType, field.Key, out _))
+                    foreach (var field in connections.GetFields(objectType))
+                        if (!connections.TryGetResolver(objectType, field.Key, out _))
                         {
                             var resolver = connections.GetOrAddResolver(objectType, field.Key);
                             resolver.Run(DefaultDictionaryResolver());
@@ -92,10 +93,9 @@ namespace tanka.graphql.tools
                         if (executionResult.Errors != null && executionResult.Errors.Any())
                         {
                             var first = executionResult.Errors.First();
-                            throw new CompleteValueException(
+                            throw new QueryExecutionException(
                                 $"{first.Message}",
-                                new[] {context.Selection},
-                                locations: new[] {context.Selection.Location},
+                                null,
                                 path: context.Path,
                                 extensions: new Dictionary<string, object>
                                 {
@@ -105,14 +105,18 @@ namespace tanka.graphql.tools
                                         errors = executionResult.Errors,
                                         extensions = executionResult.Extensions
                                     }
-                                });
+                                }, 
+                                context.Selection);
                         }
 
                         return new PreExecutedResolveResult(executionResult.Data);
                     }
 
-                //todo
-                return null;
+                throw new QueryExecutionException(
+                    "Could not get result from remote. " +
+                    "Link channel was closed before result could be read.", 
+                    context.Path,
+                    context.Selection);
             };
 
             GraphQLDocument CreateDocument(ResolverContext context)

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
 using tanka.graphql.channels;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.server.webSockets;
 
@@ -54,8 +55,8 @@ namespace graphql.server.tests.host
                 }
                 ";
 
-            var builder = new SchemaBuilder();
-            Sdl.Import(Parser.ParseDocument(sdl), builder);
+            var builder = new SchemaBuilder()
+                .Sdl(Parser.ParseDocument(sdl));
 
             var resolvers = new ResolverMap
             {

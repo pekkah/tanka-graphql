@@ -15,7 +15,7 @@ namespace tanka.graphql.tests.type
             var list = new List(itemType);
 
             /* Then */
-            Assert.Equal(itemType, list.WrappedType);
+            Assert.Equal(itemType, list.OfType);
         }
     }
 }

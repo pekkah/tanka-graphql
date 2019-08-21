@@ -7,9 +7,9 @@
             switch (type)
             {
                 case NonNull nonNull:
-                    return Unwrap(nonNull.WrappedType);
+                    return Unwrap(nonNull.OfType);
                 case List list:
-                    return Unwrap(list.WrappedType);
+                    return Unwrap(list.OfType);
             }
 
             return (INamedType)type;

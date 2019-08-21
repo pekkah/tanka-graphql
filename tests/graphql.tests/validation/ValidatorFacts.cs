@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.validation;
@@ -99,7 +100,8 @@ namespace tanka.graphql.tests.validation
                 }
                 ";
 
-            Schema = Sdl.Schema(Parser.ParseDocument(sdl));
+            Schema = new SchemaBuilder().Sdl(sdl)
+                .Build();
         }
 
         public ISchema Schema { get; }

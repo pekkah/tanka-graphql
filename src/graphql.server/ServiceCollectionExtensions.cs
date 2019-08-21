@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using tanka.graphql.extensions.tracing;
 using tanka.graphql.server.webSockets;
-using tanka.graphql.tracing;
 
 namespace tanka.graphql.server
 {
@@ -19,9 +19,9 @@ namespace tanka.graphql.server
 
 
         public static IServiceCollection AddTankaServerExecutionExtension<TExtension>(this IServiceCollection services)
-            where TExtension: class, IExtension
+            where TExtension: class, IExecutorExtension
         {
-            services.TryAddSingleton<IExtension, TExtension>();
+            services.TryAddSingleton<IExecutorExtension, TExtension>();
 
             return services;
         }

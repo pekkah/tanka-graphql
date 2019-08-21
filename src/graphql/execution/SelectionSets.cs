@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.error;
 using tanka.graphql.type;
 using GraphQLParser.AST;
 using static tanka.graphql.type.Ast;
@@ -11,11 +10,11 @@ namespace tanka.graphql.execution
 {
     public static class SelectionSets
     {
-        public static async Task<IDictionary<string, object>> ExecuteSelectionSetAsync(IExecutorContext executorContext,
+        public static async Task<IDictionary<string, object>> ExecuteSelectionSetAsync(
+            IExecutorContext executorContext,
             GraphQLSelectionSet selectionSet,
             ObjectType objectType,
             object objectValue,
-            IReadOnlyDictionary<string, object> coercedVariableValues, 
             NodePath path)
         {
             var groupedFieldSet = CollectFields(
@@ -23,21 +22,20 @@ namespace tanka.graphql.execution
                 executorContext.Document,
                 objectType,
                 selectionSet,
-                coercedVariableValues);
+                executorContext.CoercedVariableValues);
 
             var resultMap = await executorContext.Strategy.ExecuteGroupedFieldSetAsync(
                 executorContext,
                 groupedFieldSet,
                 objectType,
                 objectValue,
-                coercedVariableValues,
                 path).ConfigureAwait(false);
 
             return resultMap;
         }
 
 
-        public static GraphQLSelectionSet MergeSelectionSets(List<GraphQLFieldSelection> fields)
+        public static GraphQLSelectionSet MergeSelectionSets(IReadOnlyCollection<GraphQLFieldSelection> fields)
         {
             var selectionSet = new List<ASTNode>();
             foreach (var field in fields)
@@ -54,7 +52,7 @@ namespace tanka.graphql.execution
             };
         }
 
-        public static Dictionary<string, List<GraphQLFieldSelection>> CollectFields(
+        public static IReadOnlyDictionary<string, List<GraphQLFieldSelection>> CollectFields(
             ISchema schema,
             GraphQLDocument document,
             ObjectType objectType,
@@ -190,9 +188,6 @@ namespace tanka.graphql.execution
         {
             if (directive == null) throw new ArgumentNullException(nameof(directive));
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
-            if (argument == null)
-                throw new GraphQLError(
-                    "Directive is missing argument which is required", directive);
 
             switch (argument.Value)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.introspection
@@ -22,16 +23,16 @@ namespace tanka.graphql.introspection
             var typeList = new List(new NonNull(type));
 
             builder.Enum(TypeKindName, out var typeKind,
-                description: null,
-                directives: null,
-    (__TypeKind.SCALAR.ToString(), default, null, null),
-                (__TypeKind.OBJECT.ToString(), default, null, null),
-                (__TypeKind.ENUM.ToString(), default, null, null),
-                (__TypeKind.INPUT_OBJECT.ToString(), default, null, null),
-                (__TypeKind.INTERFACE.ToString(), default, null, null),
-                (__TypeKind.LIST.ToString(), default, null, null),
-                (__TypeKind.NON_NULL.ToString(), default, null, null),
-                (__TypeKind.UNION.ToString(), default, null, null));
+                null,
+                values => 
+                values.Value(__TypeKind.SCALAR.ToString(), default, null, null)
+                .Value(__TypeKind.OBJECT.ToString(), default, null, null)
+                .Value(__TypeKind.ENUM.ToString(), default, null, null)
+                .Value(__TypeKind.INPUT_OBJECT.ToString(), default, null, null)
+                .Value(__TypeKind.INTERFACE.ToString(), default, null, null)
+                .Value(__TypeKind.LIST.ToString(), default, null, null)
+                .Value(__TypeKind.NON_NULL.ToString(), default, null, null)
+                .Value(__TypeKind.UNION.ToString(), default, null, null));
 
             builder.Object(InputValueName, out var inputValue)
                 .Connections(connect => connect
@@ -69,19 +70,24 @@ namespace tanka.graphql.introspection
                     .Field(type, "name", ScalarType.String)
                     .Field(type, "description", ScalarType.String)
                     .Field(type, "fields", fieldList,
-                        args: ("includeDeprecated", ScalarType.Boolean, false, default))
+                        args: args => args.Arg("includeDeprecated", ScalarType.Boolean, false, default))
                     .Field(type, "interfaces", typeList)
                     .Field(type, "possibleTypes", typeList)
                     .Field(type, "enumValues", enumValueList,
-                        args: ("includeDeprecated", ScalarType.Boolean, false, default))
+                        args: args => args.Arg("includeDeprecated", ScalarType.Boolean, false, default))
                     .Field(type, "inputFields", inputValueList)
                     .Field(type, "ofType", type));
 
             builder.Enum("__DirectiveLocation", out var directiveLocation,
                 directives: null,
-                values: Enum.GetNames(typeof(__DirectiveLocation))
-                    .Select(loc => (loc, string.Empty, Enumerable.Empty<DirectiveInstance>(), string.Empty))
-                    .ToArray());
+                values: values => Enum.GetNames(typeof(__DirectiveLocation))
+                    .ToList()
+                    .ForEach(v => values
+                        .Value(
+                            v, 
+                            string.Empty, 
+                            Enumerable.Empty<DirectiveInstance>(), 
+                            null)));
 
             builder.Object("__Directive", out var directive)
                 .Connections(connect => connect
@@ -102,7 +108,7 @@ namespace tanka.graphql.introspection
                 .Connections(connect => connect
                     .Field(query, "__schema", schema)
                     .Field(query, "__type", type,
-                        args: ("name", ScalarType.NonNullString, default, default)));
+                        args: args => args.Arg("name", ScalarType.NonNullString, default, default)));
 
             return builder;
         }

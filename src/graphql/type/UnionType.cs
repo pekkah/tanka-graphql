@@ -3,11 +3,17 @@ using System.Collections.Generic;
 
 namespace tanka.graphql.type
 {
-    public class UnionType : ComplexType, INamedType, IDescribable, IAbstractType
+    public class UnionType : INamedType, IDescribable, IAbstractType, IHasDirectives
     {
+        private readonly DirectiveList _directives;
+
         public UnionType(string name, IEnumerable<ObjectType> possibleTypes, string description = null,
-            IEnumerable<DirectiveInstance> directives = null) : base(name, description, directives)
+            IEnumerable<DirectiveInstance> directives = null)
         {
+            Name = name;
+            Description = description ?? string.Empty;
+            _directives = new DirectiveList(directives);
+
             foreach (var possibleType in possibleTypes)
             {
                 if (PossibleTypes.ContainsKey(possibleType.Name))
@@ -24,5 +30,21 @@ namespace tanka.graphql.type
         {
             return PossibleTypes.ContainsKey(type.Name);
         }
+
+        public string Description { get; }
+
+        public IEnumerable<DirectiveInstance> Directives => _directives;
+
+        public DirectiveInstance GetDirective(string name)
+        {
+            return _directives.GetDirective(name);
+        }
+
+        public bool HasDirective(string name)
+        {
+            return _directives.HasDirective(name);
+        }
+
+        public string Name { get; }
     }
 }

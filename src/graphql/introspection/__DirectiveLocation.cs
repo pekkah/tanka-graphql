@@ -1,6 +1,8 @@
 ﻿namespace tanka.graphql.introspection
 {
-    public enum __DirectiveLocation {
+    // ReSharper disable once InconsistentNaming
+    public enum __DirectiveLocation
+    {
         QUERY,
         MUTATION,
         SUBSCRIPTION,
@@ -18,6 +20,6 @@
         ENUM,
         ENUM_VALUE,
         INPUT_OBJECT,
-        INPUT_FIELD_DEFINITION,
+        INPUT_FIELD_DEFINITION
     }
 }

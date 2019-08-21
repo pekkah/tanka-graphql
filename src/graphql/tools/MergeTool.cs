@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Linq;
+using tanka.graphql.schema;
 using tanka.graphql.type;
 
 namespace tanka.graphql.tools
 {
     public static class MergeTool
     {
-        [Obsolete("Use MergeTool.Schema")]
-        public static ISchema MergeSchemas(
-            ISchema left,
-            ISchema right)
-        {
-            var builder = new SchemaBuilder(left);
-            Schema(builder, right);
-            return builder.Build();
-        }
-
         public static void Schemas(SchemaBuilder target, params ISchema[] schemas)
         {
             foreach (var right in schemas) Schema(target, right);
@@ -37,7 +28,7 @@ namespace tanka.graphql.tools
                 if (leftDirective != null)
                     continue;
 
-                target.IncludeDirective(directiveType);
+                target.Include(directiveType);
             }
         }
 
@@ -58,7 +49,7 @@ namespace tanka.graphql.tools
                         if (connect.TryGetInputField(leftType, rightTypeField.Key, out _))
                             return;
 
-                        connect.IncludeInputFields(leftType, new[] {rightTypeField});
+                        connect.Include(leftType, new[] {rightTypeField});
                     });
             }
             else
@@ -68,7 +59,7 @@ namespace tanka.graphql.tools
                     .Connections(connect =>
                     {
                         var fields = right.GetInputFields(rightType.Name).ToList();
-                        connect.IncludeInputFields(rightType, fields);
+                        connect.Include(rightType, fields);
                     });
             }
         }
@@ -85,7 +76,7 @@ namespace tanka.graphql.tools
                         if (connect.TryGetField(leftType, rightTypeField.Key, out _))
                             return;
 
-                        connect.IncludeFields(leftType, new[] {rightTypeField});
+                        connect.Include(leftType, new[] {rightTypeField});
 
                         var resolver = right.GetResolver(rightType.Name, rightTypeField.Key);
 
@@ -107,7 +98,7 @@ namespace tanka.graphql.tools
                     .Connections(connect =>
                     {
                         var fields = right.GetFields(rightType.Name).ToList();
-                        connect.IncludeFields(rightType, fields);
+                        connect.Include(rightType, fields);
 
                         foreach (var rightTypeField in fields)
                         {

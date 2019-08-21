@@ -12,12 +12,12 @@ namespace tanka.graphql.type
 
             if (x is List listX && y is List listY)
             {
-                return Object.Equals(listX.WrappedType, listY.WrappedType);
+                return Object.Equals(listX.OfType, listY.OfType);
             }
 
             if (x is NonNull nonNullX && y is NonNull nonNullY)
             {
-                return Object.Equals(nonNullX.WrappedType, nonNullY.WrappedType);
+                return Object.Equals(nonNullX.OfType, nonNullY.OfType);
             }
 
             if (x is INamedType namedTypeX && y is INamedType namedTypeY)

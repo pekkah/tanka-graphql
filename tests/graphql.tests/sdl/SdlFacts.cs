@@ -1,5 +1,6 @@
 using System.Linq;
 using GraphQLParser.AST;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 using tanka.graphql.type.converters;
@@ -93,7 +94,8 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var actual = Sdl.Schema(document);
+            var actual = new SchemaBuilder().Sdl(document)
+                .Build();
 
             /* Then */
             Assert.NotNull(actual);
@@ -127,7 +129,9 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var actual = Sdl.Schema(document).QueryTypes<INamedType>();
+            var actual = new SchemaBuilder().Sdl(document)
+                .Build()
+                .QueryTypes<INamedType>();
 
             /* Then */
             Assert.Contains(actual, user => user.Name == "User");
@@ -259,7 +263,8 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var actual = Sdl.Schema(document);
+            var actual = new SchemaBuilder().Sdl(document)
+                .Build();
 
             /* Then */
             var character = actual.GetNamedType<InterfaceType>("Character");
@@ -292,7 +297,8 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var schema = Sdl.Schema(document);
+            var schema = new SchemaBuilder().Sdl(document)
+                .Build();
 
             /* Then */
             var character = schema.GetNamedType<InterfaceType>("Character");
@@ -328,7 +334,8 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var actual = Sdl.Schema(document);
+            var actual = new SchemaBuilder().Sdl(document)
+                .Build();
 
             /* Then */
             var human = actual.GetNamedType<ObjectType>("Human");
@@ -361,7 +368,7 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var actual = Sdl.Schema(document);
+            var actual = new SchemaBuilder().Sdl(document).Build();
 
             /* Then */
             var human = actual.GetNamedType<ObjectType>("Human");
@@ -393,7 +400,7 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var schema = Sdl.Schema(document);
+            var schema = new SchemaBuilder().Sdl(document).Build();
             var actual = schema.GetNamedType<ObjectType>("User");
             var actualFields = schema.GetFields("User");
 
@@ -429,7 +436,7 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var actual = Sdl.Schema(document);
+            var actual = new SchemaBuilder().Sdl(document).Build();
 
             /* Then */
             var character = actual.GetNamedType<InterfaceType>("Character");
@@ -462,7 +469,7 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var actual = Sdl.Schema(document);
+            var actual = new SchemaBuilder().Sdl(document).Build();
 
             /* Then */
             var human = actual.GetNamedType<ObjectType>("Human");
@@ -494,7 +501,7 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var schema = Sdl.Schema(document);
+            var schema = new SchemaBuilder().Sdl(document).Build();
             var actual = schema.GetNamedType<InterfaceType>("Person");
             var actualFields = schema.GetFields(actual.Name);
 
@@ -523,7 +530,7 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var schema = Sdl.Schema(document);
+            var schema = new SchemaBuilder().Sdl(document).Build();
             var actual = schema.GetNamedType<ObjectType>("User");
             var actualFields = schema.GetFields(actual.Name);
 
@@ -552,7 +559,7 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var schema = Sdl.Schema(document);
+            var schema = new SchemaBuilder().Sdl(document).Build();
             var actual = schema.GetNamedType<ObjectType>("User");
             var actualFields = schema.GetFields(actual.Name);
 
@@ -581,7 +588,7 @@ namespace tanka.graphql.tests.sdl
             var document = Parser.ParseDocument(idl);
 
             /* When */
-            var schema = Sdl.Schema(document);
+            var schema = new SchemaBuilder().Sdl(document).Build();
             var actual = schema.GetNamedType<ObjectType>("User");
             var actualFields = schema.GetFields(actual.Name);
 

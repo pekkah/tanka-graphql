@@ -1,6 +1,8 @@
 ﻿namespace tanka.graphql.introspection
 {
-    public enum __TypeKind {
+    // ReSharper disable once InconsistentNaming
+    public enum __TypeKind
+    {
         SCALAR,
         OBJECT,
         INTERFACE,

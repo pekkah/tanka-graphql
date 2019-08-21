@@ -17,13 +17,11 @@ namespace tanka.graphql.introspection
 
     internal class IntrospectionExecutionResult
     {
-        [JsonProperty("data")]
-        public IntrospectionExecutionResultData Data { get; set; }
+        [JsonProperty("data")] public IntrospectionExecutionResultData Data { get; set; }
     }
 
     internal class IntrospectionExecutionResultData
     {
-        [JsonProperty("__schema")]
-        public __Schema Schema { get; set; }
+        [JsonProperty("__schema")] public __Schema Schema { get; set; }
     }
 }

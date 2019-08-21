@@ -55,7 +55,7 @@ namespace tanka.graphql.type.converters
             }
 
             throw new FormatException(
-                $"Cannot coerce Bool value from '{input.Kind}'");
+                $"Cannot coerce Boolean value from '{input.Kind}'");
         }
     }
 }
