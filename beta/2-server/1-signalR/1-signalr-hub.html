@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Index - tanka-graphql</title>
+    <title>Signalr hub - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -120,7 +120,7 @@
 </h6>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link" href="2-server/1-signalR/1-signalr-hub.html">Signalr hub</a>
+            <a class="nav-link active bg-light" href="2-server/1-signalR/1-signalr-hub.html">Signalr hub</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="2-server/1-signalR/2-apollo-link.html">Apollo link</a>
@@ -208,67 +208,24 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1&amp;branchName=master"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql?branchName=master" alt="Build Status" /></a></p>
-<h2 id="features">Features</h2>
-<ul>
-<li>Execute queries, mutations and subscriptions</li>
-<li>Validation (new implementation in v0.3.0)</li>
-<li>SignalR hub for streaming queries, mutations and subscriptions</li>
-<li>ApolloLink for the provided SignalR hub</li>
-<li>Apollo GraphQL WebSockets (apollo-link-ws) compatible web socket server (since v0.8.0)</li>
-</ul>
-<h3 id="feeds">Feeds</h3>
-<p>Beta</p>
-<p><a href="https://www.myget.org/feed/tanka/package/nuget/tanka.graphql"><img src="https://img.shields.io/myget/tanka/vpre/tanka.graphql.svg?style=popout-square" alt="" /></a>
-<a href="https://www.myget.org/feed/tanka/package/npm/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/latest.svg?registry_uri=https%3A%2F%2Fwww.myget.org%2FF%2Ftanka%2Fnpm%2F&amp;style=popout-square" alt="" /></a></p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Documentation</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
-</ul>
-<p>Release</p>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Documentation</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
-</ul>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+                <h2 id="signalr-hub">SignalR Hub</h2>
+<p>Server is implemented as a SignalR Core Hub and it handles queries, mutations
+and subscriptions. This projects provides an Apollo Link implementation to be
+used with the provided hub.</p>
+<h3 id="graphql-server-hub">GraphQL Server Hub</h3>
+<pre><code class="lang-csharp">// Configure Services
+services.AddSignalR(options =&gt; options.EnableDetailedErrors = true)
+    // add GraphQL query streaming hub
+    .AddTankaServerHubWithTracing();
 
-npm install @tanka/tanka-graphql-server-link
-</code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
-<h2 id="develop">Develop</h2>
-<h3 id="run-the-dev-harness">Run the dev harness</h3>
-<p>This repo includes a sample application which is used for testing
-and development of the SignalR client and the server.</p>
-<p>Open the <code>tanka-graphql.sln</code> and start the <code>graphql.dev.chat.web</code> project. This will start a simple chat server using the tanka.graphql.server.</p>
-<p>Start the client by following instructions below:</p>
-<pre><code class="lang-bash"># Install dependencies
-src\graphql.server.link&gt; yarn install
+// Configure App
+app.UseSignalR(routes =&gt; routes.MapTankaServerHub(&quot;/graphql&quot;));
 
-# Link the server-link
-src\graphql.server.link&gt; yarn link
-
-# Watch for source changes and recompile the link
-src\graphql.server.link&gt; yarn watch
-
-# Install dependencies
-dev\graphql.dev.chat.ui&gt; yarn install
-
-# Use the linked server-link
-dev\graphql.dev.chat.ui&gt; yarn link @tanka/tanka-graphql-server-link
-
-# Watch for source changes and recompile the sample
-dev\graphql.dev.chat.ui&gt; yarn start
-</code></pre>
-<h3 id="run-benchmarks">Run benchmarks</h3>
-<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
+// or with options
+app.UseSignalR(routes =&gt; routes.MapTankaServerHub(&quot;/graphql&quot;, options =&gt; 
+{
+    // configure signalr hub options
+}));
 </code></pre>
                     
             </main>

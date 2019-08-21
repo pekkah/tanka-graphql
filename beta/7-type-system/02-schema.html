@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Index - tanka-graphql</title>
+    <title>Schema - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -171,7 +171,7 @@
             <a class="nav-link" href="7-type-system/01-builder.html">Builder</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="7-type-system/02-schema.html">Schema</a>
+            <a class="nav-link active bg-light" href="7-type-system/02-schema.html">Schema</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="7-type-system/04-types.html">Types</a>
@@ -208,68 +208,254 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1&amp;branchName=master"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql?branchName=master" alt="Build Status" /></a></p>
-<h2 id="features">Features</h2>
-<ul>
-<li>Execute queries, mutations and subscriptions</li>
-<li>Validation (new implementation in v0.3.0)</li>
-<li>SignalR hub for streaming queries, mutations and subscriptions</li>
-<li>ApolloLink for the provided SignalR hub</li>
-<li>Apollo GraphQL WebSockets (apollo-link-ws) compatible web socket server (since v0.8.0)</li>
-</ul>
-<h3 id="feeds">Feeds</h3>
-<p>Beta</p>
-<p><a href="https://www.myget.org/feed/tanka/package/nuget/tanka.graphql"><img src="https://img.shields.io/myget/tanka/vpre/tanka.graphql.svg?style=popout-square" alt="" /></a>
-<a href="https://www.myget.org/feed/tanka/package/npm/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/latest.svg?registry_uri=https%3A%2F%2Fwww.myget.org%2FF%2Ftanka%2Fnpm%2F&amp;style=popout-square" alt="" /></a></p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Documentation</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
-</ul>
-<p>Release</p>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Documentation</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
-</ul>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+                <h2 id="schema">Schema</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Schema">Specification</a></p>
+</blockquote>
+<p>Schema is implemented as class <code>GraphSchema</code> and it implements the <code>ISchema</code> interface.</p>
+<p><pre><code class="language-csharp">    public interface ISchema : IHasDirectives
+    {
+        ObjectType Subscription { get; }
 
-npm install @tanka/tanka-graphql-server-link
+        ObjectType Query { get; }
+
+        ObjectType Mutation { get; }
+
+        INamedType GetNamedType(string name);
+
+        IField GetField(string type, string name);
+
+        IEnumerable&lt;KeyValuePair&lt;string, IField&gt;&gt; GetFields(string type);
+
+        IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt; filter = null) where T : INamedType;
+
+        DirectiveType GetDirectiveType(string name);
+
+        IQueryable&lt;DirectiveType&gt; QueryDirectiveTypes(Predicate&lt;DirectiveType&gt; filter = null);
+
+        IEnumerable&lt;KeyValuePair&lt;string, InputObjectField&gt;&gt; GetInputFields(string type);
+
+        InputObjectField GetInputField(string type, string name);
+
+        IEnumerable&lt;ObjectType&gt; GetPossibleTypes(IAbstractType abstractType);
+
+        Resolver GetResolver(string type, string fieldName);
+
+        Subscriber GetSubscriber(string type, string fieldName);
+    }
+</code></pre></p>
+<blockquote>
+<p>Rarely accessing the actual implemention class <code>GraphSchema</code> is required</p>
+</blockquote>
+<p>Schema is immutable and cannot be changed directly once created. To create <code>Schema</code> instance you need to provide <code>query</code> root object at minimum. Optionally <code>mutation</code> and <code>subscription</code> roots can be also provided.</p>
+<h3 id="basics">Basics</h3>
+<p>Built by <code>SchemaBuilder</code></p>
+<p><pre><code class="language-csharp">        public SchemaFacts()
+        {
+            Schema = new SchemaBuilder()
+                .InputObject(&quot;input&quot;, out var input)
+                .Connections(connect =&gt; connect
+                    .InputField(input, &quot;id&quot;, ScalarType.ID))
+                .Query(out var query)
+                .Connections(connect =&gt; connect
+                    .Field(query, &quot;name&quot;, ScalarType.String))
+                .Build();
+        }
+</code></pre></p>
+<p>Query root is <code>ObjectType</code></p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Roots_Query()
+        {
+            /* Given */
+            /* When */
+            /* Then */
+            Assert.NotNull(Schema.Query);
+            Assert.IsType&lt;ObjectType&gt;(Schema.Query);
+        }
+</code></pre></p>
+<p>Mutation is optional</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Roots_Mutation()
+        {
+            /* Given */
+            /* When */
+            /* Then */
+            Assert.Null(Schema.Mutation);
+        }
+</code></pre></p>
+<p>Subscription is optional</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Roots_Subscription()
+        {
+            /* Given */
+            /* When */
+            /* Then */
+            Assert.Null(Schema.Subscription);
+        }
+</code></pre></p>
+<h3 id="querying-types">Querying types</h3>
+<p>Query named types
+<pre><code class="language-csharp">
+        [Fact]
+        public void GetNamedType()
+        {
+            /* Given */
+            var namedTypeName = Schema.Query.Name;
+
+            /* When */
+            var namedType = Schema.GetNamedType(namedTypeName);
+
+            /* Then */
+            Assert.NotNull(namedType);
+            Assert.IsAssignableFrom&lt;INamedType&gt;(namedType);
+        }
 </code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
-<h2 id="develop">Develop</h2>
-<h3 id="run-the-dev-harness">Run the dev harness</h3>
-<p>This repo includes a sample application which is used for testing
-and development of the SignalR client and the server.</p>
-<p>Open the <code>tanka-graphql.sln</code> and start the <code>graphql.dev.chat.web</code> project. This will start a simple chat server using the tanka.graphql.server.</p>
-<p>Start the client by following instructions below:</p>
-<pre><code class="lang-bash"># Install dependencies
-src\graphql.server.link&gt; yarn install
+<pre><code class="language-csharp">
+        [Fact]
+        public void QueryNamedTypes()
+        {
+            /* Given */
+            bool TypesWithoutDescription(ObjectType type)
+            {
+                return string.IsNullOrEmpty(type.Description);
+            }
 
-# Link the server-link
-src\graphql.server.link&gt; yarn link
+            /* When */
+            var undocumentedTypes = Schema.QueryTypes&lt;ObjectType&gt;(TypesWithoutDescription);
 
-# Watch for source changes and recompile the link
-src\graphql.server.link&gt; yarn watch
+            /* Then */
+            Assert.NotNull(undocumentedTypes);
+            Assert.Single(undocumentedTypes, type =&gt; type.Name == &quot;Query&quot;);
+        }
+</code></pre></p>
+<p>Query directives
+<pre><code class="language-csharp">
+        [Fact]
+        public void GetDirective()
+        {
+            /* Given */
+            var directiveTypeName = DirectiveType.Include.Name;
 
-# Install dependencies
-dev\graphql.dev.chat.ui&gt; yarn install
+            /* When */
+            var directiveType = Schema.GetDirectiveType(directiveTypeName);
 
-# Use the linked server-link
-dev\graphql.dev.chat.ui&gt; yarn link @tanka/tanka-graphql-server-link
-
-# Watch for source changes and recompile the sample
-dev\graphql.dev.chat.ui&gt; yarn start
+            /* Then */
+            Assert.NotNull(directiveType);
+            Assert.IsType&lt;DirectiveType&gt;(directiveType);
+        }
 </code></pre>
-<h3 id="run-benchmarks">Run benchmarks</h3>
-<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
+<pre><code class="language-csharp">
+        [Fact]
+        public void QueryDirectives()
+        {
+            /* Given */
+            bool AppliesToField(DirectiveType type)
+            {
+                return type.Locations.Contains(DirectiveLocation.FIELD);
+            }
+
+            /* When */
+            var directives = Schema.QueryDirectiveTypes(AppliesToField);
+
+            /* Then */
+            foreach (var directiveType in directives) Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
+        }
+</code></pre></p>
+<p>Query fields
+<pre><code class="language-csharp">
+        [Fact]
+        public void GetField()
+        {
+            /* Given */
+            var namedTypeName = Schema.Query.Name;
+
+            /* When */
+            var field = Schema.GetField(namedTypeName, &quot;name&quot;);
+
+            /* Then */
+            Assert.NotNull(field);
+            Assert.Same(ScalarType.String, field.Type);
+        }
 </code></pre>
+<pre><code class="language-csharp">
+        [Fact]
+        public void GetFields()
+        {
+            /* Given */
+            var namedTypeName = Schema.Query.Name;
+
+            /* When */
+            var fields = Schema.GetFields(namedTypeName);
+
+            /* Then */
+            Assert.Single(
+                fields,
+                kv =&gt; kv.Key == &quot;name&quot; &amp;&amp; (ScalarType) kv.Value.Type == ScalarType.String);
+        }
+</code></pre></p>
+<p>Query input fields
+<pre><code class="language-csharp">
+        [Fact]
+        public void GetInputField()
+        {
+            /* Given */
+            var inputTypeName = &quot;input&quot;;
+
+            /* When */
+            var field = Schema.GetInputField(inputTypeName, &quot;id&quot;);
+
+            /* Then */
+            Assert.NotNull(field);
+            Assert.Same(ScalarType.ID, field.Type);
+        }
+</code></pre>
+<pre><code class="language-csharp">
+        [Fact]
+        public void GetInputFields()
+        {
+            /* Given */
+            var inputTypeName = &quot;input&quot;;
+
+            /* When */
+            var fields = Schema.GetInputFields(inputTypeName);
+
+            /* Then */
+            Assert.Single(
+                fields,
+                kv =&gt; kv.Key == &quot;id&quot; &amp;&amp; (ScalarType) kv.Value.Type == ScalarType.ID);
+        }
+</code></pre></p>
+<h4 id="defaults">Defaults</h4>
+<p>By default Skip and Include directives are included
+<pre><code class="language-csharp">
+        [Fact]
+        public void Included_directives()
+        {
+            /* Given */ 
+            /* When */
+            var directives = Schema.QueryDirectiveTypes();
+
+            /* Then */
+            Assert.Single(directives, DirectiveType.Include);
+            Assert.Single(directives, DirectiveType.Skip);
+        }
+</code></pre></p>
+<p>By default all standard <code>ScalarType</code>s are included
+<pre><code class="language-csharp">
+        [Fact]
+        public void Included_scalars()
+        {
+            /* Given */
+            /* When */
+            var scalars = Schema.QueryTypes&lt;ScalarType&gt;();
+
+            /* Then */
+            Assert.Equal(ScalarType.Standard, scalars);
+        }
+</code></pre></p>
                     
             </main>
         </div>

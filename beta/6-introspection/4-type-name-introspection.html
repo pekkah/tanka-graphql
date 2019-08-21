@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Index - tanka-graphql</title>
+    <title>Type name introspection - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -153,7 +153,7 @@
 </h6>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link" href="6-introspection/4-type-name-introspection.html">Type name introspection</a>
+            <a class="nav-link active bg-light" href="6-introspection/4-type-name-introspection.html">Type name introspection</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="6-introspection/5-schema-introspection.html">Schema introspection</a>
@@ -208,68 +208,71 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1&amp;branchName=master"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql?branchName=master" alt="Build Status" /></a></p>
-<h2 id="features">Features</h2>
-<ul>
-<li>Execute queries, mutations and subscriptions</li>
-<li>Validation (new implementation in v0.3.0)</li>
-<li>SignalR hub for streaming queries, mutations and subscriptions</li>
-<li>ApolloLink for the provided SignalR hub</li>
-<li>Apollo GraphQL WebSockets (apollo-link-ws) compatible web socket server (since v0.8.0)</li>
-</ul>
-<h3 id="feeds">Feeds</h3>
-<p>Beta</p>
-<p><a href="https://www.myget.org/feed/tanka/package/nuget/tanka.graphql"><img src="https://img.shields.io/myget/tanka/vpre/tanka.graphql.svg?style=popout-square" alt="" /></a>
-<a href="https://www.myget.org/feed/tanka/package/npm/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/latest.svg?registry_uri=https%3A%2F%2Fwww.myget.org%2FF%2Ftanka%2Fnpm%2F&amp;style=popout-square" alt="" /></a></p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Documentation</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
-</ul>
-<p>Release</p>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Documentation</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
-</ul>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+                <h2 id="type-name-introspection">Type Name Introspection</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-Name-Introspection">Specification</a></p>
+</blockquote>
+<p>Any query can include the <code>__typename</code> meta-field. It returns the name of the object type currently being queried.</p>
+<h3 id="query-the-actual-type-name-of-when-querying-on-interface">Query the actual type name of when querying on interface</h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Query_typename_of_characters()
+        {
+            /* Given */
+            var starwars = new Starwars();
 
-npm install @tanka/tanka-graphql-server-link
-</code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
-<h2 id="develop">Develop</h2>
-<h3 id="run-the-dev-harness">Run the dev harness</h3>
-<p>This repo includes a sample application which is used for testing
-and development of the SignalR client and the server.</p>
-<p>Open the <code>tanka-graphql.sln</code> and start the <code>graphql.dev.chat.web</code> project. This will start a simple chat server using the tanka.graphql.server.</p>
-<p>Start the client by following instructions below:</p>
-<pre><code class="lang-bash"># Install dependencies
-src\graphql.server.link&gt; yarn install
+            var query = $@&quot;{{
+                    characters {{
+                        __typename
+                        id
+                        name
+                        appearsIn
+                    }}
+                }}&quot;;
 
-# Link the server-link
-src\graphql.server.link&gt; yarn link
+            var executableSchema = _fixture.CreateSchema(starwars);
+            var options = new ExecutionOptions
+            {
+                Schema = executableSchema,
+                Document =  ParseDocument(query),
+                OperationName = null,
+                InitialValue = null,
+                VariableValues = null
+            };
 
-# Watch for source changes and recompile the link
-src\graphql.server.link&gt; yarn watch
+            /* When */
+            var actual = await ExecuteAsync(options).ConfigureAwait(false);
 
-# Install dependencies
-dev\graphql.dev.chat.ui&gt; yarn install
-
-# Use the linked server-link
-dev\graphql.dev.chat.ui&gt; yarn link @tanka/tanka-graphql-server-link
-
-# Watch for source changes and recompile the sample
-dev\graphql.dev.chat.ui&gt; yarn start
-</code></pre>
-<h3 id="run-benchmarks">Run benchmarks</h3>
-<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
-</code></pre>
+            /* Then */
+            actual.ShouldMatchJson(
+                @&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;characters&quot;&quot;: [
+                      {
+                        &quot;&quot;appearsIn&quot;&quot;: [
+                          &quot;&quot;JEDI&quot;&quot;,
+                          &quot;&quot;EMPIRE&quot;&quot;,
+                          &quot;&quot;NEWHOPE&quot;&quot;
+                        ],
+                        &quot;&quot;name&quot;&quot;: &quot;&quot;Han&quot;&quot;,
+                        &quot;&quot;id&quot;&quot;: &quot;&quot;humans/han&quot;&quot;,
+                        &quot;&quot;__typename&quot;&quot;: &quot;&quot;Human&quot;&quot;
+                      },
+                      {
+                        &quot;&quot;appearsIn&quot;&quot;: [
+                          &quot;&quot;JEDI&quot;&quot;,
+                          &quot;&quot;EMPIRE&quot;&quot;,
+                          &quot;&quot;NEWHOPE&quot;&quot;
+                        ],
+                        &quot;&quot;name&quot;&quot;: &quot;&quot;Luke&quot;&quot;,
+                        &quot;&quot;id&quot;&quot;: &quot;&quot;humans/luke&quot;&quot;,
+                        &quot;&quot;__typename&quot;&quot;: &quot;&quot;Human&quot;&quot;
+                      }
+                    ]
+                  }
+                }&quot;);
+        }
+</code></pre></p>
                     
             </main>
         </div>
