@@ -25,7 +25,7 @@
     "@types/react": "^16.8.24",
     "@types/react-dom": "^16.8.5",
     "@types/react-redux": "^6.0.9",
-    "create-react-app": "^3.0.1",
+    "create-react-app": "^3.1.1",
     "typescript": "^3.5.3"
   },
   "resolutions": {
