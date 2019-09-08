@@ -73,10 +73,10 @@ namespace tanka.graphql.tests.type
                             authorizeType.CreateInstance()
                         }));
 
-            var resolvers = new ResolverMap
+            var resolvers = new TypeMap
             {
                 {
-                    query.Name, new FieldResolverMap
+                    query.Name, new FieldResolversMap
                     {
                         {"requiresAdmin", context => new ValueTask<IResolveResult>(Resolve.As("Hello Admin!"))},
                         {"requiresUser", context => new ValueTask<IResolveResult>(Resolve.As("Hello User!"))}
@@ -157,10 +157,10 @@ namespace tanka.graphql.tests.type
                 }
                 "));
 
-            var resolvers = new ResolverMap
+            var resolvers = new TypeMap
             {
                 {
-                    "Query", new FieldResolverMap
+                    "Query", new FieldResolversMap
                     {
                         {"requiresAdmin", context => new ValueTask<IResolveResult>(Resolve.As("Hello Admin!"))},
                         {"requiresUser", context => new ValueTask<IResolveResult>(Resolve.As("Hello User!"))}

@@ -6,11 +6,11 @@ using tanka.graphql.type;
 
 namespace tanka.graphql.introspection
 {
-    public class IntrospectionResolvers : ResolverMap
+    public class IntrospectionResolvers : TypeMap
     {
         public IntrospectionResolvers(ISchema source)
         {
-            this[source.Query.Name] = new FieldResolverMap
+            this[source.Query.Name] = new FieldResolversMap
             {
                 {"__schema", context => ResolveSync.As(source)},
                 {
@@ -19,7 +19,7 @@ namespace tanka.graphql.introspection
                 }
             };
 
-            this[IntrospectionSchema.SchemaName] = new FieldResolverMap
+            this[IntrospectionSchema.SchemaName] = new FieldResolversMap
             {
                 {"types", context => ResolveSync.As(source.QueryTypes<INamedType>())},
                 {"queryType", context => ResolveSync.As(source.Query)},
@@ -28,7 +28,7 @@ namespace tanka.graphql.introspection
                 {"directives", context => ResolveSync.As(source.QueryDirectiveTypes())}
             };
 
-            this[IntrospectionSchema.TypeName] = new FieldResolverMap
+            this[IntrospectionSchema.TypeName] = new FieldResolversMap
             {
                 {"kind", Resolve.PropertyOf<IType>(t => KindOf(t))},
                 {"name", Resolve.PropertyOf<INamedType>(t => t.Name)},
@@ -112,7 +112,7 @@ namespace tanka.graphql.introspection
                 {"ofType", Resolve.PropertyOf<IWrappingType>(t => t.OfType)}
             };
 
-            this[IntrospectionSchema.FieldName] = new FieldResolverMap
+            this[IntrospectionSchema.FieldName] = new FieldResolversMap
             {
                 {"name", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Key)},
                 {"description", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.Description)},
@@ -122,7 +122,7 @@ namespace tanka.graphql.introspection
                 {"deprecationReason", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.DeprecationReason)}
             };
 
-            this[IntrospectionSchema.InputValueName] = new FieldResolverMap
+            this[IntrospectionSchema.InputValueName] = new FieldResolversMap
             {
                 {"name", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Key)},
                 {"description", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.Description)},
@@ -130,7 +130,7 @@ namespace tanka.graphql.introspection
                 {"defaultValue", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.DefaultValue)}
             };
 
-            this[IntrospectionSchema.EnumValueName] = new FieldResolverMap
+            this[IntrospectionSchema.EnumValueName] = new FieldResolversMap
             {
                 {"name", Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Key)},
                 {"description", Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Value.Description)},
@@ -141,7 +141,7 @@ namespace tanka.graphql.introspection
                 }
             };
 
-            this["__Directive"] = new FieldResolverMap
+            this["__Directive"] = new FieldResolversMap
             {
                 {"name", Resolve.PropertyOf<DirectiveType>(d => d.Name)},
                 {"description", Resolve.PropertyOf<DirectiveType>(d => d.Description)},

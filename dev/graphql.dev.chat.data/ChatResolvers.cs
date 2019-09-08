@@ -3,27 +3,27 @@ using static tanka.graphql.resolvers.Resolve;
 
 namespace tanka.graphql.samples.chat.data
 {
-    public class ChatResolvers : ResolverMap
+    public class ChatResolvers : TypeMap
     {
         public ChatResolvers(IChatResolverService resolverService)
         {
-            this["Query"] = new FieldResolverMap
+            this["Query"] = new FieldResolversMap
             {
                 {"messages", resolverService.GetMessagesAsync}
             };
 
-            this["Mutation"] = new FieldResolverMap()
+            this["Mutation"] = new FieldResolversMap()
             {
                 {"addMessage", resolverService.AddMessageAsync},
                 {"editMessage", resolverService.EditMessageAsync}
             };
 
-            this["Subscription"] = new FieldResolverMap
+            this["Subscription"] = new FieldResolversMap
             {
                 {"messages", resolverService.StreamMessagesAsync, resolverService.ResolveMessageAsync}
             };
 
-            this["Message"] = new FieldResolverMap()
+            this["Message"] = new FieldResolversMap()
             {
                 {"id", PropertyOf<Message>(m => m.Id)},
                 {"from", PropertyOf<Message>(m => m.From)},
@@ -31,7 +31,7 @@ namespace tanka.graphql.samples.chat.data
                 {"timestamp", PropertyOf<Message>(m => m.Timestamp)}
             };
 
-            this["From"] = new FieldResolverMap()
+            this["From"] = new FieldResolversMap()
             {
                 {"userId", PropertyOf<From>(f => f.UserId)},
                 {"name", PropertyOf<From>(f => f.Name)}

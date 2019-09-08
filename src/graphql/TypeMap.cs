@@ -3,7 +3,7 @@ using tanka.graphql.resolvers;
 
 namespace tanka.graphql
 {
-    public class ResolverMap : Dictionary<string, FieldResolverMap>, IResolverMap, ISubscriberMap
+    public class TypeMap : Dictionary<string, FieldResolversMap>, IResolverMap, ISubscriberMap
     {
         public Resolver GetResolver(string typeName, string fieldName)
         {

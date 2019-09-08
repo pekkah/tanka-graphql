@@ -11,8 +11,7 @@ GraphQL operation into your logic.
 Tanka GraphQL provides few ways of binding resolvers to your schema.
 
 * Bind manually using `SchemaBuilder`
-* Bind using `SchemaTools`
-* Override `ISchema` methods
+* Bind using resolver maps by using `SchemaBuilder` or `SchemaTools`
 
 
 ### Bind manually using `SchemaBuilder`
@@ -20,12 +19,17 @@ Tanka GraphQL provides few ways of binding resolvers to your schema.
 [{tanka.graphql.tutorials.gettingStarted.GettingStarted.Part2_BindResolvers_Manual}]
 
 
-### Bind using `SchemaTools`
+### Bind using `SchemaTools` or `SchemaBuilder`
 
+This approach uses a map of the types and fields to bind resolvers to fields.
 
+NOTE: Binding is done when the method is called.
 
-### Override `ISchema` methods
+[{tanka.graphql.tutorials.gettingStarted.GettingStarted.Part2_BindResolvers_SchemaBuilder_Maps}]
 
+This is what you would usually do to bind the resolvers and create schema.
+
+[{tanka.graphql.tutorials.gettingStarted.GettingStarted.Part2_BindResolvers_SchemaTools_Maps}]
 
 
 

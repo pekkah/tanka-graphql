@@ -59,17 +59,17 @@ namespace tanka.graphql.tests
                 return ResolveSync.As(context.ObjectValue);
             }
 
-            var resolvers = new ResolverMap
+            var resolvers = new TypeMap
             {
-                ["Query"] = new FieldResolverMap
+                ["Query"] = new FieldResolversMap
                 {
                     {"messages", GetMessagesAsync}
                 },
-                ["Subscription"] = new FieldResolverMap
+                ["Subscription"] = new FieldResolversMap
                 {
                     {"messageAdded", OnMessageAdded, ResolveMessage}
                 },
-                ["Message"] = new FieldResolverMap
+                ["Message"] = new FieldResolversMap
                 {
                     {"content", Resolve.PropertyOf<Message>(r => r.Content)}
                 }

@@ -6,7 +6,7 @@ using tanka.graphql.type;
 
 namespace tanka.graphql
 {
-    public class FieldResolverMap : IEnumerable<Resolver>, IEnumerable<Subscriber>
+    public class FieldResolversMap : IEnumerable<Resolver>, IEnumerable<Subscriber>
     {
         private readonly Dictionary<string, Resolver> _resolvers = new Dictionary<string, Resolver>();
         private readonly Dictionary<string, Subscriber> _subscribers = new Dictionary<string, Subscriber>();

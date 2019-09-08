@@ -32,22 +32,22 @@ namespace tanka.graphql.tests
 
             var schema = builder.Build();
 
-            var resolvers = new ResolverMap
+            var resolvers = new TypeMap
             {
                 {
-                    "Query", new FieldResolverMap
+                    "Query", new FieldResolversMap
                     {
                         {"root", context => new ValueTask<IResolveResult>(Resolve.As(new { }))}
                     }
                 },
                 {
-                    "Mutation", new FieldResolverMap
+                    "Mutation", new FieldResolversMap
                     {
                         {"root", context => new ValueTask<IResolveResult>(Resolve.As(new { }))}
                     }
                 },
                 {
-                    "Node", new FieldResolverMap
+                    "Node", new FieldResolversMap
                     {
                         {"child", context => new ValueTask<IResolveResult>(Resolve.As(new { }))},
                         {

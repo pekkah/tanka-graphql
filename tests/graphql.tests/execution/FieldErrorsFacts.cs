@@ -82,23 +82,23 @@ namespace tanka.graphql.tests.execution
                     }
                 "));
 
-            var resolvers = new ResolverMap()
+            var resolvers = new TypeMap()
             {
-                ["Container"] = new FieldResolverMap()
+                ["Container"] = new FieldResolversMap()
                 {
                     {"nonNullWithNull", Resolve.PropertyOf<Container>(c => c.NonNull_WithNull)},
                     {"nonNullListAsNull", Resolve.PropertyOf<Container>(c => c.NonNullList_AsNull)},
                     {"nonNullListWithNonNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem)},
                     {"nonNullListWithNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem)}
                 },
-                ["CustomErrorContainer"] = new FieldResolverMap()
+                ["CustomErrorContainer"] = new FieldResolversMap()
                 {
                     {"nonNullWithCustomError", context => throw new InvalidOperationException("error")},
                     {"nullableWithCustomError", context => throw new InvalidOperationException("error")},
                     {"nonNullListWithCustomError", context => throw new InvalidOperationException("error")},
                     {"nonNullListItemWithCustomError", context => throw new InvalidOperationException("error")}
                 },
-                ["Query"] = new FieldResolverMap()
+                ["Query"] = new FieldResolversMap()
                 {
                     {"container" , context => new ValueTask<IResolveResult>(Resolve.As(Query.Container))},
                     {"custom", context=> new ValueTask<IResolveResult>(Resolve.As(Query.Custom))}
