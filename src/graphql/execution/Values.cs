@@ -117,8 +117,12 @@ namespace tanka.graphql.execution
 
         private static object CoerceListValues(
             Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            IType listWrappedType, object value)
+            IType listWrappedType, 
+            object value)
         {
+            if (value == null)
+                return null;
+
             var coercedListValues = new List<object>();
             if (value is GraphQLListValue listValue)
             {
