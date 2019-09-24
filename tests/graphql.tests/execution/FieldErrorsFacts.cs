@@ -82,7 +82,7 @@ namespace tanka.graphql.tests.execution
                     }
                 "));
 
-            var resolvers = new TypeMap()
+            var resolvers = new ObjectTypeMap()
             {
                 ["Container"] = new FieldResolversMap()
                 {

@@ -58,7 +58,7 @@ namespace graphql.server.tests.host
             var builder = new SchemaBuilder()
                 .Sdl(Parser.ParseDocument(sdl));
 
-            var resolvers = new TypeMap
+            var resolvers = new ObjectTypeMap
             {
                 {
                     "Event", new FieldResolversMap()

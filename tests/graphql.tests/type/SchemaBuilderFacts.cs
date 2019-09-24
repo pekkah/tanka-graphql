@@ -553,7 +553,7 @@ namespace tanka.graphql.tests.type
                 )
                 .Build();
 
-            var resolvers = new TypeMap
+            var resolvers = new ObjectTypeMap
             {
                 {
                     query1.Name, new FieldResolversMap

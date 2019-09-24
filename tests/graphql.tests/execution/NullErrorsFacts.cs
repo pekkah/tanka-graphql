@@ -33,7 +33,7 @@ namespace tanka.graphql.tests.execution
                 ["nestedNonNull"] = null
             };
 
-            IResolverMap resolvers = new TypeMap
+            IResolverMap resolvers = new ObjectTypeMap
             {
                 ["Query"] = new FieldResolversMap
                 {

@@ -15,4 +15,6 @@ Tanka GraphQL provides support for execution and schema directives:
 
 ### Schema directives
 
+Schema directives can be used to modify field for example by modifying the resolver of the field.
+
 [{tanka.graphql.tutorials.gettingStarted.GettingStarted.Part3_ApplyDirectives_on_Object_fields}]

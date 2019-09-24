@@ -35,7 +35,7 @@ namespace tanka.graphql.benchmarks
                     }
                     "));
 
-            var resolvers = new TypeMap
+            var resolvers = new ObjectTypeMap
             {
                 {
                     "Query", new FieldResolversMap

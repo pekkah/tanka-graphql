@@ -6,7 +6,7 @@ using tanka.graphql.type;
 
 namespace tanka.graphql.introspection
 {
-    public class IntrospectionResolvers : TypeMap
+    public class IntrospectionResolvers : ObjectTypeMap
     {
         public IntrospectionResolvers(ISchema source)
         {

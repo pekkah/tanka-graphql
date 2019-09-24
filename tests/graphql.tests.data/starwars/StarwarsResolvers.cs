@@ -9,7 +9,7 @@ namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsResolvers
     {
-        public static TypeMap BuildResolvers(Starwars starwars)
+        public static ObjectTypeMap BuildResolvers(Starwars starwars)
         {
             async ValueTask<IResolveResult> ResolveCharacter(ResolverContext context)
             {
@@ -49,7 +49,7 @@ namespace tanka.graphql.tests.data.starwars
                 return As(human);
             }
 
-            var resolverMap = new TypeMap
+            var resolverMap = new ObjectTypeMap
             {
                 // Root query
                 ["Query"] = new FieldResolversMap

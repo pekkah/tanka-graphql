@@ -104,9 +104,9 @@ namespace tanka.graphql.tutorials.gettingStarted
             // Get query type
             builder.GetQuery(out var query);
 
-            // Bind resolvers from TypeMap
+            // Bind resolvers from ObjectTypeMap
             builder.UseResolversAndSubscribers(
-                new TypeMap
+                new ObjectTypeMap
                 {
                     {
                         query.Name, new FieldResolversMap
@@ -147,10 +147,10 @@ namespace tanka.graphql.tutorials.gettingStarted
             // Get query type
             builder.GetQuery(out var query);
 
-            // Build schema by binding resolvers from TypeMap
+            // Build schema by binding resolvers from ObjectTypeMap
             var schema = SchemaTools.MakeExecutableSchema(
                 builder,
-                new TypeMap
+                new ObjectTypeMap
                 {
                     {
                         query.Name, new FieldResolversMap
@@ -190,7 +190,7 @@ namespace tanka.graphql.tutorials.gettingStarted
                     ")
                 .GetQuery(out var query)
                 .UseResolversAndSubscribers(
-                    new TypeMap
+                    new ObjectTypeMap
                     {
                         {
                             query.Name, new FieldResolversMap

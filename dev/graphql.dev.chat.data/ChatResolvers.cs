@@ -3,7 +3,7 @@ using static tanka.graphql.resolvers.Resolve;
 
 namespace tanka.graphql.samples.chat.data
 {
-    public class ChatResolvers : TypeMap
+    public class ChatResolvers : ObjectTypeMap
     {
         public ChatResolvers(IChatResolverService resolverService)
         {

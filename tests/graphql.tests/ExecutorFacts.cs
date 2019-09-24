@@ -67,7 +67,7 @@ namespace tanka.graphql.tests
         public ExecutorFacts(ITestOutputHelper atr)
         {
             Model = new EventsModel();
-            Resolvers = new TypeMap
+            Resolvers = new ObjectTypeMap
             {
                 {
                     "Success", new FieldResolversMap
@@ -148,7 +148,7 @@ namespace tanka.graphql.tests
                 Resolvers);
         }
 
-        public TypeMap Resolvers { get; set; }
+        public ObjectTypeMap Resolvers { get; set; }
 
         public EventsModel Model { get; set; }
 

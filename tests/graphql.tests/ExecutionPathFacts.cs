@@ -32,7 +32,7 @@ namespace tanka.graphql.tests
 
             var schema = builder.Build();
 
-            var resolvers = new TypeMap
+            var resolvers = new ObjectTypeMap
             {
                 {
                     "Query", new FieldResolversMap
