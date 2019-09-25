@@ -58,23 +58,23 @@ namespace graphql.server.tests.host
             var builder = new SchemaBuilder()
                 .Sdl(Parser.ParseDocument(sdl));
 
-            var resolvers = new ResolverMap
+            var resolvers = new ObjectTypeMap
             {
                 {
-                    "Event", new FieldResolverMap()
+                    "Event", new FieldResolversMap()
                     {
                         {"type", Resolve.PropertyOf<Event>(ev => ev.Type)},
                         {"message", Resolve.PropertyOf<Event>(ev => ev.Message)}
                     }
                 },
                 {
-                    "Query", new FieldResolverMap
+                    "Query", new FieldResolversMap
                     {
                         {"hello", context => new ValueTask<IResolveResult>(Resolve.As("world"))}
                     }
                 },
                 {
-                    "Mutation", new FieldResolverMap()
+                    "Mutation", new FieldResolversMap()
                     {
                         {"add", async context =>
                             {
@@ -87,7 +87,7 @@ namespace graphql.server.tests.host
                     }
                 },
                 {
-                    "Subscription", new FieldResolverMap
+                    "Subscription", new FieldResolversMap
                     {
                         {
                             "events", (context,ct) =>

@@ -69,13 +69,13 @@ namespace tanka.graphql.tests.tools
 
             var schemaTwo = SchemaTools.MakeExecutableSchema(
                 schemaTwoBuilder,
-                new ResolverMap
+                new ObjectTypeMap
                 {
-                    ["Address"] = new FieldResolverMap
+                    ["Address"] = new FieldResolversMap
                     {
                         {"city", context => ResolveSync.As(context.ObjectValue)}
                     },
-                    ["User"] = new FieldResolverMap
+                    ["User"] = new FieldResolversMap
                     {
                         {"address", context => ResolveSync.As("Vantaa")}
                     }
@@ -181,13 +181,13 @@ namespace tanka.graphql.tests.tools
 
             var schemaTwo = SchemaTools.MakeExecutableSchema(
                 schemaTwoBuilder,
-                new ResolverMap
+                new ObjectTypeMap
                 {
-                    ["Address"] = new FieldResolverMap
+                    ["Address"] = new FieldResolversMap
                     {
                         {"city", context => ResolveSync.As(context.ObjectValue)}
                     },
-                    ["User"] = new FieldResolverMap
+                    ["User"] = new FieldResolversMap
                     {
                         {"address", context => ResolveSync.As("Vantaa")}
                     }

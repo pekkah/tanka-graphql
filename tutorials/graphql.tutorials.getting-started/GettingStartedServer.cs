@@ -1,0 +1,149 @@
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.WebSockets;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using tanka.graphql.requests;
+using tanka.graphql.resolvers;
+using tanka.graphql.schema;
+using tanka.graphql.sdl;
+using tanka.graphql.server;
+using tanka.graphql.tools;
+using tanka.graphql.type;
+
+namespace tanka.graphql.tutorials.gettingStarted
+{
+    public class GettingStartedServer
+    {
+    }
+
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            // We will use memory cache to manage the cached
+            // schema instance
+            services.AddMemoryCache();
+
+            // This will manage the schema
+            services.AddSingleton<SchemaCache>();
+
+            AddSchemaOptions(services);
+
+            AddSignalRServer(services);
+
+            AddWebSocketsServer(services);
+        }
+
+        private void AddWebSocketsServer(IServiceCollection services)
+        {
+            // Configure websockets
+            services.AddWebSockets(options =>
+            {
+                options.AllowedOrigins.Add("https://localhost:5000");
+            });
+
+            // Add Tanka GraphQL-WS server
+            services.AddTankaWebSocketServer();
+        }
+
+        public void Configure(IApplicationBuilder app)
+        {
+            UseSignalRServer(app);
+
+            UseWebSocketsServer(app);
+        }
+
+        private void UseWebSocketsServer(IApplicationBuilder app)
+        {
+            // Add Websockets middleware
+            app.UseWebSockets();
+
+            // Add Tanka GraphQL-WS middleware
+            app.UseTankaWebSocketServer(new WebSocketServerOptions()
+            {
+                Path = "/graphql/ws"
+            });
+        }
+
+        private static void UseSignalRServer(IApplicationBuilder app)
+        {
+            // add SignalR
+            app.UseSignalR(routes =>
+            {
+                // Map SignalR server hub to route
+                routes.MapTankaServerHub("/graphql/hub");
+            });
+        }
+
+        private static void AddSchemaOptions(IServiceCollection services)
+        {
+            // Configure schema options
+            services.AddTankaSchemaOptions()
+                .Configure<SchemaCache>((options, cache) =>
+                {
+                    // executor will call get schema every request
+                    options.GetSchema = async query => await cache.GetOrAdd(query);
+                });
+        }
+
+        private static void AddSignalRServer(IServiceCollection services)
+        {
+            // Configure SignalR server
+            services.AddSignalR()
+                // Add SignalR server hub
+                .AddTankaServerHub();
+        }
+    }
+
+    public class SchemaCache
+    {
+        private readonly IMemoryCache _cache;
+
+        public SchemaCache(
+            IMemoryCache cache)
+        {
+            _cache = cache;
+        }
+
+        public Task<ISchema> GetOrAdd(Query query)
+        {
+            return _cache.GetOrCreateAsync(
+                "Schema",
+                entry => Create());
+        }
+
+        private async Task<ISchema> Create()
+        {
+            // Do some async work to build the schema. For example
+            // load SDL from file
+            await Task.Delay(0);
+
+            // Build simple schema from SDL string
+            var builder = new SchemaBuilder()
+                .Sdl(
+                    @"
+                    type Query {
+                        name: String!
+                    }
+
+                    schema {
+                        query: Query
+                    }
+                    ");
+
+            // Bind resolvers and build
+            return SchemaTools
+                .MakeExecutableSchemaWithIntrospection(
+                    builder,
+                    new ObjectTypeMap()
+                    {
+                        ["Query"] = new FieldResolversMap()
+                        {
+                            {"name", context => ResolveSync.As("Tanka")}
+                        }
+                    });
+        }
+    }
+}

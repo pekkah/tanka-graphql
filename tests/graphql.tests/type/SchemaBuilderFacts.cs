@@ -553,10 +553,10 @@ namespace tanka.graphql.tests.type
                 )
                 .Build();
 
-            var resolvers = new ResolverMap
+            var resolvers = new ObjectTypeMap
             {
                 {
-                    query1.Name, new FieldResolverMap
+                    query1.Name, new FieldResolversMap
                     {
                         {
                             "field1", async context =>

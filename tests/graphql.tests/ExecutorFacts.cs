@@ -67,23 +67,23 @@ namespace tanka.graphql.tests
         public ExecutorFacts(ITestOutputHelper atr)
         {
             Model = new EventsModel();
-            Resolvers = new ResolverMap
+            Resolvers = new ObjectTypeMap
             {
                 {
-                    "Success", new FieldResolverMap
+                    "Success", new FieldResolversMap
                     {
                         {"id", Resolve.PropertyOf<EventsModel.Success>(m => m.Id)},
                         {"event", Resolve.PropertyOf<EventsModel.Success>(m => m.Event)}
                     }
                 },
                 {
-                    "Failure", new FieldResolverMap
+                    "Failure", new FieldResolversMap
                     {
                         {"message", Resolve.PropertyOf<EventsModel.Failure>(m => m.Message)}
                     }
                 },
                 {
-                    "Event", new FieldResolverMap
+                    "Event", new FieldResolversMap
                     {
                         {"id", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Id)},
                         {"type", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Type)},
@@ -91,20 +91,20 @@ namespace tanka.graphql.tests
                     }
                 },
                 {
-                    "NewEvent", new FieldResolverMap
+                    "NewEvent", new FieldResolversMap
                     {
                         {"type", Resolve.PropertyOf<EventsModel.NewEvent>(type => type.Type)},
                         {"payload", Resolve.PropertyOf<EventsModel.NewEvent>(type => type.Payload)}
                     }
                 },
                 {
-                    "Query", new FieldResolverMap
+                    "Query", new FieldResolversMap
                     {
                         {"events", context => new ValueTask<IResolveResult>(Resolve.As(Model.Events))}
                     }
                 },
                 {
-                    "Mutation", new FieldResolverMap
+                    "Mutation", new FieldResolversMap
                     {
                         {
                             "create", async context =>
@@ -127,7 +127,7 @@ namespace tanka.graphql.tests
                     }
                 },
                 {
-                    "Subscription", new FieldResolverMap
+                    "Subscription", new FieldResolversMap
                     {
                         {
                             "events", async (context, unsubscribe) =>
@@ -148,7 +148,7 @@ namespace tanka.graphql.tests
                 Resolvers);
         }
 
-        public ResolverMap Resolvers { get; set; }
+        public ObjectTypeMap Resolvers { get; set; }
 
         public EventsModel Model { get; set; }
 

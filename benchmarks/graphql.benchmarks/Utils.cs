@@ -35,22 +35,22 @@ namespace tanka.graphql.benchmarks
                     }
                     "));
 
-            var resolvers = new ResolverMap
+            var resolvers = new ObjectTypeMap
             {
                 {
-                    "Query", new FieldResolverMap
+                    "Query", new FieldResolversMap
                     {
                         {"simple", context => new ValueTask<IResolveResult>(Resolve.As("value"))}
                     }
                 },
                 {
-                    "Mutation", new FieldResolverMap
+                    "Mutation", new FieldResolversMap
                     {
                         {"simple", context => new ValueTask<IResolveResult>(Resolve.As("value"))}
                     }
                 },
                 {
-                    "Subscription", new FieldResolverMap()
+                    "Subscription", new FieldResolversMap()
                     {
                         {
                             "simple", 

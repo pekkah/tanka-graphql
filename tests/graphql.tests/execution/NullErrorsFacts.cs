@@ -33,9 +33,9 @@ namespace tanka.graphql.tests.execution
                 ["nestedNonNull"] = null
             };
 
-            IResolverMap resolvers = new ResolverMap
+            IResolverMap resolvers = new ObjectTypeMap
             {
-                ["Query"] = new FieldResolverMap
+                ["Query"] = new FieldResolversMap
                 {
                     {"nonNull", context => new ValueTask<IResolveResult>(Resolve.As(null))},
                     {"nonNullNested", context => new ValueTask<IResolveResult>(Resolve.As(nestedNonNullData))},
@@ -45,7 +45,7 @@ namespace tanka.graphql.tests.execution
                     {"nullable", context => new ValueTask<IResolveResult>(Resolve.As("hello"))}
                 },
 
-                ["Nest"] = new FieldResolverMap
+                ["Nest"] = new FieldResolversMap
                 {
                     {"nestedNonNull", Resolve.PropertyOf<Dictionary<string, string>>(d => d["nestedNonNull"])}
                 }

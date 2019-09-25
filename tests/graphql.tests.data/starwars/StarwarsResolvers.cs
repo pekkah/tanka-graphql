@@ -9,7 +9,7 @@ namespace tanka.graphql.tests.data.starwars
 {
     public class StarwarsResolvers
     {
-        public static ResolverMap BuildResolvers(Starwars starwars)
+        public static ObjectTypeMap BuildResolvers(Starwars starwars)
         {
             async ValueTask<IResolveResult> ResolveCharacter(ResolverContext context)
             {
@@ -49,10 +49,10 @@ namespace tanka.graphql.tests.data.starwars
                 return As(human);
             }
 
-            var resolverMap = new ResolverMap
+            var resolverMap = new ObjectTypeMap
             {
                 // Root query
-                ["Query"] = new FieldResolverMap
+                ["Query"] = new FieldResolversMap
                 {
                     {"human", ResolveHuman},
                     {"character", ResolveCharacter},
@@ -60,13 +60,13 @@ namespace tanka.graphql.tests.data.starwars
                 },
 
                 // Root mutation
-                ["Mutation"] = new FieldResolverMap
+                ["Mutation"] = new FieldResolversMap
                 {
                     {"addHuman", AddHuman}
                 },
 
                 // ObjectType
-                ["Human"] = new FieldResolverMap
+                ["Human"] = new FieldResolversMap
                 {
                     {"id", PropertyOf<Starwars.Human>(c => c.Id)},
                     {"name", PropertyOf<Starwars.Human>(c => c.Name)},
