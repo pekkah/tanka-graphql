@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Index - tanka-graphql</title>
+    <title>Server - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -93,7 +93,7 @@
             <a class="nav-link" href="0-getting-started/03-apply-directives.html">Apply directives</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="0-getting-started/04-server.html">Server</a>
+            <a class="nav-link active bg-light" href="0-getting-started/04-server.html">Server</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -226,68 +226,170 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
-<p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1&amp;branchName=master"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql?branchName=master" alt="Build Status" /></a></p>
-<h2 id="features">Features</h2>
+                <h2 id="server">Server</h2>
+<p>Tanka provides server components in <code>tanka.graphql.server</code> NuGet
+package. It can be used to get up and running or if more control is
+required then you can implement your own server.</p>
+<blockquote>
+<p>See also</p>
 <ul>
-<li>Execute queries, mutations and subscriptions</li>
-<li>Validation (new implementation in v0.3.0)</li>
-<li>SignalR hub for streaming queries, mutations and subscriptions</li>
-<li>ApolloLink for the provided SignalR hub</li>
-<li>Apollo GraphQL WebSockets (apollo-link-ws) compatible web socket server (since v0.8.0)</li>
+<li><a href="2-server/0-common.html">Server</a></li>
 </ul>
-<h3 id="feeds">Feeds</h3>
-<p>Beta</p>
-<p><a href="https://www.myget.org/feed/tanka/package/nuget/tanka.graphql"><img src="https://img.shields.io/myget/tanka/vpre/tanka.graphql.svg?style=popout-square" alt="" /></a>
-<a href="https://www.myget.org/feed/tanka/package/npm/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/latest.svg?registry_uri=https%3A%2F%2Fwww.myget.org%2FF%2Ftanka%2Fnpm%2F&amp;style=popout-square" alt="" /></a></p>
+</blockquote>
+<p>Tanka Server provides to server components which can be used together
+or separately.</p>
 <ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/beta/">Documentation</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
+<li>SignalR - server built on top of SignalR Core</li>
+<li>GraphQL-WS - custom WebSockets server supporting <code>graphql-ws</code> messages</li>
 </ul>
-<p>Release</p>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
-<ul>
-<li><a href="https://pekkah.github.io/tanka-graphql/">Documentation</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
-</ul>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+<p>Following steps are required to get the server running with your schema.</p>
+<ol>
+<li>Build schema</li>
+<li>Configure schema options</li>
+<li>Configure server</li>
+<li>HTTP API</li>
+</ol>
+<h3 id="build-schema">1. Build schema</h3>
+<p>First step for either server is to configure your schema options
+for execution. Schema should be built only once and cached as singleton.</p>
+<p><pre><code class="language-csharp">
+        private async Task&lt;ISchema&gt; Create()
+        {
+            // Do some async work to build the schema. For example
+            // load SDL from file
+            await Task.Delay(0);
 
-npm install @tanka/tanka-graphql-server-link
-</code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
-<h2 id="develop">Develop</h2>
-<h3 id="run-the-dev-harness">Run the dev harness</h3>
-<p>This repo includes a sample application which is used for testing
-and development of the SignalR client and the server.</p>
-<p>Open the <code>tanka-graphql.sln</code> and start the <code>graphql.dev.chat.web</code> project. This will start a simple chat server using the tanka.graphql.server.</p>
-<p>Start the client by following instructions below:</p>
-<pre><code class="lang-bash"># Install dependencies
-src\graphql.server.link&gt; yarn install
+            // Build simple schema from SDL string
+            var builder = new SchemaBuilder()
+                .Sdl(
+                    @&quot;
+                    type Query {
+                        name: String!
+                    }
 
-# Link the server-link
-src\graphql.server.link&gt; yarn link
+                    schema {
+                        query: Query
+                    }
+                    &quot;);
 
-# Watch for source changes and recompile the link
-src\graphql.server.link&gt; yarn watch
+            // Bind resolvers and build
+            return SchemaTools
+                .MakeExecutableSchemaWithIntrospection(
+                    builder,
+                    new ObjectTypeMap()
+                    {
+                        [&quot;Query&quot;] = new FieldResolversMap()
+                        {
+                            {&quot;name&quot;, context =&gt; ResolveSync.As(&quot;Tanka&quot;)}
+                        }
+                    });
+        }
+</code></pre></p>
+<h3 id="configure-schema-options">2. Configure schema options</h3>
+<p>Next needed step is to configure the schema options. These options tell
+the executor where to get the schema and also allows configuring the validation
+rules for the execution. By default all validation rules from the GraphQL
+specification are included.</p>
+<p><pre><code class="language-csharp">
+        private static void AddSchemaOptions(IServiceCollection services)
+        {
+            // Configure schema options
+            services.AddTankaSchemaOptions()
+                .Configure&lt;SchemaCache&gt;((options, cache) =&gt;
+                {
+                    // executor will call get schema every request
+                    options.GetSchema = async query =&gt; await cache.GetOrAdd(query);
+                });
+        }
+</code></pre></p>
+<h3 id="configure-server">3. Configure server</h3>
+<p>Server components require calling their <code>Add*</code> methods to add required
+services and configure their options. Depending on the server also
+middleware needs to be configured using the paired <code>Use*</code> methods.</p>
+<p>Configure SignalR server
+<pre><code class="language-csharp">
+        private static void AddSignalRServer(IServiceCollection services)
+        {
+            // Configure SignalR server
+            services.AddSignalR()
+                // Add SignalR server hub
+                .AddTankaServerHub();
+        }
+</code></pre></p>
+<p>Use SignalR server
+<pre><code class="language-csharp">
+        private static void UseSignalRServer(IApplicationBuilder app)
+        {
+            // add SignalR
+            app.UseSignalR(routes =&gt;
+            {
+                // Map SignalR server hub to route
+                routes.MapTankaServerHub(&quot;/graphql/hub&quot;);
+            });
+        }
+</code></pre></p>
+<p>Configure GraphQL WS server
+<pre><code class="language-csharp">
+        private void AddWebSocketsServer(IServiceCollection services)
+        {
+            // Configure websockets
+            services.AddWebSockets(options =&gt;
+            {
+                options.AllowedOrigins.Add(&quot;https://localhost:5000&quot;);
+            });
 
-# Install dependencies
-dev\graphql.dev.chat.ui&gt; yarn install
+            // Add Tanka GraphQL-WS server
+            services.AddTankaWebSocketServer();
+        }
+</code></pre></p>
+<p>Use GraphQL WS Server
+<pre><code class="language-csharp">
+        private void UseWebSocketsServer(IApplicationBuilder app)
+        {
+            // Add Websockets middleware
+            app.UseWebSockets();
 
-# Use the linked server-link
-dev\graphql.dev.chat.ui&gt; yarn link @tanka/tanka-graphql-server-link
+            // Add Tanka GraphQL-WS middleware
+            app.UseTankaWebSocketServer(new WebSocketServerOptions()
+            {
+                Path = &quot;/graphql/ws&quot;
+            });
+        }
+</code></pre></p>
+<h3 id="http-api">4. HTTP API</h3>
+<p>Tanka Server does not provide out of the box &quot;server&quot; for basic
+HTTP/JSON API as that can be easily implemented.</p>
+<p>Here's an example of ASP.NET Core MVC Controller taken from the
+<code>tanka.graphql.samples.chat.web</code> project included in the solution.</p>
+<p><code>IQueryStreamService</code> is registered by the <code>AddTankaSchemaOptions</code>
+and is also used by the SignalR and GraphQL-WS based servers to
+execute the queries.</p>
+<p><pre><code class="language-csharp">    [Route(&quot;api/graphql&quot;)]
+    public class QueryController : Controller
+    {
+        private readonly IQueryStreamService _queryStreamService;
 
-# Watch for source changes and recompile the sample
-dev\graphql.dev.chat.ui&gt; yarn start
-</code></pre>
-<h3 id="run-benchmarks">Run benchmarks</h3>
-<pre><code class="lang-bash">src\graphql.benchmarks&gt; dotnet run --configuration release --framework netcoreapp22
-</code></pre>
+        public QueryController(IQueryStreamService queryStreamService)
+        {
+            _queryStreamService = queryStreamService;
+        }
+
+        [HttpPost]
+        public async Task&lt;IActionResult&gt; Post([FromBody] OperationRequest request)
+        {
+            var stream = await _queryStreamService.QueryAsync(new Query
+            {
+                Document = ParseDocument(request.Query),
+                Variables = request.Variables.ToNestedDictionary(),
+                OperationName = request.OperationName
+            }, Request.HttpContext.RequestAborted);
+
+            var result = await stream.Reader.ReadAsync();
+
+            return Ok(result);
+        }
+    }
+</code></pre></p>
                     
             </main>
         </div>

@@ -80,6 +80,24 @@
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="0-getting-started/01-create-schema.html">Getting started</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/01-create-schema.html">Create schema</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/02-bind-resolvers.html">Bind resolvers</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/03-apply-directives.html">Apply directives</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/04-server.html">Server</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
     <a class="d-flex align-items-center text-muted" href="1-execution/01-resolvers.html">Execution</a>
 </h6>
     <ul class="nav flex-column">
@@ -324,23 +342,23 @@
         public ExecutorFacts(ITestOutputHelper atr)
         {
             Model = new EventsModel();
-            Resolvers = new ResolverMap
+            Resolvers = new ObjectTypeMap
             {
                 {
-                    &quot;Success&quot;, new FieldResolverMap
+                    &quot;Success&quot;, new FieldResolversMap
                     {
                         {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)},
                         {&quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event)}
                     }
                 },
                 {
-                    &quot;Failure&quot;, new FieldResolverMap
+                    &quot;Failure&quot;, new FieldResolversMap
                     {
                         {&quot;message&quot;, Resolve.PropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message)}
                     }
                 },
                 {
-                    &quot;Event&quot;, new FieldResolverMap
+                    &quot;Event&quot;, new FieldResolversMap
                     {
                         {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
                         {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
@@ -348,20 +366,20 @@
                     }
                 },
                 {
-                    &quot;NewEvent&quot;, new FieldResolverMap
+                    &quot;NewEvent&quot;, new FieldResolversMap
                     {
                         {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type)},
                         {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload)}
                     }
                 },
                 {
-                    &quot;Query&quot;, new FieldResolverMap
+                    &quot;Query&quot;, new FieldResolversMap
                     {
                         {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
                     }
                 },
                 {
-                    &quot;Mutation&quot;, new FieldResolverMap
+                    &quot;Mutation&quot;, new FieldResolversMap
                     {
                         {
                             &quot;create&quot;, async context =&gt;
@@ -384,7 +402,7 @@
                     }
                 },
                 {
-                    &quot;Subscription&quot;, new FieldResolverMap
+                    &quot;Subscription&quot;, new FieldResolversMap
                     {
                         {
                             &quot;events&quot;, async (context, unsubscribe) =&gt;

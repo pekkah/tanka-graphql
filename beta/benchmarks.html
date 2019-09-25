@@ -80,6 +80,24 @@
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="0-getting-started/01-create-schema.html">Getting started</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/01-create-schema.html">Create schema</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/02-bind-resolvers.html">Bind resolvers</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/03-apply-directives.html">Apply directives</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/04-server.html">Server</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
     <a class="d-flex align-items-center text-muted" href="1-execution/01-resolvers.html">Execution</a>
 </h6>
     <ul class="nav flex-column">
@@ -233,19 +251,19 @@ Toolchain=InProcessEmitToolchain
 <tbody>
 <tr>
 <td>Query_with_defaults</td>
-<td style="text-align: right;">32.247 us</td>
-<td style="text-align: right;">0.6135 us</td>
-<td style="text-align: right;">0.6026 us</td>
-<td style="text-align: right;">3.4180</td>
-<td style="text-align: right;">0.0610</td>
+<td style="text-align: right;">29.555 us</td>
+<td style="text-align: right;">0.5653 us</td>
+<td style="text-align: right;">0.5552 us</td>
+<td style="text-align: right;">3.5400</td>
+<td style="text-align: right;">0.0916</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">22.52 KB</td>
 </tr>
 <tr>
 <td>Query_without_validation</td>
-<td style="text-align: right;">8.004 us</td>
-<td style="text-align: right;">0.1549 us</td>
-<td style="text-align: right;">0.2120 us</td>
+<td style="text-align: right;">7.464 us</td>
+<td style="text-align: right;">0.1151 us</td>
+<td style="text-align: right;">0.1077 us</td>
 <td style="text-align: right;">0.6561</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -253,19 +271,19 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Mutation_with_defaults</td>
-<td style="text-align: right;">31.477 us</td>
-<td style="text-align: right;">0.6272 us</td>
-<td style="text-align: right;">0.9577 us</td>
-<td style="text-align: right;">3.6011</td>
-<td style="text-align: right;">0.0610</td>
+<td style="text-align: right;">29.063 us</td>
+<td style="text-align: right;">0.4166 us</td>
+<td style="text-align: right;">0.3897 us</td>
+<td style="text-align: right;">3.5095</td>
+<td style="text-align: right;">0.0916</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">22.17 KB</td>
 </tr>
 <tr>
 <td>Mutation_without_validation</td>
-<td style="text-align: right;">6.955 us</td>
-<td style="text-align: right;">0.1375 us</td>
-<td style="text-align: right;">0.1739 us</td>
+<td style="text-align: right;">6.494 us</td>
+<td style="text-align: right;">0.1292 us</td>
+<td style="text-align: right;">0.1208 us</td>
 <td style="text-align: right;">0.6104</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -273,19 +291,19 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Subscribe_with_defaults</td>
-<td style="text-align: right;">59.127 us</td>
-<td style="text-align: right;">1.1813 us</td>
-<td style="text-align: right;">2.0377 us</td>
-<td style="text-align: right;">4.4556</td>
+<td style="text-align: right;">54.862 us</td>
+<td style="text-align: right;">1.0593 us</td>
+<td style="text-align: right;">1.3774 us</td>
+<td style="text-align: right;">4.6387</td>
 <td style="text-align: right;">0.1221</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">28.54 KB</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
-<td style="text-align: right;">18.721 us</td>
-<td style="text-align: right;">0.3590 us</td>
-<td style="text-align: right;">0.4134 us</td>
+<td style="text-align: right;">16.782 us</td>
+<td style="text-align: right;">0.3407 us</td>
+<td style="text-align: right;">0.6143 us</td>
 <td style="text-align: right;">1.4648</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -293,29 +311,29 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
-<td style="text-align: right;">59.226 us</td>
-<td style="text-align: right;">1.1709 us</td>
-<td style="text-align: right;">1.3939 us</td>
-<td style="text-align: right;">4.4556</td>
+<td style="text-align: right;">55.286 us</td>
+<td style="text-align: right;">1.0838 us</td>
+<td style="text-align: right;">1.4093 us</td>
+<td style="text-align: right;">4.6387</td>
 <td style="text-align: right;">0.1221</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">28.54 KB</td>
 </tr>
 <tr>
 <td>Validate_with_defaults</td>
-<td style="text-align: right;">15.617 us</td>
-<td style="text-align: right;">0.3051 us</td>
-<td style="text-align: right;">0.4176 us</td>
-<td style="text-align: right;">2.8076</td>
+<td style="text-align: right;">14.423 us</td>
+<td style="text-align: right;">0.2438 us</td>
+<td style="text-align: right;">0.2280 us</td>
+<td style="text-align: right;">2.8534</td>
 <td style="text-align: right;">0.0916</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">17.88 KB</td>
 </tr>
 <tr>
 <td>Validate_100times_with_defaults</td>
-<td style="text-align: right;">1,550.088 us</td>
-<td style="text-align: right;">30.5588 us</td>
-<td style="text-align: right;">52.7124 us</td>
+<td style="text-align: right;">1,428.716 us</td>
+<td style="text-align: right;">20.9629 us</td>
+<td style="text-align: right;">19.6087 us</td>
 <td style="text-align: right;">283.2031</td>
 <td style="text-align: right;">7.8125</td>
 <td style="text-align: right;">-</td>
