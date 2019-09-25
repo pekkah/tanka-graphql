@@ -19,6 +19,11 @@ namespace tanka.graphql.resolvers
             return new ValueTask<IResolveResult>(new ResolveResult(result));
         }
 
+        public static ValueTask<IResolveResult> As(string result)
+        {
+            return new ValueTask<IResolveResult>(new ResolveResult((object)result));
+        }
+
         public static ValueTask<IResolveResult> As(ObjectType type, object result)
         {
             return new ValueTask<IResolveResult>(new ResolveResult(type, result));

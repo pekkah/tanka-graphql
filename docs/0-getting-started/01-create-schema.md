@@ -2,7 +2,7 @@
 
 Schema defines the structure against which your queries are executed.
 
-> See also:
+> See also
 >
 > * [Specification](https://graphql.github.io/graphql-spec/June2018/#sec-Schema)
 > * [Schema](7-type-system/02-schema.html)

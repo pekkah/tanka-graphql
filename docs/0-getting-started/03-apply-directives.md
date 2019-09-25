@@ -2,7 +2,7 @@
 
 Directives are annotations for your GraphQL schema or operations.
 
-> Helpful links
+> See also
 >
 > * [Specification](https://graphql.github.io/graphql-spec/June2018/#sec-Type-System.Directives)
 > * [Directives](7-type-system/13-directives.html)

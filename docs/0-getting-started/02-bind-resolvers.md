@@ -3,7 +3,7 @@
 Resolvers are used to resolve the data for the query. They bind the execution of 
 GraphQL operation into your logic.
 
-> Helpful links
+> See also
 >
 > * [Specification](https://graphql.github.io/graphql-spec/June2018/#sec-Value-Resolution)
 > * [Resolvers](1-execution/01-resolvers.html)
