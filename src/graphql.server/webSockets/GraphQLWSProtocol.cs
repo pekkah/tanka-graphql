@@ -9,12 +9,12 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using tanka.graphql.channels;
-using tanka.graphql.requests;
-using tanka.graphql.resolvers;
-using tanka.graphql.server.webSockets.dtos;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 
-namespace tanka.graphql.server.webSockets
+namespace Tanka.GraphQL.Server.WebSockets
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class GraphQLWSProtocol : IProtocolHandler

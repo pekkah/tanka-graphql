@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace tanka.graphql.server.webSockets
+namespace Tanka.GraphQL.Server.WebSockets
 {
     public class WebSocketServer
     {

@@ -1,7 +1,6 @@
-﻿using tanka.graphql.schema;
-using tanka.graphql.tools;
+﻿using Tanka.GraphQL.SchemaBuilding;
 
-namespace tanka.graphql.directives
+namespace Tanka.GraphQL.Directives
 {
     public delegate DirectiveVisitor CreateDirectiveVisitor(SchemaBuilder builder);
 }

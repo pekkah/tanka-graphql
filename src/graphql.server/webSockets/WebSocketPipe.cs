@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace tanka.graphql.server.webSockets
+namespace Tanka.GraphQL.Server.WebSockets
 {
     public partial class WebSocketPipe : IDuplexPipe
     {

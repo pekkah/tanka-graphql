@@ -9,19 +9,19 @@ or GraphQL documents.
 
 Schema
 
-[{tanka.graphql.tests.sdl.SdlFacts.Parse_Document_as_Schema}]
+[{Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_Document_as_Schema}]
 
 Types
 
-[{tanka.graphql.tests.sdl.SdlFacts.Parse_Document_with_types}]
+[{Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_Document_with_types}]
 
 Custom scalars
 
-[{tanka.graphql.tests.sdl.SdlFacts.Parse_custom_scalar}]
+[{Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_custom_scalar}]
 
 Types can be extended
 
-[{tanka.graphql.tests.sdl.SdlFacts.Parse_ObjectType_with_extension}]
+[{Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_ObjectType_with_extension}]
 
 
 

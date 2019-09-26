@@ -2,13 +2,13 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
-using tanka.graphql.introspection;
-using tanka.graphql.schema;
-using tanka.graphql.type;
-using tanka.graphql.type.converters;
+using Tanka.GraphQL.Introspection;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
 
-namespace tanka.graphql.tests.introspection
+namespace Tanka.GraphQL.Tests.Introspection
 {
     public class GitHubIntrospectionFacts
     {
@@ -37,7 +37,7 @@ namespace tanka.graphql.tests.introspection
         private static string GetGitHubSchema()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceStream = assembly.GetManifestResourceStream("tanka.graphql.tests.github.introspection");
+            var resourceStream = assembly.GetManifestResourceStream("Tanka.GraphQL.Tests.github.introspection");
             using (var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
             {

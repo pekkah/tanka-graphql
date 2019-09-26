@@ -4,7 +4,7 @@
 
 Schema is implemented as class `GraphSchema` and it implements the `ISchema` interface.
 
-[{tanka.graphql.type.ISchema}]
+[{Tanka.GraphQL.TypeSystem.ISchema}]
 
 > Rarely accessing the actual implemention class `GraphSchema` is required
 
@@ -15,50 +15,50 @@ Schema is immutable and cannot be changed directly once created. To create `Sche
 
 Built by `SchemaBuilder`
 
-[{tanka.graphql.tests.type.SchemaFacts.SchemaFacts}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.SchemaFacts}]
 
 Query root is `ObjectType`
 
-[{tanka.graphql.tests.type.SchemaFacts.Roots_Query}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.Roots_Query}]
 
 Mutation is optional
 
-[{tanka.graphql.tests.type.SchemaFacts.Roots_Mutation}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.Roots_Mutation}]
 
 Subscription is optional
 
-[{tanka.graphql.tests.type.SchemaFacts.Roots_Subscription}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.Roots_Subscription}]
 
 
 ### Querying types
 
 Query named types
-[{tanka.graphql.tests.type.SchemaFacts.GetNamedType}]
-[{tanka.graphql.tests.type.SchemaFacts.QueryNamedTypes}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.GetNamedType}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.QueryNamedTypes}]
 
 
 Query directives
-[{tanka.graphql.tests.type.SchemaFacts.GetDirective}]
-[{tanka.graphql.tests.type.SchemaFacts.QueryDirectives}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.GetDirective}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.QueryDirectives}]
 
 
 Query fields
-[{tanka.graphql.tests.type.SchemaFacts.GetField}]
-[{tanka.graphql.tests.type.SchemaFacts.GetFields}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.GetField}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.GetFields}]
 
 
 Query input fields
-[{tanka.graphql.tests.type.SchemaFacts.GetInputField}]
-[{tanka.graphql.tests.type.SchemaFacts.GetInputFields}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.GetInputField}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.GetInputFields}]
 
 
 #### Defaults
 
 By default Skip and Include directives are included
-[{tanka.graphql.tests.type.SchemaFacts.Included_directives}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.Included_directives}]
 
 By default all standard `ScalarType`s are included
-[{tanka.graphql.tests.type.SchemaFacts.Included_scalars}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaFacts.Included_scalars}]
 
 
 

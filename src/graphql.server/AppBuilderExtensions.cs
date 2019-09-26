@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using tanka.graphql.server.webSockets;
+using Tanka.GraphQL.Server.WebSockets;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     public static class AppBuilderExtensions
     {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using tanka.graphql.type;
 using GraphQLParser.AST;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.execution
+namespace Tanka.GraphQL.Execution
 {
     public static class Variables
     {

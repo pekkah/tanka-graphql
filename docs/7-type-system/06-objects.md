@@ -13,12 +13,12 @@ Objects are created by giving them a unique name and list of fields.
 
 Type of field defines the return value of field when resolved during execution.
 
-[{tanka.graphql.tests.type.ObjectTypeFacts.With_scalar_field}]
+[{Tanka.GraphQL.Tests.TypeSystem.ObjectTypeFacts.With_scalar_field}]
 
 #### With scalar field taking a boolean argument
 
 Fields can take arguments which have a name and type.
 
-[{tanka.graphql.tests.type.ObjectTypeFacts.With_scalar_field_with_argument}]
+[{Tanka.GraphQL.Tests.TypeSystem.ObjectTypeFacts.With_scalar_field_with_argument}]
 
 

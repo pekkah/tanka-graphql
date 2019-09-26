@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using tanka.graphql.schema;
-using tanka.graphql.type;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.introspection
+namespace Tanka.GraphQL.Introspection
 {
     public class IntrospectionSchema
     {

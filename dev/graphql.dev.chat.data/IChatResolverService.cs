@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.ValueResolution;
 
-namespace tanka.graphql.samples.chat.data
+namespace Tanka.GraphQL.Samples.Chat.Data
 {
     public interface IChatResolverService
     {

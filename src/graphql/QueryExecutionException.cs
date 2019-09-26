@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using GraphQLParser.AST;
-using tanka.graphql.execution;
-using tanka.graphql.language;
+using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public class QueryExecutionException : DocumentException
     {

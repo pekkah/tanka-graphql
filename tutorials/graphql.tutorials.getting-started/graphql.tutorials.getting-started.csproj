@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <RootNamespace>tanka.graphql.tutorials.gettingStarted</RootNamespace>
+    <RootNamespace>Tanka.GraphQL.Tutorials.GettingStarted</RootNamespace>
 
     <IsPackable>false</IsPackable>
 

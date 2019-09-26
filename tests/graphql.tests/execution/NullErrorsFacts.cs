@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using tanka.graphql.resolvers;
-using tanka.graphql.schema;
-using tanka.graphql.tests.data;
-using tanka.graphql.tools;
-using tanka.graphql.type;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.Tests.Data;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace tanka.graphql.tests.execution
+namespace Tanka.GraphQL.Tests.Execution
 {
     public class NullErrorsFacts
     {

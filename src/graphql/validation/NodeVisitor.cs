@@ -1,6 +1,6 @@
 using GraphQLParser.AST;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public delegate void NodeVisitor<in T>(T node) where T : ASTNode;
 }

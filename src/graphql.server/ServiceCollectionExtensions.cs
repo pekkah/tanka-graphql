@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using tanka.graphql.extensions.tracing;
-using tanka.graphql.server.webSockets;
+using Tanka.GraphQL.Extensions.Tracing;
+using Tanka.GraphQL.Server.WebSockets;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     public static class ServiceCollectionExtensions
     {

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.execution;
-using tanka.graphql.language;
-using tanka.graphql.schema;
-using tanka.graphql.type;
+using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.sdl
+namespace Tanka.GraphQL.SDL
 {
     public class SdlReader
     {

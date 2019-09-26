@@ -1,7 +1,7 @@
-﻿using tanka.graphql.tools;
-using tanka.graphql.type;
+﻿using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.introspection
+namespace Tanka.GraphQL.Introspection
 {
     public class Introspect
     {

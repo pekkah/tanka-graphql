@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
 
-namespace tanka.graphql.language
+namespace Tanka.GraphQL.Language
 {
     /// <summary>
     ///     https://github.com/graphql-dotnet/parser/pull/20

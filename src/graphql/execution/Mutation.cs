@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 
-namespace tanka.graphql.execution
+namespace Tanka.GraphQL.Execution
 {
     public static class Mutation
     {

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.execution;
-using tanka.graphql.language;
-using tanka.graphql.type;
-using tanka.graphql.type.converters;
+using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public class FieldSelectionMergingValidator
     {

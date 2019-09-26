@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using GraphQLParser.AST;
 
-namespace tanka.graphql.requests
+namespace Tanka.GraphQL.DTOs
 {
     public class Query
     {

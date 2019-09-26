@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <RootNamespace>Tanka.GraphQL.Server.Tests.Host</RootNamespace>
+    <AssemblyName>tanka.graphql.server.tests.host</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

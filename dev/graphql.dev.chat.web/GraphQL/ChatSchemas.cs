@@ -1,17 +1,16 @@
-using System.Threading.Tasks;
-using tanka.graphql.extensions.analysis;
-using tanka.graphql.samples.chat.data;
-using tanka.graphql.samples.chat.data.idl;
-using tanka.graphql.tools;
-using tanka.graphql.type;
+using Tanka.GraphQL.Extensions.Analysis;
+using Tanka.GraphQL.Samples.Chat.Data;
+using Tanka.GraphQL.Samples.Chat.Data.IDL;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.samples.chat.web.GraphQL
+namespace Tanka.GraphQL.Samples.Chat.Web.GraphQL
 {
     public class ChatSchemas
     {
         public ChatSchemas(IChatResolverService resolverService)
         {
-            var builder = IdlSchema.Load();       
+            var builder = IdlSchema.Load();
             var resolvers = new ChatResolvers(resolverService);
 
             // add cost directive support to schema
@@ -23,7 +22,7 @@ namespace tanka.graphql.samples.chat.web.GraphQL
                 resolvers,
                 resolvers);
         }
-        
+
         public ISchema Chat { get; set; }
     }
 }

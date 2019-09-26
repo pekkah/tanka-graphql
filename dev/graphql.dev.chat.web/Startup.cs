@@ -3,22 +3,19 @@ using System.Threading.Tasks;
 using GraphQL.Server.Ui.Playground;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using tanka.graphql.extensions.analysis;
-using tanka.graphql.samples.chat.data;
-using tanka.graphql.samples.chat.web.GraphQL;
-using tanka.graphql.server;
-using tanka.graphql.server.webSockets;
-using tanka.graphql.type;
-using tanka.graphql.validation;
+using Tanka.GraphQL.Extensions.Analysis;
+using Tanka.GraphQL.Samples.Chat.Data;
+using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
+using Tanka.GraphQL.Server;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 
-namespace tanka.graphql.samples.chat.web
+namespace Tanka.GraphQL.Samples.Chat.Web
 {
     public class Startup
     {
@@ -35,7 +32,7 @@ namespace tanka.graphql.samples.chat.web
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // graphql
-            services.AddSingleton<IChat, Chat>();
+            services.AddSingleton<IChat, Data.Chat>();
             services.AddSingleton<IChatResolverService, ChatResolverService>();
             services.AddSingleton<ChatSchemas>();
             services.AddSingleton(provider => provider.GetRequiredService<ChatSchemas>().Chat);
@@ -47,7 +44,7 @@ namespace tanka.graphql.samples.chat.web
                     options.ValidationRules = ExecutionRules.All
                         .Concat(new[]
                         {
-                            CostAnalyzer.MaxCost(maxCost: 100, defaultFieldComplexity: 1, addExtensionData: true)
+                            CostAnalyzer.MaxCost(100, 1, true)
                         }).ToArray();
 
                     options.GetSchema = query => new ValueTask<ISchema>(schema);
@@ -98,23 +95,21 @@ namespace tanka.graphql.samples.chat.web
             app.UseStaticFiles();
             app.UseWebSockets();
 
-            app.UseGraphQLPlayground(new GraphQLPlaygroundOptions()
+            app.UseGraphQLPlayground(new GraphQLPlaygroundOptions
             {
                 GraphQLEndPoint = "/api/graphql",
                 Path = "/ui"
             });
 
             // websockets server
-            app.UseTankaWebSocketServer(new WebSocketServerOptions()
+            app.UseTankaWebSocketServer(new WebSocketServerOptions
             {
                 Path = "/api/graphql"
             });
 
             // signalr server
-            app.UseSignalR(routes => routes.MapTankaServerHub("/graphql", options =>
-                {
-                    options.Transports = HttpTransportType.ServerSentEvents;
-                }));
+            app.UseSignalR(routes => routes.MapTankaServerHub("/graphql",
+                options => { options.Transports = HttpTransportType.ServerSentEvents; }));
 
             app.UseMvc();
         }

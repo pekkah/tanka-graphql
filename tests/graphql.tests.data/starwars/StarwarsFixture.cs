@@ -1,8 +1,8 @@
 using System;
-using tanka.graphql.tools;
-using tanka.graphql.type;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.tests.data.starwars
+namespace Tanka.GraphQL.Tests.Data.Starwars
 {
     public class StarwarsFixture : IDisposable
     {

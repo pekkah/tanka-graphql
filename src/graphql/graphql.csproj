@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>tanka.graphql</AssemblyName>
-    <RootNamespace>tanka.graphql</RootNamespace>
+    <RootNamespace>Tanka.GraphQL</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

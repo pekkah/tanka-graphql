@@ -1,7 +1,7 @@
-﻿using tanka.graphql.type;
+﻿using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace tanka.graphql.tests.descriptions
+namespace Tanka.GraphQL.Tests.Descriptions
 {
     public class FieldFacts
     {

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using tanka.graphql.execution;
-using tanka.graphql.type;
+using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace tanka.graphql.tests.execution
+namespace Tanka.GraphQL.Tests.Execution
 {
     public class TypeIsFacts
     {

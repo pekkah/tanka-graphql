@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using tanka.graphql.language;
-using tanka.graphql.requests;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.DTOs;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     internal static class LogMessages
     {

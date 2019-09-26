@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace tanka.graphql.server.webSockets.dtos
+namespace Tanka.GraphQL.Server.WebSockets.DTOs
 {
     /// <summary>
     ///     Protocol message types defined in

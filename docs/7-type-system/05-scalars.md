@@ -24,7 +24,7 @@ In addition following non-null instances are provided for convenience.
 
 Also standard collection is provided
 
-[{tanka.graphql.type.ScalarType.Standard}]
+[{Tanka.GraphQL.TypeSystem.ScalarType.Standard}]
 
 
 ### Custom scalars
@@ -34,7 +34,7 @@ Create instance of `ScalarType` and provide name, value converter and metadata.
 #### Example:
 
 Scalar:
-[{tanka.graphql.type.ScalarType.ID}]
+[{Tanka.GraphQL.TypeSystem.ScalarType.ID}]
 
 Converter:
-[{tanka.graphql.type.converters.IdConverter}]
+[{Tanka.GraphQL.TypeSystem.ValueSerialization.IdConverter}]

@@ -2,7 +2,7 @@
 using System.Net.WebSockets;
 using Microsoft.Extensions.Logging;
 
-namespace tanka.graphql.server.webSockets
+namespace Tanka.GraphQL.Server.WebSockets
 {
     public partial class WebSocketPipe
     {

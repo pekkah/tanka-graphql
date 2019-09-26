@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using GraphQLParser.AST;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public class ValidationError
     {

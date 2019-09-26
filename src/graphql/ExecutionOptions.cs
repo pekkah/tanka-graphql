@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using tanka.graphql.type;
-using tanka.graphql.validation;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     /// <summary>
     ///     Execution options

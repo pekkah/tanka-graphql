@@ -1,13 +1,13 @@
 ﻿using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using graphql.server.tests.host;
+using Tanka.GraphQL.Server.Tests.Host;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 // ReSharper disable InconsistentNaming
 
-namespace tanka.graphql.server.tests.webSockets
+namespace Tanka.GraphQL.Server.Tests.WebSockets
 {
     public class WebSocketConnection_ConnectionFacts : WebSocketFactsBase
     {

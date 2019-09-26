@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using GraphQLParser.AST;
-using tanka.graphql.extensions.analysis;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
-using tanka.graphql.type;
-using tanka.graphql.validation;
+using Tanka.GraphQL.Extensions.Analysis;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 using Xunit;
 
-namespace tanka.graphql.tests.analysis
+namespace Tanka.GraphQL.Tests.Analysis
 {
     public class CostFacts
     {

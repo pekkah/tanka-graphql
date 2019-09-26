@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
-using tanka.graphql.execution;
+using Tanka.GraphQL.Execution;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public static partial class Executor
     {

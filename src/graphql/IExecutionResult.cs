@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public interface IExecutionResult
     {

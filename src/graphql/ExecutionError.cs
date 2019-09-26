@@ -2,7 +2,7 @@
 using GraphQLParser.AST;
 using Newtonsoft.Json;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public class ExecutionError
     {

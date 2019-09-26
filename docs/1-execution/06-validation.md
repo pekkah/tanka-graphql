@@ -5,14 +5,14 @@
 
 ### Execution
 
-[{tanka.graphql.tests.validation.ValidatorFacts.Validate}]
+[{Tanka.GraphQL.Tests.Validation.ValidatorFacts.Validate}]
 
 
 ### Rules
 
 All execution rules
 
-[{tanka.graphql.validation.ExecutionRules.All}]
+[{Tanka.GraphQL.Validation.ExecutionRules.All}]
 
 
 

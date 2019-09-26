@@ -1,14 +1,14 @@
 ﻿using System.Threading.Tasks;
-using tanka.graphql.introspection;
-using tanka.graphql.schema;
-using tanka.graphql.tests.data;
-using tanka.graphql.type;
+using Tanka.GraphQL.Introspection;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.Tests.Data;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
-using static tanka.graphql.Parser;
+using static Tanka.GraphQL.Parser;
 
 // ReSharper disable InconsistentNaming
 
-namespace tanka.graphql.tests.introspection
+namespace Tanka.GraphQL.Tests.Introspection
 {
     public class IntrospectSchemaFacts
     {

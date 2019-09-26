@@ -9,19 +9,19 @@ Enums are created as instances of `EnumType`.
 
 Direction enum
 
-[{tanka.graphql.tests.type.EnumTypeFacts.Define_enum}]
+[{Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.Define_enum}]
 
 
 ### Serialization
 
 From input value
 
-[{tanka.graphql.tests.type.EnumTypeFacts.ParseValue}]
+[{Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.ParseValue}]
 
 From AST node value
 
-[{tanka.graphql.tests.type.EnumTypeFacts.ParseLiteral}]
+[{Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.ParseLiteral}]
 
 Serialize
 
-[{tanka.graphql.tests.type.EnumTypeFacts.Serialize}]
+[{Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.Serialize}]

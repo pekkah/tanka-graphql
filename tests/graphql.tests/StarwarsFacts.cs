@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
-using tanka.graphql.introspection;
-using tanka.graphql.tests.data;
-using tanka.graphql.tests.data.starwars;
+using Tanka.GraphQL.Introspection;
+using Tanka.GraphQL.Tests.Data;
+using Tanka.GraphQL.Tests.Data.Starwars;
 using Xunit;
-using static tanka.graphql.Executor;
-using static tanka.graphql.Parser;
+using static Tanka.GraphQL.Executor;
+using static Tanka.GraphQL.Parser;
 
-namespace tanka.graphql.tests
+namespace Tanka.GraphQL.Tests
 {
     public class StarwarsFacts : IClassFixture<StarwarsFixture>
     {
@@ -28,7 +28,7 @@ namespace tanka.graphql.tests
             var result = await ExecuteAsync(
                 new ExecutionOptions()
                 {
-                    Document =  ParseDocument(graphql.introspection.Introspect.DefaultQuery),
+                    Document =  ParseDocument(GraphQL.Introspection.Introspect.DefaultQuery),
                     Schema = schema
                 }).ConfigureAwait(false);
 

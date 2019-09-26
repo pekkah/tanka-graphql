@@ -1,12 +1,12 @@
 using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
-using tanka.graphql.type;
-using tanka.graphql.type.converters;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
 
-namespace tanka.graphql.tests.sdl
+namespace Tanka.GraphQL.Tests.SDL
 {
     public class SdlFacts
     {

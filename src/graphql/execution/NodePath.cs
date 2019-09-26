@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace tanka.graphql.execution
+namespace Tanka.GraphQL.Execution
 {
     public class NodePath
     {

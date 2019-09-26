@@ -9,5 +9,5 @@ Unions are created as instances of `UnionType`.
 
 Union with two possible values
 
-[{tanka.graphql.tests.type.UnionTypeFacts.Define_union}]
+[{Tanka.GraphQL.Tests.TypeSystem.UnionTypeFacts.Define_union}]
 

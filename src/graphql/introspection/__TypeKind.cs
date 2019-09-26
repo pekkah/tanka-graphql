@@ -1,4 +1,4 @@
-﻿namespace tanka.graphql.introspection
+﻿namespace Tanka.GraphQL.Introspection
 {
     // ReSharper disable once InconsistentNaming
     public enum __TypeKind

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public static class ExecutionResultExtensions
     {

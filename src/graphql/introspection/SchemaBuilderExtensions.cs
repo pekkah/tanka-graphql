@@ -3,10 +3,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using tanka.graphql.links;
-using tanka.graphql.schema;
+using Tanka.GraphQL.Linking;
+using Tanka.GraphQL.SchemaBuilding;
 
-namespace tanka.graphql.introspection
+namespace Tanka.GraphQL.Introspection
 {
     public static class SchemaBuilderExtensions
     {

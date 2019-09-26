@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using tanka.graphql.channels;
-using tanka.graphql.resolvers;
-using tanka.graphql.samples.chat.data.domain;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.Samples.Chat.Data.Domain;
 
-namespace tanka.graphql.samples.chat.data
+namespace Tanka.GraphQL.Samples.Chat.Data
 {
     public interface IChat
     {

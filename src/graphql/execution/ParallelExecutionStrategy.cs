@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
-using tanka.graphql.type;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.execution
+namespace Tanka.GraphQL.Execution
 {
     public class ParallelExecutionStrategy : IExecutionStrategy
     {

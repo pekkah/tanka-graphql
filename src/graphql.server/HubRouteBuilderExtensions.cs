@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     public static class HubRouteBuilderExtensions
     {

@@ -1,7 +1,7 @@
 ﻿using System;
-using tanka.graphql.type;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public class VariableException : Exception
     {

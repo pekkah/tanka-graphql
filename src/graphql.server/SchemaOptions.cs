@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.requests;
-using tanka.graphql.type;
-using tanka.graphql.validation;
+using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     public class SchemaOptions
     {

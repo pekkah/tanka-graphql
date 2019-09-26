@@ -5,10 +5,10 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
-using tanka.graphql.channels;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.ValueResolution;
 
-namespace tanka.graphql.execution
+namespace Tanka.GraphQL.Execution
 {
     public static class Subscription
     {

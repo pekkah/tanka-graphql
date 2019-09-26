@@ -6,13 +6,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
-using tanka.graphql.server.webSockets;
-using tanka.graphql.server.webSockets.dtos;
+using Tanka.GraphQL.Server.WebSockets;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Xunit;
 
 // ReSharper disable InconsistentNaming
 
-namespace tanka.graphql.server.tests.webSockets
+namespace Tanka.GraphQL.Server.Tests.WebSockets
 {
     public class GraphQLWSProtocolFacts
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public class ValidationException : Exception
     {

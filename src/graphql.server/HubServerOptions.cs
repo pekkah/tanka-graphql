@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     public class HubServerOptions
     {

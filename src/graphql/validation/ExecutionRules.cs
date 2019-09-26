@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.execution;
-using tanka.graphql.type;
-using tanka.graphql.type.converters;
+using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public static class ExecutionRules
     {

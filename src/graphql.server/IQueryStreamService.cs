@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using tanka.graphql.requests;
+using Tanka.GraphQL.DTOs;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     public interface IQueryStreamService
     {

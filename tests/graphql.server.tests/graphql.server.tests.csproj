@@ -7,7 +7,7 @@
 
     <AssemblyName>tanka.graphql.server.tests</AssemblyName>
 
-    <RootNamespace>tanka.graphql.server.tests</RootNamespace>
+    <RootNamespace>Tanka.GraphQL.Server.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

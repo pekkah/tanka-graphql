@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
-using tanka.graphql.type;
-using tanka.graphql.validation;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 using Xunit;
 
-namespace tanka.graphql.tests.validation
+namespace Tanka.GraphQL.Tests.Validation
 {
     public class ValidatorFacts
     {

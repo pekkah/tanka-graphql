@@ -7,9 +7,9 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using tanka.graphql.server.webSockets.dtos;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 
-namespace tanka.graphql.server.webSockets
+namespace Tanka.GraphQL.Server.WebSockets
 {
     public class MessageServer
     {

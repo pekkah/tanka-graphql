@@ -1,6 +1,6 @@
 ﻿using System.Threading.Channels;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     public class QueryStream
     {

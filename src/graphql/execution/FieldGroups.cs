@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.resolvers;
-using tanka.graphql.type;
 using GraphQLParser.AST;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.execution
+namespace Tanka.GraphQL.Execution
 {
     public static class FieldGroups
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace tanka.graphql.samples.chat.data.domain
+namespace Tanka.GraphQL.Samples.Chat.Data.Domain
 {
     public class From
     {

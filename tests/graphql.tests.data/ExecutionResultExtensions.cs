@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Xunit;
 
-namespace tanka.graphql.tests.data
+namespace Tanka.GraphQL.Tests.Data
 {
     public static class ExecutionResultExtensions
     {

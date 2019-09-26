@@ -13,7 +13,7 @@ Schema creation includes following steps:
 2. Create query root type
 3. Build schema
 
-[{tanka.graphql.tutorials.gettingStarted.GettingStarted.Part1_CreateSchema}]
+[{Tanka.GraphQL.Tutorials.GettingStarted.GettingStarted.Part1_CreateSchema}]
 
 
 

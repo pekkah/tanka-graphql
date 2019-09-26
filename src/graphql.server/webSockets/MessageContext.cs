@@ -1,7 +1,7 @@
 ﻿using System.Threading.Channels;
-using tanka.graphql.server.webSockets.dtos;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 
-namespace tanka.graphql.server.webSockets
+namespace Tanka.GraphQL.Server.WebSockets
 {
     public class MessageContext
     {

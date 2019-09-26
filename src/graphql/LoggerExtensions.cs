@@ -1,9 +1,9 @@
 ﻿using System;
-using tanka.graphql.validation;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
+using Tanka.GraphQL.Validation;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     internal static class LoggerExtensions
     {

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using GraphQLParser.AST;
-using tanka.graphql.type;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public interface IRuleVisitorContext 
     {

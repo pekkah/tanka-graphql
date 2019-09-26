@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using graphql.server.tests.host;
+using Tanka.GraphQL.Server.Tests.Host;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using tanka.graphql.requests;
+using Tanka.GraphQL.DTOs;
 using Xunit;
 
-namespace tanka.graphql.server.tests
+namespace Tanka.GraphQL.Server.Tests
 {
     public class ServerFacts : IClassFixture<WebApplicationFactory<Startup>>
     {

@@ -9,4 +9,4 @@ NonNulls are created as instances of `NonNull`.
 
 NonNull is created by giving it itemType it will apply to.
 
-[{tanka.graphql.tests.type.NonNullFacts.Define_NonNull}]
+[{Tanka.GraphQL.Tests.TypeSystem.NonNullFacts.Define_NonNull}]

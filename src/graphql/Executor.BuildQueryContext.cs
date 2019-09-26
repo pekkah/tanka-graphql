@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using tanka.graphql.execution;
-using tanka.graphql.language;
-using tanka.graphql.validation;
+using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Validation;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public static partial class Executor
     {

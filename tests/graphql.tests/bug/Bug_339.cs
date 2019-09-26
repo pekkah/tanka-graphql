@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.introspection;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
+using Tanka.GraphQL.Introspection;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
 using Xunit;
 
-namespace tanka.graphql.tests.bug
+namespace Tanka.GraphQL.Tests.Bug
 {
     public class Bug_339
     {
