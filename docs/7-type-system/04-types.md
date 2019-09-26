@@ -10,15 +10,15 @@ Following types are supported:
 - `EnumType`
 - `InputObjectType`
 
-These all exists in `tanka.graphql.type` namespace and implement `INamedType` interface
+These all exists in `Tanka.GraphQL.type` namespace and implement `INamedType` interface
 
-[{tanka.graphql.type.INamedType}]
+[{Tanka.GraphQL.TypeSystem.INamedType}]
 
 ### Wrapping types
 
 Wrapping types implement the `IWrappingType`
 
-[{tanka.graphql.type.IWrappingType}]
+[{Tanka.GraphQL.TypeSystem.IWrappingType}]
 
 Two built-in implementations are provided
 - `List`
@@ -29,15 +29,15 @@ Two built-in implementations are provided
 
 Is input type?
 
-[{tanka.graphql.tests.execution.TypeIsFacts.IsInputType}]
+[{Tanka.GraphQL.Tests.Execution.TypeIsFacts.IsInputType}]
 
-[{tanka.graphql.tests.execution.TypeIsFacts.ValidInputTypes}]
+[{Tanka.GraphQL.Tests.Execution.TypeIsFacts.ValidInputTypes}]
 
 
 Is output type?
 
-[{tanka.graphql.tests.execution.TypeIsFacts.IsOutputType}]
+[{Tanka.GraphQL.Tests.Execution.TypeIsFacts.IsOutputType}]
 
-[{tanka.graphql.tests.execution.TypeIsFacts.ValidOutputTypes}]
+[{Tanka.GraphQL.Tests.Execution.TypeIsFacts.ValidOutputTypes}]
 
 

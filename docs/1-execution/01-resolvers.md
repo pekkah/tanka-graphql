@@ -3,10 +3,10 @@
 Resolving values is done with two specialized delegates. One is used resolving values and one for subscribing to streams when using subscriptions.
 
 Resolve fields
-[{tanka.graphql.resolvers.Resolver}]
+[{Tanka.GraphQL.ValueResolution.Resolver}]
 
 Resolve subscription event streams
-[{tanka.graphql.resolvers.Subscriber}]
+[{Tanka.GraphQL.ValueResolution.Subscriber}]
 
 
 ### Resolver
@@ -33,19 +33,19 @@ When executing subscription the `Subscriber` is used to resolve the event stream
 
 Resolvers can be configured when creating fields. This configuration is used to build the actual resolver when `Schema` is built.
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Field_Resolver}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Field_Resolver}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Field_Subscriber}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Field_Subscriber}]
 
 Resolver middlwares can be used to build an execution chain. 
 
 Middlwares are implemented as a delegate method taking in the context and delegate for the next middlware to execute. Last link in the chain is usually the actual resolver but chain can be also interrupted before it by returning a result from the middleware.
 
 Signature of the value resolver middlware:
-[{tanka.graphql.resolvers.ResolverMiddleware}]
+[{Tanka.GraphQL.ValueResolution.ResolverMiddleware}]
 
 Signature of the subscription middlware:
-[{tanka.graphql.resolvers.SubscriberMiddleware}]
+[{Tanka.GraphQL.ValueResolution.SubscriberMiddleware}]
 
 
 
@@ -53,10 +53,10 @@ Signature of the subscription middlware:
 
 In some cases it's useful to be able to build the resolvers separately from the schema building. For that purpose `SchemaTools` provide a method to bind resolvers to fields by using `IResolverMap` and `ISubscriberMap`.
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Make_executable_schema}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Make_executable_schema}]
 
 Dictionary based implementation is provided for setting up both resolvers and subscribers but other implementations can be easily provided. 
 
-[{tanka.graphql.IResolverMap}]
-[{tanka.graphql.ISubscriberMap}]
+[{Tanka.GraphQL.IResolverMap}]
+[{Tanka.GraphQL.ISubscriberMap}]
 

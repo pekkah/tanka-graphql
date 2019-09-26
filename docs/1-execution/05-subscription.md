@@ -4,7 +4,7 @@
 
 ### Execution
 
-[{tanka.graphql.tests.ExecutorFacts.Subscription}]
+[{Tanka.GraphQL.Tests.ExecutorFacts.Subscription}]
 
 
 ### Example
@@ -12,10 +12,10 @@
 These are the schema and resolvers used in the above section.
 
 Schema
-[{tanka.graphql.tests.ExecutorFacts.Sdl}]
+[{Tanka.GraphQL.Tests.ExecutorFacts.Sdl}]
 
 Initialization
 
-[{tanka.graphql.tests.ExecutorFacts.ExecutorFacts}]
+[{Tanka.GraphQL.Tests.ExecutorFacts.ExecutorFacts}]
 
 

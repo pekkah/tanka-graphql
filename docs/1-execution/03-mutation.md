@@ -4,9 +4,9 @@
 
 ### Execution
 
-[{tanka.graphql.tests.ExecutorFacts.Mutation1}]
+[{Tanka.GraphQL.Tests.ExecutorFacts.Mutation1}]
 
-[{tanka.graphql.tests.ExecutorFacts.Mutation2}]
+[{Tanka.GraphQL.Tests.ExecutorFacts.Mutation2}]
 
 
 ### Example
@@ -14,8 +14,8 @@
 These are the schema and resolvers used in the above section.
 
 Schema
-[{tanka.graphql.tests.ExecutorFacts.Sdl}]
+[{Tanka.GraphQL.Tests.ExecutorFacts.Sdl}]
 
 Initialization
 
-[{tanka.graphql.tests.ExecutorFacts.ExecutorFacts}]
+[{Tanka.GraphQL.Tests.ExecutorFacts.ExecutorFacts}]

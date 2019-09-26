@@ -9,4 +9,4 @@ Lists are created as instances of `List`.
 
 List is created by giving it itemType it will contain.
 
-[{tanka.graphql.tests.type.ListFacts.Define_list}]
+[{Tanka.GraphQL.Tests.TypeSystem.ListFacts.Define_list}]

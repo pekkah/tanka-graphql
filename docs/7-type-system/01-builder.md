@@ -5,61 +5,61 @@
 
 ### Creating Root Types
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Query}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Query}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Mutation}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Mutation}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Subscription}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Subscription}]
 
 
 ### Creating types
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Object}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Object}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Interface}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Interface}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Union}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Union}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Enum}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Enum}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Scalar}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Scalar}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_InputObject}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_InputObject}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_DirectiveType}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_DirectiveType}]
 
 
 ### Build and validate schema
 
 > NotImplemented: future enhancement
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Build_and_validate_schema}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Build_and_validate_schema}]
 
 
 ### Connecting types using fields
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Object_field}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Object_field}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_Interface_field}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Interface_field}]
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Create_InputObject_field}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_InputObject_field}]
 
 
 ### Configuring new schema based on existing schema
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Use_existing_schema}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Use_existing_schema}]
 
 
 ### Merging schemas
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Merge_schemas}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Merge_schemas}]
 
 
 ### Making executable schema
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Make_executable_schema}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Make_executable_schema}]
 
 
 ### Special cases
 
-[{tanka.graphql.tests.type.SchemaBuilderFacts.Build_with_circular_reference_between_two_objects}]
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Build_with_circular_reference_between_two_objects}]

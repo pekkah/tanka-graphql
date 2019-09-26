@@ -8,11 +8,11 @@ Interfaces are created as instances of `InterfaceType`.
 
 Define with non-null scalar field
 
-[{tanka.graphql.tests.type.InterfaceTypeFacts.Define_interface}]
+[{Tanka.GraphQL.Tests.TypeSystem.InterfaceTypeFacts.Define_interface}]
 
 
 ### Implementing interface
 
 Object implements interface
 
-[{tanka.graphql.tests.type.InterfaceTypeFacts.Implement_interface}]
+[{Tanka.GraphQL.Tests.TypeSystem.InterfaceTypeFacts.Implement_interface}]
