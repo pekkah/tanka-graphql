@@ -1,11 +1,11 @@
 ﻿using System.Linq;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
-using tanka.graphql.tools;
-using tanka.graphql.type;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace tanka.graphql.tests.tools
+namespace Tanka.GraphQL.Tests.Tools
 {
     public class MergeSchemasFacts
     {

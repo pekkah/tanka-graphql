@@ -2,8 +2,8 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
 
 namespace Tanka.GraphQL.Samples.Chat.Data.IDL
 {
@@ -24,7 +24,7 @@ namespace Tanka.GraphQL.Samples.Chat.Data.IDL
         {
             var assembly = Assembly.GetExecutingAssembly();
             var resourceStream =
-                assembly.GetManifestResourceStream("Tanka.GraphQL.Samples.Chat.Data.idl.schema.graphql");
+                assembly.GetManifestResourceStream("Tanka.GraphQL.Samples.Chat.Data.IDL.schema.graphql");
             
             using var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8);

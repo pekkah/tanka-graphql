@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using tanka.graphql.resolvers;
-using tanka.graphql.schema;
-using tanka.graphql.type;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.directives
+namespace Tanka.GraphQL.Directives
 {
     public static class SchemaBuilderExtensions
     {

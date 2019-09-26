@@ -1,4 +1,4 @@
-﻿namespace tanka.graphql.introspection
+﻿namespace Tanka.GraphQL.Introspection
 {
     public class IntrospectionResult
     {

@@ -6,14 +6,14 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using graphql.server.tests.host;
+using Tanka.GraphQL.Server.Tests.Host;
 using Microsoft.AspNetCore.Mvc.Testing;
-using tanka.graphql.server.webSockets.dtos;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Xunit;
 
 // ReSharper disable InconsistentNaming
 
-namespace tanka.graphql.server.tests.webSockets
+namespace Tanka.GraphQL.Server.Tests.WebSockets
 {
     public class WebSocketServer_SendMessageFacts : WebSocketFactsBase
     {

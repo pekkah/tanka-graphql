@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Running;
 
-namespace tanka.graphql.benchmarks
+namespace Tanka.GraphQL.Benchmarks
 {
     public class Program
     {

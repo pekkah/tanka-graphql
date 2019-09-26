@@ -1,4 +1,4 @@
-﻿namespace tanka.graphql.server.webSockets
+﻿namespace Tanka.GraphQL.Server.WebSockets
 {
     public interface IMessageContextAccessor
     {

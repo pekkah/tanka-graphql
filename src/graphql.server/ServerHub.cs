@@ -2,10 +2,10 @@
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-using tanka.graphql.channels;
-using tanka.graphql.requests;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.DTOs;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     public class ServerHub : Hub
     {

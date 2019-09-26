@@ -5,13 +5,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
-using tanka.graphql.channels;
-using tanka.graphql.links;
-using tanka.graphql.resolvers;
-using tanka.graphql.schema;
-using tanka.graphql.type;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.Linking;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.tools
+namespace Tanka.GraphQL.Tools
 {
     public static class RemoteSchemaTools
     {

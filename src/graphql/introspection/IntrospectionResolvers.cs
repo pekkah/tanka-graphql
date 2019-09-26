@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using tanka.graphql.resolvers;
-using tanka.graphql.type;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.introspection
+namespace Tanka.GraphQL.Introspection
 {
     public class IntrospectionResolvers : ObjectTypeMap
     {

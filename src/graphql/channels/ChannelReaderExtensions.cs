@@ -2,7 +2,7 @@
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace tanka.graphql.channels
+namespace Tanka.GraphQL.Channels
 {
     public static class ChannelReaderExtensions
     {

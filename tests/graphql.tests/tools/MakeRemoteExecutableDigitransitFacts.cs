@@ -7,24 +7,24 @@ using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using tanka.graphql.introspection;
-using tanka.graphql.language;
-using tanka.graphql.links;
-using tanka.graphql.schema;
-using tanka.graphql.tests.data;
-using tanka.graphql.tools;
-using tanka.graphql.type;
-using tanka.graphql.type.converters;
+using Tanka.GraphQL.Introspection;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Linking;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.Tests.Data;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
 
-namespace tanka.graphql.tests.tools
+namespace Tanka.GraphQL.Tests.Tools
 {
     public class MakeRemoteExecutableDigitransitFacts
     {
         private static string GetDigitransitIntrospection()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceStream = assembly.GetManifestResourceStream("tanka.graphql.tests.digitransit.introspection");
+            var resourceStream = assembly.GetManifestResourceStream("Tanka.GraphQL.Tests.digitransit.introspection");
             using (var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
             {

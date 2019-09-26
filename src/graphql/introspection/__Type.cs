@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace tanka.graphql.introspection
+namespace Tanka.GraphQL.Introspection
 {
     // ReSharper disable once InconsistentNaming
     public class __Type : IEquatable<__Type>

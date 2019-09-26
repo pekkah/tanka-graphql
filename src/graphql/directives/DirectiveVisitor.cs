@@ -1,4 +1,4 @@
-﻿namespace tanka.graphql.directives
+﻿namespace Tanka.GraphQL.Directives
 {
     public class DirectiveVisitor
     {

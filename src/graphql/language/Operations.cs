@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using GraphQLParser.AST;
 
-namespace tanka.graphql.language
+namespace Tanka.GraphQL.Language
 {
     public static class Operations
     {

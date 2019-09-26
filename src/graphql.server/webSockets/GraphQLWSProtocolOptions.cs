@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using tanka.graphql.server.webSockets.dtos;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 
-namespace tanka.graphql.server.webSockets
+namespace Tanka.GraphQL.Server.WebSockets
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class GraphQLWSProtocolOptions

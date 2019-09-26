@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public class ExtensionData
     {

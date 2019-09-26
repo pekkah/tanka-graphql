@@ -1,7 +1,7 @@
-﻿using tanka.graphql.type;
-using GraphQLParser.AST;
+﻿using GraphQLParser.AST;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public struct VariableUsage
     {

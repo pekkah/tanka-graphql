@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using Xunit;
 
-namespace tanka.graphql.tests.data
+namespace Tanka.GraphQL.Tests.Data
 {
     public static class TestHelpers
     {

@@ -2,7 +2,7 @@
 using System.Linq;
 using GraphQLParser.AST;
 
-namespace tanka.graphql.sdl
+namespace Tanka.GraphQL.SDL
 {
     public static class TypeDefinitionEnumerableExtensions
     {

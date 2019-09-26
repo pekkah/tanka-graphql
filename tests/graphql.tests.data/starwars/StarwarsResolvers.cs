@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using tanka.graphql.resolvers;
-using tanka.graphql.type;
-using static tanka.graphql.resolvers.Resolve;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.TypeSystem;
+using static Tanka.GraphQL.ValueResolution.Resolve;
 
-namespace tanka.graphql.tests.data.starwars
+namespace Tanka.GraphQL.Tests.Data.Starwars
 {
     public class StarwarsResolvers
     {

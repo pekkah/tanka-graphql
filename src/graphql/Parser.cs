@@ -2,7 +2,7 @@
 using GraphQLParser;
 using GraphQLParser.AST;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public static class Parser
     {

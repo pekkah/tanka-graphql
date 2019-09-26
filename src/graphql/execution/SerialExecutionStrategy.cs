@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using tanka.graphql.type;
 using GraphQLParser.AST;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.execution
+namespace Tanka.GraphQL.Execution
 {
     public class SerialExecutionStrategy : IExecutionStrategy
     {

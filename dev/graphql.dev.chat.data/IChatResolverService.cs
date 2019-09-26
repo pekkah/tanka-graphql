@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Samples.Chat.Data
 {

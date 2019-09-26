@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
-using tanka.graphql.execution;
-using tanka.graphql.type;
+using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public class TypeTracker : RuleVisitor
     {

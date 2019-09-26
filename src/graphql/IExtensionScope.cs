@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using GraphQLParser.AST;
-using tanka.graphql.resolvers;
-using tanka.graphql.validation;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.Validation;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public interface IExtensionScope
     {

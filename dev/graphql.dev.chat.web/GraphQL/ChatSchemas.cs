@@ -1,8 +1,8 @@
-using tanka.graphql.extensions.analysis;
+using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.Samples.Chat.Data;
 using Tanka.GraphQL.Samples.Chat.Data.IDL;
-using tanka.graphql.tools;
-using tanka.graphql.type;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Samples.Chat.Web.GraphQL
 {

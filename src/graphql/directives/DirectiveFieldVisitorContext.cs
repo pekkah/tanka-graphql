@@ -1,8 +1,8 @@
 ﻿using System;
-using tanka.graphql.resolvers;
-using tanka.graphql.type;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.directives
+namespace Tanka.GraphQL.Directives
 {
     public class DirectiveFieldVisitorContext: IEquatable<DirectiveFieldVisitorContext>
     {

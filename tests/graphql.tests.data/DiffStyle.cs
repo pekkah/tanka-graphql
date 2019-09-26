@@ -1,4 +1,4 @@
-namespace tanka.graphql.tests.data
+namespace Tanka.GraphQL.Tests.Data
 {
     public enum DiffStyle
     {

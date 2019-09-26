@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace tanka.graphql.introspection
+namespace Tanka.GraphQL.Introspection
 {
     public static class IntrospectionParser
     {

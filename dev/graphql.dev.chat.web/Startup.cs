@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using tanka.graphql.extensions.analysis;
+using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.Samples.Chat.Data;
 using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
-using tanka.graphql.server;
-using tanka.graphql.type;
-using tanka.graphql.validation;
+using Tanka.GraphQL.Server;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Samples.Chat.Web
 {

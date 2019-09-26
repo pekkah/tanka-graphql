@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using tanka.graphql.requests;
+using Tanka.GraphQL.DTOs;
 
-namespace tanka.graphql.server.webSockets.dtos
+namespace Tanka.GraphQL.Server.WebSockets.DTOs
 {
     [DataContract]
     public class OperationMessage : IEquatable<OperationMessage>

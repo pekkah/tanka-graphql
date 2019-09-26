@@ -1,7 +1,7 @@
 ﻿using System.Threading;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.ValueResolution;
 
-namespace tanka.graphql.channels
+namespace Tanka.GraphQL.Channels
 {
     public class PoliteEventChannel<T> : EventChannel<T>
     {

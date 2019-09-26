@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.ValueResolution;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public class ObjectTypeMap : Dictionary<string, FieldResolversMap>, IResolverMap, ISubscriberMap
     {

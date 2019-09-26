@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using tanka.graphql.resolvers;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
-using tanka.graphql.tests.data;
-using tanka.graphql.tools;
-using tanka.graphql.type;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.Tests.Data;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace tanka.graphql.tests
+namespace Tanka.GraphQL.Tests
 {
     public class ExecutorFacts
     {

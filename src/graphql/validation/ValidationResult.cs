@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace tanka.graphql.validation
+namespace Tanka.GraphQL.Validation
 {
     public class ValidationResult
     {

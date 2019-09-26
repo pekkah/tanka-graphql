@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using tanka.graphql.requests;
+using Tanka.GraphQL.DTOs;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     /// <summary>
     ///     Result of query, mutation or value of one value in the

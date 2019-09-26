@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using tanka.graphql.resolvers;
-using tanka.graphql.type;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     public interface ISubscriberMap
     {

@@ -2,11 +2,11 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
 using Xunit;
 
-namespace tanka.graphql.tests.sdl
+namespace Tanka.GraphQL.Tests.SDL
 {
     public class GithubSchemaFacts
     {

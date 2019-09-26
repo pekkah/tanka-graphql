@@ -1,8 +1,8 @@
 ﻿using System.Threading;
-using tanka.graphql.channels;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.ValueResolution;
 
-namespace tanka.graphql.benchmarks
+namespace Tanka.GraphQL.Benchmarks
 {
     public class SingleValueEventChannel : EventChannel<string>
     {

@@ -4,15 +4,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using tanka.graphql.requests;
-using tanka.graphql.resolvers;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
-using tanka.graphql.server;
-using tanka.graphql.tools;
-using tanka.graphql.type;
+using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.Server;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.tutorials.gettingStarted
+namespace Tanka.GraphQL.Tutorials.GettingStarted
 {
     public class GettingStartedServer
     {

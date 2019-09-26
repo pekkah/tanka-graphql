@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using tanka.graphql.channels;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.ValueResolution;
 
-namespace tanka.graphql.tests
+namespace Tanka.GraphQL.Tests
 {
     public class EventsModel
     {

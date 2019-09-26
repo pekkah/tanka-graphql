@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using tanka.graphql.type;
-using tanka.graphql.validation;
 using GraphQLParser.AST;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 
-namespace tanka.graphql.benchmarks
+namespace Tanka.GraphQL.Benchmarks
 {
     [MarkdownExporterAttribute.GitHub()]
     public class Benchmarks

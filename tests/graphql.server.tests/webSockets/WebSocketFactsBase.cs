@@ -5,16 +5,16 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using graphql.server.tests.host;
+using Tanka.GraphQL.Server.Tests.Host;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
-using tanka.graphql.server.webSockets;
-using tanka.graphql.server.webSockets.dtos;
+using Tanka.GraphQL.Server.WebSockets;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Xunit;
 
-namespace tanka.graphql.server.tests.webSockets
+namespace Tanka.GraphQL.Server.Tests.WebSockets
 {
     public abstract class WebSocketFactsBase : IClassFixture<WebApplicationFactory<Startup>>
     {

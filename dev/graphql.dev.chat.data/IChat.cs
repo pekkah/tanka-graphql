@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using tanka.graphql.channels;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.Samples.Chat.Data.Domain;
 
 namespace Tanka.GraphQL.Samples.Chat.Data

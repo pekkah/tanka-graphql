@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using tanka.graphql.language;
-using tanka.graphql.requests;
-using tanka.graphql.validation;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.Validation;
 
-namespace tanka.graphql.server
+namespace Tanka.GraphQL.Server
 {
     public class QueryStreamService : IQueryStreamService
     {
@@ -80,7 +80,7 @@ namespace tanka.graphql.server
         }
 
         private async Task<QueryStream> ExecuteAsync(
-            graphql.ExecutionOptions options,
+            ExecutionOptions options,
             CancellationToken cancellationToken)
         {
             var result = await Executor.ExecuteAsync(options, cancellationToken);
@@ -94,7 +94,7 @@ namespace tanka.graphql.server
         }
 
         private async Task<QueryStream> SubscribeAsync(
-            graphql.ExecutionOptions options,
+            ExecutionOptions options,
             CancellationToken cancellationToken)
         {
             if (!cancellationToken.CanBeCanceled)

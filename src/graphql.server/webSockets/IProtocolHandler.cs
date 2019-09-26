@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace tanka.graphql.server.webSockets
+namespace Tanka.GraphQL.Server.WebSockets
 {
     public interface IProtocolHandler
     {

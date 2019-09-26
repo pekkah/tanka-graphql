@@ -1,7 +1,7 @@
-﻿using tanka.graphql.schema;
-using tanka.graphql.type;
+﻿using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.TypeSystem;
 
-namespace tanka.graphql.tools
+namespace Tanka.GraphQL.Tools
 {
     public static class MergeSchemaBuilderExtensions
     {

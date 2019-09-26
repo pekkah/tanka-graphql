@@ -1,8 +1,7 @@
 ﻿using GraphQLParser.AST;
-using tanka.graphql.schema;
-using tanka.graphql.type;
+using Tanka.GraphQL.SchemaBuilding;
 
-namespace tanka.graphql.sdl
+namespace Tanka.GraphQL.SDL
 {
     public static class SchemaBuilderExtensions
     {

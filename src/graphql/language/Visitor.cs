@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using GraphQLParser.AST;
 
-namespace tanka.graphql.language
+namespace Tanka.GraphQL.Language
 {
     public class Visitor
     {

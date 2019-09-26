@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Channels;
 using Newtonsoft.Json;
 
-namespace tanka.graphql
+namespace Tanka.GraphQL
 {
     /// <summary>
     ///     Result of executing a subscription

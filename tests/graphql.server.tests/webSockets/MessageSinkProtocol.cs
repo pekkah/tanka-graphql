@@ -1,9 +1,9 @@
 ﻿using System.Threading.Channels;
 using System.Threading.Tasks;
-using tanka.graphql.server.webSockets;
-using tanka.graphql.server.webSockets.dtos;
+using Tanka.GraphQL.Server.WebSockets;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 
-namespace tanka.graphql.server.tests.webSockets
+namespace Tanka.GraphQL.Server.Tests.WebSockets
 {
     public class MessageSinkProtocol : IProtocolHandler
     {

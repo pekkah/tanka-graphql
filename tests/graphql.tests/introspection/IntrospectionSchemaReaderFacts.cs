@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using tanka.graphql.introspection;
-using tanka.graphql.schema;
-using tanka.graphql.type;
+using Tanka.GraphQL.Introspection;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace tanka.graphql.tests.introspection
+namespace Tanka.GraphQL.Tests.Introspection
 {
     public class IntrospectionSchemaReaderFacts
     {

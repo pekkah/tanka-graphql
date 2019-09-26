@@ -1,23 +1,17 @@
-﻿using System.Collections.Concurrent;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using tanka.graphql;
-using tanka.graphql.resolvers;
-using tanka.graphql.server;
-using tanka.graphql.tools;
-using tanka.graphql.type;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Internal;
-using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
-using tanka.graphql.channels;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
-using tanka.graphql.server.webSockets;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 
-namespace graphql.server.tests.host
+namespace Tanka.GraphQL.Server.Tests.Host
 {
     public class Startup
     {
@@ -61,7 +55,7 @@ namespace graphql.server.tests.host
             var resolvers = new ObjectTypeMap
             {
                 {
-                    "Event", new FieldResolversMap()
+                    "Event", new FieldResolversMap
                     {
                         {"type", Resolve.PropertyOf<Event>(ev => ev.Type)},
                         {"message", Resolve.PropertyOf<Event>(ev => ev.Message)}
@@ -74,9 +68,10 @@ namespace graphql.server.tests.host
                     }
                 },
                 {
-                    "Mutation", new FieldResolversMap()
+                    "Mutation", new FieldResolversMap
                     {
-                        {"add", async context =>
+                        {
+                            "add", async context =>
                             {
                                 var input = context.GetArgument<InputEvent>("event");
                                 var ev = await eventManager.Add(input.Type, input.Message);
@@ -90,7 +85,7 @@ namespace graphql.server.tests.host
                     "Subscription", new FieldResolversMap
                     {
                         {
-                            "events", (context,ct) =>
+                            "events", (context, ct) =>
                             {
                                 var events = eventManager.Subscribe(ct);
                                 return new ValueTask<ISubscribeResult>(events);
@@ -102,8 +97,8 @@ namespace graphql.server.tests.host
             };
 
             var executable = SchemaTools.MakeExecutableSchemaWithIntrospection(
-                builder, 
-                resolvers, 
+                builder,
+                resolvers,
                 resolvers);
 
             services.AddSingleton(provider => executable);
@@ -126,10 +121,7 @@ namespace graphql.server.tests.host
             app.UseWebSockets();
             app.UseTankaWebSocketServer();
 
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<ServerHub>(new PathString("/graphql"));
-            });
+            app.UseSignalR(routes => { routes.MapHub<ServerHub>(new PathString("/graphql")); });
         }
     }
 
@@ -151,7 +143,7 @@ namespace graphql.server.tests.host
 
         public EventManager()
         {
-            _channel = new PoliteEventChannel<Event>(new Event()
+            _channel = new PoliteEventChannel<Event>(new Event
             {
                 Type = "welcome",
                 Message = "Welcome"
@@ -160,7 +152,7 @@ namespace graphql.server.tests.host
 
         public async Task<Event> Add(string type, string message)
         {
-            var ev = new Event()
+            var ev = new Event
             {
                 Type = type,
                 Message = message
