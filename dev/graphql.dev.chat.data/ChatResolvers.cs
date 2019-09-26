@@ -1,7 +1,8 @@
-﻿using tanka.graphql.samples.chat.data.domain;
+﻿using tanka.graphql;
+using Tanka.GraphQL.Samples.Chat.Data.Domain;
 using static tanka.graphql.resolvers.Resolve;
 
-namespace tanka.graphql.samples.chat.data
+namespace Tanka.GraphQL.Samples.Chat.Data
 {
     public class ChatResolvers : ObjectTypeMap
     {
@@ -12,7 +13,7 @@ namespace tanka.graphql.samples.chat.data
                 {"messages", resolverService.GetMessagesAsync}
             };
 
-            this["Mutation"] = new FieldResolversMap()
+            this["Mutation"] = new FieldResolversMap
             {
                 {"addMessage", resolverService.AddMessageAsync},
                 {"editMessage", resolverService.EditMessageAsync}
@@ -23,7 +24,7 @@ namespace tanka.graphql.samples.chat.data
                 {"messages", resolverService.StreamMessagesAsync, resolverService.ResolveMessageAsync}
             };
 
-            this["Message"] = new FieldResolversMap()
+            this["Message"] = new FieldResolversMap
             {
                 {"id", PropertyOf<Message>(m => m.Id)},
                 {"from", PropertyOf<Message>(m => m.From)},
@@ -31,7 +32,7 @@ namespace tanka.graphql.samples.chat.data
                 {"timestamp", PropertyOf<Message>(m => m.Timestamp)}
             };
 
-            this["From"] = new FieldResolversMap()
+            this["From"] = new FieldResolversMap
             {
                 {"userId", PropertyOf<From>(f => f.UserId)},
                 {"name", PropertyOf<From>(f => f.Name)}

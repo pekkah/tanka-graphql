@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using tanka.graphql.requests;
-using tanka.graphql.samples.chat.web.GraphQL;
+using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
 using tanka.graphql.server;
 using static tanka.graphql.Parser;
 
-namespace tanka.graphql.samples.chat.web.Controllers
+namespace Tanka.GraphQL.Samples.Chat.Web.Controllers
 {
     [Route("api/graphql")]
     public class QueryController : Controller

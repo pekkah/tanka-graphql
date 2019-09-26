@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
-namespace tanka.graphql.samples.chat.web.GraphQL
+namespace Tanka.GraphQL.Samples.Chat.Web.GraphQL
 {
     public class OperationRequest
     {

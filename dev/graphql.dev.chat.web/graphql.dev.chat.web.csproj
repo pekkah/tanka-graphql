@@ -5,8 +5,8 @@
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <IsPackable>false</IsPackable>
-    <AssemblyName>tanka.graphql.samples.chat.web</AssemblyName>
-    <RootNamespace>tanka.graphql.samples.chat.web</RootNamespace>
+    <AssemblyName>Tanka.GraphQL.Samples.Chat.Web</AssemblyName>
+    <RootNamespace>Tanka.GraphQL.Samples.Chat.Web</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>tanka.graphql.samples.chat.data</AssemblyName>
-    <RootNamespace>tanka.graphql.samples.chat.data</RootNamespace>
+    <AssemblyName>Tanka.GraphQL.Samples.Chat.Data</AssemblyName>
+    <RootNamespace>Tanka.GraphQL.Samples.Chat.Data</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="idl\schema.graphql" />
+    <EmbeddedResource Include="IDL\schema.graphql" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using tanka.graphql.channels;
 using tanka.graphql.type;
 
@@ -32,10 +31,10 @@ namespace tanka.graphql.resolvers
             {
                 var source = context.ObjectValue is T objectValue ? objectValue : default;
 
-                if (source == null) return new ValueTask<IResolveResult>(As(null));
+                if (source == null) return ResolveSync.As(null);
 
                 var value = getValue(source);
-                return new ValueTask<IResolveResult>(As(value));
+                return ResolveSync.As(value);
             };
         }
 
@@ -45,14 +44,14 @@ namespace tanka.graphql.resolvers
             {
                 var source = context.ObjectValue is T objectValue ? objectValue : default;
 
-                if (source == null) return new ValueTask<IResolveResult>(As(null));
+                if (source == null) return ResolveSync.As(null);
 
                 var values = getValue(source);
 
                 if (values == null)
-                    return new ValueTask<IResolveResult>(As(null));
+                    return ResolveSync.As(null);
 
-                return new ValueTask<IResolveResult>(As(values.Select(As)));
+                return ResolveSync.As(values.Select(As));
             };
         }
 
