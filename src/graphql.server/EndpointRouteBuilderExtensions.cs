@@ -1,15 +1,15 @@
 ﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Connections;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Routing;
 
 namespace Tanka.GraphQL.Server
 {
-    public static class HubRouteBuilderExtensions
+    public static class EndpointRouteBuilderExtensions
     {
-        [Obsolete("Use endpoints")]
         public static void MapTankaServerHub(
-            this HubRouteBuilder routes,
+            this IEndpointRouteBuilder routes,
             PathString route,
             Action<HttpConnectionDispatcherOptions> configureOptions = null)
         {

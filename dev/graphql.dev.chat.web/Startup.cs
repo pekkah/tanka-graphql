@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.Samples.Chat.Data;
 using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
@@ -29,7 +30,8 @@ namespace Tanka.GraphQL.Samples.Chat.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddControllers()
+                .AddNewtonsoftJson();
 
             // graphql
             services.AddSingleton<IChat, Data.Chat>();
@@ -52,6 +54,8 @@ namespace Tanka.GraphQL.Samples.Chat.Web
 
             // signalr server
             services.AddSignalR(options => options.EnableDetailedErrors = true)
+                // This is required by DTOs 
+                .AddNewtonsoftJsonProtocol()
                 // add GraphQL query streaming hub
                 .AddTankaServerHubWithTracing();
 
@@ -78,7 +82,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             });
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -108,10 +112,12 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             });
 
             // signalr server
-            app.UseSignalR(routes => routes.MapTankaServerHub("/graphql",
-                options => { options.Transports = HttpTransportType.ServerSentEvents; }));
-
-            app.UseMvc();
+            app.UseRouting();
+            app.UseEndpoints(routes =>
+            {
+                routes.MapTankaServerHub("/graphql");
+                routes.MapControllers();
+            });
         }
     }
 }

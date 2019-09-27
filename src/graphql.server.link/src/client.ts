@@ -8,7 +8,7 @@ import {
   HubConnection,
   HubConnectionBuilder,
   IHttpConnectionOptions
-} from "@aspnet/signalr";
+} from "@microsoft/signalr";
 
 import { Request } from "./request";
 import { Subscription } from "./subscription";

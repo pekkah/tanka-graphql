@@ -29,6 +29,7 @@ namespace Tanka.GraphQL.Server.Tests
         private HubConnection Connect()
         {
             var connection = new HubConnectionBuilder()
+                .AddNewtonsoftJsonProtocol()
                 .WithUrl(new Uri(_server.BaseAddress, "graphql"),
                     o => { o.HttpMessageHandlerFactory = _ => _server.CreateHandler(); })
                 .Build();

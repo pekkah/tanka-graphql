@@ -70,11 +70,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
         private static void UseSignalRServer(IApplicationBuilder app)
         {
             // add SignalR
-            app.UseSignalR(routes =>
-            {
-                // Map SignalR server hub to route
-                routes.MapTankaServerHub("/graphql/hub");
-            });
+            app.UseEndpoints(routes => { routes.MapTankaServerHub("/graphql/hub"); });
         }
 
         private static void AddSchemaOptions(IServiceCollection services)
@@ -92,6 +88,8 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
         {
             // Configure SignalR server
             services.AddSignalR()
+                // Tanka DTOs still use Newtonsoft.Json properties so this is required
+                .AddNewtonsoftJsonProtocol()
                 // Add SignalR server hub
                 .AddTankaServerHub();
         }

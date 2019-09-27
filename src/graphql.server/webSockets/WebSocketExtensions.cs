@@ -8,51 +8,23 @@ namespace Tanka.GraphQL.Server.WebSockets
 {
     internal static class WebSocketExtensions
     {
-        public static ValueTask SendAsync(this WebSocket webSocket, ReadOnlySequence<byte> buffer, WebSocketMessageType webSocketMessageType, CancellationToken cancellationToken = default)
+        public static ValueTask SendAsync(this WebSocket webSocket, ReadOnlySequence<byte> buffer,
+            WebSocketMessageType webSocketMessageType, CancellationToken cancellationToken = default)
         {
-#if NETCOREAPP2_2
             if (buffer.IsSingleSegment)
-            {
-                return webSocket.SendAsync(buffer.First, webSocketMessageType, endOfMessage: true, cancellationToken);
-            }
-            else
-            {
-                return SendMultiSegmentAsync(webSocket, buffer, webSocketMessageType, cancellationToken);
-            }
-#else
-            if (buffer.IsSingleSegment)
-            {
-                var isArray = MemoryMarshal.TryGetArray(buffer.First, out var segment);
-                Debug.Assert(isArray);
-                return new ValueTask(webSocket.SendAsync(segment, webSocketMessageType, endOfMessage: true, cancellationToken));
-            }
-            else
-            {
-                return SendMultiSegmentAsync(webSocket, buffer, webSocketMessageType, cancellationToken);
-            }
-#endif
+                return webSocket.SendAsync(buffer.First, webSocketMessageType, true, cancellationToken);
+            return SendMultiSegmentAsync(webSocket, buffer, webSocketMessageType, cancellationToken);
         }
 
-        private static async ValueTask SendMultiSegmentAsync(WebSocket webSocket, ReadOnlySequence<byte> buffer, WebSocketMessageType webSocketMessageType, CancellationToken cancellationToken = default)
+        private static async ValueTask SendMultiSegmentAsync(WebSocket webSocket, ReadOnlySequence<byte> buffer,
+            WebSocketMessageType webSocketMessageType, CancellationToken cancellationToken = default)
         {
             var position = buffer.Start;
             while (buffer.TryGet(ref position, out var segment))
-            {
-#if NETCOREAPP2_2
-                await webSocket.SendAsync(segment, webSocketMessageType, endOfMessage: false, cancellationToken);
-#else
-                var isArray = MemoryMarshal.TryGetArray(segment, out var arraySegment);
-                Debug.Assert(isArray);
-                await webSocket.SendAsync(arraySegment, webSocketMessageType, endOfMessage: false, cancellationToken);
-#endif
-            }
+                await webSocket.SendAsync(segment, webSocketMessageType, false, cancellationToken);
 
             // Empty end of message frame
-#if NETCOREAPP2_2
-            await webSocket.SendAsync(Memory<byte>.Empty, webSocketMessageType, endOfMessage: true, cancellationToken);
-#else
-            await webSocket.SendAsync(new ArraySegment<byte>(Array.Empty<byte>()), webSocketMessageType, endOfMessage: true, cancellationToken);
-#endif
+            await webSocket.SendAsync(Memory<byte>.Empty, webSocketMessageType, true, cancellationToken);
         }
     }
 }

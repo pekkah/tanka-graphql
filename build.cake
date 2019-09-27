@@ -10,7 +10,7 @@ var sln = Argument<string>("sln", "./tanka-graphql.sln");
 var fullBenchmarks = Argument<bool>("fullBenchmarks", false);
 
 var netstandard20 = "netstandard2.0";
-var netcoreapp21 = "netcoreapp2.1";
+var netcoreapp21 = "netcoreapp3.0";
 var projectFiles = GetFiles("./src/**/*.csproj")
 	.Select(f => f.FullPath);
 
@@ -187,7 +187,7 @@ Task("Benchmarks")
 	  foreach(var benchmark in projectFiles)
 	  {
 		  var args = ProcessArgumentBuilder.FromString(
-        $"run --project {benchmark} --configuration release --framework netcoreapp22 -- -i -m");
+        $"run --project {benchmark} --configuration release --framework netcoreapp30 -- -i -m");
 
       if (isMasterOrTag || fullBenchmarks)
         args.Append("--filter *");
