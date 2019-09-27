@@ -110,6 +110,7 @@ namespace Tanka.GraphQL.Server.Tests.Host
 
             services.AddTankaWebSocketServer();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
+                .AddNewtonsoftJsonProtocol()
                 .AddTankaServerHub();
         }
 
@@ -121,7 +122,11 @@ namespace Tanka.GraphQL.Server.Tests.Host
             app.UseWebSockets();
             app.UseTankaWebSocketServer();
 
-            app.UseSignalR(routes => { routes.MapHub<ServerHub>(new PathString("/graphql")); });
+            app.UseRouting();
+            app.UseEndpoints(routes =>
+            {
+                routes.MapTankaServerHub("/graphql");
+            });
         }
     }
 

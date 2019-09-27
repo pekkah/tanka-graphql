@@ -2,9 +2,9 @@ import {
   IStreamResult,
   IStreamSubscriber,
   ISubscription
-} from "@aspnet/signalr";
+} from "@microsoft/signalr";
 
-import PushStream from "zen-push"
+import PushStream from "zen-push";
 
 import { ExecutionResult } from "./execution-result";
 
@@ -37,7 +37,7 @@ export class Subscription implements IStreamSubscriber<ExecutionResult> {
       try {
         this.sub.dispose();
       } catch (e) {
-        // noop     
+        // noop
       } finally {
         this.sub = null;
       }

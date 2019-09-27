@@ -37,7 +37,7 @@
     "typescript": "^3.4.5"
   },
   "dependencies": {
-    "@aspnet/signalr": "^1.1.4",
+    "@microsoft/signalr": "^3.0.0",
     "apollo-link": "^1.2.11",
     "graphql": "^14.3.1",
     "zen-push": "^0.2.1"
