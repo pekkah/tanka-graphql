@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.Samples.Chat.Data;
 using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
@@ -29,7 +30,8 @@ namespace Tanka.GraphQL.Samples.Chat.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                .AddNewtonsoftJson();
 
             // graphql
             services.AddSingleton<IChat, Data.Chat>();
@@ -80,7 +82,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             });
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -110,6 +112,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             });
 
             // signalr server
+            app.UseRouting();
             app.UseEndpoints(routes =>
             {
                 routes.MapTankaServerHub("/graphql");
