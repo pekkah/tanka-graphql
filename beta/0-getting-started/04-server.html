@@ -312,6 +312,8 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
         {
             // Configure SignalR server
             services.AddSignalR()
+                // Tanka DTOs still use Newtonsoft.Json properties so this is required
+                .AddNewtonsoftJsonProtocol()
                 // Add SignalR server hub
                 .AddTankaServerHub();
         }
@@ -321,11 +323,7 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
         private static void UseSignalRServer(IApplicationBuilder app)
         {
             // add SignalR
-            app.UseSignalR(routes =&gt;
-            {
-                // Map SignalR server hub to route
-                routes.MapTankaServerHub(&quot;/graphql/hub&quot;);
-            });
+            app.UseEndpoints(routes =&gt; { routes.MapTankaServerHub(&quot;/graphql/hub&quot;); });
         }
 </code></pre></p>
 <p>Configure GraphQL WS server
