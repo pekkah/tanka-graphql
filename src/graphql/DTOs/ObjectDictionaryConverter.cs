@@ -10,74 +10,96 @@ namespace Tanka.GraphQL.DTOs
         public override Dictionary<string, object> Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
         {
-            var result = ReadDictionary(ref reader, options);
-
+            var result = ReadDictionary2(ref reader, options);
             return result;
         }
 
-        private Dictionary<string, object> ReadDictionary(ref Utf8JsonReader reader, JsonSerializerOptions options)
+        private Dictionary<string, object> ReadDictionary2(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            if (reader.TokenType != JsonTokenType.StartObject)
-                throw new InvalidOperationException($"Unexpected token type: {reader.TokenType}");
+            using var doc = JsonDocument.ParseValue(ref reader);
 
-            reader.Read();
+            return ReadDictionary(doc.RootElement, options);
+        }
 
+        private Dictionary<string, object> ReadDictionary(JsonElement element, JsonSerializerOptions options)
+        {
             var result = new Dictionary<string, object>();
-            while (reader.TokenType == JsonTokenType.PropertyName)
+            foreach (var property in element.EnumerateObject())
             {
-                if (reader.TokenType != JsonTokenType.PropertyName)
-                    throw new InvalidOperationException($"Unexpected token type: {reader.TokenType}");
+                var key = property.Name;
+                var value = property.Value;
+                object resultValue = null;
 
-                // key
-                var key = reader.GetString();
-                reader.Read();
-
-                // value
-                object value = null;
-                switch (reader.TokenType)
+                switch (value.ValueKind)
                 {
-                    case JsonTokenType.StartObject:
-                        value = ReadDictionary(ref reader, options);
+                    case JsonValueKind.Object:
+                        resultValue = ReadDictionary(value, options);
                         break;
-                    case JsonTokenType.Number:
-                        if (reader.TryGetInt32(out var i))
-                            value = i;
-                        else if (reader.TryGetDouble(out var d))
-                            value = d;
-                        else if (reader.TryGetDecimal(out var dd))
-                            value = dd;
-
-                        reader.Read();
+                    case JsonValueKind.Number:
+                        if (value.TryGetInt32(out var i))
+                            resultValue = i;
+                        else if (value.TryGetDouble(out var d))
+                            resultValue = d;
+                        else if (value.TryGetDecimal(out var dd))
+                            resultValue = dd;
                         break;
-                    case JsonTokenType.True:
-                    case JsonTokenType.False:
-                        value = reader.GetBoolean();
-                        reader.Read();
+                    case JsonValueKind.True:
+                    case JsonValueKind.False:
+                        resultValue = value.GetBoolean();
                         break;
-                    case JsonTokenType.String:
-                        value = reader.GetString();
-                        reader.Read();
+                    case JsonValueKind.String:
+                        resultValue = value.GetString();
                         break;
                     default:
-                        throw new InvalidOperationException($"Unexpected token type: {reader.TokenType}");
-                        break;
-
+                        throw new InvalidOperationException($"Unexpected value kind: {value.ValueKind}");
                 }
 
-                result[key] = value;
+                result[key] = resultValue;
             }
 
-            if (reader.TokenType != JsonTokenType.EndObject)
-                throw new InvalidOperationException($"Unexpected token type: {reader.TokenType}");
-
-            reader.Read();
             return result;
         }
+
 
         public override void Write(Utf8JsonWriter writer, Dictionary<string, object> value,
             JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize(writer, value, options);
+            WriteDictionary(writer, value, options);
+        }
+
+        private void WriteDictionary(Utf8JsonWriter writer, Dictionary<string, object> dictionary, JsonSerializerOptions options)
+        {
+            writer.WriteStartObject();
+
+            foreach (var entry in dictionary)
+            {
+                var value = entry.Value;
+
+                switch (value)
+                {
+                    case int intValue:
+                        writer.WriteNumber(entry.Key, intValue);
+                        break;
+                    case double doubleValue:
+                        writer.WriteNumber(entry.Key, doubleValue);
+                        break;
+                    case decimal decimalValue:
+                        writer.WriteNumber(entry.Key, decimalValue);
+                        break;
+                    case string stringValue: 
+                        writer.WriteString(entry.Key, stringValue);
+                        break;
+                    case bool boolValue:
+                        writer.WriteBoolean(entry.Key, boolValue);
+                        break;
+                    case Dictionary<string, object> subDictionary:
+                        WriteDictionary(writer, subDictionary, options);
+                        break;
+
+                }
+            }
+
+            writer.WriteEndObject();
         }
     }
 }
