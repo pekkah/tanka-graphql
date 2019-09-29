@@ -1,22 +1,18 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Tanka.GraphQL.DTOs
 {
     public class QueryRequest
     {
-        [JsonProperty("query")]
         public string Query { get; set; }
 
-        [JsonConverter(typeof(NestedDictionaryConverter))]
-        [JsonProperty("variables")]
+        [JsonConverter(typeof(ObjectDictionaryConverter))]
         public Dictionary<string, object> Variables { get; set; }
 
-        [JsonProperty("operationName")]
         public string OperationName { get; set; }
 
-        [JsonConverter(typeof(NestedDictionaryConverter))]
-        [JsonProperty("extensions")]
+        [JsonConverter(typeof(ObjectDictionaryConverter))]
         public Dictionary<string, object> Extensions { get; set; }
     }
 }

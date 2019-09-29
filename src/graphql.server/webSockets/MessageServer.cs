@@ -65,11 +65,6 @@ namespace Tanka.GraphQL.Server.WebSockets
             try
             {
                 var reader = _writeChannel.Reader;
-                output.OnReaderCompleted((err, state) =>
-                {
-                    _writeChannel.Writer.TryComplete(err);
-                }, null);
-
                 while (true)
                 {
                     if (!await reader.WaitToReadAsync(token))
