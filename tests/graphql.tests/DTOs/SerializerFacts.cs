@@ -71,9 +71,8 @@ namespace Tanka.GraphQL.Tests.DTOs
 
             /* Then */
             Assert.Equal("{ name }", request.Query);
-            var filter = (KeyValuePair<string, object>)request.Variables["filter"];
-            var filterDict = filter.Value as Dictionary<string, object>;
-            Assert.Equal("test", filterDict["property"]);
+            var filter = (Dictionary<string, object>) request.Variables["filter"];
+            Assert.Equal("test", filter["property"]);
         }
     }
 }

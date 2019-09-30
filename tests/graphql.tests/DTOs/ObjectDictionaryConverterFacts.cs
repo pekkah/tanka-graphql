@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Tanka.GraphQL.DTOs;
 using Xunit;
@@ -43,6 +44,23 @@ namespace Tanka.GraphQL.Tests.DTOs
             Assert.Equal(123.456, actual["double"]);
             Assert.Equal("string", actual["string"]);
             Assert.Equal(true, actual["bool"]);
+        }
+
+        [Fact]
+        public void Deserialize_Simple_Null()
+        {
+            /* Given */
+            var json = @"
+                {
+                    ""string"": null
+                }
+            ";
+
+            /* When */
+            var actual = JsonSerializer.Deserialize<Dictionary<string, object>>(json, _options);
+
+            /* Then */
+            Assert.Null(actual["string"]);
         }
 
         [Fact]
@@ -160,6 +178,73 @@ namespace Tanka.GraphQL.Tests.DTOs
                 json);
         }
 
+        [Fact]
+        public void Serialize_Nested_Simple_Null()
+        {
+            /* Given */
+            var source = new Nested()
+            {
+                Dictionary = new Dictionary<string, object>()
+                {
+                    ["string"] = null
+                },
+                Value2 = 123,
+                Value1 = "string"
+            };
+
+            /* When */
+            var json = JsonSerializer.Serialize(source, _options);
+
+            /* Then */
+            Assert.Equal(
+                @"{
+  ""value1"": ""string"",
+  ""dictionary"": {
+    ""string"": null
+  },
+  ""value2"": 123
+}".Trim(),
+                json);
+        }
+
+        [Fact]
+        public void Serialize_Nested_ComplexValues()
+        {
+            /* Given */
+            var source = new Nested()
+            {
+                Dictionary = new Dictionary<string, object>()
+                {
+                    ["int"] = 123,
+                    ["string"] ="string",
+                    ["complex"] = new Dictionary<string, object>()
+                    {
+                        ["double"] = 1.123d
+                    }
+                },
+                Value2 = 123,
+                Value1 = "string"
+            };
+
+            /* When */
+            var json = JsonSerializer.Serialize(source, _options);
+
+            /* Then */
+            Assert.Equal(
+                @"{
+  ""value1"": ""string"",
+  ""dictionary"": {
+    ""int"": 123,
+    ""string"": ""string"",
+    ""complex"": {
+      ""double"": 1.123
+    }
+  },
+  ""value2"": 123
+}".Trim(),
+                json);
+        }
+        
         private class Nested
         {
             public string Value1 { get; set; }

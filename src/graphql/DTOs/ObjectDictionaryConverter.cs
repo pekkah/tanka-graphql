@@ -10,15 +10,15 @@ namespace Tanka.GraphQL.DTOs
         public override Dictionary<string, object> Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
         {
-            var result = ReadDictionary2(ref reader, options);
-            return result;
+            using var doc = JsonDocument.ParseValue(ref reader);
+            return ReadDictionary(doc.RootElement, options);
         }
 
-        private Dictionary<string, object> ReadDictionary2(ref Utf8JsonReader reader, JsonSerializerOptions options)
-        {
-            using var doc = JsonDocument.ParseValue(ref reader);
 
-            return ReadDictionary(doc.RootElement, options);
+        public override void Write(Utf8JsonWriter writer, Dictionary<string, object> value,
+            JsonSerializerOptions options)
+        {
+            WriteDictionary(writer, value, options);
         }
 
         private Dictionary<string, object> ReadDictionary(JsonElement element, JsonSerializerOptions options)
@@ -50,6 +50,9 @@ namespace Tanka.GraphQL.DTOs
                     case JsonValueKind.String:
                         resultValue = value.GetString();
                         break;
+                    case JsonValueKind.Null:
+                        // default value is null
+                        break;
                     default:
                         throw new InvalidOperationException($"Unexpected value kind: {value.ValueKind}");
                 }
@@ -60,20 +63,20 @@ namespace Tanka.GraphQL.DTOs
             return result;
         }
 
-
-        public override void Write(Utf8JsonWriter writer, Dictionary<string, object> value,
+        private void WriteDictionary(Utf8JsonWriter writer, Dictionary<string, object> dictionary,
             JsonSerializerOptions options)
-        {
-            WriteDictionary(writer, value, options);
-        }
-
-        private void WriteDictionary(Utf8JsonWriter writer, Dictionary<string, object> dictionary, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
 
             foreach (var entry in dictionary)
             {
                 var value = entry.Value;
+
+                if (value == null)
+                {
+                    writer.WriteNull(entry.Key);
+                    continue;
+                }
 
                 switch (value)
                 {
@@ -86,16 +89,16 @@ namespace Tanka.GraphQL.DTOs
                     case decimal decimalValue:
                         writer.WriteNumber(entry.Key, decimalValue);
                         break;
-                    case string stringValue: 
+                    case string stringValue:
                         writer.WriteString(entry.Key, stringValue);
                         break;
                     case bool boolValue:
                         writer.WriteBoolean(entry.Key, boolValue);
                         break;
                     case Dictionary<string, object> subDictionary:
+                        writer.WritePropertyName(entry.Key);
                         WriteDictionary(writer, subDictionary, options);
                         break;
-
                 }
             }
 

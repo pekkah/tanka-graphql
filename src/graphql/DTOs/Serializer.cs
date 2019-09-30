@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Tanka.GraphQL.DTOs
 {
-    public class Serializer
+    public class Serializer : ISerializer
     {
         private readonly JsonSerializerOptions _options;
 
