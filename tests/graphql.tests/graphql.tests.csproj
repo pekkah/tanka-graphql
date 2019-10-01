@@ -21,11 +21,11 @@
     </PackageReference>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="System.Net.Http" />
-  </ItemGroup>
 
+  <ItemGroup Condition="$(TargetFramework) == 'net472'">
+    <Reference Include="System.Net.Http"></Reference>
+  </ItemGroup>
+ 
   <ItemGroup>
     <EmbeddedResource Include="digitransit.introspection" />
     <EmbeddedResource Include="github.graphql" />
