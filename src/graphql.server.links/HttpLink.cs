@@ -8,10 +8,10 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Newtonsoft.Json;
-using Tanka.GraphQL.Language;
 using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.Language;
 
-namespace Tanka.GraphQL.Linking
+namespace Tanka.GraphQL.Server.Links
 {
     public class HttpLink
     {

@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Linking;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
-using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.Tools;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.Tools
+namespace Tanka.GraphQL.Server.Links.Tests
 {
     public class MakeRemoteExecutableFacts
     {

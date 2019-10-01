@@ -6,12 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.Linking;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Tools
+namespace Tanka.GraphQL.Server.Links
 {
     public static class RemoteSchemaTools
     {

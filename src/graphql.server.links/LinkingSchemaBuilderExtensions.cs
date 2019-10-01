@@ -3,27 +3,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Tanka.GraphQL.Linking;
+using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.SchemaBuilding;
 
-namespace Tanka.GraphQL.Introspection
+namespace Tanka.GraphQL.Server.Links
 {
-    public static class SchemaBuilderExtensions
+    public static class LinkingSchemaBuilderExtensions
     {
-        public static SchemaBuilder ImportIntrospectedSchema(
-            this SchemaBuilder builder,
-            string introspectionExecutionResultJson)
-        {
-            if (string.IsNullOrWhiteSpace(introspectionExecutionResultJson))
-                throw new ArgumentNullException(nameof(introspectionExecutionResultJson));
-
-            var result = IntrospectionParser.Deserialize(introspectionExecutionResultJson);
-            var reader = new IntrospectionSchemaReader(builder, result);
-            reader.Read();
-
-            return builder;
-        }
-
         /// <summary>
         ///     Execute <see cref="Introspect.DefaultQuery" /> on link
         ///     and import the schema
@@ -60,7 +46,7 @@ namespace Tanka.GraphQL.Introspection
                     $"Errors: {string.Join(", ", result.Errors.Select(e => e.Message))}");
 
             var json = JsonConvert.SerializeObject(result);
-            return ImportIntrospectedSchema(builder, json);
+            return builder.ImportIntrospectedSchema(json);
         }
     }
 }
