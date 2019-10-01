@@ -8,7 +8,7 @@ required then you can implement your own server.
 >
 > * [Server](2-server/0-common.html)
 
-Tanka Server provides to server components which can be used together
+Tanka Server provides two server components which can be used together
 or separately. 
 
 * SignalR - server built on top of SignalR Core
