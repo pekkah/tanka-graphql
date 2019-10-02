@@ -47,9 +47,9 @@ namespace Tanka.GraphQL.Extensions.Analysis
                         if (costDirective != null)
                         {
                             var complexity = costDirective.GetArgument<int>("complexity");
-                            var multipliers = costDirective.GetArgument<IEnumerable<object>>("multipliers");
+                            var multipliersArg = costDirective.GetArgument<object>("multipliers");
 
-                            if (multipliers != null)
+                            if (multipliersArg is IEnumerable<object> multipliers)
                                 foreach (var multiplier in multipliers)
                                 {
                                     var multiplierName = multiplier.ToString();

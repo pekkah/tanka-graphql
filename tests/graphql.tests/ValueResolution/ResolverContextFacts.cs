@@ -27,9 +27,14 @@ namespace Tanka.GraphQL.Tests.ValueResolution
         private readonly GraphQLFieldSelection _selection;
         private readonly ISchema _schema;
 
-        private class InputArg
+        private class InputArg : IReadFromObjectDictionary
         {
-            public string Name { get; set; }
+            public string Name { get; private set; }
+
+            public void Read(IReadOnlyDictionary<string, object> source)
+            {
+                Name = source.GetValue<string>("name");
+            }
         }
 
         [Fact]
@@ -133,7 +138,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 new NodePath(), null);
 
             /* When */
-            var value = sut.GetArgument<InputArg>("input");
+            var value = sut.GetObjectArgument<InputArg>("input");
 
             /* Then */
             Assert.Equal("inputArg", value.Name);

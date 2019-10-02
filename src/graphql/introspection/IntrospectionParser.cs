@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text;
+using System.Text.Json.Serialization;
+using Tanka.GraphQL.DTOs;
 
 namespace Tanka.GraphQL.Introspection
 {
@@ -6,7 +8,12 @@ namespace Tanka.GraphQL.Introspection
     {
         public static IntrospectionResult Deserialize(string introspectionResult)
         {
-            var result = JsonConvert.DeserializeObject<IntrospectionExecutionResult>(introspectionResult);
+            //todo: this is awkward
+            var bytes = Encoding.UTF8.GetBytes(introspectionResult);
+
+            var result = DefaultJsonSerializer
+                .Serializer
+                .Deserialize<IntrospectionExecutionResult>(bytes);
 
             return new IntrospectionResult
             {
@@ -17,11 +24,13 @@ namespace Tanka.GraphQL.Introspection
 
     internal class IntrospectionExecutionResult
     {
-        [JsonProperty("data")] public IntrospectionExecutionResultData Data { get; set; }
+        [JsonPropertyName("data")]
+        public IntrospectionExecutionResultData Data { get; set; }
     }
 
     internal class IntrospectionExecutionResultData
     {
-        [JsonProperty("__schema")] public __Schema Schema { get; set; }
+        [JsonPropertyName("__schema")]
+        public __Schema Schema { get; set; }
     }
 }

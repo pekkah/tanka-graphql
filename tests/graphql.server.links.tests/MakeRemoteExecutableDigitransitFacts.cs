@@ -88,7 +88,7 @@ namespace Tanka.GraphQL.Server.Links.Tests
                     var channel = Channel.CreateBounded<ExecutionResult>(1);
                     var executionResult = new ExecutionResult
                     {
-                        Errors = new[]
+                        Errors = new List<ExecutionError>
                         {
                             new ExecutionError("failed to find...")
                         }

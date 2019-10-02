@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -133,7 +134,7 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
             {
                 Id = "1",
                 Type = MessageType.GQL_START,
-                Payload = JObject.FromObject(new OperationMessageQueryPayload())
+                Payload = new Dictionary<string, object>()
             };
 
             var context = new MessageContext(message, output);
@@ -167,7 +168,7 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
             {
                 Id = "1",
                 Type = MessageType.GQL_START,
-                Payload = JObject.FromObject(new OperationMessageQueryPayload())
+                Payload = new Dictionary<string, object>()
             };
 
             var context = new MessageContext(message, output);

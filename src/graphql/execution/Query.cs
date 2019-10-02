@@ -44,7 +44,7 @@ namespace Tanka.GraphQL.Execution
                     .FieldErrors
                     .Select(context.FormatError)
                     .ToList(),
-                Data = data
+                Data = data?.ToDictionary(kv => kv.Key, kv => kv.Value)
             };
         }
     }

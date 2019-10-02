@@ -4,7 +4,7 @@ using Tanka.GraphQL.Server.WebSockets.DTOs;
 
 namespace Tanka.GraphQL.Server.WebSockets
 {
-    public struct Subscription
+    public class Subscription
     {
         public Subscription(string id, QueryStream queryStream, ChannelWriter<OperationMessage> output,
             CancellationTokenSource cancellationTokenSource)

@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.DTOs;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
 
 namespace Tanka.GraphQL.Server.WebSockets
@@ -23,7 +18,6 @@ namespace Tanka.GraphQL.Server.WebSockets
         private readonly IMessageContextAccessor _messageContextAccessor;
         private readonly GraphQLWSProtocolOptions _options;
         private readonly IQueryStreamService _queryStreamService;
-        private readonly JsonSerializer _serializer;
 
         public GraphQLWSProtocol(
             IQueryStreamService queryStreamService,
@@ -35,11 +29,6 @@ namespace Tanka.GraphQL.Server.WebSockets
             _messageContextAccessor = messageContextAccessor;
             _logger = logger;
             _options = options.Value;
-            _serializer = JsonSerializer.CreateDefault(new JsonSerializerSettings
-            {
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            });
         }
 
         protected ConcurrentDictionary<string, Subscription> Subscriptions { get; } =
@@ -53,13 +42,13 @@ namespace Tanka.GraphQL.Server.WebSockets
 
             _messageContextAccessor.Context = context;
             return context.Message.Type switch
-                {
+            {
                 MessageType.GQL_CONNECTION_INIT => HandleInitAsync(context),
                 MessageType.GQL_START => HandleStartAsync(context),
                 MessageType.GQL_STOP => HandleStopAsync(context),
                 MessageType.GQL_CONNECTION_TERMINATE => HandleTerminateAsync(context),
                 _ => HandleUnknownAsync(context),
-                };
+            };
         }
 
         public Subscription GetSubscription(string id)
@@ -126,10 +115,9 @@ namespace Tanka.GraphQL.Server.WebSockets
                 return;
             }
 
-            var payload = context
+            var payload = Payloads.GetQuery(context
                 .Message
-                .Payload
-                .ToObject<OperationMessageQueryPayload>(_serializer);
+                .Payload);
 
             using var logScope = _logger.BeginScope("Query: '{operationName}'", payload.OperationName);
 
@@ -149,9 +137,9 @@ namespace Tanka.GraphQL.Server.WebSockets
                 {
                     Id = id,
                     Type = MessageType.GQL_DATA,
-                    Payload = JObject.FromObject(result, _serializer)
+                    Payload = Payloads.ToData(result)
                 },
-                completeOnReaderCompletion: false);
+                false);
 
             // has mutation or query
             var hasMutationOrQuery = document.Definitions.OfType<GraphQLOperationDefinition>()
@@ -170,7 +158,7 @@ namespace Tanka.GraphQL.Server.WebSockets
         }
 
         private async ValueTask ExecuteSubscriptionStream(
-            MessageContext context, 
+            MessageContext context,
             QueryStream queryStream,
             CancellationTokenSource unsubscribeSource)
         {
@@ -179,7 +167,7 @@ namespace Tanka.GraphQL.Server.WebSockets
             // There might have been another start with the id between this and the contains
             // check in the beginning. todo(pekka): refactor
             var sub = new Subscription(id, queryStream, context.Output, unsubscribeSource);
-            if(!Subscriptions.TryAdd(id, sub))
+            if (!Subscriptions.TryAdd(id, sub))
             {
                 sub.Unsubscribe.Cancel();
                 await WriteError(context, $"Subscription with id '{id}' already exists");
@@ -225,22 +213,13 @@ namespace Tanka.GraphQL.Server.WebSockets
             {
                 Type = MessageType.GQL_CONNECTION_ERROR,
                 Id = context.Message.Id,
-                Payload = JObject.FromObject(new ExecutionResult
-                {
-                    Errors = new[]
-                    {
-                        new ExecutionError(errorMessage)
-                    }
-                }, _serializer)
+                Payload = Payloads.ToErrors(new ExecutionError(errorMessage))
             }, CancellationToken.None);
         }
 
         private async ValueTask HandleInitAsync(MessageContext context)
         {
-            _logger.LogInformation("Init: {payload}", context
-                .Message
-                .Payload
-                ?.ToString());
+            _logger.LogInformation("Init");
 
             await _options.AcceptAsync(context);
         }

@@ -118,8 +118,8 @@ namespace Tanka.GraphQL.Server
                 var channel = Channel.CreateBounded<ExecutionResult>(1);
                 await channel.Writer.WriteAsync(new ExecutionResult
                 {
-                    Errors = result.Errors,
-                    Extensions = result.Extensions
+                    Errors = result.Errors.ToList(),
+                    Extensions = result.Extensions.ToDictionary(kv => kv.Key, kv => kv.Value)
                 }, CancellationToken.None);
 
                 channel.Writer.TryComplete();

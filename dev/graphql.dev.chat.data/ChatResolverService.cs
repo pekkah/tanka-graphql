@@ -22,7 +22,7 @@ namespace Tanka.GraphQL.Samples.Chat.Data
 
         public async ValueTask<IResolveResult> AddMessageAsync(ResolverContext context)
         {
-            var input = context.GetArgument<InputMessage>("message");
+            var input = context.GetObjectArgument<InputMessage>("message");
             var message = await _chat.AddMessageAsync(
                 "1",
                 input.Content);
@@ -33,7 +33,7 @@ namespace Tanka.GraphQL.Samples.Chat.Data
         public async ValueTask<IResolveResult> EditMessageAsync(ResolverContext context)
         {
             var id = context.GetArgument<string>("id");
-            var input = context.GetArgument<InputMessage>("message");
+            var input = context.GetObjectArgument<InputMessage>("message");
 
             var message = await _chat.EditMessageAsync(
                 id,

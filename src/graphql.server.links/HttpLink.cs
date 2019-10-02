@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
-using Newtonsoft.Json;
 using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Language;
 
@@ -54,7 +53,8 @@ namespace Tanka.GraphQL.Server.Links
                 Query = operation.Document.ToGraphQL(),
                 Variables = operation.Variables?.ToDictionary(kv => kv.Key, kv => kv.Value)
             };
-            var json = JsonConvert.SerializeObject(query);
+            var jsonBytes = DefaultJsonSerializer.Serializer.Serialize(query);
+            var json = Encoding.UTF8.GetString(jsonBytes);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
             return request;
@@ -64,8 +64,8 @@ namespace Tanka.GraphQL.Server.Links
         {
             response.EnsureSuccessStatusCode();
 
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ExecutionResult>(json);
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            return DefaultJsonSerializer.Serializer.Deserialize<ExecutionResult>(bytes);
         }
 
         public async ValueTask<ChannelReader<ExecutionResult>> Execute(GraphQLDocument document,

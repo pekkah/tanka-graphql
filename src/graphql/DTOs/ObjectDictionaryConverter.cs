@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -78,31 +79,80 @@ namespace Tanka.GraphQL.DTOs
                     continue;
                 }
 
-                switch (value)
-                {
-                    case int intValue:
-                        writer.WriteNumber(entry.Key, intValue);
-                        break;
-                    case double doubleValue:
-                        writer.WriteNumber(entry.Key, doubleValue);
-                        break;
-                    case decimal decimalValue:
-                        writer.WriteNumber(entry.Key, decimalValue);
-                        break;
-                    case string stringValue:
-                        writer.WriteString(entry.Key, stringValue);
-                        break;
-                    case bool boolValue:
-                        writer.WriteBoolean(entry.Key, boolValue);
-                        break;
-                    case Dictionary<string, object> subDictionary:
-                        writer.WritePropertyName(entry.Key);
-                        WriteDictionary(writer, subDictionary, options);
-                        break;
-                }
+                WriteProperty(writer, options, value, entry.Key);
             }
 
             writer.WriteEndObject();
+        }
+
+        private void WriteProperty(Utf8JsonWriter writer, JsonSerializerOptions options, object value, string key)
+        {
+            switch (value)
+            {
+                case int intValue:
+                    writer.WriteNumber(key, intValue);
+                    break;
+                case double doubleValue:
+                    writer.WriteNumber(key, doubleValue);
+                    break;
+                case decimal decimalValue:
+                    writer.WriteNumber(key, decimalValue);
+                    break;
+                case string stringValue:
+                    writer.WriteString(key, stringValue);
+                    break;
+                case bool boolValue:
+                    writer.WriteBoolean(key, boolValue);
+                    break;
+                case Dictionary<string, object> subDictionary:
+                    writer.WritePropertyName(key);
+                    WriteDictionary(writer, subDictionary, options);
+                    break;
+                case IEnumerable list:
+                    writer.WritePropertyName(key);
+                    WriteArray(writer, list, options);
+                    break;
+            }
+        }
+
+        private void WriteArray(Utf8JsonWriter writer, IEnumerable list, JsonSerializerOptions options)
+        {
+            writer.WriteStartArray();
+
+            foreach (var value in list)
+            {
+                WriteArrayValue(writer, value, options);
+            }
+
+            writer.WriteEndArray();
+        }
+
+        private void WriteArrayValue(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
+        {
+            switch (value)
+            {
+                case int intValue:
+                    writer.WriteNumberValue(intValue);
+                    break;
+                case double doubleValue:
+                    writer.WriteNumberValue(doubleValue);
+                    break;
+                case decimal decimalValue:
+                    writer.WriteNumberValue(decimalValue);
+                    break;
+                case string stringValue:
+                    writer.WriteStringValue(stringValue);
+                    break;
+                case bool boolValue:
+                    writer.WriteBooleanValue(boolValue);
+                    break;
+                case Dictionary<string, object> subDictionary:
+                    WriteDictionary(writer, subDictionary, options);
+                    break;
+                case IEnumerable list:
+                    WriteArray(writer, list, options);
+                    break;
+            }
         }
     }
 }

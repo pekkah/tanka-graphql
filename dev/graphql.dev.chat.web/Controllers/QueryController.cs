@@ -23,7 +23,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web.Controllers
             var stream = await _queryStreamService.QueryAsync(new Query
             {
                 Document = ParseDocument(request.Query),
-                Variables = request.Variables.ToNestedDictionary(),
+                Variables = request.Variables,
                 OperationName = request.OperationName
             }, Request.HttpContext.RequestAborted);
 

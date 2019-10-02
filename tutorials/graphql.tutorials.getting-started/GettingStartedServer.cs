@@ -88,8 +88,6 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
         {
             // Configure SignalR server
             services.AddSignalR()
-                // Tanka DTOs still use Newtonsoft.Json properties so this is required
-                .AddNewtonsoftJsonProtocol()
                 // Add SignalR server hub
                 .AddTankaServerHub();
         }

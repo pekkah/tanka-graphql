@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.SchemaBuilding;
 
@@ -45,8 +46,8 @@ namespace Tanka.GraphQL.Server.Links
                     "Failed to execute introspection query. " +
                     $"Errors: {string.Join(", ", result.Errors.Select(e => e.Message))}");
 
-            var json = JsonConvert.SerializeObject(result);
-            return builder.ImportIntrospectedSchema(json);
+            var json = DefaultJsonSerializer.Serializer.Serialize(result);
+            return builder.ImportIntrospectedSchema(Encoding.UTF8.GetString(json));
         }
     }
 }

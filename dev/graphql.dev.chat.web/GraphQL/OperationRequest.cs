@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace Tanka.GraphQL.Samples.Chat.Web.GraphQL
 {
@@ -8,6 +8,6 @@ namespace Tanka.GraphQL.Samples.Chat.Web.GraphQL
 
         public string Query { get; set; }
 
-        public JObject Variables { get; set; }
+        public Dictionary<string, object> Variables { get; set; }
     }
 }

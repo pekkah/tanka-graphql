@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.Tools;
@@ -74,7 +77,7 @@ namespace Tanka.GraphQL.Server.Tests.Host
                         {
                             "add", async context =>
                             {
-                                var input = context.GetArgument<InputEvent>("event");
+                                var input = context.GetObjectArgument<InputEvent>("event");
                                 var ev = await eventManager.Add(input.Type, input.Message);
 
                                 return Resolve.As(ev);
@@ -111,7 +114,12 @@ namespace Tanka.GraphQL.Server.Tests.Host
 
             services.AddTankaWebSocketServer();
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddNewtonsoftJsonProtocol()
+                .AddJsonProtocol(options =>
+                {
+                    options.PayloadSerializerOptions
+                        .Converters.Add(new ObjectDictionaryConverter());
+                    options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                })
                 .AddTankaServerHub();
         }
 
@@ -137,10 +145,15 @@ namespace Tanka.GraphQL.Server.Tests.Host
         public string Message { get; set; }
     }
 
-    public class InputEvent
+    public class InputEvent : IReadFromObjectDictionary
     {
         public string Type { get; set; }
         public string Message { get; set; }
+        public void Read(IReadOnlyDictionary<string, object> source)
+        {
+            Type = source.GetValue<string>("type");
+            Message = source.GetValue<string>("message");
+        }
     }
 
     public class EventManager

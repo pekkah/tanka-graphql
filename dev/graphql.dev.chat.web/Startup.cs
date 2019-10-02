@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.Samples.Chat.Data;
 using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
@@ -31,7 +32,12 @@ namespace Tanka.GraphQL.Samples.Chat.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                .AddNewtonsoftJson();
+                .AddJsonOptions(options =>
+                {
+                    // required to serialize variables as nested dictionary
+                    options.JsonSerializerOptions.Converters
+                        .Add(new ObjectDictionaryConverter());
+                });
 
             // graphql
             services.AddSingleton<IChat, Data.Chat>();
@@ -54,8 +60,6 @@ namespace Tanka.GraphQL.Samples.Chat.Web
 
             // signalr server
             services.AddSignalR(options => options.EnableDetailedErrors = true)
-                // This is required by DTOs 
-                .AddNewtonsoftJsonProtocol()
                 // add GraphQL query streaming hub
                 .AddTankaServerHubWithTracing();
 
