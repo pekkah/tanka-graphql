@@ -47,7 +47,7 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
             /* Then */
             var json = await ReadMessage(ws);
             var message = DeserializeMessage(json);
-            var executionResult = Payloads.GetResult(message.Payload);
+            var executionResult = (ExecutionResult)message.Payload;
             executionResult.ShouldMatchJson(
                 @"{
                   ""data"": {

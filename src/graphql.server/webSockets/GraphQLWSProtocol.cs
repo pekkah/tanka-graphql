@@ -115,9 +115,7 @@ namespace Tanka.GraphQL.Server.WebSockets
                 return;
             }
 
-            var payload = Payloads.GetQuery(context
-                .Message
-                .Payload);
+            var payload = (OperationMessageQueryPayload)context.Message.Payload;
 
             using var logScope = _logger.BeginScope("Query: '{operationName}'", payload.OperationName);
 

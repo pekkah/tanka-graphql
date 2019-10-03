@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Tanka.GraphQL.Server.WebSockets.DTOs
 {
-    public class OperationMessage: IEquatable<OperationMessage>
+    public class OperationMessage : IEquatable<OperationMessage>
     {
         /// <summary>
         ///     Nullable Id
@@ -18,7 +17,7 @@ namespace Tanka.GraphQL.Server.WebSockets.DTOs
         /// <summary>
         ///     Nullable payload
         /// </summary>
-        public Dictionary<string, object> Payload { get; set; }
+        public object Payload { get; set; }
 
         public bool Equals(OperationMessage other)
         {
