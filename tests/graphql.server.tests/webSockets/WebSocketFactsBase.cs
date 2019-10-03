@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
+using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Xunit;
@@ -49,13 +50,15 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
 
         protected OperationMessage DeserializeMessage(string json)
         {
-            return JsonConvert.DeserializeObject<OperationMessage>(json);
+            return DefaultJsonSerializer.Serializer.Deserialize<OperationMessage>(Encoding.UTF8.GetBytes(json));
+            //return JsonConvert.DeserializeObject<OperationMessage>(json);
         }
 
         protected byte[] SerializeMessage(OperationMessage message)
         {
-            var json = JsonConvert.SerializeObject(message);
-            return Encoding.UTF8.GetBytes(json);
+            return DefaultJsonSerializer.Serializer.Serialize(message);
+            //var json = JsonConvert.SerializeObject(message);
+            //return Encoding.UTF8.GetBytes(json);
         }
 
         protected async Task<string> ReadMessage(WebSocket socket)

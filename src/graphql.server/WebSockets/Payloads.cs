@@ -26,20 +26,16 @@ namespace Tanka.GraphQL.Server.WebSockets
         {
             return new OperationMessageQueryPayload
             {
-                OperationName = (string) payload["operationName"],
-                Query = (string) payload["query"],
-                Variables = payload.ContainsKey("variables")
-                    ? payload["variables"] as Dictionary<string, object>
-                    : null,
-                Extensions = payload.ContainsKey("extensions")
-                    ? payload["extensions"] as Dictionary<string, object>
-                    : null
+                OperationName = payload.GetValue<string>("operationName"),
+                Query = payload.GetValue<string>("query"),
+                Variables = payload.GetValue<Dictionary<string, object>>("variables"),
+                Extensions = payload.GetValue<Dictionary<string, object>>("extensions")
             };
         }
 
         public static Dictionary<string, object> ToQuery(OperationMessageQueryPayload query)
         {
-            return new Dictionary<string, object>()
+            return new Dictionary<string, object>
             {
                 ["operationName"] = query.OperationName,
                 ["query"] = query.Query,
@@ -50,24 +46,23 @@ namespace Tanka.GraphQL.Server.WebSockets
 
         public static ExecutionResult GetResult(Dictionary<string, object> result)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
-                Data = result.ContainsKey("data")
-                    ? result["data"] as Dictionary<string, object>
-                    : null,
+                Data = result.GetValue<Dictionary<string, object>>("data"),
                 Errors = GetErrors(result),
-                Extensions = result.ContainsKey("extensions")
-                    ? result["extensions"] as Dictionary<string, object>
-                    : null
+                Extensions = result.GetValue<Dictionary<string, object>>("extensions")
             };
         }
 
         private static List<ExecutionError> GetErrors(Dictionary<string, object> executionResult)
         {
-            if (!executionResult.ContainsKey("errors"))
+            if (!executionResult.TryGetValue("errors", out var errorsObject))
                 return null;
 
-            var errorsList = executionResult["errors"] as IEnumerable<object>;
+            if (errorsObject == null)
+                return null;
+
+            var errorsList = errorsObject as IEnumerable<object>;
 
             var result = new List<ExecutionError>();
             foreach (var errorObject in errorsList)
@@ -78,7 +73,7 @@ namespace Tanka.GraphQL.Server.WebSockets
                 {
                     Extensions = errorDictionary.ContainsKey("extensions")
                         ? errorDictionary["extensions"] as Dictionary<string, object>
-                        : null,
+                        : null
                 });
             }
 

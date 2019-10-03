@@ -7,6 +7,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
 
 namespace Tanka.GraphQL.Server.WebSockets
@@ -171,20 +172,30 @@ namespace Tanka.GraphQL.Server.WebSockets
             return true;
         }
 
+        private static readonly byte[] _separatorBytes = Encoding.UTF8.GetBytes(new[] {'\n'});
+
         private  int WriteOperationMessage(OperationMessage message, PipeWriter output)
         {
-            var json = JsonConvert.SerializeObject(message, Formatting.None, _settings);
-            json += '\n';
-            var count = Encoding.UTF8.GetByteCount(json);
-            var memory = output.GetMemory(sizeHint: count);
-            return Encoding.UTF8.GetBytes(json, memory.Span);
+            var jsonBytes = DefaultJsonSerializer.Serializer.Serialize(message);
+            
+            //var json = JsonConvert.SerializeObject(message, Formatting.None, _settings);
+            //json += '\n';
+            byte[] messageBytes = new byte[jsonBytes.Length + 1];
+            jsonBytes.CopyTo(messageBytes, 0);
+            _separatorBytes.CopyTo(messageBytes, jsonBytes.Length);
+
+            //var count = Encoding.UTF8.GetByteCount(json);
+            var memory = output.GetMemory(sizeHint: messageBytes.Length);
+            messageBytes.CopyTo(memory);
+            return messageBytes.Length;
         }
 
         private OperationMessage ReadOperationMessage(in ReadOnlySequence<byte> payload)
         {
-            return JsonConvert.DeserializeObject<OperationMessage>(
+            return DefaultJsonSerializer.Serializer.Deserialize<OperationMessage>(payload.ToArray());
+            /*return JsonConvert.DeserializeObject<OperationMessage>(
                 GetUtf8String(payload), 
-                _settings);
+                _settings);*/
         }
 
         private static string GetUtf8String(ReadOnlySequence<byte> buffer)

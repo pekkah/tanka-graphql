@@ -31,7 +31,10 @@ namespace Tanka.GraphQL.Server.Tests
             var connection = new HubConnectionBuilder()
                 .WithUrl(new Uri(_server.BaseAddress, "graphql"),
                     o => { o.HttpMessageHandlerFactory = _ => _server.CreateHandler(); })
-                .AddJsonProtocol()
+                .AddJsonProtocol(options =>
+                {
+                    options.PayloadSerializerOptions.Converters.Add(new ObjectDictionaryConverter());
+                })
                 .Build();
 
             connection.Closed += exception =>
