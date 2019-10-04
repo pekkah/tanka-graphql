@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 

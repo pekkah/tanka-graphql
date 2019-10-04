@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
-namespace Tanka.GraphQL.DTOs
+namespace Tanka.GraphQL.Server.Links.DTOs
 {
     public class QueryRequest
     {

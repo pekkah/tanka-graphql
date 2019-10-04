@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
 using Tanka.GraphQL.Server;
 using static Tanka.GraphQL.Parser;

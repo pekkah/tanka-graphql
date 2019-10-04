@@ -2,7 +2,7 @@
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
-using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace Tanka.GraphQL.Server.Links
 {

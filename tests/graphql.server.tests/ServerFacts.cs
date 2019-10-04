@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.Server.Links.DTOs;
 using Xunit;
 
 namespace Tanka.GraphQL.Server.Tests

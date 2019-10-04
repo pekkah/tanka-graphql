@@ -1,27 +1,28 @@
-using System;
+﻿using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.Data
+namespace Tanka.GraphQL.Server.Tests
 {
-    public static class ExecutionResultExtensions
+    public static class OperationMessageExtensions
     {
-        public static void ShouldMatchJson(this ExecutionResult actualResult, string expectedJson)
+        public static void ShouldMatchJson(this OperationMessage actualResult, string expectedJson)
         {
             if (expectedJson == null) throw new ArgumentNullException(nameof(expectedJson));
             if (actualResult == null) throw new ArgumentNullException(nameof(actualResult));
 
             var actualJson = JToken.FromObject(actualResult,
-                JsonSerializer.Create(new JsonSerializerSettings()
+                JsonSerializer.Create(new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 }));
 
             var expectedJsonObject = JObject.FromObject(
-                JsonConvert.DeserializeObject<ExecutionResult>(expectedJson),
-                JsonSerializer.Create(new JsonSerializerSettings()
+                JsonConvert.DeserializeObject<OperationMessage>(expectedJson),
+                JsonSerializer.Create(new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 }));

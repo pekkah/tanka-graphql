@@ -1,16 +1,26 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace Tanka.GraphQL.Server.Links
 {
     public static class LinkingSchemaBuilderExtensions
     {
+        private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters =
+            {
+                new ObjectDictionaryConverter(),
+            }
+        };
+
         /// <summary>
         ///     Execute <see cref="Introspect.DefaultQuery" /> on link
         ///     and import the schema
@@ -46,8 +56,10 @@ namespace Tanka.GraphQL.Server.Links
                     "Failed to execute introspection query. " +
                     $"Errors: {string.Join(", ", result.Errors.Select(e => e.Message))}");
 
-            var json = DefaultJsonSerializer.Serializer.Serialize(result);
-            return builder.ImportIntrospectedSchema(Encoding.UTF8.GetString(json));
+            var json = JsonSerializer.Serialize(result, _jsonOptions);
+            return builder.ImportIntrospectedSchema(json);
         }
+
+
     }
 }

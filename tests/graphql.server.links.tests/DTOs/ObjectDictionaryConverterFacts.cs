@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json;
-using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.Server.Links.DTOs;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.DTOs
+namespace Tanka.GraphQL.Server.Links.Tests.DTOs
 {
     public class ObjectDictionaryConverterFacts
     {

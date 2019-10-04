@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Tanka.GraphQL.DTOs
+namespace Tanka.GraphQL.Server.Links.DTOs
 {
     public class ObjectDictionaryConverter : JsonConverter<Dictionary<string, object>>
     {
@@ -14,6 +15,13 @@ namespace Tanka.GraphQL.DTOs
         {
             using var doc = JsonDocument.ParseValue(ref reader);
             return ReadDictionary(doc.RootElement, options);
+        }
+
+        private void EnsureTokenType(JsonTokenType actual, JsonTokenType expected)
+        {
+            if (actual != expected)
+                throw new InvalidOperationException(
+                    $"Unexpected token type '{actual}' expected '{expected}'");
         }
 
 

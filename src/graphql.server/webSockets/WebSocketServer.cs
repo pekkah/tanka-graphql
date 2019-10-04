@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Tanka.GraphQL.Server.WebSockets
 {
@@ -11,12 +12,15 @@ namespace Tanka.GraphQL.Server.WebSockets
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<WebSocketServer> _logger;
+        private readonly IOptions<WebSocketProtocolOptions> _options;
 
         public WebSocketServer(
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IOptions<WebSocketProtocolOptions> options)
         {
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<WebSocketServer>();
+            _options = options;
         }
 
         public ConcurrentDictionary<string, MessageServer> Clients { get; } =
@@ -30,8 +34,8 @@ namespace Tanka.GraphQL.Server.WebSockets
                 var connection = new WebSocketPipe(_loggerFactory);
                 var protocol = context.RequestServices
                     .GetRequiredService<IProtocolHandler>();
-
-                var messageServer = new SubscriptionServer(protocol);
+                
+                var messageServer = new SubscriptionServer(protocol, _options);
 
                 Clients.TryAdd(context.TraceIdentifier, messageServer);
                 var run = messageServer.RunAsync(connection, context.RequestAborted);

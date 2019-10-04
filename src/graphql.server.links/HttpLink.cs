@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace Tanka.GraphQL.Server.Links
 {
@@ -16,6 +17,15 @@ namespace Tanka.GraphQL.Server.Links
     {
         private readonly HttpClient _client;
         private readonly Func<HttpResponseMessage, ValueTask<ExecutionResult>> _transformResponse;
+
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters =
+            {
+                new ObjectDictionaryConverter()
+            }
+        };
         private readonly string _url;
 
         private readonly
@@ -53,7 +63,7 @@ namespace Tanka.GraphQL.Server.Links
                 Query = operation.Document.ToGraphQL(),
                 Variables = operation.Variables?.ToDictionary(kv => kv.Key, kv => kv.Value)
             };
-            var jsonBytes = DefaultJsonSerializer.Serializer.Serialize(query);
+            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(query, _jsonOptions);
             var json = Encoding.UTF8.GetString(jsonBytes);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -65,7 +75,7 @@ namespace Tanka.GraphQL.Server.Links
             response.EnsureSuccessStatusCode();
 
             var bytes = await response.Content.ReadAsByteArrayAsync();
-            return DefaultJsonSerializer.Serializer.Deserialize<ExecutionResult>(bytes);
+            return JsonSerializer.Deserialize<ExecutionResult>(bytes, _jsonOptions);
         }
 
         public async ValueTask<ChannelReader<ExecutionResult>> Execute(GraphQLDocument document,

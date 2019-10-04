@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.Samples.Chat.Data;
 using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
 using Tanka.GraphQL.Server;
+using Tanka.GraphQL.Server.Links.DTOs;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 

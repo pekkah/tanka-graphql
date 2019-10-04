@@ -1,7 +1,7 @@
 ﻿using System;
 using Tanka.GraphQL.SchemaBuilding;
 
-namespace Tanka.GraphQL.Introspection
+namespace Tanka.GraphQL.Server.Links
 {
     public static class IntrospectionSchemaBuilderExtensions
     {

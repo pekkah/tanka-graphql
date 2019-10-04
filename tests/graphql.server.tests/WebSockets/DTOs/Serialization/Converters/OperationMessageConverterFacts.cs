@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json;
-using Tanka.GraphQL.DTOs;
-using Tanka.GraphQL.Server.Serialization.Converters;
+using Tanka.GraphQL.Server.Links.DTOs;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
+using Tanka.GraphQL.Server.WebSockets.DTOs.Serialization.Converters;
 using Xunit;
 
-namespace Tanka.GraphQL.Server.Tests.Serialization.Converters
+namespace Tanka.GraphQL.Server.Tests.WebSockets.DTOs.Serialization.Converters
 {
     public class OperationMessageConverterFacts
     {
@@ -83,6 +83,31 @@ namespace Tanka.GraphQL.Server.Tests.Serialization.Converters
         }
 
         [Fact]
+        public void Deserialize_Data()
+        {
+            /* Given */
+            var json = CreateMessageJson(
+                "1",
+                MessageType.GQL_DATA,
+                @"
+                {
+                    ""data"": 
+                    {
+                        ""field"": 123    
+                    }
+                }
+                ");
+
+            /* When */
+            var actual = JsonSerializer.Deserialize<OperationMessage>(json, _options);
+
+            /* Then */
+            Assert.Equal("1", actual.Id);
+            Assert.Equal(MessageType.GQL_DATA, actual.Type);
+            Assert.IsType<ExecutionResult>(actual.Payload);
+        }
+
+        [Fact]
         public void Deserialize_Stop()
         {
             /* Given */
@@ -97,6 +122,74 @@ namespace Tanka.GraphQL.Server.Tests.Serialization.Converters
             Assert.Equal("1", actual.Id);
             Assert.Equal(MessageType.GQL_STOP, actual.Type);
             Assert.Null(actual.Payload);
+        }
+
+        [Fact]
+        public void Serialize_Data()
+        {
+            /* Given */
+            var message = new OperationMessage()
+            {
+                Id = "1",
+                Type = MessageType.GQL_DATA,
+                Payload = new ExecutionResult()
+                {
+                    Data = new Dictionary<string, object>()
+                    {
+                        ["field"] = "123"
+                    }
+                }
+            };
+
+            /* When */
+            var actual = JsonSerializer.Serialize(message, _options);
+
+
+            /* Then */
+            message.ShouldMatchJson(actual);
+        }
+
+        [Fact]
+        public void Serialize_Complete()
+        {
+            /* Given */
+            var message = new OperationMessage()
+            {
+                Id = "1",
+                Type = MessageType.GQL_COMPLETE
+            };
+
+            /* When */
+            var actual = JsonSerializer.Serialize(message, _options);
+
+
+            /* Then */
+            message.ShouldMatchJson(actual);
+        }
+
+        [Fact]
+        public void Serialize_Error()
+        {
+            /* Given */
+            var message = new OperationMessage()
+            {
+                Id = "1",
+                Type = MessageType.GQL_CONNECTION_ERROR,
+                Payload = new ExecutionResult()
+                {
+                    Errors = new List<ExecutionError>()
+                    {
+                        new ExecutionError("error")
+                    }
+                }
+            };
+
+            /* When */
+            var actual = JsonSerializer.Serialize(message, _options);
+
+
+            /* Then */
+            message.ShouldMatchJson(actual);
         }
     }
 }

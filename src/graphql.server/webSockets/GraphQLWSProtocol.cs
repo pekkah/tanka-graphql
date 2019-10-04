@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -16,12 +17,12 @@ namespace Tanka.GraphQL.Server.WebSockets
     {
         private readonly ILogger<GraphQLWSProtocol> _logger;
         private readonly IMessageContextAccessor _messageContextAccessor;
-        private readonly GraphQLWSProtocolOptions _options;
+        private readonly WebSocketProtocolOptions _options;
         private readonly IQueryStreamService _queryStreamService;
 
         public GraphQLWSProtocol(
             IQueryStreamService queryStreamService,
-            IOptions<GraphQLWSProtocolOptions> options,
+            IOptions<WebSocketProtocolOptions> options,
             IMessageContextAccessor messageContextAccessor,
             ILogger<GraphQLWSProtocol> logger)
         {
@@ -84,7 +85,7 @@ namespace Tanka.GraphQL.Server.WebSockets
             var id = context.Message.Id;
             var subscription = GetSubscription(id);
 
-            if (subscription.Equals(default(Subscription)))
+            if (subscription == null)
                 return;
 
             // unsubscribe the stream
@@ -115,7 +116,13 @@ namespace Tanka.GraphQL.Server.WebSockets
                 return;
             }
 
-            var payload = (OperationMessageQueryPayload)context.Message.Payload;
+            var payload = context.Message.Payload as OperationMessageQueryPayload;
+
+            if (payload == null || string.IsNullOrEmpty(payload.Query))
+            {
+                await WriteError(context, $"Message '{id}' does not have required query payload");
+                return;
+            }
 
             using var logScope = _logger.BeginScope("Query: '{operationName}'", payload.OperationName);
 
@@ -135,7 +142,7 @@ namespace Tanka.GraphQL.Server.WebSockets
                 {
                     Id = id,
                     Type = MessageType.GQL_DATA,
-                    Payload = Payloads.ToData(result)
+                    Payload = result
                 },
                 false);
 
@@ -211,7 +218,13 @@ namespace Tanka.GraphQL.Server.WebSockets
             {
                 Type = MessageType.GQL_CONNECTION_ERROR,
                 Id = context.Message.Id,
-                Payload = Payloads.ToErrors(new ExecutionError(errorMessage))
+                Payload = new ExecutionResult()
+                {
+                    Errors = new List<ExecutionError>()
+                    {
+                        new ExecutionError(errorMessage)
+                    }
+                }
             }, CancellationToken.None);
         }
 

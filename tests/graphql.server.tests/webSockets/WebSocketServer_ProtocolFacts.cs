@@ -36,12 +36,12 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
             {
                 Id = "1",
                 Type = MessageType.GQL_START,
-                Payload = Payloads.ToQuery(new OperationMessageQueryPayload
+                Payload = new OperationMessageQueryPayload
                 {
                     Query = "{ hello }",
                     OperationName = null,
                     Variables = new Dictionary<string, object>()
-                })
+                }
             }), WebSocketMessageType.Text, true, CancellationToken.None);
 
             /* Then */

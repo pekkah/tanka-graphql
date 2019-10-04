@@ -8,7 +8,6 @@ using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Language;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server

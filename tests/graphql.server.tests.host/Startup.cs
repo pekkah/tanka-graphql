@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.Server.Links.DTOs;
 using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -118,7 +118,6 @@ namespace Tanka.GraphQL.Server.Tests.Host
                 {
                     options.PayloadSerializerOptions
                         .Converters.Add(new ObjectDictionaryConverter());
-                    options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 })
                 .AddTankaServerHub();
         }
