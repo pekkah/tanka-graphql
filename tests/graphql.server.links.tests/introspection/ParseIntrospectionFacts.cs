@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Xunit;
 
-namespace Tanka.GraphQL.Server.Links.Tests.introspection
+namespace Tanka.GraphQL.Server.Links.Tests.Introspection
 {
     public class ParseIntrospectionFacts
     {

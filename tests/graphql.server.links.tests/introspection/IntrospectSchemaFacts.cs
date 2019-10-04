@@ -7,7 +7,7 @@ using static Tanka.GraphQL.Parser;
 
 // ReSharper disable InconsistentNaming
 
-namespace Tanka.GraphQL.Server.Links.Tests.introspection
+namespace Tanka.GraphQL.Server.Links.Tests.Introspection
 {
     public class IntrospectSchemaFacts
     {

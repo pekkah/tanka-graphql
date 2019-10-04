@@ -5,7 +5,7 @@ using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace Tanka.GraphQL.Server.Links.Tests.introspection
+namespace Tanka.GraphQL.Server.Links.Tests.Introspection
 {
     public class IntrospectionSchemaReaderFacts
     {

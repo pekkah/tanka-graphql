@@ -7,7 +7,7 @@ using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
 
-namespace Tanka.GraphQL.Server.Links.Tests.introspection
+namespace Tanka.GraphQL.Server.Links.Tests.Introspection
 {
     public class DigitransitIntrospectionFacts
     {
