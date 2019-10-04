@@ -26,20 +26,20 @@ namespace Tanka.GraphQL.Server
             return services;
         }
 
-        public static OptionsBuilder<GraphQLWSProtocolOptions> AddTankaWebSocketServerWithTracing(
+        public static OptionsBuilder<WebSocketProtocolOptions> AddTankaWebSocketServerWithTracing(
             this IServiceCollection services)
         {
             services.AddTankaServerExecutionExtension<TraceExtension>();
             return AddTankaWebSocketServer(services);
         }
 
-        public static OptionsBuilder<GraphQLWSProtocolOptions> AddTankaWebSocketServer(this IServiceCollection services)
+        public static OptionsBuilder<WebSocketProtocolOptions> AddTankaWebSocketServer(this IServiceCollection services)
         {
             services.AddSingleton<WebSocketServer>();
             services.TryAddScoped<IProtocolHandler, GraphQLWSProtocol>();
             services.TryAddScoped<IMessageContextAccessor, MessageContextAccessor>();
 
-            return services.AddOptions<GraphQLWSProtocolOptions>();
+            return services.AddOptions<WebSocketProtocolOptions>();
         }
     }
 }

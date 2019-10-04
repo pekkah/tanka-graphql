@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
+using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
 
-namespace Tanka.GraphQL.Introspection
+namespace Tanka.GraphQL.Server.Links
 {
     /// <summary>
     ///     Read types from <see cref="IntrospectionResult" /> into <see cref="SchemaBuilder" />

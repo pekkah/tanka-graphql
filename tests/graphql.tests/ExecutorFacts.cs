@@ -109,7 +109,7 @@ namespace Tanka.GraphQL.Tests
                         {
                             "create", async context =>
                             {
-                                var newEvent = context.GetArgument<EventsModel.NewEvent>("event");
+                                var newEvent = context.GetObjectArgument<EventsModel.NewEvent>("event");
 
                                 if (newEvent.Payload == null)
                                     return Resolve.As(

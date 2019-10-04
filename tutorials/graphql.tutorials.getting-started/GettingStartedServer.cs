@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
@@ -88,8 +87,6 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
         {
             // Configure SignalR server
             services.AddSignalR()
-                // Tanka DTOs still use Newtonsoft.Json properties so this is required
-                .AddNewtonsoftJsonProtocol()
                 // Add SignalR server hub
                 .AddTankaServerHub();
         }

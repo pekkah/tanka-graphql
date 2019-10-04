@@ -58,7 +58,8 @@ namespace Tanka.GraphQL
                     }
                 }
 
-                if (result is IDictionary<string, object> child) currentObject = child;
+                if (result is Dictionary<string, object> child) 
+                    currentObject = child;
             }
 
             return result;

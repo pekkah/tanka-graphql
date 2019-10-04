@@ -2,10 +2,9 @@
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Server.Tests.Host;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
+using Tanka.GraphQL.Server.Tests.Host;
 using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Tanka.GraphQL.Tests.Data;
@@ -15,7 +14,7 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
 {
     public class WebSocketServer_ProtocolFacts : WebSocketFactsBase
     {
-        public WebSocketServer_ProtocolFacts(WebApplicationFactory<Startup> factory) 
+        public WebSocketServer_ProtocolFacts(WebApplicationFactory<Startup> factory)
             : base(factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
@@ -24,7 +23,6 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
                 });
             }))
         {
-            
         }
 
         [Fact]
@@ -32,24 +30,24 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
         {
             /* Given */
             using var ws = await ConnectAsync();
-            
+
             /* When */
-            await ws.SendAsync(SerializeMessage(new OperationMessage()
+            await ws.SendAsync(SerializeMessage(new OperationMessage
             {
                 Id = "1",
                 Type = MessageType.GQL_START,
-                Payload = JObject.FromObject(new OperationMessageQueryPayload()
+                Payload = new OperationMessageQueryPayload
                 {
                     Query = "{ hello }",
                     OperationName = null,
                     Variables = new Dictionary<string, object>()
-                })
+                }
             }), WebSocketMessageType.Text, true, CancellationToken.None);
 
             /* Then */
             var json = await ReadMessage(ws);
             var message = DeserializeMessage(json);
-            var executionResult = message.Payload.ToObject<ExecutionResult>();
+            var executionResult = (ExecutionResult)message.Payload;
             executionResult.ShouldMatchJson(
                 @"{
                   ""data"": {

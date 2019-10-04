@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Microsoft.AspNetCore.SignalR.Client;
 using Tanka.GraphQL.Language;
-using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.Server.Links.DTOs;
 
-namespace Tanka.GraphQL.Linking
+namespace Tanka.GraphQL.Server.Links
 {
     public static class RemoteLinks
     {

@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
 using Tanka.GraphQL.Server;
 using static Tanka.GraphQL.Parser;
@@ -23,7 +22,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web.Controllers
             var stream = await _queryStreamService.QueryAsync(new Query
             {
                 Document = ParseDocument(request.Query),
-                Variables = request.Variables.ToNestedDictionary(),
+                Variables = request.Variables,
                 OperationName = request.OperationName
             }, Request.HttpContext.RequestAborted);
 

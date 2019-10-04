@@ -1,6 +1,7 @@
 ﻿using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace Tanka.GraphQL.Server.WebSockets
 {
@@ -9,7 +10,8 @@ namespace Tanka.GraphQL.Server.WebSockets
         private readonly IProtocolHandler _protocol;
 
         public SubscriptionServer(
-            IProtocolHandler protocol)
+            IProtocolHandler protocol, 
+            IOptions<WebSocketProtocolOptions> options) : base(options)
         {
             _protocol = protocol;
         }

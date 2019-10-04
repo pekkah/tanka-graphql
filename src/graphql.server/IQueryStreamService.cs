@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Tanka.GraphQL.DTOs;
 
 namespace Tanka.GraphQL.Server
 {

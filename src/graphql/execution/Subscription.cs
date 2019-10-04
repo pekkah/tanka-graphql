@@ -165,7 +165,7 @@ namespace Tanka.GraphQL.Execution
             var result = new ExecutionResult
             {
                 Errors = context.FieldErrors.Select(formatError).ToList(),
-                Data = data
+                Data = data?.ToDictionary(kv => kv.Key, kv => kv.Value)
             };
 
             return result;

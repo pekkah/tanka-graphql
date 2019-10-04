@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Tanka.GraphQL.DTOs;
 
 namespace Tanka.GraphQL
 {
@@ -12,13 +9,11 @@ namespace Tanka.GraphQL
     /// </summary>
     public class ExecutionResult : IExecutionResult
     {
-        private IDictionary<string, object> _data;
-        private IEnumerable<ExecutionError> _errors;
-        private IDictionary<string, object> _extensions;
+        private Dictionary<string, object> _data;
+        private List<ExecutionError> _errors;
+        private Dictionary<string, object> _extensions;
 
-        [JsonConverter(typeof(NestedDictionaryConverter))]
-        [DataMember(Name = "data")]
-        public IDictionary<string, object> Data
+        public Dictionary<string, object> Data
         {
             get => _data;
             set
@@ -33,9 +28,7 @@ namespace Tanka.GraphQL
             }
         }
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        [DataMember(Name = "extensions")]
-        public IDictionary<string, object> Extensions
+        public Dictionary<string, object> Extensions
         {
             get => _extensions;
             set
@@ -50,9 +43,7 @@ namespace Tanka.GraphQL
             }
         }
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        [DataMember(Name = "errors")]
-        public IEnumerable<ExecutionError> Errors
+        public List<ExecutionError> Errors
         {
             get => _errors;
             set

@@ -33,7 +33,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.dev.chat.data", "de
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.dev.chat.web", "dev\graphql.dev.chat.web\graphql.dev.chat.web.csproj", "{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graphql.tutorials.getting-started", "tutorials\graphql.tutorials.getting-started\graphql.tutorials.getting-started.csproj", "{917EF279-90B7-421B-92D0-B113FD9E2ECA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.tutorials.getting-started", "tutorials\graphql.tutorials.getting-started\graphql.tutorials.getting-started.csproj", "{917EF279-90B7-421B-92D0-B113FD9E2ECA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graphql.server.links", "src\graphql.server.links\graphql.server.links.csproj", "{16F69519-406E-4AEA-B012-C2164C1722A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graphql.server.links.tests", "tests\graphql.server.links.tests\graphql.server.links.tests.csproj", "{563B3005-79F0-4E41-94C6-E90F23A44973}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -165,6 +169,30 @@ Global
 		{917EF279-90B7-421B-92D0-B113FD9E2ECA}.Release|x64.Build.0 = Release|Any CPU
 		{917EF279-90B7-421B-92D0-B113FD9E2ECA}.Release|x86.ActiveCfg = Release|Any CPU
 		{917EF279-90B7-421B-92D0-B113FD9E2ECA}.Release|x86.Build.0 = Release|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Debug|x64.Build.0 = Debug|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Debug|x86.Build.0 = Debug|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Release|x64.ActiveCfg = Release|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Release|x64.Build.0 = Release|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Release|x86.ActiveCfg = Release|Any CPU
+		{16F69519-406E-4AEA-B012-C2164C1722A4}.Release|x86.Build.0 = Release|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Debug|x64.Build.0 = Debug|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Debug|x86.Build.0 = Debug|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Release|Any CPU.Build.0 = Release|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Release|x64.ActiveCfg = Release|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Release|x64.Build.0 = Release|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Release|x86.ActiveCfg = Release|Any CPU
+		{563B3005-79F0-4E41-94C6-E90F23A44973}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

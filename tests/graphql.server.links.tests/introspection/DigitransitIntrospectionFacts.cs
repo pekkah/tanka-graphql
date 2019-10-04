@@ -2,20 +2,19 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
-using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.Introspection
+namespace Tanka.GraphQL.Server.Links.Tests.Introspection
 {
     public class DigitransitIntrospectionFacts
     {
         private static string GetDigitransitIntrospection()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceStream = assembly.GetManifestResourceStream("Tanka.GraphQL.Tests.digitransit.introspection");
+            var resourceStream = assembly.GetManifestResourceStream("Tanka.GraphQL.Server.Links.Tests.digitransit.introspection");
             using (var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
             {

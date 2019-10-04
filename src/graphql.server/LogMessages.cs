@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Tanka.GraphQL.Language;
-using Tanka.GraphQL.DTOs;
 
 namespace Tanka.GraphQL.Server
 {

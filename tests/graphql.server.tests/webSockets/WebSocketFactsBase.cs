@@ -3,15 +3,17 @@ using System.IO;
 using System.Net.Http;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Server.Tests.Host;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Newtonsoft.Json;
+using Tanka.GraphQL.Server.Links.DTOs;
 using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
+using Tanka.GraphQL.Server.WebSockets.DTOs.Serialization.Converters;
 using Xunit;
 
 namespace Tanka.GraphQL.Server.Tests.WebSockets
@@ -21,6 +23,16 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
         private HttpClient Client;
 
         protected WebApplicationFactory<Startup> Factory;
+
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters =
+            {
+                new OperationMessageConverter(),
+                new ObjectDictionaryConverter()
+            }
+        };
 
         protected WebSocketFactsBase(WebApplicationFactory<Startup> factory)
         {
@@ -49,13 +61,12 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
 
         protected OperationMessage DeserializeMessage(string json)
         {
-            return JsonConvert.DeserializeObject<OperationMessage>(json);
+            return JsonSerializer.Deserialize<OperationMessage>(json, _jsonOptions);
         }
 
         protected byte[] SerializeMessage(OperationMessage message)
         {
-            var json = JsonConvert.SerializeObject(message);
-            return Encoding.UTF8.GetBytes(json);
+            return JsonSerializer.SerializeToUtf8Bytes(message, _jsonOptions);
         }
 
         protected async Task<string> ReadMessage(WebSocket socket)

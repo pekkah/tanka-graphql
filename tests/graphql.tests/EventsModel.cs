@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Channels;
@@ -78,11 +79,17 @@ namespace Tanka.GraphQL.Tests
             public string Payload { get; set; }
         }
 
-        public class NewEvent
+        public class NewEvent : IReadFromObjectDictionary
         {
             public EventType Type { get; set; }
 
             public string Payload { get; set; }
+
+            public void Read(IReadOnlyDictionary<string, object> source)
+            {
+                Type = (EventType)Enum.Parse(typeof(EventType), source.GetValue<string>("type"));
+                Payload = source.GetValue<string>("payload");
+            }
         }
     }
 }

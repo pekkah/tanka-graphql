@@ -3,7 +3,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace Tanka.GraphQL.Server
 {

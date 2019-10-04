@@ -1,28 +1,25 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Tanka.GraphQL.Linking;
+using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.Server.Links.DTOs;
 
-namespace Tanka.GraphQL.Introspection
+namespace Tanka.GraphQL.Server.Links
 {
-    public static class SchemaBuilderExtensions
+    public static class LinkingSchemaBuilderExtensions
     {
-        public static SchemaBuilder ImportIntrospectedSchema(
-            this SchemaBuilder builder,
-            string introspectionExecutionResultJson)
+        private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
         {
-            if (string.IsNullOrWhiteSpace(introspectionExecutionResultJson))
-                throw new ArgumentNullException(nameof(introspectionExecutionResultJson));
-
-            var result = IntrospectionParser.Deserialize(introspectionExecutionResultJson);
-            var reader = new IntrospectionSchemaReader(builder, result);
-            reader.Read();
-
-            return builder;
-        }
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters =
+            {
+                new ObjectDictionaryConverter(),
+            }
+        };
 
         /// <summary>
         ///     Execute <see cref="Introspect.DefaultQuery" /> on link
@@ -59,8 +56,10 @@ namespace Tanka.GraphQL.Introspection
                     "Failed to execute introspection query. " +
                     $"Errors: {string.Join(", ", result.Errors.Select(e => e.Message))}");
 
-            var json = JsonConvert.SerializeObject(result);
-            return ImportIntrospectedSchema(builder, json);
+            var json = JsonSerializer.Serialize(result, _jsonOptions);
+            return builder.ImportIntrospectedSchema(json);
         }
+
+
     }
 }

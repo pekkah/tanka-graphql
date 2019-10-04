@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 
 namespace Tanka.GraphQL.TypeSystem
 {
@@ -21,7 +19,7 @@ namespace Tanka.GraphQL.TypeSystem
 
         public T GetArgument<T>(string name)
         {
-            object rawValue = default;
+            object rawValue;
 
             if (_arguments.ContainsKey(name))
             {
@@ -34,16 +32,10 @@ namespace Tanka.GraphQL.TypeSystem
                 rawValue = argument?.DefaultValue;
             }
 
-            if (rawValue == null || rawValue.Equals(default(T)))
+            if (rawValue == null || rawValue.Equals(null))
                 return default(T);
 
-            if (rawValue is T argAsType)
-                return argAsType;
-
-            //todo(pekka): should not depend directly on JSON.Net
-            var obj = JObject.FromObject(rawValue);
-
-            return obj.ToObject<T>();
+            return (T)rawValue;
         }
 
         public override string ToString()

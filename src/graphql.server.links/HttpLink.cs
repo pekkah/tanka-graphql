@@ -3,20 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
-using Newtonsoft.Json;
 using Tanka.GraphQL.Language;
-using Tanka.GraphQL.DTOs;
+using Tanka.GraphQL.Server.Links.DTOs;
 
-namespace Tanka.GraphQL.Linking
+namespace Tanka.GraphQL.Server.Links
 {
     public class HttpLink
     {
         private readonly HttpClient _client;
         private readonly Func<HttpResponseMessage, ValueTask<ExecutionResult>> _transformResponse;
+
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters =
+            {
+                new ObjectDictionaryConverter()
+            }
+        };
         private readonly string _url;
 
         private readonly
@@ -54,7 +63,8 @@ namespace Tanka.GraphQL.Linking
                 Query = operation.Document.ToGraphQL(),
                 Variables = operation.Variables?.ToDictionary(kv => kv.Key, kv => kv.Value)
             };
-            var json = JsonConvert.SerializeObject(query);
+            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(query, _jsonOptions);
+            var json = Encoding.UTF8.GetString(jsonBytes);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
             return request;
@@ -64,8 +74,8 @@ namespace Tanka.GraphQL.Linking
         {
             response.EnsureSuccessStatusCode();
 
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ExecutionResult>(json);
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            return JsonSerializer.Deserialize<ExecutionResult>(bytes, _jsonOptions);
         }
 
         public async ValueTask<ChannelReader<ExecutionResult>> Execute(GraphQLDocument document,

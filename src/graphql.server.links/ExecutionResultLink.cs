@@ -4,7 +4,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
 
-namespace Tanka.GraphQL.Linking
+namespace Tanka.GraphQL.Server.Links
 {
     public delegate ValueTask<ChannelReader<ExecutionResult>> ExecutionResultLink(
         GraphQLDocument document,

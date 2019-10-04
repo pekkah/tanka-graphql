@@ -8,7 +8,6 @@ using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Language;
-using Tanka.GraphQL.DTOs;
 using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server
@@ -118,8 +117,8 @@ namespace Tanka.GraphQL.Server
                 var channel = Channel.CreateBounded<ExecutionResult>(1);
                 await channel.Writer.WriteAsync(new ExecutionResult
                 {
-                    Errors = result.Errors,
-                    Extensions = result.Extensions
+                    Errors = result.Errors.ToList(),
+                    Extensions = result.Extensions.ToDictionary(kv => kv.Key, kv => kv.Value)
                 }, CancellationToken.None);
 
                 channel.Writer.TryComplete();

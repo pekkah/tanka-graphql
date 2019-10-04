@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -16,13 +17,13 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
 {
     public class GraphQLWSProtocolFacts
     {
-        private IOptions<GraphQLWSProtocolOptions> _options;
+        private IOptions<WebSocketProtocolOptions> _options;
         private NullLogger<GraphQLWSProtocol> _logger;
         private MessageContextAccessor _accessor;
 
         public GraphQLWSProtocolFacts()
         {
-            _options = Options.Create(new GraphQLWSProtocolOptions());
+            _options = Options.Create(new WebSocketProtocolOptions());
             _logger = new NullLogger<GraphQLWSProtocol>();
             _accessor = new MessageContextAccessor();
         }
@@ -133,7 +134,10 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
             {
                 Id = "1",
                 Type = MessageType.GQL_START,
-                Payload = JObject.FromObject(new OperationMessageQueryPayload())
+                Payload = new OperationMessageQueryPayload()
+                {
+                    Query = "subscription { hello }"
+                }
             };
 
             var context = new MessageContext(message, output);
@@ -143,7 +147,7 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
 
             /* Then */
             var subscription = sut.GetSubscription(message.Id);
-            Assert.NotEqual(default, subscription);
+            Assert.NotNull(subscription);
         }
 
         [Fact]
@@ -167,7 +171,7 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
             {
                 Id = "1",
                 Type = MessageType.GQL_START,
-                Payload = JObject.FromObject(new OperationMessageQueryPayload())
+                Payload = new OperationMessageQueryPayload()
             };
 
             var context = new MessageContext(message, output);
