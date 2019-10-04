@@ -28,7 +28,13 @@ namespace Tanka.GraphQL.Server.Links.DTOs
         public override void Write(Utf8JsonWriter writer, Dictionary<string, object> value,
             JsonSerializerOptions options)
         {
-            WriteDictionary(writer, value, options);
+            //WriteDictionary(writer, value, options);
+            var internalOptions = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            JsonSerializer.Serialize(writer, value, internalOptions);
         }
 
         private Dictionary<string, object> ReadDictionary(JsonElement element, JsonSerializerOptions options)
@@ -123,6 +129,9 @@ namespace Tanka.GraphQL.Server.Links.DTOs
                 case IEnumerable list:
                     writer.WritePropertyName(key);
                     WriteArray(writer, list, options);
+                    break;
+                default:
+                    JsonSerializer.Serialize(writer, value, value.GetType(), options);
                     break;
             }
         }

@@ -34,7 +34,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             services.AddControllers()
                 .AddJsonOptions(options =>
                 {
-                    // required to serialize variables as nested dictionary
+                    // required to serialize 
                     options.JsonSerializerOptions.Converters
                         .Add(new ObjectDictionaryConverter());
                 });
