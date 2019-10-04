@@ -416,7 +416,7 @@
                         {
                             &quot;create&quot;, async context =&gt;
                             {
-                                var newEvent = context.GetArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
+                                var newEvent = context.GetObjectArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
 
                                 if (newEvent.Payload == null)
                                     return Resolve.As(

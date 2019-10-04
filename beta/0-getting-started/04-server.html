@@ -312,8 +312,6 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
         {
             // Configure SignalR server
             services.AddSignalR()
-                // Tanka DTOs still use Newtonsoft.Json properties so this is required
-                .AddNewtonsoftJsonProtocol()
                 // Add SignalR server hub
                 .AddTankaServerHub();
         }
@@ -378,7 +376,7 @@ execute the queries.</p>
             var stream = await _queryStreamService.QueryAsync(new Query
             {
                 Document = ParseDocument(request.Query),
-                Variables = request.Variables.ToNestedDictionary(),
+                Variables = request.Variables,
                 OperationName = request.OperationName
             }, Request.HttpContext.RequestAborted);
 
