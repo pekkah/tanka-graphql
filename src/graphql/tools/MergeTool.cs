@@ -5,6 +5,7 @@ using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Tools
 {
+    [Obsolete("Use SchemaBuilder.Merge")]
     public static class MergeTool
     {
         public static void Schemas(SchemaBuilder target, params ISchema[] schemas)
@@ -14,12 +15,14 @@ namespace Tanka.GraphQL.Tools
 
         public static void Schema(SchemaBuilder target, ISchema right)
         {
-            foreach (var rightType in right.QueryTypes<ComplexType>())
-                MergeComplexType(right, target, rightType);
+            foreach (var rightType in right.QueryTypes<EnumType>())
+                MergeEnumType(right, target, rightType);
 
-            foreach (var rightType in right.QueryTypes<InputObjectType>()) MergeInputType(right, target, rightType);
+            foreach (var rightType in right.QueryTypes<InputObjectType>()) 
+                MergeInputType(right, target, rightType);
 
-            foreach (var rightType in right.QueryTypes<ScalarType>()) MergeScalarType(target, rightType);
+            foreach (var rightType in right.QueryTypes<ScalarType>())
+                MergeScalarType(target, rightType);
 
             foreach (var directiveType in right.QueryDirectiveTypes())
             {
@@ -29,6 +32,53 @@ namespace Tanka.GraphQL.Tools
                     continue;
 
                 target.Include(directiveType);
+            }
+
+            // merge complex types
+            foreach (var rightType in right.QueryTypes<ComplexType>())
+                MergeComplexType(right, target, rightType);
+
+            // merge complex type field
+            foreach (var rightType in right.QueryTypes<ComplexType>())
+                MergeComplexTypeFields(right, target, rightType);
+        }
+
+        private static void MergeEnumType(ISchema right, SchemaBuilder builder, EnumType rightType)
+        {
+            // merge values if enum exists in both
+            if (builder.TryGetType<EnumType>(rightType.Name, out var leftEnumType))
+            {
+                var leftValues = leftEnumType.Values.ToList();
+                var rightValues = rightType.Values;
+
+                // combine values
+                foreach (var rightValue in rightValues)
+                {
+                    // if key is same then the values are same
+                    if (leftValues.Any(v => v.Key == rightValue.Key))
+                        continue;
+
+                    //todo: should we merge directives?
+
+                    leftValues.Add(rightValue);
+                }
+
+                builder.Remove(leftEnumType);
+                builder.Enum(
+                    leftEnumType.Name,
+                    out _,
+                    rightType.Description,
+                    values => leftValues.ForEach(v => values.Value(
+                        v.Value.Value, 
+                        v.Value.Description, 
+                        v.Value.Directives,
+                        v.Value.DeprecationReason)),
+                    rightType.Directives);
+            }
+            else
+            {
+                // include whole enum
+                builder.Include(rightType);
             }
         }
 
@@ -66,6 +116,15 @@ namespace Tanka.GraphQL.Tools
 
         private static void MergeComplexType(ISchema right, SchemaBuilder builder, ComplexType rightType)
         {
+            // complex type from right is missing so include it
+            if (!builder.TryGetType<ComplexType>(rightType.Name, out _))
+            {
+                builder.Include(rightType);
+            }
+        }
+
+        private static void MergeComplexTypeFields(ISchema right, SchemaBuilder builder, ComplexType rightType)
+        {
             if (builder.TryGetType<ComplexType>(rightType.Name, out var leftType))
             {
                 var rightTypeFields = right.GetFields(rightType.Name);
@@ -73,17 +132,21 @@ namespace Tanka.GraphQL.Tools
                 foreach (var rightTypeField in rightTypeFields)
                     builder.Connections(connect =>
                     {
+                        // if field already exists skip it
                         if (connect.TryGetField(leftType, rightTypeField.Key, out _))
                             return;
 
-                        connect.Include(leftType, new[] {rightTypeField});
+                        // include field
+                        connect.Include(leftType, rightTypeField);
 
+                        // include resolver
                         var resolver = right.GetResolver(rightType.Name, rightTypeField.Key);
 
                         if (resolver != null)
                             connect.GetOrAddResolver(leftType, rightTypeField.Key)
                                 .Run(resolver);
 
+                        // include subscriber
                         var subscriber = right.GetSubscriber(rightType.Name, rightTypeField.Key);
 
                         if (subscriber != null)
@@ -93,28 +156,10 @@ namespace Tanka.GraphQL.Tools
             }
             else
             {
-                builder
-                    .Include(rightType)
-                    .Connections(connect =>
-                    {
-                        var fields = right.GetFields(rightType.Name).ToList();
-                        connect.Include(rightType, fields);
-
-                        foreach (var rightTypeField in fields)
-                        {
-                            var resolver = right.GetResolver(rightType.Name, rightTypeField.Key);
-
-                            if (resolver != null)
-                                connect.GetOrAddResolver(rightType, rightTypeField.Key)
-                                    .Run(resolver);
-
-                            var subscriber = right.GetSubscriber(rightType.Name, rightTypeField.Key);
-
-                            if (subscriber != null)
-                                connect.GetOrAddSubscriber(rightType, rightTypeField.Key)
-                                    .Run(subscriber);
-                        }
-                    });
+                throw new SchemaBuilderException(
+                    rightType.Name,
+                    $"Cannot merge fields of {rightType}. Type is now known by builder. " +
+                    $"Call MergeComplexType first.");
             }
         }
     }

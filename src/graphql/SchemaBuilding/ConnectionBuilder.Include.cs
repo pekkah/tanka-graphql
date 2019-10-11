@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.SchemaBuilding
 {
@@ -11,15 +11,39 @@ namespace Tanka.GraphQL.SchemaBuilding
             ComplexType owner,
             IEnumerable<KeyValuePair<string, IField>> fields)
         {
-            if (!Builder.TryGetType<ComplexType>(owner.Name, out _))
-                throw new SchemaBuilderException(owner.Name,
-                    $"Cannot include fields. Owner type {owner.Name} is not known.");
+            EnsureTypeKnown(owner);
 
             if (!_fields.ContainsKey(owner.Name))
                 _fields[owner.Name] = new Dictionary<string, IField>();
 
             foreach (var field in fields)
-                _fields[owner.Name].Add(field.Key, field.Value);
+                Include(owner, field);
+
+            return this;
+        }
+
+        public ConnectionBuilder Include(
+            ComplexType owner,
+            KeyValuePair<string, IField> field)
+        {
+            EnsureTypeKnown(owner);
+            EnsureTypeKnown(field.Value.Type);
+
+            foreach (var argument in field.Value.Arguments)
+            {
+                EnsureTypeKnown(argument.Value.Type);
+            }
+
+            foreach (var directive in field.Value.Directives)
+            {
+                EnsureDirectiveKnown(directive);
+            }
+
+            if (!_fields.ContainsKey(owner.Name))
+                _fields[owner.Name] = new Dictionary<string, IField>();
+
+            _fields[owner.Name].Add(field.Key, field.Value);
+
 
             return this;
         }
@@ -28,14 +52,33 @@ namespace Tanka.GraphQL.SchemaBuilding
             InputObjectType owner,
             IEnumerable<KeyValuePair<string, InputObjectField>> fields)
         {
-            if (!Builder.TryGetType<InputObjectType>(owner.Name, out _))
-                throw new SchemaBuilderException(owner.Name,
-                    $"Cannot include input fields. Owner type {owner.Name} is not known.");
+            EnsureTypeKnown(owner);
 
             if (!_inputFields.ContainsKey(owner.Name))
                 _inputFields[owner.Name] = new Dictionary<string, InputObjectField>();
 
-            foreach (var field in fields) _inputFields[owner.Name].Add(field.Key, field.Value);
+            foreach (var field in fields)
+                Include(owner, field);
+
+            return this;
+        }
+
+        public ConnectionBuilder Include(
+            InputObjectType owner,
+            KeyValuePair<string, InputObjectField> field)
+        {
+            EnsureTypeKnown(owner);
+            EnsureTypeKnown(field.Value.Type);
+
+            foreach (var directive in field.Value.Directives)
+            {
+                EnsureDirectiveKnown(directive);
+            }
+
+            if (!_inputFields.ContainsKey(owner.Name))
+                _inputFields[owner.Name] = new Dictionary<string, InputObjectField>();
+
+            _inputFields[owner.Name].Add(field.Key, field.Value);
 
             return this;
         }
