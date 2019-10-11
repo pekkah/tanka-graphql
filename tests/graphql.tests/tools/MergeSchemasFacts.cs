@@ -10,7 +10,7 @@ namespace Tanka.GraphQL.Tests.Tools
     public class MergeSchemasFacts
     {
         [Fact]
-        public void should_include_fields_if_no_conflict()
+        public void Should_include_fields_if_no_conflict()
         {
             /* Given */
             var left = new SchemaBuilder()
@@ -78,6 +78,48 @@ namespace Tanka.GraphQL.Tests.Tools
             /* Then */
             var rightInput = schema.GetNamedType<InputObjectType>("RightInput");
             Assert.NotNull(rightInput);
+        }
+
+        [Fact]
+        public void Merge_schema_with_new_enum()
+        {
+            /* Given */
+            var newTypes = new SchemaBuilder()
+                .Sdl(@"
+                    enum COLOR {
+                        RED
+                        BLUE
+                        GREEN
+                        }
+
+                    type Query {
+                        currentColor: COLOR
+                    }     
+                    ")
+                .Build();
+
+            var builder = new SchemaBuilder()
+                .Sdl(@"
+                    type Query {
+                        name: String!
+                    }
+
+                    schema {
+                        query: Query
+                    }
+                    ");
+
+            
+            /* When */
+            var schema = builder.Merge(newTypes)
+                .Build();
+
+            /* Then */
+            var newEnumType = schema.GetNamedType<EnumType>("COLOR");
+            Assert.NotNull(newEnumType);
+
+            var field = schema.GetField("Query", "currentColor");
+            Assert.Equal(newEnumType, field.Type);
         }
     }
 }
