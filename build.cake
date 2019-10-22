@@ -221,12 +221,11 @@ Task("Docs")
     }
 
      var args = ProcessArgumentBuilder.FromString(
-        "tanka-docs "
         + $"--output=\"{targetFolder}\" "
         + $"--basepath=\"{basepath}\"");
 			
       var exitCode = StartProcess(
-			  "dotnet",
+			  "dotnet-tanka-docs",
 			  new ProcessSettings() {
 				  Arguments = args
 			  }
