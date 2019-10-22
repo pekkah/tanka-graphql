@@ -1,5 +1,5 @@
-#tool nuget:?package=GitVersion.CommandLine&version=4.0.0
-#addin nuget:?package=Cake.Npm&version=0.16.0
+#tool nuget:?package=GitVersion.CommandLine&version=5.0.1
+#addin nuget:?package=Cake.Npm&version=0.17.0
 
 var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
@@ -221,11 +221,11 @@ Task("Docs")
     }
 
      var args = ProcessArgumentBuilder.FromString(
-         $"--output=\"{targetFolder}\" "
-       + $"--basepath=\"{basepath}\"");
+          $"--output=\"{targetFolder}\" "
+        + $"--basepath=\"{basepath}\"");
 			
       var exitCode = StartProcess(
-			  "generate-docs",
+			  "dotnet-tanka-docs",
 			  new ProcessSettings() {
 				  Arguments = args
 			  }
