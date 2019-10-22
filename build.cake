@@ -221,7 +221,7 @@ Task("Docs")
     }
 
      var args = ProcessArgumentBuilder.FromString(
-        + $"--output=\"{targetFolder}\" "
+          $"--output=\"{targetFolder}\" "
         + $"--basepath=\"{basepath}\"");
 			
       var exitCode = StartProcess(
