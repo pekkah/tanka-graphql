@@ -23,15 +23,14 @@ namespace Tanka.GraphQL
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var extensions = new ExtensionsRunner(options.Extensions);
-            await extensions.BeginExecuteAsync(options);
+            var extensionsRunner = await options.ExtensionsRunnerFactory.BeginScope(options);
             var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
             using (logger.Begin(options.OperationName))
             {
                 var (queryContext, validationResult) = await BuildQueryContextAsync(
                     options,
-                    extensions,
+                    extensionsRunner,
                     logger);
 
                 if (!validationResult.IsValid)
@@ -63,7 +62,7 @@ namespace Tanka.GraphQL
                         executionResult.AddExtension(validationExtension.Key, validationExtension.Value);
 
                 logger.ExecutionResult(executionResult);
-                await extensions.EndExecuteAsync(executionResult);
+                await extensionsRunner.EndExecuteAsync(executionResult);
                 return executionResult;
             }
         }

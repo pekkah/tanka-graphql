@@ -9,7 +9,8 @@ namespace Tanka.GraphQL
     public static partial class Executor
     {
         public static async Task<(QueryContext queryContext, ValidationResult validationResult)>
-            BuildQueryContextAsync(ExecutionOptions options,
+            BuildQueryContextAsync(
+                ExecutionOptions options,
                 ExtensionsRunner extensionsRunner,
                 ILogger logger)
         {
