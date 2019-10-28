@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Validation - tanka-graphql</title>
+    <title>Dependency injection - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -96,7 +96,7 @@
             <a class="nav-link" href="0-getting-started/04-server.html">Server</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
+            <a class="nav-link active bg-light" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -117,7 +117,7 @@
             <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="1-execution/06-validation.html">Validation</a>
+            <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -229,68 +229,53 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="validation">Validation</h2>
-<blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Validation">Specification</a></p>
-</blockquote>
-<h3 id="execution">Execution</h3>
-<p><pre><code class="language-csharp">
-        private ValidationResult Validate(
-            GraphQLDocument document,
-            CombineRule rule,
-            Dictionary&lt;string, object&gt; variables = null)
+                <h2 id="dependency-injection">Dependency Injection</h2>
+<p>Tanka GraphQL servers is built on top of the ASP.NET Core and uses
+the builtin dependency injection services.</p>
+<p>The recommended lifetime of a schema in Tanka is singleton as long
+as the schema does not change. This adds a challenge when using
+services which require scoped lifetime. Usually the scope is defined
+as HTTP request.</p>
+<h3 id="dependency-injection-using-context-extensions">Dependency injection using context extensions</h3>
+<p>Tanka GraphQL allows extending the execution trough extensions. Server
+adds an context extension which carries object trough the execution pipeline.
+These objects can be access during the value resolution. As the objects are
+resolved from <code>IServiceProvider</code> during the beginning of GraphQL request execution
+they will have their lifetime specified when they're added to the <code>IServiceCollection</code>.</p>
+<p>Steps required to register context extension using <code>IServiceCollection</code>:</p>
+<ol>
+<li>Define context object and add to services</li>
+<li>Use service in resolver</li>
+</ol>
+<h4 id="define-context-and-add-to-services">1. Define context and add to services</h4>
+<p>Define context object
+<pre><code class="language-csharp">
+    public class ResolverController
+    {
+        public ValueTask&lt;IResolveResult&gt; QueryLastName(ResolverContext context)
+        { 
+            return ResolveSync.As(&quot;GraphQL&quot;);
+        }
+    }
+</code></pre></p>
+<p>Add context to services and add context extension
+<pre><code class="language-csharp">
+        private void AddContextExtension(IServiceCollection services)
         {
-            if (document == null) throw new ArgumentNullException(nameof(document));
-            if (rule == null) throw new ArgumentNullException(nameof(rule));
-
-            return Validator.Validate(           
-                new[] {rule},
-                Schema,
-                document,
-                variables);
+            services.AddScoped&lt;ResolverController&gt;();
+            services.AddTankaServerExecutionContextExtension&lt;ResolverController&gt;();
         }
 </code></pre></p>
-<h3 id="rules">Rules</h3>
-<p>All execution rules</p>
-<p><pre><code class="language-csharp">All = new[]
+<h4 id="use-service-in-resolver">3. Use service in resolver</h4>
+<p>See <a href="0-getting-started/04-server.html">Server</a> for usage for below method.</p>
+<p><pre><code class="language-csharp">
+        private Resolver UseContextExtension()
         {
-            R511ExecutableDefinitions(),
-            
-            R5211OperationNameUniqueness(),
-            R5221LoneAnonymousOperation(),
-            R5231SingleRootField(),
-            
-            R531FieldSelections(),
-            R532FieldSelectionMerging(),
-            R533LeafFieldSelections(),
-
-            R541ArgumentNames(),
-            R542ArgumentUniqueness(),
-            R5421RequiredArguments(),
-
-            R5511FragmentNameUniqueness(),
-            R5512FragmentSpreadTypeExistence(),
-            R5513FragmentsOnCompositeTypes(),
-            R5514FragmentsMustBeUsed(),
-
-            R5521FragmentSpreadTargetDefined(),
-            R5522FragmentSpreadsMustNotFormCycles(),
-            R5523FragmentSpreadIsPossible(),
-
-            R561ValuesOfCorrectType(),
-            R562InputObjectFieldNames(),
-            R563InputObjectFieldUniqueness(),
-            R564InputObjectRequiredFields(),
-            
-            R571And573Directives(),
-            R572DirectivesAreInValidLocations(),
-
-            R581And582Variables(),
-            //todo: 5.8.3 All Variable Uses Defined
-            R584AllVariablesUsed(),
-            R585AllVariableUsagesAreAllowed(),
-            
-        }</code></pre></p>
+            return context =&gt; context
+                .Use&lt;ResolverController&gt;()
+                .QueryLastName(context);
+        }
+</code></pre></p>
                     
             </main>
         </div>

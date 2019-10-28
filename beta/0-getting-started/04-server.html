@@ -95,6 +95,9 @@
         <li class="nav-item">
             <a class="nav-link active bg-light" href="0-getting-started/04-server.html">Server</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
+        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -264,7 +267,8 @@ for execution. Schema should be built only once and cached as singleton.</p>
                 .Sdl(
                     @&quot;
                     type Query {
-                        name: String!
+                        firstName: String!
+                        lastName: String!
                     }
 
                     schema {
@@ -280,7 +284,8 @@ for execution. Schema should be built only once and cached as singleton.</p>
                     {
                         [&quot;Query&quot;] = new FieldResolversMap()
                         {
-                            {&quot;name&quot;, context =&gt; ResolveSync.As(&quot;Tanka&quot;)}
+                            {&quot;firstName&quot;, context =&gt; ResolveSync.As(&quot;Tanka&quot;)},
+                            {&quot;lastName&quot;, UseContextExtension()}
                         }
                     });
         }
