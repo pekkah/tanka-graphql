@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Net;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Extensions.Tracing;
@@ -24,6 +25,12 @@ namespace Tanka.GraphQL.Server
             services.TryAddSingleton<IExecutorExtension, TExtension>();
 
             return services;
+        }
+
+        public static IServiceCollection AddTankaServerExecutionContextExtension<TContext>(
+            this IServiceCollection services)
+        {
+            return services.AddTankaServerExecutionExtension<ContextExtension<TContext>>();
         }
 
         public static OptionsBuilder<WebSocketProtocolOptions> AddTankaWebSocketServerWithTracing(

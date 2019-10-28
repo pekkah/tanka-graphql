@@ -43,6 +43,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             services.AddSingleton<IChat, Data.Chat>();
             services.AddSingleton<IChatResolverService, ChatResolverService>();
             services.AddSingleton<ChatSchemas>();
+            services.AddTankaServerExecutionContextExtension<Data.IChat>();
             services.AddSingleton(provider => provider.GetRequiredService<ChatSchemas>().Chat);
 
             // configure execution options

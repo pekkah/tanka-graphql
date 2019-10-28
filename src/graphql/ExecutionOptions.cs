@@ -64,6 +64,8 @@ namespace Tanka.GraphQL
         /// </summary>
         public ICollection<IExecutorExtension> Extensions { get; set; } = new List<IExecutorExtension>();
 
+        public ExtensionsRunnerFactory ExtensionsRunnerFactory { get; set; } = new ExtensionsRunnerFactory();
+
         public static ValueTask<ValidationResult> DefaultValidate(
             IEnumerable<CombineRule> rules,
             ISchema schema,

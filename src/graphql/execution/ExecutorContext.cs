@@ -28,7 +28,9 @@ namespace Tanka.GraphQL.Execution
         }
 
         public GraphQLOperationDefinition Operation { get; }
+
         public IDictionary<string, GraphQLFragmentDefinition> Fragments { get; }
+
         public IReadOnlyDictionary<string, object> CoercedVariableValues { get; }
 
         public ISchema Schema { get; }

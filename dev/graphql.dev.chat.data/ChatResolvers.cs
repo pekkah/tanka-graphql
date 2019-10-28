@@ -1,5 +1,4 @@
-﻿using Tanka.GraphQL;
-using Tanka.GraphQL.Samples.Chat.Data.Domain;
+﻿using Tanka.GraphQL.Samples.Chat.Data.Domain;
 using static Tanka.GraphQL.ValueResolution.Resolve;
 
 namespace Tanka.GraphQL.Samples.Chat.Data

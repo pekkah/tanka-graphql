@@ -51,10 +51,8 @@ namespace Tanka.GraphQL.ValueResolution
         public T GetArgument<T>(string name)
         {
             if (!Arguments.TryGetValue(name, out var arg))
-            {
                 throw new ArgumentOutOfRangeException(nameof(name), name,
                     $"Field '{FieldName}' does not contain argument with name '{name}''");
-            }
 
             return (T) arg;
         }
@@ -63,13 +61,13 @@ namespace Tanka.GraphQL.ValueResolution
         ///     Read InputObject argument dictionary as object
         /// </summary>
         /// <remarks>
-        /// Experimental. This might go away anytime and be replaced with something better.
+        ///     Experimental. This might go away anytime and be replaced with something better.
         /// </remarks>
         /// <typeparam name="T"></typeparam>
         /// <param name="name"></param>
         /// <returns></returns>
-        public T GetObjectArgument<T>(string name) 
-            where T: IReadFromObjectDictionary, new()
+        public T GetObjectArgument<T>(string name)
+            where T : IReadFromObjectDictionary, new()
         {
             var arg = GetArgument<IReadOnlyDictionary<string, object>>(name);
 
@@ -77,7 +75,13 @@ namespace Tanka.GraphQL.ValueResolution
             value.Read(arg);
             return value;
         }
+
+        public T Extension<T>() where T : IExtensionScope
+        {
+            return ExecutionContext.ExtensionsRunner.Extension<T>();
+        }
     }
+
 
     public interface IReadFromObjectDictionary
     {

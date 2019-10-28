@@ -106,7 +106,7 @@ namespace Tanka.GraphQL.Extensions.Tracing
                 _resolverTraces.Add(new TraceExtensionRecord.ResolverTrace()
                 {
                     StartOffset = start.TotalNanoSeconds(),
-                    Duration = (end -start).TotalNanoSeconds(),
+                    Duration = (end - start).TotalNanoSeconds(),
                     ParentType = context.ObjectType.Name,
                     FieldName = context.FieldName,
                     Path = context.Path.Segments.ToList(),

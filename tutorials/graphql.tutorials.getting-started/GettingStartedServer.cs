@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.WebSockets;
@@ -33,6 +34,14 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             AddSignalRServer(services);
 
             AddWebSocketsServer(services);
+
+            AddContextExtension(services);
+        }
+
+        private void AddContextExtension(IServiceCollection services)
+        {
+            services.AddScoped<ResolverController>();
+            services.AddTankaServerExecutionContextExtension<ResolverController>();
         }
 
         private void AddWebSocketsServer(IServiceCollection services)
@@ -92,6 +101,14 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
         }
     }
 
+    public class ResolverController
+    {
+        public ValueTask<IResolveResult> QueryLastName(ResolverContext context)
+        { 
+            return ResolveSync.As("GraphQL");
+        }
+    }
+
     public class SchemaCache
     {
         private readonly IMemoryCache _cache;
@@ -120,7 +137,8 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
                 .Sdl(
                     @"
                     type Query {
-                        name: String!
+                        firstName: String!
+                        lastName: String!
                     }
 
                     schema {
@@ -136,9 +154,17 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
                     {
                         ["Query"] = new FieldResolversMap()
                         {
-                            {"name", context => ResolveSync.As("Tanka")}
+                            {"firstName", context => ResolveSync.As("Tanka")},
+                            {"lastName", UseContextExtension()}
                         }
                     });
+        }
+
+        private Resolver UseContextExtension()
+        {
+            return context => context
+                .Use<ResolverController>()
+                .QueryLastName(context);
         }
     }
 }

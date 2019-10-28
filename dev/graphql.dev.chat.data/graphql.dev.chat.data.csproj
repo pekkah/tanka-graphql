@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <AssemblyName>Tanka.GraphQL.Samples.Chat.Data</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Samples.Chat.Data</RootNamespace>
   </PropertyGroup>
@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\graphql.server\graphql.server.csproj" />
     <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
   </ItemGroup>
 
