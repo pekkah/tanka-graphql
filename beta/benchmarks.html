@@ -230,10 +230,10 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <pre><code class="lang-ini">
-BenchmarkDotNet=v0.11.5, OS=Windows 10.0.17763.737 (1809/October2018Update/Redstone5)
+BenchmarkDotNet=v0.12.0, OS=Windows 10.0.17763.737 (1809/October2018Update/Redstone5)
 Intel Xeon CPU E5-2673 v3 2.40GHz, 1 CPU, 2 logical and 2 physical cores
 .NET Core SDK=3.0.100
-  [Host] : .NET Core 3.0.0 (CoreCLR 4.700.19.46205, CoreFX 4.700.19.46214), 64bit RyuJIT
+  [Host] : .NET Core 3.0.0 (CoreCLR 4.700.19.46205, CoreFX 4.700.19.46214), X64 RyuJIT
 
 Toolchain=InProcessEmitToolchain  
 
@@ -254,9 +254,9 @@ Toolchain=InProcessEmitToolchain
 <tbody>
 <tr>
 <td>Query_with_defaults</td>
-<td style="text-align: right;">27.836 us</td>
-<td style="text-align: right;">0.4641 us</td>
-<td style="text-align: right;">0.4114 us</td>
+<td style="text-align: right;">29.351 us</td>
+<td style="text-align: right;">0.5719 us</td>
+<td style="text-align: right;">0.5616 us</td>
 <td style="text-align: right;">1.4343</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -264,9 +264,9 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Query_without_validation</td>
-<td style="text-align: right;">6.742 us</td>
-<td style="text-align: right;">0.1336 us</td>
-<td style="text-align: right;">0.1958 us</td>
+<td style="text-align: right;">6.951 us</td>
+<td style="text-align: right;">0.1325 us</td>
+<td style="text-align: right;">0.1361 us</td>
 <td style="text-align: right;">0.2823</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -274,9 +274,9 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Mutation_with_defaults</td>
-<td style="text-align: right;">28.712 us</td>
-<td style="text-align: right;">0.3545 us</td>
-<td style="text-align: right;">0.3316 us</td>
+<td style="text-align: right;">27.271 us</td>
+<td style="text-align: right;">0.5072 us</td>
+<td style="text-align: right;">0.4744 us</td>
 <td style="text-align: right;">1.4038</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -284,9 +284,9 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Mutation_without_validation</td>
-<td style="text-align: right;">6.140 us</td>
-<td style="text-align: right;">0.1025 us</td>
-<td style="text-align: right;">0.0959 us</td>
+<td style="text-align: right;">6.135 us</td>
+<td style="text-align: right;">0.1223 us</td>
+<td style="text-align: right;">0.1502 us</td>
 <td style="text-align: right;">0.2518</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -294,39 +294,39 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Subscribe_with_defaults</td>
-<td style="text-align: right;">54.478 us</td>
-<td style="text-align: right;">0.6018 us</td>
-<td style="text-align: right;">0.5629 us</td>
+<td style="text-align: right;">50.600 us</td>
+<td style="text-align: right;">0.8198 us</td>
+<td style="text-align: right;">0.7668 us</td>
 <td style="text-align: right;">1.7700</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">27.52 KB</td>
+<td style="text-align: right;">27.64 KB</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
-<td style="text-align: right;">15.600 us</td>
-<td style="text-align: right;">0.1054 us</td>
-<td style="text-align: right;">0.0881 us</td>
-<td style="text-align: right;">0.5798</td>
+<td style="text-align: right;">14.224 us</td>
+<td style="text-align: right;">0.1508 us</td>
+<td style="text-align: right;">0.1260 us</td>
+<td style="text-align: right;">0.5951</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">8.98 KB</td>
+<td style="text-align: right;">9.11 KB</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
-<td style="text-align: right;">52.643 us</td>
-<td style="text-align: right;">1.0027 us</td>
-<td style="text-align: right;">1.1547 us</td>
+<td style="text-align: right;">50.238 us</td>
+<td style="text-align: right;">0.9914 us</td>
+<td style="text-align: right;">1.0181 us</td>
 <td style="text-align: right;">1.7700</td>
-<td style="text-align: right;">0.0610</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">27.52 KB</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">27.64 KB</td>
 </tr>
 <tr>
 <td>Validate_with_defaults</td>
-<td style="text-align: right;">14.495 us</td>
-<td style="text-align: right;">0.2942 us</td>
-<td style="text-align: right;">0.3721 us</td>
+<td style="text-align: right;">13.885 us</td>
+<td style="text-align: right;">0.2666 us</td>
+<td style="text-align: right;">0.2738 us</td>
 <td style="text-align: right;">1.1292</td>
 <td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
@@ -334,9 +334,9 @@ Toolchain=InProcessEmitToolchain
 </tr>
 <tr>
 <td>Validate_100times_with_defaults</td>
-<td style="text-align: right;">1,443.164 us</td>
-<td style="text-align: right;">28.2695 us</td>
-<td style="text-align: right;">33.6528 us</td>
+<td style="text-align: right;">1,399.515 us</td>
+<td style="text-align: right;">27.8133 us</td>
+<td style="text-align: right;">34.1573 us</td>
 <td style="text-align: right;">113.2813</td>
 <td style="text-align: right;">3.9063</td>
 <td style="text-align: right;">-</td>
