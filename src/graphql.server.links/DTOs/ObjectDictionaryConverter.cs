@@ -69,6 +69,9 @@ namespace Tanka.GraphQL.Server.Links.DTOs
                     case JsonValueKind.Null:
                         // default value is null
                         break;
+                    case JsonValueKind.Array:
+                        resultValue = ReadArray(value, options).ToList();
+                        break;
                     default:
                         throw new InvalidOperationException($"Unexpected value kind: {value.ValueKind}");
                 }
@@ -80,6 +83,42 @@ namespace Tanka.GraphQL.Server.Links.DTOs
                 return null;
 
             return result;
+        }
+
+        private IEnumerable<object> ReadArray(JsonElement value, JsonSerializerOptions options)
+        {
+            foreach (JsonElement item in value.EnumerateArray())
+            {
+                switch (item.ValueKind)
+                {
+                    case JsonValueKind.Object:
+                        yield return ReadDictionary(item, options);
+                        break;
+                    case JsonValueKind.Number:
+                        if (item.TryGetInt32(out var i))
+                            yield return i;
+                        else if (item.TryGetDouble(out var d))
+                            yield return d;
+                        else if (item.TryGetDecimal(out var dd))
+                            yield return dd;
+                        break;
+                    case JsonValueKind.True:
+                    case JsonValueKind.False:
+                        yield return item.GetBoolean();
+                        break;
+                    case JsonValueKind.String:
+                        yield return item.GetString();
+                        break;
+                    case JsonValueKind.Null:
+                        yield return null;
+                        break;
+                    case JsonValueKind.Array:
+                        yield return ReadArray(item, options);
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unexpected value kind: {item.ValueKind}");
+                }
+            }
         }
 
         private void WriteDictionary(Utf8JsonWriter writer, Dictionary<string, object> dictionary,

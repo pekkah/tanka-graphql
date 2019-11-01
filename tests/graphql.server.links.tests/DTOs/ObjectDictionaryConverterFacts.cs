@@ -63,6 +63,23 @@ namespace Tanka.GraphQL.Server.Links.Tests.DTOs
         }
 
         [Fact]
+        public void Deserialize_Array()
+        {
+            /* Given */
+            var json = @"
+                {
+                    ""values"": [1, 2, 3]
+                }
+            ";
+
+            /* When */
+            var actual = JsonSerializer.Deserialize<Dictionary<string, object>>(json, _options);
+
+            /* Then */
+            Assert.NotNull(actual["values"]);
+        }
+
+        [Fact]
         public void Deserialize_ComplexValue()
         {
             /* Given */
