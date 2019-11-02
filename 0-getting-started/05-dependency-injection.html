@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Unions - tanka-graphql</title>
+    <title>Dependency injection - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -96,7 +96,7 @@
             <a class="nav-link" href="0-getting-started/04-server.html">Server</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
+            <a class="nav-link active bg-light" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -207,7 +207,7 @@
             <a class="nav-link" href="7-type-system/07-interfaces.html">Interfaces</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="7-type-system/08-unions.html">Unions</a>
+            <a class="nav-link" href="7-type-system/08-unions.html">Unions</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="7-type-system/09-enums.html">Enums</a>
@@ -229,38 +229,51 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="unions">Unions</h2>
-<blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Unions">Specification</a></p>
-</blockquote>
-<p>Unions are created as instances of <code>UnionType</code>.</p>
-<h3 id="creating-union">Creating union</h3>
-<p>Union with two possible values</p>
-<p><pre><code class="language-csharp">        [Fact]
-        public void Define_union()
+                <h2 id="dependency-injection">Dependency Injection</h2>
+<p>Tanka GraphQL servers is built on top of the ASP.NET Core and uses
+the builtin dependency injection services.</p>
+<p>The recommended lifetime of a schema in Tanka is singleton as long
+as the schema does not change. This adds a challenge when using
+services which require scoped lifetime. Usually the scope is defined
+as HTTP request.</p>
+<h3 id="dependency-injection-using-context-extensions">Dependency injection using context extensions</h3>
+<p>Tanka GraphQL allows extending the execution trough extensions. Server
+adds an context extension which carries object trough the execution pipeline.
+These objects can be access during the value resolution. As the objects are
+resolved from <code>IServiceProvider</code> during the beginning of GraphQL request execution
+they will have their lifetime specified when they're added to the <code>IServiceCollection</code>.</p>
+<p>Steps required to register context extension using <code>IServiceCollection</code>:</p>
+<ol>
+<li>Define context object and add to services</li>
+<li>Use service in resolver</li>
+</ol>
+<h4 id="define-context-and-add-to-services">1. Define context and add to services</h4>
+<p>Define context object
+<pre><code class="language-csharp">
+    public class ResolverController
+    {
+        public ValueTask&lt;IResolveResult&gt; QueryLastName(ResolverContext context)
+        { 
+            return ResolveSync.As(&quot;GraphQL&quot;);
+        }
+    }
+</code></pre></p>
+<p>Add context to services and add context extension
+<pre><code class="language-csharp">
+        private void AddContextExtension(IServiceCollection services)
         {
-            /* Given */
-            var builder = new SchemaBuilder();
-
-            builder.Object(&quot;Person&quot;, out var person)
-                .Connections(connect =&gt; connect
-                    .Field(person, &quot;name&quot;, ScalarType.NonNullString));
-
-            builder.Object(&quot;Photo&quot;, out var photo)
-                .Connections(connect =&gt; connect
-                    .Field(photo, &quot;height&quot;, ScalarType.NonNullInt)
-                    .Field(photo, &quot;width&quot;, ScalarType.NonNullInt));
-
-            /* When */
-            builder.Union(&quot;SearchResult&quot;, out var searchResult,
-                possibleTypes: new[] {person, photo});
-
-            var personIsPossible = searchResult.IsPossible(person);
-            var photoIsPossible = searchResult.IsPossible(photo);
-
-            /* Then */
-            Assert.True(personIsPossible);
-            Assert.True(photoIsPossible);
+            services.AddScoped&lt;ResolverController&gt;();
+            services.AddTankaServerExecutionContextExtension&lt;ResolverController&gt;();
+        }
+</code></pre></p>
+<h4 id="use-service-in-resolver">3. Use service in resolver</h4>
+<p>See <a href="0-getting-started/04-server.html">Server</a> for usage for below method.</p>
+<p><pre><code class="language-csharp">
+        private Resolver UseContextExtension()
+        {
+            return context =&gt; context
+                .Use&lt;ResolverController&gt;()
+                .QueryLastName(context);
         }
 </code></pre></p>
                     

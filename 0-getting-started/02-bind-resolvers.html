@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Unions - tanka-graphql</title>
+    <title>Bind resolvers - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -87,7 +87,7 @@
             <a class="nav-link" href="0-getting-started/01-create-schema.html">Create schema</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="0-getting-started/02-bind-resolvers.html">Bind resolvers</a>
+            <a class="nav-link active bg-light" href="0-getting-started/02-bind-resolvers.html">Bind resolvers</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="0-getting-started/03-apply-directives.html">Apply directives</a>
@@ -207,7 +207,7 @@
             <a class="nav-link" href="7-type-system/07-interfaces.html">Interfaces</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="7-type-system/08-unions.html">Unions</a>
+            <a class="nav-link" href="7-type-system/08-unions.html">Unions</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="7-type-system/09-enums.html">Enums</a>
@@ -229,38 +229,160 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="unions">Unions</h2>
+                <h2 id="bind-resolvers">Bind resolvers</h2>
+<p>Resolvers are used to resolve the data for the query. They bind the execution of
+GraphQL operation into your logic.</p>
 <blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Unions">Specification</a></p>
+<p>See also</p>
+<ul>
+<li><a href="https://graphql.github.io/graphql-spec/June2018/#sec-Value-Resolution">Specification</a></li>
+<li><a href="1-execution/01-resolvers.html">Resolvers</a></li>
+</ul>
 </blockquote>
-<p>Unions are created as instances of <code>UnionType</code>.</p>
-<h3 id="creating-union">Creating union</h3>
-<p>Union with two possible values</p>
-<p><pre><code class="language-csharp">        [Fact]
-        public void Define_union()
+<p>Tanka GraphQL provides few ways of binding resolvers to your schema.</p>
+<ul>
+<li>Bind manually using <code>SchemaBuilder</code></li>
+<li>Bind using resolver maps by using <code>SchemaBuilder</code> or <code>SchemaTools</code></li>
+</ul>
+<h3 id="bind-manually-using-schemabuilder">Bind manually using <code>SchemaBuilder</code></h3>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Part2_BindResolvers_Manual()
         {
-            /* Given */
-            var builder = new SchemaBuilder();
+            // Create builder and load sdl
+            var builder = new SchemaBuilder()
+                .Sdl(@&quot;
+                type Query {
+                    name: String
+                }
+                &quot;);
 
-            builder.Object(&quot;Person&quot;, out var person)
-                .Connections(connect =&gt; connect
-                    .Field(person, &quot;name&quot;, ScalarType.NonNullString));
+            // Get query type
+            builder.GetQuery(out var query);
 
-            builder.Object(&quot;Photo&quot;, out var photo)
-                .Connections(connect =&gt; connect
-                    .Field(photo, &quot;height&quot;, ScalarType.NonNullInt)
-                    .Field(photo, &quot;width&quot;, ScalarType.NonNullInt));
+            // Connections are used to defined fields and resolvers.
+            // Connections method can be called multiple times.
+            builder.Connections(connections =&gt;
+            {
+                // Get or add resolver builder for Query.name field
+                var nameResolverBuilder = connections
+                    .GetOrAddResolver(query, &quot;name&quot;);
 
-            /* When */
-            builder.Union(&quot;SearchResult&quot;, out var searchResult,
-                possibleTypes: new[] {person, photo});
+                // &quot;Run&quot; allows us to define an end of the resolver 
+                // chain. You can add &quot;middlewares&quot; using &quot;Use&quot;.
+                nameResolverBuilder
+                    .Run(context =&gt;
+                    {
+                        // Create result using Test as the value
+                        var result = Resolve.As(&quot;Test&quot;);
 
-            var personIsPossible = searchResult.IsPossible(person);
-            var photoIsPossible = searchResult.IsPossible(photo);
+                        // Resolvers can be sync or async so
+                        // ValueTask result is used to reduce 
+                        // allocations
+                        return new ValueTask&lt;IResolveResult&gt;(result);
+                    });
+            });
 
-            /* Then */
-            Assert.True(personIsPossible);
-            Assert.True(photoIsPossible);
+            // Build schema with the resolver
+            var schema = builder.Build();
+
+            // Get resolver for Query.name field
+            var nameResolver = schema.GetResolver(schema.Query.Name, &quot;name&quot;);
+
+            // Execute the resolver. This is normally handled by the executor.
+            var nameValue = await nameResolver(null);
+            Assert.Equal(&quot;Test&quot;, nameValue.Value);
+        }
+</code></pre></p>
+<h3 id="bind-using-schematools-or-schemabuilder">Bind using <code>SchemaTools</code> or <code>SchemaBuilder</code></h3>
+<p>This approach uses a map of the types and fields to bind resolvers to fields.</p>
+<p>NOTE: Binding is done when the method is called.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Part2_BindResolvers_SchemaBuilder_Maps()
+        {
+            // Create builder and load sdl
+            var builder = new SchemaBuilder()
+                .Sdl(@&quot;
+                type Query {
+                    name: String
+                }
+                &quot;);
+
+            // Get query type
+            builder.GetQuery(out var query);
+
+            // Bind resolvers from ObjectTypeMap
+            builder.UseResolversAndSubscribers(
+                new ObjectTypeMap
+                {
+                    {
+                        query.Name, new FieldResolversMap
+                        {
+                            {
+                                &quot;name&quot;, context =&gt;
+                                {
+                                    var result = Resolve.As(&quot;Test&quot;);
+                                    return new ValueTask&lt;IResolveResult&gt;(result);
+                                }
+                            }
+                        }
+                    }
+                });
+
+            // Build schema
+            var schema = builder.Build();
+
+            // Get resolver for Query.name field
+            var nameResolver = schema.GetResolver(schema.Query.Name, &quot;name&quot;);
+
+            // Execute the resolver. This is normally handled by the executor.
+            var nameValue = await nameResolver(null);
+            Assert.Equal(&quot;Test&quot;, nameValue.Value);
+        }
+</code></pre></p>
+<p>This is what you would usually do to bind the resolvers and create schema.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public async Task Part2_BindResolvers_SchemaTools_Maps()
+        {
+            // Create builder and load sdl
+            var builder = new SchemaBuilder()
+                .Sdl(@&quot;
+                type Query {
+                    name: String
+                }
+                &quot;);
+
+            // Get query type
+            builder.GetQuery(out var query);
+
+            // Build schema by binding resolvers from ObjectTypeMap
+            var schema = SchemaTools.MakeExecutableSchema(
+                builder,
+                new ObjectTypeMap
+                {
+                    {
+                        query.Name, new FieldResolversMap
+                        {
+                            {
+                                &quot;name&quot;, context =&gt;
+                                {
+                                    var result = Resolve.As(&quot;Test&quot;);
+                                    return new ValueTask&lt;IResolveResult&gt;(result);
+                                }
+                            }
+                        }
+                    }
+                });
+
+
+            // Get resolver for Query.name field
+            var nameResolver = schema.GetResolver(schema.Query.Name, &quot;name&quot;);
+
+            // Execute the resolver. This is normally handled by the executor.
+            var nameValue = await nameResolver(null);
+            Assert.Equal(&quot;Test&quot;, nameValue.Value);
         }
 </code></pre></p>
                     

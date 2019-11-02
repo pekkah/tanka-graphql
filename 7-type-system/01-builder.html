@@ -80,6 +80,27 @@
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="0-getting-started/01-create-schema.html">Getting started</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/01-create-schema.html">Create schema</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/02-bind-resolvers.html">Bind resolvers</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/03-apply-directives.html">Apply directives</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/04-server.html">Server</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
     <a class="d-flex align-items-center text-muted" href="1-execution/01-resolvers.html">Execution</a>
 </h6>
     <ul class="nav flex-column">
@@ -643,10 +664,10 @@
                 )
                 .Build();
 
-            var resolvers = new ResolverMap
+            var resolvers = new ObjectTypeMap
             {
                 {
-                    query1.Name, new FieldResolverMap
+                    query1.Name, new FieldResolversMap
                     {
                         {
                             &quot;field1&quot;, async context =&gt;
