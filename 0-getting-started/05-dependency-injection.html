@@ -252,7 +252,7 @@ they will have their lifetime specified when they're added to the <code>IService
 <pre><code class="language-csharp">
     public class ResolverController
     {
-        public ValueTask&lt;IResolveResult&gt; QueryLastName(ResolverContext context)
+        public ValueTask&lt;IResolveResult&gt; QueryLastName(IResolverContext context)
         { 
             return ResolveSync.As(&quot;GraphQL&quot;);
         }

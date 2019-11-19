@@ -423,14 +423,14 @@
 
                                 if (newEvent.Payload == null)
                                     return Resolve.As(
-                                        context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Failure&quot;),
+                                        context.ExecutionContext.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Failure&quot;),
                                         new EventsModel.Failure(&quot;Payload should be given&quot;));
 
                                 var id = await Model.AddAsync(newEvent);
                                 var ev = Model.Events.Single(e =&gt; e.Id == id);
 
                                 return Resolve.As(
-                                    context.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
+                                    context.ExecutionContext.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
                                     new EventsModel.Success(id, ev));
                             }
                         }
