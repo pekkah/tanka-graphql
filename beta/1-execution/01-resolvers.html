@@ -232,10 +232,10 @@
                 <h2 id="resolvers">Resolvers</h2>
 <p>Resolving values is done with two specialized delegates. One is used resolving values and one for subscribing to streams when using subscriptions.</p>
 <p>Resolve fields
-<pre><code class="language-csharp">    public delegate ValueTask&lt;IResolveResult&gt; Resolver(ResolverContext context);
+<pre><code class="language-csharp">    public delegate ValueTask&lt;IResolveResult&gt; Resolver(IResolverContext context);
 </code></pre></p>
 <p>Resolve subscription event streams
-<pre><code class="language-csharp">    public delegate ValueTask&lt;ISubscribeResult&gt; Subscriber(ResolverContext context, CancellationToken unsubscribe);
+<pre><code class="language-csharp">    public delegate ValueTask&lt;ISubscribeResult&gt; Subscriber(IResolverContext context, CancellationToken unsubscribe);
 </code></pre></p>
 <h3 id="resolver">Resolver</h3>
 <p>When executing query or mutation <code>Resolver</code> is used to resolve the value of the field. Resolver can use the context to access field arguments, schema, and other details about the context of the execution.</p>
@@ -299,10 +299,10 @@
 <p>Resolver middlwares can be used to build an execution chain.</p>
 <p>Middlwares are implemented as a delegate method taking in the context and delegate for the next middlware to execute. Last link in the chain is usually the actual resolver but chain can be also interrupted before it by returning a result from the middleware.</p>
 <p>Signature of the value resolver middlware:
-<pre><code class="language-csharp">    public delegate ValueTask&lt;IResolveResult&gt; ResolverMiddleware(ResolverContext context, Resolver next);
+<pre><code class="language-csharp">    public delegate ValueTask&lt;IResolveResult&gt; ResolverMiddleware(IResolverContext context, Resolver next);
 </code></pre></p>
 <p>Signature of the subscription middlware:
-<pre><code class="language-csharp">    public delegate ValueTask&lt;ISubscribeResult&gt; SubscriberMiddleware(ResolverContext context, CancellationToken unsubscribe, Subscriber next);
+<pre><code class="language-csharp">    public delegate ValueTask&lt;ISubscribeResult&gt; SubscriberMiddleware(IResolverContext context, CancellationToken unsubscribe, Subscriber next);
 </code></pre></p>
 <h3 id="using-resolver-and-subscriber-maps">Using resolver and subscriber maps</h3>
 <p>In some cases it's useful to be able to build the resolvers separately from the schema building. For that purpose <code>SchemaTools</code> provide a method to bind resolvers to fields by using <code>IResolverMap</code> and <code>ISubscriberMap</code>.</p>
