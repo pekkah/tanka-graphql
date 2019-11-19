@@ -6,7 +6,7 @@ using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
 {
-    public class ResolverContext
+    public class ResolverContext : IResolverContext
     {
         public ResolverContext(
             ISchema schema, //todo: remove and get from execution

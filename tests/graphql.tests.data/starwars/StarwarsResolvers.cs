@@ -11,14 +11,14 @@ namespace Tanka.GraphQL.Tests.Data.Starwars
     {
         public static ObjectTypeMap BuildResolvers(Starwars starwars)
         {
-            async ValueTask<IResolveResult> ResolveCharacter(ResolverContext context)
+            async ValueTask<IResolveResult> ResolveCharacter(IResolverContext context)
             {
                 var id = (string) context.Arguments["id"];
                 var character = await starwars.GetCharacter(id).ConfigureAwait(false);
-                return As(context.Schema.GetNamedType<ObjectType>("Human"), character);
+                return As(context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"), character);
             }
 
-            async ValueTask<IResolveResult> ResolveHuman(ResolverContext context)
+            async ValueTask<IResolveResult> ResolveHuman(IResolverContext context)
             {
                 var id = (string) context.Arguments["id"];
 
@@ -26,21 +26,21 @@ namespace Tanka.GraphQL.Tests.Data.Starwars
                 return As(human);
             }
 
-            async ValueTask<IResolveResult> ResolveFriends(ResolverContext context)
+            async ValueTask<IResolveResult> ResolveFriends(IResolverContext context)
             {
                 var character = (Starwars.Character) context.ObjectValue;
                 var friends = character.GetFriends();
                 await Task.Delay(0).ConfigureAwait(false);
-                return As(friends.Select(c => As(context.Schema.GetNamedType<ObjectType>("Human"), c)));
+                return As(friends.Select(c => As(context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"), c)));
             }
 
-            async ValueTask<IResolveResult> ResolveCharacters(ResolverContext context)
+            async ValueTask<IResolveResult> ResolveCharacters(IResolverContext context)
             {
                 await Task.Delay(0).ConfigureAwait(false);
-                return As(starwars.Characters.Select(c => As(context.Schema.GetNamedType<ObjectType>("Human"), c)));
+                return As(starwars.Characters.Select(c => As(context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"), c)));
             }
 
-            async ValueTask<IResolveResult> AddHuman(ResolverContext context)
+            async ValueTask<IResolveResult> AddHuman(IResolverContext context)
             {
                 var humanInput = (IDictionary<string, object>) context.Arguments["human"];
                 var human = starwars.AddHuman(humanInput["name"].ToString());

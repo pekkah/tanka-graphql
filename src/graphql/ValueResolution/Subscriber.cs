@@ -3,5 +3,5 @@ using System.Threading.Tasks;
 
 namespace Tanka.GraphQL.ValueResolution
 {
-    public delegate ValueTask<ISubscribeResult> Subscriber(ResolverContext context, CancellationToken unsubscribe);
+    public delegate ValueTask<ISubscribeResult> Subscriber(IResolverContext context, CancellationToken unsubscribe);
 }

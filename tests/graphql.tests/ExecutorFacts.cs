@@ -113,14 +113,14 @@ namespace Tanka.GraphQL.Tests
 
                                 if (newEvent.Payload == null)
                                     return Resolve.As(
-                                        context.Schema.GetNamedType<ObjectType>("Failure"),
+                                        context.ExecutionContext.Schema.GetNamedType<ObjectType>("Failure"),
                                         new EventsModel.Failure("Payload should be given"));
 
                                 var id = await Model.AddAsync(newEvent);
                                 var ev = Model.Events.Single(e => e.Id == id);
 
                                 return Resolve.As(
-                                    context.Schema.GetNamedType<ObjectType>("Success"),
+                                    context.ExecutionContext.Schema.GetNamedType<ObjectType>("Success"),
                                     new EventsModel.Success(id, ev));
                             }
                         }

@@ -6,14 +6,14 @@ namespace Tanka.GraphQL.Samples.Chat.Data
 {
     public interface IChatResolverService
     {
-        ValueTask<IResolveResult> GetMessagesAsync(ResolverContext context);
+        ValueTask<IResolveResult> GetMessagesAsync(IResolverContext context);
 
-        ValueTask<IResolveResult> AddMessageAsync(ResolverContext context);
+        ValueTask<IResolveResult> AddMessageAsync(IResolverContext context);
 
-        ValueTask<IResolveResult> EditMessageAsync(ResolverContext context);
+        ValueTask<IResolveResult> EditMessageAsync(IResolverContext context);
 
-        ValueTask<ISubscribeResult> StreamMessagesAsync(ResolverContext context, CancellationToken cancellationToken);
+        ValueTask<ISubscribeResult> StreamMessagesAsync(IResolverContext context, CancellationToken cancellationToken);
 
-        ValueTask<IResolveResult> ResolveMessageAsync(ResolverContext context);
+        ValueTask<IResolveResult> ResolveMessageAsync(IResolverContext context);
     }
 }

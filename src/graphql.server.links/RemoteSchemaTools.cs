@@ -118,7 +118,7 @@ namespace Tanka.GraphQL.Server.Links
                     context.Selection);
             };
 
-            GraphQLDocument CreateDocument(ResolverContext context)
+            GraphQLDocument CreateDocument(IResolverContext context)
             {
                 return context.ExecutionContext.Document;
             }
@@ -167,7 +167,7 @@ namespace Tanka.GraphQL.Server.Links
                 return Resolve.Subscribe(stream, unsubscribe);
             };
 
-            GraphQLDocument CreateDocument(ResolverContext context)
+            GraphQLDocument CreateDocument(IResolverContext context)
             {
                 return context.ExecutionContext.Document;
             }

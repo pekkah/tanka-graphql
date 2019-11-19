@@ -44,17 +44,17 @@ namespace Tanka.GraphQL.Tests
             _messagesChannel = new EventChannel<Message>();
 
             // resolvers
-            ValueTask<IResolveResult> GetMessagesAsync(ResolverContext context)
+            ValueTask<IResolveResult> GetMessagesAsync(IResolverContext context)
             {
                 return ResolveSync.As(messages);
             }
 
-            ValueTask<ISubscribeResult> OnMessageAdded(ResolverContext context, CancellationToken unsubscribe)
+            ValueTask<ISubscribeResult> OnMessageAdded(IResolverContext context, CancellationToken unsubscribe)
             {
                 return ResolveSync.Subscribe(_messagesChannel, unsubscribe);
             }
 
-            ValueTask<IResolveResult> ResolveMessage(ResolverContext context)
+            ValueTask<IResolveResult> ResolveMessage(IResolverContext context)
             {
                 return ResolveSync.As(context.ObjectValue);
             }
