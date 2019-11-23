@@ -10,7 +10,12 @@ namespace Tanka.GraphQL
             Message = message;
         }
 
-        public string Message { get; }
+        public ExecutionError()
+        {
+            // required by System.Text.Json deserialization
+        }
+
+        public string Message { get; set; }
 
         public List<GraphQLLocation> Locations { get; set; }
 
