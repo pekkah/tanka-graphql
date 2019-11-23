@@ -15,7 +15,7 @@ namespace Tanka.GraphQL
             // required by System.Text.Json deserialization
         }
 
-        public string Message { get; }
+        public string Message { get; set; }
 
         public List<GraphQLLocation> Locations { get; set; }
 
