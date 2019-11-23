@@ -23,6 +23,8 @@ namespace Tanka.GraphQL.ValueResolution
 
         string FieldName { get; }
 
+        IDictionary<object, object> Items { get; }
+
         T GetArgument<T>(string name);
 
         /// <summary>
