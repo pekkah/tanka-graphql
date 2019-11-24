@@ -56,8 +56,9 @@ namespace Tanka.GraphQL.Validation
 
         public ExecutionError ToError()
         {
-            return new ExecutionError(ToString())
+            return new ExecutionError()
             {
+                Message = ToString(),
                 Locations = Nodes.Select(n => n.Location).ToList(),
                 Extensions = new Dictionary<string, object>
                 {

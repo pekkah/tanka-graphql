@@ -27,7 +27,7 @@ namespace Tanka.GraphQL
         /// </summary>
         public Func<Exception, ExecutionError> FormatError { get; set; }
 
-        public bool IncludeExceptionDetails { get; set; } = false;
+        public bool IncludeExceptionDetails { get; set; } = true;
 
         /// <summary>
         ///     Query validator function
@@ -64,7 +64,7 @@ namespace Tanka.GraphQL
         /// </summary>
         public ICollection<IExecutorExtension> Extensions { get; set; } = new List<IExecutorExtension>();
 
-        public ExtensionsRunnerFactory ExtensionsRunnerFactory { get; set; } = new ExtensionsRunnerFactory();
+        public IExtensionsRunnerFactory ExtensionsRunnerFactory { get; set; } = new ExtensionsRunnerFactory();
 
         public static ValueTask<ValidationResult> DefaultValidate(
             IEnumerable<CombineRule> rules,
@@ -85,7 +85,10 @@ namespace Tanka.GraphQL
         {
             var rootCause = exception.GetBaseException();
             var message = rootCause.Message;
-            var error = new ExecutionError(message);
+            var error = new ExecutionError()
+            {
+                Message = message
+            };
 
             EnrichWithErrorCode(error, rootCause);
 

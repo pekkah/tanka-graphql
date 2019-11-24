@@ -5,11 +5,6 @@ namespace Tanka.GraphQL
 {
     public class ExecutionError
     {
-        public ExecutionError(string message)
-        {
-            Message = message;
-        }
-
         public ExecutionError()
         {
             // required by System.Text.Json deserialization
