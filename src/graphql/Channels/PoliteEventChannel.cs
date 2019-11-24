@@ -14,13 +14,13 @@ namespace Tanka.GraphQL.Channels
             _byeItem = byeItem;
         }
         
-        public override void OnSubscribed(ISubscribeResult subscription)
+        public override void OnSubscribed(ISubscriberResult subscription)
         {
             if (!_welcomeItem.Equals(default(T)))
                 subscription.WriteAsync(_welcomeItem, CancellationToken.None);
         }
 
-        public override void OnUnsubscribing(ISubscribeResult subscription)
+        public override void OnUnsubscribing(ISubscriberResult subscription)
         {
             if (!_byeItem.Equals(default(T)))
                 subscription.WriteAsync(_byeItem, CancellationToken.None);

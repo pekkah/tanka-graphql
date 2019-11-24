@@ -8,30 +8,30 @@ namespace Tanka.GraphQL.ValueResolution
 {
     public static class ResolveSync
     {
-        public static ValueTask<ISubscribeResult> Subscribe<T>(EventChannel<T> eventChannel,
+        public static ValueTask<ISubscriberResult> Subscribe<T>(EventChannel<T> eventChannel,
             CancellationToken unsubscribe)
         {
-            return new ValueTask<ISubscribeResult>(eventChannel.Subscribe(unsubscribe));
+            return new ValueTask<ISubscriberResult>(eventChannel.Subscribe(unsubscribe));
         }
 
-        public static ValueTask<IResolveResult> As(object result)
+        public static ValueTask<IResolverResult> As(object result)
         {
-            return new ValueTask<IResolveResult>(new ResolveResult(result));
+            return new ValueTask<IResolverResult>(new ResolverResult(result));
         }
 
-        public static ValueTask<IResolveResult> As(string result)
+        public static ValueTask<IResolverResult> As(string result)
         {
-            return new ValueTask<IResolveResult>(new ResolveResult((object)result));
+            return new ValueTask<IResolverResult>(new ResolverResult((object)result));
         }
 
-        public static ValueTask<IResolveResult> As(ObjectType type, object result)
+        public static ValueTask<IResolverResult> As(ObjectType type, object result)
         {
-            return new ValueTask<IResolveResult>(new ResolveResult(type, result));
+            return new ValueTask<IResolverResult>(new ResolverResult(type, result));
         }
 
-        public static ValueTask<IResolveResult> As(IEnumerable result)
+        public static ValueTask<IResolverResult> As(IEnumerable result)
         {
-            return new ValueTask<IResolveResult>(new ResolveResult(result));
+            return new ValueTask<IResolverResult>(new ResolverResult(result));
         }
     }
 }

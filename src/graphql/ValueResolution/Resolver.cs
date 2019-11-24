@@ -2,5 +2,5 @@
 
 namespace Tanka.GraphQL.ValueResolution
 {
-    public delegate ValueTask<IResolveResult> Resolver(IResolverContext context);
+    public delegate ValueTask<IResolverResult> Resolver(IResolverContext context);
 }

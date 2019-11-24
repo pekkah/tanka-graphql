@@ -6,7 +6,7 @@ using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
 {
-    public interface IResolveResult
+    public interface IResolverResult
     {
         object Value { get; }
 

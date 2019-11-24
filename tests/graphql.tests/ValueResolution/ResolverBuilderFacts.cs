@@ -32,7 +32,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 return next(context);
             });
 
-            builder.Run(context => new ValueTask<IResolveResult>(Resolve.As(42)));
+            builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
 
             /* When */
             var resolver = builder.Build();
@@ -67,7 +67,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 return next(context);
             });
 
-            builder.Run(context => new ValueTask<IResolveResult>(Resolve.As(42)));
+            builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
 
             /* When */
             var resolver = builder.Build();
@@ -87,7 +87,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 .Use((context, next) => next(context))
                 .Use((context, next) => next(context));
 
-            builder.Run(context => new ValueTask<IResolveResult>(Resolve.As(42)));
+            builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
 
             /* When */
             var resolver = builder.Build();
@@ -109,7 +109,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 return next(context);
             });
 
-            builder.Run(context => new ValueTask<IResolveResult>(Resolve.As(42)));
+            builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
 
             /* When */
             builder.Build();

@@ -103,7 +103,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
 
     public class ResolverController
     {
-        public ValueTask<IResolveResult> QueryLastName(IResolverContext context)
+        public ValueTask<IResolverResult> QueryLastName(IResolverContext context)
         { 
             return ResolveSync.As("GraphQL");
         }

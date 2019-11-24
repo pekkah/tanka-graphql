@@ -8,14 +8,14 @@ namespace Tanka.GraphQL.Channels
 {
     public class EventChannel<T>
     {
-        private readonly ConcurrentDictionary<CancellationToken, ISubscribeResult> 
-            _subscriptions = new ConcurrentDictionary<CancellationToken, ISubscribeResult>();
+        private readonly ConcurrentDictionary<CancellationToken, ISubscriberResult> 
+            _subscriptions = new ConcurrentDictionary<CancellationToken, ISubscriberResult>();
 
-        protected IEnumerable<KeyValuePair<CancellationToken, ISubscribeResult>> Subscriptions => _subscriptions;
+        protected IEnumerable<KeyValuePair<CancellationToken, ISubscriberResult>> Subscriptions => _subscriptions;
 
-        public ISubscribeResult Subscribe(CancellationToken unsubscribe)
+        public ISubscriberResult Subscribe(CancellationToken unsubscribe)
         {
-            var subscription = new SubscribeResult();
+            var subscription = new SubscriberResult();
             _subscriptions[unsubscribe] = subscription;
 
             unsubscribe.Register(() =>
@@ -31,11 +31,11 @@ namespace Tanka.GraphQL.Channels
             return subscription;
         }
 
-        public virtual void OnSubscribed(ISubscribeResult subscription)
+        public virtual void OnSubscribed(ISubscriberResult subscription)
         {
         }
 
-        public virtual void OnUnsubscribing(ISubscribeResult subscription)
+        public virtual void OnUnsubscribing(ISubscriberResult subscription)
         {
         }
 

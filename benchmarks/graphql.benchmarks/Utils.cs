@@ -40,13 +40,13 @@ namespace Tanka.GraphQL.Benchmarks
                 {
                     "Query", new FieldResolversMap
                     {
-                        {"simple", context => new ValueTask<IResolveResult>(Resolve.As("value"))}
+                        {"simple", context => new ValueTask<IResolverResult>(Resolve.As("value"))}
                     }
                 },
                 {
                     "Mutation", new FieldResolversMap
                     {
-                        {"simple", context => new ValueTask<IResolveResult>(Resolve.As("value"))}
+                        {"simple", context => new ValueTask<IResolverResult>(Resolve.As("value"))}
                     }
                 },
                 {
@@ -55,7 +55,7 @@ namespace Tanka.GraphQL.Benchmarks
                         {
                             "simple", 
                             (context, unsubscribe) => ResolveSync.Subscribe(events, unsubscribe), 
-                            context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))}
+                            context => new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue))}
                     }
                 }
             };

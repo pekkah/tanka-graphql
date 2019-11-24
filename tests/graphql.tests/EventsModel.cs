@@ -43,7 +43,7 @@ namespace Tanka.GraphQL.Tests
             return LastId;
         }
 
-        public ISubscribeResult Subscribe(CancellationToken unsubscribe)
+        public ISubscriberResult Subscribe(CancellationToken unsubscribe)
         {
             return Broadcast.Subscribe(unsubscribe);
         }

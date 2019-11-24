@@ -37,12 +37,12 @@ namespace Tanka.GraphQL.Tests.Execution
             {
                 ["Query"] = new FieldResolversMap
                 {
-                    {"nonNull", context => new ValueTask<IResolveResult>(Resolve.As(null))},
-                    {"nonNullNested", context => new ValueTask<IResolveResult>(Resolve.As(nestedNonNullData))},
-                    {"nonNullListItem", context => new ValueTask<IResolveResult>(Resolve.As(new[] {"str", null, "str"}))},
-                    {"nonNullList", context => new ValueTask<IResolveResult>(Resolve.As(null))},
-                    {"nullableNested", context => new ValueTask<IResolveResult>(Resolve.As(nestedNonNullData))},
-                    {"nullable", context => new ValueTask<IResolveResult>(Resolve.As("hello"))}
+                    {"nonNull", context => new ValueTask<IResolverResult>(Resolve.As(null))},
+                    {"nonNullNested", context => new ValueTask<IResolverResult>(Resolve.As(nestedNonNullData))},
+                    {"nonNullListItem", context => new ValueTask<IResolverResult>(Resolve.As(new[] {"str", null, "str"}))},
+                    {"nonNullList", context => new ValueTask<IResolverResult>(Resolve.As(null))},
+                    {"nullableNested", context => new ValueTask<IResolverResult>(Resolve.As(nestedNonNullData))},
+                    {"nullable", context => new ValueTask<IResolverResult>(Resolve.As("hello"))}
                 },
 
                 ["Nest"] = new FieldResolversMap

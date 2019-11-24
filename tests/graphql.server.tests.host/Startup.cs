@@ -68,7 +68,7 @@ namespace Tanka.GraphQL.Server.Tests.Host
                 {
                     "Query", new FieldResolversMap
                     {
-                        {"hello", context => new ValueTask<IResolveResult>(Resolve.As("world"))}
+                        {"hello", context => new ValueTask<IResolverResult>(Resolve.As("world"))}
                     }
                 },
                 {
@@ -92,9 +92,9 @@ namespace Tanka.GraphQL.Server.Tests.Host
                             "events", (context, ct) =>
                             {
                                 var events = eventManager.Subscribe(ct);
-                                return new ValueTask<ISubscribeResult>(events);
+                                return new ValueTask<ISubscriberResult>(events);
                             },
-                            context => new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue))
+                            context => new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue))
                         }
                     }
                 }
@@ -179,7 +179,7 @@ namespace Tanka.GraphQL.Server.Tests.Host
             return ev;
         }
 
-        public ISubscribeResult Subscribe(CancellationToken cancellationToken)
+        public ISubscriberResult Subscribe(CancellationToken cancellationToken)
         {
             return _channel.Subscribe(cancellationToken);
         }

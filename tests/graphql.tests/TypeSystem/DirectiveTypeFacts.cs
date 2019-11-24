@@ -78,8 +78,8 @@ namespace Tanka.GraphQL.Tests.TypeSystem
                 {
                     query.Name, new FieldResolversMap
                     {
-                        {"requiresAdmin", context => new ValueTask<IResolveResult>(Resolve.As("Hello Admin!"))},
-                        {"requiresUser", context => new ValueTask<IResolveResult>(Resolve.As("Hello User!"))}
+                        {"requiresAdmin", context => new ValueTask<IResolverResult>(Resolve.As("Hello Admin!"))},
+                        {"requiresUser", context => new ValueTask<IResolverResult>(Resolve.As("Hello User!"))}
                     }
                 }
             };
@@ -162,8 +162,8 @@ namespace Tanka.GraphQL.Tests.TypeSystem
                 {
                     "Query", new FieldResolversMap
                     {
-                        {"requiresAdmin", context => new ValueTask<IResolveResult>(Resolve.As("Hello Admin!"))},
-                        {"requiresUser", context => new ValueTask<IResolveResult>(Resolve.As("Hello User!"))}
+                        {"requiresAdmin", context => new ValueTask<IResolverResult>(Resolve.As("Hello Admin!"))},
+                        {"requiresUser", context => new ValueTask<IResolverResult>(Resolve.As("Hello User!"))}
                     }
                 }
             };

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace Tanka.GraphQL.ValueResolution
 {
-    public class SubscribeResult : ISubscribeResult
+    public class SubscriberResult : ISubscriberResult
     {
         private readonly Channel<object> _channel;
 
-        public SubscribeResult()
+        public SubscriberResult()
         {
             _channel = Channel.CreateUnbounded<object>();
         }

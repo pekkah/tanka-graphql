@@ -62,19 +62,19 @@ namespace Tanka.GraphQL.Execution
 
         public static SubscriptionResult MapSourceToResponseEventAsync(
             IExecutorContext context,
-            ISubscribeResult subscribeResult,
+            ISubscriberResult subscriberResult,
             GraphQLOperationDefinition subscription,
             IReadOnlyDictionary<string, object> coercedVariableValues,
             Func<Exception, ExecutionError> formatError, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (subscribeResult == null) throw new ArgumentNullException(nameof(subscribeResult));
+            if (subscriberResult == null) throw new ArgumentNullException(nameof(subscriberResult));
             if (subscription == null) throw new ArgumentNullException(nameof(subscription));
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
             if (formatError == null) throw new ArgumentNullException(nameof(formatError));
 
             var responseStream = Channel.CreateUnbounded<ExecutionResult>();
-            var reader = subscribeResult.Reader;
+            var reader = subscriberResult.Reader;
 
             // execute event
             var _ = reader.TransformAndWriteTo(responseStream, item => ExecuteSubscriptionEventAsync(
@@ -87,7 +87,7 @@ namespace Tanka.GraphQL.Execution
             return new SubscriptionResult(responseStream);
         }
 
-        public static async Task<ISubscribeResult> CreateSourceEventStreamAsync(
+        public static async Task<ISubscriberResult> CreateSourceEventStreamAsync(
             IExecutorContext context,
             GraphQLOperationDefinition subscription,
             IReadOnlyDictionary<string, object> coercedVariableValues,

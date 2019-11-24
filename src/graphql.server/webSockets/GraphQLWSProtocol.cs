@@ -222,7 +222,10 @@ namespace Tanka.GraphQL.Server.WebSockets
                 {
                     Errors = new List<ExecutionError>()
                     {
-                        new ExecutionError(errorMessage)
+                        new ExecutionError()
+                        {
+                            Message = errorMessage
+                        }
                     }
                 }
             }, CancellationToken.None);

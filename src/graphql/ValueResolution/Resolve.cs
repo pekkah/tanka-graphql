@@ -10,19 +10,19 @@ namespace Tanka.GraphQL.ValueResolution
 {
     public static class Resolve
     {
-        public static IResolveResult As(object result)
+        public static IResolverResult As(object result)
         {
-            return new ResolveResult(result);
+            return new ResolverResult(result);
         }
 
-        public static IResolveResult As(ObjectType type, object result)
+        public static IResolverResult As(ObjectType type, object result)
         {
-            return new ResolveResult(type, result);
+            return new ResolverResult(type, result);
         }
 
-        public static IResolveResult As(IEnumerable result)
+        public static IResolverResult As(IEnumerable result)
         {
-            return new ResolveResult(result);
+            return new ResolverResult(result);
         }
 
         public static Resolver PropertyOf<T>(Func<T, object> getValue)
@@ -55,7 +55,7 @@ namespace Tanka.GraphQL.ValueResolution
             };
         }
 
-        public static ISubscribeResult Subscribe<T>(EventChannel<T> eventChannel, CancellationToken unsubscribe)
+        public static ISubscriberResult Subscribe<T>(EventChannel<T> eventChannel, CancellationToken unsubscribe)
         {
             return eventChannel.Subscribe(unsubscribe);
         }

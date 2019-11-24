@@ -6,11 +6,11 @@ using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
 {
-    public class PreExecutedResolveResult : IResolveResult
+    public class PreExecutedResolverResult : IResolverResult
     {
         private readonly IDictionary<string, object> _data;
 
-        public PreExecutedResolveResult(IDictionary<string, object> data)
+        public PreExecutedResolverResult(IDictionary<string, object> data)
         {
             _data = data;
         }
@@ -26,7 +26,7 @@ namespace Tanka.GraphQL.ValueResolution
             NodePath path)
         {
             var value = _data[selection.Name.Value];
-            var resolveResult = new ResolveResult(value);
+            var resolveResult = new ResolverResult(value);
             return resolveResult.CompleteValueAsync(
                 executorContext,
                 objectType,
