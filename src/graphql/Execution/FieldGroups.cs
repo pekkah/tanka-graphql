@@ -36,17 +36,6 @@ namespace Tanka.GraphQL.Execution
 
             try
             {
-                var resolverContext =
-                    new ResolverContext(
-                        context.Schema,
-                        objectType,
-                        objectValue,
-                        field,
-                        fieldSelection,
-                        argumentValues,
-                        path,
-                        context);
-
                 var resolver = schema.GetResolver(objectType.Name, fieldName);
 
                 if (resolver == null)
@@ -54,17 +43,22 @@ namespace Tanka.GraphQL.Execution
                         $"Could not get resolver for {objectType.Name}.{fieldName}",
                         path);
 
-                resolver = context.ExtensionsRunner.Resolver(resolverContext, resolver);
-                var result = await resolver(resolverContext).ConfigureAwait(false);
-                completedValue = await result.CompleteValueAsync(
-                    context,
-                    objectType,
-                    field,
-                    fieldType,
-                    fieldSelection,
-                    fields,
-                    path).ConfigureAwait(false);
+                var resolverContext =
+                    new ResolverContext(
+                        context.Schema,
+                        objectType,
+                        objectValue,
+                        field,
+                        fieldSelection,
+                        fields,
+                        argumentValues,
+                        path,
+                        context);
 
+                resolver = context.ExtensionsRunner.Resolver(resolverContext, resolver);
+                var result = await resolver(resolverContext);
+
+                completedValue = await result.CompleteValueAsync(resolverContext);
                 return completedValue;
             }
             catch (Exception e)

@@ -8,6 +8,12 @@ namespace Tanka.GraphQL.ValueResolution
 {
     public interface IResolverResult
     {
+        ValueTask<object> CompleteValueAsync(
+            IResolverContext context);
+    }
+
+    public interface IResolverResult3
+    {
         object Value { get; }
 
         Task<object> CompleteValueAsync(IExecutorContext executorContext,

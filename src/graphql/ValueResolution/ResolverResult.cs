@@ -9,25 +9,25 @@ using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
 {
-    public class ResolverResult : IResolverResult
+    public class ResolverResult3 : IResolverResult3
     {
-        public ResolverResult(object value)
+        public ResolverResult3(object value)
         {
             Value = value;
         }
 
-        public ResolverResult(ObjectType objectType, object value)
+        public ResolverResult3(ObjectType objectType, object value)
             : this(value)
         {
             ActualType = objectType;
         }
 
-        public ResolverResult(IEnumerable values)
+        public ResolverResult3(IEnumerable values)
         {
             Value = values;
         }
 
-        public ResolverResult(IEnumerable<IResolverResult> values)
+        public ResolverResult3(IEnumerable<IResolverResult3> values)
         {
             Value = values;
         }
@@ -70,7 +70,7 @@ namespace Tanka.GraphQL.ValueResolution
             object value,
             NodePath path)
         {
-            if (value is IResolverResult resolveResult)
+            if (value is IResolverResult3 resolveResult)
                 return await resolveResult.CompleteValueAsync(
                     executorContext,
                     objectType,

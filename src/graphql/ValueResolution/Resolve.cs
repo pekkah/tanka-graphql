@@ -12,17 +12,17 @@ namespace Tanka.GraphQL.ValueResolution
     {
         public static IResolverResult As(object result)
         {
-            return new ResolverResult(result);
+            return new CompleteValueResult(result, null);
         }
 
         public static IResolverResult As(ObjectType type, object result)
         {
-            return new ResolverResult(type, result);
+            return new CompleteValueResult(result, type);
         }
 
         public static IResolverResult As(IEnumerable result)
         {
-            return new ResolverResult(result);
+            return new CompleteValueResult(result, null);
         }
 
         public static Resolver PropertyOf<T>(Func<T, object> getValue)

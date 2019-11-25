@@ -128,6 +128,7 @@ namespace Tanka.GraphQL.Execution
                 initialValue,
                 field,
                 fieldSelection,
+                fields,
                 coercedArgumentValues,
                 path,
                 context);

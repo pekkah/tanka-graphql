@@ -14,6 +14,7 @@ namespace Tanka.GraphQL.ValueResolution
             object objectValue,
             IField field,
             GraphQLFieldSelection selection,
+            IReadOnlyCollection<GraphQLFieldSelection> fields,
             IReadOnlyDictionary<string, object> arguments,
             NodePath path,
             IExecutorContext executionContext)
@@ -23,6 +24,7 @@ namespace Tanka.GraphQL.ValueResolution
             ObjectValue = objectValue;
             Field = field ?? throw new ArgumentNullException(nameof(field));
             Selection = selection ?? throw new ArgumentNullException(nameof(selection));
+            Fields = fields;
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Path = path ?? throw new ArgumentNullException(nameof(path));
             ExecutionContext = executionContext;
@@ -39,6 +41,7 @@ namespace Tanka.GraphQL.ValueResolution
         public IField Field { get; }
 
         public GraphQLFieldSelection Selection { get; }
+        public IReadOnlyCollection<GraphQLFieldSelection> Fields { get; }
 
         public IReadOnlyDictionary<string, object> Arguments { get; }
 

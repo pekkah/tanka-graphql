@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
-using Tanka.GraphQL.Execution;
-using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
 {
@@ -17,24 +14,11 @@ namespace Tanka.GraphQL.ValueResolution
 
         public object Value => _data;
 
-        public Task<object> CompleteValueAsync(IExecutorContext executorContext,
-            ObjectType objectType,
-            IField field,
-            IType fieldType,
-            GraphQLFieldSelection selection,
-            IReadOnlyCollection<GraphQLFieldSelection> fields,
-            NodePath path)
+        public ValueTask<object> CompleteValueAsync(IResolverContext context)
         {
-            var value = _data[selection.Name.Value];
-            var resolveResult = new ResolverResult(value);
-            return resolveResult.CompleteValueAsync(
-                executorContext,
-                objectType,
-                field,
-                fieldType,
-                selection,
-                fields,
-                path);
+            var value = _data[context.FieldName];
+            var resolveResult = new CompleteValueResult(value, null);
+            return resolveResult.CompleteValueAsync(context);
         }
     }
 }
