@@ -249,6 +249,8 @@ paket-files/
 # FAKE - F# Make
 .fake/
 
+/tools/
+
 # JetBrains Rider
 .idea/
 *.sln.iml
@@ -259,9 +261,6 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-
-# cake Tools
-tools/
 
 .rpt2_cache/
 dist/
