@@ -27,7 +27,7 @@ namespace Tanka.GraphQL
         /// </summary>
         public Func<Exception, ExecutionError> FormatError { get; set; }
 
-        public bool IncludeExceptionDetails { get; set; } = true;
+        public bool IncludeExceptionDetails { get; set; } = false;
 
         /// <summary>
         ///     Query validator function

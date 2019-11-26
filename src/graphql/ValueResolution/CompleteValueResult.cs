@@ -18,6 +18,8 @@ namespace Tanka.GraphQL.ValueResolution
             _actualType = actualType;
         }
 
+        public object Value => _value;
+
         public ValueTask<object> CompleteValueAsync(
             IResolverContext context)
         {
@@ -30,6 +32,9 @@ namespace Tanka.GraphQL.ValueResolution
             NodePath path,
             IResolverContext context)
         {
+            if (value is IResolverResult resolverResult)
+                return resolverResult.CompleteValueAsync(context);
+
             if (type is NonNull nonNull)
                 return CompleteNonNullValueAsync(value, nonNull, path, context);
 
@@ -46,7 +51,7 @@ namespace Tanka.GraphQL.ValueResolution
                 ObjectType objectType => CompleteObjectValueAsync(value, objectType, path, context),
 
                 InterfaceType interfaceType => CompleteInterfaceValueAsync(value, interfaceType, path, context),
-                UnionType unionType => default,
+                UnionType unionType => CompleteUnionValueAsync(value, unionType, path, context),
                 _ => throw new CompleteValueException(
                     $"Cannot complete value for field {context.FieldName}. Cannot complete value of type {type}.",
                     path,
@@ -54,7 +59,7 @@ namespace Tanka.GraphQL.ValueResolution
             };
         }
 
-        private async Task<object> CompleteUnionValueAsync(
+        private async ValueTask<object> CompleteUnionValueAsync(
             object value,
             UnionType unionType,
             NodePath path,
@@ -160,7 +165,7 @@ namespace Tanka.GraphQL.ValueResolution
         {
             if (!(value is IEnumerable values))
                 throw new CompleteValueException(
-                    $"Cannot complete value for list field '{context.FieldName}':'{listType}'. " +
+                    $"Cannot complete value for list field '{context.FieldName}':'{list}'. " +
                     "Resolved value is not a collection",
                     context.Path,
                     context.Selection);

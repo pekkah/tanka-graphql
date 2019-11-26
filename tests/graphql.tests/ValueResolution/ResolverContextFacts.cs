@@ -26,6 +26,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
         private readonly object _objectValue;
         private readonly GraphQLFieldSelection _selection;
         private readonly ISchema _schema;
+        private IReadOnlyCollection<GraphQLFieldSelection> _fields;
 
         private class InputArg : IReadFromObjectDictionary
         {
@@ -52,6 +53,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 _objectValue,
                 _field,
                 _selection,
+                _fields,
                 arguments,
                 new NodePath(),
                 null);
@@ -72,8 +74,16 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 {"float", 100.1F}
             };
 
-            var sut = new ResolverContext(_schema, _objectType, _objectValue, _field, _selection, arguments,
-                new NodePath(), null);
+            var sut = new ResolverContext(
+                _schema,
+                _objectType,
+                _objectValue,
+                _field,
+                _selection,
+                _fields,
+                arguments,
+                new NodePath(),
+                null);
 
             /* When */
             var value = sut.GetArgument<float>("float");
@@ -91,8 +101,16 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 {"int", 101}
             };
 
-            var sut = new ResolverContext(_schema, _objectType, _objectValue, _field, _selection, arguments,
-                new NodePath(), null);
+            var sut = new ResolverContext(
+                _schema,
+                _objectType,
+                _objectValue,
+                _field,
+                _selection,
+                _fields,
+                arguments,
+                new NodePath(),
+                null);
 
             /* When */
             var value = sut.GetArgument<int>("int");
@@ -110,8 +128,16 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 {"long", 100L}
             };
 
-            var sut = new ResolverContext(_schema, _objectType, _objectValue, _field, _selection, arguments,
-                new NodePath(), null);
+            var sut = new ResolverContext(
+                _schema,
+                _objectType,
+                _objectValue,
+                _field,
+                _selection,
+                _fields,
+                arguments,
+                new NodePath(),
+                null);
 
             /* When */
             var value = sut.GetArgument<long>("long");
@@ -134,8 +160,16 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 }
             };
 
-            var sut = new ResolverContext(_schema, _objectType, _objectValue, _field, _selection, arguments,
-                new NodePath(), null);
+            var sut = new ResolverContext(
+                _schema,
+                _objectType,
+                _objectValue,
+                _field,
+                _selection,
+                _fields,
+                arguments,
+                new NodePath(),
+                null);
 
             /* When */
             var value = sut.GetObjectArgument<InputArg>("input");
@@ -153,8 +187,16 @@ namespace Tanka.GraphQL.Tests.ValueResolution
                 {"string", "101"}
             };
 
-            var sut = new ResolverContext(_schema, _objectType, _objectValue, _field, _selection, arguments,
-                new NodePath(), null);
+            var sut = new ResolverContext(
+                _schema,
+                _objectType,
+                _objectValue,
+                _field,
+                _selection,
+                _fields,
+                arguments,
+                new NodePath(),
+                null);
 
             /* When */
             var value = sut.GetArgument<string>("string");

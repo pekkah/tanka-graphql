@@ -16,22 +16,22 @@ namespace Tanka.GraphQL.ValueResolution
 
         public static ValueTask<IResolverResult> As(object result)
         {
-            return new ValueTask<IResolverResult>(new ResolverResult(result));
+            return new ValueTask<IResolverResult>(new CompleteValueResult(result, null));
         }
 
         public static ValueTask<IResolverResult> As(string result)
         {
-            return new ValueTask<IResolverResult>(new ResolverResult((object)result));
+            return new ValueTask<IResolverResult>(new CompleteValueResult((object)result, null));
         }
 
         public static ValueTask<IResolverResult> As(ObjectType type, object result)
         {
-            return new ValueTask<IResolverResult>(new ResolverResult(type, result));
+            return new ValueTask<IResolverResult>(new CompleteValueResult(result, type));
         }
 
         public static ValueTask<IResolverResult> As(IEnumerable result)
         {
-            return new ValueTask<IResolverResult>(new ResolverResult(result));
+            return new ValueTask<IResolverResult>(new CompleteValueResult(result, null));
         }
     }
 }
