@@ -45,7 +45,6 @@ namespace Tanka.GraphQL.Execution
 
                 var resolverContext =
                     new ResolverContext(
-                        context.Schema,
                         objectType,
                         objectValue,
                         field,

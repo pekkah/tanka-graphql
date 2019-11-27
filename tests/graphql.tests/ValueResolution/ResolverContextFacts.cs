@@ -48,7 +48,6 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             };
 
             var sut = new ResolverContext(
-                _schema,
                 _objectType,
                 _objectValue,
                 _field,
@@ -75,7 +74,6 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             };
 
             var sut = new ResolverContext(
-                _schema,
                 _objectType,
                 _objectValue,
                 _field,
@@ -102,7 +100,6 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             };
 
             var sut = new ResolverContext(
-                _schema,
                 _objectType,
                 _objectValue,
                 _field,
@@ -129,7 +126,6 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             };
 
             var sut = new ResolverContext(
-                _schema,
                 _objectType,
                 _objectValue,
                 _field,
@@ -161,7 +157,6 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             };
 
             var sut = new ResolverContext(
-                _schema,
                 _objectType,
                 _objectValue,
                 _field,
@@ -188,7 +183,6 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             };
 
             var sut = new ResolverContext(
-                _schema,
                 _objectType,
                 _objectValue,
                 _field,

@@ -123,7 +123,6 @@ namespace Tanka.GraphQL.Execution
             var field = schema.GetField(subscriptionType.Name, fieldName);
             var path = new NodePath();
             var resolveContext = new ResolverContext(
-                schema,
                 subscriptionType,
                 initialValue,
                 field,

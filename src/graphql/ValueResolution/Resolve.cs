@@ -51,7 +51,7 @@ namespace Tanka.GraphQL.ValueResolution
                 if (values == null)
                     return ResolveSync.As(null);
 
-                return ResolveSync.As(values.Select(As));
+                return ResolveSync.As(values);
             };
         }
 

@@ -9,7 +9,6 @@ namespace Tanka.GraphQL.ValueResolution
     public class ResolverContext : IResolverContext
     {
         public ResolverContext(
-            ISchema schema, //todo: remove and get from execution
             ObjectType objectType,
             object objectValue,
             IField field,
@@ -19,7 +18,6 @@ namespace Tanka.GraphQL.ValueResolution
             NodePath path,
             IExecutorContext executionContext)
         {
-            Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             ObjectType = objectType ?? throw new ArgumentNullException(nameof(objectType));
             ObjectValue = objectValue;
             Field = field ?? throw new ArgumentNullException(nameof(field));
@@ -32,7 +30,7 @@ namespace Tanka.GraphQL.ValueResolution
 
         public IDictionary<object, object> Items { get; } = new Dictionary<object, object>();
 
-        public ISchema Schema { get; }
+        public ISchema Schema => ExecutionContext.Schema;
 
         public ObjectType ObjectType { get; }
 

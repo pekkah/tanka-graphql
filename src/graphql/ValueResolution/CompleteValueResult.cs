@@ -14,10 +14,6 @@ namespace Tanka.GraphQL.ValueResolution
 
         public CompleteValueResult(object value, ObjectType actualType)
         {
-            if (value is IResolverResult)
-                throw new ArgumentOutOfRangeException(
-                    $"Value of type {nameof(IResolverContext)} cannot be completed.");
-
             _value = value;
             _actualType = actualType;
         }
@@ -27,7 +23,7 @@ namespace Tanka.GraphQL.ValueResolution
         public ValueTask<object> CompleteValueAsync(
             IResolverContext context)
         {
-            return CompleteValueAsync(_value, context.Field.Type, context.Path, context);
+            return CompleteValueAsync(_value, _actualType ?? context.Field.Type, context.Path, context);
         }
 
         private ValueTask<object> CompleteValueAsync(
@@ -36,6 +32,12 @@ namespace Tanka.GraphQL.ValueResolution
             NodePath path,
             IResolverContext context)
         {
+            if (value is IResolverResult subResult)
+            {
+                return subResult.CompleteValueAsync(context);
+            }
+
+
             if (type is NonNull nonNull)
                 return CompleteNonNullValueAsync(value, nonNull, path, context);
 
@@ -152,7 +154,7 @@ namespace Tanka.GraphQL.ValueResolution
                 throw new NullValueForNonNullException(
                     context.ObjectType.Name,
                     context.FieldName,
-                    context.Path,
+                    path,
                     context.Selection);
 
             return completedResult;
@@ -168,7 +170,7 @@ namespace Tanka.GraphQL.ValueResolution
                 throw new CompleteValueException(
                     $"Cannot complete value for list field '{context.FieldName}':'{list}'. " +
                     "Resolved value is not a collection",
-                    context.Path,
+                    path,
                     context.Selection);
 
             var innerType = list.OfType;
