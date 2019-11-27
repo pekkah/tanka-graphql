@@ -9,61 +9,60 @@ using Xunit;
 
 namespace Tanka.GraphQL.Tests.ValueResolution
 {
-    public class InterfaceCompletionFacts
+    public class UnionCompletionFacts
     {
         [Fact]
         public async Task Should_fail_if_no_ActualType_given()
         {
             /* Given */
-            var character = new InterfaceType("Character");
+            var success = new ObjectType("Success");
+            var error = new ObjectType("Error");
+            var result = new UnionType("Result", new []{success, error});
             var value = new object();
             var context = Substitute.For<IResolverContext>();
             context.FieldName.Returns("field");
-            context.Field.Returns(new Field(character));
+            context.Field.Returns(new Field(result));
 
 
             var sut = new CompleteValueResult(value, null);
 
             /* When */
-            var exception =
-                await Assert.ThrowsAsync<CompleteValueException>(() => sut.CompleteValueAsync(context).AsTask());
+            var exception = await Assert.ThrowsAsync<CompleteValueException>(()=> sut.CompleteValueAsync(context).AsTask());
 
             /* Then */
-            Assert.Equal(
-                "Cannot complete value for field 'field':'Character'. ActualType is required for interface values.",
-                exception.Message);
+            Assert.Equal("Cannot complete value for field 'field':'Result'. ActualType is required for union values.", exception.Message);
         }
 
         [Fact]
         public async Task Should_fail_if_ActualType_is_not_possible()
         {
             /* Given */
-            var character = new InterfaceType("Character");
-            var humanNotCharacter = new ObjectType("Human");
+            var notPossible = new ObjectType("NotPossible");
+            var success = new ObjectType("Success");
+            var error = new ObjectType("Error");
+            var result = new UnionType("Result", new []{success, error});
             var value = new object();
             var context = Substitute.For<IResolverContext>();
             context.FieldName.Returns("field");
-            context.Field.Returns(new Field(character));
+            context.Field.Returns(new Field(result));
 
 
-            var sut = new CompleteValueResult(value, humanNotCharacter);
+            var sut = new CompleteValueResult(value, notPossible);
 
             /* When */
-            var exception =
-                await Assert.ThrowsAsync<CompleteValueException>(() => sut.CompleteValueAsync(context).AsTask());
+            var exception = await Assert.ThrowsAsync<CompleteValueException>(()=> sut.CompleteValueAsync(context).AsTask());
 
             /* Then */
-            Assert.Equal(
-                "Cannot complete value for field 'field':'Character'. ActualType 'Human' does not implement interface 'Character'",
-                exception.Message);
+            Assert.Equal("Cannot complete value for field 'field':'Result'. ActualType 'NotPossible' is not possible for 'Result'", exception.Message);
         }
 
         [Fact]
         public async Task Should_complete_value()
         {
             /* Given */
-            var character = new InterfaceType("Character");
-            var humanCharacter = new ObjectType("Human", implements: new[] {character});
+            var success = new ObjectType("Success");
+            var error = new ObjectType("Error");
+            var result = new UnionType("Result", new []{success, error});
             var mockValue = new object();
             var context = Substitute.For<IResolverContext>();
             context.ExecutionContext.Schema.Returns(Substitute.For<ISchema>());
@@ -73,10 +72,10 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             });
             context.Path.Returns(new NodePath());
             context.FieldName.Returns("field");
-            context.Field.Returns(new Field(character));
+            context.Field.Returns(new Field(result));
 
 
-            var sut = new CompleteValueResult(mockValue, humanCharacter);
+            var sut = new CompleteValueResult(mockValue, success);
 
             /* When */
             var value = await sut.CompleteValueAsync(context);
@@ -89,8 +88,9 @@ namespace Tanka.GraphQL.Tests.ValueResolution
         public async Task Should_complete_list_of_values()
         {
             /* Given */
-            var character = new InterfaceType("Character");
-            var humanCharacter = new ObjectType("Human", implements: new[] {character});
+            var success = new ObjectType("Success");
+            var error = new ObjectType("Error");
+            var result = new UnionType("Result", new []{success, error});
             var mockValue = new object();
             var context = Substitute.For<IResolverContext>();
             context.ExecutionContext.Schema.Returns(Substitute.For<ISchema>());
@@ -100,10 +100,10 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             });
             context.Path.Returns(new NodePath());
             context.FieldName.Returns("field");
-            context.Field.Returns(new Field(character));
+            context.Field.Returns(new Field(result));
 
 
-            var sut = new CompleteValueResult(new[] {mockValue}, _ => humanCharacter);
+            var sut = new CompleteValueResult(new [] {mockValue} , _ => success);
 
             /* When */
             var value = await sut.CompleteValueAsync(context);

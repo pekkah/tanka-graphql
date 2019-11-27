@@ -82,14 +82,14 @@ namespace Tanka.GraphQL.ValueResolution
             if (actualType == null)
                 throw new CompleteValueException(
                     $"Cannot complete value for field '{context.FieldName}':'{unionType}'. " +
-                    "ActualType is required for union field values.",
+                    "ActualType is required for union values.",
                     path,
                     context.Selection);
 
             if (!unionType.IsPossible(actualType))
                 throw new CompleteValueException(
-                    "Cannot complete value as union. " +
-                    $"Actual type {actualType.Name} is not possible for {unionType.Name}",
+                    $"Cannot complete value for field '{context.FieldName}':'{unionType}'. " +
+                    $"ActualType '{actualType}' is not possible for '{unionType}'",
                     path,
                     context.Selection);
 
@@ -122,7 +122,7 @@ namespace Tanka.GraphQL.ValueResolution
             if (!actualType.Implements(interfaceType))
                 throw new CompleteValueException(
                     $"Cannot complete value for field '{context.FieldName}':'{interfaceType}'. " +
-                    $"ActualType '{actualType.Name}' does not implement interface '{interfaceType.Name}'",
+                    $"ActualType '{actualType}' does not implement interface '{interfaceType}'",
                     path,
                     context.Selection);
 
