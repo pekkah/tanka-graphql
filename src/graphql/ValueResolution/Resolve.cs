@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Tanka.GraphQL.Channels;
 using Tanka.GraphQL.TypeSystem;
@@ -23,6 +22,11 @@ namespace Tanka.GraphQL.ValueResolution
         public static IResolverResult As(IEnumerable result)
         {
             return new CompleteValueResult(result, null);
+        }
+
+        public static IResolverResult As(IEnumerable result, Func<object, IType> isTypeOf)
+        {
+            return new CompleteValueResult(result, isTypeOf);
         }
 
         public static Resolver PropertyOf<T>(Func<T, object> getValue)

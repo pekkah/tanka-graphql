@@ -9,45 +9,54 @@ namespace Tanka.GraphQL.ValueResolution
 {
     public class CompleteValueResult : IResolverResult
     {
-        private readonly ObjectType _actualType;
         private readonly object _value;
 
-        public CompleteValueResult(object value, ObjectType actualType)
+        public CompleteValueResult(object value, IType actualType)
         {
             _value = value;
-            _actualType = actualType;
+            IsTypeOf = _ => actualType;
         }
+
+        public CompleteValueResult(IEnumerable value, Func<object, IType> isTypeOf)
+        {
+            _value = value;
+            IsTypeOf = isTypeOf;
+        }
+
+        public Func<object, IType> IsTypeOf { get; }
 
         public object Value => _value;
 
         public ValueTask<object> CompleteValueAsync(
             IResolverContext context)
         {
-            return CompleteValueAsync(_value, _actualType ?? context.Field.Type, context.Path, context);
+            return CompleteValueAsync(_value, context.Field.Type, context.Path, context);
         }
 
         private ValueTask<object> CompleteValueAsync(
             object value,
-            IType type,
+            IType fieldType,
             NodePath path,
             IResolverContext context)
         {
-            if (value is IResolverResult subResult)
+            if (value is IResolverResult)
             {
-                return subResult.CompleteValueAsync(context);
+                throw new CompleteValueException($"Cannot complete value for field '{context.FieldName}':'{context.Field.Type}'. Resolving {nameof(IResolverResult)} value is not supported.",
+                    path,
+                    context.Selection);
             }
 
 
-            if (type is NonNull nonNull)
+            if (fieldType is NonNull nonNull)
                 return CompleteNonNullValueAsync(value, nonNull, path, context);
 
             if (value == null)
                 return default;
 
-            if (type is List list)
+            if (fieldType is List list)
                 return CompleteListValueAsync(value, list, path, context);
 
-            return type switch
+            return fieldType switch
             {
                 ScalarType scalarType => new ValueTask<object>(scalarType.Serialize(value)),
                 EnumType enumType => new ValueTask<object>(enumType.Serialize(value)),
@@ -56,7 +65,7 @@ namespace Tanka.GraphQL.ValueResolution
                 InterfaceType interfaceType => CompleteInterfaceValueAsync(value, interfaceType, path, context),
                 UnionType unionType => CompleteUnionValueAsync(value, unionType, path, context),
                 _ => throw new CompleteValueException(
-                    $"Cannot complete value for field {context.FieldName}. Cannot complete value of type {type}.",
+                    $"Cannot complete value for field {context.FieldName}. Cannot complete value of type {fieldType}.",
                     path,
                     context.Selection)
             };
@@ -68,17 +77,19 @@ namespace Tanka.GraphQL.ValueResolution
             NodePath path,
             IResolverContext context)
         {
-            if (_actualType == null)
+            var actualType = IsTypeOf(value) as ObjectType;
+
+            if (actualType == null)
                 throw new CompleteValueException(
-                    "Cannot complete value as interface or union. " +
-                    "Actual type not given when resolving interface value.",
+                    $"Cannot complete value for field '{context.FieldName}':'{unionType}'. " +
+                    "ActualType is required for union field values.",
                     path,
                     context.Selection);
 
-            if (!unionType.IsPossible(_actualType))
+            if (!unionType.IsPossible(actualType))
                 throw new CompleteValueException(
                     "Cannot complete value as union. " +
-                    $"Actual type {_actualType.Name} is not possible for {unionType.Name}",
+                    $"Actual type {actualType.Name} is not possible for {unionType.Name}",
                     path,
                     context.Selection);
 
@@ -86,7 +97,7 @@ namespace Tanka.GraphQL.ValueResolution
             var data = await SelectionSets.ExecuteSelectionSetAsync(
                 context.ExecutionContext,
                 subSelectionSet,
-                _actualType,
+                actualType,
                 value,
                 path).ConfigureAwait(false);
 
@@ -99,17 +110,19 @@ namespace Tanka.GraphQL.ValueResolution
             NodePath path,
             IResolverContext context)
         {
-            if (_actualType == null)
+            var actualType = IsTypeOf(value) as ObjectType;
+
+            if (actualType == null)
                 throw new CompleteValueException(
-                    "Cannot complete value as interface or union. " +
-                    "Actual type not given when resolving interface value.",
+                    $"Cannot complete value for field '{context.FieldName}':'{interfaceType}'. " +
+                    "ActualType is required for interface values.",
                     path,
                     context.Selection);
 
-            if (!_actualType.Implements(interfaceType))
+            if (!actualType.Implements(interfaceType))
                 throw new CompleteValueException(
-                    "Cannot complete value as interface. " +
-                    $"Actual type {_actualType.Name} does not implement {interfaceType.Name}",
+                    $"Cannot complete value for field '{context.FieldName}':'{interfaceType}'. " +
+                    $"ActualType '{actualType.Name}' does not implement interface '{interfaceType.Name}'",
                     path,
                     context.Selection);
 
@@ -117,7 +130,7 @@ namespace Tanka.GraphQL.ValueResolution
             var data = await SelectionSets.ExecuteSelectionSetAsync(
                 context.ExecutionContext,
                 subSelectionSet,
-                _actualType,
+                actualType,
                 value,
                 path);
 

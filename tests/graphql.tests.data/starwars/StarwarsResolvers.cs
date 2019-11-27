@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,13 +32,22 @@ namespace Tanka.GraphQL.Tests.Data.Starwars
                 var character = (Starwars.Character) context.ObjectValue;
                 var friends = character.GetFriends();
                 await Task.Delay(0).ConfigureAwait(false);
-                return As(friends.Select(c => As(context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"), c)));
+                return As(friends, friend => CharacterIsTypeOf(friend, context));
+            }
+
+            IType CharacterIsTypeOf(object character, IResolverContext context)
+            {
+                return character switch
+                {
+                    Starwars.Human human => context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"),
+                    _ => throw new ArgumentOutOfRangeException(nameof(character))
+                };
             }
 
             async ValueTask<IResolverResult> ResolveCharacters(IResolverContext context)
             {
                 await Task.Delay(0).ConfigureAwait(false);
-                return As(starwars.Characters.Select(c => As(context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"), c)));
+                return As(starwars.Characters, character => CharacterIsTypeOf(character, context));
             }
 
             async ValueTask<IResolverResult> AddHuman(IResolverContext context)
