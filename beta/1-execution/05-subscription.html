@@ -371,7 +371,7 @@
                 {
                     &quot;Query&quot;, new FieldResolversMap
                     {
-                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
+                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(Model.Events))}
                     }
                 },
                 {
@@ -407,7 +407,7 @@
                                 var source = Model.Subscribe(unsubscribe);
                                 return source;
                             },
-                            context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
+                            context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(context.ObjectValue))
                         }
                     }
                 }

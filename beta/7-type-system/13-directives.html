@@ -299,8 +299,8 @@
                 {
                     &quot;Query&quot;, new FieldResolversMap
                     {
-                        {&quot;requiresAdmin&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;Hello Admin!&quot;))},
-                        {&quot;requiresUser&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(&quot;Hello User!&quot;))}
+                        {&quot;requiresAdmin&quot;, context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(&quot;Hello Admin!&quot;))},
+                        {&quot;requiresUser&quot;, context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(&quot;Hello User!&quot;))}
                     }
                 }
             };

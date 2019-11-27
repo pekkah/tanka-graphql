@@ -279,7 +279,7 @@ GraphQL operation into your logic.</p>
                         // Resolvers can be sync or async so
                         // ValueTask result is used to reduce 
                         // allocations
-                        return new ValueTask&lt;IResolveResult&gt;(result);
+                        return new ValueTask&lt;IResolverResult&gt;(result);
                     });
             });
 
@@ -323,7 +323,7 @@ GraphQL operation into your logic.</p>
                                 &quot;name&quot;, context =&gt;
                                 {
                                     var result = Resolve.As(&quot;Test&quot;);
-                                    return new ValueTask&lt;IResolveResult&gt;(result);
+                                    return new ValueTask&lt;IResolverResult&gt;(result);
                                 }
                             }
                         }
@@ -369,7 +369,7 @@ GraphQL operation into your logic.</p>
                                 &quot;name&quot;, context =&gt;
                                 {
                                     var result = Resolve.As(&quot;Test&quot;);
-                                    return new ValueTask&lt;IResolveResult&gt;(result);
+                                    return new ValueTask&lt;IResolverResult&gt;(result);
                                 }
                             }
                         }
