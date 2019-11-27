@@ -14,6 +14,10 @@ namespace Tanka.GraphQL.ValueResolution
 
         public CompleteValueResult(object value, ObjectType actualType)
         {
+            if (value is IResolverResult)
+                throw new ArgumentOutOfRangeException(
+                    $"Value of type {nameof(IResolverContext)} cannot be completed.");
+
             _value = value;
             _actualType = actualType;
         }
@@ -32,9 +36,6 @@ namespace Tanka.GraphQL.ValueResolution
             NodePath path,
             IResolverContext context)
         {
-            if (value is IResolverResult resolverResult)
-                return resolverResult.CompleteValueAsync(context);
-
             if (type is NonNull nonNull)
                 return CompleteNonNullValueAsync(value, nonNull, path, context);
 
