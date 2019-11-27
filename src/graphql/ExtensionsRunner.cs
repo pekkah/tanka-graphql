@@ -13,10 +13,11 @@ namespace Tanka.GraphQL
         private readonly List<IExtensionScope> _scopes = new List<IExtensionScope>();
         private readonly Dictionary<Type, IExtensionScope> _scopesDictionary = new Dictionary<Type, IExtensionScope>();
 
-        public ExtensionsRunner(IEnumerable<IExtensionScope> extensions)
+        public ExtensionsRunner(IReadOnlyList<IExtensionScope> extensions)
         {
             _scopes.AddRange(extensions);
-            foreach (var extensionScope in extensions) _scopesDictionary.Add(extensionScope.GetType(), extensionScope);
+            foreach (var extensionScope in extensions) 
+                _scopesDictionary.Add(extensionScope.GetType(), extensionScope);
         }
 
         public T Extension<T>() where T : IExtensionScope

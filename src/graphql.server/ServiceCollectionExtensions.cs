@@ -22,7 +22,7 @@ namespace Tanka.GraphQL.Server
         public static IServiceCollection AddTankaServerExecutionExtension<TExtension>(this IServiceCollection services)
             where TExtension : class, IExecutorExtension
         {
-            services.TryAddSingleton<IExecutorExtension, TExtension>();
+            services.AddSingleton<IExecutorExtension, TExtension>();
 
             return services;
         }
@@ -33,12 +33,6 @@ namespace Tanka.GraphQL.Server
             return services.AddTankaServerExecutionExtension<ContextExtension<TContext>>();
         }
 
-        public static OptionsBuilder<WebSocketProtocolOptions> AddTankaWebSocketServerWithTracing(
-            this IServiceCollection services)
-        {
-            services.AddTankaServerExecutionExtension<TraceExtension>();
-            return AddTankaWebSocketServer(services);
-        }
 
         public static OptionsBuilder<WebSocketProtocolOptions> AddTankaWebSocketServer(this IServiceCollection services)
         {

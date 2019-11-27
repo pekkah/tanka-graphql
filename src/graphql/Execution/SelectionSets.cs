@@ -17,6 +17,11 @@ namespace Tanka.GraphQL.Execution
             object objectValue,
             NodePath path)
         {
+            if (executorContext == null) throw new ArgumentNullException(nameof(executorContext));
+            if (selectionSet == null) throw new ArgumentNullException(nameof(selectionSet));
+            if (objectType == null) throw new ArgumentNullException(nameof(objectType));
+            if (path == null) throw new ArgumentNullException(nameof(path));
+
             var groupedFieldSet = CollectFields(
                 executorContext.Schema,
                 executorContext.Document,

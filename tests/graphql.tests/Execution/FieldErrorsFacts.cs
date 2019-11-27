@@ -100,8 +100,8 @@ namespace Tanka.GraphQL.Tests.Execution
                 },
                 ["Query"] = new FieldResolversMap()
                 {
-                    {"container" , context => new ValueTask<IResolveResult>(Resolve.As(Query.Container))},
-                    {"custom", context=> new ValueTask<IResolveResult>(Resolve.As(Query.Custom))}
+                    {"container" , context => new ValueTask<IResolverResult>(Resolve.As(Query.Container))},
+                    {"custom", context=> new ValueTask<IResolverResult>(Resolve.As(Query.Custom))}
                 }
             };
 

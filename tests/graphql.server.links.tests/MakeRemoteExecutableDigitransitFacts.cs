@@ -90,7 +90,10 @@ namespace Tanka.GraphQL.Server.Links.Tests
                     {
                         Errors = new List<ExecutionError>
                         {
-                            new ExecutionError("failed to find...")
+                            new ExecutionError()
+                            {
+                                Message = "failed to find..."
+                                }
                         }
                     };
                     await channel.Writer.WriteAsync(executionResult, cancellationToken);

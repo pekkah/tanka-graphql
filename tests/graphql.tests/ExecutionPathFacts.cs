@@ -37,28 +37,28 @@ namespace Tanka.GraphQL.Tests
                 {
                     "Query", new FieldResolversMap
                     {
-                        {"root", context => new ValueTask<IResolveResult>(Resolve.As(new { }))}
+                        {"root", context => new ValueTask<IResolverResult>(Resolve.As(new { }))}
                     }
                 },
                 {
                     "Mutation", new FieldResolversMap
                     {
-                        {"root", context => new ValueTask<IResolveResult>(Resolve.As(new { }))}
+                        {"root", context => new ValueTask<IResolverResult>(Resolve.As(new { }))}
                     }
                 },
                 {
                     "Node", new FieldResolversMap
                     {
-                        {"child", context => new ValueTask<IResolveResult>(Resolve.As(new { }))},
+                        {"child", context => new ValueTask<IResolverResult>(Resolve.As(new { }))},
                         {
-                            "children", context => new ValueTask<IResolveResult>(Resolve.As(new[]
+                            "children", context => new ValueTask<IResolverResult>(Resolve.As(new[]
                             {
                                 new {id = 0},
                                 new {id = 1}
                             }))
                         },
-                        {"value", context => new ValueTask<IResolveResult>(Resolve.As("value"))},
-                        {"path", context => new ValueTask<IResolveResult>(Resolve.As(context.Path.Segments))}
+                        {"value", context => new ValueTask<IResolverResult>(Resolve.As("value"))},
+                        {"path", context => new ValueTask<IResolverResult>(Resolve.As(context.Path.Segments))}
                     }
                 }
             };

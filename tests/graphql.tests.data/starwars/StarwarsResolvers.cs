@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,14 +12,14 @@ namespace Tanka.GraphQL.Tests.Data.Starwars
     {
         public static ObjectTypeMap BuildResolvers(Starwars starwars)
         {
-            async ValueTask<IResolveResult> ResolveCharacter(IResolverContext context)
+            async ValueTask<IResolverResult> ResolveCharacter(IResolverContext context)
             {
                 var id = (string) context.Arguments["id"];
                 var character = await starwars.GetCharacter(id).ConfigureAwait(false);
                 return As(context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"), character);
             }
 
-            async ValueTask<IResolveResult> ResolveHuman(IResolverContext context)
+            async ValueTask<IResolverResult> ResolveHuman(IResolverContext context)
             {
                 var id = (string) context.Arguments["id"];
 
@@ -26,21 +27,30 @@ namespace Tanka.GraphQL.Tests.Data.Starwars
                 return As(human);
             }
 
-            async ValueTask<IResolveResult> ResolveFriends(IResolverContext context)
+            async ValueTask<IResolverResult> ResolveFriends(IResolverContext context)
             {
                 var character = (Starwars.Character) context.ObjectValue;
                 var friends = character.GetFriends();
                 await Task.Delay(0).ConfigureAwait(false);
-                return As(friends.Select(c => As(context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"), c)));
+                return As(friends, friend => CharacterIsTypeOf(friend, context));
             }
 
-            async ValueTask<IResolveResult> ResolveCharacters(IResolverContext context)
+            IType CharacterIsTypeOf(object character, IResolverContext context)
+            {
+                return character switch
+                {
+                    Starwars.Human human => context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"),
+                    _ => throw new ArgumentOutOfRangeException(nameof(character))
+                };
+            }
+
+            async ValueTask<IResolverResult> ResolveCharacters(IResolverContext context)
             {
                 await Task.Delay(0).ConfigureAwait(false);
-                return As(starwars.Characters.Select(c => As(context.ExecutionContext.Schema.GetNamedType<ObjectType>("Human"), c)));
+                return As(starwars.Characters, character => CharacterIsTypeOf(character, context));
             }
 
-            async ValueTask<IResolveResult> AddHuman(IResolverContext context)
+            async ValueTask<IResolverResult> AddHuman(IResolverContext context)
             {
                 var humanInput = (IDictionary<string, object>) context.Arguments["human"];
                 var human = starwars.AddHuman(humanInput["name"].ToString());

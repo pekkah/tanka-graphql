@@ -24,6 +24,7 @@ namespace Tanka.GraphQL.ValueResolution
         string FieldName { get; }
 
         IDictionary<object, object> Items { get; }
+        IReadOnlyCollection<GraphQLFieldSelection> Fields { get; }
 
         T GetArgument<T>(string name);
 

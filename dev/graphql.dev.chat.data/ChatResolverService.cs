@@ -8,13 +8,13 @@ namespace Tanka.GraphQL.Samples.Chat.Data
 {
     public class ChatResolverService : IChatResolverService
     {
-        public async ValueTask<IResolveResult> GetMessagesAsync(IResolverContext context)
+        public async ValueTask<IResolverResult> GetMessagesAsync(IResolverContext context)
         {
             var messages = await context.Use<IChat>().GetMessagesAsync(100);
             return Resolve.As(messages);
         }
 
-        public async ValueTask<IResolveResult> AddMessageAsync(IResolverContext context)
+        public async ValueTask<IResolverResult> AddMessageAsync(IResolverContext context)
         {
             var input = context.GetObjectArgument<InputMessage>("message");
             var message = await context.Use<IChat>().AddMessageAsync(
@@ -24,7 +24,7 @@ namespace Tanka.GraphQL.Samples.Chat.Data
             return Resolve.As(message);
         }
 
-        public async ValueTask<IResolveResult> EditMessageAsync(IResolverContext context)
+        public async ValueTask<IResolverResult> EditMessageAsync(IResolverContext context)
         {
             var id = context.GetArgument<string>("id");
             var input = context.GetObjectArgument<InputMessage>("message");
@@ -36,12 +36,12 @@ namespace Tanka.GraphQL.Samples.Chat.Data
             return Resolve.As(message);
         }
 
-        public ValueTask<ISubscribeResult> StreamMessagesAsync(IResolverContext context, CancellationToken unsubscribe)
+        public ValueTask<ISubscriberResult> StreamMessagesAsync(IResolverContext context, CancellationToken unsubscribe)
         {
             return context.Use<IChat>().JoinAsync(unsubscribe);
         }
 
-        public ValueTask<IResolveResult> ResolveMessageAsync(IResolverContext context)
+        public ValueTask<IResolverResult> ResolveMessageAsync(IResolverContext context)
         {
             return ResolveSync.As(context.ObjectValue);
         }

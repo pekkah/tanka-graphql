@@ -75,7 +75,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
                         // Resolvers can be sync or async so
                         // ValueTask result is used to reduce 
                         // allocations
-                        return new ValueTask<IResolveResult>(result);
+                        return new ValueTask<IResolverResult>(result);
                     });
             });
 
@@ -115,7 +115,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
                                 "name", context =>
                                 {
                                     var result = Resolve.As("Test");
-                                    return new ValueTask<IResolveResult>(result);
+                                    return new ValueTask<IResolverResult>(result);
                                 }
                             }
                         }
@@ -159,7 +159,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
                                 "name", context =>
                                 {
                                     var result = Resolve.As("Test");
-                                    return new ValueTask<IResolveResult>(result);
+                                    return new ValueTask<IResolverResult>(result);
                                 }
                             }
                         }
@@ -199,7 +199,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
                                     "name", context =>
                                     {
                                         var result = Resolve.As("Test");
-                                        return new ValueTask<IResolveResult>(result);
+                                        return new ValueTask<IResolverResult>(result);
                                     }
                                 }
                             }

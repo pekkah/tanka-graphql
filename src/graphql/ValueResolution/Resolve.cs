@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Tanka.GraphQL.Channels;
 using Tanka.GraphQL.TypeSystem;
@@ -10,19 +9,24 @@ namespace Tanka.GraphQL.ValueResolution
 {
     public static class Resolve
     {
-        public static IResolveResult As(object result)
+        public static IResolverResult As(object result)
         {
-            return new ResolveResult(result);
+            return new CompleteValueResult(result, null);
         }
 
-        public static IResolveResult As(ObjectType type, object result)
+        public static IResolverResult As(ObjectType type, object result)
         {
-            return new ResolveResult(type, result);
+            return new CompleteValueResult(result, type);
         }
 
-        public static IResolveResult As(IEnumerable result)
+        public static IResolverResult As(IEnumerable result)
         {
-            return new ResolveResult(result);
+            return new CompleteValueResult(result, null);
+        }
+
+        public static IResolverResult As(IEnumerable result, Func<object, IType> isTypeOf)
+        {
+            return new CompleteValueResult(result, isTypeOf);
         }
 
         public static Resolver PropertyOf<T>(Func<T, object> getValue)
@@ -51,11 +55,11 @@ namespace Tanka.GraphQL.ValueResolution
                 if (values == null)
                     return ResolveSync.As(null);
 
-                return ResolveSync.As(values.Select(As));
+                return ResolveSync.As(values);
             };
         }
 
-        public static ISubscribeResult Subscribe<T>(EventChannel<T> eventChannel, CancellationToken unsubscribe)
+        public static ISubscriberResult Subscribe<T>(EventChannel<T> eventChannel, CancellationToken unsubscribe)
         {
             return eventChannel.Subscribe(unsubscribe);
         }

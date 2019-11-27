@@ -440,7 +440,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
                 {
                     connections.Field(query, "field1", ScalarType.String,
                         "test field",
-                        resolve => resolve.Run(context => new ValueTask<IResolveResult>(Resolve.As(42))));
+                        resolve => resolve.Run(context => new ValueTask<IResolverResult>(Resolve.As(42))));
                 });
 
 

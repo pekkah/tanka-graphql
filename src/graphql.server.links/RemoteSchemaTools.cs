@@ -108,7 +108,7 @@ namespace Tanka.GraphQL.Server.Links
                                 context.Selection);
                         }
 
-                        return new PreExecutedResolveResult(executionResult.Data);
+                        return new PreExecutedResolverResult(executionResult.Data);
                     }
 
                 throw new QueryExecutionException(
@@ -134,7 +134,7 @@ namespace Tanka.GraphQL.Server.Links
                 else if (context.ObjectValue is KeyValuePair<string, object> keyValue)
                     value = keyValue.Value;
                 else if (context.ObjectValue is ExecutionResult er)
-                    return new ValueTask<IResolveResult>(new PreExecutedResolveResult(er.Data));
+                    return new ValueTask<IResolverResult>(new PreExecutedResolverResult(er.Data));
 
                 if (value is IDictionary<string, object>) return ResolveSync.As(value);
 

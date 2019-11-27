@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Tanka.GraphQL.ValueResolution
 {
-    public interface ISubscribeResult
+    public interface ISubscriberResult
     {
         ValueTask WriteAsync<T>(T item, CancellationToken cancellationToken);
 

@@ -22,7 +22,7 @@ namespace Tanka.GraphQL.Samples.Chat.Data
             string id,
             string content);
 
-        ValueTask<ISubscribeResult> JoinAsync(CancellationToken unsubscribe);
+        ValueTask<ISubscriberResult> JoinAsync(CancellationToken unsubscribe);
     }
 
     public class Chat : IChat
@@ -73,9 +73,9 @@ namespace Tanka.GraphQL.Samples.Chat.Data
             return originalMessage;
         }
 
-        public ValueTask<ISubscribeResult> JoinAsync(CancellationToken unsubscribe)
+        public ValueTask<ISubscriberResult> JoinAsync(CancellationToken unsubscribe)
         {
-            return new ValueTask<ISubscribeResult>(_messageStream.Subscribe(unsubscribe));
+            return new ValueTask<ISubscriberResult>(_messageStream.Subscribe(unsubscribe));
         }
 
         private async Task<From> GetFromAsync(string fromId)

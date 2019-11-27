@@ -7,19 +7,6 @@ namespace Tanka.GraphQL.Server
 {
     public static class SignalRServerBuilderExtensions
     {
-        public static ISignalRServerBuilder AddTankaServerHubWithTracing(
-            this ISignalRServerBuilder builder)
-        {
-            var services = builder.Services;
-
-            // add tracing extension
-            services.AddTankaServerExecutionExtension<TraceExtension>();
-
-            // default configuration
-            return AddTankaServerHub(
-                builder);
-        }
-
         /// <summary>
         ///     Add GraphQL query streaming hub with configured options
         /// </summary>

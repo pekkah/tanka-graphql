@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Tanka.GraphQL.Extensions.Analysis;
+using Tanka.GraphQL.Extensions.Tracing;
 using Tanka.GraphQL.Samples.Chat.Data;
 using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
 using Tanka.GraphQL.Server;
@@ -59,10 +60,14 @@ namespace Tanka.GraphQL.Samples.Chat.Web
                     options.GetSchema = query => new ValueTask<ISchema>(schema);
                 });
 
+
+            // tracing extension
+            services.AddTankaServerExecutionExtension<TraceExtension>();
+
             // signalr server
             services.AddSignalR(options => options.EnableDetailedErrors = true)
                 // add GraphQL query streaming hub
-                .AddTankaServerHubWithTracing();
+                .AddTankaServerHub();
 
             // graphql-ws websocket server
             // web socket server
@@ -71,7 +76,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
                 options.AllowedOrigins.Add("https://localhost:5000");
                 options.AllowedOrigins.Add("https://localhost:3000");
             });
-            services.AddTankaWebSocketServerWithTracing();
+            services.AddTankaWebSocketServer();
 
             // CORS is required for the graphql.samples.chat.ui React App
             services.AddCors(options =>

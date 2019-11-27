@@ -179,7 +179,10 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets.DTOs.Serialization.Converters
                 {
                     Errors = new List<ExecutionError>()
                     {
-                        new ExecutionError("error")
+                        new ExecutionError()
+                        {
+                            Message = "error"
+                        }
                     }
                 }
             };
