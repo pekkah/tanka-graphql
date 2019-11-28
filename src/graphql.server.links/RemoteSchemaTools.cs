@@ -89,26 +89,7 @@ namespace Tanka.GraphQL.Server.Links
                 while (await reader.WaitToReadAsync(CancellationToken.None))
                     if (reader.TryRead(out var executionResult))
                     {
-                        if (executionResult.Errors != null && executionResult.Errors.Any())
-                        {
-                            var first = executionResult.Errors.First();
-                            throw new QueryExecutionException(
-                                $"{first.Message}",
-                                null,
-                                path: context.Path,
-                                extensions: new Dictionary<string, object>
-                                {
-                                    ["remoteError"] = new
-                                    {
-                                        data = executionResult.Data,
-                                        errors = executionResult.Errors,
-                                        extensions = executionResult.Extensions
-                                    }
-                                }, 
-                                context.Selection);
-                        }
-
-                        return new PreExecutedResolverResult(executionResult.Data);
+                        return new PreExecutedResolverResult(executionResult);
                     }
 
                 throw new QueryExecutionException(
@@ -134,7 +115,7 @@ namespace Tanka.GraphQL.Server.Links
                 else if (context.ObjectValue is KeyValuePair<string, object> keyValue)
                     value = keyValue.Value;
                 else if (context.ObjectValue is ExecutionResult er)
-                    return new ValueTask<IResolverResult>(new PreExecutedResolverResult(er.Data));
+                    return new ValueTask<IResolverResult>(new PreExecutedResolverResult(er));
 
                 if (value is IDictionary<string, object>) return ResolveSync.As(value);
 
