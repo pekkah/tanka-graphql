@@ -163,7 +163,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
         private Resolver UseContextExtension()
         {
             return context => context
-                .Use<ResolverController>()
+                .ContextExtension<ResolverController>()
                 .QueryLastName(context);
         }
     }

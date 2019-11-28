@@ -10,7 +10,7 @@ namespace Tanka.GraphQL.Samples.Chat.Data
     {
         public async ValueTask<IResolverResult> GetMessagesAsync(IResolverContext context)
         {
-            var messages = await context.Use<IChat>().GetMessagesAsync(100);
+            var messages = await context.ContextExtension<IChat>().GetMessagesAsync(100);
             return Resolve.As(messages);
         }
 

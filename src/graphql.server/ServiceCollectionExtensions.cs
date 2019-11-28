@@ -13,6 +13,7 @@ namespace Tanka.GraphQL.Server
             this IServiceCollection services)
         {
             services.TryAddScoped<IQueryStreamService, QueryStreamService>();
+            services.AddTankaServerExecutionExtension<ExecutionServiceScopeExtension>();
 
             var optionsBuilder = services.AddOptions<SchemaOptions>();
             return optionsBuilder;
@@ -22,7 +23,7 @@ namespace Tanka.GraphQL.Server
         public static IServiceCollection AddTankaServerExecutionExtension<TExtension>(this IServiceCollection services)
             where TExtension : class, IExecutorExtension
         {
-            services.AddSingleton<IExecutorExtension, TExtension>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IExecutorExtension, TExtension>());
 
             return services;
         }

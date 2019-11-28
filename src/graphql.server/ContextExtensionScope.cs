@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
@@ -26,6 +27,9 @@ namespace Tanka.GraphQL.Server
 
         public ValueTask EndExecuteAsync(IExecutionResult executionResult)
         {
+            if (Context is IDisposable disposable)
+                disposable.Dispose();
+
             return default;
         }
 
