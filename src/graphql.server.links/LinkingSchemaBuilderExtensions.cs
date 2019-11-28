@@ -46,7 +46,7 @@ namespace Tanka.GraphQL.Server.Links
                     "Failed to execute introspection query. Link returned a null channel.");
 
             var result = await channel.ReadAsync(cancellationToken);
-
+            
             if (result == null)
                 throw new InvalidOperationException(
                     "Failed to execute introspection query. Link channel read result is null");

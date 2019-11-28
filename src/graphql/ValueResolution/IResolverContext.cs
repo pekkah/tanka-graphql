@@ -24,22 +24,7 @@ namespace Tanka.GraphQL.ValueResolution
         string FieldName { get; }
 
         IDictionary<object, object> Items { get; }
+
         IReadOnlyCollection<GraphQLFieldSelection> Fields { get; }
-
-        T GetArgument<T>(string name);
-
-        /// <summary>
-        ///     Read InputObject argument dictionary as object
-        /// </summary>
-        /// <remarks>
-        ///     Experimental. This might go away anytime and be replaced with something better.
-        /// </remarks>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        T GetObjectArgument<T>(string name)
-            where T : IReadFromObjectDictionary, new();
-
-        T Extension<T>() where T : IExtensionScope;
     }
 }
