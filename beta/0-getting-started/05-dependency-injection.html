@@ -272,7 +272,7 @@ they will have their lifetime specified when they're added to the <code>IService
         private Resolver UseContextExtension()
         {
             return context =&gt; context
-                .Use&lt;ResolverController&gt;()
+                .ContextExtension&lt;ResolverController&gt;()
                 .QueryLastName(context);
         }
 </code></pre></p>
