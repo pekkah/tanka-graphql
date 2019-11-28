@@ -22,7 +22,7 @@ namespace Tanka.GraphQL.Server.Links
 
         public ValueTask<object> CompleteValueAsync(IResolverContext context)
         {
-            if (_errors.Any())
+            if (_errors != null && _errors.Any())
             {
                 var first = _errors.First();
                 throw new CompleteValueException(
@@ -42,7 +42,13 @@ namespace Tanka.GraphQL.Server.Links
                     context.Selection);
             }
 
-            var value = _data[context.FieldName];
+            if (!_data.TryGetValue(context.FieldName, out var value))
+                throw new CompleteValueException(
+                    $"Could not complete value for field '{context.FieldName}:{context.Field.Type}'. " +
+                    $"Could not find field value from execution result. Fields found '{string.Join(",", _data.Keys)}'",
+                    context.Path,
+                    context.Selection);
+
             var resolveResult = new CompleteValueResult(value, context.Field.Type);
             return resolveResult.CompleteValueAsync(context);
         }
