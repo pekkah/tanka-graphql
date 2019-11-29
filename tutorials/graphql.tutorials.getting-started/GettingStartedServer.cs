@@ -35,13 +35,12 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
 
             AddWebSocketsServer(services);
 
-            AddContextExtension(services);
+            AddExecutionScopedService(services);
         }
 
-        private void AddContextExtension(IServiceCollection services)
+        private void AddExecutionScopedService(IServiceCollection services)
         {
             services.AddScoped<ResolverController>();
-            services.AddTankaServerExecutionContextExtension<ResolverController>();
         }
 
         private void AddWebSocketsServer(IServiceCollection services)
@@ -155,15 +154,15 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
                         ["Query"] = new FieldResolversMap()
                         {
                             {"firstName", context => ResolveSync.As("Tanka")},
-                            {"lastName", UseContextExtension()}
+                            {"lastName", UseService()}
                         }
                     });
         }
 
-        private Resolver UseContextExtension()
+        private Resolver UseService()
         {
             return context => context
-                .ContextExtension<ResolverController>()
+                .Use<ResolverController>()
                 .QueryLastName(context);
         }
     }
