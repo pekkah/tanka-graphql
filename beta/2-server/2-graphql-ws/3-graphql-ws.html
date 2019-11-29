@@ -236,10 +236,7 @@ compatible websocket server. This server can be used with
 <h3 id="add-required-services">Add required services</h3>
 <p>This will add the required services and Apollo Tracing extension to execution
 pipeline.</p>
-<pre><code class="lang-csharp">services.AddTankaWebSocketServerWithTracing();
-
-// or without the tracing extension
-services.AddTankaWebSocketServer();
+<pre><code class="lang-csharp">services.AddTankaWebSocketServer();
 
 // you might also need to configure the websockets
 services.AddWebSockets(options =&gt;

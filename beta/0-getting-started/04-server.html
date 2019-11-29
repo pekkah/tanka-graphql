@@ -285,7 +285,7 @@ for execution. Schema should be built only once and cached as singleton.</p>
                         [&quot;Query&quot;] = new FieldResolversMap()
                         {
                             {&quot;firstName&quot;, context =&gt; ResolveSync.As(&quot;Tanka&quot;)},
-                            {&quot;lastName&quot;, UseContextExtension()}
+                            {&quot;lastName&quot;, UseService()}
                         }
                     });
         }
