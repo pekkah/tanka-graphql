@@ -9,30 +9,28 @@ services which require scoped lifetime. Usually the scope is defined
 as HTTP request.
 
 
-### Dependency injection using context extensions
+### Dependency injection
 
-Tanka GraphQL allows extending the execution trough extensions. Server
-adds an context extension which carries object trough the execution pipeline. 
-These objects can be access during the value resolution. As the objects are
-resolved from `IServiceProvider` during the beginning of GraphQL request execution
-they will have their lifetime specified when they're added to the `IServiceCollection`.
+Tanka GraphQL server starts an dependency injection scope at the beginning of
+execution and disposes it at the end. You can access this scope by using `Use<T>`
+extensions methods of `IResolverContext`.
 
-Steps required to register context extension using `IServiceCollection`:
-1. Define context object and add to services
-3. Use service in resolver
+Steps
+1. Add service using the `Add{Lifetime}` etc. methods of the `IServiceCollection`
+3. Use service in resolver using `Use<T>`.
 
 
-#### 1. Define context and add to services
+#### 1. Add service
 
-Define context object
+Define service
 [{Tanka.GraphQL.Tutorials.GettingStarted.ResolverController}]
 
-Add context to services and add context extension
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddContextExtension}]
+Add service
+[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddExecutionScopedService}]
 
 
 #### 3. Use service in resolver 
 
 See [Server](0-getting-started/04-server.html) for usage for below method.
 
-[{Tanka.GraphQL.Tutorials.GettingStarted.SchemaCache.UseContextExtension}]
+[{Tanka.GraphQL.Tutorials.GettingStarted.SchemaCache.UseService}]

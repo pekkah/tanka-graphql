@@ -10,9 +10,6 @@ This will add the required services and Apollo Tracing extension to execution
 pipeline.
 
 ```csharp
-services.AddTankaWebSocketServerWithTracing();
-
-// or without the tracing extension
 services.AddTankaWebSocketServer();
 
 // you might also need to configure the websockets
