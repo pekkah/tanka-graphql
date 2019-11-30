@@ -29,7 +29,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             // This will manage the schema
             services.AddSingleton<SchemaCache>();
 
-            AddSchemaOptions(services);
+            AddTanka(services);
 
             AddSignalRServer(services);
 
@@ -69,10 +69,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             app.UseWebSockets();
 
             // Add Tanka GraphQL-WS middleware
-            app.UseTankaGraphQLWebSockets(new WebSocketServerOptions()
-            {
-                Path = "/graphql/ws"
-            });
+            app.UseTankaGraphQLWebSockets("/graphql/ws");
         }
 
         private static void UseSignalRServer(IApplicationBuilder app)
@@ -81,7 +78,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             app.UseEndpoints(routes => { routes.MapTankaSignalR("/graphql/hub"); });
         }
 
-        private static void AddSchemaOptions(IServiceCollection services)
+        private static void AddTanka(IServiceCollection services)
         {
             // Configure schema options
             services.AddTankaGraphQL()

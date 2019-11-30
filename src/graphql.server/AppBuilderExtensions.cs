@@ -1,24 +1,18 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Server.WebSockets;
 
 namespace Tanka.GraphQL.Server
 {
     public static class AppBuilderExtensions
     {
-        public static IApplicationBuilder UseTankaGraphQLWebSockets(this IApplicationBuilder app)
-        {
-            var options = app.ApplicationServices.GetRequiredService<IOptions<WebSocketServerOptions>>();
-            return UseTankaGraphQLWebSockets(app, options.Value);
-        }
-
         public static IApplicationBuilder UseTankaGraphQLWebSockets(this IApplicationBuilder app,
-            WebSocketServerOptions options)
+            PathString path)
         {
             app.Use(next => context =>
             {
-                if (context.Request.Path.StartsWithSegments(options.Path)
+                if (context.Request.Path.StartsWithSegments(path)
                     && context.WebSockets.IsWebSocketRequest)
                 {
                     var connection = context.RequestServices.GetRequiredService<WebSocketServer>();

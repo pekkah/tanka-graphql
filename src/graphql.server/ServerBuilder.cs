@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Tanka.GraphQL.Server.Links.DTOs;
 using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
@@ -34,15 +31,73 @@ namespace Tanka.GraphQL.Server
             return WithExtension<ContextExtension<TContext>>();
         }
 
-
-        public ServerBuilder WithWebSockets(Action<WebSockets.WebSocketServerOptions> configure = null)
+        public ServerBuilder WithWebSockets()
         {
             Services.TryAddSingleton<WebSocketServer>();
             Services.TryAddScoped<IProtocolHandler, GraphQLWSProtocol>();
             Services.TryAddScoped<IMessageContextAccessor, MessageContextAccessor>();
 
-            if (configure != null)
-                Services.Configure(configure);
+            Services.AddOptions<WebSocketServerOptions>();
+
+            return this;
+        }
+
+        public ServerBuilder WithWebSockets(Func<MessageContext, Task> accept)
+        {
+            if (accept == null) throw new ArgumentNullException(nameof(accept));
+
+            Services.TryAddSingleton<WebSocketServer>();
+            Services.TryAddScoped<IProtocolHandler, GraphQLWSProtocol>();
+            Services.TryAddScoped<IMessageContextAccessor, MessageContextAccessor>();
+
+            var builder = Services.AddOptions<WebSocketServerOptions>();
+            builder.Configure(options => options.AcceptAsync = accept);
+
+            return this;
+        }
+
+        public ServerBuilder WithWebSockets<TDep>(Func<MessageContext, TDep, Task> accept) where TDep : class
+        {
+            if (accept == null) throw new ArgumentNullException(nameof(accept));
+
+            Services.TryAddSingleton<WebSocketServer>();
+            Services.TryAddScoped<IProtocolHandler, GraphQLWSProtocol>();
+            Services.TryAddScoped<IMessageContextAccessor, MessageContextAccessor>();
+
+            var builder = Services.AddOptions<WebSocketServerOptions>();
+            builder.Configure<TDep>((options, dep) => options.AcceptAsync = context => accept(context, dep));
+
+            return this;
+        }
+
+        public ServerBuilder WithWebSockets<TDep, TDep1>(Func<MessageContext, TDep, TDep1, Task> accept)
+            where TDep : class where TDep1 : class
+        {
+            if (accept == null) throw new ArgumentNullException(nameof(accept));
+
+            Services.TryAddSingleton<WebSocketServer>();
+            Services.TryAddScoped<IProtocolHandler, GraphQLWSProtocol>();
+            Services.TryAddScoped<IMessageContextAccessor, MessageContextAccessor>();
+
+            var builder = Services.AddOptions<WebSocketServerOptions>();
+            builder.Configure<TDep, TDep1>((options, dep, dep1) =>
+                options.AcceptAsync = context => accept(context, dep, dep1));
+
+            return this;
+        }
+
+        public ServerBuilder WithWebSockets<TDep, TDep1, TDep2>(Func<MessageContext, TDep, TDep1, TDep2, Task> accept)
+            where TDep : class where TDep1 : class where TDep2 : class
+        {
+            if (accept == null) throw new ArgumentNullException(nameof(accept));
+
+            Services.TryAddSingleton<WebSocketServer>();
+            Services.TryAddScoped<IProtocolHandler, GraphQLWSProtocol>();
+            Services.TryAddScoped<IMessageContextAccessor, MessageContextAccessor>();
+
+            var builder = Services.AddOptions<WebSocketServerOptions>();
+            builder.Configure<TDep, TDep1, TDep2>((options, dep, dep1, dep2) =>
+                options.AcceptAsync = context => accept(context, dep, dep1, dep2));
 
             return this;
         }
@@ -103,7 +158,8 @@ namespace Tanka.GraphQL.Server
             if (configureRules == null) throw new ArgumentNullException(nameof(configureRules));
 
             var builder = Services.AddOptions<ServerOptions>();
-            builder.Configure<TDep>((options, dep) => options.ValidationRules = configureRules(options.ValidationRules, dep));
+            builder.Configure<TDep>((options, dep) =>
+                options.ValidationRules = configureRules(options.ValidationRules, dep));
             return this;
         }
 
@@ -113,17 +169,20 @@ namespace Tanka.GraphQL.Server
             if (configureRules == null) throw new ArgumentNullException(nameof(configureRules));
 
             var builder = Services.AddOptions<ServerOptions>();
-            builder.Configure<TDep, TDep1>((options, dep, dep1) => options.ValidationRules = configureRules(options.ValidationRules, dep, dep1));
+            builder.Configure<TDep, TDep1>((options, dep, dep1) =>
+                options.ValidationRules = configureRules(options.ValidationRules, dep, dep1));
             return this;
         }
 
-        public ServerBuilder WithRules<TDep, TDep1, TDep2>(Func<CombineRule[], TDep, TDep1, TDep2, CombineRule[]> configureRules)
+        public ServerBuilder WithRules<TDep, TDep1, TDep2>(
+            Func<CombineRule[], TDep, TDep1, TDep2, CombineRule[]> configureRules)
             where TDep : class where TDep1 : class where TDep2 : class
         {
             if (configureRules == null) throw new ArgumentNullException(nameof(configureRules));
 
             var builder = Services.AddOptions<ServerOptions>();
-            builder.Configure<TDep, TDep1, TDep2>((options, dep, dep1, dep2) => options.ValidationRules = configureRules(options.ValidationRules, dep, dep1, dep2));
+            builder.Configure<TDep, TDep1, TDep2>((options, dep, dep1, dep2) =>
+                options.ValidationRules = configureRules(options.ValidationRules, dep, dep1, dep2));
             return this;
         }
 

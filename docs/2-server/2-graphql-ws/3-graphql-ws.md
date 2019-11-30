@@ -10,13 +10,10 @@ This will add the required services and Apollo Tracing extension to execution
 pipeline.
 
 ```csharp
-services.AddTankaWebSocketServer();
+services.AddWebSockets();
 
-// you might also need to configure the websockets
-services.AddWebSockets(options =>
-{
-    options.AllowedOrigins.Add("https://localhost:5000");
-});
+services.AddTankaGraphQL()
+        .WithWebSockets();
 ```
 
 ### Add middleware to app pipeline
@@ -38,7 +35,7 @@ the connection and sends `connection_ack` message back to the client. You can
 configure this behavior with your own logic.
 
 ```csharp
-services.AddTankaWebSocketServerWithTracing()
+services.AddTankaGraphQL()
         .Configure<IHttpContextAccessor>(
             (
             options, 

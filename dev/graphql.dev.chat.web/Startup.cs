@@ -107,10 +107,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             });
 
             // websockets server
-            app.UseTankaGraphQLWebSockets(new WebSocketServerOptions
-            {
-                Path = "/api/graphql"
-            });
+            app.UseTankaGraphQLWebSockets("/api/graphql");
 
             // signalr server
             app.UseRouting();
