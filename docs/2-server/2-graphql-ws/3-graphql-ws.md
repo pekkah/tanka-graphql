@@ -6,8 +6,7 @@ compatible websocket server. This server can be used with
 
 ### Add required services
 
-This will add the required services and Apollo Tracing extension to execution 
-pipeline.
+This will add the required services to execution pipeline.
 
 ```csharp
 services.AddWebSockets();
@@ -19,12 +18,8 @@ services.AddTankaGraphQL()
 ### Add middleware to app pipeline
 
 ```csharp
-// websockets server
 app.UseWebSockets();
-app.UseTankaWebSocketServer(new WebSocketServerOptions()
-{
-    Path = "/api/graphql"
-});
+app.UseTankaGraphQLWebSockets("/api/graphql");
 ```
 
 ### Configure protocol
@@ -36,11 +31,7 @@ configure this behavior with your own logic.
 
 ```csharp
 services.AddTankaGraphQL()
-        .Configure<IHttpContextAccessor>(
-            (
-            options, 
-            accessor
-            ) => options.AcceptAsync = async context =>
+        .WithWebSockets<IHttpContextAccessor>((context, accessor) =>
             {
                 var succeeded = await AuthorizeHelper.AuthorizeAsync(
                     accessor.HttpContext,
