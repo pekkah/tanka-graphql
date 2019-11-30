@@ -19,20 +19,21 @@ Configure `ISchema` for execution.
 
 ```csharp
 services.AddTankaGraphQL()
-    .WithSchema<SchemaCache>(async cache => await cache.GetOrAdd());
+    .WithSchema(() => GetSchemaAsync());
 ```
 
 
 ### Add rules
 
 Configure validation rules for execution. Note that by default all rules
-specified in the specification are included.
+specified in the specification are included. Following will append NewRule
+to validation rules.
 
 ```csharp
 services.AddTankaGraphQL()
         .WithRules(rules => rules.Concat(new[]
         {
-            CostAnalyzer.MaxCost(100, 1, true)
+            NewRule
         }).ToArray());
 ```
 
@@ -43,6 +44,6 @@ Add tracing extension
 
 ```csharp
 services.AddTankaGraphQL()
-                .WithExtension<TraceExtension>();
+        .WithExtension<TraceExtension>();
 ```
 
