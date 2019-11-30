@@ -7,13 +7,13 @@ namespace Tanka.GraphQL.Server
 {
     public static class AppBuilderExtensions
     {
-        public static IApplicationBuilder UseTankaWebSocketServer(this IApplicationBuilder app)
+        public static IApplicationBuilder UseTankaGraphQLWebSockets(this IApplicationBuilder app)
         {
             var options = app.ApplicationServices.GetRequiredService<IOptions<WebSocketServerOptions>>();
-            return UseTankaWebSocketServer(app, options.Value);
+            return UseTankaGraphQLWebSockets(app, options.Value);
         }
 
-        public static IApplicationBuilder UseTankaWebSocketServer(this IApplicationBuilder app,
+        public static IApplicationBuilder UseTankaGraphQLWebSockets(this IApplicationBuilder app,
             WebSocketServerOptions options)
         {
             app.Use(next => context =>

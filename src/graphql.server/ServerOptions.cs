@@ -6,7 +6,7 @@ using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server
 {
-    public class SchemaOptions
+    public class ServerOptions
     {
         public Func<Query, ValueTask<ISchema>> GetSchema { get; set; }
 

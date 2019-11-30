@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.Server.WebSockets
 
         public SubscriptionServer(
             IProtocolHandler protocol, 
-            IOptions<WebSocketProtocolOptions> options) : base(options)
+            IOptions<WebSocketServerOptions> options) : base(options)
         {
             _protocol = protocol;
         }

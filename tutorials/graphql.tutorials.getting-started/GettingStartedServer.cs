@@ -52,7 +52,8 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             });
 
             // Add Tanka GraphQL-WS server
-            services.AddTankaWebSocketServer();
+            services.AddTankaGraphQL()
+                .WithWebSockets();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -68,7 +69,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             app.UseWebSockets();
 
             // Add Tanka GraphQL-WS middleware
-            app.UseTankaWebSocketServer(new WebSocketServerOptions()
+            app.UseTankaGraphQLWebSockets(new WebSocketServerOptions()
             {
                 Path = "/graphql/ws"
             });
@@ -77,26 +78,21 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
         private static void UseSignalRServer(IApplicationBuilder app)
         {
             // add SignalR
-            app.UseEndpoints(routes => { routes.MapTankaServerHub("/graphql/hub"); });
+            app.UseEndpoints(routes => { routes.MapTankaSignalR("/graphql/hub"); });
         }
 
         private static void AddSchemaOptions(IServiceCollection services)
         {
             // Configure schema options
-            services.AddTankaSchemaOptions()
-                .Configure<SchemaCache>((options, cache) =>
-                {
-                    // executor will call get schema every request
-                    options.GetSchema = async query => await cache.GetOrAdd(query);
-                });
+            services.AddTankaGraphQL()
+                .WithSchema<SchemaCache>(async cache => await cache.GetOrAdd());
         }
 
         private static void AddSignalRServer(IServiceCollection services)
         {
-            // Configure SignalR server
+            // Configure Tanka server
             services.AddSignalR()
-                // Add SignalR server hub
-                .AddTankaServerHub();
+                .AddTankaGraphQL();
         }
     }
 
@@ -118,7 +114,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             _cache = cache;
         }
 
-        public Task<ISchema> GetOrAdd(Query query)
+        public Task<ISchema> GetOrAdd()
         {
             return _cache.GetOrCreateAsync(
                 "Schema",
