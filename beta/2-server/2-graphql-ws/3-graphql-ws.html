@@ -234,35 +234,23 @@
 compatible websocket server. This server can be used with
 <a href="https://www.apollographql.com/docs/link/links/ws">apollo-link-ws</a>.</p>
 <h3 id="add-required-services">Add required services</h3>
-<p>This will add the required services and Apollo Tracing extension to execution
-pipeline.</p>
-<pre><code class="lang-csharp">services.AddTankaWebSocketServer();
+<p>This will add the required services to execution pipeline.</p>
+<pre><code class="lang-csharp">services.AddWebSockets();
 
-// you might also need to configure the websockets
-services.AddWebSockets(options =&gt;
-{
-    options.AllowedOrigins.Add(&quot;https://localhost:5000&quot;);
-});
+services.AddTankaGraphQL()
+        .WithWebSockets();
 </code></pre>
 <h3 id="add-middleware-to-app-pipeline">Add middleware to app pipeline</h3>
-<pre><code class="lang-csharp">// websockets server
-app.UseWebSockets();
-app.UseTankaWebSocketServer(new WebSocketServerOptions()
-{
-    Path = &quot;/api/graphql&quot;
-});
+<pre><code class="lang-csharp">app.UseWebSockets();
+app.UseTankaGraphQLWebSockets(&quot;/api/graphql&quot;);
 </code></pre>
 <h3 id="configure-protocol">Configure protocol</h3>
 <p>When <code>connection_init</code> message is received from client the protocol calls
 <code>AcceptAsync</code> of the options to accept the connection. By default it accepts
 the connection and sends <code>connection_ack</code> message back to the client. You can
 configure this behavior with your own logic.</p>
-<pre><code class="lang-csharp">services.AddTankaWebSocketServerWithTracing()
-        .Configure&lt;IHttpContextAccessor&gt;(
-            (
-            options, 
-            accessor
-            ) =&gt; options.AcceptAsync = async context =&gt;
+<pre><code class="lang-csharp">services.AddTankaGraphQL()
+        .WithWebSockets&lt;IHttpContextAccessor&gt;((context, accessor) =&gt;
             {
                 var succeeded = await AuthorizeHelper.AuthorizeAsync(
                     accessor.HttpContext,
