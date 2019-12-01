@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Server
 {
     public static class EndpointRouteBuilderExtensions
     {
-        public static HubEndpointConventionBuilder MapTankaSignalR(
+        public static HubEndpointConventionBuilder MapTankaGraphQLSignalR(
             this IEndpointRouteBuilder routes,
             PathString route,
             Action<HttpConnectionDispatcherOptions> configureOptions = null)

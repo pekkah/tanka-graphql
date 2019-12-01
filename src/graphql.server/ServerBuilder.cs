@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
@@ -18,7 +19,7 @@ namespace Tanka.GraphQL.Server
 
         public IServiceCollection Services { get; }
 
-        public ServerBuilder WithExtension<TExtension>()
+        public ServerBuilder AddExtension<TExtension>()
             where TExtension : class, IExecutorExtension
         {
             Services.TryAddEnumerable(ServiceDescriptor.Singleton<IExecutorExtension, TExtension>());
@@ -26,12 +27,12 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithContextExtension<TContext>()
+        public ServerBuilder AddContextExtension<TContext>()
         {
-            return WithExtension<ContextExtension<TContext>>();
+            return AddExtension<ContextExtension<TContext>>();
         }
 
-        public ServerBuilder WithWebSockets()
+        public ServerBuilder ConfigureWebSockets()
         {
             Services.TryAddSingleton<WebSocketServer>();
             Services.TryAddScoped<IProtocolHandler, GraphQLWSProtocol>();
@@ -42,7 +43,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithWebSockets(Func<MessageContext, Task> accept)
+        public ServerBuilder ConfigureWebSockets(Func<MessageContext, Task> accept)
         {
             if (accept == null) throw new ArgumentNullException(nameof(accept));
 
@@ -56,7 +57,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithWebSockets<TDep>(Func<MessageContext, TDep, Task> accept) where TDep : class
+        public ServerBuilder ConfigureWebSockets<TDep>(Func<MessageContext, TDep, Task> accept) where TDep : class
         {
             if (accept == null) throw new ArgumentNullException(nameof(accept));
 
@@ -70,7 +71,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithWebSockets<TDep, TDep1>(Func<MessageContext, TDep, TDep1, Task> accept)
+        public ServerBuilder ConfigureWebSockets<TDep, TDep1>(Func<MessageContext, TDep, TDep1, Task> accept)
             where TDep : class where TDep1 : class
         {
             if (accept == null) throw new ArgumentNullException(nameof(accept));
@@ -86,7 +87,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithWebSockets<TDep, TDep1, TDep2>(Func<MessageContext, TDep, TDep1, TDep2, Task> accept)
+        public ServerBuilder ConfigureWebSockets<TDep, TDep1, TDep2>(Func<MessageContext, TDep, TDep1, TDep2, Task> accept)
             where TDep : class where TDep1 : class where TDep2 : class
         {
             if (accept == null) throw new ArgumentNullException(nameof(accept));
@@ -102,7 +103,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithSchema(Func<ValueTask<ISchema>> schemaFactory)
+        public ServerBuilder ConfigureSchema(Func<ValueTask<ISchema>> schemaFactory)
         {
             if (schemaFactory == null) throw new ArgumentNullException(nameof(schemaFactory));
 
@@ -111,7 +112,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithSchema<TDep>(Func<TDep, ValueTask<ISchema>> schemaFactory) where TDep : class
+        public ServerBuilder ConfigureSchema<TDep>(Func<TDep, ValueTask<ISchema>> schemaFactory) where TDep : class
         {
             if (schemaFactory == null) throw new ArgumentNullException(nameof(schemaFactory));
 
@@ -121,7 +122,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithSchema<TDep, TDep1>(Func<TDep, TDep1, ValueTask<ISchema>> schemaFactory)
+        public ServerBuilder ConfigureSchema<TDep, TDep1>(Func<TDep, TDep1, ValueTask<ISchema>> schemaFactory)
             where TDep : class where TDep1 : class
         {
             if (schemaFactory == null) throw new ArgumentNullException(nameof(schemaFactory));
@@ -132,7 +133,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithSchema<TDep, TDep1, TDep2>(Func<TDep, TDep1, TDep2, ValueTask<ISchema>> schemaFactory)
+        public ServerBuilder ConfigureSchema<TDep, TDep1, TDep2>(Func<TDep, TDep1, TDep2, ValueTask<ISchema>> schemaFactory)
             where TDep : class where TDep1 : class where TDep2 : class
         {
             if (schemaFactory == null) throw new ArgumentNullException(nameof(schemaFactory));
@@ -144,7 +145,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithRules(Func<CombineRule[], CombineRule[]> configureRules)
+        public ServerBuilder ConfigureRules(Func<CombineRule[], CombineRule[]> configureRules)
         {
             if (configureRules == null) throw new ArgumentNullException(nameof(configureRules));
 
@@ -153,7 +154,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithRules<TDep>(Func<CombineRule[], TDep, CombineRule[]> configureRules) where TDep : class
+        public ServerBuilder ConfigureRules<TDep>(Func<CombineRule[], TDep, CombineRule[]> configureRules) where TDep : class
         {
             if (configureRules == null) throw new ArgumentNullException(nameof(configureRules));
 
@@ -163,7 +164,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithRules<TDep, TDep1>(Func<CombineRule[], TDep, TDep1, CombineRule[]> configureRules)
+        public ServerBuilder ConfigureRules<TDep, TDep1>(Func<CombineRule[], TDep, TDep1, CombineRule[]> configureRules)
             where TDep : class where TDep1 : class
         {
             if (configureRules == null) throw new ArgumentNullException(nameof(configureRules));
@@ -174,7 +175,7 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        public ServerBuilder WithRules<TDep, TDep1, TDep2>(
+        public ServerBuilder ConfigureRules<TDep, TDep1, TDep2>(
             Func<CombineRule[], TDep, TDep1, TDep2, CombineRule[]> configureRules)
             where TDep : class where TDep1 : class where TDep2 : class
         {
@@ -186,13 +187,13 @@ namespace Tanka.GraphQL.Server
             return this;
         }
 
-        private void Initialize(Action<ServerOptions> configure = null)
+        private OptionsBuilder<ServerOptions> Initialize(Action<ServerOptions> configure = null)
         {
             Services.TryAddScoped<IQueryStreamService, QueryStreamService>();
-            WithExtension<ExecutionServiceScopeExtension>();
+            AddExtension<ExecutionServiceScopeExtension>();
 
-            if (configure != null)
-                Services.Configure(configure);
+            return Services.AddOptions<ServerOptions>()
+                .ValidateDataAnnotations();
         }
     }
 }

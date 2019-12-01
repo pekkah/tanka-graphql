@@ -48,13 +48,13 @@ namespace Tanka.GraphQL.Samples.Chat.Web
 
             // configure execution options
             services.AddTankaGraphQL()
-                .WithRules(rules => rules.Concat(new[]
+                .ConfigureRules(rules => rules.Concat(new[]
                 {
                     CostAnalyzer.MaxCost(100, 1, true)
                 }).ToArray())
-                .WithSchema<ISchema>(schema => new ValueTask<ISchema>(schema))
-                .WithExtension<TraceExtension>()
-                .WithWebSockets();
+                .ConfigureSchema<ISchema>(schema => new ValueTask<ISchema>(schema))
+                .AddExtension<TraceExtension>()
+                .ConfigureWebSockets();
                 
 
             // signalr server
@@ -113,7 +113,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             app.UseRouting();
             app.UseEndpoints(routes =>
             {
-                routes.MapTankaSignalR("/graphql");
+                routes.MapTankaGraphQLSignalR("/graphql");
                 routes.MapControllers();
             });
         }

@@ -8,7 +8,6 @@ using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Language;
-using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server
 {
@@ -17,14 +16,14 @@ namespace Tanka.GraphQL.Server
         private readonly List<IExecutorExtension> _extensions;
         private readonly ILogger<QueryStreamService> _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IOptionsMonitor<ServerOptions> _optionsMonitor;
+        private readonly ServerOptions _options;
 
         public QueryStreamService(
             IOptionsMonitor<ServerOptions> optionsMonitor,
             ILoggerFactory loggerFactory,
             IEnumerable<IExecutorExtension> extensions)
         {
-            _optionsMonitor = optionsMonitor;
+            _options = optionsMonitor.CurrentValue;
             _loggerFactory = loggerFactory;
             _extensions = extensions.ToList();
             _logger = loggerFactory.CreateLogger<QueryStreamService>();
@@ -37,7 +36,7 @@ namespace Tanka.GraphQL.Server
             try
             {
                 _logger.Query(query);
-                var schemaOptions = _optionsMonitor.CurrentValue;
+                var schemaOptions = _options;
                 var document = query.Document;
                 var schema = await schemaOptions.GetSchema(query);
                 var executionOptions = new ExecutionOptions

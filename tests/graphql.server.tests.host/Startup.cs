@@ -106,8 +106,8 @@ namespace Tanka.GraphQL.Server.Tests.Host
 
             // configure common options and add web socket services
             services.AddTankaGraphQL()
-                .WithSchema(()=> new ValueTask<ISchema>(executable))
-                .WithWebSockets();
+                .ConfigureSchema(()=> new ValueTask<ISchema>(executable))
+                .ConfigureWebSockets();
 
             // add SignalR services and Tanka SignalR hub services
             services.AddSignalR()
@@ -123,7 +123,7 @@ namespace Tanka.GraphQL.Server.Tests.Host
             app.UseTankaGraphQLWebSockets("/api/graphql");
 
             app.UseRouting();
-            app.UseEndpoints(routes => { routes.MapTankaSignalR("/graphql"); });
+            app.UseEndpoints(routes => { routes.MapTankaGraphQLSignalR("/graphql"); });
         }
     }
 
