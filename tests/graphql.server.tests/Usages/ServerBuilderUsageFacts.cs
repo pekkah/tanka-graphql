@@ -85,6 +85,7 @@ namespace Tanka.GraphQL.Server.Tests.Usages
         {
             /* Given */
             var schema = Substitute.For<ISchema>();
+            var maxCost = CostAnalyzer.MaxCost(100);
 
             /* When */
             Services.AddTankaGraphQL()
@@ -93,14 +94,14 @@ namespace Tanka.GraphQL.Server.Tests.Usages
                 .ConfigureRules(rules => rules.Concat(new []
                 {
                     // append max query cost validation rule
-                    CostAnalyzer.MaxCost(100)
+                    maxCost
                 }).ToArray());
 
             /* Then */
             var provider = Services.BuildServiceProvider();
             var options = provider.GetService<IOptions<ServerOptions>>().Value;
             var actual = options.ValidationRules;
-            Assert.Empty(actual);
+            Assert.Contains(actual, rule => rule == maxCost);
         }
 
         [Fact]
