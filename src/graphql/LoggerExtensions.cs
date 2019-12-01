@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 using Tanka.GraphQL.Validation;
@@ -15,6 +16,12 @@ namespace Tanka.GraphQL
                 LogLevel.Information,
                 default(EventId),
                 "Execution complete. HasErrors: {HasErrors}");
+
+        private static readonly Action<ILogger, bool, string, Exception> ExecutionResultWithErrorsAction =
+            LoggerMessage.Define<bool, string>(
+                LogLevel.Information,
+                default(EventId),
+                "Execution complete. HasErrors: {HasErrors}, First: '{error}'");
 
         private static readonly Action<ILogger, string, string, Exception> OperationAction = LoggerMessage
             .Define<string, string>(
@@ -72,7 +79,10 @@ namespace Tanka.GraphQL
 
         internal static void ExecutionResult(this ILogger logger, IExecutionResult result)
         {
-            ExecutionResultAction(logger, result.Errors != null, null);
+            if (result.Errors != null && result.Errors.Any())
+                ExecutionResultWithErrorsAction(logger, result.Errors != null, result.Errors?.First().Message, null);
+            else
+                ExecutionResultAction(logger, result.Errors != null, null);
         }
     }
 }
