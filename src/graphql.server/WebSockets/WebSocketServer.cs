@@ -12,11 +12,11 @@ namespace Tanka.GraphQL.Server.WebSockets
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<WebSocketServer> _logger;
-        private readonly IOptions<WebSocketProtocolOptions> _options;
+        private readonly IOptions<WebSocketServerOptions> _options;
 
         public WebSocketServer(
             ILoggerFactory loggerFactory,
-            IOptions<WebSocketProtocolOptions> options)
+            IOptions<WebSocketServerOptions> options)
         {
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<WebSocketServer>();

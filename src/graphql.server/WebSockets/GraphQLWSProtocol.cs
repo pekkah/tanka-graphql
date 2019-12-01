@@ -17,12 +17,12 @@ namespace Tanka.GraphQL.Server.WebSockets
     {
         private readonly ILogger<GraphQLWSProtocol> _logger;
         private readonly IMessageContextAccessor _messageContextAccessor;
-        private readonly WebSocketProtocolOptions _options;
+        private readonly WebSocketServerOptions _options;
         private readonly IQueryStreamService _queryStreamService;
 
         public GraphQLWSProtocol(
             IQueryStreamService queryStreamService,
-            IOptions<WebSocketProtocolOptions> options,
+            IOptions<WebSocketServerOptions> options,
             IMessageContextAccessor messageContextAccessor,
             ILogger<GraphQLWSProtocol> logger)
         {

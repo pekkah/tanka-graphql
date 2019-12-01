@@ -47,26 +47,19 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             services.AddSingleton(provider => provider.GetRequiredService<ChatSchemas>().Chat);
 
             // configure execution options
-            services.AddTankaSchemaOptions()
-                .Configure<ISchema>((options, schema) =>
+            services.AddTankaGraphQL()
+                .ConfigureRules(rules => rules.Concat(new[]
                 {
-                    options.ValidationRules = ExecutionRules.All
-                        .Concat(new[]
-                        {
-                            CostAnalyzer.MaxCost(100, 1, true)
-                        }).ToArray();
-
-                    options.GetSchema = query => new ValueTask<ISchema>(schema);
-                });
-
-
-            // tracing extension
-            services.AddTankaServerExecutionExtension<TraceExtension>();
+                    CostAnalyzer.MaxCost(100, 1, true)
+                }).ToArray())
+                .ConfigureSchema<ISchema>(schema => new ValueTask<ISchema>(schema))
+                .AddExtension<TraceExtension>()
+                .ConfigureWebSockets();
+                
 
             // signalr server
             services.AddSignalR(options => options.EnableDetailedErrors = true)
-                // add GraphQL query streaming hub
-                .AddTankaServerHub();
+                .AddTankaGraphQL();
 
             // graphql-ws websocket server
             // web socket server
@@ -75,7 +68,6 @@ namespace Tanka.GraphQL.Samples.Chat.Web
                 options.AllowedOrigins.Add("https://localhost:5000");
                 options.AllowedOrigins.Add("https://localhost:3000");
             });
-            services.AddTankaWebSocketServer();
 
             // CORS is required for the graphql.samples.chat.ui React App
             services.AddCors(options =>
@@ -115,16 +107,13 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             });
 
             // websockets server
-            app.UseTankaWebSocketServer(new WebSocketServerOptions
-            {
-                Path = "/api/graphql"
-            });
+            app.UseTankaGraphQLWebSockets("/api/graphql");
 
             // signalr server
             app.UseRouting();
             app.UseEndpoints(routes =>
             {
-                routes.MapTankaServerHub("/graphql");
+                routes.MapTankaGraphQLSignalR("/graphql");
                 routes.MapControllers();
             });
         }

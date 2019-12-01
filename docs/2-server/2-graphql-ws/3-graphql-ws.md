@@ -6,28 +6,20 @@ compatible websocket server. This server can be used with
 
 ### Add required services
 
-This will add the required services and Apollo Tracing extension to execution 
-pipeline.
+This will add the required services to execution pipeline.
 
 ```csharp
-services.AddTankaWebSocketServer();
+services.AddWebSockets();
 
-// you might also need to configure the websockets
-services.AddWebSockets(options =>
-{
-    options.AllowedOrigins.Add("https://localhost:5000");
-});
+services.AddTankaGraphQL()
+        .WithWebSockets();
 ```
 
 ### Add middleware to app pipeline
 
 ```csharp
-// websockets server
 app.UseWebSockets();
-app.UseTankaWebSocketServer(new WebSocketServerOptions()
-{
-    Path = "/api/graphql"
-});
+app.UseTankaGraphQLWebSockets("/api/graphql");
 ```
 
 ### Configure protocol
@@ -38,12 +30,8 @@ the connection and sends `connection_ack` message back to the client. You can
 configure this behavior with your own logic.
 
 ```csharp
-services.AddTankaWebSocketServerWithTracing()
-        .Configure<IHttpContextAccessor>(
-            (
-            options, 
-            accessor
-            ) => options.AcceptAsync = async context =>
+services.AddTankaGraphQL()
+        .WithWebSockets<IHttpContextAccessor>((context, accessor) =>
             {
                 var succeeded = await AuthorizeHelper.AuthorizeAsync(
                     accessor.HttpContext,

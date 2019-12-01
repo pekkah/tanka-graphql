@@ -16,7 +16,7 @@ namespace Tanka.GraphQL.Server.WebSockets
         private readonly Channel<OperationMessage> _readChannel;
         private readonly Channel<OperationMessage> _writeChannel;
 
-        public MessageServer(IOptions<WebSocketProtocolOptions> options)
+        public MessageServer(IOptions<WebSocketServerOptions> options)
         {
             _readChannel = Channel.CreateUnbounded<OperationMessage>();
             _writeChannel = Channel.CreateUnbounded<OperationMessage>();

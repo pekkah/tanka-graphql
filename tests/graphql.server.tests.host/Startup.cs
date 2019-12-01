@@ -1,16 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Tanka.GraphQL.Channels;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
-using Tanka.GraphQL.Server.Links.DTOs;
 using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -105,21 +102,16 @@ namespace Tanka.GraphQL.Server.Tests.Host
                 resolvers,
                 resolvers);
 
-            services.AddSingleton(provider => executable);
             services.AddSingleton(provider => eventManager);
 
-            // web socket server
-            services.AddTankaSchemaOptions()
-                .Configure<ISchema>((options, schema) => options.GetSchema = query => new ValueTask<ISchema>(schema));
+            // configure common options and add web socket services
+            services.AddTankaGraphQL()
+                .ConfigureSchema(()=> new ValueTask<ISchema>(executable))
+                .ConfigureWebSockets();
 
-            services.AddTankaWebSocketServer();
-            services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddJsonProtocol(options =>
-                {
-                    options.PayloadSerializerOptions
-                        .Converters.Add(new ObjectDictionaryConverter());
-                })
-                .AddTankaServerHub();
+            // add SignalR services and Tanka SignalR hub services
+            services.AddSignalR()
+                .AddTankaGraphQL();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -128,13 +120,10 @@ namespace Tanka.GraphQL.Server.Tests.Host
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseWebSockets();
-            app.UseTankaWebSocketServer();
+            app.UseTankaGraphQLWebSockets("/api/graphql");
 
             app.UseRouting();
-            app.UseEndpoints(routes =>
-            {
-                routes.MapTankaServerHub("/graphql");
-            });
+            app.UseEndpoints(routes => { routes.MapTankaGraphQLSignalR("/graphql"); });
         }
     }
 
@@ -148,6 +137,7 @@ namespace Tanka.GraphQL.Server.Tests.Host
     {
         public string Type { get; set; }
         public string Message { get; set; }
+
         public void Read(IReadOnlyDictionary<string, object> source)
         {
             Type = source.GetValue<string>("type");

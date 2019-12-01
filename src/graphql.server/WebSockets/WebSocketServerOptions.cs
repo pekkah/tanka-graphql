@@ -9,7 +9,7 @@ using Tanka.GraphQL.Server.WebSockets.DTOs.Serialization.Converters;
 namespace Tanka.GraphQL.Server.WebSockets
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public class WebSocketProtocolOptions
+    public class WebSocketServerOptions
     {
         /// <summary>
         ///     Method called when `connection_init` message is received from client to validate

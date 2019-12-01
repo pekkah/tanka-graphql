@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +30,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             // This will manage the schema
             services.AddSingleton<SchemaCache>();
 
-            AddSchemaOptions(services);
+            AddTanka(services);
 
             AddSignalRServer(services);
 
@@ -52,7 +53,8 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             });
 
             // Add Tanka GraphQL-WS server
-            services.AddTankaWebSocketServer();
+            services.AddTankaGraphQL()
+                .ConfigureWebSockets();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -68,35 +70,27 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             app.UseWebSockets();
 
             // Add Tanka GraphQL-WS middleware
-            app.UseTankaWebSocketServer(new WebSocketServerOptions()
-            {
-                Path = "/graphql/ws"
-            });
+            app.UseTankaGraphQLWebSockets("/graphql/ws");
         }
 
         private static void UseSignalRServer(IApplicationBuilder app)
         {
             // add SignalR
-            app.UseEndpoints(routes => { routes.MapTankaServerHub("/graphql/hub"); });
+            app.UseEndpoints(routes => { routes.MapTankaGraphQLSignalR("/graphql/hub"); });
         }
 
-        private static void AddSchemaOptions(IServiceCollection services)
+        private static void AddTanka(IServiceCollection services)
         {
             // Configure schema options
-            services.AddTankaSchemaOptions()
-                .Configure<SchemaCache>((options, cache) =>
-                {
-                    // executor will call get schema every request
-                    options.GetSchema = async query => await cache.GetOrAdd(query);
-                });
+            services.AddTankaGraphQL()
+                .ConfigureSchema<SchemaCache>(async cache => await cache.GetOrAdd());
         }
 
         private static void AddSignalRServer(IServiceCollection services)
         {
-            // Configure SignalR server
+            // Configure Tanka server
             services.AddSignalR()
-                // Add SignalR server hub
-                .AddTankaServerHub();
+                .AddTankaGraphQL();
         }
     }
 
@@ -118,7 +112,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             _cache = cache;
         }
 
-        public Task<ISchema> GetOrAdd(Query query)
+        public Task<ISchema> GetOrAdd()
         {
             return _cache.GetOrCreateAsync(
                 "Schema",

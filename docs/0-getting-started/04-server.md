@@ -31,14 +31,14 @@ for execution. Schema should be built only once and cached as singleton.
 [{Tanka.GraphQL.Tutorials.GettingStarted.SchemaCache.Create}]
 
 
-### 2. Configure schema options
+### 2. Configure
 
-Next needed step is to configure the schema options. These options tell
+Next needed step is to configure server options. These options tell
 the executor where to get the schema and also allows configuring the validation
 rules for the execution. By default all validation rules from the GraphQL
 specification are included.
 
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddSchemaOptions}]
+[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddTanka}]
 
 
 ### 3. Configure server
@@ -69,7 +69,7 @@ HTTP/JSON API as that can be easily implemented.
 Here's an example of ASP.NET Core MVC Controller taken from the 
 `Tanka.GraphQL.Samples.Chat.Web` project included in the solution.
 
-`IQueryStreamService` is registered by the `AddTankaSchemaOptions`
+`IQueryStreamService` is registered by the `AddTankaGraphQL`
 and is also used by the SignalR and GraphQL-WS based servers to 
 execute the queries.
 

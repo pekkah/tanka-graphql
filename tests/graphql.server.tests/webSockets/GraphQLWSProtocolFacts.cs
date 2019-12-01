@@ -17,13 +17,13 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets
 {
     public class GraphQLWSProtocolFacts
     {
-        private IOptions<WebSocketProtocolOptions> _options;
+        private IOptions<Server.WebSockets.WebSocketServerOptions> _options;
         private NullLogger<GraphQLWSProtocol> _logger;
         private MessageContextAccessor _accessor;
 
         public GraphQLWSProtocolFacts()
         {
-            _options = Options.Create(new WebSocketProtocolOptions());
+            _options = Options.Create(new Server.WebSockets.WebSocketServerOptions());
             _logger = new NullLogger<GraphQLWSProtocol>();
             _accessor = new MessageContextAccessor();
         }
