@@ -15,17 +15,4 @@ See the detailed explanation and schema configuration in
 
 Add cost limiting validation rule to options
 
-```csharp
-services.AddTankaSchemaOptions()
-    .Configure(options =>
-    {
-        options.ValidationRules = ExecutionRules.All
-            .Concat(new[]
-            {
-                CostAnalyzer.MaxCost(
-                    maxCost: 100, 
-                    defaultFieldComplexity: 1
-                )
-            }).ToArray();
-    });
-```
+[{Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_Rules}]

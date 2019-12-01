@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Execution
 {
@@ -54,10 +54,22 @@ namespace Tanka.GraphQL.Execution
                         path,
                         context);
 
-                resolver = context.ExtensionsRunner.Resolver(resolverContext, resolver);
-                var result = await resolver(resolverContext);
+                resolver = context.ExtensionsRunner.Resolver(resolver);
+                var resultTask = resolver(resolverContext);
 
-                completedValue = await result.CompleteValueAsync(resolverContext);
+                IResolverResult result;
+                if (resultTask.IsCompletedSuccessfully)
+                    result = resultTask.Result;
+                else
+                    result = await resultTask;
+
+
+                var completedValueTask = result.CompleteValueAsync(resolverContext);
+                if (completedValueTask.IsCompletedSuccessfully)
+                    completedValue = completedValueTask.Result;
+                else
+                    completedValue = await completedValueTask;
+
                 return completedValue;
             }
             catch (Exception e)
@@ -78,7 +90,7 @@ namespace Tanka.GraphQL.Execution
             IExecutorContext context,
             ObjectType objectType,
             object objectValue,
-            KeyValuePair<string, IReadOnlyCollection<GraphQLFieldSelection>> fieldGroup, 
+            KeyValuePair<string, IReadOnlyCollection<GraphQLFieldSelection>> fieldGroup,
             NodePath path)
         {
             if (objectType == null) throw new ArgumentNullException(nameof(objectType));
@@ -89,10 +101,7 @@ namespace Tanka.GraphQL.Execution
             path.Append(fieldName);
 
             // __typename hack
-            if (fieldName == "__typename")
-            {
-                return objectType.Name;
-            }
+            if (fieldName == "__typename") return objectType.Name;
 
             var fieldType = schema
                 .GetField(objectType.Name, fieldName)?

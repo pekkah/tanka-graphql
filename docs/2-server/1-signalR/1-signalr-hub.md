@@ -4,20 +4,10 @@ Server is implemented as a SignalR Core Hub and it handles queries, mutations
 and subscriptions. This projects provides an Apollo Link implementation to be
 used with the provided hub.
 
-### GraphQL Server Hub
+### GraphQL Server
 
-```csharp
-// Configure Services
-services.AddSignalR(options => options.EnableDetailedErrors = true)
-    // add GraphQL query streaming hub
-    .AddTankaServerHubWithTracing();
+Configure SignalR server
+[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddSignalRServer}]
 
-// Configure App
-app.UseSignalR(routes => routes.MapTankaServerHub("/graphql"));
-
-// or with options
-app.UseSignalR(routes => routes.MapTankaServerHub("/graphql", options => 
-{
-    // configure signalr hub options
-}));
-```
+Use SignalR server
+[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseSignalRServer}]
