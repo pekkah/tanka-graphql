@@ -1,9 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using Tanka.GraphQL.Extensions.Analysis;
+using Tanka.GraphQL.Extensions.Tracing;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 using Xunit;
@@ -46,6 +51,7 @@ namespace Tanka.GraphQL.Server.Tests.Usages
 
             /* When */
             Services.AddTankaGraphQL()
+                // simple factory function for setting up the schema
                 .ConfigureSchema(() => new ValueTask<ISchema>(schema));
 
             /* Then */
@@ -63,6 +69,7 @@ namespace Tanka.GraphQL.Server.Tests.Usages
 
             /* When */
             Services.AddTankaGraphQL()
+                // factory function with one dependency resolved from service provider
                 .ConfigureSchema<IMemoryCache>(async cache =>
                     await cache.GetOrCreateAsync("schema", entry => Task.FromResult(schema)));
 
@@ -82,6 +89,30 @@ namespace Tanka.GraphQL.Server.Tests.Usages
             /* When */
             Services.AddTankaGraphQL()
                 .ConfigureSchema(() => new ValueTask<ISchema>(schema))
+                // rules factory function with the default rules as the parameter
+                .ConfigureRules(rules => rules.Concat(new []
+                {
+                    // append max query cost validation rule
+                    CostAnalyzer.MaxCost(100)
+                }).ToArray());
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            var options = provider.GetService<IOptions<ServerOptions>>().Value;
+            var actual = options.ValidationRules;
+            Assert.Empty(actual);
+        }
+
+        [Fact]
+        public void Configure_Rules_remove_all()
+        {
+            /* Given */
+            var schema = Substitute.For<ISchema>();
+
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() => new ValueTask<ISchema>(schema))
+                // rules factory function with the default rules as the parameter
                 .ConfigureRules(rules => new CombineRule[0]);
 
             /* Then */
@@ -100,6 +131,7 @@ namespace Tanka.GraphQL.Server.Tests.Usages
             /* When */
             Services.AddTankaGraphQL()
                 .ConfigureSchema(() => new ValueTask<ISchema>(schema))
+                // rules factory function with default rules and dependency resolved from service provider
                 .ConfigureRules<ILogger<ServerBuilderUsageFacts>>((rules, logger) => new CombineRule[0]);
 
             /* Then */
@@ -107,6 +139,21 @@ namespace Tanka.GraphQL.Server.Tests.Usages
             var options = provider.GetService<IOptions<ServerOptions>>().Value;
             var actual = options.ValidationRules;
             Assert.Empty(actual);
+        }
+
+        [Fact]
+        public void Add_Extension()
+        {
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() => default)
+                // add trace execution extension
+                .AddExtension<TraceExtension>();
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            var executorExtensions = provider.GetService<IEnumerable<IExecutorExtension>>();
+            Assert.Contains(executorExtensions, extension => extension is TraceExtension);
         }
 
         [Fact]
