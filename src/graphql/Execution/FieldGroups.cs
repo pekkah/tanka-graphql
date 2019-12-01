@@ -54,9 +54,7 @@ namespace Tanka.GraphQL.Execution
                         path,
                         context);
 
-                resolver = context.ExtensionsRunner.Resolver(resolverContext, resolver);
-                var result = await resolver(resolverContext);
-
+                var result = context.ExtensionsRunner.Resolve(resolver, resolverContext);
                 completedValue = await result.CompleteValueAsync(resolverContext);
                 return completedValue;
             }

@@ -17,6 +17,6 @@ namespace Tanka.GraphQL
 
         ValueTask EndParseDocumentAsync(GraphQLDocument document);
 
-        Resolver Resolver(Resolver next);
+        IResolverResult Resolve(IResolverContext context);
     }
 }

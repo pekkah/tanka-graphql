@@ -67,5 +67,10 @@ namespace Tanka.GraphQL
 
             return result;
         }
+
+        public ValueTask<IResolverResult> Resolve(Resolver resolver, ResolverContext context)
+        {
+            return resolver(context);
+        }
     }
 }
