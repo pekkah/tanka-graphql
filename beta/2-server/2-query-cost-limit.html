@@ -164,9 +164,6 @@
         <li class="nav-item">
             <a class="nav-link" href="5-extensions/5-query-cost-analysis.html">Query cost analysis</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="5-extensions/9-dotnet-client.html">Dotnet client</a>
-        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -226,6 +223,15 @@
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="9-clients/1-dotnet-client.html">Clients</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="9-clients/1-dotnet-client.html">Dotnet client</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
@@ -239,19 +245,31 @@ this type of attack is to limit the query cost based on complexity.</p>
 <a href="5-extensions/5-query-cost-analysis.html">Query Cost Analysis</a>.</p>
 <h2 id="usage-with-server">Usage with server</h2>
 <p>Add cost limiting validation rule to options</p>
-<pre><code class="lang-csharp">services.AddTankaSchemaOptions()
-    .Configure(options =&gt;
-    {
-        options.ValidationRules = ExecutionRules.All
-            .Concat(new[]
-            {
-                CostAnalyzer.MaxCost(
-                    maxCost: 100, 
-                    defaultFieldComplexity: 1
-                )
-            }).ToArray();
-    });
-</code></pre>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Configure_Rules()
+        {
+            /* Given */
+            var schema = Substitute.For&lt;ISchema&gt;();
+            var maxCost = CostAnalyzer.MaxCost(100);
+
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema))
+                // rules factory function with the default rules as the parameter
+                .ConfigureRules(rules =&gt; rules.Concat(new []
+                {
+                    // append max query cost validation rule
+                    maxCost
+                }).ToArray());
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
+            var actual = options.ValidationRules;
+            Assert.Contains(actual, rule =&gt; rule == maxCost);
+        }
+</code></pre></p>
                     
             </main>
         </div>

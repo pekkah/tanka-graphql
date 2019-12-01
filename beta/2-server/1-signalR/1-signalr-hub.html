@@ -164,9 +164,6 @@
         <li class="nav-item">
             <a class="nav-link" href="5-extensions/5-query-cost-analysis.html">Query cost analysis</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="5-extensions/9-dotnet-client.html">Dotnet client</a>
-        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -226,6 +223,15 @@
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="9-clients/1-dotnet-client.html">Clients</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="9-clients/1-dotnet-client.html">Dotnet client</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
@@ -233,21 +239,24 @@
 <p>Server is implemented as a SignalR Core Hub and it handles queries, mutations
 and subscriptions. This projects provides an Apollo Link implementation to be
 used with the provided hub.</p>
-<h3 id="graphql-server-hub">GraphQL Server Hub</h3>
-<pre><code class="lang-csharp">// Configure Services
-services.AddSignalR(options =&gt; options.EnableDetailedErrors = true)
-    // add GraphQL query streaming hub
-    .AddTankaServerHubWithTracing();
-
-// Configure App
-app.UseSignalR(routes =&gt; routes.MapTankaServerHub(&quot;/graphql&quot;));
-
-// or with options
-app.UseSignalR(routes =&gt; routes.MapTankaServerHub(&quot;/graphql&quot;, options =&gt; 
-{
-    // configure signalr hub options
-}));
-</code></pre>
+<h3 id="graphql-server">GraphQL Server</h3>
+<p>Configure SignalR server
+<pre><code class="language-csharp">
+        private static void AddSignalRServer(IServiceCollection services)
+        {
+            // Configure Tanka server
+            services.AddSignalR()
+                .AddTankaGraphQL();
+        }
+</code></pre></p>
+<p>Use SignalR server
+<pre><code class="language-csharp">
+        private static void UseSignalRServer(IApplicationBuilder app)
+        {
+            // add SignalR
+            app.UseEndpoints(routes =&gt; { routes.MapTankaGraphQLSignalR(&quot;/graphql/hub&quot;); });
+        }
+</code></pre></p>
                     
             </main>
         </div>
