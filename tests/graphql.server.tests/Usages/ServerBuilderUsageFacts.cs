@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,6 +11,8 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.Extensions.Tracing;
+using Tanka.GraphQL.Server.WebSockets;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 using Xunit;
@@ -123,6 +127,7 @@ namespace Tanka.GraphQL.Server.Tests.Usages
             Assert.Empty(actual);
         }
 
+
         [Fact]
         public void Configure_Rules_with_dependency()
         {
@@ -155,6 +160,66 @@ namespace Tanka.GraphQL.Server.Tests.Usages
             var provider = Services.BuildServiceProvider();
             var executorExtensions = provider.GetService<IEnumerable<IExecutorExtension>>();
             Assert.Contains(executorExtensions, extension => extension is TraceExtension);
+        }
+
+        [Fact]
+        public void Configure_WebSockets()
+        {
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() => default)
+                // Add websocket services with defaults
+                .ConfigureWebSockets();
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            Assert.NotNull(provider.GetService<WebSocketServer>());
+            Assert.NotNull(provider.GetService<IOptions<WebSocketServerOptions>>());
+        }
+
+        [Fact]
+        public async Task Configure_WebSockets_with_Accept()
+        {
+            /* Given */
+            var called = false;
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() => default)
+                // Add websockets services with accept method
+                .ConfigureWebSockets(async context =>
+                {
+                    called = true;
+                    var succeeded = true; //todo: authorize
+
+                    if (succeeded)
+                    {
+                        await context.Output.WriteAsync(new OperationMessage
+                        {
+                            Type = MessageType.GQL_CONNECTION_ACK
+                        });
+                    }
+                    else
+                    {
+                        // you must decide what kind of message to send back to the client
+                        // in case the connection is not accepted.
+                        await context.Output.WriteAsync(new OperationMessage
+                        {
+                            Type = MessageType.GQL_CONNECTION_ERROR,
+                            Id = context.Message.Id
+                        });
+
+                        // complete the output forcing the server to disconnect
+                        context.Output.Complete();
+                    }
+                });
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            Assert.NotNull(provider.GetService<WebSocketServer>());
+            var options = provider.GetRequiredService<IOptions<WebSocketServerOptions>>().Value;
+            await options.AcceptAsync(new MessageContext(new OperationMessage(),
+                Channel.CreateUnbounded<OperationMessage>()));
+            Assert.True(called);
         }
 
         [Fact]

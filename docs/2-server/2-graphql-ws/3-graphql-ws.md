@@ -4,16 +4,13 @@ Besides the SignalR based server Tanka also provides a graphql-ws protocol
 compatible websocket server. This server can be used with 
 [apollo-link-ws](https://www.apollographql.com/docs/link/links/ws).
 
-### Add required services
+
+### Configure required services
 
 This will add the required services to execution pipeline.
 
-```csharp
-services.AddWebSockets();
+[{Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_WebSockets}]
 
-services.AddTankaGraphQL()
-        .WithWebSockets();
-```
 
 ### Add middleware to app pipeline
 
@@ -22,6 +19,7 @@ app.UseWebSockets();
 app.UseTankaGraphQLWebSockets("/api/graphql");
 ```
 
+
 ### Configure protocol
 
 When `connection_init` message is received from client the protocol calls
@@ -29,38 +27,5 @@ When `connection_init` message is received from client the protocol calls
 the connection and sends `connection_ack` message back to the client. You can 
 configure this behavior with your own logic.
 
-```csharp
-services.AddTankaGraphQL()
-        .WithWebSockets<IHttpContextAccessor>((context, accessor) =>
-            {
-                var succeeded = await AuthorizeHelper.AuthorizeAsync(
-                    accessor.HttpContext,
-                    new List<IAuthorizeData>()
-                    {
-                        new AuthorizeAttribute("authorize")
-                    });
-
-                if (succeeded)
-                {
-                    await context.Output.WriteAsync(new OperationMessage
-                    {
-                        Type = MessageType.GQL_CONNECTION_ACK
-                    });
-                }
-                else
-                {
-                    // you must decide what kind of message to send back to the client
-                    // in case the connection is not accepted.
-                    await context.Output.WriteAsync(new OperationMessage
-                    {
-                        Type = MessageType.GQL_CONNECTION_ERROR,
-                        Id = context.Message.Id
-                    });
-
-                    // complete the output forcing the server to disconnect
-                    context.Output.Complete();
-                }
-            });
-```
-
+[{Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_WebSockets_with_Accept}]
 
