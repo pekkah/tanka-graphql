@@ -1,12 +1,12 @@
-﻿using System;
+﻿using GraphQLParser.AST;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Language;
 
 namespace Tanka.GraphQL.Server
@@ -82,6 +82,15 @@ namespace Tanka.GraphQL.Server
             CancellationToken cancellationToken)
         {
             var result = await Executor.ExecuteAsync(options, cancellationToken);
+
+            if (_logger.IsEnabled(LogLevel.Debug) && result.Errors != null)
+            {
+                foreach (var error in result.Errors)
+                {
+                    _logger.LogError($"GraphQL ERROR: '{error.Message}', Path: '{error.Path}'");
+                }
+            }
+
             var channel = Channel.CreateBounded<ExecutionResult>(1);
 
             await channel.Writer.WriteAsync(result, cancellationToken);
@@ -113,6 +122,14 @@ namespace Tanka.GraphQL.Server
 
             if (result.Errors != null && result.Errors.Any())
             {
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        _logger.LogError($"GraphQL ERROR: '{error.Message}', Path: '{error.Path}'");
+                    }
+                }
+
                 var channel = Channel.CreateBounded<ExecutionResult>(1);
                 await channel.Writer.WriteAsync(new ExecutionResult
                 {
