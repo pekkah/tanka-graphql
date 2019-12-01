@@ -60,17 +60,13 @@ namespace Tanka.GraphQL
             foreach (var extension in _scopes) await extension.EndParseDocumentAsync(document);
         }
 
-        public Resolver Resolver(ResolverContext resolverContext, Resolver fieldResolver)
+        [Obsolete("This method is currently under review for removal or changes")]
+        public Resolver Resolver(Resolver fieldResolver)
         {
             var result = fieldResolver;
             foreach (var extension in _scopes) result = extension.Resolver(result);
 
             return result;
-        }
-
-        public ValueTask<IResolverResult> Resolve(Resolver resolver, ResolverContext context)
-        {
-            return resolver(context);
         }
     }
 }
