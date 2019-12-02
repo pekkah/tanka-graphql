@@ -190,7 +190,8 @@ namespace Tanka.GraphQL.Server
         private OptionsBuilder<ServerOptions> Initialize(Action<ServerOptions> configure = null)
         {
             Services.TryAddScoped<IQueryStreamService, QueryStreamService>();
-            AddExtension<ServiceProviderScopeExtension>();
+            AddExtension<RequestServicesScopeProvider>();
+            Services.AddHttpContextAccessor();
 
             return Services.AddOptions<ServerOptions>()
                 .ValidateDataAnnotations();
