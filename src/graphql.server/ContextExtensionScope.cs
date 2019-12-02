@@ -8,8 +8,11 @@ namespace Tanka.GraphQL.Server
 {
     public class ContextExtensionScope<T> : IExtensionScope
     {
-        public ContextExtensionScope(T context)
+        private readonly bool _dispose;
+
+        public ContextExtensionScope(T context, bool dispose = true)
         {
+            _dispose = dispose;
             Context = context;
         }
 
@@ -27,7 +30,7 @@ namespace Tanka.GraphQL.Server
 
         public ValueTask EndExecuteAsync(IExecutionResult executionResult)
         {
-            if (Context is IDisposable disposable)
+            if (Context is IDisposable disposable && _dispose)
                 disposable.Dispose();
 
             return default;
