@@ -15,7 +15,7 @@ namespace Tanka.GraphQL.Server
         public Task<IExtensionScope> BeginExecuteAsync(ExecutionOptions options)
         {
             IExtensionScope context =
-                new ContextExtensionScope<IServiceProvider>(_serviceProvider);
+                new ContextExtensionScope<IServiceProvider>(_serviceProvider, false);
             return Task.FromResult(context);
         }
     }
