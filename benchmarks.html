@@ -164,9 +164,6 @@
         <li class="nav-item">
             <a class="nav-link" href="5-extensions/5-query-cost-analysis.html">Query cost analysis</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="5-extensions/9-dotnet-client.html">Dotnet client</a>
-        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -226,6 +223,15 @@
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="9-clients/1-dotnet-client.html">Clients</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="9-clients/1-dotnet-client.html">Dotnet client</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
@@ -254,89 +260,89 @@ Toolchain=InProcessEmitToolchain
 <tbody>
 <tr>
 <td>Query_with_defaults</td>
-<td style="text-align: right;">27.463 us</td>
-<td style="text-align: right;">0.5812 us</td>
-<td style="text-align: right;">1.0025 us</td>
+<td style="text-align: right;">30.105 us</td>
+<td style="text-align: right;">0.5607 us</td>
+<td style="text-align: right;">0.7091 us</td>
 <td style="text-align: right;">0.8545</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">22.07 KB</td>
+<td style="text-align: right;">21.93 KB</td>
 </tr>
 <tr>
 <td>Query_without_validation</td>
-<td style="text-align: right;">6.720 us</td>
+<td style="text-align: right;">6.725 us</td>
 <td style="text-align: right;">0.1315 us</td>
-<td style="text-align: right;">0.2048 us</td>
-<td style="text-align: right;">0.1678</td>
+<td style="text-align: right;">0.2160 us</td>
+<td style="text-align: right;">0.1602</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">4.37 KB</td>
+<td style="text-align: right;">4.23 KB</td>
 </tr>
 <tr>
 <td>Mutation_with_defaults</td>
-<td style="text-align: right;">25.809 us</td>
-<td style="text-align: right;">0.5151 us</td>
-<td style="text-align: right;">0.5726 us</td>
+<td style="text-align: right;">28.660 us</td>
+<td style="text-align: right;">0.5370 us</td>
+<td style="text-align: right;">0.5274 us</td>
 <td style="text-align: right;">0.8240</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">21.72 KB</td>
+<td style="text-align: right;">21.58 KB</td>
 </tr>
 <tr>
 <td>Mutation_without_validation</td>
-<td style="text-align: right;">5.897 us</td>
-<td style="text-align: right;">0.1154 us</td>
-<td style="text-align: right;">0.1282 us</td>
-<td style="text-align: right;">0.1526</td>
+<td style="text-align: right;">5.973 us</td>
+<td style="text-align: right;">0.1158 us</td>
+<td style="text-align: right;">0.1803 us</td>
+<td style="text-align: right;">0.1450</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">3.91 KB</td>
+<td style="text-align: right;">3.77 KB</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults</td>
-<td style="text-align: right;">49.904 us</td>
-<td style="text-align: right;">0.9735 us</td>
-<td style="text-align: right;">1.4269 us</td>
+<td style="text-align: right;">54.455 us</td>
+<td style="text-align: right;">1.0650 us</td>
+<td style="text-align: right;">1.4578 us</td>
 <td style="text-align: right;">1.0376</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">27.64 KB</td>
+<td style="text-align: right;">27.59 KB</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
-<td style="text-align: right;">14.324 us</td>
-<td style="text-align: right;">0.2846 us</td>
-<td style="text-align: right;">0.4514 us</td>
-<td style="text-align: right;">0.3510</td>
+<td style="text-align: right;">15.282 us</td>
+<td style="text-align: right;">0.2946 us</td>
+<td style="text-align: right;">0.4225 us</td>
+<td style="text-align: right;">0.3357</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">9.11 KB</td>
+<td style="text-align: right;">9.05 KB</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
-<td style="text-align: right;">50.703 us</td>
-<td style="text-align: right;">1.0768 us</td>
-<td style="text-align: right;">1.4375 us</td>
+<td style="text-align: right;">55.537 us</td>
+<td style="text-align: right;">1.1050 us</td>
+<td style="text-align: right;">1.8463 us</td>
 <td style="text-align: right;">1.0376</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
-<td style="text-align: right;">27.64 KB</td>
+<td style="text-align: right;">27.59 KB</td>
 </tr>
 <tr>
 <td>Validate_with_defaults</td>
-<td style="text-align: right;">13.599 us</td>
-<td style="text-align: right;">0.2647 us</td>
-<td style="text-align: right;">0.3442 us</td>
+<td style="text-align: right;">16.656 us</td>
+<td style="text-align: right;">0.3314 us</td>
+<td style="text-align: right;">0.5537 us</td>
 <td style="text-align: right;">0.6714</td>
-<td style="text-align: right;">0.0153</td>
+<td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">17.47 KB</td>
 </tr>
 <tr>
 <td>Validate_100times_with_defaults</td>
-<td style="text-align: right;">1,331.367 us</td>
-<td style="text-align: right;">26.3184 us</td>
-<td style="text-align: right;">31.3302 us</td>
+<td style="text-align: right;">1,667.136 us</td>
+<td style="text-align: right;">32.4407 us</td>
+<td style="text-align: right;">42.1821 us</td>
 <td style="text-align: right;">68.3594</td>
 <td style="text-align: right;">1.9531</td>
 <td style="text-align: right;">-</td>

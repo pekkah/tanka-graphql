@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>Graphql ws - tanka-graphql</title>
+    <title>Dotnet client - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -153,7 +153,7 @@
 </h6>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="2-server/2-graphql-ws/3-graphql-ws.html">Graphql ws</a>
+            <a class="nav-link" href="2-server/2-graphql-ws/3-graphql-ws.html">Graphql ws</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -228,90 +228,14 @@
 </h6>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link" href="9-clients/1-dotnet-client.html">Dotnet client</a>
+            <a class="nav-link active bg-light" href="9-clients/1-dotnet-client.html">Dotnet client</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="graphql-ws">GraphQL WS</h2>
-<p>Besides the SignalR based server Tanka also provides a graphql-ws protocol
-compatible websocket server. This server can be used with
-<a href="https://www.apollographql.com/docs/link/links/ws">apollo-link-ws</a>.</p>
-<h3 id="configure-required-services">Configure required services</h3>
-<p>This will add the required services to execution pipeline.</p>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public void Configure_WebSockets()
-        {
-            /* When */
-            Services.AddTankaGraphQL()
-                .ConfigureSchema(() =&gt; default)
-                // Add websocket services with defaults
-                .ConfigureWebSockets();
-
-            /* Then */
-            var provider = Services.BuildServiceProvider();
-            Assert.NotNull(provider.GetService&lt;WebSocketServer&gt;());
-            Assert.NotNull(provider.GetService&lt;IOptions&lt;WebSocketServerOptions&gt;&gt;());
-        }
-</code></pre></p>
-<h3 id="add-middleware-to-app-pipeline">Add middleware to app pipeline</h3>
-<pre><code class="lang-csharp">app.UseWebSockets();
-app.UseTankaGraphQLWebSockets(&quot;/api/graphql&quot;);
-</code></pre>
-<h3 id="configure-protocol">Configure protocol</h3>
-<p>When <code>connection_init</code> message is received from client the protocol calls
-<code>AcceptAsync</code> of the options to accept the connection. By default it accepts
-the connection and sends <code>connection_ack</code> message back to the client. You can
-configure this behavior with your own logic.</p>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public async Task Configure_WebSockets_with_Accept()
-        {
-            /* Given */
-            var called = false;
-            /* When */
-            Services.AddTankaGraphQL()
-                .ConfigureSchema(() =&gt; default)
-                // Add websockets services with accept method
-                .ConfigureWebSockets(async context =&gt;
-                {
-                    called = true;
-                    var succeeded = true; //todo: authorize
-
-                    if (succeeded)
-                    {
-                        await context.Output.WriteAsync(new OperationMessage
-                        {
-                            Type = MessageType.GQL_CONNECTION_ACK
-                        });
-                    }
-                    else
-                    {
-                        // you must decide what kind of message to send back to the client
-                        // in case the connection is not accepted.
-                        await context.Output.WriteAsync(new OperationMessage
-                        {
-                            Type = MessageType.GQL_CONNECTION_ERROR,
-                            Id = context.Message.Id
-                        });
-
-                        // complete the output forcing the server to disconnect
-                        context.Output.Complete();
-                    }
-                });
-
-            /* Then */
-            var provider = Services.BuildServiceProvider();
-            Assert.NotNull(provider.GetService&lt;WebSocketServer&gt;());
-            var options = provider.GetRequiredService&lt;IOptions&lt;WebSocketServerOptions&gt;&gt;().Value;
-            await options.AcceptAsync(new MessageContext(new OperationMessage(),
-                Channel.CreateUnbounded&lt;OperationMessage&gt;()));
-            Assert.True(called);
-        }
-</code></pre></p>
+                <p>Dotnet client is available at <a href="https://github.com/anttikajanus/tanka-graphql-net-client">https://github.com/anttikajanus/tanka-graphql-net-client</a></p>
                     
             </main>
         </div>

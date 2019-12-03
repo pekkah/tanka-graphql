@@ -164,9 +164,6 @@
         <li class="nav-item">
             <a class="nav-link" href="5-extensions/5-query-cost-analysis.html">Query cost analysis</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="5-extensions/9-dotnet-client.html">Dotnet client</a>
-        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -226,6 +223,15 @@
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="9-clients/1-dotnet-client.html">Clients</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="9-clients/1-dotnet-client.html">Dotnet client</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
@@ -236,40 +242,37 @@ the builtin dependency injection services.</p>
 as the schema does not change. This adds a challenge when using
 services which require scoped lifetime. Usually the scope is defined
 as HTTP request.</p>
-<h3 id="dependency-injection-using-context-extensions">Dependency injection using context extensions</h3>
-<p>Tanka GraphQL allows extending the execution trough extensions. Server
-adds an context extension which carries object trough the execution pipeline.
-These objects can be access during the value resolution. As the objects are
-resolved from <code>IServiceProvider</code> during the beginning of GraphQL request execution
-they will have their lifetime specified when they're added to the <code>IServiceCollection</code>.</p>
-<p>Steps required to register context extension using <code>IServiceCollection</code>:</p>
+<h3 id="dependency-injection-1">Dependency injection</h3>
+<p>Tanka GraphQL server starts an dependency injection scope at the beginning of
+execution and disposes it at the end. You can access this scope by using <code>Use&lt;T&gt;</code>
+extensions methods of <code>IResolverContext</code>.</p>
+<p>Steps</p>
 <ol>
-<li>Define context object and add to services</li>
-<li>Use service in resolver</li>
+<li>Add service using the <code>Add{Lifetime}</code> etc. methods of the <code>IServiceCollection</code></li>
+<li>Use service in resolver using <code>Use&lt;T&gt;</code>.</li>
 </ol>
-<h4 id="define-context-and-add-to-services">1. Define context and add to services</h4>
-<p>Define context object
+<h4 id="add-service">1. Add service</h4>
+<p>Define service
 <pre><code class="language-csharp">
     public class ResolverController
     {
-        public ValueTask&lt;IResolveResult&gt; QueryLastName(IResolverContext context)
+        public ValueTask&lt;IResolverResult&gt; QueryLastName(IResolverContext context)
         { 
             return ResolveSync.As(&quot;GraphQL&quot;);
         }
     }
 </code></pre></p>
-<p>Add context to services and add context extension
+<p>Add service
 <pre><code class="language-csharp">
-        private void AddContextExtension(IServiceCollection services)
+        private void AddExecutionScopedService(IServiceCollection services)
         {
             services.AddScoped&lt;ResolverController&gt;();
-            services.AddTankaServerExecutionContextExtension&lt;ResolverController&gt;();
         }
 </code></pre></p>
 <h4 id="use-service-in-resolver">3. Use service in resolver</h4>
 <p>See <a href="0-getting-started/04-server.html">Server</a> for usage for below method.</p>
 <p><pre><code class="language-csharp">
-        private Resolver UseContextExtension()
+        private Resolver UseService()
         {
             return context =&gt; context
                 .Use&lt;ResolverController&gt;()

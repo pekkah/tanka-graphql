@@ -164,9 +164,6 @@
         <li class="nav-item">
             <a class="nav-link" href="5-extensions/5-query-cost-analysis.html">Query cost analysis</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="5-extensions/9-dotnet-client.html">Dotnet client</a>
-        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -223,6 +220,15 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" href="7-type-system/13-directives.html">Directives</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="9-clients/1-dotnet-client.html">Clients</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="9-clients/1-dotnet-client.html">Dotnet client</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -285,26 +291,22 @@ for execution. Schema should be built only once and cached as singleton.</p>
                         [&quot;Query&quot;] = new FieldResolversMap()
                         {
                             {&quot;firstName&quot;, context =&gt; ResolveSync.As(&quot;Tanka&quot;)},
-                            {&quot;lastName&quot;, UseContextExtension()}
+                            {&quot;lastName&quot;, UseService()}
                         }
                     });
         }
 </code></pre></p>
-<h3 id="configure-schema-options">2. Configure schema options</h3>
-<p>Next needed step is to configure the schema options. These options tell
+<h3 id="configure">2. Configure</h3>
+<p>Next needed step is to configure server options. These options tell
 the executor where to get the schema and also allows configuring the validation
 rules for the execution. By default all validation rules from the GraphQL
 specification are included.</p>
 <p><pre><code class="language-csharp">
-        private static void AddSchemaOptions(IServiceCollection services)
+        private static void AddTanka(IServiceCollection services)
         {
             // Configure schema options
-            services.AddTankaSchemaOptions()
-                .Configure&lt;SchemaCache&gt;((options, cache) =&gt;
-                {
-                    // executor will call get schema every request
-                    options.GetSchema = async query =&gt; await cache.GetOrAdd(query);
-                });
+            services.AddTankaGraphQL()
+                .ConfigureSchema&lt;SchemaCache&gt;(async cache =&gt; await cache.GetOrAdd());
         }
 </code></pre></p>
 <h3 id="configure-server">3. Configure server</h3>
@@ -315,10 +317,9 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
 <pre><code class="language-csharp">
         private static void AddSignalRServer(IServiceCollection services)
         {
-            // Configure SignalR server
+            // Configure Tanka server
             services.AddSignalR()
-                // Add SignalR server hub
-                .AddTankaServerHub();
+                .AddTankaGraphQL();
         }
 </code></pre></p>
 <p>Use SignalR server
@@ -326,7 +327,7 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
         private static void UseSignalRServer(IApplicationBuilder app)
         {
             // add SignalR
-            app.UseEndpoints(routes =&gt; { routes.MapTankaServerHub(&quot;/graphql/hub&quot;); });
+            app.UseEndpoints(routes =&gt; { routes.MapTankaGraphQLSignalR(&quot;/graphql/hub&quot;); });
         }
 </code></pre></p>
 <p>Configure GraphQL WS server
@@ -340,7 +341,8 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
             });
 
             // Add Tanka GraphQL-WS server
-            services.AddTankaWebSocketServer();
+            services.AddTankaGraphQL()
+                .ConfigureWebSockets();
         }
 </code></pre></p>
 <p>Use GraphQL WS Server
@@ -351,10 +353,7 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
             app.UseWebSockets();
 
             // Add Tanka GraphQL-WS middleware
-            app.UseTankaWebSocketServer(new WebSocketServerOptions()
-            {
-                Path = &quot;/graphql/ws&quot;
-            });
+            app.UseTankaGraphQLWebSockets(&quot;/graphql/ws&quot;);
         }
 </code></pre></p>
 <h3 id="http-api">4. HTTP API</h3>
@@ -362,7 +361,7 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
 HTTP/JSON API as that can be easily implemented.</p>
 <p>Here's an example of ASP.NET Core MVC Controller taken from the
 <code>Tanka.GraphQL.Samples.Chat.Web</code> project included in the solution.</p>
-<p><code>IQueryStreamService</code> is registered by the <code>AddTankaSchemaOptions</code>
+<p><code>IQueryStreamService</code> is registered by the <code>AddTankaGraphQL</code>
 and is also used by the SignalR and GraphQL-WS based servers to
 execute the queries.</p>
 <p><pre><code class="language-csharp">    [Route(&quot;api/graphql&quot;)]

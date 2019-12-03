@@ -164,9 +164,6 @@
         <li class="nav-item">
             <a class="nav-link" href="5-extensions/5-query-cost-analysis.html">Query cost analysis</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="5-extensions/9-dotnet-client.html">Dotnet client</a>
-        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -223,6 +220,15 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" href="7-type-system/13-directives.html">Directives</a>
+        </li>
+    </ul>
+<ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
+</ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
+    <a class="d-flex align-items-center text-muted" href="9-clients/1-dotnet-client.html">Clients</a>
+</h6>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="9-clients/1-dotnet-client.html">Dotnet client</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -378,7 +384,7 @@
                 {
                     &quot;Query&quot;, new FieldResolversMap
                     {
-                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(Model.Events))}
+                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(Model.Events))}
                     }
                 },
                 {
@@ -414,7 +420,7 @@
                                 var source = Model.Subscribe(unsubscribe);
                                 return source;
                             },
-                            context =&gt; new ValueTask&lt;IResolveResult&gt;(Resolve.As(context.ObjectValue))
+                            context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(context.ObjectValue))
                         }
                     }
                 }
