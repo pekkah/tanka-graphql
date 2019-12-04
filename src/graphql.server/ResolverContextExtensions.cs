@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Server
@@ -25,7 +24,8 @@ namespace Tanka.GraphQL.Server
         /// <returns></returns>
         public static TService Use<TService>(this IResolverContext context)
         {
-            return context.ContextExtension<IServiceProvider>()
+            return context.ContextExtension<IServiceScope>()
+                .ServiceProvider
                 .GetRequiredService<TService>();
         }
     }
