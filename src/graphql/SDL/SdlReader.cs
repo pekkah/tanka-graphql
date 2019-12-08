@@ -52,6 +52,17 @@ namespace Tanka.GraphQL.SDL
 
             foreach (var action in _afterTypeDefinitions) action(_builder);
 
+            var schemaDefinition = definitions.OfType<GraphQLSchemaDefinition>()
+                .SingleOrDefault();
+
+            if (schemaDefinition?.Directives != null)
+            {
+                var directives = Directives(schemaDefinition.Directives);
+                _builder.Schema(
+                    schemaDefinition.Comment?.Text,
+                    directives);
+            }
+
             return _builder;
         }
 
@@ -230,6 +241,9 @@ namespace Tanka.GraphQL.SDL
         protected IEnumerable<DirectiveInstance> Directives(
             IEnumerable<GraphQLDirective> directives)
         {
+            if (directives == null)
+                yield break;
+
             foreach (var directive in directives)
             foreach (var directiveInstance in DirectiveInstance(directive))
                 yield return directiveInstance;
@@ -292,7 +306,13 @@ namespace Tanka.GraphQL.SDL
         {
             if (_builder.TryGetType<InputObjectType>(definition.Name.Value, out var inputObject)) return inputObject;
 
-            _builder.InputObject(definition.Name.Value, out inputObject);
+            var directives = Directives(definition.Directives);
+            _builder.InputObject(
+                definition.Name.Value, 
+                out inputObject,
+                description: definition.Comment?.Text,
+                directives: directives);
+            
             _builder.Connections(connect =>
             {
                 var fields = InputValues(definition.Fields);

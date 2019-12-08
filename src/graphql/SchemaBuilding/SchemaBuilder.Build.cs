@@ -17,7 +17,8 @@ namespace Tanka.GraphQL.SchemaBuilding
                 inputFields,
                 _directives,
                 BuildResolvers(resolvers),
-                BuildSubscribers(subscribers));
+                BuildSubscribers(subscribers),
+                _schemaDirectives);
         }
 
         public (ISchema Schema, object ValidationResult) BuildAndValidate()
