@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
@@ -11,8 +10,12 @@ namespace Tanka.GraphQL.SchemaBuilding
         private readonly ConnectionBuilder _connections;
         private readonly Dictionary<string, DirectiveType> _directives = new Dictionary<string, DirectiveType>();
 
+        private readonly List<DirectiveInstance> _schemaDirectives = new List<DirectiveInstance>();
+
         private readonly Dictionary<string, INamedType> _types =
             new Dictionary<string, INamedType>();
+
+        private string _schemaDescription;
 
         public SchemaBuilder()
         {
@@ -131,6 +134,17 @@ namespace Tanka.GraphQL.SchemaBuilding
         {
             scalarType = new ScalarType(name, converter, description, directives);
             Include(scalarType);
+            return this;
+        }
+
+        public SchemaBuilder Schema(
+            string description = null,
+            IEnumerable<DirectiveInstance> directives = null)
+        {
+            _schemaDescription = description;
+            if (directives != null)
+                _schemaDirectives.AddRange(directives);
+
             return this;
         }
     }

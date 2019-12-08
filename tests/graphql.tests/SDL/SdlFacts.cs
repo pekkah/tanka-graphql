@@ -11,6 +11,96 @@ namespace Tanka.GraphQL.Tests.SDL
     public class SdlFacts
     {
         [Fact]
+        public void Parse_directives_on_schema()
+        {
+            /* Given */
+            var sdl = @"
+                directive @map(from: String!, to: String!) on SCHEMA
+
+                type Query {
+                }
+
+                
+                schema @map(from: ""from"", to: ""to"") {
+                    query: Query
+                }
+                ";
+
+            var schema = new SchemaBuilder()
+                .Sdl(sdl)
+                .Build();
+
+
+            /* When */
+            var directive = schema.GetDirective("map");
+
+            /* Then */
+            Assert.NotNull(directive);
+        }
+
+        [Fact]
+        public void Parse_directives_on_object()
+        {
+            /* Given */
+            var sdl = @"
+                directive @map(from: String!, to: String!) on OBJECT
+
+                type Query @map(from: ""from"", to: ""to"") {
+                }
+                
+                schema {
+                    query: Query
+                }
+                ";
+
+            var schema = new SchemaBuilder()
+                .Sdl(sdl)
+                .Build();
+
+
+            /* When */
+            var directive = schema
+                .GetNamedType<ObjectType>("Query")
+                .GetDirective("map");
+
+            /* Then */
+            Assert.NotNull(directive);
+        }
+
+        [Fact]
+        public void Parse_directives_on_input_object()
+        {
+            /* Given */
+            var sdl = @"
+                directive @map(from: String!, to: String!) on INPUT_OBJECT
+
+                input Input @map(from: ""from"", to: ""to"") {
+                }
+
+                type Query {
+                }
+                
+                schema {
+                    query: Query
+                }
+                ";
+
+            var schema = new SchemaBuilder()
+                .Sdl(sdl)
+                .Build();
+
+
+            /* When */
+            var directive = schema
+                .GetNamedType<InputObjectType>("Input")
+                .GetDirective("map");
+
+            /* Then */
+            Assert.NotNull(directive);
+        }
+
+
+        [Fact]
         public void Parse_custom_scalar()
         {
             /* Given */
