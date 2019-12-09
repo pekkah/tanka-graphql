@@ -30,7 +30,7 @@
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "rollup": "^1.21.4",
-    "rollup-plugin-typescript2": "^0.24.3",
+    "rollup-plugin-typescript2": "^0.25.3",
     "ts-jest": "^24.1.0",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
