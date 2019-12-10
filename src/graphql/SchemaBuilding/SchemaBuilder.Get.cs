@@ -34,5 +34,10 @@ namespace Tanka.GraphQL.SchemaBuilding
                 name,
                 $"Could not get serializer for type '{name}'");
         }
+
+        public bool TryGetScalarSerializer(string name, out IValueConverter serializer)
+        {
+            return _scalarSerializers.TryGetValue(name, out serializer);
+        }
     }
 }

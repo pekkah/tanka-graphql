@@ -9,6 +9,7 @@ using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
+using Tanka.GraphQL.Validation;
 using Xunit;
 
 // ReSharper disable ArgumentsStyleOther
@@ -32,10 +33,10 @@ namespace Tanka.GraphQL.Tests.TypeSystem
             var (schema, validationResult) = builder.BuildAndValidate();
 
             /* Then */
+            Assert.True(validationResult.IsValid);
             Assert.IsAssignableFrom<ISchema>(schema);
             Assert.IsType<SchemaGraph>(schema);
             Assert.NotNull(schema.Query);
-            Assert.IsType<NotImplementedException>(validationResult);
         }
 
         [Fact]
@@ -625,11 +626,11 @@ namespace Tanka.GraphQL.Tests.TypeSystem
             var builder = new SchemaBuilder();
 
             /* When */
-            var exception = Assert.Throws<ArgumentNullException>(
+            var exception = Assert.Throws<ValidationException>(
                 () => builder.Build());
 
             /* Then */
-            Assert.Equal("types", exception.ParamName);
+            Assert.Contains(exception.Result.Errors, error => error.Code == "SCHEMA_QUERY_ROOT_MISSING");
         }
 
         [Fact]

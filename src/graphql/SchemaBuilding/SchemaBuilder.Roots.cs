@@ -33,6 +33,11 @@ namespace Tanka.GraphQL.SchemaBuilding
             return this;
         }
 
+        public bool TryGetQuery(out ObjectType query)
+        {
+            return TryGetType(_queryTypeName, out query);
+        }
+
         public SchemaBuilder Mutation(
             out ObjectType mutation,
             string description = null,
