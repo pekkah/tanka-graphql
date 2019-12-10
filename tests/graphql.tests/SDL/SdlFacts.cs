@@ -113,18 +113,16 @@ namespace Tanka.GraphQL.Tests.SDL
                     query: Query
                 }
                 ";
-            var urlScalar = new ScalarType("Url", new StringConverter());
-            var document = Parser.ParseDocument(idl);
-            var reader = new SdlReader(document, new SchemaBuilder()
-                .Include(urlScalar));
+
+            var builder = new SchemaBuilder()
+                .Sdl(idl); 
 
 
             /* When */
-            var actual = reader.Read().Build().GetNamedType<ScalarType>("Url");
+            var actual = builder.Build().GetNamedType<ScalarType>("Url");
 
             /* Then */
             Assert.Equal("Url", actual.Name);
-            Assert.Equal(urlScalar, actual);
         }
 
         [Fact]
@@ -273,13 +271,11 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var jediPowerLevel = new ScalarType("JediPowerLevel", new IntConverter());
-            var jediTrickLevel = new ScalarType("JediTrickLevel", new DoubleConverter());
+            var jediPowerLevel = new ScalarType("JediPowerLevel");
+            var jediTrickLevel = new ScalarType("JediTrickLevel");
 
             var document = Parser.ParseDocument(idl);
-            var reader = new SdlReader(document, new SchemaBuilder()
-                .Include(jediPowerLevel)
-                .Include(jediTrickLevel));
+            var reader = new SdlReader(document, new SchemaBuilder());
 
             /* When */
             var schema = reader.Read().Build();

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GraphQLParser.AST;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.Execution
 {
@@ -11,18 +12,34 @@ namespace Tanka.GraphQL.Execution
     {
         public static object CoerceValue(
             Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
+            Func<string, IValueConverter> getScalarSerializer,
             object value,
             IType valueType)
         {
-            if (valueType is NonNull nonNull) return CoerceNonNullValue(getInputObjectFields, value, nonNull);
+            if (valueType is NonNull nonNull)
+                return CoerceNonNullValue(
+                    getInputObjectFields,
+                    getScalarSerializer,
+                    value,
+                    nonNull);
 
-            if (valueType is List list) return CoerceListValues(getInputObjectFields, list.OfType, value);
+            if (valueType is List list)
+                return CoerceListValues(
+                    getInputObjectFields,
+                    getScalarSerializer,
+                    list.OfType,
+                    value);
 
-            if (valueType is ScalarType scalar) return CoerceScalarValue(value, scalar);
+            if (valueType is ScalarType scalar) return CoerceScalarValue(getScalarSerializer, value, scalar);
 
             if (valueType is EnumType enumType) return CoerceEnumValue(value, enumType);
 
-            if (valueType is InputObjectType input) return CoerceInputValue(getInputObjectFields, value, input);
+            if (valueType is InputObjectType input)
+                return CoerceInputValue(
+                    getInputObjectFields,
+                    getScalarSerializer,
+                    value,
+                    input);
 
             throw new ValueCoercionException(
                 $"Unexpected valueType {valueType}. Cannot coerce value.",
@@ -31,7 +48,9 @@ namespace Tanka.GraphQL.Execution
         }
 
         private static IDictionary<string, object> CoerceInputValue(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, object value,
+            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
+            Func<string, IValueConverter> getScalarSerializer, 
+            object value,
             InputObjectType input)
         {
             if (value == null)
@@ -40,7 +59,7 @@ namespace Tanka.GraphQL.Execution
             var result = new Dictionary<string, object>();
 
             if (value is GraphQLObjectValue objectValue)
-                return CoerceInputValueAst(getInputObjectFields, input, objectValue, result);
+                return CoerceInputValueAst(getInputObjectFields, getScalarSerializer, input, objectValue, result);
 
             if (value is IDictionary<string, object> dictionaryValues)
             {
@@ -55,7 +74,7 @@ namespace Tanka.GraphQL.Execution
 
                     if (dictionaryValues.ContainsKey(fieldName)) astValue = dictionaryValues[fieldName];
 
-                    var coercedFieldValue = CoerceValue(getInputObjectFields, astValue, fieldType);
+                    var coercedFieldValue = CoerceValue(getInputObjectFields, getScalarSerializer, astValue, fieldType);
 
                     result[fieldName] = coercedFieldValue;
                 }
@@ -66,6 +85,7 @@ namespace Tanka.GraphQL.Execution
 
         private static IDictionary<string, object> CoerceInputValueAst(
             Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
+            Func<string, IValueConverter> getScalarSerializer,
             InputObjectType input,
             GraphQLObjectValue graphQLObjectValue,
             Dictionary<string, object> result)
@@ -78,7 +98,8 @@ namespace Tanka.GraphQL.Execution
                 var fieldType = field.Type;
 
                 var astValue = graphQLObjectValue.Fields.SingleOrDefault(v => v.Name.Value == fieldName);
-                var coercedFieldValue = CoerceValue(getInputObjectFields, astValue?.Value, fieldType);
+                var coercedFieldValue =
+                    CoerceValue(getInputObjectFields, getScalarSerializer, astValue?.Value, fieldType);
 
                 result[fieldName] = coercedFieldValue;
             }
@@ -87,10 +108,12 @@ namespace Tanka.GraphQL.Execution
         }
 
         private static object CoerceNonNullValue(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields, object value,
+            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
+            Func<string, IValueConverter> getScalarSerializer,
+            object value,
             NonNull nonNull)
         {
-            var coercedValue = CoerceValue(getInputObjectFields, value, nonNull.OfType);
+            var coercedValue = CoerceValue(getInputObjectFields, getScalarSerializer, value, nonNull.OfType);
             if (coercedValue == null)
                 throw new ValueCoercionException("Coerced value is null",
                     value,
@@ -107,17 +130,23 @@ namespace Tanka.GraphQL.Execution
             return enumType1.ParseValue(value);
         }
 
-        private static object CoerceScalarValue(object value, ScalarType scalarType)
+        private static object CoerceScalarValue(
+            Func<string, IValueConverter> getScalarSerializer,
+            object value,
+            ScalarType scalarType)
         {
-            if (value is GraphQLScalarValue astValue)
-                return scalarType.ParseLiteral(astValue);
+            var serializer = getScalarSerializer(scalarType.Name);
 
-            return scalarType.ParseValue(value);
+            if (value is GraphQLScalarValue astValue)
+                return serializer.ParseLiteral(astValue);
+
+            return serializer.ParseValue(value);
         }
 
         private static object CoerceListValues(
             Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            IType listWrappedType, 
+            Func<string, IValueConverter> getScalarSerializer,
+            IType listWrappedType,
             object value)
         {
             if (value == null)
@@ -128,7 +157,8 @@ namespace Tanka.GraphQL.Execution
             {
                 foreach (var listValueValue in listValue.Values)
                 {
-                    var coercedValue = CoerceValue(getInputObjectFields, listValueValue, listWrappedType);
+                    var coercedValue = CoerceValue(getInputObjectFields, getScalarSerializer, listValueValue,
+                        listWrappedType);
                     coercedListValues.Add(coercedValue);
                 }
 
@@ -139,14 +169,14 @@ namespace Tanka.GraphQL.Execution
             {
                 foreach (var v in values)
                 {
-                    var coercedValue = CoerceValue(getInputObjectFields, v, listWrappedType);
+                    var coercedValue = CoerceValue(getInputObjectFields, getScalarSerializer, v, listWrappedType);
                     coercedListValues.Add(coercedValue);
                 }
 
                 return coercedListValues.ToArray();
             }
 
-            coercedListValues.Add(CoerceValue(getInputObjectFields, value, listWrappedType));
+            coercedListValues.Add(CoerceValue(getInputObjectFields, getScalarSerializer, value, listWrappedType));
             return coercedListValues.ToArray();
         }
     }

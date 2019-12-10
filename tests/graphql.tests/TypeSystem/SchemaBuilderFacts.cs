@@ -488,7 +488,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
             builder.Scalar(
                 name: name,
                 out var url,
-                converter: new StringConverter(),
+                serializer: new StringConverter(),
                 description: "Description",
                 directives: new DirectiveInstance[]
                 {

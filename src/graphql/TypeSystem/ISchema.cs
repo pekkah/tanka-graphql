@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.TypeSystem
@@ -34,5 +35,7 @@ namespace Tanka.GraphQL.TypeSystem
         Resolver GetResolver(string type, string fieldName);
 
         Subscriber GetSubscriber(string type, string fieldName);
+
+        IValueConverter GetScalarSerializer(string type);
     }
 }

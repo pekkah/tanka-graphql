@@ -18,6 +18,10 @@ namespace Tanka.GraphQL.SchemaBuilding
                 _directives,
                 BuildResolvers(resolvers),
                 BuildSubscribers(subscribers),
+                _scalarSerializers,
+                _queryTypeName,
+                _mutationTypeName,
+                _subscriptionTypeName,
                 _schemaDirectives);
         }
 

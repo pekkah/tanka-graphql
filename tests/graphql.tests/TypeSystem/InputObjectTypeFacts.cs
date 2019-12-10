@@ -52,9 +52,9 @@ namespace Tanka.GraphQL.Tests.TypeSystem
                 ["b"] = 123
             };
 
-            var actual =
-                (Dictionary<string, object>) Values.CoerceValue(
+            var actual = (Dictionary<string, object>) Values.CoerceValue(
                     schema.GetInputFields, 
+                    schema.GetScalarSerializer,
                     literalValue, 
                     input);
 

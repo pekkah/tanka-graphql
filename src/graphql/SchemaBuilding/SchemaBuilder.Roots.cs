@@ -10,14 +10,25 @@ namespace Tanka.GraphQL.SchemaBuilding
             string description = null,
             IEnumerable<InterfaceType> interfaces = null)
         {
-            Object("Query", out query, description, interfaces);
+            Query(_queryTypeName, out query, description, interfaces);
+            return this;
+        }
+
+        public SchemaBuilder Query(
+            string name,
+            out ObjectType query,
+            string description = null,
+            IEnumerable<InterfaceType> interfaces = null)
+        {
+            Object(name, out query, description, interfaces);
+            _queryTypeName = name;
             return this;
         }
 
         public SchemaBuilder GetQuery(out ObjectType query)
         {
-            if (!TryGetType("Query", out query))
-                throw new SchemaBuilderException("Query", "Query root does not exists");
+            if (!TryGetType(_queryTypeName, out query))
+                throw new SchemaBuilderException(_queryTypeName, "Query root does not exists");
 
             return this;
         }
@@ -27,14 +38,25 @@ namespace Tanka.GraphQL.SchemaBuilding
             string description = null,
             IEnumerable<InterfaceType> interfaces = null)
         {
-            Object("Mutation", out mutation, description, interfaces);
+            Mutation(_mutationTypeName, out mutation, description, interfaces);
+            return this;
+        }
+
+        public SchemaBuilder Mutation(
+            string name,
+            out ObjectType mutation,
+            string description = null,
+            IEnumerable<InterfaceType> interfaces = null)
+        {
+            Object(name, out mutation, description, interfaces);
+            _mutationTypeName = name;
             return this;
         }
 
         public SchemaBuilder GetMutation(out ObjectType mutation)
         {
-            if (!TryGetType("Mutation", out mutation))
-                throw new SchemaBuilderException("Mutation", "Mutation root does not exists");
+            if (!TryGetType(_mutationTypeName, out mutation))
+                throw new SchemaBuilderException(_mutationTypeName, "Mutation root does not exists");
 
             return this;
         }
@@ -44,14 +66,25 @@ namespace Tanka.GraphQL.SchemaBuilding
             string description = null,
             IEnumerable<InterfaceType> interfaces = null)
         {
-            Object("Subscription", out subscription, description, interfaces);
+            Subscription(_subscriptionTypeName, out subscription, description, interfaces);
+            return this;
+        }
+
+        public SchemaBuilder Subscription(
+            string name,
+            out ObjectType subscription,
+            string description = null,
+            IEnumerable<InterfaceType> interfaces = null)
+        {
+            Object(name, out subscription, description, interfaces);
+            _subscriptionTypeName = name;
             return this;
         }
 
         public SchemaBuilder GetSubscription(out ObjectType subscription)
         {
-            if (!TryGetType("Subscription", out subscription))
-                throw new SchemaBuilderException("Subscription", "Subscription root does not exists");
+            if (!TryGetType(_subscriptionTypeName, out subscription))
+                throw new SchemaBuilderException(_subscriptionTypeName, "Subscription root does not exists");
 
             return this;
         }

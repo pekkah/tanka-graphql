@@ -16,13 +16,21 @@ namespace Tanka.GraphQL.SchemaBuilding
             new Dictionary<string, INamedType>();
 
         private string _schemaDescription;
+        private readonly Dictionary<string, IValueConverter> _scalarSerializers = new Dictionary<string, IValueConverter>();
+
+        private string _queryTypeName = "Query";
+        private string _mutationTypeName = "Mutation";
+        private string _subscriptionTypeName = "Subscription";
 
         public SchemaBuilder()
         {
             _connections = new ConnectionBuilder(this);
 
-            foreach (var scalarType in ScalarType.Standard)
-                Include(scalarType);
+            foreach (var scalar in ScalarType.Standard)
+            {
+                Include(scalar.Type);
+                ScalarSerializer(scalar.Type.Name, scalar.Serializer);
+            }
 
             Include(TypeSystem.DirectiveType.Include);
             Include(TypeSystem.DirectiveType.Skip);
@@ -128,12 +136,33 @@ namespace Tanka.GraphQL.SchemaBuilding
         public SchemaBuilder Scalar(
             string name,
             out ScalarType scalarType,
-            IValueConverter converter,
+            IValueConverter serializer,
             string description = null,
             IEnumerable<DirectiveInstance> directives = null)
         {
-            scalarType = new ScalarType(name, converter, description, directives);
+            scalarType = new ScalarType(name, description, directives);
             Include(scalarType);
+            ScalarSerializer(name, serializer);
+            return this;
+        }
+
+        public SchemaBuilder Scalar(
+            string name,
+            out ScalarType scalarType,
+            string description = null,
+            IEnumerable<DirectiveInstance> directives = null)
+        {
+            scalarType = new ScalarType(name, description, directives);
+            Include(scalarType);
+
+            return this;
+        }
+
+        public SchemaBuilder ScalarSerializer(
+            string name,
+            IValueConverter serializer)
+        {
+            _scalarSerializers.Add(name, serializer);
             return this;
         }
 
