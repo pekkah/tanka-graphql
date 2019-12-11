@@ -10,7 +10,7 @@ var sln = Argument<string>("sln", "./tanka-graphql.sln");
 var fullBenchmarks = Argument<bool>("fullBenchmarks", false);
 
 var netstandard20 = "netstandard2.0";
-var netcoreapp21 = "netcoreapp3.0";
+var netcoreapp21 = "netcoreapp3.1";
 var projectFiles = GetFiles("./src/**/*.csproj")
 	.Select(f => f.FullPath);
 
