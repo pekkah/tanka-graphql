@@ -76,7 +76,8 @@ stages:
 - stage: Publish
   jobs:
   - job: Publish
-    pool: ubuntu-latest
+    pool: 
+      vmImage: ubuntu-latest
     steps:
     - download: current
       artifact: artifacts
