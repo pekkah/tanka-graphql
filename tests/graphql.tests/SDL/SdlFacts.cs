@@ -275,8 +275,8 @@ namespace Tanka.GraphQL.Tests.SDL
             builder.TryGetType<ScalarType>("JediPowerLevel", out var jediPowerLevel);
             builder.TryGetType<ScalarType>("JediTrickLevel", out var jediTrickLevel);
 
-            builder.ScalarSerializer("JediPowerLevel", new IntConverter())
-                .ScalarSerializer("JediTrickLevel", new IntConverter());
+            builder.Include("JediPowerLevel", new IntConverter())
+                .Include("JediTrickLevel", new IntConverter());
 
             /* When */
             var schema = builder.Build();

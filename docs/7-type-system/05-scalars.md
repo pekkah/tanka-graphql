@@ -29,7 +29,7 @@ Also standard collection is provided
 
 ### Custom scalars
 
-Create instance of `ScalarType` and provide name and metadata. Serializer
+Create instance of `ScalarType` and provide name and metadata. Value converter
 is also needed when building schema with custom scalar in it.
 
 #### Example:

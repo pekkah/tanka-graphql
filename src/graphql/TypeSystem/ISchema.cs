@@ -36,6 +36,6 @@ namespace Tanka.GraphQL.TypeSystem
 
         Subscriber GetSubscriber(string type, string fieldName);
 
-        IValueConverter GetScalarSerializer(string type);
+        IValueConverter GetValueConverter(string type);
     }
 }

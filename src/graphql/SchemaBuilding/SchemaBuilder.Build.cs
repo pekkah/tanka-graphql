@@ -29,7 +29,7 @@ namespace Tanka.GraphQL.SchemaBuilding
                 _directives,
                 BuildResolvers(resolvers),
                 BuildSubscribers(subscribers),
-                _scalarSerializers,
+                _valueConverters,
                 _queryTypeName,
                 _mutationTypeName,
                 _subscriptionTypeName,
@@ -54,11 +54,11 @@ namespace Tanka.GraphQL.SchemaBuilding
             // validate serializers exists for scalar types
             foreach (var scalarType in GetTypes<ScalarType>())
             {
-                if (!TryGetScalarSerializer(scalarType.Name, out _))
+                if (!TryGetValueConverter(scalarType.Name, out _))
                 {
                     errors.Add(new ValidationError(
-                        "SCHEMA_SCALAR_SERIALIZER_MISSING",
-                        $"Could not find serializer for type '{scalarType.Name}'",
+                        "SCHEMA_VALUE_CONVERTER_MISSING",
+                        $"Could not find value converter for type '{scalarType.Name}'",
                         Enumerable.Empty<ASTNode>()));
                 }
             }

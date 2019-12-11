@@ -935,8 +935,8 @@ namespace Tanka.GraphQL.Validation
 
                 try
                 {
-                    var serializer = context.Schema.GetScalarSerializer(type.Name);
-                    serializer.ParseLiteral((GraphQLScalarValue) node);
+                    var converter = context.Schema.GetValueConverter(type.Name);
+                    converter.ParseLiteral((GraphQLScalarValue) node);
                 }
                 catch (Exception e)
                 {

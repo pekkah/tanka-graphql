@@ -90,7 +90,7 @@ namespace Tanka.GraphQL.Execution
 
                 var coercedValue = Values.CoerceValue(
                     schema.GetInputFields,
-                    schema.GetScalarSerializer,
+                    schema.GetValueConverter,
                     value,
                     argumentType);
 

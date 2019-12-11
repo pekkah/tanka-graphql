@@ -54,7 +54,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
 
             var actual = (Dictionary<string, object>) Values.CoerceValue(
                     schema.GetInputFields, 
-                    schema.GetScalarSerializer,
+                    schema.GetValueConverter,
                     literalValue, 
                     input);
 

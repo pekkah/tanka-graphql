@@ -152,7 +152,7 @@ namespace Tanka.GraphQL.TypeSystem
             return null;
         }
 
-        public IValueConverter GetScalarSerializer(string type)
+        public IValueConverter GetValueConverter(string type)
         {
             if (_scalarSerializers.TryGetValue(type, out var serializer))
                 return serializer;

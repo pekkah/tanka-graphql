@@ -27,17 +27,17 @@ namespace Tanka.GraphQL.SchemaBuilding
 
         public IValueConverter GetScalarSerializer(string name)
         {
-            if (_scalarSerializers.TryGetValue(name, out var serializer))
-                return serializer;
+            if (_valueConverters.TryGetValue(name, out var converter))
+                return converter;
 
             throw new SchemaBuilderException(
                 name,
-                $"Could not get serializer for type '{name}'");
+                $"Could not get value converter for type '{name}'");
         }
 
-        public bool TryGetScalarSerializer(string name, out IValueConverter serializer)
+        public bool TryGetValueConverter(string name, out IValueConverter serializer)
         {
-            return _scalarSerializers.TryGetValue(name, out serializer);
+            return _valueConverters.TryGetValue(name, out serializer);
         }
     }
 }

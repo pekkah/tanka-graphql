@@ -16,7 +16,7 @@ namespace Tanka.GraphQL.SchemaBuilding
             new Dictionary<string, INamedType>();
 
         private string _schemaDescription;
-        private readonly Dictionary<string, IValueConverter> _scalarSerializers = new Dictionary<string, IValueConverter>();
+        private readonly Dictionary<string, IValueConverter> _valueConverters = new Dictionary<string, IValueConverter>();
 
         private string _queryTypeName = "Query";
         private string _mutationTypeName = "Mutation";
@@ -29,7 +29,7 @@ namespace Tanka.GraphQL.SchemaBuilding
             foreach (var scalar in ScalarType.Standard)
             {
                 Include(scalar.Type);
-                ScalarSerializer(scalar.Type.Name, scalar.Serializer);
+                Include(scalar.Type.Name, scalar.Converter);
             }
 
             Include(TypeSystem.DirectiveType.Include);
@@ -136,13 +136,13 @@ namespace Tanka.GraphQL.SchemaBuilding
         public SchemaBuilder Scalar(
             string name,
             out ScalarType scalarType,
-            IValueConverter serializer,
+            IValueConverter converter,
             string description = null,
             IEnumerable<DirectiveInstance> directives = null)
         {
             scalarType = new ScalarType(name, description, directives);
             Include(scalarType);
-            ScalarSerializer(name, serializer);
+            Include(name, converter);
             return this;
         }
 
@@ -158,11 +158,11 @@ namespace Tanka.GraphQL.SchemaBuilding
             return this;
         }
 
-        public SchemaBuilder ScalarSerializer(
+        public SchemaBuilder Include(
             string name,
-            IValueConverter serializer)
+            IValueConverter converter)
         {
-            _scalarSerializers.Add(name, serializer);
+            _valueConverters.Add(name, converter);
             return this;
         }
 

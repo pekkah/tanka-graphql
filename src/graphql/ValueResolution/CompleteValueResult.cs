@@ -79,8 +79,8 @@ namespace Tanka.GraphQL.ValueResolution
 
         private ValueTask<object> CompleteScalarType(object value, ScalarType scalarType, IResolverContext context)
         {
-            var serializer = context.ExecutionContext.Schema.GetScalarSerializer(scalarType.Name);
-            return new ValueTask<object>(serializer.Serialize(value));
+            var converter = context.ExecutionContext.Schema.GetValueConverter(scalarType.Name);
+            return new ValueTask<object>(converter.Serialize(value));
         }
 
         private async ValueTask<object> CompleteUnionValueAsync(

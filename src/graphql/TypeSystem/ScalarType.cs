@@ -40,8 +40,8 @@ namespace Tanka.GraphQL.TypeSystem
         public static NonNull NonNullInt = new NonNull(Int);
         public static NonNull NonNullString = new NonNull(String);
 
-        public static IEnumerable<(ScalarType Type, IValueConverter Serializer)> Standard =
-            new List<(ScalarType Type, IValueConverter Serializer)>()
+        public static IEnumerable<(ScalarType Type, IValueConverter Converter)> Standard =
+            new List<(ScalarType Type, IValueConverter Converter)>()
             {
                 (String, new StringConverter()),
                 (Int, new IntConverter()),
