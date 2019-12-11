@@ -76,11 +76,12 @@ stages:
 - stage: Publish
   jobs:
   - job: Publish
+    pool: ubuntu-latest
     steps:
     - download: current
       artifact: artifacts
     - script: | 
-        dir $(Pipeline.Workspace)
+        ls $(Pipeline.Workspace)/artifacts
 
     - task: NuGetToolInstaller@1
       displayName: 'Use NuGet '
@@ -107,6 +108,6 @@ stages:
       displayName: 'npm publish'
       inputs:
         command: publish
-        workingDir: '$(System.DefaultWorkingDirectory)/build/packages/package'
+        workingDir: '$(Pipeline.Workspace)/artifacts/packages/package'
         verbose: false
         publishEndpoint: NPM
