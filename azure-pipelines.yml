@@ -51,6 +51,7 @@ stages:
         arguments: 'build.cake -target=Benchmarks'
 
     - task: CmdLine@1
+      enabled: false
       displayName: Docs
       inputs:
         filename: 'dotnet-tools\dotnet-cake.exe'
@@ -78,8 +79,8 @@ stages:
     steps:
     - download: current
       artifact: artifacts
-    - bash: | 
-        ls $(Pipeline.Workspace)
+    - script: | 
+        dir $(Pipeline.Workspace)
 
     - task: NuGetToolInstaller@1
       displayName: 'Use NuGet '
