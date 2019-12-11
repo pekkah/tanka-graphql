@@ -51,6 +51,8 @@ Task("Pack")
       Information($"Pack to: {artifactsDir}");
       var buildSettings = new DotNetCoreMSBuildSettings();
       buildSettings.SetVersion(version);
+      buildSettings.WithProperty("IncludeSymbols", "true");
+      buildSettings.WithProperty("SymbolPackageFormat", "snupkg");
       var settings = new DotNetCorePackSettings
       {
           Configuration = configuration,
