@@ -64,6 +64,7 @@ stages:
         mergeTestResults: false
 
     - task: PublishBuildArtifacts@1
+      enabled: false
       inputs:
         pathtoPublish: 'BenchmarkDotNet.Artifacts' 
         artifactName: 'benchmarks' 
