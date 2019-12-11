@@ -76,6 +76,8 @@ stages:
     steps:
     - download: current
       artifact: artifacts
+    - script: | 
+        dir $(Pipeline.Workspace)/artifacts
 
     - task: NuGetToolInstaller@1
       displayName: 'Use NuGet '
