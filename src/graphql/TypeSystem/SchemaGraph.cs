@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.TypeSystem
@@ -13,6 +14,7 @@ namespace Tanka.GraphQL.TypeSystem
         private readonly IReadOnlyDictionary<string, Dictionary<string, IField>> _fields;
         private readonly IReadOnlyDictionary<string, Dictionary<string, InputObjectField>> _inputFields;
         private readonly IReadOnlyDictionary<string, INamedType> _types;
+        private readonly IReadOnlyDictionary<string, IValueConverter> _scalarSerializers;
         private readonly DirectiveList _directives;
 
         public SchemaGraph(
@@ -22,6 +24,10 @@ namespace Tanka.GraphQL.TypeSystem
             IReadOnlyDictionary<string, DirectiveType> directiveTypes,
             IReadOnlyDictionary<string, Dictionary<string, Resolver>> resolvers,
             IReadOnlyDictionary<string, Dictionary<string, Subscriber>> subscribers,
+            IReadOnlyDictionary<string, IValueConverter> scalarSerializers,
+            string queryTypeName = "Query",
+            string mutationTypeName = "Mutation",
+            string subscriptionTypeName = "Subscription",
             IEnumerable<DirectiveInstance> directives = null)
         {
             _types = types;
@@ -30,12 +36,15 @@ namespace Tanka.GraphQL.TypeSystem
             _directiveTypes = directiveTypes;
             _resolvers = resolvers;
             _subscribers = subscribers;
-            Query = GetNamedType<ObjectType>("Query") ?? throw new ArgumentNullException(
+            _scalarSerializers = scalarSerializers;
+            _directives = new DirectiveList(directives);
+
+            Query = GetNamedType<ObjectType>(queryTypeName) ?? throw new ArgumentNullException(
                         nameof(types),
                         $"Could not find root type 'Query' from given types");
-            Mutation = GetNamedType<ObjectType>("Mutation");
-            Subscription = GetNamedType<ObjectType>("Subscription");
-            _directives = new DirectiveList(directives);
+
+            Mutation = GetNamedType<ObjectType>(mutationTypeName);
+            Subscription = GetNamedType<ObjectType>(subscriptionTypeName);
         }
 
         public ObjectType Subscription { get; }
@@ -139,6 +148,14 @@ namespace Tanka.GraphQL.TypeSystem
             if (_subscribers.TryGetValue(type, out var fields))
                 if (fields.TryGetValue(fieldName, out var field))
                     return field;
+
+            return null;
+        }
+
+        public IValueConverter GetValueConverter(string type)
+        {
+            if (_scalarSerializers.TryGetValue(type, out var serializer))
+                return serializer;
 
             return null;
         }

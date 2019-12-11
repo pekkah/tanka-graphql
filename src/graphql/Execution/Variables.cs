@@ -47,6 +47,7 @@ namespace Tanka.GraphQL.Execution
                     else
                         coercedValues[variableName] = Values.CoerceValue(
                             schema.GetInputFields,
+                            schema.GetValueConverter,
                             value,
                             variableType);
                 }

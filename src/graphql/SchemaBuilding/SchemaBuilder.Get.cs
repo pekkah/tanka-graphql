@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using DirectiveType = Tanka.GraphQL.TypeSystem.DirectiveType;
 using INamedType = Tanka.GraphQL.TypeSystem.INamedType;
 
@@ -22,6 +23,21 @@ namespace Tanka.GraphQL.SchemaBuilding
             where T : INamedType
         {
             return _types.TryGetValue(name, out namedType);
+        }
+
+        public IValueConverter GetScalarSerializer(string name)
+        {
+            if (_valueConverters.TryGetValue(name, out var converter))
+                return converter;
+
+            throw new SchemaBuilderException(
+                name,
+                $"Could not get value converter for type '{name}'");
+        }
+
+        public bool TryGetValueConverter(string name, out IValueConverter serializer)
+        {
+            return _valueConverters.TryGetValue(name, out serializer);
         }
     }
 }

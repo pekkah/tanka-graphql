@@ -1,11 +1,14 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GraphQLParser.AST;
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
 
 namespace Tanka.GraphQL.Tutorials.GettingStarted
@@ -247,6 +250,73 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             // Execute the resolver. This is normally handled by the executor.
             var nameValue = await nameResolver(null);
             Assert.Equal("TestTest", nameValue.Value);
+        }
+
+        [Fact]
+        public async Task Part6_Custom_Scalar()
+        {
+            // Create builder and load sdl
+            var builder = new SchemaBuilder()
+                .Sdl(@"
+
+                # Custom scalar defined in the SDL
+                scalar Uri
+
+                type Query {
+                    url: Uri!
+                }
+                ");
+
+            // Get query type
+            builder.GetQuery(out var query);
+
+            // Build schema by binding resolvers from ObjectTypeMap
+            var schema = SchemaTools.MakeExecutableSchema(
+                builder,
+                new ObjectTypeMap
+                {
+                    {
+                        query.Name, new FieldResolversMap
+                        {
+                            {
+                                "url", context => ResolveSync.As(new Uri("https://localhost/"))
+                            }
+                        }
+                    }
+                },
+                converters: new Dictionary<string, IValueConverter>()
+                {
+                    // this will add value converter for Uri scalar type
+                    ["Uri"] = new InlineConverter(
+                        serialize: value =>
+                        {
+                            var uri = (Uri) value;
+                            return uri.ToString();
+                        },
+                        parseValue: value => new Uri(value.ToString()),
+                        parseLiteral: value =>
+                        {
+                            if (value.Kind == ASTNodeKind.StringValue)
+                            {
+                                return new Uri(value.Value);
+                            }
+
+                            throw new ArgumentOutOfRangeException(
+                                nameof(value),
+                                $"Cannot coerce Uri from value kind: '{value.Kind}'");
+                        })
+                });
+
+
+            // execute query
+            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+            {
+                Schema = schema,
+                Document = Parser.ParseDocument(@"{ url }")
+            });
+
+            var url = result.Data["url"];
+            Assert.Equal("https://localhost/", url.ToString());
         }
     }
 }

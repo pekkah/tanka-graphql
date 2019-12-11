@@ -1,15 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GraphQLParser.AST;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.SchemaBuilding
 {
     public partial class SchemaBuilder
     {
-        public ISchema Build()
+        public ISchema Build(bool validate = true)
         {
+            if (validate)
+            {
+                var validationResult = Validate();
+                if (!validationResult.IsValid)
+                {
+                    throw new ValidationException(validationResult);
+                }
+            }
+
             var (fields, inputFields, resolvers, subscribers) = _connections.Build();
             return new SchemaGraph(
                 _types,
@@ -18,13 +29,53 @@ namespace Tanka.GraphQL.SchemaBuilding
                 _directives,
                 BuildResolvers(resolvers),
                 BuildSubscribers(subscribers),
+                _valueConverters,
+                _queryTypeName,
+                _mutationTypeName,
+                _subscriptionTypeName,
                 _schemaDirectives);
         }
 
-        public (ISchema Schema, object ValidationResult) BuildAndValidate()
+        public (ISchema Schema, ValidationResult ValidationResult) BuildAndValidate()
         {
+            var validationResult = Validate();
+
+            if (!validationResult.IsValid)
+                return (null, validationResult);
+
             var schema = Build();
-            return (schema, new NotImplementedException("todo"));
+            return (schema, new ValidationResult());
+        }
+
+        private ValidationResult Validate()
+        {
+            var errors = new List<ValidationError>();
+
+            // validate serializers exists for scalar types
+            foreach (var scalarType in GetTypes<ScalarType>())
+            {
+                if (!TryGetValueConverter(scalarType.Name, out _))
+                {
+                    errors.Add(new ValidationError(
+                        "SCHEMA_VALUE_CONVERTER_MISSING",
+                        $"Could not find value converter for type '{scalarType.Name}'",
+                        Enumerable.Empty<ASTNode>()));
+                }
+            }
+
+            // validate query root
+            if (!TryGetQuery(out _))
+            {
+                errors.Add(new ValidationError(
+                    "SCHEMA_QUERY_ROOT_MISSING",
+                    $"Could not find Query root",
+                    Enumerable.Empty<ASTNode>()));
+            }
+
+            return new ValidationResult()
+            {
+                Errors = errors
+            };
         }
 
         private IReadOnlyDictionary<string, Dictionary<string, Subscriber>> BuildSubscribers(

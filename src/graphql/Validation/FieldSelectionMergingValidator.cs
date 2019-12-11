@@ -520,7 +520,9 @@ namespace Tanka.GraphQL.Validation
 
             if (type2 is NonNull) return true;
 
-            if (type1 is IValueConverter || type2 is IValueConverter) return !Equals(type1, type2);
+            if (type1 is ScalarType || type2 is ScalarType) return !Equals(type1, type2);
+
+            if (type1 is EnumType || type2 is EnumType) return !Equals(type1, type2);
 
             return false;
         }

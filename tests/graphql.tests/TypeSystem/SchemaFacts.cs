@@ -186,10 +186,14 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         {
             /* Given */
             /* When */
-            var scalars = Schema.QueryTypes<ScalarType>();
+            var scalars = Schema.QueryTypes<ScalarType>()
+                .ToList();
 
             /* Then */
-            Assert.Equal(ScalarType.Standard, scalars);
+            foreach (var scalar in ScalarType.Standard)
+            {
+                Assert.Contains(scalar.Type, scalars);
+            }
         }
     }
 }

@@ -307,6 +307,7 @@ namespace Tanka.GraphQL.Server.Links.Tests.Introspection
         {
             /* Given */
             var types = ScalarType.Standard
+                .Select(s => s.Type)
                 .Select(scalar => new __Type
                 {
                     Kind = __TypeKind.SCALAR,
@@ -330,7 +331,8 @@ namespace Tanka.GraphQL.Server.Links.Tests.Introspection
             reader.Read();
 
             /* Then */
-            foreach (var scalarType in ScalarType.Standard)
+            foreach (var scalarType in ScalarType.Standard
+                .Select(s => s.Type))
                 Assert.True(builder.TryGetType<ScalarType>(scalarType.Name, out _));
         }
 

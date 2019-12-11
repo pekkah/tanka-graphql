@@ -1,5 +1,4 @@
 using System.Linq;
-using GraphQLParser.AST;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.TypeSystem;
@@ -11,17 +10,44 @@ namespace Tanka.GraphQL.Tests.SDL
     public class SdlFacts
     {
         [Fact]
-        public void Parse_directives_on_schema()
+        public void Parse_custom_scalar()
         {
             /* Given */
-            var sdl = @"
-                directive @map(from: String!, to: String!) on SCHEMA
+            var idl = @"
+                scalar Url
 
                 type Query {
                 }
+                schema {
+                    query: Query
+                }
+                ";
 
+            var builder = new SchemaBuilder()
+                .Sdl(idl);
+
+
+            /* When */
+            builder.TryGetType<ScalarType>("Url", out var actual);
+
+            /* Then */
+            Assert.Equal("Url", actual.Name);
+        }
+
+        [Fact]
+        public void Parse_directives_on_input_object()
+        {
+            /* Given */
+            var sdl = @"
+                directive @map(from: String!, to: String!) on INPUT_OBJECT
+
+                input Input @map(from: ""from"", to: ""to"") {
+                }
+
+                type Query {
+                }
                 
-                schema @map(from: ""from"", to: ""to"") {
+                schema {
                     query: Query
                 }
                 ";
@@ -32,7 +58,9 @@ namespace Tanka.GraphQL.Tests.SDL
 
 
             /* When */
-            var directive = schema.GetDirective("map");
+            var directive = schema
+                .GetNamedType<InputObjectType>("Input")
+                .GetDirective("map");
 
             /* Then */
             Assert.NotNull(directive);
@@ -68,19 +96,17 @@ namespace Tanka.GraphQL.Tests.SDL
         }
 
         [Fact]
-        public void Parse_directives_on_input_object()
+        public void Parse_directives_on_schema()
         {
             /* Given */
             var sdl = @"
-                directive @map(from: String!, to: String!) on INPUT_OBJECT
-
-                input Input @map(from: ""from"", to: ""to"") {
-                }
+                directive @map(from: String!, to: String!) on SCHEMA
 
                 type Query {
                 }
+
                 
-                schema {
+                schema @map(from: ""from"", to: ""to"") {
                     query: Query
                 }
                 ";
@@ -91,40 +117,10 @@ namespace Tanka.GraphQL.Tests.SDL
 
 
             /* When */
-            var directive = schema
-                .GetNamedType<InputObjectType>("Input")
-                .GetDirective("map");
+            var directive = schema.GetDirective("map");
 
             /* Then */
             Assert.NotNull(directive);
-        }
-
-
-        [Fact]
-        public void Parse_custom_scalar()
-        {
-            /* Given */
-            var idl = @"
-                scalar Url
-
-                type Query {
-                }
-                schema {
-                    query: Query
-                }
-                ";
-            var urlScalar = new ScalarType("Url", new StringConverter());
-            var document = Parser.ParseDocument(idl);
-            var reader = new SdlReader(document, new SchemaBuilder()
-                .Include(urlScalar));
-
-
-            /* When */
-            var actual = reader.Read().Build().GetNamedType<ScalarType>("Url");
-
-            /* Then */
-            Assert.Equal("Url", actual.Name);
-            Assert.Equal(urlScalar, actual);
         }
 
         [Fact]
@@ -273,16 +269,17 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var jediPowerLevel = new ScalarType("JediPowerLevel", new IntConverter());
-            var jediTrickLevel = new ScalarType("JediTrickLevel", new DoubleConverter());
+            var builder = new SchemaBuilder()
+                .Sdl(idl);
 
-            var document = Parser.ParseDocument(idl);
-            var reader = new SdlReader(document, new SchemaBuilder()
-                .Include(jediPowerLevel)
-                .Include(jediTrickLevel));
+            builder.TryGetType<ScalarType>("JediPowerLevel", out var jediPowerLevel);
+            builder.TryGetType<ScalarType>("JediTrickLevel", out var jediTrickLevel);
+
+            builder.Include("JediPowerLevel", new IntConverter())
+                .Include("JediTrickLevel", new IntConverter());
 
             /* When */
-            var schema = reader.Read().Build();
+            var schema = builder.Build();
             var actual = schema.QueryTypes<INamedType>();
 
             /* Then */

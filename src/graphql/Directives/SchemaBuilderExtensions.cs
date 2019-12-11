@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.Directives
     {
         public static SchemaBuilder ApplyDirectives(
             this SchemaBuilder builder,
-            Dictionary<string, CreateDirectiveVisitor> directiveFactories)
+            IReadOnlyDictionary<string, CreateDirectiveVisitor> directiveFactories)
         {
             if (directiveFactories == null) 
                 throw new ArgumentNullException(nameof(directiveFactories));

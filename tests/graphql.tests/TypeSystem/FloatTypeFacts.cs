@@ -1,16 +1,17 @@
 ﻿using GraphQLParser.AST;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.TypeSystem
 {
     public class FloatTypeFacts
     {
-        private readonly ScalarType _sut;
+        private readonly IValueConverter _sut;
 
         public FloatTypeFacts()
         {
-            _sut = ScalarType.Float;
+            _sut = new DoubleConverter();
         }
 
         [Theory]

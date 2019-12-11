@@ -1,14 +1,15 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
+using Tanka.GraphQL.Validation;
+using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
 // ReSharper disable ArgumentsStyleOther
@@ -21,6 +22,23 @@ namespace Tanka.GraphQL.Tests.TypeSystem
     public class SchemaBuilderFacts
     {
         [Fact]
+        public void Build()
+        {
+            /* Given */
+            var builder = new SchemaBuilder()
+                // query is required to build schema
+                .Query(out _);
+
+            /* When */
+            var schema = builder.Build();
+
+            /* Then */
+            Assert.IsAssignableFrom<ISchema>(schema);
+            Assert.IsType<SchemaGraph>(schema);
+            Assert.NotNull(schema.Query);
+        }
+
+        [Fact]
         public void Build_and_validate_schema()
         {
             /* Given */
@@ -32,10 +50,10 @@ namespace Tanka.GraphQL.Tests.TypeSystem
             var (schema, validationResult) = builder.BuildAndValidate();
 
             /* Then */
+            Assert.True(validationResult.IsValid);
             Assert.IsAssignableFrom<ISchema>(schema);
             Assert.IsType<SchemaGraph>(schema);
             Assert.NotNull(schema.Query);
-            Assert.IsType<NotImplementedException>(validationResult);
         }
 
         [Fact]
@@ -148,6 +166,53 @@ namespace Tanka.GraphQL.Tests.TypeSystem
             /* Then */
             Assert.Equal(name, enum1.Name);
             Assert.True(builder.TryGetType<EnumType>(enum1.Name, out _));
+        }
+
+        [Fact]
+        public async Task Create_Field_Resolver()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out var query)
+                .Connections(connections =>
+                {
+                    connections.Field(query, "field1", ScalarType.String,
+                        "test field",
+                        resolve => resolve.Run(context => new ValueTask<IResolverResult>(Resolve.As(42))));
+                });
+
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            var result = await sut.GetResolver(query.Name, "field1")(null);
+            Assert.Equal(42, result.Value);
+        }
+
+        [Fact]
+        public async Task Create_Field_Subscriber()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            builder.Query(out var query)
+                .Connections(connections =>
+                {
+                    connections.Field(query, "field1", ScalarType.String,
+                        "test field",
+                        resolve => resolve.Run(context =>
+                            ResolveSync.As(42)),
+                        subscribe => subscribe.Run((context, unsubscribe) =>
+                            ResolveSync.Subscribe(new EventChannel<object>(), unsubscribe)));
+                });
+
+
+            /* When */
+            var sut = builder.Build();
+
+            /* Then */
+            var result = await sut.GetSubscriber(query.Name, "field1")(null, CancellationToken.None);
+            Assert.NotNull(result.Reader);
         }
 
         [Fact]
@@ -431,53 +496,6 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         }
 
         [Fact]
-        public async Task Create_Field_Resolver()
-        {
-            /* Given */
-            var builder = new SchemaBuilder();
-            builder.Query(out var query)
-                .Connections(connections =>
-                {
-                    connections.Field(query, "field1", ScalarType.String,
-                        "test field",
-                        resolve => resolve.Run(context => new ValueTask<IResolverResult>(Resolve.As(42))));
-                });
-
-
-            /* When */
-            var sut = builder.Build();
-
-            /* Then */
-            var result = await sut.GetResolver(query.Name, "field1")(null);
-            Assert.Equal(42, result.Value);
-        }
-
-        [Fact]
-        public async Task Create_Field_Subscriber()
-        {
-            /* Given */
-            var builder = new SchemaBuilder();
-            builder.Query(out var query)
-                .Connections(connections =>
-                {
-                    connections.Field(query, "field1", ScalarType.String,
-                        "test field",
-                        resolve => resolve.Run(context => 
-                            ResolveSync.As(42)),
-                        subscribe => subscribe.Run((context, unsubscribe) => 
-                            ResolveSync.Subscribe(new EventChannel<object>(), unsubscribe)));
-                });
-
-
-            /* When */
-            var sut = builder.Build();
-
-            /* Then */
-            var result = await sut.GetSubscriber(query.Name, "field1")(null, CancellationToken.None);
-            Assert.NotNull(result.Reader);
-        }
-
-        [Fact]
         public void Create_Scalar()
         {
             /* Given */
@@ -489,6 +507,28 @@ namespace Tanka.GraphQL.Tests.TypeSystem
                 name: name,
                 out var url,
                 converter: new StringConverter(),
+                description: "Description",
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, url.Name);
+            Assert.True(builder.TryGetType<ScalarType>(url.Name, out _));
+        }
+
+        [Fact]
+        public void Create_Scalar_without_converter()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = "Url";
+
+            /* When */
+            builder.Scalar(
+                name: name,
+                out var url,
                 description: "Description",
                 directives: new DirectiveInstance[]
                 {
@@ -546,17 +586,22 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         public async Task Make_executable_schema()
         {
             /* Given */
-            var schema1 = new SchemaBuilder()
-                .Query(out var query1)
-                .Connections(connect =>
-                    connect.Field(query1, "field1", ScalarType.Int)
-                )
-                .Build();
+            var builder = new SchemaBuilder()
+                .Sdl(@"
+                    type Query {
+                        field1: Int!
+                    }
+
+                    schema {
+                        query: Query
+                    }
+                    "
+                );
 
             var resolvers = new ObjectTypeMap
             {
                 {
-                    query1.Name, new FieldResolversMap
+                    "Query", new FieldResolversMap
                     {
                         {
                             "field1", async context =>
@@ -571,9 +616,11 @@ namespace Tanka.GraphQL.Tests.TypeSystem
 
             /* When */
             var executableSchema = SchemaTools.MakeExecutableSchema(
-                schema: schema1,
+                builder: builder,
                 resolvers: resolvers,
-                subscribers: null);
+                subscribers: null,
+                converters: null,
+                directives: null);
 
             /* Then */
             var result = await Executor.ExecuteAsync(
@@ -625,11 +672,11 @@ namespace Tanka.GraphQL.Tests.TypeSystem
             var builder = new SchemaBuilder();
 
             /* When */
-            var exception = Assert.Throws<ArgumentNullException>(
+            var exception = Assert.Throws<ValidationException>(
                 () => builder.Build());
 
             /* Then */
-            Assert.Equal("types", exception.ParamName);
+            Assert.Contains(exception.Result.Errors, error => error.Code == "SCHEMA_QUERY_ROOT_MISSING");
         }
 
         [Fact]

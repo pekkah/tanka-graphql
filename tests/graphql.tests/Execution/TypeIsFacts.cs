@@ -48,7 +48,7 @@ namespace Tanka.GraphQL.Tests.Execution
         {
             get
             {
-                foreach (var scalarType in ScalarType.Standard)
+                foreach (var scalarType in ScalarType.Standard.Select(s => s.Type))
                 {
                     yield return new object[] {scalarType};
                 }
@@ -70,7 +70,7 @@ namespace Tanka.GraphQL.Tests.Execution
         {
             get
             {
-                foreach (var scalarType in ScalarType.Standard)
+                foreach (var scalarType in ScalarType.Standard.Select(s => s.Type))
                 {
                     yield return new object[] {scalarType};
                 }

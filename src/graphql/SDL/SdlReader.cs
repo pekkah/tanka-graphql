@@ -68,12 +68,11 @@ namespace Tanka.GraphQL.SDL
 
         protected ScalarType Scalar(GraphQLScalarTypeDefinition definition)
         {
-            if (!_builder.TryGetType<ScalarType>(definition.Name.Value, out var scalar))
-            {
-                throw new ArgumentOutOfRangeException(
-                    $"Could not find scalar '{definition.Name.Value}' from known types. " +
-                    "Scalars require a value converter to function and cannot be created from SDL.");
-            }
+            _builder.Scalar(
+                definition.Name.Value,
+                out var scalar,
+                definition.Comment?.Text,
+                Directives(definition.Directives));
 
             return scalar;
         }
@@ -112,6 +111,7 @@ namespace Tanka.GraphQL.SDL
                     {
                         defaultValue = Values.CoerceValue(
                             connections.GetInputFields,
+                            _builder.GetScalarSerializer,
                             definition.DefaultValue,
                             type);
                     });
@@ -294,6 +294,7 @@ namespace Tanka.GraphQL.SDL
                                     ? defaultValue
                                     : Values.CoerceValue(
                                         connect.GetInputFields,
+                                        _builder.GetScalarSerializer,
                                         value,
                                         type));
                 });
@@ -351,10 +352,11 @@ namespace Tanka.GraphQL.SDL
                     {
                         defaultValue = Values.CoerceValue(
                             connect.GetInputFields,
+                            _builder.GetScalarSerializer,
                             definition.DefaultValue,
                             type);
                     }
-                    catch (ValueCoercionException)
+                    catch (Exception)
                     {
                         defaultValue = null;
                     }

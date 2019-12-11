@@ -58,8 +58,8 @@ namespace Tanka.GraphQL.ValueResolution
 
             return fieldType switch
             {
-                ScalarType scalarType => new ValueTask<object>(scalarType.Serialize(value)),
-                EnumType enumType => new ValueTask<object>(enumType.Serialize(value)),
+                ScalarType scalarType => CompleteScalarType(value, scalarType, context),
+                EnumType enumType => CompleteEnumType(value, enumType, context),
                 ObjectType objectType => CompleteObjectValueAsync(value, objectType, path, context),
 
                 InterfaceType interfaceType => CompleteInterfaceValueAsync(value, interfaceType, path, context),
@@ -69,6 +69,18 @@ namespace Tanka.GraphQL.ValueResolution
                     path,
                     context.Selection)
             };
+        }
+
+        private ValueTask<object> CompleteEnumType(object value, EnumType enumType, IResolverContext context)
+        {
+            //todo: use similar pattern to scalars
+            return new ValueTask<object>(enumType.Serialize(value));
+        }
+
+        private ValueTask<object> CompleteScalarType(object value, ScalarType scalarType, IResolverContext context)
+        {
+            var converter = context.ExecutionContext.Schema.GetValueConverter(scalarType.Name);
+            return new ValueTask<object>(converter.Serialize(value));
         }
 
         private async ValueTask<object> CompleteUnionValueAsync(

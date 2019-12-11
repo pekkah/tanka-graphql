@@ -920,7 +920,7 @@ namespace Tanka.GraphQL.Validation
                     .Tracker
                     .GetNamedType(locationType);
 
-                if (!(maybeScalarType is IValueConverter type))
+                if (!(maybeScalarType is ScalarType type))
                 {
                     context.Error(
                         ValidationErrorCodes.R561ValuesOfCorrectType,
@@ -935,7 +935,8 @@ namespace Tanka.GraphQL.Validation
 
                 try
                 {
-                    type.ParseLiteral((GraphQLScalarValue) node);
+                    var converter = context.Schema.GetValueConverter(type.Name);
+                    converter.ParseLiteral((GraphQLScalarValue) node);
                 }
                 catch (Exception e)
                 {
