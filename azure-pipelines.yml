@@ -44,6 +44,7 @@ stages:
         arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration)'
 
     - task: CmdLine@1
+      enabled: false
       displayName: Benchmarks
       inputs:
         filename: 'dotnet-tools\dotnet-cake.exe'
@@ -76,7 +77,7 @@ stages:
     steps:
     - download: current
       artifact: artifacts
-    - script: | 
+    - bash: | 
         dir $(Pipeline.Workspace)/artifacts
 
     - task: NuGetToolInstaller@1
