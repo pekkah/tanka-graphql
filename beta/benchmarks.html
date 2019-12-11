@@ -98,6 +98,9 @@
         <li class="nav-item">
             <a class="nav-link" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/06-custom-scalars.html">Custom scalars</a>
+        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -236,8 +239,8 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <pre><code class="lang-ini">
-BenchmarkDotNet=v0.12.0, OS=Windows 10.0.17763.805 (1809/October2018Update/Redstone5)
-Intel Xeon CPU E5-2673 v4 2.30GHz, 1 CPU, 2 logical and 2 physical cores
+BenchmarkDotNet=v0.12.0, OS=Windows 10.0.17763.864 (1809/October2018Update/Redstone5)
+Intel Xeon CPU E5-2673 v3 2.40GHz, 1 CPU, 2 logical and 2 physical cores
 .NET Core SDK=3.0.101
   [Host] : .NET Core 3.0.1 (CoreCLR 4.700.19.51502, CoreFX 4.700.19.51609), X64 RyuJIT
 
@@ -251,7 +254,6 @@ Toolchain=InProcessEmitToolchain
 <th style="text-align: right;">Mean</th>
 <th style="text-align: right;">Error</th>
 <th style="text-align: right;">StdDev</th>
-<th style="text-align: right;">Median</th>
 <th style="text-align: right;">Gen 0</th>
 <th style="text-align: right;">Gen 1</th>
 <th style="text-align: right;">Gen 2</th>
@@ -261,100 +263,91 @@ Toolchain=InProcessEmitToolchain
 <tbody>
 <tr>
 <td>Query_with_defaults</td>
-<td style="text-align: right;">28.666 us</td>
-<td style="text-align: right;">0.5932 us</td>
-<td style="text-align: right;">1.7491 us</td>
-<td style="text-align: right;">28.588 us</td>
-<td style="text-align: right;">0.8545</td>
-<td style="text-align: right;">-</td>
+<td style="text-align: right;">27.412 us</td>
+<td style="text-align: right;">0.3051 us</td>
+<td style="text-align: right;">0.2854 us</td>
+<td style="text-align: right;">1.4038</td>
+<td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">21.93 KB</td>
 </tr>
 <tr>
 <td>Query_without_validation</td>
-<td style="text-align: right;">6.306 us</td>
-<td style="text-align: right;">0.1257 us</td>
-<td style="text-align: right;">0.1234 us</td>
-<td style="text-align: right;">6.287 us</td>
-<td style="text-align: right;">0.1602</td>
+<td style="text-align: right;">6.484 us</td>
+<td style="text-align: right;">0.1215 us</td>
+<td style="text-align: right;">0.1248 us</td>
+<td style="text-align: right;">0.2747</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">4.23 KB</td>
 </tr>
 <tr>
 <td>Mutation_with_defaults</td>
-<td style="text-align: right;">27.019 us</td>
-<td style="text-align: right;">0.5528 us</td>
-<td style="text-align: right;">1.6299 us</td>
-<td style="text-align: right;">27.133 us</td>
-<td style="text-align: right;">0.8240</td>
-<td style="text-align: right;">-</td>
+<td style="text-align: right;">26.581 us</td>
+<td style="text-align: right;">0.5198 us</td>
+<td style="text-align: right;">0.5105 us</td>
+<td style="text-align: right;">1.4038</td>
+<td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">21.58 KB</td>
 </tr>
 <tr>
 <td>Mutation_without_validation</td>
-<td style="text-align: right;">5.443 us</td>
-<td style="text-align: right;">0.1069 us</td>
-<td style="text-align: right;">0.1845 us</td>
-<td style="text-align: right;">5.423 us</td>
-<td style="text-align: right;">0.1450</td>
+<td style="text-align: right;">5.942 us</td>
+<td style="text-align: right;">0.0948 us</td>
+<td style="text-align: right;">0.0887 us</td>
+<td style="text-align: right;">0.2441</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">3.77 KB</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults</td>
-<td style="text-align: right;">52.909 us</td>
-<td style="text-align: right;">1.0447 us</td>
-<td style="text-align: right;">0.9772 us</td>
-<td style="text-align: right;">52.894 us</td>
-<td style="text-align: right;">1.0376</td>
-<td style="text-align: right;">-</td>
+<td style="text-align: right;">51.694 us</td>
+<td style="text-align: right;">1.0103 us</td>
+<td style="text-align: right;">1.5122 us</td>
+<td style="text-align: right;">1.7700</td>
+<td style="text-align: right;">0.0610</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">27.59 KB</td>
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
-<td style="text-align: right;">14.063 us</td>
-<td style="text-align: right;">0.2842 us</td>
-<td style="text-align: right;">0.3984 us</td>
-<td style="text-align: right;">13.992 us</td>
-<td style="text-align: right;">0.3510</td>
+<td style="text-align: right;">14.920 us</td>
+<td style="text-align: right;">0.2887 us</td>
+<td style="text-align: right;">0.3952 us</td>
+<td style="text-align: right;">0.5798</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">9.05 KB</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
-<td style="text-align: right;">53.814 us</td>
-<td style="text-align: right;">0.7962 us</td>
-<td style="text-align: right;">0.7447 us</td>
-<td style="text-align: right;">53.794 us</td>
-<td style="text-align: right;">1.0376</td>
+<td style="text-align: right;">52.634 us</td>
+<td style="text-align: right;">0.8897 us</td>
+<td style="text-align: right;">0.8322 us</td>
+<td style="text-align: right;">1.7700</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">27.59 KB</td>
 </tr>
 <tr>
 <td>Validate_with_defaults</td>
-<td style="text-align: right;">13.775 us</td>
-<td style="text-align: right;">0.3108 us</td>
-<td style="text-align: right;">0.9163 us</td>
-<td style="text-align: right;">13.488 us</td>
-<td style="text-align: right;">0.6714</td>
-<td style="text-align: right;">0.0153</td>
+<td style="text-align: right;">14.368 us</td>
+<td style="text-align: right;">0.2692 us</td>
+<td style="text-align: right;">0.2765 us</td>
+<td style="text-align: right;">1.1292</td>
+<td style="text-align: right;">0.0305</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">17.47 KB</td>
 </tr>
 <tr>
 <td>Validate_100times_with_defaults</td>
-<td style="text-align: right;">1,394.261 us</td>
-<td style="text-align: right;">34.0501 us</td>
-<td style="text-align: right;">100.3975 us</td>
-<td style="text-align: right;">1,375.282 us</td>
-<td style="text-align: right;">68.3594</td>
-<td style="text-align: right;">1.9531</td>
+<td style="text-align: right;">1,457.468 us</td>
+<td style="text-align: right;">28.7324 us</td>
+<td style="text-align: right;">49.5619 us</td>
+<td style="text-align: right;">113.2813</td>
+<td style="text-align: right;">3.9063</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">1746.88 KB</td>
 </tr>

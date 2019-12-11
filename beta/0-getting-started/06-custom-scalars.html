@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Query cost limit - tanka-graphql</title>
+    <title>Custom scalars - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -99,7 +99,7 @@
             <a class="nav-link" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="0-getting-started/06-custom-scalars.html">Custom scalars</a>
+            <a class="nav-link active bg-light" href="0-getting-started/06-custom-scalars.html">Custom scalars</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -135,7 +135,7 @@
             <a class="nav-link" href="2-server/1-tracing.html">Tracing</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="2-server/2-query-cost-limit.html">Query cost limit</a>
+            <a class="nav-link" href="2-server/2-query-cost-limit.html">Query cost limit</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -238,39 +238,76 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="query-cost-limit">Query Cost Limit</h2>
-<p>GraphQL has some unique characteristics which open services
-for various types of attacks. Common attack is to overwhelm
-the service with resource heavy queries. Common way to counter
-this type of attack is to limit the query cost based on complexity.</p>
-<h2 id="query-cost-analysis">Query Cost Analysis</h2>
-<p>See the detailed explanation and schema configuration in
-<a href="5-extensions/5-query-cost-analysis.html">Query Cost Analysis</a>.</p>
-<h2 id="usage-with-server">Usage with server</h2>
-<p>Add cost limiting validation rule to options</p>
-<p><pre><code class="language-csharp">
+                <h2 id="custom-scalars">Custom Scalars</h2>
+<p>TGQL supports adding custom scalars with their custom value conversion
+logic.</p>
+<p>Following example adds custom scalar and converter
+<pre><code class="language-csharp">
         [Fact]
-        public void Configure_Rules()
+        public async Task Part6_Custom_Scalar()
         {
-            /* Given */
-            var schema = Substitute.For&lt;ISchema&gt;();
-            var maxCost = CostAnalyzer.MaxCost(100);
+            // Create builder and load sdl
+            var builder = new SchemaBuilder()
+                .Sdl(@&quot;
 
-            /* When */
-            Services.AddTankaGraphQL()
-                .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema))
-                // rules factory function with the default rules as the parameter
-                .ConfigureRules(rules =&gt; rules.Concat(new []
+                # Custom scalar defined in the SDL
+                scalar Uri
+
+                type Query {
+                    url: Uri!
+                }
+                &quot;);
+
+            // Get query type
+            builder.GetQuery(out var query);
+
+            // Build schema by binding resolvers from ObjectTypeMap
+            var schema = SchemaTools.MakeExecutableSchema(
+                builder,
+                new ObjectTypeMap
                 {
-                    // append max query cost validation rule
-                    maxCost
-                }).ToArray());
+                    {
+                        query.Name, new FieldResolversMap
+                        {
+                            {
+                                &quot;url&quot;, context =&gt; ResolveSync.As(new Uri(&quot;https://localhost/&quot;))
+                            }
+                        }
+                    }
+                },
+                converters: new Dictionary&lt;string, IValueConverter&gt;()
+                {
+                    // this will add value converter for Uri scalar type
+                    [&quot;Uri&quot;] = new InlineConverter(
+                        serialize: value =&gt;
+                        {
+                            var uri = (Uri) value;
+                            return uri.ToString();
+                        },
+                        parseValue: value =&gt; new Uri(value.ToString()),
+                        parseLiteral: value =&gt;
+                        {
+                            if (value.Kind == ASTNodeKind.StringValue)
+                            {
+                                return new Uri(value.Value);
+                            }
 
-            /* Then */
-            var provider = Services.BuildServiceProvider();
-            var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
-            var actual = options.ValidationRules;
-            Assert.Contains(actual, rule =&gt; rule == maxCost);
+                            throw new ArgumentOutOfRangeException(
+                                nameof(value),
+                                $&quot;Cannot coerce Uri from value kind: '{value.Kind}'&quot;);
+                        })
+                });
+
+
+            // execute query
+            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+            {
+                Schema = schema,
+                Document = Parser.ParseDocument(@&quot;{ url }&quot;)
+            });
+
+            var url = result.Data[&quot;url&quot;];
+            Assert.Equal(&quot;https://localhost/&quot;, url.ToString());
         }
 </code></pre></p>
                     
