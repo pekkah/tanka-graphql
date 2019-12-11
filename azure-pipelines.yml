@@ -44,14 +44,12 @@ stages:
         arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration)'
 
     - task: CmdLine@1
-      enabled: false
       displayName: Benchmarks
       inputs:
         filename: 'dotnet-tools\dotnet-cake.exe'
         arguments: 'build.cake -target=Benchmarks'
 
     - task: CmdLine@1
-      enabled: false
       displayName: Docs
       inputs:
         filename: 'dotnet-tools\dotnet-cake.exe'
@@ -65,7 +63,6 @@ stages:
         mergeTestResults: false
 
     - task: PublishBuildArtifacts@1
-      enabled: false
       inputs:
         pathtoPublish: 'BenchmarkDotNet.Artifacts' 
         artifactName: 'benchmarks' 
@@ -74,6 +71,7 @@ stages:
       artifact: artifacts
 
 - stage: Publish
+  condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
   jobs:
   - job: Publish
     pool: 
@@ -81,14 +79,11 @@ stages:
     steps:
     - download: current
       artifact: artifacts
-    - script: | 
-        ls $(Pipeline.Workspace)/artifacts
 
     - task: NuGetToolInstaller@1
       displayName: 'Use NuGet '
 
     - task: NuGetCommand@2
-      enabled: false
       displayName: 'NuGet push'
       inputs:
         command: push
@@ -105,7 +100,6 @@ stages:
       continueOnError: true
 
     - task: Npm@1
-      enabled: false
       displayName: 'npm publish'
       inputs:
         command: publish
