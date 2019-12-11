@@ -25,19 +25,19 @@
   "homepage": "https://github.com/pekkah/tanka-graphql",
   "devDependencies": {
     "@types/graphql": "^14.5.0",
-    "@types/jest": "^24.0.18",
+    "@types/jest": "^24.0.23",
     "@types/zen-push": "^0.1.1",
     "jest": "^24.9.0",
-    "prettier": "^1.18.2",
-    "rollup": "^1.21.4",
-    "rollup-plugin-typescript2": "^0.24.3",
-    "ts-jest": "^24.1.0",
-    "tslint": "^5.20.0",
+    "prettier": "^1.19.1",
+    "rollup": "^1.27.10",
+    "rollup-plugin-typescript2": "^0.25.3",
+    "ts-jest": "^24.2.0",
+    "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.6.3"
+    "typescript": "^3.7.3"
   },
   "dependencies": {
-    "@microsoft/signalr": "^3.0.0",
+    "@microsoft/signalr": "^3.1.0",
     "apollo-link": "^1.2.13",
     "graphql": "^14.5.8",
     "zen-push": "^0.2.1"
