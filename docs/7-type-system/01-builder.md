@@ -24,6 +24,8 @@
 
 [{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Scalar}]
 
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Scalar_without_converter}]
+
 [{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_InputObject}]
 
 [{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_DirectiveType}]
@@ -31,8 +33,11 @@
 
 ### Build and validate schema
 
-> NotImplemented: future enhancement
+Normal (will throw ValidationException if schema is not valid)
+[{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Build}]
 
+
+Without throwing validation exception
 [{Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Build_and_validate_schema}]
 
 

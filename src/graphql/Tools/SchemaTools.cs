@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Introspection;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Tools
 {
@@ -13,8 +14,13 @@ namespace Tanka.GraphQL.Tools
             SchemaBuilder builder,
             IResolverMap resolvers,
             ISubscriberMap subscribers = null,
-            Dictionary<string, CreateDirectiveVisitor> directives = null)
+            IReadOnlyDictionary<string, IValueConverter> converters = null,
+            IReadOnlyDictionary<string, CreateDirectiveVisitor> directives = null)
         {
+            // add converters
+            if (converters != null)
+                UseConverters(builder, converters);
+
             // bind resolvers
             builder.UseResolversAndSubscribers(resolvers, subscribers);
 
@@ -39,8 +45,13 @@ namespace Tanka.GraphQL.Tools
             SchemaBuilder builder,
             IResolverMap resolvers,
             ISubscriberMap subscribers = null,
-            Dictionary<string, CreateDirectiveVisitor> directives = null)
+            IReadOnlyDictionary<string, IValueConverter> converters = null,
+            IReadOnlyDictionary<string, CreateDirectiveVisitor> directives = null)
         {
+            // add converters
+            if (converters != null)
+                UseConverters(builder, converters);
+
             builder.UseResolversAndSubscribers(resolvers, subscribers);
 
             if (directives != null)
@@ -52,6 +63,19 @@ namespace Tanka.GraphQL.Tools
             return new SchemaBuilder()
                 .Merge(schema, introspection)
                 .Build();
+        }
+
+        private static void UseConverters(SchemaBuilder builder,
+            IReadOnlyDictionary<string, IValueConverter> converters)
+        {
+            foreach (var converter in converters)
+            {
+                // remove existing converter if exists
+                builder.RemoveConverter(converter.Key);
+
+                // include converter
+                builder.Include(converter.Key, converter.Value);
+            }
         }
     }
 }

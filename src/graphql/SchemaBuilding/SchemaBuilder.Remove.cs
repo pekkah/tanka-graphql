@@ -32,5 +32,13 @@ namespace Tanka.GraphQL.SchemaBuilding
 
             return this;
         }
+
+        public SchemaBuilder RemoveConverter(string name)
+        {
+            if (_valueConverters.ContainsKey(name))
+                _valueConverters.Remove(name);
+
+            return this;
+        }
     }
 }
