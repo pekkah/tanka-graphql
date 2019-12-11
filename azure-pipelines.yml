@@ -79,7 +79,7 @@ stages:
     - download: current
       artifact: artifacts
     - bash: | 
-        dir $(Pipeline.Workspace)/artifacts
+        ls $(Pipeline.Workspace)
 
     - task: NuGetToolInstaller@1
       displayName: 'Use NuGet '
