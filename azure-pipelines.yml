@@ -74,13 +74,13 @@ stages:
       artifact: artifacts
 
 - stage: Publish
-  checkout: none
   condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
   jobs:
   - job: Publish
     pool: 
       vmImage: ubuntu-latest
     steps:
+    - checkout: none
     - download: current
       artifact: artifacts
 
@@ -112,7 +112,6 @@ stages:
         publishEndpoint: NPM
 
 - stage: Docs
-  checkout: gh-pages
   # condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
   dependsOn: Build
   jobs:
@@ -120,6 +119,7 @@ stages:
     pool: 
       vmImage: ubuntu-latest
     steps:
+    - checkout: gh-pages
     - script: |
         ls $(Pipeline.Workspace)
 
