@@ -115,7 +115,8 @@ stages:
   # condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
   dependsOn: Build
   jobs:
-  - job: Update gh-pages
+  - job: ghpages
+    displayName: Update gh-pages
     pool: 
       vmImage: ubuntu-latest
     steps:
