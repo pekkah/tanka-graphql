@@ -1,12 +1,15 @@
-# ASP.NET Core
-# Build and test ASP.NET Core web applications targeting .NET Core.
-# Add steps that run tests, create a NuGet package, deploy, and more:
-# https://docs.microsoft.com/vsts/pipelines/languages/dotnet-core
-
 name: 'graphql'
 
 pool:
   vmImage: 'windows-2019'
+
+resources:
+  repositories:
+  - repository: gh-pages # The name used to reference this repository in the checkout step
+    type: github
+    endpoint: pekkah
+    name: pekkah/tanka-graphql
+    ref: gh-pages
 
 variables:
   buildConfiguration: 'Release'
@@ -71,6 +74,7 @@ stages:
       artifact: artifacts
 
 - stage: Publish
+  checkout: none
   condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
   jobs:
   - job: Publish
@@ -106,3 +110,16 @@ stages:
         workingDir: '$(Pipeline.Workspace)/packages/package'
         verbose: false
         publishEndpoint: NPM
+
+- stage: Docs
+  checkout: gh-pages
+  # condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
+  dependsOn: Build
+  jobs:
+  - job: Update gh-pages
+    pool: 
+      vmImage: ubuntu-latest
+    steps:
+    - script: |
+        ls $(Pipeline.Workspace)
+
