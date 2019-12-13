@@ -122,13 +122,15 @@ stages:
     steps:
     - download: current
       artifact: artifacts
-    - checkout: ghpages
+    # - checkout: self
+    - script: |
+        git switch -c gh-pages
     - script: |
         ls $(Pipeline.Workspace)/artifacts/gh-pages
     - script: |
         ls $(Build.SourcesDirectory)
     - script: |
-        cp -r $(Pipeline.Workspace)/artifacts/gh-pages $(Build.SourcesDirectory)
+        cp -rv $(Pipeline.Workspace)/artifacts/gh-pages/** $(Build.SourcesDirectory)/
     - script: |
         cd $(Build.SourcesDirectory)
         git status
