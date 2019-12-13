@@ -106,11 +106,7 @@ stages:
         workingDir: '$(Pipeline.Workspace)/packages/package'
         verbose: false
         publishEndpoint: NPM
-
-- stage: Docs
-  # condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
-  dependsOn: Build
-  jobs:
+        
   - job: ghpages
     displayName: Update gh-pages
     pool: 
@@ -138,5 +134,6 @@ stages:
         cd $(Build.SourcesDirectory)
         echo "BuildNumber: $(Build.BuildNumber)"
         git commit -m "$(Build.BuildNumber)"
+  
 
 
