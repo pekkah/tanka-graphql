@@ -122,10 +122,8 @@ stages:
       persistCredentials: true
       clean: true
     - script: |
-        echo "email: $(Build.RequestedForEmail)"
-        echo "name: $(Build.RequestedFor)"
-        git config user.email "$(Build.RequestedForEmail)"
-        git config user.name "$(Build.RequestedFor)"
+        git config user.email "$(git.email)"
+        git config user.name "$(git.name)"
         git switch -c gh-pages
       displayName: Use gh-pages
     - script: |
