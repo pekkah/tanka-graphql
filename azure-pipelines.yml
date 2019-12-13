@@ -120,7 +120,10 @@ stages:
     pool: 
       vmImage: ubuntu-latest
     steps:
+    - download: current
+      artifact: artifacts
     - checkout: ghpages
     - script: |
-        ls $(Pipeline.Workspace)
+        ls $(Pipeline.Workspace)/artifacts
+        ls $(Build.SourcesDirectory)
 
