@@ -124,6 +124,12 @@ stages:
       artifact: artifacts
     - checkout: ghpages
     - script: |
-        ls $(Pipeline.Workspace)/artifacts
+        ls $(Pipeline.Workspace)/artifacts/gh-pages
+    - script: |
         ls $(Build.SourcesDirectory)
+    - script: |
+        cp -r $(Pipeline.Workspace)/artifacts/gh-pages $(Build.SourcesDirectory)
+    - script: |
+        cd $(Build.SourcesDirectory)
+        git status
 
