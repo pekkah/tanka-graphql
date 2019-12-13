@@ -124,12 +124,20 @@ stages:
       artifact: artifacts
     - checkout: self
       persistCredentials: true
+      clean: true
     - script: |
         git switch -c gh-pages
+      displayName: Use gh-pages
     - script: |
         cp -rv $(Pipeline.Workspace)/artifacts/gh-pages/** $(Build.SourcesDirectory)/
+      displayName: Update files
     - script: |
         cd $(Build.SourcesDirectory)
         git add --all
         git status
+      displayName: Add changes
+    - script: |
+        cd $(Build.SourcesDirectory)
+        git commit -m "$(Build.BuildNumber)"
+
 
