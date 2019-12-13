@@ -122,7 +122,8 @@ stages:
     steps:
     - download: current
       artifact: artifacts
-    # - checkout: self
+    - checkout: self
+      persistCredentials: true
     - script: |
         git switch -c gh-pages
     - script: |
