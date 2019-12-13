@@ -1,74 +1,140 @@
-# ASP.NET Core
-# Build and test ASP.NET Core web applications targeting .NET Core.
-# Add steps that run tests, create a NuGet package, deploy, and more:
-# https://docs.microsoft.com/vsts/pipelines/languages/dotnet-core
-
 name: 'graphql'
 
 pool:
   vmImage: 'windows-2019'
 
+resources:
+  repositories:
+  - repository: ghpages # The name used to reference this repository in the checkout step
+    type: github
+    endpoint: pekkah
+    name: pekkah/tanka-graphql
+    ref: gh-pages
+
 variables:
   buildConfiguration: 'Release'
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
-steps:
-- task: UseDotNet@2
-  displayName: Use dotnet core SDK
-  inputs:
-    packageType: 'sdk'
-    version: '3.1.x'
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: UseDotNet@2
+      displayName: Use dotnet core SDK
+      inputs:
+        packageType: 'sdk'
+        version: '3.1.x'
 
-- task: DotNetCoreCLI@2
-  displayName: Install cake.tool
-  inputs:
-    command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
-    custom: 'tool'
-    arguments: 'install --tool-path dotnet-tools Cake.Tool'
+    - task: DotNetCoreCLI@2
+      displayName: Restore tools
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'restore'
 
-- task: DotNetCoreCLI@2
-  displayName: Install generate-docs
-  inputs:
-    command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
-    custom: 'tool'
-    arguments: 'install --tool-path dotnet-tools tanka.generate.docs'
+    - task: DotNetCoreCLI@2
+      displayName: Build.cake
+      inputs:
+        command: 'custom'
+        custom: 'cake'
+        arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration)'
 
-- task: CmdLine@1
-  displayName: Build.cake
-  inputs:
-    filename: 'dotnet-tools\dotnet-cake.exe'
-    arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration)'
+    - task: DotNetCoreCLI@2
+      displayName: Benchmarks
+      inputs:
+        command: 'custom'
+        custom: 'cake'
+        arguments: 'build.cake -target=Benchmarks'
 
-- task: CmdLine@1
-  displayName: Benchmarks
-  inputs:
-    filename: 'dotnet-tools\dotnet-cake.exe'
-    arguments: 'build.cake -target=Benchmarks'
+    - task: DotNetCoreCLI@2
+      displayName: Build.cake
+      inputs:
+        command: 'custom'
+        custom: 'cake'
+        arguments: 'build.cake -target=Docs -artifactsDir=$(Build.ArtifactStagingDirectory)'
 
-- task: CmdLine@1
-  displayName: Docs
-  inputs:
-    filename: 'dotnet-tools\dotnet-cake.exe'
-    arguments: 'build.cake -target=Docs -artifactsDir=$(Build.ArtifactStagingDirectory)'
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: VSTest
+        searchFolder: '$(Build.ArtifactStagingDirectory)'
+        testResultsFiles: '**/*.trx' 
+        mergeTestResults: false
 
-- task: PublishTestResults@2
-  inputs:
-    testResultsFormat: VSTest
-    searchFolder: '$(Build.ArtifactStagingDirectory)'
-    testResultsFiles: '**/*.trx' 
-    mergeTestResults: false
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: 'BenchmarkDotNet.Artifacts' 
+        artifactName: 'benchmarks' 
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: 'BenchmarkDotNet.Artifacts' 
-    artifactName: 'benchmarks' 
+    - publish: $(Build.ArtifactStagingDirectory)
+      artifact: artifacts
 
-# Publish Build Artifacts
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
-    artifactName: 'artifacts' 
-    #publishLocation: 'Container' # Options: container, filePath
-    #targetPath: # Required when publishLocation == FilePath
-    #parallel: false # Optional
-    #parallelCount: # Optional
+- stage: Publish
+  condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
+  jobs:
+  - job: Publish
+    pool: 
+      vmImage: ubuntu-latest
+    steps:
+    - checkout: none
+    - download: current
+      artifact: artifacts
+
+    - task: NuGetToolInstaller@1
+      displayName: 'Use NuGet '
+
+    - task: NuGetCommand@2
+      displayName: 'NuGet push'
+      inputs:
+        command: push
+        packagesToPush: '$(Pipeline.Workspace)/artifacts/**/*.nupkg'
+        nuGetFeedType: external
+        publishFeedCredentials: 'NuGet-TankaGraphQL'
+        allowPackageConflicts: true
+    
+    - task: ExtractFiles@1
+      displayName: 'Extract files '
+      inputs:
+        archiveFilePatterns: '$(Pipeline.Workspace)/artifacts/*.tgz'
+        destinationFolder: '$(Pipeline.Workspace)/packages/'
+      continueOnError: true
+
+    - task: Npm@1
+      displayName: 'npm publish'
+      inputs:
+        command: publish
+        workingDir: '$(Pipeline.Workspace)/packages/package'
+        verbose: false
+        publishEndpoint: NPM
+
+  - job: ghpages
+    displayName: Update gh-pages
+    pool: 
+      vmImage: ubuntu-latest
+    steps:
+    - download: current
+      artifact: artifacts
+    - checkout: self
+      persistCredentials: true
+      clean: true
+    - script: |
+        git config user.email "$(git.email)"
+        git config user.name "$(git.name)"
+        git switch -c gh-pages
+      displayName: Use gh-pages
+    - script: |
+        cp -rv $(Pipeline.Workspace)/artifacts/gh-pages/** $(Build.SourcesDirectory)/
+      displayName: Update files
+    - script: |
+        cd $(Build.SourcesDirectory)
+        git add --all
+        git status
+      displayName: Add changes
+    - script: |
+        cd $(Build.SourcesDirectory)
+        echo "BuildNumber: $(Build.BuildNumber)"
+        git commit -m "$(Build.BuildNumber)"
+        git push
+  
+
+

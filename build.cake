@@ -51,6 +51,8 @@ Task("Pack")
       Information($"Pack to: {artifactsDir}");
       var buildSettings = new DotNetCoreMSBuildSettings();
       buildSettings.SetVersion(version);
+      buildSettings.WithProperty("IncludeSymbols", "true");
+      buildSettings.WithProperty("SymbolPackageFormat", "snupkg");
       var settings = new DotNetCorePackSettings
       {
           Configuration = configuration,
@@ -221,11 +223,12 @@ Task("Docs")
     }
 
      var args = ProcessArgumentBuilder.FromString(
-          $"--output=\"{targetFolder}\" "
+          "tanka-docs "
+        + $"--output=\"{targetFolder}\" "
         + $"--basepath=\"{basepath}\"");
 			
       var exitCode = StartProcess(
-			  "dotnet-tanka-docs",
+			  "dotnet",
 			  new ProcessSettings() {
 				  Arguments = args
 			  }
