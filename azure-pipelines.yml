@@ -127,12 +127,9 @@ stages:
     - script: |
         git switch -c gh-pages
     - script: |
-        ls $(Pipeline.Workspace)/artifacts/gh-pages
-    - script: |
-        ls $(Build.SourcesDirectory)
-    - script: |
         cp -rv $(Pipeline.Workspace)/artifacts/gh-pages/** $(Build.SourcesDirectory)/
     - script: |
         cd $(Build.SourcesDirectory)
+        git add --all
         git status
 
