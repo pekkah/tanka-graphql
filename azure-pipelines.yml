@@ -27,35 +27,31 @@ stages:
         version: '3.1.x'
 
     - task: DotNetCoreCLI@2
-      displayName: Install cake.tool
+      displayName: Restore tools
       inputs:
-        command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
+        command: 'custom'
         custom: 'tool'
-        arguments: 'install --tool-path dotnet-tools Cake.Tool'
+        arguments: 'restore'
 
     - task: DotNetCoreCLI@2
-      displayName: Install generate-docs
-      inputs:
-        command: 'custom' # Options: build, push, pack, publish, restore, run, test, custom
-        custom: 'tool'
-        arguments: 'install --tool-path dotnet-tools tanka.generate.docs'
-
-    - task: CmdLine@1
       displayName: Build.cake
       inputs:
-        filename: 'dotnet-tools\dotnet-cake.exe'
+        command: 'custom'
+        custom: 'cake'
         arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration)'
 
-    - task: CmdLine@1
+    - task: DotNetCoreCLI@2
       displayName: Benchmarks
       inputs:
-        filename: 'dotnet-tools\dotnet-cake.exe'
+        command: 'custom'
+        custom: 'cake'
         arguments: 'build.cake -target=Benchmarks'
 
-    - task: CmdLine@1
-      displayName: Docs
+    - task: DotNetCoreCLI@2
+      displayName: Build.cake
       inputs:
-        filename: 'dotnet-tools\dotnet-cake.exe'
+        command: 'custom'
+        custom: 'cake'
         arguments: 'build.cake -target=Docs -artifactsDir=$(Build.ArtifactStagingDirectory)'
 
     - task: PublishTestResults@2
