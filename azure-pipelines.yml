@@ -106,7 +106,7 @@ stages:
         workingDir: '$(Pipeline.Workspace)/packages/package'
         verbose: false
         publishEndpoint: NPM
-        
+
   - job: ghpages
     displayName: Update gh-pages
     pool: 
@@ -134,6 +134,7 @@ stages:
         cd $(Build.SourcesDirectory)
         echo "BuildNumber: $(Build.BuildNumber)"
         git commit -m "$(Build.BuildNumber)"
+        git push
   
 
 
