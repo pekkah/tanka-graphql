@@ -100,12 +100,22 @@ stages:
       continueOnError: true
 
     - task: Npm@1
-      displayName: 'npm publish'
+      displayName: publish beta
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
       inputs:
-        command: publish
+        command: 'custom'
         workingDir: '$(Pipeline.Workspace)/packages/package'
-        verbose: false
-        publishEndpoint: NPM
+        customCommand: 'publish --tag beta'
+        customEndpoint: 'NPM'
+
+    - task: Npm@1
+      displayName: 'npm publish latest'
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags')
+      inputs:
+        command: 'custom'
+        workingDir: '$(Pipeline.Workspace)/packages/package'
+        customCommand: 'publish'
+        customEndpoint: 'NPM'
 
   - job: ghpages
     displayName: Update gh-pages
