@@ -30,9 +30,9 @@ namespace Tanka.GraphQL.SchemaBuilding
                 BuildResolvers(resolvers),
                 BuildSubscribers(subscribers),
                 _valueConverters,
-                _queryTypeName,
-                _mutationTypeName,
-                _subscriptionTypeName,
+                QueryTypeName,
+                MutationTypeName,
+                SubscriptionTypeName,
                 _schemaDirectives);
         }
 

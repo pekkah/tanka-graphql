@@ -111,7 +111,7 @@ namespace Tanka.GraphQL.SDL
                     {
                         defaultValue = Values.CoerceValue(
                             connections.GetInputFields,
-                            _builder.GetScalarSerializer,
+                            _builder.GetValueConverter,
                             definition.DefaultValue,
                             type);
                     });
@@ -294,7 +294,7 @@ namespace Tanka.GraphQL.SDL
                                     ? defaultValue
                                     : Values.CoerceValue(
                                         connect.GetInputFields,
-                                        _builder.GetScalarSerializer,
+                                        _builder.GetValueConverter,
                                         value,
                                         type));
                 });
@@ -352,7 +352,7 @@ namespace Tanka.GraphQL.SDL
                     {
                         defaultValue = Values.CoerceValue(
                             connect.GetInputFields,
-                            _builder.GetScalarSerializer,
+                            _builder.GetValueConverter,
                             definition.DefaultValue,
                             type);
                     }

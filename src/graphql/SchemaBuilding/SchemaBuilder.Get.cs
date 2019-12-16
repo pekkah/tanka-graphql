@@ -25,7 +25,7 @@ namespace Tanka.GraphQL.SchemaBuilding
             return _types.TryGetValue(name, out namedType);
         }
 
-        public IValueConverter GetScalarSerializer(string name)
+        public IValueConverter GetValueConverter(string name)
         {
             if (_valueConverters.TryGetValue(name, out var converter))
                 return converter;

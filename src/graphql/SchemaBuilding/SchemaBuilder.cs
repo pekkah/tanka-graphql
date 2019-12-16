@@ -18,9 +18,11 @@ namespace Tanka.GraphQL.SchemaBuilding
         private string _schemaDescription;
         private readonly Dictionary<string, IValueConverter> _valueConverters = new Dictionary<string, IValueConverter>();
 
-        private string _queryTypeName = "Query";
-        private string _mutationTypeName = "Mutation";
-        private string _subscriptionTypeName = "Subscription";
+        public string QueryTypeName { get; private set; } = "Query";
+
+        public string MutationTypeName { get; private set; } = "Mutation";
+
+        public string SubscriptionTypeName { get; private set; } = "Subscription";
 
         public SchemaBuilder()
         {
