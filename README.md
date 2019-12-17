@@ -25,8 +25,8 @@ Release
 
 Both beta and release packages are available from NuGet and NPM
 
-![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/tanka.graphql?style=flat-square)
 ![Nuget](https://img.shields.io/nuget/v/tanka.graphql?style=flat-square)
+![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/tanka.graphql?style=flat-square)
 
 ![npm](https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/latest?style=flat-square)
 ![npm](https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/beta?style=flat-square)
