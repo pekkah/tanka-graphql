@@ -47,7 +47,7 @@ namespace Tanka.GraphQL.TypeSystem
                 (Int, new IntConverter()),
                 (Float, new DoubleConverter()),
                 (Boolean, new BooleanConverter()),
-                (ID, new StringConverter())
+                (ID, new IdConverter())
             };
         
 
