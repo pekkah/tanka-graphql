@@ -98,6 +98,9 @@
         <li class="nav-item">
             <a class="nav-link" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/06-custom-scalars.html">Custom scalars</a>
+        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -235,7 +238,7 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="tanka-graphql-library">Tanka GraphQL library</h1>
+                <h1 id="tanka-graphql-library-tgql">Tanka GraphQL library (TGQL)</h1>
 <p><a href="https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1&amp;branchName=master"><img src="https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql?branchName=master" alt="Build Status" /></a></p>
 <h2 id="features">Features</h2>
 <ul>
@@ -247,21 +250,18 @@
 </ul>
 <h3 id="feeds">Feeds</h3>
 <p>Beta</p>
-<p><a href="https://www.myget.org/feed/tanka/package/nuget/tanka.graphql"><img src="https://img.shields.io/myget/tanka/vpre/tanka.graphql.svg?style=popout-square" alt="" /></a>
-<a href="https://www.myget.org/feed/tanka/package/npm/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/latest.svg?registry_uri=https%3A%2F%2Fwww.myget.org%2FF%2Ftanka%2Fnpm%2F&amp;style=popout-square" alt="" /></a></p>
 <ul>
 <li><a href="https://pekkah.github.io/tanka-graphql/beta/">Documentation</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/api/v3/index.json">https://www.myget.org/F/tanka/api/v3/index.json</a></li>
-<li>MyGet: <a href="https://www.myget.org/F/tanka/npm/">https://www.myget.org/F/tanka/npm/</a></li>
 </ul>
 <p>Release</p>
-<p><a href="https://www.nuget.org/packages/tanka.graphql/"><img src="https://buildstats.info/nuget/tanka.graphql" alt="" /></a>
-<a href="https://www.npmjs.com/package/@tanka/tanka-graphql-server-link"><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link.svg?style=popout-square" alt="" /></a></p>
 <ul>
 <li><a href="https://pekkah.github.io/tanka-graphql/">Documentation</a></li>
-<li>From NuGet</li>
-<li>From NPM</li>
 </ul>
+<p>Both beta and release packages are available from NuGet and NPM</p>
+<p><img src="https://img.shields.io/nuget/vpre/tanka.graphql?style=flat-square" alt="Nuget (with prereleases)" />
+<img src="https://img.shields.io/nuget/v/tanka.graphql?style=flat-square" alt="Nuget" /></p>
+<p><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/latest?style=flat-square" alt="npm" />
+<img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/beta?style=flat-square" alt="npm" /></p>
 <h3 id="install">Install</h3>
 <pre><code class="lang-bash">dotnet add tanka.graphql
 dotnet add tanka.graphql.server

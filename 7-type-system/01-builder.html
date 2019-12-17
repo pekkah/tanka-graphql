@@ -98,6 +98,9 @@
         <li class="nav-item">
             <a class="nav-link" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/06-custom-scalars.html">Custom scalars</a>
+        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -423,6 +426,29 @@
 </code></pre></p>
 <p><pre><code class="language-csharp">
         [Fact]
+        public void Create_Scalar_without_converter()
+        {
+            /* Given */
+            var builder = new SchemaBuilder();
+            const string name = &quot;Url&quot;;
+
+            /* When */
+            builder.Scalar(
+                name: name,
+                out var url,
+                description: &quot;Description&quot;,
+                directives: new DirectiveInstance[]
+                {
+                    /*directive*/
+                });
+
+            /* Then */
+            Assert.Equal(name, url.Name);
+            Assert.True(builder.TryGetType&lt;ScalarType&gt;(url.Name, out _));
+        }
+</code></pre></p>
+<p><pre><code class="language-csharp">
+        [Fact]
         public void Create_InputObject()
         {
             /* Given */
@@ -473,10 +499,27 @@
         }
 </code></pre></p>
 <h3 id="build-and-validate-schema">Build and validate schema</h3>
-<blockquote>
-<p>NotImplemented: future enhancement</p>
-</blockquote>
-<p><pre><code class="language-csharp">        [Fact]
+<p>Normal (will throw ValidationException if schema is not valid)
+<pre><code class="language-csharp">        [Fact]
+        public void Build()
+        {
+            /* Given */
+            var builder = new SchemaBuilder()
+                // query is required to build schema
+                .Query(out _);
+
+            /* When */
+            var schema = builder.Build();
+
+            /* Then */
+            Assert.IsAssignableFrom&lt;ISchema&gt;(schema);
+            Assert.IsType&lt;SchemaGraph&gt;(schema);
+            Assert.NotNull(schema.Query);
+        }
+</code></pre></p>
+<p>Without throwing validation exception
+<pre><code class="language-csharp">
+        [Fact]
         public void Build_and_validate_schema()
         {
             /* Given */
@@ -488,10 +531,10 @@
             var (schema, validationResult) = builder.BuildAndValidate();
 
             /* Then */
+            Assert.True(validationResult.IsValid);
             Assert.IsAssignableFrom&lt;ISchema&gt;(schema);
             Assert.IsType&lt;SchemaGraph&gt;(schema);
             Assert.NotNull(schema.Query);
-            Assert.IsType&lt;NotImplementedException&gt;(validationResult);
         }
 </code></pre></p>
 <h3 id="connecting-types-using-fields">Connecting types using fields</h3>
@@ -663,17 +706,22 @@
         public async Task Make_executable_schema()
         {
             /* Given */
-            var schema1 = new SchemaBuilder()
-                .Query(out var query1)
-                .Connections(connect =&gt;
-                    connect.Field(query1, &quot;field1&quot;, ScalarType.Int)
-                )
-                .Build();
+            var builder = new SchemaBuilder()
+                .Sdl(@&quot;
+                    type Query {
+                        field1: Int!
+                    }
+
+                    schema {
+                        query: Query
+                    }
+                    &quot;
+                );
 
             var resolvers = new ObjectTypeMap
             {
                 {
-                    query1.Name, new FieldResolversMap
+                    &quot;Query&quot;, new FieldResolversMap
                     {
                         {
                             &quot;field1&quot;, async context =&gt;
@@ -688,9 +736,11 @@
 
             /* When */
             var executableSchema = SchemaTools.MakeExecutableSchema(
-                schema: schema1,
+                builder: builder,
                 resolvers: resolvers,
-                subscribers: null);
+                subscribers: null,
+                converters: null,
+                directives: null);
 
             /* Then */
             var result = await Executor.ExecuteAsync(

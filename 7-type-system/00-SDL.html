@@ -98,6 +98,9 @@
         <li class="nav-item">
             <a class="nav-link" href="0-getting-started/05-dependency-injection.html">Dependency injection</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="0-getting-started/06-custom-scalars.html">Custom scalars</a>
+        </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
@@ -323,16 +326,17 @@ or GraphQL documents.</p>
                 }
                 &quot;;
 
-            var jediPowerLevel = new ScalarType(&quot;JediPowerLevel&quot;, new IntConverter());
-            var jediTrickLevel = new ScalarType(&quot;JediTrickLevel&quot;, new DoubleConverter());
+            var builder = new SchemaBuilder()
+                .Sdl(idl);
 
-            var document = Parser.ParseDocument(idl);
-            var reader = new SdlReader(document, new SchemaBuilder()
-                .Include(jediPowerLevel)
-                .Include(jediTrickLevel));
+            builder.TryGetType&lt;ScalarType&gt;(&quot;JediPowerLevel&quot;, out var jediPowerLevel);
+            builder.TryGetType&lt;ScalarType&gt;(&quot;JediTrickLevel&quot;, out var jediTrickLevel);
+
+            builder.Include(&quot;JediPowerLevel&quot;, new IntConverter())
+                .Include(&quot;JediTrickLevel&quot;, new IntConverter());
 
             /* When */
-            var schema = reader.Read().Build();
+            var schema = builder.Build();
             var actual = schema.QueryTypes&lt;INamedType&gt;();
 
             /* Then */
@@ -363,18 +367,16 @@ or GraphQL documents.</p>
                     query: Query
                 }
                 &quot;;
-            var urlScalar = new ScalarType(&quot;Url&quot;, new StringConverter());
-            var document = Parser.ParseDocument(idl);
-            var reader = new SdlReader(document, new SchemaBuilder()
-                .Include(urlScalar));
+
+            var builder = new SchemaBuilder()
+                .Sdl(idl);
 
 
             /* When */
-            var actual = reader.Read().Build().GetNamedType&lt;ScalarType&gt;(&quot;Url&quot;);
+            builder.TryGetType&lt;ScalarType&gt;(&quot;Url&quot;, out var actual);
 
             /* Then */
             Assert.Equal(&quot;Url&quot;, actual.Name);
-            Assert.Equal(urlScalar, actual);
         }
 </code></pre></p>
 <p>Types can be extended</p>
