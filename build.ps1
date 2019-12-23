@@ -1,5 +1,6 @@
 param (
-    [string]$Output = "./artifacts"
+    [string]$Output = "./artifacts",
+    [string]$CurrentBranch = $Env:BUILD_SOURCEBRANCH
  )
 
 # Parameters
@@ -7,7 +8,10 @@ Write-Host "----------------------------------------"
 Write-Host "Output: $Output"
 
 # Git Information
-$CurrentBranch = git branch --show-current | Out-String
+if ($CurrentBranch -eq '') {
+    $CurrentBranch = git branch --show-current | Out-String
+}
+
 $CurrentBranch = $CurrentBranch.Trim()
 $Tag = git describe --tags --exact-match 2>$null | Out-String
 $Tag = $Tag.Trim()
