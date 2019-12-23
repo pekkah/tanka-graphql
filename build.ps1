@@ -6,6 +6,8 @@ param (
 # Parameters
 "----------------------------------------"
 "Output: $Output"
+$Location = Get-Location
+"Location: $Location"
 
 # Git Information
 if ($CurrentBranch -eq '') {
@@ -49,9 +51,16 @@ $Version = $Version.Trim()
 $IsMasterOrTag = $CurrentBranch -eq 'master' -or $Tag -ne ''
 "Is tag or master: $IsMasterOrTag"
 
-
 # Build
 "----------------------------------------"
-"Build"
+"Build Dotnet"
 dotnet build -c Release
-npm run build --prefix ./src/graphql.server.link
+dotnet test -c Release -l trx -r $Output
+
+# Build NPM package
+"----------------------------------------"
+"Build Node"
+Set-Location ./src/graphql.server.link
+npm i
+npm run build
+Set-Location $Location
