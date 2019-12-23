@@ -12,12 +12,14 @@ if ($CurrentBranch -eq '') {
     $CurrentBranch = git branch --show-current | Out-String
 }
 
-$CurrentBranch = $CurrentBranch.Trim()
 $Tag = git describe --tags --exact-match 2>$null
 
-if ($null -ne $Tag) {
-    $Tag = $Tag.Trim()
+if ($null -eq $Tag) {
+    $Tag = ''
 }
+
+$CurrentBranch = $CurrentBranch.Trim()
+$Tag = $Tag.Trim();
 
 Write-Host "----------------------------------------"
 Write-Host "CurrentBranch: $CurrentBranch"

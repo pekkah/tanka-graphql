@@ -1,24 +1,16 @@
 name: 'graphql'
 
-pool:
-  vmImage: 'windows-2019'
-
-resources:
-  repositories:
-  - repository: ghpages # The name used to reference this repository in the checkout step
-    type: github
-    endpoint: pekkah
-    name: pekkah/tanka-graphql
-    ref: gh-pages
-
 variables:
   buildConfiguration: 'Release'
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  
 stages:
 - stage: Build
   jobs:
   - job: Build
+    pool:
+      vmImage: 'windows-2019'
     steps:
     - task: UseDotNet@2
       displayName: Use dotnet core SDK
