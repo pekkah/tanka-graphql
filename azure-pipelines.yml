@@ -25,11 +25,12 @@ stages:
         checkLatest: true
     
     - task: PowerShell@2
+      displayName: build.ps1
       inputs:
         filePath: ./build.ps1
         arguments: -Output $(Build.StagingDirectory)
         errorActionPreference: 'stop'
-        failOnStderr: true
+        failOnStderr: false
         pwsh: true
 
     - task: PublishTestResults@2
