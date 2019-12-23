@@ -31,7 +31,7 @@ stages:
         filePath: ./build.ps1
         arguments: -Output $(Build.StagingDirectory)
         errorActionPreference: 'stop'
-        failOnStderr: true
+        failOnStderr: false
         pwsh: true
 
     - task: PublishTestResults@2
