@@ -28,8 +28,8 @@ stages:
       inputs:
         filePath: ./build.ps1
         arguments: -Output $(Build.StagingDirectory)
-        errorActionPreference: 'continue'
-        failOnStderr: false
+        errorActionPreference: 'stop'
+        failOnStderr: true
         pwsh: true
 
     - task: PublishTestResults@2

@@ -5,6 +5,7 @@
     <AssemblyName>tanka.graphql.tests.data</AssemblyName>
     <RootNamespace>Tanka.Graphql.Tests.Data</RootNamespace>
     <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

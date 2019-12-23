@@ -3,6 +3,13 @@ param (
     [string]$CurrentBranch = $Env:BUILD_SOURCEBRANCH
  )
 
+# Utils
+function EnsureLastExitCode($message){
+    if ($LASTEXITCODE -ne 0) {
+        throw $message
+    } 
+}
+
 # Parameters
 "----------------------------------------"
 "Output: $Output"
@@ -17,6 +24,7 @@ if ((Test-Path $output) -eq $True) {
 # Git Information
 if ($CurrentBranch -eq '') {
     $CurrentBranch = git branch --show-current | Out-String
+    EnsureLastExitCode("git branch --show-current failed")
 }
 
 $CurrentBranch = $CurrentBranch.Trim()
@@ -34,15 +42,19 @@ if ($CurrentBranch -eq '') {
 "Restoring dotnet tools"
 dotnet tool restore
 
+EnsureLastExitCode("Restore failed")
+
 # Get GitVersion
 "----------------------------------------"
 "Getting GitVersion"
 $Version = dotnet gitversion /output json /showvariable SemVer | Out-String -NoNewline
+EnsureLastExitCode("Could not get SemVer from gitversion")
 $Version = $Version.Trim()
 "Git version: '$Version'"
 "##vso[build.updatebuildnumber]$Version"
 
-$PreReleaseTag = dotnet gitversion /output json /showvariable PreReleaseTag | Out-String
+$PreReleaseTag = dotnet gitversion /output json /showvariable PreReleaseTag | Out-String -NoNewline
+EnsureLastExitCode("Could not get PrReleaseTag from gitversion")
 $PreReleaseTag = $PreReleaseTag.Trim()
 $IsPreRelease = $PreReleaseTag -ne '' -or $null -ne $PreReleaseTag
 "PreReleaseTag: $PreReleaseTag, IsPreRelease: $IsPreRelease"
@@ -53,15 +65,19 @@ $IsPreRelease = $PreReleaseTag -ne '' -or $null -ne $PreReleaseTag
 $IsMaster = $CurrentBranch -eq 'master'
 "Is master: $IsMaster"
 
-# Build
+# Build and test
 "----------------------------------------"
 "Build Dotnet"
 dotnet build -c Release
+EnsureLastExitCode("dotnet build failed")
+
 dotnet test -c Release -l trx -r $Output
+EnsureLastExitCode("dotnet test failed")
 
 "----------------------------------------"
 "Pack NuGet"
 dotnet pack -c Release -o $Output -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+EnsureLastExitCode("dotnet pack failed")
 
 "----------------------------------------"
 "Pack NPM"
@@ -70,10 +86,12 @@ Copy-Item -Recurse -Exclude $Exclude ./src/graphql.server.link/ $Output/graphql.
 Set-Location $Output/graphql.server.link
 npm i
 npm run build
+EnsureLastExitCode("npm run build failed")
 npm --no-git-tag-version --allow-same-version version $Version
 Set-Location $Location
 Set-Location $Output
 npm pack ./graphql.server.link
+EnsureLastExitCode("npm pack failed")
 
 Set-Location $Location
 
@@ -86,6 +104,7 @@ if ($IsPreRelease) {
 }
 
 Invoke-Expression $BechmarkCmd
+EnsureLastExitCode("dotnet benchmarks failed")
 
 "----------------------------------------"
 "Docs"
@@ -101,6 +120,7 @@ if ($IsPreRelease) {
 "BasePath: $Basepath"
 
 dotnet tanka-docs --output $DocsOutput --basepath $Basepath
+EnsureLastExitCode("dotnet tanka-docs failed")
 
 "----------------------------------------"
 "DONE"
