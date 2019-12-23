@@ -4,8 +4,8 @@ param (
  )
 
 # Parameters
-Write-Host "----------------------------------------"
-Write-Host "Output: $Output"
+"----------------------------------------"
+"Output: $Output"
 
 # Git Information
 if ($CurrentBranch -eq '') {
@@ -21,9 +21,9 @@ if ($null -eq $Tag) {
 $CurrentBranch = $CurrentBranch.Trim()
 $Tag = $Tag.Trim();
 
-Write-Host "----------------------------------------"
-Write-Host "CurrentBranch: $CurrentBranch"
-Write-Host "Tag: $Tag"
+"----------------------------------------"
+"CurrentBranch: $CurrentBranch"
+"Tag: $Tag"
 
 if ($CurrentBranch -eq '' -and $Tag -eq '') {
     Write-Error "Not branch or tag"
@@ -31,22 +31,27 @@ if ($CurrentBranch -eq '' -and $Tag -eq '') {
 }
 
 # Install tools
-Write-Host "----------------------------------------"
-Write-Host "Restoring dotnet tools"
+"----------------------------------------"
+"Restoring dotnet tools"
 dotnet tool restore
 
 # Get GitVersion
-Write-Host "----------------------------------------"
-Write-Host "Getting GitVersion"
+"----------------------------------------"
+"Getting GitVersion"
 $Version = dotnet gitversion /output json /showvariable SemVer | Out-String
 $Version = $Version.Trim()
-Write-Host "Git version: $Version"
-Write-Host "##vso[build.updatebuildnumber]$Version"
+"Git version: '$Version'"
+"##vso[build.updatebuildnumber]$Version"
 
 # Is Master Or Tag?
 "----------------------------------------"
-Write-Host "Check is master or tag"
+"Check is master or tag"
 $IsMasterOrTag = $CurrentBranch -eq 'master' -or $Tag -ne ''
-Write-Host "Is tag or master: $IsMasterOrTag"
+"Is tag or master: $IsMasterOrTag"
 
 
+# Build
+"----------------------------------------"
+"Build"
+dotnet build -c Release
+npm run build --prefix ./src/graphql.server.link
