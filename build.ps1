@@ -65,7 +65,8 @@ dotnet pack -c Release -o $Output -p:Version=$Version -p:IncludeSymbols=true -p:
 
 "----------------------------------------"
 "Pack NPM"
-Copy-Item -Recurse ./src/graphql.server.link/ $Output/graphql.server.link -Exclude [string[]]@("node_modules")
+$Exclude = [string[]]@("node_modules")
+Copy-Item -Recurse -Exclude $Exclude ./src/graphql.server.link/ $Output/graphql.server.link
 Set-Location $Output/graphql.server.link
 npm i
 npm run build
@@ -75,6 +76,16 @@ Set-Location $Output
 npm pack ./graphql.server.link
 
 Set-Location $Location
+
+"----------------------------------------"
+"Benchmarks"
+$BechmarkCmd = "dotnet run --project ./benchmarks/graphql.benchmarks/graphql.benchmarks.csproj --configuration Release --framework netcoreapp31 -- -i -m --filter *"
+
+if ($IsPreRelease) {
+    $BechmarkCmd += " --job short"
+}
+
+Invoke-Expression $BechmarkCmd
 
 "----------------------------------------"
 "Docs"
@@ -90,3 +101,7 @@ if ($IsPreRelease) {
 "BasePath: $Basepath"
 
 dotnet tanka-docs --output $DocsOutput --basepath $Basepath
+
+"----------------------------------------"
+"DONE"
+Set-Location $Location
