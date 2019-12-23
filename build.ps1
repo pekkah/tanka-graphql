@@ -9,25 +9,22 @@ param (
 $Location = Get-Location
 "Location: $Location"
 
+if ((Test-Path $output) -eq $True) {
+    "Clean: $Output"
+    Remove-Item -Recurse -Force $Output
+}
+
 # Git Information
 if ($CurrentBranch -eq '') {
     $CurrentBranch = git branch --show-current | Out-String
 }
 
-$Tag = git describe --tags --exact-match 2>$null
-
-if ($null -eq $Tag) {
-    $Tag = ''
-}
-
 $CurrentBranch = $CurrentBranch.Trim()
-$Tag = $Tag.Trim();
 
 "----------------------------------------"
 "CurrentBranch: $CurrentBranch"
-"Tag: $Tag"
 
-if ($CurrentBranch -eq '' -and $Tag -eq '') {
+if ($CurrentBranch -eq '') {
     Write-Error "Not branch or tag"
     return
 }
@@ -40,16 +37,21 @@ dotnet tool restore
 # Get GitVersion
 "----------------------------------------"
 "Getting GitVersion"
-$Version = dotnet gitversion /output json /showvariable SemVer | Out-String
+$Version = dotnet gitversion /output json /showvariable SemVer | Out-String -NoNewline
 $Version = $Version.Trim()
 "Git version: '$Version'"
 "##vso[build.updatebuildnumber]$Version"
 
-# Is Master Or Tag?
+$PreReleaseTag = dotnet gitversion /output json /showvariable PreReleaseTag | Out-String
+$PreReleaseTag = $PreReleaseTag.Trim()
+$IsPreRelease = $PreReleaseTag -ne '' -or $null -ne $PreReleaseTag
+"PreReleaseTag: $PreReleaseTag, IsPreRelease: $IsPreRelease"
+
+# Is Master
 "----------------------------------------"
-"Check is master or tag"
-$IsMasterOrTag = $CurrentBranch -eq 'master' -or $Tag -ne ''
-"Is tag or master: $IsMasterOrTag"
+"Check is master"
+$IsMaster = $CurrentBranch -eq 'master'
+"Is master: $IsMaster"
 
 # Build
 "----------------------------------------"
@@ -57,10 +59,34 @@ $IsMasterOrTag = $CurrentBranch -eq 'master' -or $Tag -ne ''
 dotnet build -c Release
 dotnet test -c Release -l trx -r $Output
 
-# Build NPM package
 "----------------------------------------"
-"Build Node"
-Set-Location ./src/graphql.server.link
+"Pack NuGet"
+dotnet pack -c Release -o $Output -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+
+"----------------------------------------"
+"Pack NPM"
+Copy-Item -Recurse ./src/graphql.server.link/ $Output/graphql.server.link -Exclude [string[]]@("node_modules")
+Set-Location $Output/graphql.server.link
 npm i
 npm run build
+npm --no-git-tag-version --allow-same-version version $Version
 Set-Location $Location
+Set-Location $Output
+npm pack ./graphql.server.link
+
+Set-Location $Location
+
+"----------------------------------------"
+"Docs"
+$DocsOutput = "$Output/gh-pages"
+$Basepath = "/tanka-graphql/"
+
+if ($IsPreRelease) {
+    $DocsOutput += "/beta"
+    $Basepath += "beta/"
+}
+
+"Output: $DocsOutput"
+"BasePath: $Basepath"
+
+dotnet tanka-docs --output $DocsOutput --basepath $Basepath
