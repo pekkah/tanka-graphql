@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>Tanka.GraphQL.Samples.Chat.Data</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Samples.Chat.Data</RootNamespace>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

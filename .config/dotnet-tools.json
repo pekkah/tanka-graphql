@@ -2,10 +2,10 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "cake.tool": {
-      "version": "0.35.0",
+    "gitversion.tool": {
+      "version": "5.1.2",
       "commands": [
-        "dotnet-cake"
+        "dotnet-gitversion"
       ]
     },
     "tanka.generate.docs": {
