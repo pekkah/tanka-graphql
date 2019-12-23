@@ -30,7 +30,7 @@ stages:
       inputs:
         filePath: ./build.ps1
         arguments: -Output $(Build.StagingDirectory)
-        errorActionPreference: 'stop'
+        errorActionPreference: 'continue'
         failOnStderr: false
         pwsh: true
 
