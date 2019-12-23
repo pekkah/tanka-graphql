@@ -25,19 +25,39 @@ stages:
       inputs:
         packageType: 'sdk'
         version: '3.1.x'
-    
-    - task: PowerShell@2
+
+    - task: DotNetCoreCLI@2
+      displayName: Restore tools
       inputs:
-        filePath: ./build.ps1
-        arguments: -Output $(Build.StagingDirectory)
-        errorActionPreference: 'stop'
-        failOnStderr: true
-        pwsh: true
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'restore'
+
+    - task: DotNetCoreCLI@2
+      displayName: Build.cake
+      inputs:
+        command: 'custom'
+        custom: 'cake'
+        arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration)'
+
+    - task: DotNetCoreCLI@2
+      displayName: Benchmarks
+      inputs:
+        command: 'custom'
+        custom: 'cake'
+        arguments: 'build.cake -target=Benchmarks'
+
+    - task: DotNetCoreCLI@2
+      displayName: Build.cake
+      inputs:
+        command: 'custom'
+        custom: 'cake'
+        arguments: 'build.cake -target=Docs -artifactsDir=$(Build.ArtifactStagingDirectory)'
 
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: VSTest
-        searchFolder: '$(Build.StagingDirectory)'
+        searchFolder: '$(Build.ArtifactStagingDirectory)'
         testResultsFiles: '**/*.trx' 
         mergeTestResults: false
 
@@ -46,7 +66,7 @@ stages:
         pathtoPublish: 'BenchmarkDotNet.Artifacts' 
         artifactName: 'benchmarks' 
 
-    - publish: $(Build.StagingDirectory)
+    - publish: $(Build.ArtifactStagingDirectory)
       artifact: artifacts
 
 - stage: Publish
