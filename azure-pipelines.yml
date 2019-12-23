@@ -100,7 +100,7 @@ stages:
               customCommand: 'publish'
               customEndpoint: 'NPM'
 
-  - deployment: gh-pages
+  - deployment: ghpages
     displayName: Publish gh-pages
     pool:
       vmImage: ubuntu-latest
