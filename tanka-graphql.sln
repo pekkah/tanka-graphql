@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		azure-pipelines.yml = azure-pipelines.yml
-		build.cake = build.cake
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
 		README.md = README.md
@@ -35,9 +34,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.dev.chat.web", "dev
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.tutorials.getting-started", "tutorials\graphql.tutorials.getting-started\graphql.tutorials.getting-started.csproj", "{917EF279-90B7-421B-92D0-B113FD9E2ECA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graphql.server.links", "src\graphql.server.links\graphql.server.links.csproj", "{16F69519-406E-4AEA-B012-C2164C1722A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.server.links", "src\graphql.server.links\graphql.server.links.csproj", "{16F69519-406E-4AEA-B012-C2164C1722A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graphql.server.links.tests", "tests\graphql.server.links.tests\graphql.server.links.tests.csproj", "{563B3005-79F0-4E41-94C6-E90F23A44973}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.server.links.tests", "tests\graphql.server.links.tests\graphql.server.links.tests.csproj", "{563B3005-79F0-4E41-94C6-E90F23A44973}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
