@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL
 {
@@ -58,6 +57,41 @@ namespace Tanka.GraphQL
                 return null;
 
             return _subscribers[key];
+        }
+
+        public FieldResolversMap Clone()
+        {
+            var result = new FieldResolversMap();
+            foreach (var aResolver in _resolvers) result._resolvers.Add(aResolver.Key, aResolver.Value);
+
+            foreach (var aSubscriber in _subscribers) result._subscribers.Add(aSubscriber.Key, aSubscriber.Value);
+
+            return result;
+        }
+
+        public static FieldResolversMap operator +(FieldResolversMap a, FieldResolversMap b)
+        {
+            var result = a.Clone();
+
+            // override resolvers of a with b
+            foreach (var bResolver in b._resolvers) result._resolvers[bResolver.Key] = bResolver.Value;
+
+            foreach (var bSubscriber in b._subscribers) result._subscribers[bSubscriber.Key] = bSubscriber.Value;
+
+            return result;
+        }
+
+        public static FieldResolversMap operator -(FieldResolversMap a, string fieldName)
+        {
+            var result = a.Clone();
+
+            if (result._resolvers.ContainsKey(fieldName))
+                result._resolvers.Remove(fieldName);
+
+            if (result._subscribers.ContainsKey(fieldName))
+                result._subscribers.Remove(fieldName);
+
+            return result;
         }
     }
 }
