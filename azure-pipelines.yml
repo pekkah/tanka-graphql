@@ -1,24 +1,16 @@
 name: 'graphql'
 
-pool:
-  vmImage: 'windows-2019'
-
-resources:
-  repositories:
-  - repository: ghpages # The name used to reference this repository in the checkout step
-    type: github
-    endpoint: pekkah
-    name: pekkah/tanka-graphql
-    ref: gh-pages
-
 variables:
   buildConfiguration: 'Release'
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  
 stages:
 - stage: Build
   jobs:
   - job: Build
+    pool:
+      vmImage: 'windows-2019'
     steps:
     - task: UseDotNet@2
       displayName: Use dotnet core SDK
@@ -26,38 +18,25 @@ stages:
         packageType: 'sdk'
         version: '3.1.x'
 
-    - task: DotNetCoreCLI@2
-      displayName: Restore tools
+    - task: NodeTool@0
+      displayName: "Install Node"
       inputs:
-        command: 'custom'
-        custom: 'tool'
-        arguments: 'restore'
-
-    - task: DotNetCoreCLI@2
-      displayName: Build.cake
+        versionSpec: "12.x"
+        checkLatest: true
+    
+    - task: PowerShell@2
+      displayName: build.ps1
       inputs:
-        command: 'custom'
-        custom: 'cake'
-        arguments: 'build.cake -artifactsDir=$(Build.ArtifactStagingDirectory) -configuration=$(buildConfiguration)'
-
-    - task: DotNetCoreCLI@2
-      displayName: Benchmarks
-      inputs:
-        command: 'custom'
-        custom: 'cake'
-        arguments: 'build.cake -target=Benchmarks'
-
-    - task: DotNetCoreCLI@2
-      displayName: Build.cake
-      inputs:
-        command: 'custom'
-        custom: 'cake'
-        arguments: 'build.cake -target=Docs -artifactsDir=$(Build.ArtifactStagingDirectory)'
+        filePath: ./build.ps1
+        arguments: -Output $(Build.StagingDirectory)
+        errorActionPreference: 'continue'
+        failOnStderr: false
+        pwsh: true
 
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: VSTest
-        searchFolder: '$(Build.ArtifactStagingDirectory)'
+        searchFolder: '$(Build.StagingDirectory)'
         testResultsFiles: '**/*.trx' 
         mergeTestResults: false
 
@@ -66,85 +45,94 @@ stages:
         pathtoPublish: 'BenchmarkDotNet.Artifacts' 
         artifactName: 'benchmarks' 
 
-    - publish: $(Build.ArtifactStagingDirectory)
+    - publish: $(Build.StagingDirectory)
       artifact: artifacts
 
 - stage: Publish
   condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
   jobs:
-  - job: Publish
-    pool: 
+  - deployment: Deploy
+    displayName: Publish packages
+    pool:
       vmImage: ubuntu-latest
-    steps:
-    - checkout: none
-    - download: current
-      artifact: artifacts
+    environment: 'NuGets'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: none
+          - download: current
+            artifact: artifacts
 
-    - task: NuGetToolInstaller@1
-      displayName: 'Use NuGet '
+          - task: NuGetToolInstaller@1
+            displayName: 'Use NuGet '
 
-    - task: NuGetCommand@2
-      displayName: 'NuGet push'
-      inputs:
-        command: push
-        packagesToPush: '$(Pipeline.Workspace)/artifacts/**/*.nupkg'
-        nuGetFeedType: external
-        publishFeedCredentials: 'NuGet-TankaGraphQL'
-        allowPackageConflicts: true
-    
-    - task: ExtractFiles@1
-      displayName: 'Extract files '
-      inputs:
-        archiveFilePatterns: '$(Pipeline.Workspace)/artifacts/*.tgz'
-        destinationFolder: '$(Pipeline.Workspace)/packages/'
-      continueOnError: true
+          - task: NuGetCommand@2
+            displayName: 'NuGet push'
+            inputs:
+              command: push
+              packagesToPush: '$(Pipeline.Workspace)/artifacts/**/*.nupkg'
+              nuGetFeedType: external
+              publishFeedCredentials: 'NuGet-TankaGraphQL'
+              allowPackageConflicts: true
+          
+          - task: ExtractFiles@1
+            displayName: 'Extract files '
+            inputs:
+              archiveFilePatterns: '$(Pipeline.Workspace)/artifacts/*.tgz'
+              destinationFolder: '$(Pipeline.Workspace)/packages/'
+            continueOnError: true
 
-    - task: Npm@1
-      displayName: publish beta
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
-      inputs:
-        command: 'custom'
-        workingDir: '$(Pipeline.Workspace)/packages/package'
-        customCommand: 'publish --tag beta'
-        customEndpoint: 'NPM'
+          - task: Npm@1
+            displayName: publish beta
+            condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+            inputs:
+              command: 'custom'
+              workingDir: '$(Pipeline.Workspace)/packages/package'
+              customCommand: 'publish --tag beta'
+              customEndpoint: 'NPM'
 
-    - task: Npm@1
-      displayName: 'npm publish latest'
-      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags')
-      inputs:
-        command: 'custom'
-        workingDir: '$(Pipeline.Workspace)/packages/package'
-        customCommand: 'publish'
-        customEndpoint: 'NPM'
+          - task: Npm@1
+            displayName: 'npm publish latest'
+            condition: startsWith(variables['Build.SourceBranch'], 'refs/tags')
+            inputs:
+              command: 'custom'
+              workingDir: '$(Pipeline.Workspace)/packages/package'
+              customCommand: 'publish'
+              customEndpoint: 'NPM'
 
-  - job: ghpages
-    displayName: Update gh-pages
-    pool: 
+  - deployment: ghpages
+    displayName: Publish gh-pages
+    pool:
       vmImage: ubuntu-latest
-    steps:
-    - download: current
-      artifact: artifacts
-    - checkout: self
-      persistCredentials: true
-      clean: true
-    - script: |
-        git config user.email "$(git.email)"
-        git config user.name "$(git.name)"
-        git switch gh-pages
-      displayName: Use gh-pages
-    - script: |
-        cp -rv $(Pipeline.Workspace)/artifacts/gh-pages/** $(Build.SourcesDirectory)/
-      displayName: Update files
-    - script: |
-        cd $(Build.SourcesDirectory)
-        git add --all
-        git status
-      displayName: Add changes
-    - script: |
-        cd $(Build.SourcesDirectory)
-        echo "BuildNumber: $(Build.BuildNumber)"
-        git commit -m "$(Build.BuildNumber)"
-        git push
+    environment: 'NuGets'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: artifacts
+          - checkout: self
+            persistCredentials: true
+            clean: true
+          - script: |
+              git config user.email "$(git.email)"
+              git config user.name "$(git.name)"
+              git switch gh-pages
+            displayName: Use gh-pages
+          - script: |
+              cp -rv $(Pipeline.Workspace)/artifacts/gh-pages/** $(Build.SourcesDirectory)/
+            displayName: Update files
+          - script: |
+              cd $(Build.SourcesDirectory)
+              git add --all
+              git status
+            displayName: Add changes
+          - script: |
+              cd $(Build.SourcesDirectory)
+              echo "BuildNumber: $(Build.BuildNumber)"
+              git commit -m "$(Build.BuildNumber)"
+              git push
   
 
 

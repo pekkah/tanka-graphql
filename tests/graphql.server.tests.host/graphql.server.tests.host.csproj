@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Tanka.GraphQL.Server.Tests.Host</RootNamespace>
     <AssemblyName>tanka.graphql.server.tests.host</AssemblyName>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
