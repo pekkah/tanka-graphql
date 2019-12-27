@@ -46,9 +46,14 @@ namespace Tanka.GraphQL.Server
             return default;
         }
 
-        public Resolver Resolver(Resolver next)
+        public ValueTask BeginResolveAsync(IResolverContext context)
         {
-            return next;
+            return default;
+        }
+
+        public ValueTask EndResolveAsync(IResolverContext context, IResolverResult result)
+        {
+            return default;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Tanka.GraphQL
         public ExtensionsRunner(IReadOnlyList<IExtensionScope> extensions)
         {
             _scopes.AddRange(extensions);
-            foreach (var extensionScope in extensions) 
+            foreach (var extensionScope in extensions)
                 _scopesDictionary.Add(extensionScope.GetType(), extensionScope);
         }
 
@@ -60,13 +60,30 @@ namespace Tanka.GraphQL
             foreach (var extension in _scopes) await extension.EndParseDocumentAsync(document);
         }
 
-        [Obsolete("This method is currently under review for removal or changes")]
-        public Resolver Resolver(Resolver fieldResolver)
+        public async ValueTask BeginResolveAsync(IResolverContext context)
         {
-            var result = fieldResolver;
-            foreach (var extension in _scopes) result = extension.Resolver(result);
+            foreach (var extension in _scopes)
+            {
+                var task = extension.BeginResolveAsync(context);
 
-            return result;
+                if (task.IsCompletedSuccessfully)
+                    continue;
+
+                await task;
+            }
+        }
+
+        public async ValueTask EndResolveAsync(IResolverContext context, IResolverResult result)
+        {
+            foreach (var extension in _scopes)
+            {
+                var task = extension.EndResolveAsync(context, result);
+
+                if (task.IsCompletedSuccessfully)
+                    continue;
+
+                await task;
+            }
         }
     }
 }

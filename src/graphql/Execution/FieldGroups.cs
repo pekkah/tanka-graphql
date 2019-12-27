@@ -54,7 +54,8 @@ namespace Tanka.GraphQL.Execution
                         path,
                         context);
 
-                resolver = context.ExtensionsRunner.Resolver(resolver);
+                // begin resolve
+                await context.ExtensionsRunner.BeginResolveAsync(resolverContext);
                 var resultTask = resolver(resolverContext);
 
                 IResolverResult result;
@@ -63,12 +64,16 @@ namespace Tanka.GraphQL.Execution
                 else
                     result = await resultTask;
 
+                await context.ExtensionsRunner.EndResolveAsync(resolverContext, result);
+                // end resolve
 
+                // begin complete
                 var completedValueTask = result.CompleteValueAsync(resolverContext);
                 if (completedValueTask.IsCompletedSuccessfully)
                     completedValue = completedValueTask.Result;
                 else
                     completedValue = await completedValueTask;
+                // end complete
 
                 return completedValue;
             }
