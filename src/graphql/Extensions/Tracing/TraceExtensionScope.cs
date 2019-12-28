@@ -95,26 +95,36 @@ namespace Tanka.GraphQL.Extensions.Tracing
             return default;
         }
 
-        public Resolver Resolver(Resolver next)
+        public ValueTask BeginResolveAsync(IResolverContext context)
         {
-            return async context =>
+            var start = _stopwatch.Elapsed;
+            var record = new TraceExtensionRecord.ResolverTrace()
             {
-                var start = _stopwatch.Elapsed;
-                var result = await next(context);
-                var end = _stopwatch.Elapsed;
-
-                _resolverTraces.Add(new TraceExtensionRecord.ResolverTrace()
-                {
-                    StartOffset = start.TotalNanoSeconds(),
-                    Duration = (end - start).TotalNanoSeconds(),
-                    ParentType = context.ObjectType.Name,
-                    FieldName = context.FieldName,
-                    Path = context.Path.Segments.ToList(),
-                    ReturnType = context.Field.Type.ToString()
-                });
-
-                return result;
+                StartOffset = start.TotalNanoSeconds(),
+                ParentType = context.ObjectType.Name,
+                FieldName = context.FieldName,
+                Path = context.Path.Segments.ToList(),
+                ReturnType = context.Field.Type.ToString()
             };
+            context.Items.Add("trace", record);
+            return default;
+        }
+
+        public ValueTask EndResolveAsync(IResolverContext context, IResolverResult result)
+        {
+            var end = _stopwatch.Elapsed.TotalNanoSeconds();
+
+            if (context.Items.TryGetValue("trace", out var recordItem))
+            {
+
+                if (!(recordItem is TraceExtensionRecord.ResolverTrace record))
+                    return default;
+
+                record.Duration = (end - record.StartOffset);
+                _resolverTraces.Add(record);
+            }
+
+            return default;
         }
     }
 }
