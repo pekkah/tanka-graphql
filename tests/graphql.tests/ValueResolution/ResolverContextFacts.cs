@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using GraphQLParser.AST;
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.ValueResolution;
@@ -171,6 +172,87 @@ namespace Tanka.GraphQL.Tests.ValueResolution
 
             /* Then */
             Assert.Equal("inputArg", value.Name);
+        }
+
+        [Fact]
+        public void Get_InputObject_List_argument()
+        {
+            /* Given */
+            var arguments = new Dictionary<string, object>
+            {
+                {
+                    "inputs", new []
+                    {
+                        new Dictionary<string, object>
+                        {
+                            {"name", "1"}
+                        },
+                        new Dictionary<string, object>
+                        {
+                            {"name", "2"}
+                        }
+                    }
+                }
+            };
+
+            var sut = new ResolverContext(
+                _objectType,
+                _objectValue,
+                _field,
+                _selection,
+                _fields,
+                arguments,
+                new NodePath(),
+                null);
+
+            /* When */
+            var value = sut.GetObjectArgumentList<InputArg>("inputs");
+
+            /* Then */
+            Assert.Single(value, v => v.Name == "1");
+            Assert.Single(value, v => v.Name == "2");
+        }
+
+        [Fact]
+        public void Get_InputObject_List_argument_with_null()
+        {
+            /* Given */
+            var arguments = new Dictionary<string, object>
+            {
+                {
+                    "inputs", new []
+                    {
+                        new Dictionary<string, object>
+                        {
+                            {"name", "1"}
+                        },
+                        null,
+                        new Dictionary<string, object>
+                        {
+                            {"name", "2"}
+                        }
+                    }
+                }
+            };
+
+            var sut = new ResolverContext(
+                _objectType,
+                _objectValue,
+                _field,
+                _selection,
+                _fields,
+                arguments,
+                new NodePath(),
+                null);
+
+            /* When */
+            var value = sut.GetObjectArgumentList<InputArg?>("inputs")
+                .ToList();
+
+            /* Then */
+            Assert.Single(value, v => v?.Name == "1");
+            Assert.Single(value, v => v?.Name == "2");
+            Assert.Single(value, v => v is null);
         }
 
         [Fact]

@@ -34,6 +34,37 @@ namespace Tanka.GraphQL.ValueResolution
             return value;
         }
 
+        /// <summary>
+        ///     Read InputObject argument dictionary as object
+        /// </summary>
+        /// <remarks>
+        ///     Experimental. This might go away anytime and be replaced with something better.
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> GetObjectArgumentList<T>(this IResolverContext context, string name)
+            where T : IReadFromObjectDictionary, new()
+        {
+            var arg = context.GetArgument<IEnumerable<IReadOnlyDictionary<string, object>>>(name);
+
+            if (arg is null)
+                yield break;
+
+            foreach (var item in arg)
+            {
+                if (item is null)
+                {
+                    yield return default(T);
+                    continue;
+                }
+
+                var value = new T();
+                value.Read(item);
+                yield return value;
+            }
+        }
+
         public static T Extension<T>(this IResolverContext context) where T : IExtensionScope
         {
             return context.ExecutionContext.ExtensionsRunner.Extension<T>();
