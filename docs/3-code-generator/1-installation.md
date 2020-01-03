@@ -27,8 +27,7 @@ generation.
 
 1. Install the tool
 
-#### Locally
-
+Locally
 ```bash
 # new dotnet tool manifest
 dotnet new tool-manifest
@@ -36,8 +35,7 @@ dotnet new tool-manifest
 dotnet tool install tanka.graphql.generator.tool
 ```
 
-#### Globally
-
+Globally
 ```bash
 dotnet tool install --global tanka.graphql.generator.tool
 ```
