@@ -25,6 +25,8 @@ Code generator is distributed as NuGet packages:
 generation.
 
 
+Steps
+
 1. Install the tool
 
 Locally
@@ -40,12 +42,11 @@ Globally
 dotnet tool install --global tanka.graphql.generator.tool
 ```
 
-2. Install MSBuild tasks
+2. Install MSBuild tasks, ItemTypes and targets
 
 ```bash
 dotnet add package tanka.graphql.generator
 ```
-
 
 3. Add SDL file
 
@@ -60,8 +61,8 @@ and GraphQL SDL file.
 
 4. Generate code
 
-Code is generated automatically every time the SDL files are changes. 
-Rebuilding project will force the renegeration to be executed.
+Code is generated automatically every time the SDL files are changed. 
+Rebuilding project will force renegeration to be executed.
 Generated code files are located in IntermediateOutput directory. They're 
 automatically included in the compilation of the project and 
 Visual Studio IntelliSense will work with them. 
