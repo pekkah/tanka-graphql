@@ -1,9 +1,6 @@
 Tanka GraphQL library (TGQL)
 =====================================
 
-[![Build Status](https://dev.azure.com/tanka-ops/graphql/_apis/build/status/graphql?branchName=master)](https://dev.azure.com/tanka-ops/graphql/_build/latest?definitionId=1&branchName=master)
-
-
 ## Features
 
 * Execute queries, mutations and subscriptions
