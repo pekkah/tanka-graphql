@@ -27,7 +27,9 @@ generation.
 
 Steps
 
-1. Install the tool
+> Generated code requires that the target project references `tanka.graphql` and `tanka.graphql.server` packages.
+
+#### 1. Install the tool
 
 Locally
 ```bash
@@ -42,13 +44,13 @@ Globally
 dotnet tool install --global tanka.graphql.generator.tool
 ```
 
-2. Install MSBuild tasks, ItemTypes and targets
+#### 2. Install MSBuild tasks, ItemTypes and targets
 
 ```bash
 dotnet add package tanka.graphql.generator
 ```
 
-3. Add SDL file
+#### 3. Add SDL file
 
 Add SDL file to project and include it as
 and GraphQL SDL file.
@@ -59,7 +61,7 @@ and GraphQL SDL file.
 </ItemGroup>
 ```
 
-4. Generate code
+#### 4. Generate code
 
 Code is generated automatically every time the SDL files are changed. 
 Rebuilding project will force renegeration to be executed.

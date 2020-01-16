@@ -1,17 +1,31 @@
 ## ObjectType
 
+```graphql
+type ObjectType {
+	property: Int!
+	method(arg1: Int!): Int!
+	method2(arg1: Int): Int
+}
+```
+
 Generated
 - Low level interface with resolver method for each field,
 - A model class with property for each field of the ObjectType without arguments,
 - Abstract base class which implements the generated interface and acts an an 
 controller for the generated model.
 
-```graphql
-type ObjectType 
+
+### Model
+
+```csharp
+public partial class ObjectType
 {
-	property: Int!
-	method(arg1: Int!): Int!
-	method2(arg1: Int): Int
+    public string __Typename => "ObjectType";
+    public int Property
+    {
+        get;
+        set;
+    }
 }
 ```
 
@@ -27,21 +41,7 @@ public partial interface IObjectTypeController
 ```
 
 
-### Model
-
-```csharp
-public partial class ObjectType
-{
-    public int Property
-    {
-        get;
-        set;
-    }
-}
-```
-
-
-### Controller
+### Default Controller base class implementation
 
 ```csharp
 public abstract class ObjectTypeControllerBase<T> : IObjectTypeController where T : ObjectType

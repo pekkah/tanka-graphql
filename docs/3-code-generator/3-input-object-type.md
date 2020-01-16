@@ -1,17 +1,17 @@
 ## InputObjectType
 
+```gql
+input InputObjectType {
+	property1: Int!
+	property2: Float!
+}
+```
+
 Generated
 - A Model class implementing the `IReadFromObjectDictionary` interface required to
 to use the `GetObjectArgument` helper method of `IResolverContext` to read the argument
 value.
 
-```gql
-input InputObjectType 
-{
-	property1: Int!
-	property2: Float!
-}
-```
 
 ### Model
 
