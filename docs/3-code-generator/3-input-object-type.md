@@ -1,6 +1,6 @@
 ## InputObjectType
 
-```gql
+```graphql
 input InputObjectType {
 	property1: Int!
 	property2: Float!
