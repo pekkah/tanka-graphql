@@ -8,9 +8,7 @@ input InputObjectType {
 ```
 
 Generated
-- A Model class implementing the `IReadFromObjectDictionary` interface required to
-to use the `GetObjectArgument` helper method of `IResolverContext` to read the argument
-value.
+- A Model class implementing the `IReadFromObjectDictionary` interface required to to use the `GetObjectArgument` helper method of `IResolverContext` to read the argument value.
 
 
 ### Model

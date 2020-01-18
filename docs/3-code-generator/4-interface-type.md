@@ -21,6 +21,8 @@ Generated
 
 ### Model
 
+Model class is generated with properties generated according to same rules as for object types.
+
 ```csharp
 public partial interface IInterfaceType
 {
@@ -35,6 +37,8 @@ public partial interface IInterfaceType
 
 ### Controller
 
+GraphQL execution requires to know the actual type of the interface during value completion. Controller interface is generated with `IsTypeOf` method to resolve the actual type.
+
 ```csharp
 public partial interface IInterfaceTypeController
 {
@@ -44,6 +48,8 @@ public partial interface IInterfaceTypeController
 
 
 ### Default Controller implementation
+
+Default implementation of the interface controller uses the generated `__Typename` property to fetch the named type from the schema.
 
 ```csharp
 public partial class InterfaceTypeController : IInterfaceTypeController

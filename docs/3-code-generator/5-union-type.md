@@ -20,6 +20,8 @@ Generated
 
 ### Model
 
+Marker interface is generated to provide common base interface for members of the union. Each member of the union will implement this interface.
+
 ```csharp
 public partial interface IFieldType
 {
@@ -40,6 +42,8 @@ public partial class FieldValue2 : IFieldType
 
 ### Controller
 
+GraphQL execution requires to know the actual type of the union member during value completion. Controller interface is generated with `IsTypeOf` method to resolve the actual type. This is similar to interfaces.
+
 ```csharp
 public partial interface IFieldTypeController
 {
@@ -49,6 +53,8 @@ public partial interface IFieldTypeController
 
 
 ### Default Controller implementation
+
+Default implementation of the union controller uses the generated `__Typename` property to fetch the named type from the schema.
 
 ```csharp
 public partial class FieldTypeController : IFieldTypeController

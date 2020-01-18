@@ -17,6 +17,13 @@ controller for the generated model.
 
 ### Model
 
+Model class represents the type in the schema. 
+
+Property is generated from field of the type when:
+- field has no arguments,
+- field type is not an union, object or interface,
+- or owner type of the field is not an subscription root.
+
 ```csharp
 public partial class ObjectType
 {
@@ -29,7 +36,9 @@ public partial class ObjectType
 }
 ```
 
-### Interface
+### Controller
+
+Interface is generated with resolver method for each field of the type.
 
 ```csharp
 public partial interface IObjectTypeController
@@ -42,6 +51,12 @@ public partial interface IObjectTypeController
 
 
 ### Default Controller base class implementation
+
+Default controller base class implementing the interface is generated for the model class.
+
+If field of the type exists as property on the model class then
+simple resolver is generated which returns the value of the property
+as the resolver result; otherwise abstract method is generated.
 
 ```csharp
 public abstract class ObjectTypeControllerBase<T> : IObjectTypeController where T : ObjectType
