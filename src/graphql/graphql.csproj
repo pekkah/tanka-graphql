@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="GraphQL-Parser" Version="4.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.1" />
     <PackageReference Include="System.Text.Json" Version="4.7.0" />
     <PackageReference Include="System.Threading.Channels" Version="4.7.0" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
