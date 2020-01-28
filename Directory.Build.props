@@ -2,14 +2,12 @@
 <Project>
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
-    <!--<NullableContextOptions>enable</NullableContextOptions> -->
-
     <Copyright>Pekka Heikura</Copyright>
     <PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
     <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
     <Description>GraphQL Query, Mutation and Subscription library</Description>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageTags>graphql,tanka,signalr</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>graphql,tanka,signalr,apollo</PackageTags>
     <Authors>Pekka Heikura</Authors>
   </PropertyGroup>
 </Project>
