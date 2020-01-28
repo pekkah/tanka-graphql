@@ -263,15 +263,15 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h1 id="tanka-graphql-library-tgql">Tanka GraphQL library (TGQL)</h1>
-<h2 id="features">Features</h2>
 <ul>
 <li>Execute queries, mutations and subscriptions</li>
 <li>Validation (new implementation in v0.3.0)</li>
 <li>SignalR hub for streaming queries, mutations and subscriptions</li>
 <li>ApolloLink for the provided SignalR hub</li>
 <li>Apollo GraphQL WebSockets (apollo-link-ws) compatible web socket server (since v0.8.0)</li>
+<li>Code generation</li>
 </ul>
-<h3 id="feeds">Feeds</h3>
+<h2 id="documentation-and-packages">Documentation and packages</h2>
 <p>Beta</p>
 <ul>
 <li><a href="https://pekkah.github.io/tanka-graphql/beta/">Documentation</a></li>
@@ -285,14 +285,15 @@
 <img src="https://img.shields.io/nuget/vpre/tanka.graphql?style=flat-square" alt="Nuget (with prereleases)" /></p>
 <p><img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/latest?style=flat-square" alt="npm" />
 <img src="https://img.shields.io/npm/v/@tanka/tanka-graphql-server-link/beta?style=flat-square" alt="npm" /></p>
-<h3 id="install">Install</h3>
-<pre><code class="lang-bash">dotnet add tanka.graphql
-dotnet add tanka.graphql.server
+<h2 id="sample">Sample</h2>
+<p>Complete sample with codegeration
+See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
+<h2 id="install">Install</h2>
+<pre><code class="lang-bash">dotnet package add tanka.graphql
+dotnet package add tanka.graphql.server
 
 npm install @tanka/tanka-graphql-server-link
 </code></pre>
-<h2 id="sample">Sample</h2>
-<p>See <a href="https://github.com/pekkah/tanka-graphql-samples">Sample</a></p>
 <h2 id="develop">Develop</h2>
 <h3 id="run-the-dev-harness">Run the dev harness</h3>
 <p>This repo includes a sample application which is used for testing
