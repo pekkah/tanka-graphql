@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Subscription - tanka-graphql</title>
+    <title>Object type - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -117,7 +117,7 @@
             <a class="nav-link" href="1-execution/04-query.html">Query</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="1-execution/05-subscription.html">Subscription</a>
+            <a class="nav-link" href="1-execution/05-subscription.html">Subscription</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="1-execution/06-validation.html">Validation</a>
@@ -168,7 +168,7 @@
             <a class="nav-link" href="3-code-generator/1-installation.html">Installation</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="3-code-generator/2-object-type.html">Object type</a>
+            <a class="nav-link active bg-light" href="3-code-generator/2-object-type.html">Object type</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="3-code-generator/3-input-object-type.html">Input object type</a>
@@ -262,196 +262,105 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="subscription">Subscription</h2>
+                <h2 id="objecttype">ObjectType</h2>
+<pre><code class="lang-graphql">type ObjectType {
+	property: Int!
+	method(arg1: Int!): Int!
+	method2(arg1: Int): Int
+}
+</code></pre>
+<p>Generated</p>
+<ul>
+<li>Low level interface with resolver method for each field,</li>
+<li>A model class with property for each field of the ObjectType without arguments,</li>
+<li>Abstract base class which implements the generated interface and acts an an
+controller for the generated model.</li>
+</ul>
+<h3 id="model">Model</h3>
+<p>Model class represents the type in the schema.</p>
+<p>Property is generated from field of the type when:</p>
+<ul>
+<li>field has no arguments,</li>
+<li>field type is not an union, object or interface,</li>
+<li>or owner type of the field is not an subscription root.</li>
+</ul>
+<pre><code class="lang-csharp">public partial class ObjectType
+{
+    public string __Typename =&gt; &quot;ObjectType&quot;;
+    public int Property
+    {
+        get;
+        set;
+    }
+}
+</code></pre>
+<h3 id="controller">Controller</h3>
+<p>Interface is generated with resolver method for each field of the type.</p>
+<pre><code class="lang-csharp">public partial interface IObjectTypeController
+{
+    ValueTask&lt;IResolverResult&gt; Property(IResolverContext context);
+    ValueTask&lt;IResolverResult&gt; Method(IResolverContext context);
+    ValueTask&lt;IResolverResult&gt; Method2(IResolverContext context);
+}
+</code></pre>
+<h3 id="abstract-controller-base-class">Abstract Controller base class</h3>
+<p>Default abstract controller base class implementing the interface is generated for the model class.</p>
+<p>If field of the type exists as property on the model class then
+simple resolver is generated which returns the value of the property
+as the resolver result; otherwise abstract method is generated.</p>
 <blockquote>
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Subscription">Specification</a></p>
+<p>Actual implementation of this class is required with the required logic for fetching the data.</p>
 </blockquote>
-<h3 id="execution">Execution</h3>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public async Task Subscription()
-        {
-            /* Given */
-            var subscription = Parser.ParseDocument(
-                @&quot;subscription {
-                    events {
-                        __typename
-                        id
-                        type
-                        payload
-                    }
-                }&quot;);
+<pre><code class="lang-csharp">public abstract class ObjectTypeControllerBase&lt;T&gt; : IObjectTypeController where T : ObjectType
+{
+    public virtual async ValueTask&lt;IResolverResult&gt; Property(IResolverContext context)
+    {
+        var objectValue = (T)context.ObjectValue;
+        // if parent field was null this should never run
+        if (objectValue == null)
+            return Resolve.As(null);
+        var resultTask = Property(objectValue, context);
+        if (resultTask.IsCompletedSuccessfully)
+            return Resolve.As(resultTask.Result);
+        var result = await resultTask;
+        return Resolve.As(result);
+    }
 
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+    public virtual ValueTask&lt;int&gt; Property(T objectValue, IResolverContext context)
+    {
+        return new ValueTask&lt;int&gt;(objectValue.Property);
+    }
 
-            /* When */
-            var result = await Executor.SubscribeAsync(new ExecutionOptions()
-            {
-                Schema = Schema,
-                Document = subscription
-            }, cts.Token);
+    public virtual async ValueTask&lt;IResolverResult&gt; Method(IResolverContext context)
+    {
+        var objectValue = (T)context.ObjectValue;
+        // if parent field was null this should never run
+        if (objectValue == null)
+            return Resolve.As(null);
+        var resultTask = Method(objectValue, context.GetArgument&lt;int&gt;(&quot;arg1&quot;), context);
+        if (resultTask.IsCompletedSuccessfully)
+            return Resolve.As(resultTask.Result);
+        var result = await resultTask;
+        return Resolve.As(result);
+    }
 
-            await Model.AddAsync(new EventsModel.NewEvent()
-            {
-                Type = EventsModel.EventType.DELETE,
-                Payload = &quot;payload1&quot;
-            });
+    public abstract ValueTask&lt;int&gt; Method(T objectValue, int arg1, IResolverContext context);
+    public virtual async ValueTask&lt;IResolverResult&gt; Method2(IResolverContext context)
+    {
+        var objectValue = (T)context.ObjectValue;
+        // if parent field was null this should never run
+        if (objectValue == null)
+            return Resolve.As(null);
+        var resultTask = Method2(objectValue, context.GetArgument&lt;int?&gt;(&quot;arg1&quot;), context);
+        if (resultTask.IsCompletedSuccessfully)
+            return Resolve.As(resultTask.Result);
+        var result = await resultTask;
+        return Resolve.As(result);
+    }
 
-            var ev = await result.Source.Reader.ReadAsync(cts.Token);
-
-            // unsubscribe
-            cts.Cancel();
-
-            /* Then */
-            ev.ShouldMatchJson(
-                @&quot;{
-                  &quot;&quot;data&quot;&quot;: {
-                    &quot;&quot;events&quot;&quot;: {
-                      &quot;&quot;type&quot;&quot;: &quot;&quot;DELETE&quot;&quot;,
-                      &quot;&quot;id&quot;&quot;: &quot;&quot;1&quot;&quot;,
-                      &quot;&quot;__typename&quot;&quot;: &quot;&quot;Event&quot;&quot;,
-                      &quot;&quot;payload&quot;&quot;: &quot;&quot;payload1&quot;&quot;
-                    }
-                  }
-                }&quot;);
-        }
-</code></pre></p>
-<h3 id="example">Example</h3>
-<p>These are the schema and resolvers used in the above section.</p>
-<p>Schema
-<pre><code class="language-csharp">Sdl = @&quot;
-                enum EventType {
-                    INSERT
-                    UPDATE
-                    DELETE
-                }
-
-                type Success {
-                    id: ID!
-                    event: Event
-                }
-
-                type Failure {
-                    message: String!
-                }
-
-                union Result = Success | Failure
-
-                type Event {
-                    id: ID!
-                    type: EventType!
-                    payload: String
-                }
-
-                input NewEvent {
-                    type: String!
-                    payload: String
-                }
-
-                type Query {
-                    events: [Event!]
-                }
-
-                type Mutation {
-                    create(event: NewEvent!): Result
-                }
-
-                type Subscription {
-                    events: Event!
-                }
-
-                schema {
-                    query: Query
-                    mutation: Mutation
-                    subscription: Subscription
-                }
-                &quot;</code></pre></p>
-<p>Initialization</p>
-<p><pre><code class="language-csharp">
-        public ExecutorFacts(ITestOutputHelper atr)
-        {
-            Model = new EventsModel();
-            Resolvers = new ObjectTypeMap
-            {
-                {
-                    &quot;Success&quot;, new FieldResolversMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id)},
-                        {&quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event)}
-                    }
-                },
-                {
-                    &quot;Failure&quot;, new FieldResolversMap
-                    {
-                        {&quot;message&quot;, Resolve.PropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message)}
-                    }
-                },
-                {
-                    &quot;Event&quot;, new FieldResolversMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id)},
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload)}
-                    }
-                },
-                {
-                    &quot;NewEvent&quot;, new FieldResolversMap
-                    {
-                        {&quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type)},
-                        {&quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload)}
-                    }
-                },
-                {
-                    &quot;Query&quot;, new FieldResolversMap
-                    {
-                        {&quot;events&quot;, context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(Model.Events))}
-                    }
-                },
-                {
-                    &quot;Mutation&quot;, new FieldResolversMap
-                    {
-                        {
-                            &quot;create&quot;, async context =&gt;
-                            {
-                                var newEvent = context.GetObjectArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
-
-                                if (newEvent.Payload == null)
-                                    return Resolve.As(
-                                        context.ExecutionContext.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Failure&quot;),
-                                        new EventsModel.Failure(&quot;Payload should be given&quot;));
-
-                                var id = await Model.AddAsync(newEvent);
-                                var ev = Model.Events.Single(e =&gt; e.Id == id);
-
-                                return Resolve.As(
-                                    context.ExecutionContext.Schema.GetNamedType&lt;ObjectType&gt;(&quot;Success&quot;),
-                                    new EventsModel.Success(id, ev));
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;Subscription&quot;, new FieldResolversMap
-                    {
-                        {
-                            &quot;events&quot;, async (context, unsubscribe) =&gt;
-                            {
-                                await Task.Delay(0);
-                                var source = Model.Subscribe(unsubscribe);
-                                return source;
-                            },
-                            context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(context.ObjectValue))
-                        }
-                    }
-                }
-            };
-
-            Schema = SchemaTools.MakeExecutableSchema(
-                new SchemaBuilder().Sdl(Parser.ParseDocument(Sdl)),
-                Resolvers,
-                Resolvers);
-        }
-</code></pre></p>
+    public abstract ValueTask&lt;int?&gt; Method2(T objectValue, int? arg1, IResolverContext context);
+}
+</code></pre>
                     
             </main>
         </div>
