@@ -50,13 +50,15 @@ public partial interface IObjectTypeController
 ```
 
 
-### Default Controller base class implementation
+### Abstract Controller base class
 
-Default controller base class implementing the interface is generated for the model class.
+Default abstract controller base class implementing the interface is generated for the model class.
 
 If field of the type exists as property on the model class then
 simple resolver is generated which returns the value of the property
 as the resolver result; otherwise abstract method is generated.
+
+> Actual implementation of this class is required with the required logic for fetching the data.
 
 ```csharp
 public abstract class ObjectTypeControllerBase<T> : IObjectTypeController where T : ObjectType
