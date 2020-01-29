@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <base href="/tanka-graphql/">
+    <base href="/tanka-graphql/beta/">
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Import materialize.css-->
@@ -13,7 +13,7 @@
 
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Descriptions - Tanka GraphQL</title>
+    <title>Descriptions - tanka-graphql</title>
 </head>
 
 <body>
@@ -21,15 +21,13 @@
         <div class="col s12 m4 l3">
             <ul class="collection with-header">
                 <li class="collection-header">
-                    <h6>Home</h6>
+                    <a href="index.html"><h6>Home</h6></a>
                 </li>
-                        <a class="collection-item" href="index.html">Index</a>
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
-                    <h6>Type system</h6>
+                    <a href="1-type-system/02-schema.html"><h6>Type system</h6></a>
                 </li>
-                        <a class="collection-item" href="1-type-system/01-type-system-extensions.html">Type system extensions</a>
                         <a class="collection-item" href="1-type-system/02-schema.html">Schema</a>
                         <a class="collection-item active" href="1-type-system/03-descriptions.html">Descriptions</a>
                         <a class="collection-item" href="1-type-system/04-types.html">Types</a>
@@ -42,42 +40,91 @@
                         <a class="collection-item" href="1-type-system/11-list.html">List</a>
                         <a class="collection-item" href="1-type-system/12-non-null.html">Non null</a>
                         <a class="collection-item" href="1-type-system/13-directives.html">Directives</a>
+                        <a class="collection-item" href="1-type-system/14-named-type-reference.html">Named type reference</a>
+                        <a class="collection-item" href="1-type-system/15-SDL.html">SDL</a>
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
-                    <h6>Introspection</h6>
+                    <a href="2-introspection/4-type-name-introspection.html"><h6>Introspection</h6></a>
                 </li>
-                        <a class="collection-item" href="2-introspection/1-reserved-names.html">Reserved names</a>
-                        <a class="collection-item" href="2-introspection/2-documentation.html">Documentation</a>
-                        <a class="collection-item" href="2-introspection/3-deprecation.html">Deprecation</a>
                         <a class="collection-item" href="2-introspection/4-type-name-introspection.html">Type name introspection</a>
                         <a class="collection-item" href="2-introspection/5-schema-introspection.html">Schema introspection</a>
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
-                    <h6>Validation</h6>
+                    <a href="4-execution/1-validation.html"><h6>Execution</h6></a>
                 </li>
-                        <a class="collection-item" href="3-validation/1-documents.html">Documents</a>
-            </ul>
-            <ul class="collection with-header">
-                <li class="collection-header">
-                    <h6>Execution</h6>
-                </li>
+                        <a class="collection-item" href="4-execution/1-validation.html">Validation</a>
                         <a class="collection-item" href="4-execution/2-query.html">Query</a>
                         <a class="collection-item" href="4-execution/3-mutation.html">Mutation</a>
                         <a class="collection-item" href="4-execution/4-subscription.html">Subscription</a>
             </ul>
             <ul class="collection with-header">
                 <li class="collection-header">
-                    <h6>Response</h6>
+                    <a href="5-server/1-signalr-hub.html"><h6>Server</h6></a>
                 </li>
-                        <a class="collection-item" href="5-response/1-response-format.html">Response format</a>
-                        <a class="collection-item" href="5-response/2-serialization-format.html">Serialization format</a>
+                        <a class="collection-item" href="5-server/1-signalr-hub.html">Signalr hub</a>
+                        <a class="collection-item" href="5-server/2-apollo-link.html">Apollo link</a>
             </ul>
         </div>
         <div class="col s12 m8 l9">
             <article class="flow-text">
-                
+                <h2 id="descriptions">Descriptions</h2>
+<blockquote>
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Descriptions">Specification</a></p>
+</blockquote>
+<blockquote>
+<p>NotSupported: the parser used does not currently support block string
+documentation.
+Issue <a href="https://github.com/pekkah/tanka-graphql/issues/24">#24</a></p>
+</blockquote>
+<p><code>Meta</code> class provides the fields for descriptions. Following elements can be described using the <code>Meta</code> class. Usually by providing it as an constructor parameter.</p>
+<ul>
+<li><code>Argument</code></li>
+<li><code>DirectiveType</code></li>
+<li><code>EnumType</code> and values</li>
+<li><code>Field</code></li>
+<li><code>InputObjectField</code></li>
+<li><code>InputObjectType</code></li>
+<li><code>InterfaceType</code></li>
+<li><code>ObjectType</code></li>
+<li><code>ScalarType</code></li>
+<li><code>UnionType</code></li>
+</ul>
+<h3 id="example-field-description">Example: Field description</h3>
+<p>Description for the field is given by providing instance of <code>Meta</code>.</p>
+<p><pre><code class="language-csharp">        [Fact]
+        public void Describe()
+        {
+            /* Given */
+            var meta = new Meta(
+                &quot;Unique ID of the object&quot;);
+
+            /* When */
+            var field = new Field(
+                ScalarType.NonNullID,
+                meta: meta);
+
+            /* Then */
+            Assert.Equal(field.Meta.Description, meta.Description);
+        }
+</code></pre></p>
+<p>If no meta is given then the default <code>Meta</code> is used with empty value as description.</p>
+<p><pre><code class="language-csharp">
+        [Fact]
+        public void Meta_is_always_available()
+        {
+            /* Given */
+            /* When */
+            var field = new Field(
+                ScalarType.NonNullID);
+
+            /* Then */
+            Assert.NotNull(field.Meta);
+            Assert.Empty(field.Meta.Description);
+        }
+</code></pre></p>
+
             </article>
         </div>
     </div>
