@@ -56,7 +56,7 @@ $Version = $Version.Trim()
 $PreReleaseTag = dotnet gitversion /output json /showvariable PreReleaseTag | Out-String -NoNewline
 EnsureLastExitCode("Could not get PrReleaseTag from gitversion")
 $PreReleaseTag = $PreReleaseTag.Trim()
-$IsPreRelease = $PreReleaseTag -ne '' -or $null -ne $PreReleaseTag
+$IsPreRelease = $PreReleaseTag -ne ''
 "PreReleaseTag: $PreReleaseTag, IsPreRelease: $IsPreRelease"
 
 # Is Master
