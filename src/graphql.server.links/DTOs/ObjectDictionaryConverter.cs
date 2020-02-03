@@ -17,14 +17,6 @@ namespace Tanka.GraphQL.Server.Links.DTOs
             return ReadDictionary(doc.RootElement, options);
         }
 
-        private void EnsureTokenType(JsonTokenType actual, JsonTokenType expected)
-        {
-            if (actual != expected)
-                throw new InvalidOperationException(
-                    $"Unexpected token type '{actual}' expected '{expected}'");
-        }
-
-
         public override void Write(Utf8JsonWriter writer, Dictionary<string, object> value,
             JsonSerializerOptions options)
         {
