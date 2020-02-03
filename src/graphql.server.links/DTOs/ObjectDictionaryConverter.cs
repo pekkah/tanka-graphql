@@ -113,7 +113,7 @@ namespace Tanka.GraphQL.Server.Links.DTOs
                         yield return null;
                         break;
                     case JsonValueKind.Array:
-                        yield return ReadArray(item, options);
+                        yield return ReadArray(item, options).ToList();
                         break;
                     default:
                         throw new InvalidOperationException($"Unexpected value kind: {item.ValueKind}");
