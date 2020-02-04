@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Tanka.GraphQL.Server.Links.DTOs;
 using Xunit;
@@ -15,6 +16,7 @@ namespace Tanka.GraphQL.Server.Links.Tests.DTOs
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 WriteIndented = true,
+                IgnoreNullValues = false,
                 Converters =
                 {
                     new ObjectDictionaryConverter()
@@ -77,6 +79,25 @@ namespace Tanka.GraphQL.Server.Links.Tests.DTOs
 
             /* Then */
             Assert.NotNull(actual["values"]);
+        }
+
+        [Fact]
+        public void Deserialize_Array_in_Array()
+        {
+            /* Given */
+            var json = @"
+                {
+                    ""values"": [[1,2,3]]
+                }
+            ";
+
+            /* When */
+            var actual = JsonSerializer.Deserialize<Dictionary<string, object>>(json, _options);
+
+            /* Then */
+            Assert.NotNull(actual["values"]);
+            var values = actual["values"];
+            Assert.IsAssignableFrom<IEnumerable<object>>(values);
         }
 
         [Fact]
@@ -161,6 +182,29 @@ namespace Tanka.GraphQL.Server.Links.Tests.DTOs
             /* Then */
             Assert.Equal("string", actual.Value1);
             Assert.Equal(123, actual.Value2);
+        }
+
+        [Fact]
+        public void Serialize_SimpleValues()
+        {
+            /* Given */
+            var source = new Nested() 
+            {
+                Value2 = 123,
+                Value1 = null
+            };
+
+            /* When */
+            var json = JsonSerializer.Serialize(source, _options);
+
+            /* Then */
+            Assert.Equal(
+                @"{
+  ""value1"": null,
+  ""dictionary"": null,
+  ""value2"": 123
+}".Trim(),
+                json);
         }
 
         [Fact]

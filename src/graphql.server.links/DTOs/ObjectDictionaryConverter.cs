@@ -10,6 +10,94 @@ namespace Tanka.GraphQL.Server.Links.DTOs
 {
     public class ObjectDictionaryConverter : JsonConverter<Dictionary<string, object>>
     {
+        public override Dictionary<string, object> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var result = new Dictionary<string, object>();
+            // {
+            reader.Read();
+            
+            //"property": value
+            while (IsProperty(ref reader))
+            {
+                // prop
+                var propertyName = reader.GetString();
+                reader.Read();
+
+                // value
+                var value = ReadValue(ref reader, options);
+
+                result[propertyName] = value;
+            }
+
+            // }
+            reader.Read();
+            return result;
+        }
+
+        private object ReadValue(ref Utf8JsonReader reader, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.StartArray)
+            {
+                return JsonSerializer.Deserialize<object[]>(ref reader, options);
+            }
+
+            if (reader.TokenType == JsonTokenType.StartObject)
+            {
+                return Read(ref reader, typeof(Dictionary<string, object>), options);
+            }
+
+            object value = null;
+            switch (reader.TokenType)
+            {
+                case JsonTokenType.True:
+                    value = true;
+                    break;
+                case JsonTokenType.False:
+                    value = false;
+                    break;
+                case JsonTokenType.Number:
+                {
+                    if (reader.TryGetInt32(out int intValue))
+                    {
+                        value = intValue;
+                    }
+                    else if (reader.TryGetInt64(out long longValue))
+                    {
+                        value = longValue;
+                    }
+                    else
+                        value = reader.GetDouble();
+
+                    break;
+                }
+                case JsonTokenType.String:
+                    value = reader.GetString();
+                    break;
+            }
+
+            reader.Read();
+            return value;
+        }
+
+        private bool IsProperty(ref Utf8JsonReader reader)
+        {
+            return reader.TokenType == JsonTokenType.PropertyName;
+        }
+
+        public override void Write(Utf8JsonWriter writer, Dictionary<string, object> value, JsonSerializerOptions options)
+        {
+            writer.WriteStartObject();
+            foreach (var kvp in value)
+            {
+                writer.WritePropertyName(kvp.Key);
+                JsonSerializer.Serialize(writer, kvp.Value, options);
+            }
+            writer.WriteEndObject();
+        }
+    }
+
+    public class ObjectDictionaryConverter2 : JsonConverter<Dictionary<string, object>>
+    {
         public override Dictionary<string, object> Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
         {
