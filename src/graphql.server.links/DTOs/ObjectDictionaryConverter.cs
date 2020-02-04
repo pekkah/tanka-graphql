@@ -13,6 +13,7 @@ namespace Tanka.GraphQL.Server.Links.DTOs
         public override Dictionary<string, object> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var result = new Dictionary<string, object>();
+
             // {
             reader.Read();
             
