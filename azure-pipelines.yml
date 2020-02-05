@@ -10,7 +10,7 @@ stages:
   jobs:
   - job: Build
     pool:
-      vmImage: 'windows-2019'
+      vmImage: 'ubuntu-latest'
     steps:
     - task: UseDotNet@2
       displayName: Use dotnet core SDK
@@ -49,7 +49,7 @@ stages:
       artifact: artifacts
 
 - stage: Publish
-  # condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
+  condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
   jobs:
   - deployment: Deploy
     displayName: Publish packages
@@ -84,7 +84,7 @@ stages:
             continueOnError: true
 
           - task: Npm@1
-            enabled: false
+            enabled: true
             displayName: publish beta
             condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
             inputs:
@@ -94,7 +94,7 @@ stages:
               customEndpoint: 'NPM'
 
           - task: Npm@1
-            enabled: false
+            enabled: true
             displayName: 'npm publish latest'
             condition: startsWith(variables['Build.SourceBranch'], 'refs/tags')
             inputs:
@@ -140,7 +140,7 @@ stages:
               cd $(Build.SourcesDirectory)
               git push
               git status
-            enabled: false
+            enabled: true
             displayName: Push
   
 
