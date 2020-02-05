@@ -84,6 +84,7 @@ stages:
             continueOnError: true
 
           - task: Npm@1
+            enabled: false
             displayName: publish beta
             condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
             inputs:
@@ -93,6 +94,7 @@ stages:
               customEndpoint: 'NPM'
 
           - task: Npm@1
+            enabled: false
             displayName: 'npm publish latest'
             condition: startsWith(variables['Build.SourceBranch'], 'refs/tags')
             inputs:
