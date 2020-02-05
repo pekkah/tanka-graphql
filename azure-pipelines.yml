@@ -49,7 +49,7 @@ stages:
       artifact: artifacts
 
 - stage: Publish
-  condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
+  # condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
   jobs:
   - deployment: Deploy
     displayName: Publish packages
@@ -135,8 +135,13 @@ stages:
               echo "BuildNumber: $(Build.BuildNumber)"
               git commit -m "$(Build.BuildNumber)"
               git status
-              # git push
-            displayName: Commit and push
+            displayName: Commit
+          - script: |
+              cd $(Build.SourcesDirectory)
+              git push
+              git status
+            enabled: false
+            displayName: Push
   
 
 
