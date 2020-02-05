@@ -120,7 +120,7 @@ stages:
           - script: |
               git config user.email "$(git.email)"
               git config user.name "$(git.name)"
-              git checkout gh-pages
+              git checkout --track origin/gh-pages
             displayName: Use gh-pages
           - script: |
               cp -rv $(Pipeline.Workspace)/artifacts/gh-pages/** $(Build.SourcesDirectory)/
