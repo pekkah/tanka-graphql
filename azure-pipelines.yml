@@ -10,7 +10,7 @@ stages:
   jobs:
   - job: Build
     pool:
-      vmImage: 'windows-2019'
+      vmImage: 'windows-latest'
     steps:
     - task: UseDotNet@2
       displayName: Use dotnet core SDK
@@ -84,6 +84,7 @@ stages:
             continueOnError: true
 
           - task: Npm@1
+            enabled: true
             displayName: publish beta
             condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
             inputs:
@@ -93,6 +94,7 @@ stages:
               customEndpoint: 'NPM'
 
           - task: Npm@1
+            enabled: true
             displayName: 'npm publish latest'
             condition: startsWith(variables['Build.SourceBranch'], 'refs/tags')
             inputs:
@@ -118,7 +120,7 @@ stages:
           - script: |
               git config user.email "$(git.email)"
               git config user.name "$(git.name)"
-              git switch gh-pages
+              git checkout --track origin/gh-pages
             displayName: Use gh-pages
           - script: |
               cp -rv $(Pipeline.Workspace)/artifacts/gh-pages/** $(Build.SourcesDirectory)/
@@ -132,7 +134,14 @@ stages:
               cd $(Build.SourcesDirectory)
               echo "BuildNumber: $(Build.BuildNumber)"
               git commit -m "$(Build.BuildNumber)"
+              git status
+            displayName: Commit
+          - script: |
+              cd $(Build.SourcesDirectory)
               git push
+              git status
+            enabled: true
+            displayName: Push
   
 
 
