@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <base href="/tanka-graphql/beta/">
+    <base href="/tanka-graphql/">
     <title>Benchmarks - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -268,8 +268,7 @@ Intel Xeon CPU E5-2673 v4 2.30GHz, 1 CPU, 2 logical and 2 physical cores
 .NET Core SDK=3.1.101
   [Host] : .NET Core 3.1.1 (CoreCLR 4.700.19.60701, CoreFX 4.700.19.60801), X64 RyuJIT
 
-Toolchain=InProcessEmitToolchain  IterationCount=3  LaunchCount=1  
-WarmupCount=3  
+Toolchain=InProcessEmitToolchain  
 
 </code></pre>
 <table>
@@ -288,9 +287,9 @@ WarmupCount=3
 <tbody>
 <tr>
 <td>Query_with_defaults</td>
-<td style="text-align: right;">30.578 us</td>
-<td style="text-align: right;">7.5138 us</td>
-<td style="text-align: right;">0.4119 us</td>
+<td style="text-align: right;">23.757 us</td>
+<td style="text-align: right;">0.4743 us</td>
+<td style="text-align: right;">0.6649 us</td>
 <td style="text-align: right;">0.8545</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -298,9 +297,9 @@ WarmupCount=3
 </tr>
 <tr>
 <td>Query_without_validation</td>
-<td style="text-align: right;">7.200 us</td>
-<td style="text-align: right;">0.8033 us</td>
-<td style="text-align: right;">0.0440 us</td>
+<td style="text-align: right;">5.587 us</td>
+<td style="text-align: right;">0.0969 us</td>
+<td style="text-align: right;">0.0809 us</td>
 <td style="text-align: right;">0.1602</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -308,9 +307,9 @@ WarmupCount=3
 </tr>
 <tr>
 <td>Mutation_with_defaults</td>
-<td style="text-align: right;">29.820 us</td>
-<td style="text-align: right;">5.6880 us</td>
-<td style="text-align: right;">0.3118 us</td>
+<td style="text-align: right;">22.468 us</td>
+<td style="text-align: right;">0.5329 us</td>
+<td style="text-align: right;">0.7977 us</td>
 <td style="text-align: right;">0.8240</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -318,9 +317,9 @@ WarmupCount=3
 </tr>
 <tr>
 <td>Mutation_without_validation</td>
-<td style="text-align: right;">6.365 us</td>
-<td style="text-align: right;">2.1926 us</td>
-<td style="text-align: right;">0.1202 us</td>
+<td style="text-align: right;">4.825 us</td>
+<td style="text-align: right;">0.0919 us</td>
+<td style="text-align: right;">0.1162 us</td>
 <td style="text-align: right;">0.1450</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -328,9 +327,9 @@ WarmupCount=3
 </tr>
 <tr>
 <td>Subscribe_with_defaults</td>
-<td style="text-align: right;">56.493 us</td>
-<td style="text-align: right;">13.9264 us</td>
-<td style="text-align: right;">0.7634 us</td>
+<td style="text-align: right;">44.974 us</td>
+<td style="text-align: right;">0.9270 us</td>
+<td style="text-align: right;">0.9520 us</td>
 <td style="text-align: right;">1.0376</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -338,19 +337,19 @@ WarmupCount=3
 </tr>
 <tr>
 <td>Subscribe_without_validation</td>
-<td style="text-align: right;">17.263 us</td>
-<td style="text-align: right;">4.3677 us</td>
-<td style="text-align: right;">0.2394 us</td>
-<td style="text-align: right;">0.3357</td>
-<td style="text-align: right;">-</td>
+<td style="text-align: right;">13.540 us</td>
+<td style="text-align: right;">0.2683 us</td>
+<td style="text-align: right;">0.3848 us</td>
+<td style="text-align: right;">0.3510</td>
+<td style="text-align: right;">0.0153</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">9.05 KB</td>
 </tr>
 <tr>
 <td>Subscribe_with_defaults_and_get_value</td>
-<td style="text-align: right;">56.408 us</td>
-<td style="text-align: right;">14.2268 us</td>
-<td style="text-align: right;">0.7798 us</td>
+<td style="text-align: right;">45.335 us</td>
+<td style="text-align: right;">0.8911 us</td>
+<td style="text-align: right;">1.6516 us</td>
 <td style="text-align: right;">1.0376</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">-</td>
@@ -358,19 +357,19 @@ WarmupCount=3
 </tr>
 <tr>
 <td>Validate_with_defaults</td>
-<td style="text-align: right;">16.512 us</td>
-<td style="text-align: right;">5.9306 us</td>
-<td style="text-align: right;">0.3251 us</td>
+<td style="text-align: right;">11.286 us</td>
+<td style="text-align: right;">0.2116 us</td>
+<td style="text-align: right;">0.2173 us</td>
 <td style="text-align: right;">0.6714</td>
-<td style="text-align: right;">-</td>
+<td style="text-align: right;">0.0153</td>
 <td style="text-align: right;">-</td>
 <td style="text-align: right;">17.47 KB</td>
 </tr>
 <tr>
 <td>Validate_100times_with_defaults</td>
-<td style="text-align: right;">1,597.074 us</td>
-<td style="text-align: right;">2,030.9395 us</td>
-<td style="text-align: right;">111.3226 us</td>
+<td style="text-align: right;">1,153.241 us</td>
+<td style="text-align: right;">25.4364 us</td>
+<td style="text-align: right;">44.5497 us</td>
 <td style="text-align: right;">68.3594</td>
 <td style="text-align: right;">1.9531</td>
 <td style="text-align: right;">-</td>
