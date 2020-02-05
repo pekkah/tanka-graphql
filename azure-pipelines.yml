@@ -118,7 +118,7 @@ stages:
           - script: |
               git config user.email "$(git.email)"
               git config user.name "$(git.name)"
-              git switch gh-pages
+              git checkout gh-pages
             displayName: Use gh-pages
           - script: |
               cp -rv $(Pipeline.Workspace)/artifacts/gh-pages/** $(Build.SourcesDirectory)/
@@ -132,7 +132,9 @@ stages:
               cd $(Build.SourcesDirectory)
               echo "BuildNumber: $(Build.BuildNumber)"
               git commit -m "$(Build.BuildNumber)"
-              git push
+              git status
+              # git push
+            displayName: Commit and push
   
 
 

@@ -59,12 +59,6 @@ $PreReleaseTag = $PreReleaseTag.Trim()
 $IsPreRelease = $PreReleaseTag -ne ''
 "PreReleaseTag: $PreReleaseTag, IsPreRelease: $IsPreRelease"
 
-# Is Master
-"----------------------------------------"
-"Check is master"
-$IsMaster = $CurrentBranch -eq 'master'
-"Is master: $IsMaster"
-
 # Build and test
 "----------------------------------------"
 "Build Dotnet"
