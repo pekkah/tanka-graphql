@@ -38,9 +38,19 @@ namespace Tanka.GraphQL.Tools
             foreach (var rightType in right.QueryTypes<ComplexType>())
                 MergeComplexType(right, target, rightType);
 
+            // merge unions
+            foreach (var rightType in right.QueryTypes<UnionType>())
+                MergeUnionType(right, target, rightType);
+
             // merge complex type field
             foreach (var rightType in right.QueryTypes<ComplexType>())
                 MergeComplexTypeFields(right, target, rightType);
+        }
+
+        private static void MergeUnionType(ISchema right, SchemaBuilder builder, UnionType rightType)
+        {
+            if (!builder.TryGetType<UnionType>(rightType.Name, out _)) 
+                builder.Include(rightType);
         }
 
         private static void MergeEnumType(ISchema right, SchemaBuilder builder, EnumType rightType)

@@ -121,5 +121,47 @@ namespace Tanka.GraphQL.Tests.Tools
             var field = schema.GetField("Query", "currentColor");
             Assert.Equal(newEnumType, field.Type);
         }
+
+        [Fact]
+        public void Merge_schema_with_new_union()
+        {
+            /* Given */
+            var newTypes = new SchemaBuilder()
+                .Sdl(@"
+type Red {
+}
+
+type Green {
+}
+
+type Orange {
+}
+
+union Color = Red | Orange | Green
+
+type Query {
+    color: Color
+}
+                    ")
+                .Build();
+
+            var builder = new SchemaBuilder()
+                .Sdl(@"
+                    type Query {
+                    }
+                    ");
+
+            
+            /* When */
+            var schema = builder.Merge(newTypes)
+                .Build();
+
+            /* Then */
+            var newUnionType = schema.GetNamedType<UnionType>("Color");
+            Assert.NotNull(newUnionType);
+
+            var field = schema.GetField("Query", "color");
+            Assert.Equal(newUnionType, field.Type);
+        }
     }
 }
