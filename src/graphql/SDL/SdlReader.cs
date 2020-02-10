@@ -201,7 +201,7 @@ namespace Tanka.GraphQL.SDL
 
             if (definition == null)
                 throw new InvalidOperationException(
-                    $"Could not find a input type definition '{typeName}'.");
+                    $"Could not find a output type definition '{typeName}'.");
 
             switch (definition)
             {
