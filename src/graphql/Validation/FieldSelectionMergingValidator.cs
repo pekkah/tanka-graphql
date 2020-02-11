@@ -359,7 +359,9 @@ namespace Tanka.GraphQL.Validation
 
             var fragments = _context.Document
                 .Definitions
-                .OfType<GraphQLFragmentDefinition>();
+                .OfType<GraphQLFragmentDefinition>()
+                .ToList();
+
             var fragment1 = fragments.SingleOrDefault(f => f.Name.Value == fragmentName1);
             var fragment2 = fragments.SingleOrDefault(f => f.Name.Value == fragmentName2);
 
