@@ -1,0 +1,15 @@
+﻿interface InterfaceType {
+	property: Int!
+	method(arg1: Int!): Int!
+}
+
+type FieldType implements InterfaceType {
+	property: Int!
+	method(arg1: Int!): Int!
+	property2: String!
+}
+
+type ObjectType {
+	property: InterfaceType
+	list: [InterfaceType]
+}

@@ -1,0 +1,77 @@
+﻿<ProjectSchemaDefinitions xmlns="http://schemas.microsoft.com/build/2009/properties">
+    <FileExtension Name=".graphql"
+                   ContentType="GraphQLFile" />
+
+    <ContentType Name="GraphQLFile"
+                 DisplayName="GraphQL SDL file"
+                 ItemType="GraphQL" />
+
+    <ItemType Name="GraphQL"
+              DisplayName="GraphQL SDL" />
+
+    <Rule Name="GraphQL"
+          DisplayName="File Properties"
+          PageTemplate="generic"
+          Description="File Properties"
+          OverrideMode="Extend">
+        <Rule.DataSource>
+            <DataSource Persistence="ProjectFile" Label="Configuration" ItemType="GraphQL"
+                        HasConfigurationCondition="false" SourceOfDefaultValue="AfterContext" />
+        </Rule.DataSource>
+
+        <Rule.Categories>
+            <Category Name="Advanced" DisplayName="Advanced" />
+            <Category Name="Misc" DisplayName="Misc" />
+        </Rule.Categories>
+
+        <DynamicEnumProperty Name="{}{ItemType}" DisplayName="Build Action" Category="Advanced"
+                             Description="How the file relates to the build and deployment processes."
+                             EnumProvider="ItemTypes" />
+
+        <StringProperty Name="Identity" Visible="false" ReadOnly="true">
+            <StringProperty.DataSource>
+                <DataSource Persistence="Intrinsic" ItemType="GraphQL"
+                            PersistedName="Identity" SourceOfDefaultValue="AfterContext" />
+            </StringProperty.DataSource>
+        </StringProperty>
+
+        <StringProperty Name="FullPath"
+                        DisplayName="Full Path"
+                        ReadOnly="true"
+                        Category="Misc"
+                        Description="Location of the file.">
+            <StringProperty.DataSource>
+                <DataSource Persistence="Intrinsic" ItemType="GraphQL"
+                            PersistedName="FullPath" SourceOfDefaultValue="AfterContext" />
+            </StringProperty.DataSource>
+        </StringProperty>
+
+        <StringProperty Name="FileNameAndExtension"
+                        DisplayName="File Name"
+                        ReadOnly="true"
+                        Category="Misc"
+                        Description="Name of the file or folder.">
+            <StringProperty.DataSource>
+                <DataSource Persistence="Intrinsic" ItemType="GraphQL"
+                            PersistedName="FileNameAndExtension" SourceOfDefaultValue="AfterContext" />
+            </StringProperty.DataSource>
+        </StringProperty>
+
+        <BoolProperty Name="Visible" Visible="false" Default="true" />
+
+        <StringProperty Name="DependentUpon" Visible="false">
+            <StringProperty.Metadata>
+                <NameValuePair Name="DoNotCopyAcrossProjects" Value="true" />
+            </StringProperty.Metadata>
+        </StringProperty>
+
+        <StringProperty Name="Link" Visible="false">
+            <StringProperty.DataSource>
+                <DataSource SourceOfDefaultValue="AfterContext" />
+            </StringProperty.DataSource>
+            <StringProperty.Metadata>
+                <NameValuePair Name="DoNotCopyAcrossProjects" Value="true" />
+            </StringProperty.Metadata>
+        </StringProperty>
+    </Rule>
+</ProjectSchemaDefinitions>

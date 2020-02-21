@@ -1,0 +1,5 @@
+﻿type ObjectType {
+	property: Int!
+	method(arg1: Int!): Int!
+	method2(arg1: Int): Int
+}
