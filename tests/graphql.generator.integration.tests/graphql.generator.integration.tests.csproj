@@ -11,7 +11,7 @@
     <TankaGeneratorForce>true</TankaGeneratorForce>
     <TankaSchemaTaskAssembly>$(TempTaskFolder)/tanka.graphql.generator.dll</TankaSchemaTaskAssembly>
     <TankaGeneratorToolCommand>dotnet</TankaGeneratorToolCommand>
-    <TankaGeneratorToolCommandArgs>run --no-build -p $(MSBuildThisFileDirectory)../../src/graphql.generator.tool/ -- gen-model</TankaGeneratorToolCommandArgs>
+    <TankaGeneratorToolCommandArgs>run --no-build -c $(Configuration) -p $(MSBuildThisFileDirectory)../../src/graphql.generator.tool/ -- gen-model</TankaGeneratorToolCommandArgs>
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)/../../src/graphql.generator/build/tanka.graphql.generator.targets" />
   <ItemGroup>
