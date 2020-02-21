@@ -7,6 +7,8 @@
     <AssemblyName>tanka.graphql.generator.tool</AssemblyName>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>dotnet-tanka-graphql</ToolCommandName>
+    <Description>Code generator for Tanka GraphQL library</Description>
+    <PackageTags>graphql,tanka,resolvers,generator,msbuild</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

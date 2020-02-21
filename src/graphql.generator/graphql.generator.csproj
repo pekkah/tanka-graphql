@@ -8,6 +8,10 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <AssemblyName>tanka.graphql.generator</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Generator</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <Description>Code generator for Tanka GraphQL library</Description>
+    <PackageTags>graphql,tanka,resolvers,generator,msbuild</PackageTags>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

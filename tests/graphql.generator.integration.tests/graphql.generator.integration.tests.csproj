@@ -4,6 +4,7 @@
     <IsPackable>false</IsPackable>
     <RootNamespace>Tanka.GraphQL.Generator.Integration.Tests</RootNamespace>
     <AssemblyName>Tanka.GraphQL.Generator.Integration.Tests</AssemblyName>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
     <TempTaskFolder>$([System.IO.Path]::GetTempPath())$([System.IO.Path]::GetRandomFileName())</TempTaskFolder>
