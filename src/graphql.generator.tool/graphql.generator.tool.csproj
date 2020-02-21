@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>Tanka.GraphQL.Generator.Tool</RootNamespace>
+    <AssemblyName>tanka.graphql.generator.tool</AssemblyName>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>dotnet-tanka-graphql</ToolCommandName>
+    <Description>Code generator for Tanka GraphQL library</Description>
+    <PackageTags>graphql,tanka,resolvers,generator,msbuild</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.7.82" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\graphql.generator.core\graphql.generator.core.csproj" />
+  </ItemGroup>
+
+</Project>

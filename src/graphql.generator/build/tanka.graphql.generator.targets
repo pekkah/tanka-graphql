@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Project
+  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TankaSchemaTaskAssembly Condition="'$(TankaSchemaTaskAssembly)' == ''">netstandard2.0\tanka.graphql.generator.dll</TankaSchemaTaskAssembly>
+    <TankaGeneratorToolCommand Condition="'$(TankaGeneratorToolCommand)' == ''">dotnet</TankaGeneratorToolCommand>
+    <TankaGeneratorToolCommandArgs Condition="'$(TankaGeneratorToolCommandArgs)' == ''">tanka-graphql gen-model</TankaGeneratorToolCommandArgs>
+    <TankaGeneratorForce Condition="'$(TankaGeneratorForce)' == ''">false</TankaGeneratorForce>
+  </PropertyGroup>
+
+  <UsingTask AssemblyFile="$(TankaSchemaTaskAssembly)" TaskName="SchemaGenerator" />
+  
+  <ItemGroup>
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)tanka.graphql.generator.xaml">
+      <Context>File;BrowseObject</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)graphql.xaml">
+      <Context>File;BrowseObject</Context>
+    </PropertyPageSchema>
+
+    <AvailableItemName Include="GraphQL" />
+  </ItemGroup>
+
+  <ItemDefinitionGroup>
+    <GraphQL>
+      <Generator>MSBuild:GenerateGraphQL</Generator>
+      <Code>%(RelativeDir)%(Filename).g.cs</Code>
+      <Generate>Complete</Generate>
+    </GraphQL>
+  </ItemDefinitionGroup>
+
+  <Target Name="BeforeGenerateGraphQL" />
+  <Target Name="AfterGenerateGraphQL" />
+
+  <Target Name="PrepareGenerateGraphQL">
+    <PropertyGroup>
+      <CodeGenerationRoot Condition="'$(CodeGenerationRoot)' == ''">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)</CodeGenerationRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <GraphQL Update="@(GraphQL)">
+        <Code>$(CodeGenerationRoot)%(Code)</Code>
+      </GraphQL>
+    </ItemGroup>
+    <ItemGroup>
+      <GraphQL Remove="@(GraphQL)" Condition=" %(Generate) == 'None' " />
+    </ItemGroup>
+  </Target>
+
+  <Target
+    Name="GenerateGraphQLCode"
+    Condition="'@(GraphQL)' != ''">
+    <SchemaGenerator
+      Command="$(TankaGeneratorToolCommand)"
+      CommandArgs="$(TankaGeneratorToolCommandArgs)"
+      InputFiles="@(GraphQL)"
+      RootNamespace="$(RootNamespace)"
+      Force="$(TankaGeneratorForce)">
+      <Output TaskParameter="OutputFiles" ItemName="SchemaCode" />
+    </SchemaGenerator>
+    <ItemGroup>
+      <Compile Include="@(SchemaCode)" />
+      <!-- Extend to be cleaned on clean-->
+      <FileWrites Include="@(SchemaCode)" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <GenerateGraphQLDependsOn>
+      $(GenerateGraphQLDependsOn);
+      BeforeGenerateGraphQL;
+      PrepareGenerateGraphQL;
+      GenerateGraphQLCode;
+      AfterGenerateGraphQL;
+    </GenerateGraphQLDependsOn>
+  </PropertyGroup>
+
+  <Target Name="GenerateGraphQL"
+          DependsOnTargets="$(GenerateGraphQLDependsOn)"
+          BeforeTargets="CoreCompile">
+  </Target>
+
+  <!--<Target Name="_GraphQL_SourceFilesProjectOutputGroup"
+          BeforeTargets="SourceFilesProjectOutputGroup"
+          Condition=" '@(GraphQL)' != '' " >
+    <ItemGroup>
+      <SourceFilesProjectOutputGroupOutput Include="@(GraphQL->'%(FullPath)')" />
+    </ItemGroup>
+  </Target>-->
+
+  <Target Name="EmbedGraphQL" BeforeTargets="PrepareForBuild">
+    <ItemGroup>
+      <EmbeddedResource Include="@(GraphQL)" />
+    </ItemGroup>
+  </Target>
+</Project>
