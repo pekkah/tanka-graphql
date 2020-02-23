@@ -16,6 +16,17 @@ namespace Tanka.GraphQL.Tests
             /* Given */
             var provider = Substitute.For<IDocumentImportProvider>();
             provider.CanImport(null).ReturnsForAnyArgs(true);
+            provider.ImportAsync(null).ReturnsForAnyArgs(
+                new List<ASTNode>()
+                {
+                    new GraphQLObjectTypeDefinition()
+                    {
+                        Name = new GraphQLName()
+                        {
+                            Value = "Imported"
+                        }
+                    }
+                });
             
             var sdl = @"
                 # @import(path: ""./Imported"")
