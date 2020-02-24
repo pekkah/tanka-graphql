@@ -70,7 +70,7 @@ namespace Tanka.GraphQL
             if (provider == null)
                 throw new InvalidOperationException($"Could not find import provider for '{import}'");
 
-            return provider.ImportAsync(import);
+            return provider.ImportAsync(import, options);
         }
 
         private static IEnumerable<DirectiveInstance> ParseImports(string document)
@@ -126,13 +126,17 @@ namespace Tanka.GraphQL
 
     public class ParserOptions
     {
-        public List<IDocumentImportProvider> ImportProviders { get; set; }
+        public List<IDocumentImportProvider> ImportProviders { get; set; } = new List<IDocumentImportProvider>()
+        {
+            new FileSystemImportProvider(),
+            new EmbeddedResourceImportProvider()
+        };
     }
 
     public interface IDocumentImportProvider
     {
         bool CanImport(DirectiveInstance import);
 
-        ValueTask<IEnumerable<ASTNode>> ImportAsync(DirectiveInstance import);
+        ValueTask<IEnumerable<ASTNode>> ImportAsync(DirectiveInstance import, ParserOptions options);
     }
 }

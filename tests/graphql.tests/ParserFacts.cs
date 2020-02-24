@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
 using NSubstitute;
-using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests
@@ -16,18 +15,18 @@ namespace Tanka.GraphQL.Tests
             /* Given */
             var provider = Substitute.For<IDocumentImportProvider>();
             provider.CanImport(null).ReturnsForAnyArgs(true);
-            provider.ImportAsync(null).ReturnsForAnyArgs(
-                new List<ASTNode>()
+            provider.ImportAsync(null, null).ReturnsForAnyArgs(
+                new List<ASTNode>
                 {
-                    new GraphQLObjectTypeDefinition()
+                    new GraphQLObjectTypeDefinition
                     {
-                        Name = new GraphQLName()
+                        Name = new GraphQLName
                         {
                             Value = "Imported"
                         }
                     }
                 });
-            
+
             var sdl = @"
                 # @import(path: ""./Imported"")
 
