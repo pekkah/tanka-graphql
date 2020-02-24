@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using GraphQLParser;
 using GraphQLParser.AST;
-using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.TypeSystem;
@@ -14,6 +13,15 @@ namespace Tanka.GraphQL
 {
     public static class Parser
     {
+        public static DirectiveType ImportDirectiveType = new DirectiveType(
+            "import",
+            new[] {DirectiveLocation.SCHEMA},
+            new Args
+            {
+                ["path"] = new Argument(ScalarType.NonNullString, null, "Path"),
+                ["types"] = new Argument(new List(ScalarType.NonNullString), null, "Types to import")
+            });
+
         /// <summary>
         ///     Parse <see cref="document" /> into <see cref="GraphQLDocument" />
         /// </summary>
@@ -28,25 +36,28 @@ namespace Tanka.GraphQL
 
         /// <summary>
         ///     Parse <see cref="document" /> into <see cref="GraphQLDocument" />
+        ///     with default options
         /// </summary>
         /// <param name="document"></param>
         /// <returns></returns>
+        [Obsolete]
         public static Task<GraphQLDocument> ParseDocumentAsync(string document)
         {
-            return Task.Factory.StartNew(() =>
-            {
-                var lexer = new Lexer();
-                var parser = new GraphQLParser.Parser(lexer);
-                return parser.Parse(new Source(document));
-            });
+            return ParseDocumentAsync(document, new ParserOptions());
         }
 
-        public static async Task<GraphQLDocument> ParseDocumentAsync(string source, ParserOptions options)
+        /// <summary>
+        ///     Parse <see cref="document" /> into <see cref="GraphQLDocument" />
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static async Task<GraphQLDocument> ParseDocumentAsync(string document, ParserOptions options)
         {
-            var root = ParseDocument(source);
+            var root = ParseDocument(document);
             if (options.ImportProviders != null && options.ImportProviders.Any())
             {
-                var imports = ParseImports(source);
+                var imports = ParseImports(document);
 
                 var importedTypeDefs = new List<ASTNode>();
                 foreach (var import in imports)
@@ -90,7 +101,7 @@ namespace Tanka.GraphQL
                     yield return ReadImport(line);
                 else if (line.StartsWith("#"))
                     continue;
-                else if(line == string.Empty)
+                else if (line == string.Empty)
                     continue;
                 else
                     break;
@@ -113,30 +124,5 @@ namespace Tanka.GraphQL
 
             return import;
         }
-
-        public static DirectiveType ImportDirectiveType = new DirectiveType(
-            "import", 
-            new []{DirectiveLocation.SCHEMA}, 
-            new Args()
-            {
-                ["path"] = new Argument(ScalarType.NonNullString, null, "Path"),
-                ["types"] = new Argument(new List(ScalarType.NonNullString), null, "Types to import")
-            });
-    }
-
-    public class ParserOptions
-    {
-        public List<IDocumentImportProvider> ImportProviders { get; set; } = new List<IDocumentImportProvider>()
-        {
-            new FileSystemImportProvider(),
-            new EmbeddedResourceImportProvider()
-        };
-    }
-
-    public interface IDocumentImportProvider
-    {
-        bool CanImport(DirectiveInstance import);
-
-        ValueTask<IEnumerable<ASTNode>> ImportAsync(DirectiveInstance import, ParserOptions options);
     }
 }

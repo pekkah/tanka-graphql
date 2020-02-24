@@ -22,6 +22,13 @@ namespace Tanka.GraphQL.Extensions.Analysis
                 {"multipliers", new List(ScalarType.NonNullString)}
             });
 
+        internal static IEnumerable<ASTNode> CostDirectiveAst = Parser.ParseDocument(
+            @" directive @cost(
+                    complexity: String!
+                    multipliers: [String!]
+               ) on FIELD_DEFINITION 
+            ").Definitions;
+
 
         public static CombineRule MaxCost(
             uint maxCost,

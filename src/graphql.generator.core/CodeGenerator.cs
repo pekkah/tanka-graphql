@@ -88,14 +88,14 @@ namespace Tanka.GraphQL.Generator.Core
             return new NamedTypeGenerator(type, schema).Generate().ToList();
         }
         
-        private Task<SchemaBuilder> LoadSchema()
+        private async Task<SchemaBuilder> LoadSchema()
         {
             var content = File.ReadAllText(_inputFile);
-            var builder = new SchemaBuilder()
+            var builder = await new SchemaBuilder()
                 //.Sdl(CodeDirectivesSdl)
-                .Sdl(content);
+                .SdlAsync(content);
 
-            return Task.FromResult(builder);
+            return builder;
         }
 
         /*public static string CodeDirectivesSdl = @"
