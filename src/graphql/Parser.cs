@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GraphQLParser;
 using GraphQLParser.AST;
+using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.TypeSystem;
@@ -13,15 +14,6 @@ namespace Tanka.GraphQL
 {
     public static class Parser
     {
-        public static DirectiveType ImportDirectiveType = new DirectiveType(
-            "import",
-            new[] {DirectiveLocation.SCHEMA},
-            new Args
-            {
-                ["path"] = new Argument(ScalarType.NonNullString, null, "Path"),
-                ["types"] = new Argument(new List(ScalarType.NonNullString), null, "Types to import")
-            });
-
         /// <summary>
         ///     Parse <see cref="document" /> into <see cref="GraphQLDocument" />
         /// </summary>
@@ -62,7 +54,7 @@ namespace Tanka.GraphQL
                 var importedTypeDefs = new List<ASTNode>();
                 foreach (var import in imports)
                 {
-                    var typeDefs = await ImportAsync(import, options);
+                    var typeDefs = await ImportAsync(import.Path, import.Types, options);
                     importedTypeDefs.AddRange(typeDefs);
                 }
 
@@ -73,18 +65,18 @@ namespace Tanka.GraphQL
             return root;
         }
 
-        private static ValueTask<IEnumerable<ASTNode>> ImportAsync(DirectiveInstance import, ParserOptions options)
+        private static ValueTask<IEnumerable<ASTNode>> ImportAsync(string path, string[] types, ParserOptions options)
         {
             var provider = options.ImportProviders
-                .FirstOrDefault(p => p.CanImport(import));
+                .FirstOrDefault(p => p.CanImport(path, types));
 
             if (provider == null)
-                throw new InvalidOperationException($"Could not find import provider for '{import}'");
+                throw new InvalidOperationException($"Could not find import provider for '{path}'");
 
-            return provider.ImportAsync(import, options);
+            return provider.ImportAsync(path, types, options);
         }
 
-        private static IEnumerable<DirectiveInstance> ParseImports(string document)
+        private static IEnumerable<(string Path, string[] Types)> ParseImports(string document)
         {
             var reader = new StringReader(document);
 
@@ -108,21 +100,48 @@ namespace Tanka.GraphQL
             }
         }
 
-        private static DirectiveInstance ReadImport(string commentLineWithImport)
+        private static (string Path, string[] Types) ReadImport(string commentLineWithImport)
         {
             var lineWithImport = commentLineWithImport.Substring(1).Trim();
 
             // hack to parse directive without a type
             var document = ParseDocument($"scalar Hack {lineWithImport}");
-            var builder = new SchemaBuilder()
-                .Include(ImportDirectiveType)
-                .Sdl(document);
+          
+            // find import
+            var import = document.Definitions
+                .OfType<GraphQLScalarTypeDefinition>()
+                .Single()
+                .Directives
+                .Single();
 
-            var import = builder.GetTypes<ScalarType>()
-                .Single(s => s.Name == "Hack")
-                .GetDirective("import");
+            // parse args
+            var pathArg = import.Arguments.Single(a => a.Name.Value == "path");
+            var typesArg = import.Arguments.SingleOrDefault(a => a.Name.Value == "types");
 
-            return import;
+            var path = Values.CoerceValue(
+                _ => Enumerable.Empty<KeyValuePair<string, InputObjectField>>(),
+                ScalarType.GetStandardConverter,
+                pathArg.Value,
+                ScalarType.NonNullString)
+                .ToString();
+
+            // types can be null
+            if (typesArg != null)
+            {
+                var typesObjects = (IEnumerable<object>)Values.CoerceValue(
+                    _ => Enumerable.Empty<KeyValuePair<string, InputObjectField>>(),
+                    ScalarType.GetStandardConverter,
+                    typesArg.Value,
+                    new List(ScalarType.NonNullString));
+
+                var types = typesObjects.Select(o => o.ToString())
+                    .ToArray();
+
+                return (path, types);
+            }
+
+            // no types given
+            return (path, null);
         }
     }
 }

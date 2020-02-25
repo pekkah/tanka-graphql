@@ -1,15 +1,22 @@
 ﻿using System.Collections.Generic;
 using Tanka.GraphQL.Extensions;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.ImportProviders;
 
 namespace Tanka.GraphQL
 {
     public class ParserOptions
     {
-        public List<IDocumentImportProvider> ImportProviders { get; set; } = new List<IDocumentImportProvider>()
+        public static ParserOptions Sdl = new ParserOptions
         {
-            new ExtensionsImportProvider(),
-            new FileSystemImportProvider(),
-            new EmbeddedResourceImportProvider()
+            ImportProviders = new List<IImportProvider>
+            {
+                new ExtensionsImportProvider(),
+                new FileSystemImportProvider(),
+                new EmbeddedResourceImportProvider()
+            }
         };
+
+        public List<IImportProvider> ImportProviders { get; set; }
     }
 }

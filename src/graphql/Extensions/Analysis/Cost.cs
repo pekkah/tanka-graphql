@@ -23,8 +23,8 @@ namespace Tanka.GraphQL.Extensions.Analysis
             });
 
         internal static IEnumerable<ASTNode> CostDirectiveAst = Parser.ParseDocument(
-            @" directive @cost(
-                    complexity: String!
+            @"directive @cost(
+                    complexity: Int!
                     multipliers: [String!]
                ) on FIELD_DEFINITION 
             ").Definitions;
