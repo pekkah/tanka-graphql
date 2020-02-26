@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Files\Import.graphql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NSubstitute" Version="4.2.1" />
@@ -31,6 +35,7 @@
   </ItemGroup>
  
   <ItemGroup>
+    <EmbeddedResource Include="Files\Import.graphql" />
     <EmbeddedResource Include="github.graphql" />
   </ItemGroup>
 

@@ -1,0 +1,3 @@
+directive @Directive(
+	name: String!
+) on FIELD_DEFINITION

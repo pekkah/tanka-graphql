@@ -533,11 +533,20 @@ namespace Tanka.GraphQL.Validation
             FieldDefPair fieldDefPair1,
             FieldDefPair fieldDefPair2)
         {
-            var arguments1 = fieldDefPair1.Field.Arguments
+            var arguments1 = fieldDefPair1.Field.Arguments?
                 .ToDictionary(l => l.Name.Value, l => l);
 
-            var arguments2 = fieldDefPair2.Field.Arguments
+            var arguments2 = fieldDefPair2.Field.Arguments?
                 .ToDictionary(l => l.Name.Value, l => l);
+
+            if (arguments1 == null && arguments2 == null)
+                return true;
+
+            if (arguments1 == null)
+                return false;
+
+            if (arguments2 == null)
+                return false;
 
             if (arguments1.Count() != arguments2.Count()) 
                 return false;

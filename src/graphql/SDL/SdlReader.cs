@@ -100,6 +100,10 @@ namespace Tanka.GraphQL.SDL
             IEnumerable<GraphQLInputValueDefinition> definitions)
         {
             var args = new List<(string Name, IType Type, object DefaultValue, string Description)>();
+
+            if (definitions == null)
+                return args;
+
             foreach (var definition in definitions)
             {
                 var type = InputType(definition.Type);
@@ -267,7 +271,7 @@ namespace Tanka.GraphQL.SDL
                 var type = argument.Value.Type;
                 var defaultValue = argument.Value.DefaultValue;
 
-                var definition = directiveDefinition.Arguments
+                var definition = directiveDefinition.Arguments?
                     .SingleOrDefault(a => a.Name.Value == argument.Key);
 
                 var hasValue = definition != null;
@@ -333,6 +337,9 @@ namespace Tanka.GraphQL.SDL
         protected InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions)
         {
             var fields = new InputFields();
+
+            if (definitions == null)
+                return fields;
 
             foreach (var definition in definitions)
             {
@@ -474,6 +481,9 @@ namespace Tanka.GraphQL.SDL
         {
             var interfaces = new List<InterfaceType>();
 
+            if (definitions == null)
+                return Enumerable.Empty<InterfaceType>();
+
             foreach (var namedType in definitions)
             {
                 if (!(OutputType(namedType) is InterfaceType type))
@@ -487,6 +497,9 @@ namespace Tanka.GraphQL.SDL
 
         private void Fields(ComplexType owner, IEnumerable<GraphQLFieldDefinition> definitions)
         {
+            if (definitions == null)
+                return;
+
             foreach (var definition in definitions)
             {
                 var type = OutputType(definition.Type);

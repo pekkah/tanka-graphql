@@ -1,0 +1,5 @@
+﻿# @import(path:"tanka://cost-analysis")
+
+type ObjectType {
+	property: Int! @cost(complexity: 1)
+}

@@ -34,5 +34,16 @@ value of the argument can be used as mulpliplier for the complexity.
 [{Tanka.GraphQL.Tests.Analysis.CostFacts.Cost_above_max_cost_with_costDirective_and_multiplier}]
 
 
+## Import directive
+
+Using SDL import
+
+[{Tanka.GraphQL.Tests.Extensions.CostAnalysisImportFacts.Parse_Sdl}]
 
 
+Or you can include it manually using the `SchemaBuilder.Include`
+
+```csharp
+var builder = new SchemaBuilder()
+    .Include(CostAnalyzer.CostDirective);
+```

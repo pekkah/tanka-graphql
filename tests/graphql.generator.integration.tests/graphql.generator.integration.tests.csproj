@@ -15,6 +15,10 @@
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)/../../src/graphql.generator/build/tanka.graphql.generator.targets" />
   <ItemGroup>
+    <None Remove="Extensions\Analysis\Schema.graphql" />
+  </ItemGroup>
+  <ItemGroup>
+    <GraphQL Include="Extensions\Analysis\Schema.graphql" Generate="Complete" />
     <GraphQL Include="Types\InputObjectType\Schema.graphql" Generate="Complete" />
     <GraphQL Include="Types\UnionType\Schema.graphql" Generate="Complete" />
     <GraphQL Include="Types\InterfaceType\Schema.graphql" Generate="Complete" />
@@ -44,6 +48,6 @@
     </ItemGroup>
     <Copy SourceFiles="@(_TaskFiles)" DestinationFolder="$(TempTaskFolder)" />
   </Target>
-  <Target Name="AfterGenerateGraphQL">
+  <Target Name="AfterBuild">
   </Target>
 </Project>

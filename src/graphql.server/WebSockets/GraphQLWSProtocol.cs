@@ -19,6 +19,7 @@ namespace Tanka.GraphQL.Server.WebSockets
         private readonly IMessageContextAccessor _messageContextAccessor;
         private readonly WebSocketServerOptions _options;
         private readonly IQueryStreamService _queryStreamService;
+        private readonly ParserOptions _parserOptions;
 
         public GraphQLWSProtocol(
             IQueryStreamService queryStreamService,
@@ -30,6 +31,10 @@ namespace Tanka.GraphQL.Server.WebSockets
             _messageContextAccessor = messageContextAccessor;
             _logger = logger;
             _options = options.Value;
+            _parserOptions = new ParserOptions()
+            {
+                ImportProviders = null
+            }; //todo: inject
         }
 
         protected ConcurrentDictionary<string, Subscription> Subscriptions { get; } =
@@ -126,7 +131,7 @@ namespace Tanka.GraphQL.Server.WebSockets
 
             using var logScope = _logger.BeginScope("Query: '{operationName}'", payload.OperationName);
 
-            var document = Parser.ParseDocument(payload.Query);
+            var document = await Parser.ParseDocumentAsync(payload.Query, _parserOptions);
             var unsubscribeSource = new CancellationTokenSource();
             var queryStream = await _queryStreamService.QueryAsync(new Query
             {

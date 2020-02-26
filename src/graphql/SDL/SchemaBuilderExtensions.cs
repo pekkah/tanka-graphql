@@ -1,4 +1,5 @@
-﻿using GraphQLParser.AST;
+﻿using System.Threading.Tasks;
+using GraphQLParser.AST;
 using Tanka.GraphQL.SchemaBuilding;
 
 namespace Tanka.GraphQL.SDL
@@ -15,6 +16,12 @@ namespace Tanka.GraphQL.SDL
             var reader = new SdlReader(document, builder);
             reader.Read();
             return builder;
+        }
+
+        public static async Task<SchemaBuilder> SdlAsync(this SchemaBuilder builder, string sdl)
+        {
+            var document = await Parser.ParseDocumentAsync(sdl, ParserOptions.Sdl);
+            return Sdl(builder, document);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using GraphQLParser.AST;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
@@ -122,6 +123,16 @@ namespace Tanka.GraphQL.TypeSystem
         public static bool operator !=(ScalarType left, ScalarType right)
         {
             return !Equals(left, right);
+        }
+
+        internal static IValueConverter GetStandardConverter(string scalarName)
+        {
+            var scalar = Standard.SingleOrDefault(s => s.Type.Name == scalarName);
+
+            if (scalar.Type == null)
+                return null;
+
+            return scalar.Converter;
         }
     }
 }

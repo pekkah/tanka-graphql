@@ -211,11 +211,11 @@ namespace Tanka.GraphQL.Execution
             switch (node)
             {
                 case GraphQLFieldSelection fieldSelection:
-                    return fieldSelection.Directives;
+                    return fieldSelection.Directives ?? Enumerable.Empty<GraphQLDirective>();
                 case GraphQLFragmentSpread fragmentSpread:
-                    return fragmentSpread.Directives;
+                    return fragmentSpread.Directives ?? Enumerable.Empty<GraphQLDirective>();
                 case GraphQLInlineFragment inlineFragment:
-                    return inlineFragment.Directives;
+                    return inlineFragment.Directives ?? Enumerable.Empty<GraphQLDirective>();
                 default:
                     return Enumerable.Empty<GraphQLDirective>();
             }
