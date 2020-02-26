@@ -1,7 +1,7 @@
 ## Imports
 
-GraphQL specfication does not yet provide a way of importing types
-in SDL from other sources. There is some [discussion][] on
+GraphQL specification does not yet provide a way of importing types
+from SDL from other sources. There is some [discussion][] on
 this topic but nothing concrete and "official" is yet released. 
 
 > [graphql-import][] solves this, but the syntax does not feel like
@@ -11,15 +11,16 @@ this topic but nothing concrete and "official" is yet released.
 Tanka GraphQL solves this problem by providing a type system
 level directive which allows specifying path and list of types 
 to import. The actual details of how the import is fulfilled is
-delegated to providers. Few providers are provided out of the box
+delegated to import providers. Few providers are provided out of the box
 and others can be added.
 
 
 ### Syntax
 
 GraphQL does not allows specifying type system level directives.
-Because of this TGQL implements them by looking them from the comment
-lines in the beginning of SDL content.
+TGQL goes around this limitation by putting them inside a comment
+in the beginning of SDL content. Parser will check each comment line
+in the beginning of the SDL for `@import` directive.
 
 Example import
 
@@ -37,6 +38,9 @@ directive @import(
 )
 ```
 
+> Filtering using the `types` is not yet supported. All types will be
+> imported.
+
 
 ### Providers
 
@@ -53,6 +57,9 @@ Built in providers: (these are added to options by default)
 
 Custom providers can be implemented by implementing `IImportProvider` interface
 and adding the provider to the options.
+
+> Imports are only supported when using the `SchemaBuilder.SdlAsync` extension 
+> method or `Parser.ParseDocumentAsync` 
 
 
 [discussion]: https://github.com/graphql/graphql-wg/blob/master/notes/2018-02-01.md#present-graphql-import
