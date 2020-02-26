@@ -66,7 +66,7 @@ namespace Tanka.GraphQL.Extensions.Analysis
                                         continue;
 
                                     var multiplierArg =
-                                        node.Arguments.SingleOrDefault(a => a.Name.Value == multiplierName);
+                                        node.Arguments?.SingleOrDefault(a => a.Name.Value == multiplierName);
 
                                     if (multiplierArg == null)
                                         continue;

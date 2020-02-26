@@ -16,7 +16,7 @@ namespace Tanka.GraphQL.Validation
         }
 
         public ValidationError(string code, string message, IEnumerable<ASTNode> nodes)
-            : this(message, nodes.ToArray())
+            : this(message, nodes?.ToArray() ?? new ASTNode[0])
         {
             Code = code;
         }

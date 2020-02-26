@@ -58,7 +58,10 @@ namespace Tanka.GraphQL
                     importedTypeDefs.AddRange(typeDefs);
                 }
 
-                root.Definitions = root.Definitions.Concat(importedTypeDefs);
+                if (root.Definitions == null)
+                    root.Definitions = new List<ASTNode>();
+
+                root.Definitions.AddRange(importedTypeDefs);
                 return root;
             }
 

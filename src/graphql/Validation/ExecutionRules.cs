@@ -352,16 +352,37 @@ namespace Tanka.GraphQL.Validation
         /// </summary>
         public static CombineRule R5421RequiredArguments()
         {
-            IEnumerable<KeyValuePair<string, Argument>> GetArgumentDefinitions(IRuleVisitorContext context)
+            IEnumerable<KeyValuePair<string, Argument>> GetFieldArgumentDefinitions(IRuleVisitorContext context)
             {
-                var definitions = context.Tracker.GetDirective()?.Arguments
-                                  ?? context.Tracker.GetFieldDef()?.Field.Arguments;
+                var definitions = context
+                    .Tracker
+                    .GetFieldDef()
+                    ?.Field
+                    .Arguments;
+
+                if (definitions == null)
+                    return Enumerable.Empty<KeyValuePair<string, Argument>>();
 
                 return definitions;
             }
 
-            void ValidateArguments(IEnumerable<KeyValuePair<string, Argument>> keyValuePairs,
-                List<GraphQLArgument> graphQLArguments, IRuleVisitorContext ruleVisitorContext)
+            IEnumerable<KeyValuePair<string, Argument>> GetDirectiveArgumentDefinitions(IRuleVisitorContext context)
+            {
+                var definitions = context
+                                      .Tracker
+                                      .GetDirective()
+                                      ?.Arguments;
+
+                if (definitions == null)
+                    return Enumerable.Empty<KeyValuePair<string, Argument>>();
+
+                return definitions;
+            }
+
+            void ValidateArguments(
+                IEnumerable<KeyValuePair<string, Argument>> keyValuePairs,
+                List<GraphQLArgument> graphQLArguments, 
+                IRuleVisitorContext ruleVisitorContext)
             {
                 foreach (var argumentDefinition in keyValuePairs)
                 {
@@ -372,7 +393,8 @@ namespace Tanka.GraphQL.Validation
                         continue;
 
                     var argumentName = argumentDefinition.Key;
-                    var argument = graphQLArguments.SingleOrDefault(a => a.Name.Value == argumentName);
+                    var argument = graphQLArguments?
+                        .SingleOrDefault(a => a.Name.Value == argumentName);
 
                     if (argument == null)
                     {
@@ -406,8 +428,9 @@ namespace Tanka.GraphQL.Validation
             {
                 rule.EnterFieldSelection += field =>
                 {
-                    var args = field.Arguments.ToList();
-                    var argumentDefinitions = GetArgumentDefinitions(context);
+                    var args = field.Arguments?.ToList();
+                    var argumentDefinitions = 
+                        GetFieldArgumentDefinitions(context);
 
                     //todo: should this produce error?
                     if (argumentDefinitions == null)
@@ -418,7 +441,8 @@ namespace Tanka.GraphQL.Validation
                 rule.EnterDirective += directive =>
                 {
                     var args = directive.Arguments.ToList();
-                    var argumentDefinitions = GetArgumentDefinitions(context);
+                    var argumentDefinitions = 
+                        GetDirectiveArgumentDefinitions(context);
 
                     //todo: should this produce error?
                     if (argumentDefinitions == null)
@@ -1087,6 +1111,9 @@ namespace Tanka.GraphQL.Validation
             // 5.7.3
             void CheckDirectives(IRuleVisitorContext context, IEnumerable<GraphQLDirective> directives)
             {
+                if (directives == null)
+                    return;
+
                 var knownDirectives = new List<string>();
 
                 foreach (var directive in directives)
@@ -1121,6 +1148,9 @@ namespace Tanka.GraphQL.Validation
                 ASTNode node,
                 IEnumerable<GraphQLDirective> directives)
             {
+                if (directives == null)
+                    return;
+
                 var currentLocation = GetLocation(node);
                 foreach (var directive in directives)
                 {
