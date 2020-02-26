@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/beta/">
-    <title>Graphql ws - tanka-graphql</title>
+    <title>Imports - tanka-graphql</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -108,7 +108,7 @@
 </h6>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link" href="0-language/02-imports.html">Imports</a>
+            <a class="nav-link active bg-light" href="0-language/02-imports.html">Imports</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -165,7 +165,7 @@
 </h6>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link active bg-light" href="2-server/2-graphql-ws/3-graphql-ws.html">Graphql ws</a>
+            <a class="nav-link" href="2-server/2-graphql-ws/3-graphql-ws.html">Graphql ws</a>
         </li>
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
@@ -271,83 +271,59 @@
 </ul></ul>                </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="graphql-ws">GraphQL WS</h2>
-<p>Besides the SignalR based server Tanka also provides a graphql-ws protocol
-compatible websocket server. This server can be used with
-<a href="https://www.apollographql.com/docs/link/links/ws">apollo-link-ws</a>.</p>
-<h3 id="configure-required-services">Configure required services</h3>
-<p>This will add the required services to execution pipeline.</p>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public void Configure_WebSockets()
-        {
-            /* When */
-            Services.AddTankaGraphQL()
-                .ConfigureSchema(() =&gt; default)
-                // Add websocket services with defaults
-                .ConfigureWebSockets();
-
-            /* Then */
-            var provider = Services.BuildServiceProvider();
-            Assert.NotNull(provider.GetService&lt;WebSocketServer&gt;());
-            Assert.NotNull(provider.GetService&lt;IOptions&lt;WebSocketServerOptions&gt;&gt;());
-        }
-</code></pre></p>
-<h3 id="add-middleware-to-app-pipeline">Add middleware to app pipeline</h3>
-<pre><code class="lang-csharp">app.UseWebSockets();
-app.UseTankaGraphQLWebSockets(&quot;/api/graphql&quot;);
+                <h2 id="imports">Imports</h2>
+<p>GraphQL specification does not yet provide a way of importing types
+from SDL from other sources. There is some <a href="https://github.com/graphql/graphql-wg/blob/master/notes/2018-02-01.md#present-graphql-import">discussion</a> on
+this topic but nothing concrete and &quot;official&quot; is yet released.</p>
+<blockquote>
+<p><a href="https://github.com/ardatan/graphql-import">graphql-import</a> solves this, but the syntax does not feel like
+GraphQL and also would require additional syntax support from
+parsers.</p>
+</blockquote>
+<p>Tanka GraphQL solves this problem by providing a type system
+level directive which allows specifying path and list of types
+to import. The actual details of how the import is fulfilled is
+delegated to import providers. Few providers are provided out of the box
+and others can be added.</p>
+<h3 id="syntax">Syntax</h3>
+<p>GraphQL does not allows specifying type system level directives.
+TGQL goes around this limitation by putting them inside a comment
+in the beginning of SDL content. Parser will check each comment line
+in the beginning of the SDL for <code>@import</code> directive.</p>
+<p>Example import</p>
+<pre><code class="lang-graphql"># @import(path: &quot;/query&quot;)
 </code></pre>
-<h3 id="configure-protocol">Configure protocol</h3>
-<p>When <code>connection_init</code> message is received from client the protocol calls
-<code>AcceptAsync</code> of the options to accept the connection. By default it accepts
-the connection and sends <code>connection_ack</code> message back to the client. You can
-configure this behavior with your own logic.</p>
-<p><pre><code class="language-csharp">
-        [Fact]
-        public async Task Configure_WebSockets_with_Accept()
-        {
-            /* Given */
-            var called = false;
-            /* When */
-            Services.AddTankaGraphQL()
-                .ConfigureSchema(() =&gt; default)
-                // Add websockets services with accept method
-                .ConfigureWebSockets(async context =&gt;
-                {
-                    called = true;
-                    var succeeded = true; //todo: authorize
-
-                    if (succeeded)
-                    {
-                        await context.Output.WriteAsync(new OperationMessage
-                        {
-                            Type = MessageType.GQL_CONNECTION_ACK
-                        });
-                    }
-                    else
-                    {
-                        // you must decide what kind of message to send back to the client
-                        // in case the connection is not accepted.
-                        await context.Output.WriteAsync(new OperationMessage
-                        {
-                            Type = MessageType.GQL_CONNECTION_ERROR,
-                            Id = context.Message.Id
-                        });
-
-                        // complete the output forcing the server to disconnect
-                        context.Output.Complete();
-                    }
-                });
-
-            /* Then */
-            var provider = Services.BuildServiceProvider();
-            Assert.NotNull(provider.GetService&lt;WebSocketServer&gt;());
-            var options = provider.GetRequiredService&lt;IOptions&lt;WebSocketServerOptions&gt;&gt;().Value;
-            await options.AcceptAsync(new MessageContext(new OperationMessage(),
-                Channel.CreateUnbounded&lt;OperationMessage&gt;()));
-            Assert.True(called);
-        }
-</code></pre></p>
+<p>Import directive is defined as path and list of types. On part omitted
+as GraphQL does not provide a suitable target yet.</p>
+<pre><code class="lang-graphql">directive @import(
+    path: String!
+    types: [String!]
+)
+</code></pre>
+<blockquote>
+<p>Filtering using the <code>types</code> is not yet supported. All types will be
+imported.</p>
+</blockquote>
+<h3 id="providers">Providers</h3>
+<p><code>Parser.ParseDocumentAsync</code> allows providing <code>ParserOptions</code> which allows
+setting a list of import providers. Parser will query these providers when
+it finds the <code>@import</code> directives. Provider can tell the parser that it can
+complete the import by returning true from <code>CanImport</code> function. If multiple
+providers can import the import then the parser will pick the first one.</p>
+<p>Built in providers: (these are added to options by default)</p>
+<ul>
+<li>ExtensionsImportProvider: provides Tanka GraphQL extension types,</li>
+<li>FileSystemImportProvider: import types from files,</li>
+<li>EmbeddedResourceImportProvider: import types from EmbeddedResources.</li>
+</ul>
+<p>Custom providers can be implemented by implementing <code>IImportProvider</code> interface
+and adding the provider to the options.</p>
+<blockquote>
+<p>Imports are only supported when using the <code>SchemaBuilder.SdlAsync</code> extension
+method or <code>Parser.ParseDocumentAsync</code></p>
+</blockquote>
+<h3 id="examples">Examples</h3>
+<p>See <a href="5-extensions/5-query-cost-analysis.html">cost-analysis</a> for example import</p>
                     
             </main>
         </div>
