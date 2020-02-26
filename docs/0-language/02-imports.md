@@ -61,6 +61,10 @@ and adding the provider to the options.
 > Imports are only supported when using the `SchemaBuilder.SdlAsync` extension 
 > method or `Parser.ParseDocumentAsync` 
 
+### Examples
+
+See [cost-analysis][] for example import
 
 [discussion]: https://github.com/graphql/graphql-wg/blob/master/notes/2018-02-01.md#present-graphql-import
 [graphql-import]: https://github.com/ardatan/graphql-import
+[cost-analysis]: 5-extensions/5-query-cost-analysis.html

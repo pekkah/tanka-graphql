@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Tests.Extensions
         {
             /* Given */
             var sdl = 
-                @"# @import(path:""tanka://cost-analysis"")
+                  @"# @import(path:""tanka://cost-analysis"")
 
                     type ObjectType {
 	                    property: Int! @cost(complexity: 1)
@@ -22,10 +22,11 @@ namespace Tanka.GraphQL.Tests.Extensions
                     type Query {
                         obj: ObjectType
                     }
-                    ";
+                 ";
 
             /* When */
             var builder = await new SchemaBuilder()
+                // BuiltIn import providers are used
                 .SdlAsync(sdl);
 
             var schema = builder.Build();
