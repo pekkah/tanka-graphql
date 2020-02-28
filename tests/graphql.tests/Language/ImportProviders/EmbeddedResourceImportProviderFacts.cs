@@ -43,7 +43,7 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
             /* Then */
             Assert.Single(
                 typeDefs.OfType<GraphQLDirectiveDefinition>(),
-                dt => dt.Name.Value == "Directive");
+                dt => dt.Name.Value == "directive");
         }
     }
 }

@@ -35,7 +35,9 @@
   </ItemGroup>
  
   <ItemGroup>
-    <EmbeddedResource Include="Files\Import.graphql" />
+    <EmbeddedResource Include="Files\Import.graphql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="github.graphql" />
   </ItemGroup>
 
