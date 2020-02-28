@@ -312,9 +312,9 @@ complete the import by returning true from <code>CanImport</code> function. If m
 providers can import the import then the parser will pick the first one.</p>
 <p>Built in providers: (these are added to options by default)</p>
 <ul>
-<li>ExtensionsImportProvider: provides Tanka GraphQL extension types,</li>
-<li>FileSystemImportProvider: import types from files,</li>
-<li>EmbeddedResourceImportProvider: import types from EmbeddedResources.</li>
+<li><code>ExtensionsImportProvider</code>: provides Tanka GraphQL extension types,</li>
+<li><code>FileSystemImportProvider</code>: import types from files,</li>
+<li><code>EmbeddedResourceImportProvider</code>: import types from EmbeddedResources.</li>
 </ul>
 <p>Custom providers can be implemented by implementing <code>IImportProvider</code> interface
 and adding the provider to the options.</p>
@@ -322,8 +322,57 @@ and adding the provider to the options.</p>
 <p>Imports are only supported when using the <code>SchemaBuilder.SdlAsync</code> extension
 method or <code>Parser.ParseDocumentAsync</code></p>
 </blockquote>
-<h3 id="examples">Examples</h3>
-<p>See <a href="5-extensions/5-query-cost-analysis.html">cost-analysis</a> for example import</p>
+<h4 id="extensionsimportprovider"><code>ExtensionsImportProvider</code></h4>
+<p>This import provider allows importing Tanka GraphQL extensions. Currently these
+extensions only include:</p>
+<ul>
+<li><a href="5-extensions/5-query-cost-analysis.html">cost-analysis</a>: <code>@cost</code> directive.</li>
+</ul>
+<p>Syntax</p>
+<pre><code class="lang-graphql"># @import(path: &quot;tanka://&lt;extension&gt;&quot;)
+</code></pre>
+<h4 id="filesystemimportprovider"><code>FileSystemImportProvider</code></h4>
+<p>This import provider allows importing files. These files are parsed using the
+same parser options as the main file and can also contain other imports.</p>
+<p>Syntax</p>
+<pre><code class="lang-graphql"># @import(path: &quot;path/to/file&quot;)
+</code></pre>
+<p>If no file extension provided then &quot;.graphql&quot; will be appended to the path.</p>
+<p>Example
+<pre><code class="language-csharp">        [Fact]
+        public async Task Parse_Sdl()
+        {
+            /* Given */
+            var sdl = 
+                  @&quot;# @import(path:&quot;&quot;Files/Import&quot;&quot;)
+
+                    type Query {
+                        imported: ImportedType
+                    }
+                 &quot;;
+
+            /* When */
+            var builder = await new SchemaBuilder()
+                // BuiltIn import providers are used
+                .SdlAsync(sdl);
+
+            var schema = builder.Build();
+
+            /* Then */
+            var importedType = schema.GetNamedType&lt;ObjectType&gt;(&quot;ImportedType&quot;);
+            Assert.NotNull(importedType);
+            var importedField = schema.GetField(schema.Query.Name, &quot;imported&quot;);
+            Assert.Same(importedType, importedField.Type.Unwrap());
+        }
+</code></pre></p>
+<h4 id="embeddedresourceimportprovider"><code>EmbeddedResourceImportProvider</code></h4>
+<p>This import provider allows importing files embedded into the assembly. These files are parsed using the
+same parser options as the main file and can also contain other imports.</p>
+<p>Syntax</p>
+<pre><code class="lang-graphql"># @import(path: &quot;@embedded://&lt;assembly&gt;/&lt;resourceName&gt;&quot;)
+</code></pre>
+<h3 id="other-examples">Other Examples</h3>
+<p>See <a href="5-extensions/5-query-cost-analysis.html">cost-analysis</a> for example import from the TGQL extensions.</p>
                     
             </main>
         </div>
