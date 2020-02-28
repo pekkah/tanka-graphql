@@ -95,7 +95,7 @@ same parser options as the main file and can also contain other imports.
 
 Syntax
 ```graphql
-# @import(path: "@embedded://<assembly>/<resourceName>")
+# @import(path: "embedded://<assembly>/<resourceName>")
 ```
 
 
