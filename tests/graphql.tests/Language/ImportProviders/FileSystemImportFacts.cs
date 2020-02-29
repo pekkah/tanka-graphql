@@ -32,6 +32,8 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
             Assert.NotNull(importedType);
             var importedField = schema.GetField(schema.Query.Name, "imported");
             Assert.Same(importedType, importedField.Type.Unwrap());
+            var nestedType = schema.GetNamedType<ObjectType>("NestedObject");
+            Assert.NotNull(nestedType);
         }
     }
 }

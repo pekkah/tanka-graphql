@@ -16,6 +16,7 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
         {
             _options = new ParserOptions();
             _sut = new FileSystemImportProvider();
+            _options.ImportProviders.Add(_sut);
             _importedFileName = "Files/Import.graphql";
         }
 
