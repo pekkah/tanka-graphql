@@ -17,6 +17,19 @@ namespace Tanka.GraphQL
             }
         };
 
-        public List<IImportProvider> ImportProviders { get; set; }
+        public List<IImportProvider> ImportProviders { get; set; } = new List<IImportProvider>();
+
+        public ParserOptions ReplaceImportProvider(
+            IImportProvider provider, 
+            IImportProvider with)
+        {
+            var options = new ParserOptions();
+            options.ImportProviders.AddRange(ImportProviders);
+            var index = options.ImportProviders.IndexOf(provider);
+            options.ImportProviders.Remove(provider);
+            options.ImportProviders.Insert(index, with);
+
+            return options;
+        }
     }
 }
