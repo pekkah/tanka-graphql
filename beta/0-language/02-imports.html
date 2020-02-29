@@ -363,13 +363,15 @@ same parser options as the main file and can also contain other imports.</p>
             Assert.NotNull(importedType);
             var importedField = schema.GetField(schema.Query.Name, &quot;imported&quot;);
             Assert.Same(importedType, importedField.Type.Unwrap());
+            var nestedType = schema.GetNamedType&lt;ObjectType&gt;(&quot;NestedObject&quot;);
+            Assert.NotNull(nestedType);
         }
 </code></pre></p>
 <h4 id="embeddedresourceimportprovider"><code>EmbeddedResourceImportProvider</code></h4>
 <p>This import provider allows importing files embedded into the assembly. These files are parsed using the
 same parser options as the main file and can also contain other imports.</p>
 <p>Syntax</p>
-<pre><code class="lang-graphql"># @import(path: &quot;@embedded://&lt;assembly&gt;/&lt;resourceName&gt;&quot;)
+<pre><code class="lang-graphql"># @import(path: &quot;embedded://&lt;assembly&gt;/&lt;resourceName&gt;&quot;)
 </code></pre>
 <h3 id="other-examples">Other Examples</h3>
 <p>See <a href="5-extensions/5-query-cost-analysis.html">cost-analysis</a> for example import from the TGQL extensions.</p>
