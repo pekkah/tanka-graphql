@@ -8,13 +8,13 @@ namespace Tanka.GraphQL.Language
     {
         private Reader _reader;
 
-        private long _currentLineStart;
+        private int _currentLineStart;
 
         public TokenKind Kind { get; private set; }
 
-        public long Line { get; private set; }
+        public int Line { get; private set; }
 
-        public long Column => Start - _currentLineStart + 1;
+        public int Column => Start - _currentLineStart + 1;
 
         public int Start { get; set; }
 
@@ -37,14 +37,14 @@ namespace Tanka.GraphQL.Language
             return new Lexer(span);
         }
 
-        public static Lexer Create(string data)
+        public static Lexer Create(in string data)
         {
             return Create(Encoding.UTF8.GetBytes(data));
         }
 
         public bool Advance()
         {
-            if (_reader.Position == -1) 
+            if (_reader.Position == -1)
                 ReadBom();
 
             IgnoreWhitespace();
@@ -88,6 +88,8 @@ namespace Tanka.GraphQL.Language
                 throw new Exception("Syntax error");
             }
 
+            Start = Position;
+            Kind = TokenKind.End;
             return false;
         }
 
@@ -107,11 +109,9 @@ namespace Tanka.GraphQL.Language
                         throw new Exception($"BlockString at {Start} is not terminated.");
 
                     if (_reader.Span[_reader.Position] == Constants.Backslash)
-                    {
                         // skip escaped block string quote
                         if (_reader.IsNext(Constants.BlockString.Span))
                             _reader.Advance(3);
-                    }
                 }
 
                 // skip the end..
@@ -133,10 +133,7 @@ namespace Tanka.GraphQL.Language
                     continue;
 
                 // check escape
-                if (Position > 0 && _reader.Span[Position-1] == Constants.Backslash)
-                {
-                    continue;
-                }
+                if (Position > 0 && _reader.Span[Position - 1] == Constants.Backslash) continue;
 
                 Value = _reader.Span.Slice(valueStart, Position - valueStart);
                 return;
@@ -153,17 +150,13 @@ namespace Tanka.GraphQL.Language
             var isExponent = false;
             var isFloat = false;
             if (_reader.TryPeek(out var code))
-            {
                 if (code == Constants.Minus)
-                {
                     _reader.Advance();
-                }
-            }
 
             _reader.TryReadWhileAny(
                 out var integerPart,
                 Constants.IsDigit,
-                orEnd: true);
+                true);
 
             if (_reader.TryPeek(out code))
             {
@@ -171,26 +164,22 @@ namespace Tanka.GraphQL.Language
                 {
                     _reader.Advance();
                     if (_reader.TryPeek(out var nextCode))
-                    {
                         if (Constants.IsDigit[nextCode])
                         {
                             isExponent = true;
                             _reader.Advance();
                         }
-                    }
                 }
 
                 if (code == Constants.Dot)
                 {
                     _reader.Advance();
                     if (_reader.TryPeek(out var nextCode))
-                    {
                         if (Constants.IsDigit[nextCode])
                         {
                             isFloat = true;
                             _reader.Advance();
                         }
-                    }
                 }
             }
 
@@ -199,30 +188,26 @@ namespace Tanka.GraphQL.Language
                 Kind = TokenKind.FloatValue;
 
                 // skip ., e, E
-                _reader.Advance(1);
+                _reader.Advance();
                 _reader.TryReadWhileAny(
                     out var fractionPart,
                     Constants.IsDigit,
-                    orEnd: true);
+                    true);
 
                 if (_reader.TryPeek(out code))
-                {
                     if (code == Constants.e || code == Constants.E)
                     {
                         _reader.Advance();
                         if (_reader.TryPeek(out var nextCode))
-                        {
                             if (Constants.IsDigit[nextCode])
                             {
                                 isExponent = true;
                                 _reader.TryReadWhileAny(
                                     out _,
                                     Constants.IsDigit,
-                                    orEnd: true);
+                                    true);
                             }
-                        }
                     }
-                }
             }
 
             Value = _reader.Span.Slice(Start, Position - Start + 1);
@@ -241,11 +226,11 @@ namespace Tanka.GraphQL.Language
         private void ReadName()
         {
             Kind = TokenKind.Name;
-            Start = _reader.Position+1;
+            Start = _reader.Position + 1;
             _reader.TryReadWhileAny(
-                out var data, 
+                out var data,
                 Constants.IsLetterOrDigitOrUnderscore,
-                orEnd: true);
+                true);
 
             Value = data;
         }
@@ -277,9 +262,9 @@ namespace Tanka.GraphQL.Language
 
             // read until \r or \n or end
             _reader.TryReadWhileNotAny(
-                out var data, 
+                out var data,
                 Constants.IsReturnOrNewLine,
-                orEnd: true);
+                true);
 
             Value = data;
         }
@@ -288,7 +273,6 @@ namespace Tanka.GraphQL.Language
         private void IgnoreWhitespace()
         {
             while (_reader.TryPeek(out var code))
-            {
                 switch (code)
                 {
                     case Constants.NewLine:
@@ -305,9 +289,7 @@ namespace Tanka.GraphQL.Language
                         break;
                     default:
                         return;
-
                 }
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -5,6 +5,7 @@
     <IsPackable>false</IsPackable>
     <AssemblyName>tanka.graphql.language.tests</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Language.Tests</RootNamespace>
+    <Nullabl>enable</Nullabl>
   </PropertyGroup>
 
   <ItemGroup>
