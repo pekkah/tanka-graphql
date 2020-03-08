@@ -42,7 +42,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void IgnoreWhitespace()
         {
             /* Given */
-            var source = "   ";
+            var source = "   {";
 
             var sut = Lexer.Create(source);
 
@@ -50,10 +50,9 @@ namespace Tanka.GraphQL.Language.Tests
             sut.Advance();
 
             /* Then */
-            Assert.Equal(2, sut.Position);
-            Assert.Equal(TokenKind.Start, sut.Kind);
+            Assert.Equal(TokenKind.LeftBrace, sut.Kind);
             Assert.Equal(1, sut.Line);
-            Assert.Equal(1, sut.Column);
+            Assert.Equal(4, sut.Column);
         }
 
         [Fact]
@@ -69,7 +68,7 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             Assert.Equal(Constants.Bom.Length - 1, sut.Position);
-            Assert.Equal(TokenKind.Start, sut.Kind);
+            Assert.Equal(TokenKind.End, sut.Kind);
         }
 
         [Theory]
