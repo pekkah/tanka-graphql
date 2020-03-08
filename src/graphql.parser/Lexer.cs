@@ -84,8 +84,8 @@ namespace Tanka.GraphQL.Language
                     ReadNumber();
                     return true;
                 }
-                
-                return false;
+
+                throw new Exception("Syntax error");
             }
 
             return false;
