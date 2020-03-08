@@ -51,7 +51,7 @@ namespace Tanka.GraphQL.Benchmarks
             AssertResult(result.Errors);
         }
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public async Task Query_without_validation()
         {
             var result = await Executor.ExecuteAsync(new ExecutionOptions
