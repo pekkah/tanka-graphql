@@ -1,6 +1,6 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public readonly struct Location
+    public class Location
     {
         public Location(in int line, in int column)
         {

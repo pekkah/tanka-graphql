@@ -1,6 +1,6 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public readonly struct FragmentDefinition
+    public class FragmentDefinition
     {
     }
 }

@@ -93,6 +93,7 @@ namespace Tanka.GraphQL.Language
             return false;
         }
 
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ReadStringValue()
         {
             Start = Position + 1;
@@ -142,6 +143,7 @@ namespace Tanka.GraphQL.Language
             throw new Exception($"StringValue at {Start} is not terminated.");
         }
 
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ReadNumber()
         {
             Kind = TokenKind.IntValue;
@@ -213,7 +215,7 @@ namespace Tanka.GraphQL.Language
             Value = _reader.Span.Slice(Start, Position - Start + 1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ReadSpreadPunctuator()
         {
             _reader.Advance();
@@ -222,7 +224,7 @@ namespace Tanka.GraphQL.Language
             _reader.Advance(2);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ReadName()
         {
             Kind = TokenKind.Name;
@@ -235,7 +237,7 @@ namespace Tanka.GraphQL.Language
             Value = data;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ReadPunctuator()
         {
             if (_reader.TryRead(out var code))
@@ -248,7 +250,7 @@ namespace Tanka.GraphQL.Language
         /// <summary>
         ///     comment
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ReadComment()
         {
             Kind = TokenKind.Comment;
@@ -269,7 +271,7 @@ namespace Tanka.GraphQL.Language
             Value = data;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void IgnoreWhitespace()
         {
             while (_reader.TryPeek(out var code))

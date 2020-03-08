@@ -1,15 +1,16 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public readonly ref struct Document
+    public class Document
     {
+        public readonly FragmentDefinition[]? FragmentDefinitions;
+
+        public readonly OperationDefinition[]? OperationDefinitions;
+
         public Document(in OperationDefinition[] operationDefinitions)
         {
             OperationDefinitions = operationDefinitions;
             FragmentDefinitions = default;
         }
-
-        public readonly OperationDefinition[]? OperationDefinitions;
-        public readonly FragmentDefinition[]? FragmentDefinitions;
 
         /*
         public readonly TypeSystemDefinition[] TypeSystemDefinitions
@@ -17,8 +18,13 @@
         */
     }
 
-    public readonly struct OperationDefinition
+    public class OperationDefinition
     {
+        public readonly Location Location;
+        public readonly Name? Name;
+        public readonly OperationType Operation;
+        public readonly SelectionSet SelectionSet;
+
         public OperationDefinition(
             in OperationType operation,
             in Name? name,
@@ -28,36 +34,44 @@
         {
             Operation = operation;
             Name = name;
+            SelectionSet = selectionSet;
             Location = location;
         }
-
-        public readonly OperationType Operation;
-        public readonly Name? Name;
-        public readonly Location Location;
     }
 
-    public readonly struct SelectionSet
+    public class SelectionSet
     {
+        public readonly Location Location;
+        public readonly ISelection[] Selections;
+
         public SelectionSet(
-            Selection[] selections,
+            ISelection[] selections,
             in Location location)
         {
             Selections = selections;
             Location = location;
         }
-
-        private readonly Selection[] Selections;
-        public readonly Location Location;
     }
 
-    public readonly struct Selection
+    public class FieldSelection : ISelection
     {
-        public Selection(
+        public readonly Location Location;
+        public readonly Name? Alias;
+        public readonly Name Name;
+        public readonly SelectionSet? SelectionSet;
+
+        public FieldSelection(
+            in Name? alias,
+            in Name name,
+            in SelectionSet? selectionSet,
             in Location location)
         {
+            Alias = alias;
+            Name = name;
+            SelectionSet = selectionSet;
             Location = location;
         }
 
-        private readonly Location Location;
+        public SelectionType SelectionType => SelectionType.Field;
     }
 }

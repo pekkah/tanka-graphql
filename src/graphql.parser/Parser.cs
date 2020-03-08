@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Transactions;
 using Tanka.GraphQL.Language.Nodes;
@@ -91,7 +92,7 @@ namespace Tanka.GraphQL.Language
             Skip(TokenKind.LeftBrace);
 
             // parse until }
-            var selections = new List<Selection>();
+            var selections = new List<FieldSelection>();
             while (_lexer.Kind != TokenKind.RightBrace)
             {
                 if (_lexer.Kind == TokenKind.RightBrace)
@@ -103,6 +104,9 @@ namespace Tanka.GraphQL.Language
 
                 var field = ParseField();
                 selections.Add(field);
+
+                if (!_lexer.Advance())
+                    break;
             }
 
             // }
@@ -111,15 +115,44 @@ namespace Tanka.GraphQL.Language
             return new SelectionSet(selections.ToArray(), location);
         }
 
-        private Selection ParseField()
+        private FieldSelection ParseField()
         {
-            return default;
+            // Alias? Name Arguments? Directives? SelectionSet?
+            var location = GetLocation();
+            var nameOrAlias = ParseName();
+            var name = nameOrAlias;
+
+            var hasAlias = false;
+            if (_lexer.Kind == TokenKind.Colon)
+            {
+                _lexer.Advance();
+                name = ParseName();
+                hasAlias = true;
+            }
+
+            if (name == null)
+                throw new Exception("Field must have name");
+
+            //var arguments = ParseArguments();
+            //var directives = ParseDirectives();
+            var selectionSet = ParseSelectionSet();
+
+            return new FieldSelection(
+                hasAlias ? nameOrAlias: null,
+                in name,
+                in selectionSet,
+                in location);
         }
 
-        private Name? ParseName()
+        private Name? ParseName(bool required = true)
         {
             if (_lexer.Kind != TokenKind.Name)
+            {
+                if (required)
+                    throw new Exception($"Expected Name but found {_lexer.Kind}");
+
                 return null;
+            }
 
             var value = Encoding.UTF8.GetString(_lexer.Value);
             var location = GetLocation();
