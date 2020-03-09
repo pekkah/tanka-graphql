@@ -53,5 +53,11 @@ namespace Tanka.GraphQL.Language.Nodes
         {
             return value.Value;
         }
+
+        public override string ToString()
+        {
+            var location = Location != null ? Location.ToString() : string.Empty;
+            return $"{Value}{location}";
+        }
     }
 }

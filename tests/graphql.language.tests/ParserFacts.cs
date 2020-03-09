@@ -36,6 +36,83 @@ namespace Tanka.GraphQL.Language.Tests
         }
 
         [Fact]
+        public void OperationDefinition_With_Comment_Before()
+        {
+            /* Given */
+            var source = 
+                    @"# comment 
+                    query { 
+                        field 
+                    }";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
+
+            /* Then */
+            Assert.Single(actual.SelectionSet.Selections);
+        }
+
+        [Fact]
+        public void OperationDefinition_With_Comment_Before_Selection()
+        {
+            /* Given */
+            var source = 
+                @"query {
+                        # comment 
+                        field 
+                    }";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
+
+            /* Then */
+            Assert.Single(actual.SelectionSet.Selections);
+        }
+
+        [Fact]
+        public void OperationDefinition_With_Comment_After_Selection()
+        {
+            /* Given */
+            var source = 
+                @"query {
+                        field 
+                        # comment 
+                    }";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
+
+            /* Then */
+            Assert.Single(actual.SelectionSet.Selections);
+        }
+
+        [Fact]
+        public void OperationDefinition_With_Comment_Betweeen_Selections()
+        {
+            /* Given */
+            var source = 
+                @"query {
+                        field1
+                        # comment
+                        field2
+                    }";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
+
+            /* Then */
+            Assert.True(actual.SelectionSet.Selections.Count == 2);
+        }
+        
+        [Fact]
         public void Field()
         {
             /* Given */

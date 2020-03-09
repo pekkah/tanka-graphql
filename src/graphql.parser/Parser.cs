@@ -71,6 +71,8 @@ namespace Tanka.GraphQL.Language
 
         public SelectionSet? ParseOptionalSelectionSet()
         {
+            SkipComment();
+
             if (_lexer.Kind != TokenKind.LeftBrace)
                 return null;
 
@@ -96,6 +98,8 @@ namespace Tanka.GraphQL.Language
             var selections = new List<FieldSelection>();
             while (_lexer.Kind != TokenKind.RightBrace)
             {
+                SkipComment();
+
                 // check for fragment
                 if (_lexer.Kind == TokenKind.Spread)
                     throw new NotImplementedException();
@@ -141,6 +145,8 @@ namespace Tanka.GraphQL.Language
 
         private Name? ParseOptionalName()
         {
+            SkipComment();
+
             if (_lexer.Kind != TokenKind.Name)
                 return null;
 
@@ -159,6 +165,8 @@ namespace Tanka.GraphQL.Language
 
         private void Ensure(TokenKind kind)
         {
+            SkipComment();
+
             if (_lexer.Kind != kind)
                 throw new Exception(
                     $"Unexpected token: {_lexer.Kind}@{_lexer.Line}:{_lexer.Column}. " +
@@ -168,6 +176,12 @@ namespace Tanka.GraphQL.Language
         private Location GetLocation()
         {
             return new Location(_lexer.Line, _lexer.Column);
+        }
+
+        private void SkipComment()
+        {
+            if (_lexer.Kind == TokenKind.Comment)
+                _lexer.Advance();
         }
 
         private void Skip(TokenKind expectedToken)

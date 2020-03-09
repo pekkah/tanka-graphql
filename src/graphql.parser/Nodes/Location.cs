@@ -10,5 +10,10 @@
 
         public readonly int Line;
         public readonly int Column;
+
+        public override string ToString()
+        {
+            return $"@{Line}:{Column}";
+        }
     }
 }
