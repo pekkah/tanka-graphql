@@ -1,5 +1,3 @@
-using System.Linq;
-using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Xunit;
 
@@ -14,12 +12,12 @@ namespace Tanka.GraphQL.Language.Tests
             var source = "query { }";
 
             var sut = Parser.Create(source);
-
+            
             /* When */
-            var actual = sut.Parse();
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
 
             /* Then */
-            Assert.Single(actual.OperationDefinitions);
+            Assert.Equal(OperationType.Query, actual.Operation);
         }
 
         [Fact]
@@ -31,55 +29,57 @@ namespace Tanka.GraphQL.Language.Tests
             var sut = Parser.Create(source);
 
             /* When */
-            var actual = sut.Parse();
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
 
             /* Then */
-            Assert.Single(actual.OperationDefinitions);
-            Assert.Single(actual.OperationDefinitions.Single().SelectionSet.Selections);
+            Assert.Single(actual.SelectionSet.Selections);
         }
 
         [Fact]
-        public void OperationDefinition_SelectionSet_Field()
+        public void Field()
         {
             /* Given */
-            var source = "query { field }";
+            var source = "field";
 
             var sut = Parser.Create(source);
 
             /* When */
-            var actual = sut.Parse();
+            var actual = sut.ParseFieldSelection();
 
             /* Then */
-            var selectionSet = actual.OperationDefinitions
-                .Single()
-                .SelectionSet;
-
-            Assert.Single(
-                selectionSet.Selections.OfType<FieldSelection>(),
-                selection => selection.Name == "field"
-                             && selection.Alias == "alias");
+            Assert.Equal("field", actual.Name);
         }
 
         [Fact]
-        public void OperationDefinition_SelectionSet_Field_with_Alias()
+        public void Field_with_Alias()
         {
             /* Given */
-            var source = "query { alias: field }";
+            var source = "alias: field";
 
             var sut = Parser.Create(source);
 
             /* When */
-            var actual = sut.Parse();
+            var actual = sut.ParseFieldSelection();
 
             /* Then */
-            var selectionSet = actual.OperationDefinitions
-                .Single()
-                .SelectionSet;
+            Assert.Equal("alias", actual.Alias);
+            Assert.Equal("field", actual.Name);
+        }
 
-            Assert.Single(
-                selectionSet.Selections.OfType<FieldSelection>(),
-                selection => selection.Name == "field"
-                && selection.Alias == "alias");
+        [Fact]
+        public void Field_SelectionSet()
+        {
+            /* Given */
+            var source = "field { subField }";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseFieldSelection();
+
+            /* Then */
+            Assert.NotNull(actual.SelectionSet?.Selections);
+            Assert.NotEmpty(actual.SelectionSet.Selections);
         }
     }
 }

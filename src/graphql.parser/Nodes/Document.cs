@@ -1,12 +1,15 @@
-﻿namespace Tanka.GraphQL.Language.Nodes
+﻿using System.Collections.Generic;
+
+namespace Tanka.GraphQL.Language.Nodes
 {
     public class Document
     {
-        public readonly FragmentDefinition[]? FragmentDefinitions;
+        public readonly IReadOnlyCollection<FragmentDefinition>? FragmentDefinitions;
 
-        public readonly OperationDefinition[]? OperationDefinitions;
+        public readonly IReadOnlyCollection<OperationDefinition>? OperationDefinitions;
 
-        public Document(in OperationDefinition[] operationDefinitions)
+        public Document(
+            in IReadOnlyCollection<OperationDefinition> operationDefinitions)
         {
             OperationDefinitions = operationDefinitions;
             FragmentDefinitions = default;
@@ -42,10 +45,10 @@
     public class SelectionSet
     {
         public readonly Location Location;
-        public readonly ISelection[] Selections;
+        public readonly IReadOnlyCollection<ISelection> Selections;
 
         public SelectionSet(
-            ISelection[] selections,
+            in IReadOnlyCollection<ISelection> selections,
             in Location location)
         {
             Selections = selections;

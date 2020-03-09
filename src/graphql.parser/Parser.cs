@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
-using System.Transactions;
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Language
@@ -10,10 +9,11 @@ namespace Tanka.GraphQL.Language
     public ref struct Parser
     {
         private Lexer _lexer;
-        
+
         public Parser(in ReadOnlySpan<byte> span)
         {
             _lexer = Lexer.Create(span);
+            _lexer.Advance();
         }
 
         public static Parser Create(in ReadOnlySpan<byte> span)
@@ -26,56 +26,58 @@ namespace Tanka.GraphQL.Language
             return Create(Encoding.UTF8.GetBytes(data));
         }
 
-        public Document Parse()
+        public Document ParseDocument()
         {
             var operations = new List<OperationDefinition>();
-            while (_lexer.Advance())
+            while (_lexer.Kind != TokenKind.End)
             {
+                _lexer.Advance();
                 switch (_lexer.Kind)
                 {
                     case TokenKind.Name:
                         if (Keywords.IsOperation(_lexer.Value, out var operationType))
-                        {
-                            ParseOperationDefinition(operations, operationType);
-                        }
+                            operations.Add(ParseOperationDefinition(operationType));
                         break;
                 }
-
-                if (_lexer.Kind == TokenKind.End)
-                    break;
 
                 throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
             }
 
 
-            return new Document(operations.ToArray());
+            return new Document(operations);
         }
 
-        private void ParseOperationDefinition(List<OperationDefinition> operations, in OperationType operationType)
+        public OperationDefinition ParseOperationDefinition(in OperationType operationType)
         {
             var location = GetLocation();
             // OperationType Name? VariableDefinitions? Directives? SelectionSet
 
-            // OperationType (coming in as arg
+            // OperationType (coming in as param)
             Skip(TokenKind.Name);
 
             // Name?
-            var name = ParseName();
+            var name = ParseOptionalName();
 
             //var variableDefinitions = ParseVariableDefinitions();
             //var directives = ParseDirectives();
             var selectionSet = ParseSelectionSet();
 
-            var operation = new OperationDefinition(
-                in operationType, 
-                in name, 
-                in selectionSet, 
+            return new OperationDefinition(
+                in operationType,
+                in name,
+                in selectionSet,
                 in location);
-            
-            operations.Add(operation);
         }
 
-        private SelectionSet ParseSelectionSet()
+        public SelectionSet? ParseOptionalSelectionSet()
+        {
+            if (_lexer.Kind != TokenKind.LeftBrace)
+                return null;
+
+            return ParseSelectionSet();
+        }
+
+        public SelectionSet ParseSelectionSet()
         {
             /*  SelectionSet
                     {Selection[]}
@@ -85,7 +87,6 @@ namespace Tanka.GraphQL.Language
                     FragmentSpread
                     InlineFragment
             */
-
             var location = GetLocation();
 
             // {
@@ -95,27 +96,21 @@ namespace Tanka.GraphQL.Language
             var selections = new List<FieldSelection>();
             while (_lexer.Kind != TokenKind.RightBrace)
             {
-                if (_lexer.Kind == TokenKind.RightBrace)
-                    break;
-
                 // check for fragment
                 if (_lexer.Kind == TokenKind.Spread)
                     throw new NotImplementedException();
 
-                var field = ParseField();
+                var field = ParseFieldSelection();
                 selections.Add(field);
-
-                if (!_lexer.Advance())
-                    break;
             }
 
             // }
             Skip(TokenKind.RightBrace);
 
-            return new SelectionSet(selections.ToArray(), location);
+            return new SelectionSet(selections, location);
         }
 
-        private FieldSelection ParseField()
+        public FieldSelection ParseFieldSelection()
         {
             // Alias? Name Arguments? Directives? SelectionSet?
             var location = GetLocation();
@@ -135,29 +130,39 @@ namespace Tanka.GraphQL.Language
 
             //var arguments = ParseArguments();
             //var directives = ParseDirectives();
-            var selectionSet = ParseSelectionSet();
+            var selectionSet = ParseOptionalSelectionSet();
 
             return new FieldSelection(
-                hasAlias ? nameOrAlias: null,
+                hasAlias ? nameOrAlias : null,
                 in name,
                 in selectionSet,
                 in location);
         }
 
-        private Name? ParseName(bool required = true)
+        private Name? ParseOptionalName()
         {
             if (_lexer.Kind != TokenKind.Name)
-            {
-                if (required)
-                    throw new Exception($"Expected Name but found {_lexer.Kind}");
-
                 return null;
-            }
+
+            return ParseName();
+        }
+
+        private Name ParseName()
+        {
+            Ensure(TokenKind.Name);
 
             var value = Encoding.UTF8.GetString(_lexer.Value);
             var location = GetLocation();
-
+            _lexer.Advance();
             return new Name(in value, in location);
+        }
+
+        private void Ensure(TokenKind kind)
+        {
+            if (_lexer.Kind != kind)
+                throw new Exception(
+                    $"Unexpected token: {_lexer.Kind}@{_lexer.Line}:{_lexer.Column}. " +
+                    $"Expected: {kind}");
         }
 
         private Location GetLocation()
@@ -167,20 +172,17 @@ namespace Tanka.GraphQL.Language
 
         private void Skip(TokenKind expectedToken)
         {
-            if (_lexer.Kind != expectedToken)
-                throw new Exception(
-                    $"Expected to skip {expectedToken} at {_lexer.Line}:{_lexer.Column} but current is {_lexer.Kind}");
-            
+            Ensure(expectedToken);
+
             if (!_lexer.Advance() && _lexer.Kind != TokenKind.End)
                 throw new Exception(
                     $"Expected to skip {expectedToken} at {_lexer.Line}:{_lexer.Column} but lexer could not advance");
-
         }
     }
 
     public static class Keywords
     {
-        public static ReadOnlyMemory<byte> Query 
+        public static ReadOnlyMemory<byte> Query
             = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("query"));
 
         public static bool IsOperation(ReadOnlySpan<byte> value, out OperationType operation)

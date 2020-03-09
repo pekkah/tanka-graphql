@@ -39,7 +39,7 @@ namespace Tanka.GraphQL.Benchmarks
         public void NewParser_SimpleQuery()
         {
             var parser = Language.Parser.Create(SimpleQuery);
-            var document = parser.Parse();
+            var document = parser.ParseDocument();
 
             if (!document.OperationDefinitions.Any())
                 throw new InvalidOperationException("Failed");
