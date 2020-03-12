@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
@@ -21,60 +22,68 @@ namespace Tanka.GraphQL.Language.Nodes
         */
     }
 
-    public class OperationDefinition
+    public class VariableDefinition
     {
-        public readonly Location Location;
-        public readonly Name? Name;
-        public readonly OperationType Operation;
-        public readonly SelectionSet SelectionSet;
+        public readonly Variable Variable;
+        public readonly Location? Location;
 
-        public OperationDefinition(
-            in OperationType operation,
-            in Name? name,
-            in SelectionSet selectionSet,
-            in Location location
-        )
+        public VariableDefinition(
+            in Variable variable,
+            in Location? location)
         {
-            Operation = operation;
-            Name = name;
-            SelectionSet = selectionSet;
+            Variable = variable;
             Location = location;
         }
     }
 
-    public class SelectionSet
+    public abstract class Value
     {
-        public readonly Location Location;
-        public readonly IReadOnlyCollection<ISelection> Selections;
 
-        public SelectionSet(
-            in IReadOnlyCollection<ISelection> selections,
-            in Location location)
+    }
+
+    public sealed class EnumValue : Value
+    {
+        public readonly Name Value;
+        public readonly Location? Location;
+
+        public EnumValue(
+            in Name value,
+            in Location? location)
         {
-            Selections = selections;
+            Value = value;
+            Location = location;
+        }
+
+    }
+
+    public sealed class ObjectValue : Value
+    {
+        public readonly IReadOnlyCollection<ObjectField> Fields;
+        public readonly Location? Location;
+
+        public ObjectValue(
+            in IReadOnlyCollection<ObjectField> fields,
+            in Location? location)
+        {
+            Fields = fields;
             Location = location;
         }
     }
 
-    public class FieldSelection : ISelection
+    public sealed class ObjectField
     {
-        public readonly Location Location;
-        public readonly Name? Alias;
         public readonly Name Name;
-        public readonly SelectionSet? SelectionSet;
+        public readonly Value Value;
+        public readonly Location? Location;
 
-        public FieldSelection(
-            in Name? alias,
+        public ObjectField(
             in Name name,
-            in SelectionSet? selectionSet,
-            in Location location)
+            in Value value,
+            in Location? location)
         {
-            Alias = alias;
             Name = name;
-            SelectionSet = selectionSet;
+            Value = value;
             Location = location;
         }
-
-        public SelectionType SelectionType => SelectionType.Field;
     }
 }

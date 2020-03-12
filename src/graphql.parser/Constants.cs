@@ -72,6 +72,11 @@ namespace Tanka.GraphQL.Language
             NewLine
         });
 
+        public static ReadOnlyMemory<byte> NewLineMemory = new ReadOnlyMemory<byte>(new[]
+        {
+            NewLine
+        });
+
         public static ReadOnlyMemory<byte> Punctuators = new ReadOnlyMemory<byte>(new[]
         {
             ExclamationMark,

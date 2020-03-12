@@ -100,72 +100,56 @@ namespace Tanka.GraphQL.Language
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryReadWhileAny(
             out ReadOnlySpan<byte> data, 
-            in bool[] matchTable, 
-            bool orEnd)
+            in bool[] matchTable)
         {
             var start = Position + 1;
-            var end = start;
-            while(TryRead(out var value))
+            var length = 0;
+            while(TryPeek(out var value))
             {
-                if (matchTable[value])
+                if (!matchTable[value])
                 {
-                    continue;
+                    break;
                 }
 
-                end = Position;
-                Position--;
-                break;
+                Advance();
+                length++;
             }
 
-            if (orEnd && start == end)
-            {
-                data = Span.Slice(start);
-                return true;
-            }
-
-            if (start == end)
+            if (length == 0)
             {
                 data = ReadOnlySpan<byte>.Empty;
                 return false;
             }
 
-            data = Span.Slice(start, end - start);
+            data = Span.Slice(start, length);
             return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryReadWhileNotAny(
             out ReadOnlySpan<byte> data, 
-            in bool[] matchTable, 
-            bool orEnd)
+            in bool[] matchTable)
         {
             var start = Position + 1;
-            var end = start;
-            while(TryRead(out var value))
+            var length = 0;
+            while(TryPeek(out var value))
             {
-                if (!matchTable[value])
+                if (matchTable[value])
                 {
-                    continue;
+                    break;
                 }
 
-                end = Position;
-                Position--;
-                break;
+                Advance();
+                length++;
             }
 
-            if (orEnd && start == end)
-            {
-                data = Span.Slice(start);
-                return true;
-            }
-
-            if (start == end)
+            if (length == 0)
             {
                 data = ReadOnlySpan<byte>.Empty;
                 return false;
             }
 
-            data = Span.Slice(start, end - start);
+            data = Span.Slice(start, length);
             return true;
         }
     }

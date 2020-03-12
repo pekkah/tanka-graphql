@@ -148,7 +148,6 @@ namespace Tanka.GraphQL.Language
         {
             Kind = TokenKind.IntValue;
             Start = Position + 1;
-            var end = Start;
             var isExponent = false;
             var isFloat = false;
             if (_reader.TryPeek(out var code))
@@ -157,8 +156,7 @@ namespace Tanka.GraphQL.Language
 
             _reader.TryReadWhileAny(
                 out var integerPart,
-                Constants.IsDigit,
-                true);
+                Constants.IsDigit);
 
             if (_reader.TryPeek(out code))
             {
@@ -169,7 +167,6 @@ namespace Tanka.GraphQL.Language
                         if (Constants.IsDigit[nextCode])
                         {
                             isExponent = true;
-                            _reader.Advance();
                         }
                 }
 
@@ -180,7 +177,6 @@ namespace Tanka.GraphQL.Language
                         if (Constants.IsDigit[nextCode])
                         {
                             isFloat = true;
-                            _reader.Advance();
                         }
                 }
             }
@@ -189,12 +185,9 @@ namespace Tanka.GraphQL.Language
             {
                 Kind = TokenKind.FloatValue;
 
-                // skip ., e, E
-                _reader.Advance();
                 _reader.TryReadWhileAny(
                     out var fractionPart,
-                    Constants.IsDigit,
-                    true);
+                    Constants.IsDigit);
 
                 if (_reader.TryPeek(out code))
                     if (code == Constants.e || code == Constants.E)
@@ -206,8 +199,7 @@ namespace Tanka.GraphQL.Language
                                 isExponent = true;
                                 _reader.TryReadWhileAny(
                                     out _,
-                                    Constants.IsDigit,
-                                    true);
+                                    Constants.IsDigit);
                             }
                     }
             }
@@ -231,8 +223,7 @@ namespace Tanka.GraphQL.Language
             Start = _reader.Position + 1;
             _reader.TryReadWhileAny(
                 out var data,
-                Constants.IsLetterOrDigitOrUnderscore,
-                true);
+                Constants.IsLetterOrDigitOrUnderscore);
 
             Value = data;
         }
@@ -265,8 +256,7 @@ namespace Tanka.GraphQL.Language
             // read until \r or \n or end
             _reader.TryReadWhileNotAny(
                 out var data,
-                Constants.IsReturnOrNewLine,
-                true);
+                Constants.IsReturnOrNewLine);
 
             Value = data;
         }

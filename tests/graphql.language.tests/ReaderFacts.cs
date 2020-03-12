@@ -116,5 +116,37 @@ namespace Tanka.GraphQL.Language.Tests
             /* Then */
             Assert.Equal(expectedIsNext, actualIsNext);
         }
+
+        [Fact]
+        public void TryReadWhileAny()
+        {
+            /* Given */
+            var sut = new Reader(Encoding.UTF8.GetBytes("2.0 }"));
+
+            /* When */
+            Assert.True(sut.TryReadWhileAny(out var integerPart, Constants.IsDigit));
+            Assert.True(sut.TryRead(out var dot));
+            Assert.True(sut.TryReadWhileAny(out var fractionPart, Constants.IsDigit));
+
+            /* Then */
+            Assert.Equal("2", Encoding.UTF8.GetString(integerPart));
+            Assert.Equal(Constants.Dot, dot);
+            Assert.Equal("0", Encoding.UTF8.GetString(fractionPart));
+        }
+
+        [Fact]
+        public void TryReadWhileNotAny()
+        {
+            /* Given */
+            var sut = new Reader(Encoding.UTF8.GetBytes("test test test\n test"));
+
+            /* When */
+            sut.TryReadWhileNotAny(
+                out var data,
+                Constants.IsReturnOrNewLine);
+
+            /* Then */
+            Assert.Equal("test test test", Encoding.UTF8.GetString(data));
+        }
     }
 }
