@@ -44,9 +44,9 @@ namespace Tanka.GraphQL.Language
                     case TokenKind.LeftBrace:
                         operations.Add(ParseShortOperationDefinition());
                         break;
+                    default:
+                        throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
                 }
-
-                throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
             }
 
 
