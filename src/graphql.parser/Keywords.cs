@@ -16,6 +16,9 @@ namespace Tanka.GraphQL.Language
         public static ReadOnlyMemory<byte> Subscription
             = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("subscription"));
 
+        public static ReadOnlyMemory<byte> Fragment
+            = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("fragment"));
+
         public static ReadOnlyMemory<byte> Null
             = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("null"));
 
@@ -82,6 +85,12 @@ namespace Tanka.GraphQL.Language
         public static bool IsOn(in ReadOnlySpan<byte> value)
         {
             return On.Span.SequenceEqual(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsFragment(in ReadOnlySpan<byte> value)
+        {
+            return Fragment.Span.SequenceEqual(value);
         }
     }
 }

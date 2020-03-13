@@ -31,15 +31,17 @@ namespace Tanka.GraphQL.Language
 
         public Document ParseDocument()
         {
-            var operations = new List<OperationDefinition>();
+            var operations = new List<OperationDefinition>(1);
+            var fragmentDefinitions = new List<FragmentDefinition>();
             while (_lexer.Kind != TokenKind.End)
             {
-                _lexer.Advance();
                 switch (_lexer.Kind)
                 {
                     case TokenKind.Name:
                         if (Keywords.IsOperation(_lexer.Value, out var operationType))
                             operations.Add(ParseOperationDefinition(operationType));
+                        else if (Keywords.IsFragment(_lexer.Value))
+                            fragmentDefinitions.Add(ParseFragmentDefinition());
                         break;
                     case TokenKind.LeftBrace:
                         operations.Add(ParseShortOperationDefinition());
@@ -47,10 +49,36 @@ namespace Tanka.GraphQL.Language
                     default:
                         throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
                 }
+
+                _lexer.Advance();
             }
 
 
-            return new Document(operations);
+            return new Document(
+                operations, 
+                fragmentDefinitions);
+        }
+
+        public FragmentDefinition ParseFragmentDefinition()
+        {
+            /* fragment FragmentName TypeCondition Directives? SelectionSet */
+            if (!Keywords.IsFragment(_lexer.Value))
+                throw new Exception("Unexpected keyword. Expected 'fragment'.");
+
+            // fragment
+            var location = Skip(TokenKind.Name);
+
+            var fragmentName = ParseFragmentName();
+            var typeCondition = ParseTypeCondition();
+            var directives = ParseOptionalDirectives();
+            var selectionSet = ParseSelectionSet();
+
+            return new FragmentDefinition(
+                in fragmentName,
+                in typeCondition,
+                in directives,
+                in selectionSet,
+                in location);
         }
 
         public OperationDefinition ParseOperationDefinition(in OperationType operationType)
@@ -513,6 +541,11 @@ namespace Tanka.GraphQL.Language
             if (_lexer.Kind != TokenKind.Name)
                 return null;
 
+            return ParseTypeCondition();
+        }
+
+        public NamedType ParseTypeCondition()
+        {
             if (!Keywords.IsOn(_lexer.Value))
                 throw new Exception(
                     $"Unexpected keyword '{Encoding.UTF8.GetString(_lexer.Value)}'. " +

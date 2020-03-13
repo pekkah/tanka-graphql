@@ -34,6 +34,21 @@ namespace Tanka.GraphQL.Language.Tests
         }
 
         [Fact]
+        public void Document_FragmentDefinition()
+        {
+            /* Given */
+            var source = @"fragment address on Person { field }";
+
+            var sut = Parser.Create(source);
+            
+            /* When */
+            var actual = sut.ParseDocument();
+
+            /* Then */
+            Assert.Equal(1, actual.FragmentDefinitions?.Count);
+        }
+
+        [Fact]
         public void OperationDefinition_Empty()
         {
             /* Given */
@@ -245,6 +260,58 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             Assert.Equal(2, actual.Directives?.Count);
+        }
+
+        [Fact]
+        public void FragmentDefinition()
+        {
+            /* Given */
+            var sut = Parser.Create("fragment name on Human { field }");
+
+            /* When */
+            var fragmentDefinition = sut.ParseFragmentDefinition();
+
+            /* Then */
+            Assert.Equal("name", fragmentDefinition.FragmentName);
+        }
+
+        [Fact]
+        public void FragmentDefinition_TypeCondition()
+        {
+            /* Given */
+            var sut = Parser.Create("fragment name on Human { field }");
+
+            /* When */
+            var fragmentDefinition = sut.ParseFragmentDefinition();
+
+            /* Then */
+            Assert.Equal("Human", fragmentDefinition.TypeCondition.Name);
+        }
+
+        [Fact]
+        public void FragmentDefinition_Directives()
+        {
+            /* Given */
+            var sut = Parser.Create("fragment name on Human @a @b { field }");
+
+            /* When */
+            var fragmentDefinition = sut.ParseFragmentDefinition();
+
+            /* Then */
+            Assert.Equal(2, fragmentDefinition.Directives.Count);
+        }
+
+        [Fact]
+        public void FragmentDefinition_SelectionSet()
+        {
+            /* Given */
+            var sut = Parser.Create("fragment name on Human @a @b { field }");
+
+            /* When */
+            var fragmentDefinition = sut.ParseFragmentDefinition();
+
+            /* Then */
+            Assert.Equal(1, fragmentDefinition.SelectionSet.Selections.Count);
         }
 
         [Fact]
