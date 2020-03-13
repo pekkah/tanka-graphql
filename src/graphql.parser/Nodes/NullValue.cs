@@ -1,6 +1,6 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class NullValue : Value
+    public sealed class NullValue : IValue
     {
         public readonly Location Location;
 

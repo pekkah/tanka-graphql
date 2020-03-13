@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
@@ -8,6 +9,30 @@ namespace Tanka.GraphQL.Language.Tests
 {
     public class ParserFacts
     {
+        [Fact]
+        public void Document()
+        {
+            /* Given */
+            var source = @"query {
+                                field
+                            }
+                            mutation {
+                                field
+                            }
+                            subscription {
+                                field
+                            }
+                            ";
+
+            var sut = Parser.Create(source);
+            
+            /* When */
+            var actual = sut.ParseDocument();
+
+            /* Then */
+            Assert.Equal(3, actual.OperationDefinitions?.Count);
+        }
+
         [Fact]
         public void OperationDefinition_Empty()
         {
@@ -24,7 +49,44 @@ namespace Tanka.GraphQL.Language.Tests
         }
 
         [Fact]
-        public void OperationDefinition_SelectionSet_Selection()
+        public void OperationDefinition_Short_Empty()
+        {
+            /* Given */
+            var source = "{ }";
+
+            var sut = Parser.Create(source);
+            
+            /* When */
+            var actual = sut.ParseShortOperationDefinition();
+
+            /* Then */
+            Assert.Equal(OperationType.Query, actual.Operation);
+        }
+
+        [Fact]
+        public void OperationDefinition_Short_Selection()
+        {
+            /* Given */
+            var source = @"{ 
+                            field
+                            field2 {
+                                ... on Human {
+                                    name
+                                }
+                            }
+                           }";
+
+            var sut = Parser.Create(source);
+            
+            /* When */
+            var actual = sut.ParseShortOperationDefinition();
+
+            /* Then */
+            Assert.Equal(2, actual.SelectionSet.Selections.Count);
+        }
+
+        [Fact]
+        public void OperationDefinition_SelectionSet_FieldSelection()
         {
             /* Given */
             var source = "query { field }";
@@ -36,6 +98,44 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             Assert.Single(actual.SelectionSet.Selections);
+        }
+
+        [Fact]
+        public void OperationDefinition_SelectionSet_InlineFragment()
+        {
+            /* Given */
+            var source = @"query {  
+                            ... on Human {
+                                field
+                            }
+                         }";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
+
+            /* Then */
+            Assert.Single(actual.SelectionSet.Selections);
+            Assert.IsType<InlineFragment>(actual.SelectionSet.Selections.Single());
+        }
+
+        [Fact]
+        public void OperationDefinition_SelectionSet_FragmentSpread()
+        {
+            /* Given */
+            var source = @"query {  
+                            ...fragmentName
+                         }";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
+
+            /* Then */
+            Assert.Single(actual.SelectionSet.Selections);
+            Assert.IsType<FragmentSpread>(actual.SelectionSet.Selections.Single());
         }
 
         [Fact]
@@ -114,9 +214,109 @@ namespace Tanka.GraphQL.Language.Tests
             /* Then */
             Assert.True(actual.SelectionSet.Selections.Count == 2);
         }
+
+        [Fact]
+        public void OperationDefinition_VariableDefinitions()
+        {
+            /* Given */
+            var source = 
+                @"query ($name: String!, $version: Float!) {}";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
+
+            /* Then */
+            Assert.Equal(2, actual.VariableDefinitions?.Count);
+        }
+
+        [Fact]
+        public void OperationDefinition_Directives()
+        {
+            /* Given */
+            var source = 
+                @"query @a @b(a: -0, b:-54.0) {}";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseOperationDefinition(OperationType.Query);
+
+            /* Then */
+            Assert.Equal(2, actual.Directives?.Count);
+        }
+
+        [Fact]
+        public void Directive()
+        {
+            /* Given */
+            var sut = Parser.Create("@name");
+
+            /* When */
+            var directive = sut.ParseDirective();
+
+            /* Then */
+            Assert.Equal("name", directive.Name);
+        }
+
+        [Fact]
+        public void Directive_Arguments()
+        {
+            /* Given */
+            var sut = Parser.Create("@name(a: 1, b: true, c: null)");
+
+            /* When */
+            var directive = sut.ParseDirective();
+
+            /* Then */
+            Assert.Equal(3, directive.Arguments?.Count);
+        }
+
+        [Fact]
+        public void Directives()
+        {
+            /* Given */
+            var sut = Parser.Create("@name(a: 1, b: true, c: null) @version {");
+
+            /* When */
+            var directives = sut.ParseOptionalDirectives();
+
+            /* Then */
+            Assert.Equal(2, directives?.Count);
+        }
+
+        [Theory]
+        [InlineData("name: [1,2,3]", "name", typeof(ListValue))]
+        [InlineData("another: -123.123", "another", typeof(FloatValue))]
+        public void Argument(string source, string name, Type valueType)
+        {
+            /* Given */
+            var sut = Parser.Create(source);
+
+            /* When */
+            var argument = sut.ParseArgument();
+
+            /* Then */
+            Assert.Equal(name, argument.Name);
+            Assert.IsType(valueType, argument.Value);
+        }
+
+        [Fact]
+        public void Arguments()
+        {
+            /* Given */
+            var sut = Parser.Create("(arg1: 123, arg2: -32, arg3: $variable)");
+
+            /* When */
+            var arguments = sut.ParseOptionalArguments();
+
+            /* Then */
+            Assert.Equal(3, arguments?.Count);
+        }
         
         [Fact]
-        public void Field()
+        public void FieldSelection()
         {
             /* Given */
             var source = "field";
@@ -131,7 +331,97 @@ namespace Tanka.GraphQL.Language.Tests
         }
 
         [Fact]
-        public void Field_with_Alias()
+        public void FragmentSpread()
+        {
+            /* Given */
+            var source = "...name";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseFragmentSpread();
+
+            /* Then */
+            Assert.Equal("name", actual.FragmentName);
+        }
+
+        [Fact]
+        public void FragmentSpread_Directives()
+        {
+            /* Given */
+            var source = "...name @a @b @c";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseFragmentSpread();
+
+            /* Then */
+            Assert.Equal(3, actual.Directives?.Count);
+        }
+
+        [Fact]
+        public void InlineFragment()
+        {
+            /* Given */
+            var source = "... on Human {}";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseInlineFragment();
+
+            /* Then */
+            Assert.Equal("Human", actual.TypeCondition?.Name);
+        }
+
+        [Fact]
+        public void InlineFragment_Directives()
+        {
+            /* Given */
+            var source = "... on Human @a @b {}";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseInlineFragment();
+
+            /* Then */
+            Assert.Equal(2, actual.Directives?.Count);
+        }
+
+        [Fact]
+        public void InlineFragment_SelectionSet()
+        {
+            /* Given */
+            var source = "... on Human { field }";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseInlineFragment();
+
+            /* Then */
+            Assert.Equal(1, actual.SelectionSet.Selections.Count);
+        }
+
+        [Fact]
+        public void InlineFragment_NoTypeCondition_SelectionSet()
+        {
+            /* Given */
+            var source = "... { field }";
+
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseInlineFragment();
+
+            /* Then */
+            Assert.Equal(1, actual.SelectionSet.Selections.Count);
+        }
+
+        [Fact]
+        public void FieldSelection_with_Alias()
         {
             /* Given */
             var source = "alias: field";
@@ -147,7 +437,7 @@ namespace Tanka.GraphQL.Language.Tests
         }
 
         [Fact]
-        public void Field_SelectionSet()
+        public void FieldSelection_SelectionSet()
         {
             /* Given */
             var source = "field { subField }";
@@ -166,30 +456,47 @@ namespace Tanka.GraphQL.Language.Tests
         public void VariableDefinitions()
         {
             /* Given */
-            var source = "";
+            var source = @"($name: String! = ""tanka"", $Version: Float = 2.0)";
 
             var sut = Parser.Create(source);
 
             /* When */
-            var actual = sut.ParseVariableDefinitions();
+            var variableDefinitions = sut.ParseVariableDefinitions();
 
             /* Then */
-            
+            Assert.Equal(2, variableDefinitions.Count);
         }
 
-        [Fact]
-        public void VariableDefinition()
+        [Theory]
+        [InlineData("$variable: Int", "variable", "Int")]
+        [InlineData("$variable2: String", "variable2", "String")]
+        public void VariableDefinition(string source, string name, string typeName)
         {
             /* Given */
-            var source = "";
-
             var sut = Parser.Create(source);
 
             /* When */
             var actual = sut.ParseVariableDefinition();
 
             /* Then */
-            
+            Assert.Equal(name, actual.Variable.Name);
+            var namedType = Assert.IsType<NamedType>(actual.Type);
+            Assert.Equal(typeName, namedType.Name);
+        }
+
+        [Theory]
+        [InlineData("$variable: Int=123", typeof(IntValue))]
+        [InlineData(@"$variable2: String = ""Test""", typeof(StringValue))]
+        public void VariableDefinition_DefaultValue(string source, Type expectedDefaultValueType)
+        {
+            /* Given */
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = sut.ParseVariableDefinition();
+
+            /* Then */
+            Assert.IsType(expectedDefaultValueType, actual.DefaultValue?.Value);
         }
 
         [Fact]

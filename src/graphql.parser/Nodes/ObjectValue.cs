@@ -2,16 +2,16 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class ListValue : IValue
+    public sealed class ObjectValue : IValue
     {
-        public readonly IReadOnlyCollection<IValue> Value;
+        public readonly IReadOnlyCollection<ObjectField> Fields;
         public readonly Location? Location;
 
-        public ListValue(
-            in IReadOnlyCollection<IValue> value,
+        public ObjectValue(
+            in IReadOnlyCollection<ObjectField> fields,
             in Location? location)
         {
-            Value = value;
+            Fields = fields;
             Location = location;
         }
     }
