@@ -7,8 +7,8 @@
         public readonly Location Location;
 
         public ObjectField(
-            in Name name,
-            in IValue value,
+            Name name,
+            IValue value,
             in Location location)
         {
             Name = name;

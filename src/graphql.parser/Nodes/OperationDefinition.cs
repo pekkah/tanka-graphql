@@ -12,12 +12,12 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly SelectionSet SelectionSet;
 
         public OperationDefinition(
-            in OperationType operation,
-            in Name? name,
-            in IReadOnlyCollection<VariableDefinition>? variableDefinitions,
-            in IReadOnlyCollection<Directive>? directives,
-            in SelectionSet selectionSet,
-            in Location location
+            OperationType operation,
+            Name? name,
+            IReadOnlyCollection<VariableDefinition>? variableDefinitions,
+            IReadOnlyCollection<Directive>? directives,
+            SelectionSet selectionSet,
+            Location location
         )
         {
             Operation = operation;

@@ -6,7 +6,7 @@
         public readonly Location Location;
 
         public DefaultValue(
-            in IValue value,
+            IValue value,
             in Location location)
         {
             Value = value;

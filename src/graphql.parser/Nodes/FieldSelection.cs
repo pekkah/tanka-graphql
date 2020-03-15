@@ -12,11 +12,11 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly SelectionSet? SelectionSet;
 
         public FieldSelection(
-            in Name? alias,
-            in Name name,
-            in IReadOnlyCollection<Argument>? arguments,
-            in IReadOnlyCollection<Directive>? directives,
-            in SelectionSet? selectionSet,
+            Name? alias,
+            Name name,
+            IReadOnlyCollection<Argument>? arguments,
+            IReadOnlyCollection<Directive>? directives,
+            SelectionSet? selectionSet,
             in Location location)
         {
             Alias = alias;

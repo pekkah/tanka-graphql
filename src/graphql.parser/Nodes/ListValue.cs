@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly Location Location;
 
         public ListValue(
-            in IReadOnlyCollection<IValue> value,
+            IReadOnlyCollection<IValue> value,
             in Location location)
         {
             Value = value;

@@ -9,8 +9,8 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly Location Location;
 
         public Directive(
-            in Name name,
-            in IReadOnlyCollection<Argument>? arguments,
+            Name name,
+            IReadOnlyCollection<Argument>? arguments,
             in Location location)
         {
             Name = name;

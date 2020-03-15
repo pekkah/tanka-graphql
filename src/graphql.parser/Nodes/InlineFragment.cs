@@ -12,9 +12,9 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly Location Location;
 
         public InlineFragment(
-            in NamedType? typeCondition,
-            in IReadOnlyCollection<Directive>? directives,
-            in SelectionSet selectionSet,
+            NamedType? typeCondition,
+            IReadOnlyCollection<Directive>? directives,
+            SelectionSet selectionSet,
             in Location location)
         {
             TypeCondition = typeCondition;

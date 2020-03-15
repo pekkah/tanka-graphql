@@ -11,10 +11,10 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly Location Location;
 
         public FragmentDefinition(
-            in Name fragmentName, 
-            in NamedType typeCondition, 
-            in IReadOnlyCollection<Directive>? directives, 
-            in SelectionSet selectionSet,
+            Name fragmentName, 
+            NamedType typeCondition, 
+            IReadOnlyCollection<Directive>? directives, 
+            SelectionSet selectionSet,
             in Location location)
         {
             FragmentName = fragmentName;

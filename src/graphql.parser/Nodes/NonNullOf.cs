@@ -6,7 +6,7 @@
         public readonly Location Location;
 
         public NonNullOf(
-            in Type ofType,
+            Type ofType,
             in Location location)
         {
             OfType = ofType;

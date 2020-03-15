@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly IReadOnlyCollection<ISelection> Selections;
 
         public SelectionSet(
-            in IReadOnlyCollection<ISelection> selections,
+            IReadOnlyCollection<ISelection> selections,
             in Location location)
         {
             Selections = selections;

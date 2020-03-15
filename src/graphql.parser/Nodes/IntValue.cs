@@ -6,7 +6,7 @@
         public readonly Location Location;
 
         public IntValue(
-            in int value,
+            int value,
             in Location location)
         {
             Value = value;

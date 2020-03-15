@@ -11,8 +11,8 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly Location Location;
 
         public FragmentSpread(
-            in Name fragmentName,
-            in IReadOnlyCollection<Directive>? directives,
+            Name fragmentName,
+            IReadOnlyCollection<Directive>? directives,
             in Location location)
         {
             FragmentName = fragmentName;

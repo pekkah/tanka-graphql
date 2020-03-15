@@ -6,7 +6,7 @@
         public readonly Location Location;
 
         public EnumValue(
-            in Name value,
+            Name value,
             in Location location)
         {
             Value = value;

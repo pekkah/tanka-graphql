@@ -6,7 +6,7 @@
         public readonly Location Location;
 
         public StringValue(
-            in string value,
+            string value,
             in Location location)
         {
             Value = value;

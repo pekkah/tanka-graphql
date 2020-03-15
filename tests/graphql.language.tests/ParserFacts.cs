@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
@@ -700,7 +701,8 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             var floatValue = Assert.IsType<FloatValue>(value);
-            Assert.Equal(expected, floatValue.Value);
+            Assert.True(Utf8Parser.TryParse(floatValue.Value.Span, out double d, out _));
+            Assert.Equal(expected, d);
         }
 
         [Theory]

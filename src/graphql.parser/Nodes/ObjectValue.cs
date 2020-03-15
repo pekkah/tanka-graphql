@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly Location Location;
 
         public ObjectValue(
-            in IReadOnlyCollection<ObjectField> fields,
+            IReadOnlyCollection<ObjectField> fields,
             in Location location)
         {
             Fields = fields;

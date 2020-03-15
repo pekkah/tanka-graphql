@@ -6,7 +6,7 @@
         public readonly Location Location;
 
         public NamedType(
-            in Name name,
+            Name name,
             in Location location)
         {
             Name = name;

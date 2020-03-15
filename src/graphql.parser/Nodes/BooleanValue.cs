@@ -6,7 +6,7 @@
         public readonly Location Location;
 
         public BooleanValue(
-            in bool value,
+            bool value,
             in Location location)
         {
             Value = value;

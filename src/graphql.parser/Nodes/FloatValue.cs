@@ -1,15 +1,17 @@
-﻿namespace Tanka.GraphQL.Language.Nodes
+﻿using System;
+
+namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class FloatValue : IValue
     {
-        public readonly double Value;
+        public readonly ReadOnlyMemory<byte> Value;
         public readonly Location Location;
 
         public FloatValue(
-            in double value,
+            in ReadOnlySpan<byte> value,
             in Location location)
         {
-            Value = value;
+            Value = new ReadOnlyMemory<byte>(value.ToArray());
             Location = location;
         }
     }

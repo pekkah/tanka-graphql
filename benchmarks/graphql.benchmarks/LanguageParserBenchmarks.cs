@@ -17,8 +17,6 @@ namespace Tanka.GraphQL.Benchmarks
     public class LanguageParserBenchmarks
     {
         public Memory<byte> IntrospectionQueryMemory;
-        public string SimpleQuery { get; set; }
-
         public string IntrospectionQuery { get; set; }
 
         [GlobalSetup]
@@ -30,7 +28,7 @@ namespace Tanka.GraphQL.Benchmarks
         }
 
         [Benchmark(Baseline = true)]
-        public void OldParser_IntrospectionQuery()
+        public void GraphQL_dotnet_Parser_IntrospectionQuery()
         {
             var parser = new GraphQLParser.Parser(new Lexer());
             var source = new Source(IntrospectionQuery);
@@ -41,22 +39,12 @@ namespace Tanka.GraphQL.Benchmarks
         }
 
         [Benchmark]
-        public void NewParser_IntrospectionQuery_String()
-        {
-            var parser = Language.Parser.Create(IntrospectionQuery);
-            var document = parser.ParseDocument();
-
-            if (document.OperationDefinitions == null || !document.OperationDefinitions.Any())
-                throw new InvalidOperationException("Failed");
-        }
-
-        [Benchmark]
-        public void NewParser_IntrospectionQuery_Span()
+        public void Tanka_GraphQL_Parser_IntrospectionQuery()
         {
             var parser = Language.Parser.Create(IntrospectionQueryMemory.Span);
             var document = parser.ParseDocument();
 
-            if ((document.OperationDefinitions == null) || !document.OperationDefinitions.Any())
+            if (document.OperationDefinitions == null || !document.OperationDefinitions.Any())
                 throw new InvalidOperationException("Failed");
         }
     }

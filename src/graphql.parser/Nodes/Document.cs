@@ -8,8 +8,8 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly IReadOnlyCollection<OperationDefinition>? OperationDefinitions;
 
         public Document(
-            in IReadOnlyCollection<OperationDefinition>? operationDefinitions,
-            in IReadOnlyCollection<FragmentDefinition>? fragmentDefinitions)
+            IReadOnlyCollection<OperationDefinition>? operationDefinitions,
+            IReadOnlyCollection<FragmentDefinition>? fragmentDefinitions)
         {
             OperationDefinitions = operationDefinitions;
             FragmentDefinitions = fragmentDefinitions;
