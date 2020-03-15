@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Xunit;
 
@@ -71,6 +72,7 @@ namespace Tanka.GraphQL.Language.Tests
             Assert.Equal(TokenKind.End, sut.Kind);
         }
 
+        [Conditional("GQL_COMMENTS")]
         [Theory]
         [InlineData("# comment")]
         [InlineData("#comment")]
@@ -79,6 +81,7 @@ namespace Tanka.GraphQL.Language.Tests
         [InlineData("#comment\r\n")]
         public void ReadComment(string comment)
         {
+#if GQL_COMMENTS
             /* Given */
             var source = comment;
 
@@ -91,6 +94,7 @@ namespace Tanka.GraphQL.Language.Tests
             Assert.Equal(TokenKind.Comment, sut.Kind);
             Assert.Equal("comment", Encoding.UTF8.GetString(sut.Value));
             Assert.Equal(1, sut.Column);
+#endif
         }
 
         [Fact]

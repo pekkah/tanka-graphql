@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Linq;
+using System.Text;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 using GraphQLParser;
 using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.Language;
@@ -9,54 +10,23 @@ using TokenKind = GraphQLParser.TokenKind;
 
 namespace Tanka.GraphQL.Benchmarks
 {
-    [MarkdownExporterAttribute.GitHub]
-    public class LanguageParserBenchmarks
-    {
-        public string SimpleQuery { get; set; }
-
-        public string IntrospectionQuery { get; set; }
-
-        [GlobalSetup]
-        public void Setup()
-        {
-            IntrospectionQuery = Introspect.DefaultQuery;
-            SimpleQuery = "query { field }";
-            var _ = Constants.Space;
-        }
-
-        [Benchmark(Baseline = true)]
-        public void OldParser_SimpleQuery()
-        {
-            var parser = new GraphQLParser.Parser(new Lexer());
-            var source = new Source(SimpleQuery);
-            var document = parser.Parse(source);
-
-            if (!document.Definitions.Any())
-                throw new InvalidOperationException("Failed");
-        }
-
-        [Benchmark]
-        public void NewParser_SimpleQuery()
-        {
-            var parser = Language.Parser.Create(SimpleQuery);
-            var document = parser.ParseDocument();
-
-            if (!document.OperationDefinitions.Any())
-                throw new InvalidOperationException("Failed");
-        }
-    }
-
+    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
+    [RankColumn]
+    [MemoryDiagnoser]
     [MarkdownExporterAttribute.GitHub]
     public class LanguageLexerBenchmarks
     {
         public string SimpleQuery { get; set; }
 
         public string IntrospectionQuery { get; set; }
+        
+        public Memory<byte> IntrospectionQueryMemory { get; set; }
 
         [GlobalSetup]
         public void Setup()
         {
             IntrospectionQuery = Introspect.DefaultQuery;
+            IntrospectionQueryMemory = new Memory<byte>(Encoding.UTF8.GetBytes(IntrospectionQuery));
             SimpleQuery = "query { field }";
             var _ = Constants.Space;
         }
@@ -74,6 +44,16 @@ namespace Tanka.GraphQL.Benchmarks
         public void NewLexer_IntrospectionQuery()
         {
             var lexer = Language.Lexer.Create(IntrospectionQuery);
+            while (lexer.Advance())
+            {
+                //noop
+            }
+        }
+
+        [Benchmark]
+        public void NewLexer_IntrospectionQuery_Span()
+        {
+            var lexer = Language.Lexer.Create(IntrospectionQueryMemory.Span);
             while (lexer.Advance())
             {
                 //noop

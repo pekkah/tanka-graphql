@@ -4,7 +4,6 @@
     {
         Start,
         End,
-        Comment,
         ExclamationMark,
         Dollar,
         Ampersand,
@@ -23,6 +22,9 @@
         IntValue,
         FloatValue,
         StringValue,
-        BlockStringValue
+        BlockStringValue,
+#if GQL_COMMENTS
+        Comment
+#endif
     }
 }

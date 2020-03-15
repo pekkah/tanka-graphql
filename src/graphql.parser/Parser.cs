@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Tanka.GraphQL.Language.Internal;
@@ -83,11 +84,10 @@ namespace Tanka.GraphQL.Language
 
         public OperationDefinition ParseOperationDefinition(in OperationType operationType)
         {
-            var location = GetLocation();
             // OperationType Name? VariableDefinitions? Directives? SelectionSet
 
             // OperationType (coming in as param)
-            Skip(TokenKind.Name);
+            var location = Skip(TokenKind.Name);
 
             var name = ParseOptionalName();
             var variableDefinitions = ParseOptionalVariableDefinitions();
@@ -557,7 +557,7 @@ namespace Tanka.GraphQL.Language
             return ParseNamedType();
         }
 
-        private Name? ParseOptionalName()
+        public Name? ParseOptionalName()
         {
             SkipComment();
 
@@ -567,17 +567,17 @@ namespace Tanka.GraphQL.Language
             return ParseName();
         }
 
-        private Name ParseName()
+        public Name ParseName()
         {
-            Ensure(TokenKind.Name);
+            var location = Ensure(TokenKind.Name);
 
             var value = Encoding.UTF8.GetString(_lexer.Value);
-            var location = GetLocation();
             _lexer.Advance();
+
             return new Name(in value, in location);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Location Ensure(TokenKind kind)
         {
             SkipComment();
@@ -590,20 +590,23 @@ namespace Tanka.GraphQL.Language
             return GetLocation();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Location GetLocation()
         {
             return new Location(_lexer.Line, _lexer.Column);
         }
 
+        [Conditional("GQL_COMMENTS")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SkipComment()
         {
+#if GQL_COMMENTS
             if (_lexer.Kind == TokenKind.Comment)
                 _lexer.Advance();
+#endif
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Location Skip(TokenKind expectedToken)
         {
             var location = Ensure(expectedToken);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -51,14 +52,18 @@ namespace Tanka.GraphQL.Language
 
             if (_reader.TryPeek(out var code))
             {
-                switch (code)
+#if GQL_COMMENTS
+                if (code == Constants.Hash)
                 {
-                    case Constants.Hash:
-                        ReadComment();
-                        return true;
-                    case Constants.Quote:
-                        ReadStringValue();
-                        return true;
+                    ReadComment();
+                    return true;
+                }
+#endif
+
+                if (code == Constants.Quote)
+                {
+                    ReadStringValue();
+                    return true;
                 }
 
                 if (Constants.IsPunctuator(code))
@@ -238,12 +243,15 @@ namespace Tanka.GraphQL.Language
             }
         }
 
+
         /// <summary>
         ///     comment
         /// </summary>
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Conditional("GQL_COMMENTS")]
         private void ReadComment()
         {
+#if GQL_COMMENTS
             Kind = TokenKind.Comment;
 
             // skip #
@@ -259,6 +267,7 @@ namespace Tanka.GraphQL.Language
                 Constants.IsReturnOrNewLine);
 
             Value = data;
+#endif
         }
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -267,6 +276,9 @@ namespace Tanka.GraphQL.Language
             while (_reader.TryPeek(out var code))
                 switch (code)
                 {
+                    case Constants.Hash:
+                        _reader.TryReadWhileNotAny(out _, Constants.IsReturnOrNewLine);
+                        break;
                     case Constants.NewLine:
                         _reader.Advance();
                         StartNewLine();

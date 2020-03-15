@@ -24,6 +24,16 @@ namespace Tanka.GraphQL.Language.Tests
             }
         }
 
+        [Fact]
+        public void Parse_IntrospectionQuery()
+        {
+            var parser = Parser.Create(_queryBytes);
+            var document = parser.ParseDocument();
+
+            Assert.NotNull(document.OperationDefinitions);
+            Assert.NotEmpty(document.OperationDefinitions);
+        }
+
         public static string DefaultQuery = @"
             query IntrospectionQuery {
               __schema {
