@@ -1,8 +1,8 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public class Location
+    public readonly struct Location
     {
-        public Location(in int line, in int column)
+        public Location(int line, int column)
         {
             Line = line;
             Column = column;

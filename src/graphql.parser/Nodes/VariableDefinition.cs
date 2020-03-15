@@ -8,14 +8,14 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly Type Type;
         public readonly DefaultValue? DefaultValue;
         public readonly IReadOnlyCollection<Directive>? Directives;
-        public readonly Location? Location;
+        public readonly Location Location;
 
         public VariableDefinition(
             in Variable variable,
             in Type type,
             in DefaultValue? defaultValue,
             in IReadOnlyCollection<Directive>? directives,
-            in Location? location)
+            in Location location)
         {
             Variable = variable;
             Type = type;

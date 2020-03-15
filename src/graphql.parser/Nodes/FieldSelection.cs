@@ -4,7 +4,7 @@ namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class FieldSelection : ISelection
     {
-        public readonly Location? Location;
+        public readonly Location Location;
         public readonly Name? Alias;
         public readonly Name Name;
         public readonly IReadOnlyCollection<Argument>? Arguments;
@@ -17,7 +17,7 @@ namespace Tanka.GraphQL.Language.Nodes
             in IReadOnlyCollection<Argument>? arguments,
             in IReadOnlyCollection<Directive>? directives,
             in SelectionSet? selectionSet,
-            in Location? location)
+            in Location location)
         {
             Alias = alias;
             Name = name;

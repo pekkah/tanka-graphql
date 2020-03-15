@@ -3,11 +3,11 @@
     public sealed class DefaultValue
     {
         public readonly IValue Value;
-        public readonly Location? Location;
+        public readonly Location Location;
 
         public DefaultValue(
             in IValue value,
-            in Location? location)
+            in Location location)
         {
             Value = value;
             Location = location;

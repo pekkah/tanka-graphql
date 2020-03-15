@@ -4,11 +4,11 @@ namespace Tanka.GraphQL.Language.Nodes
 {
     public class Name : IEquatable<Name>
     {
-        public readonly Location? Location;
+        public readonly Location Location;
 
         public readonly string Value;
 
-        public Name(in string value, in Location? location)
+        public Name(in string value, in Location location)
         {
             Value = value;
             Location = location;
@@ -46,7 +46,7 @@ namespace Tanka.GraphQL.Language.Nodes
 
         public static implicit operator Name(string value)
         {
-            return new Name(value, null);
+            return new Name(value, default);
         }
 
         public static implicit operator string(Name value)
@@ -56,7 +56,7 @@ namespace Tanka.GraphQL.Language.Nodes
 
         public override string ToString()
         {
-            var location = Location != null ? Location.ToString() : string.Empty;
+            var location = Location.Equals(default) ? Location.ToString() : string.Empty;
             return $"{Value}{location}";
         }
     }

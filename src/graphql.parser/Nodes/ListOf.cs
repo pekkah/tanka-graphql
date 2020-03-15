@@ -3,11 +3,11 @@
     public class ListOf: Type
     {
         public readonly Type OfType;
-        public readonly Location? Location;
+        public readonly Location Location;
 
         public ListOf(
             in Type ofType,
-            in Location? location)
+            in Location location)
         {
             OfType = ofType;
             Location = location;

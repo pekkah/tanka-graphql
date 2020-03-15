@@ -3,11 +3,11 @@
     public sealed class StringValue: IValue
     {
         public readonly string Value;
-        public readonly Location? Location;
+        public readonly Location Location;
 
         public StringValue(
             in string value,
-            in Location? location)
+            in Location location)
         {
             Value = value;
             Location = location;

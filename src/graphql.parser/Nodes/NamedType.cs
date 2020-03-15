@@ -3,11 +3,11 @@
     public class NamedType: Type
     {
         public readonly Name Name;
-        public readonly Location? Location;
+        public readonly Location Location;
 
         public NamedType(
             in Name name,
-            in Location? location)
+            in Location location)
         {
             Name = name;
             Location = location;

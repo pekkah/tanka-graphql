@@ -3,11 +3,11 @@
     public class NonNullOf: Type
     {
         public readonly Type OfType;
-        public readonly Location? Location;
+        public readonly Location Location;
 
         public NonNullOf(
             in Type ofType,
-            in Location? location)
+            in Location location)
         {
             OfType = ofType;
             Location = location;
