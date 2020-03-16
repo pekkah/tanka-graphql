@@ -2,12 +2,12 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public class Document
+    public class ExecutableDocument
     {
         public readonly IReadOnlyCollection<FragmentDefinition>? FragmentDefinitions;
         public readonly IReadOnlyCollection<OperationDefinition>? OperationDefinitions;
 
-        public Document(
+        public ExecutableDocument(
             IReadOnlyCollection<OperationDefinition>? operationDefinitions,
             IReadOnlyCollection<FragmentDefinition>? fragmentDefinitions)
         {

@@ -30,7 +30,7 @@ namespace Tanka.GraphQL.Language
             return Create(Encoding.UTF8.GetBytes(data));
         }
 
-        public Document ParseDocument()
+        public ExecutableDocument ParseExecutableDocument()
         {
             var operations = new List<OperationDefinition>(1);
             var fragmentDefinitions = new List<FragmentDefinition>();
@@ -55,7 +55,7 @@ namespace Tanka.GraphQL.Language
             }
 
 
-            return new Document(
+            return new ExecutableDocument(
                 operations, 
                 fragmentDefinitions);
         }

@@ -28,7 +28,7 @@ namespace Tanka.GraphQL.Language.Tests
             var sut = Parser.Create(source);
             
             /* When */
-            var actual = sut.ParseDocument();
+            var actual = sut.ParseExecutableDocument();
 
             /* Then */
             Assert.Equal(3, actual.OperationDefinitions?.Count);
@@ -43,7 +43,7 @@ namespace Tanka.GraphQL.Language.Tests
             var sut = Parser.Create(source);
             
             /* When */
-            var actual = sut.ParseDocument();
+            var actual = sut.ParseExecutableDocument();
 
             /* Then */
             Assert.Equal(1, actual.FragmentDefinitions?.Count);

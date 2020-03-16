@@ -29,7 +29,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void Parse_IntrospectionQuery()
         {
             var parser = Parser.Create(_queryBytes);
-            var document = parser.ParseDocument();
+            var document = parser.ParseExecutableDocument();
 
             Assert.NotNull(document.OperationDefinitions);
             Assert.NotEmpty(document.OperationDefinitions);

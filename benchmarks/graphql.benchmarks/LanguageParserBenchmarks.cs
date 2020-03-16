@@ -42,7 +42,7 @@ namespace Tanka.GraphQL.Benchmarks
         public void Tanka_GraphQL_Parser_IntrospectionQuery()
         {
             var parser = Language.Parser.Create(IntrospectionQueryMemory.Span);
-            var document = parser.ParseDocument();
+            var document = parser.ParseExecutableDocument();
 
             if (document.OperationDefinitions == null || !document.OperationDefinitions.Any())
                 throw new InvalidOperationException("Failed");
