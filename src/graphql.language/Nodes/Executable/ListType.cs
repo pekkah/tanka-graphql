@@ -1,12 +1,12 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public class NonNullOf: Type
+    public sealed class ListType: IType
     {
-        public readonly Type OfType;
+        public readonly IType OfType;
         public readonly Location Location;
 
-        public NonNullOf(
-            Type ofType,
+        public ListType(
+            IType ofType,
             in Location location)
         {
             OfType = ofType;

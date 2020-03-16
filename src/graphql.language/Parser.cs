@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Tanka.GraphQL.Language.Internal;
 using Tanka.GraphQL.Language.Nodes;
-using Type = Tanka.GraphQL.Language.Nodes.Type;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Language
 {
@@ -28,6 +28,16 @@ namespace Tanka.GraphQL.Language
         public static Parser Create(in string data)
         {
             return Create(Encoding.UTF8.GetBytes(data));
+        }
+
+        public TypeSystemDocument ParseTypeDefinitions()
+        {
+            return new TypeSystemDocument(
+                null,
+                null,
+                null,
+                null,
+                null);
         }
 
         public ExecutableDocument ParseExecutableDocument()
@@ -56,7 +66,7 @@ namespace Tanka.GraphQL.Language
 
 
             return new ExecutableDocument(
-                operations, 
+                operations,
                 fragmentDefinitions);
         }
 
@@ -356,7 +366,7 @@ namespace Tanka.GraphQL.Language
             return new ListValue(values, location);
         }
 
-        public Type ParseType()
+        public IType ParseType()
         {
             // Type
             // [Type]
@@ -366,13 +376,13 @@ namespace Tanka.GraphQL.Language
 
             // [Type]
             var location = GetLocation();
-            Type type;
+            IType type;
             if (_lexer.Kind == TokenKind.LeftBracket)
             {
                 Skip(TokenKind.LeftBracket);
                 var listType = ParseType();
                 Skip(TokenKind.RightBracket);
-                type = new ListOf(listType, location);
+                type = new ListType(listType, location);
             }
             else
             {
@@ -383,7 +393,7 @@ namespace Tanka.GraphQL.Language
             if (_lexer.Kind == TokenKind.ExclamationMark)
             {
                 Skip(TokenKind.ExclamationMark);
-                type = new NonNullOf(type, location);
+                type = new NonNullType(type, location);
             }
 
             return type;

@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public class Name : IEquatable<Name>
+    public sealed class Name : IEquatable<Name>
     {
         public readonly Location Location;
 

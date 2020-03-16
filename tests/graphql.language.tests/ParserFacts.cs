@@ -597,8 +597,8 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             Assert.NotNull(type);
-            Assert.IsType<NonNullOf>(type);
-            Assert.IsType<NamedType>(((NonNullOf)type).OfType);
+            Assert.IsType<NonNullType>(type);
+            Assert.IsType<NamedType>(((NonNullType)type).OfType);
         }
 
         [Fact]
@@ -614,8 +614,8 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             Assert.NotNull(type);
-            Assert.IsType<ListOf>(type);
-            Assert.IsType<NamedType>(((ListOf)type).OfType);
+            Assert.IsType<ListType>(type);
+            Assert.IsType<NamedType>(((ListType)type).OfType);
         }
 
         [Fact]
@@ -631,8 +631,8 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             Assert.NotNull(type);
-            Assert.IsType<NonNullOf>(type);
-            Assert.IsType<ListOf>(((NonNullOf)type).OfType);
+            Assert.IsType<NonNullType>(type);
+            Assert.IsType<ListType>(((NonNullType)type).OfType);
         }
 
         [Fact]
@@ -648,8 +648,8 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             Assert.NotNull(type);
-            Assert.IsType<ListOf>(type);
-            Assert.IsType<NonNullOf>(((ListOf)type).OfType);
+            Assert.IsType<ListType>(type);
+            Assert.IsType<NonNullType>(((ListType)type).OfType);
         }
 
         [Fact]
@@ -665,9 +665,9 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             Assert.NotNull(type);
-            var nonNullOf = Assert.IsType<NonNullOf>(type);
-            var listOf = Assert.IsType<ListOf>(nonNullOf.OfType);
-            var nonNullItemOf = Assert.IsType<NonNullOf>(listOf.OfType);
+            var nonNullOf = Assert.IsType<NonNullType>(type);
+            var listOf = Assert.IsType<ListType>(nonNullOf.OfType);
+            var nonNullItemOf = Assert.IsType<NonNullType>(listOf.OfType);
             Assert.IsType<NamedType>(nonNullItemOf.OfType);
         }
 

@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public class OperationDefinition
+    public sealed class OperationDefinition
     {
         public readonly Location Location;
         public readonly Name? Name;
