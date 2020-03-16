@@ -2,12 +2,13 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Tanka.GraphQL.Language.Internal;
 
 namespace Tanka.GraphQL.Language
 {
     public ref struct Lexer
     {
-        private Reader _reader;
+        private SpanReader _reader;
 
         private int _currentLineStart;
 
@@ -25,7 +26,7 @@ namespace Tanka.GraphQL.Language
 
         public Lexer(in ReadOnlySpan<byte> span)
         {
-            _reader = new Reader(span);
+            _reader = new SpanReader(span);
             _currentLineStart = 0;
             Kind = TokenKind.Start;
             Value = ReadOnlySpan<byte>.Empty;
@@ -276,9 +277,11 @@ namespace Tanka.GraphQL.Language
             while (_reader.TryPeek(out var code))
                 switch (code)
                 {
+                    #if !GQL_COMMENTS
                     case Constants.Hash:
                         _reader.TryReadWhileNotAny(out _, Constants.IsReturnOrNewLine);
                         break;
+                    #endif
                     case Constants.NewLine:
                         _reader.Advance();
                         StartNewLine();

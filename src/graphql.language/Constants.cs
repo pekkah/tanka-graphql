@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -42,12 +41,12 @@ namespace Tanka.GraphQL.Language
         public const byte E = (byte) 'E';
 
         private static readonly bool[] _isPunctuator = new bool[256];
-        
+
         public static readonly bool[] IsLetterOrUnderscore = new bool[256];
         public static readonly bool[] IsLetterOrDigitOrUnderscore = new bool[256];
-        public static readonly  bool[] IsReturnOrNewLine = new bool[256];
-        public static readonly  bool[] IsMinusOrNonZeroDigit = new bool[256];
-        public static readonly  bool[] IsDigit = new bool[256];
+        public static readonly bool[] IsReturnOrNewLine = new bool[256];
+        public static readonly bool[] IsMinusOrNonZeroDigit = new bool[256];
+        public static readonly bool[] IsDigit = new bool[256];
 
         public static ReadOnlyMemory<byte> Bom = new ReadOnlyMemory<byte>(
             Encoding.UTF8.GetPreamble());
@@ -101,45 +100,36 @@ namespace Tanka.GraphQL.Language
                 _isPunctuator[punctuator] = true;
 
             /* NameStart */
-            for (var c = 'a'; c <= 'z'; c++) 
+            for (var c = 'a'; c <= 'z'; c++)
                 IsLetterOrUnderscore[c] = true;
 
-            for (var c = 'A'; c <= 'Z'; c++) 
+            for (var c = 'A'; c <= 'Z'; c++)
                 IsLetterOrUnderscore[c] = true;
 
-            IsLetterOrUnderscore['_'] = true;
+            IsLetterOrUnderscore[Underscore] = true;
 
             /* NameContinue */
-            for (var c = 'a'; c <= 'z'; c++) 
+            for (var c = 'a'; c <= 'z'; c++)
                 IsLetterOrDigitOrUnderscore[c] = true;
 
-            for (var c = 'A'; c <= 'Z'; c++) 
+            for (var c = 'A'; c <= 'Z'; c++)
                 IsLetterOrDigitOrUnderscore[c] = true;
 
-            for(char d = '0'; d <= '9'; d++)
-            {
-                IsLetterOrDigitOrUnderscore[d] = true;
-            }
+            for (var d = '0'; d <= '9'; d++) IsLetterOrDigitOrUnderscore[d] = true;
 
-            IsLetterOrDigitOrUnderscore['_'] = true;
+            IsLetterOrDigitOrUnderscore[Underscore] = true;
 
             /* Return Or NewLine */
             IsReturnOrNewLine[Return] = true;
             IsReturnOrNewLine[NewLine] = true;
 
             /* Digit */
-            for(char d = '0'; d <= '9'; d++)
-            {
-                IsDigit[d] = true;
-            }
+            for (var d = '0'; d <= '9'; d++) IsDigit[d] = true;
 
             /* Minus Or Digit */
-            for(char d = '1'; d <= '9'; d++)
-            {
-                IsMinusOrNonZeroDigit[d] = true;
-            }
+            for (var d = '1'; d <= '9'; d++) IsMinusOrNonZeroDigit[d] = true;
 
-            IsMinusOrNonZeroDigit['-'] = true;
+            IsMinusOrNonZeroDigit[Minus] = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

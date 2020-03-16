@@ -1,9 +1,10 @@
 using System.Text;
+using Tanka.GraphQL.Language.Internal;
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests
 {
-    public class ReaderFacts
+    public class SpanReaderFacts
     {
         [Theory]
         [InlineData(0, 0, '0')]
@@ -17,7 +18,7 @@ namespace Tanka.GraphQL.Language.Tests
         {
             /* Given */
             var data = "0123456789";
-            var sut = new Reader(Encoding.UTF8.GetBytes(data));
+            var sut = new SpanReader(Encoding.UTF8.GetBytes(data));
 
             /* When */
             Assert.True(sut.Advance(count));
@@ -33,7 +34,7 @@ namespace Tanka.GraphQL.Language.Tests
         {
             /* Given */
             var data = string.Empty;
-            var sut = new Reader(Encoding.UTF8.GetBytes(data));
+            var sut = new SpanReader(Encoding.UTF8.GetBytes(data));
 
             /* When */
             /* Then */
@@ -47,7 +48,7 @@ namespace Tanka.GraphQL.Language.Tests
         {
             /* Given */
             var data = "123";
-            var sut = new Reader(Encoding.UTF8.GetBytes(data));
+            var sut = new SpanReader(Encoding.UTF8.GetBytes(data));
 
             /* When */
             /* Then */
@@ -62,7 +63,7 @@ namespace Tanka.GraphQL.Language.Tests
         {
             /* Given */
             var data = "123";
-            var sut = new Reader(Encoding.UTF8.GetBytes(data));
+            var sut = new SpanReader(Encoding.UTF8.GetBytes(data));
 
             /* When */
             /* Then */
@@ -77,7 +78,7 @@ namespace Tanka.GraphQL.Language.Tests
         {
             /* Given */
             var data = "123";
-            var sut = new Reader(Encoding.UTF8.GetBytes(data));
+            var sut = new SpanReader(Encoding.UTF8.GetBytes(data));
 
             /* When */
             /* Then */
@@ -92,7 +93,7 @@ namespace Tanka.GraphQL.Language.Tests
         {
             /* Given */
             var data = "0123456789";
-            var sut = new Reader(Encoding.UTF8.GetBytes(data));
+            var sut = new SpanReader(Encoding.UTF8.GetBytes(data));
 
             /* When */
             /* Then */
@@ -108,7 +109,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void IsNext(string data, string expectedNext, bool expectedIsNext)
         {
             /* Given */
-            var sut = new Reader(Encoding.UTF8.GetBytes(data));
+            var sut = new SpanReader(Encoding.UTF8.GetBytes(data));
 
             /* When */
             var actualIsNext = sut.IsNext(Encoding.UTF8.GetBytes(expectedNext));
@@ -121,7 +122,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void TryReadWhileAny()
         {
             /* Given */
-            var sut = new Reader(Encoding.UTF8.GetBytes("2.0 }"));
+            var sut = new SpanReader(Encoding.UTF8.GetBytes("2.0 }"));
 
             /* When */
             Assert.True(sut.TryReadWhileAny(out var integerPart, Constants.IsDigit));
@@ -138,7 +139,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void TryReadWhileNotAny()
         {
             /* Given */
-            var sut = new Reader(Encoding.UTF8.GetBytes("test test test\n test"));
+            var sut = new SpanReader(Encoding.UTF8.GetBytes("test test test\n test"));
 
             /* When */
             sut.TryReadWhileNotAny(

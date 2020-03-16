@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace Tanka.GraphQL.Language
+namespace Tanka.GraphQL.Language.Internal
 {
-    internal ref struct Reader
+    internal ref struct SpanReader
     {
         public readonly ReadOnlySpan<byte> Span;
 
@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.Language
 
         public long Length => Span.Length;
 
-        public Reader(ReadOnlySpan<byte> span)
+        public SpanReader(ReadOnlySpan<byte> span)
         {
             Span = span;
             Position = -1;
