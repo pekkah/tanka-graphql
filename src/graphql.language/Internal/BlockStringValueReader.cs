@@ -22,7 +22,7 @@ namespace Tanka.GraphQL.Language.Internal
 
             // trim
             trimWriter.Write(firstLine);
-            if (commonIndent != null && commonIndent > 0)
+            if (commonIndent != null)
                 while (lineReader.TryReadLine(out var line))
                 {
                     trimWriter.Write(Constants.NewLineMemory.Span);

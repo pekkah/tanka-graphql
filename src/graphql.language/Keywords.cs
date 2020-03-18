@@ -31,6 +31,39 @@ namespace Tanka.GraphQL.Language
         public static ReadOnlyMemory<byte> On
             = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("on"));
 
+        public static ReadOnlyMemory<byte> Repeatable
+            = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("repeatable"));
+
+        public static ReadOnlyMemory<byte> Schema = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("schema"));
+
+        public static ReadOnlyMemory<byte> Directive = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("directive"));
+
+        public static ReadOnlyMemory<byte> Type = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("type"));
+
+        public static ReadOnlyMemory<byte> Scalar = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("scalar"));
+
+        public static ReadOnlyMemory<byte> Interface = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("interface"));
+
+        public static ReadOnlyMemory<byte> Extend = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("extend"));
+
+        public static ReadOnlyMemory<byte> Implements = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("implements"));
+
+        public static ReadOnlyMemory<byte> Union = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("union"));
+
+        public static ReadOnlyMemory<byte> Enum = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("enum"));
+
+        public static ReadOnlyMemory<byte> Input = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("input"));
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsOperation(in ReadOnlySpan<byte> span, out OperationType operation)
         {
@@ -91,6 +124,18 @@ namespace Tanka.GraphQL.Language
         public static bool IsFragment(in ReadOnlySpan<byte> value)
         {
             return Fragment.Span.SequenceEqual(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsRepeatable(in ReadOnlySpan<byte> value)
+        {
+            return Repeatable.Span.SequenceEqual(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsImplements(in ReadOnlySpan<byte> value)
+        {
+            return Implements.Span.SequenceEqual(value);
         }
     }
 }

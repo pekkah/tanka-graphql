@@ -20,16 +20,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
     }
 
-    public sealed class TypeDefinition
-    {
-
-    }
-
-    public sealed class DirectiveDefinition
-    {
-
-    }
-
     public sealed class SchemaExtension
     {
 

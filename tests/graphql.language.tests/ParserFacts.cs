@@ -753,6 +753,22 @@ namespace Tanka.GraphQL.Language.Tests
         }
 
         [Fact]
+        public void Value_BlockString_AsDescription()
+        {
+            /* Given */
+            var sut = Parser.Create(@"
+""""""
+Description
+""""""
+");
+            /* When */
+            var value = sut.ParseOptionalDescription();
+
+            /* Then */
+            Assert.Equal("Description", value);
+        }
+
+        [Fact]
         public void Value_Null()
         {
             /* Given */
