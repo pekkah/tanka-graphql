@@ -41,6 +41,44 @@ namespace Tanka.GraphQL.Language
                 null);
         }
 
+        public SchemaDefinition ParseSchemaDefinition()
+        {
+            /* Description? schema Directives? { RootOperationTypeDefinition[] } */
+            var location = GetLocation();
+            var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Schema.Span);
+            var directives = ParseOptionalDirectives(constant: true);
+            var operations = ParseRootOperationDefinitions();
+            
+            return new SchemaDefinition(
+                description,
+                directives,
+                operations,
+                location);
+        }
+
+        public IReadOnlyCollection<(OperationType Operation, NamedType NamedType)> ParseRootOperationDefinitions()
+        {
+            Skip(TokenKind.LeftBrace);
+
+            var operations = new List<(OperationType Operation, NamedType NamedType)>();
+            while (_lexer.Kind != TokenKind.RightBrace)
+            {
+                /* OperationType: NamedType */
+                if (!Keywords.IsOperation(_lexer.Value, out var operation))
+                    throw new Exception(
+                        $"Unexpected operation type: '{Encoding.UTF8.GetString(_lexer.Value)}'.");
+
+                Skip(TokenKind.Name);
+                Skip(TokenKind.Colon);
+                var namedType = ParseNamedType();
+                operations.Add((operation, namedType));
+            }
+
+            Skip(TokenKind.RightBrace);
+            return operations;
+        }
+
         public DirectiveDefinition ParseDirectiveDefinition()
         {
             /* Description? directive @Name ArgumentsDefinition[]? repeatable? on DirectiveLocations*/

@@ -6,26 +6,26 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     {
         public TypeSystemDocument(
             IReadOnlyCollection<SchemaDefinition>? schemaDefinitions,
-            IReadOnlyCollection<TypeDefinition>? typeDefinitions,
+            IReadOnlyCollection<ITypeDefinition>? typeDefinitions,
             IReadOnlyCollection<DirectiveDefinition>? directiveDefinitions,
-            IReadOnlyCollection<SchemaExtension>? schemaExtensions,
-            IReadOnlyCollection<TypeExtension>? typeExtensions)
+            IReadOnlyCollection<ISchemaExtension>? schemaExtensions,
+            IReadOnlyCollection<ITypeExtension>? typeExtensions)
         {
       
         }
     }
 
-    public sealed class SchemaDefinition
+    public interface ISchemaExtension
     {
 
     }
 
-    public sealed class SchemaExtension
+    public interface ITypeExtension
     {
 
     }
 
-    public sealed class TypeExtension
+    public interface ITypeDefinition
     {
 
     }

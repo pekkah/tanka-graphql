@@ -628,5 +628,65 @@ input Name @a @b  {
             Assert.NotNull(definition.Directives);
             Assert.NotNull(definition.Fields);
         }
+
+        [Fact]
+        public void SchemaDefinition()
+        {
+            /* Given */
+            var sut = Parser.Create("schema { query: TypeName }");
+            
+            /* When */
+            var definition = sut.ParseSchemaDefinition();
+
+            /* Then */
+            Assert.Null(definition.Description);
+            Assert.Null(definition.Directives);
+            Assert.Single(definition.Operations, op => op.Operation == OperationType.Query);
+        }
+
+        [Fact]
+        public void SchemaDefinition_Description()
+        {
+            /* Given */
+            var sut = Parser.Create(@"
+""Description""
+schema { query: TypeName }");
+            
+            /* When */
+            var definition = sut.ParseSchemaDefinition();
+
+            /* Then */
+            Assert.Equal("Description", definition.Description);
+        }
+
+        [Fact]
+        public void SchemaDefinition_Directives()
+        {
+            /* Given */
+            var sut = Parser.Create("schema @a @b { query: TypeName }");
+            
+            /* When */
+            var definition = sut.ParseSchemaDefinition();
+
+            /* Then */
+            Assert.Equal(2, definition.Directives?.Count);
+        }
+
+        [Fact]
+        public void SchemaDefinition_AllRootTypes()
+        {
+            /* Given */
+            var sut = Parser.Create("schema { query: Query mutation: Mutation subscription: Subscription }");
+            
+            /* When */
+            var definition = sut.ParseSchemaDefinition();
+
+            /* Then */
+            Assert.Null(definition.Description);
+            Assert.Null(definition.Directives);
+            Assert.Single(definition.Operations, op => op.Operation == OperationType.Query);
+            Assert.Single(definition.Operations, op => op.Operation == OperationType.Mutation);
+            Assert.Single(definition.Operations, op => op.Operation == OperationType.Subscription);
+        }
     }
 }
