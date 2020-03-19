@@ -4,21 +4,11 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class UnionDefinition : ITypeDefinition
     {
-        public StringValue? Description { get; }
-        
-        public Name Name { get; }
-
-        public IReadOnlyCollection<Directive>? Directives { get; }
-        
-        public IReadOnlyCollection<NamedType>? Members { get; }
-        
-        public Location? Location { get; }
-
         public UnionDefinition(
-            StringValue? description, 
-            Name name, 
-            IReadOnlyCollection<Directive>? directives, 
-            IReadOnlyCollection<NamedType>? members, 
+            StringValue? description,
+            Name name,
+            IReadOnlyCollection<Directive>? directives,
+            IReadOnlyCollection<NamedType>? members,
             in Location? location)
         {
             Description = description;
@@ -27,5 +17,15 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             Members = members;
             Location = location;
         }
+
+        public StringValue? Description { get; }
+
+        public Name Name { get; }
+
+        public IReadOnlyCollection<Directive>? Directives { get; }
+
+        public IReadOnlyCollection<NamedType>? Members { get; }
+
+        public Location? Location { get; }
     }
 }

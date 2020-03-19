@@ -4,17 +4,11 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class InputObjectDefinition : ITypeDefinition
     {
-        public StringValue? Description { get; }
-        public Name Name { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
-        public IReadOnlyCollection<InputValueDefinition>? Fields { get; }
-        public Location? Location { get; }
-
         public InputObjectDefinition(
-            StringValue? description, 
-            Name name, 
-            IReadOnlyCollection<Directive>? directives, 
-            IReadOnlyCollection<InputValueDefinition>? fields, 
+            StringValue? description,
+            Name name,
+            IReadOnlyCollection<Directive>? directives,
+            IReadOnlyCollection<InputValueDefinition>? fields,
             in Location? location)
         {
             Description = description;
@@ -23,5 +17,11 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             Fields = fields;
             Location = location;
         }
+
+        public StringValue? Description { get; }
+        public Name Name { get; }
+        public IReadOnlyCollection<Directive>? Directives { get; }
+        public IReadOnlyCollection<InputValueDefinition>? Fields { get; }
+        public Location? Location { get; }
     }
 }

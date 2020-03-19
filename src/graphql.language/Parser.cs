@@ -2,16 +2,13 @@
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Tanka.GraphQL.Language.Internal;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Language
 {
-   
     public ref partial struct Parser
     {
         private StringValue? _description;
@@ -33,7 +30,7 @@ namespace Tanka.GraphQL.Language
         {
             return Create(Encoding.UTF8.GetBytes(data));
         }
-        
+
 
         private Location SkipKeyword(in ReadOnlySpan<byte> keyword)
         {

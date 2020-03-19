@@ -4,18 +4,18 @@ namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class FragmentDefinition
     {
-        public readonly Name FragmentName;
-        public readonly NamedType TypeCondition;
         public readonly IReadOnlyCollection<Directive>? Directives;
+        public readonly Name FragmentName;
+        public readonly Location? Location;
         public readonly SelectionSet SelectionSet;
-        public readonly Location Location;
+        public readonly NamedType TypeCondition;
 
         public FragmentDefinition(
-            Name fragmentName, 
-            NamedType typeCondition, 
-            IReadOnlyCollection<Directive>? directives, 
+            Name fragmentName,
+            NamedType typeCondition,
+            IReadOnlyCollection<Directive>? directives,
             SelectionSet selectionSet,
-            in Location location)
+            in Location? location)
         {
             FragmentName = fragmentName;
             TypeCondition = typeCondition;

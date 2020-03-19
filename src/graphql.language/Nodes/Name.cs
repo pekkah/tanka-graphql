@@ -4,11 +4,11 @@ namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class Name : IEquatable<Name>
     {
-        public readonly Location Location;
+        public readonly Location? Location;
 
         public readonly string Value;
 
-        public Name(string value, in Location location)
+        public Name(string value, in Location? location)
         {
             Value = value;
             Location = location;

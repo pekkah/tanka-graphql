@@ -20,7 +20,7 @@ namespace Tanka.GraphQL.Language.Internal
             if (Position >= _span.Length)
             {
                 line = default;
-                Position = _span.Length-1;
+                Position = _span.Length - 1;
                 return false;
             }
 
@@ -38,10 +38,7 @@ namespace Tanka.GraphQL.Language.Internal
 
             Position += newLineOrReturnIndex;
             // skip \r
-            if (unreadSpan[newLineOrReturnIndex] == Constants.Return)
-            {
-                Position++;
-            }
+            if (unreadSpan[newLineOrReturnIndex] == Constants.Return) Position++;
 
             line = unreadSpan.Slice(0, newLineOrReturnIndex);
             return true;

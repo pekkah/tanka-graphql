@@ -2,10 +2,10 @@
 {
     public sealed class NullValue : IValue
     {
-        public readonly Location Location;
+        public readonly Location? Location;
 
         public NullValue(
-            in Location location)
+            in Location? location)
         {
             Location = location;
         }

@@ -2,12 +2,12 @@
 {
     public sealed class DefaultValue
     {
+        public readonly Location? Location;
         public readonly IValue Value;
-        public readonly Location Location;
 
         public DefaultValue(
             IValue value,
-            in Location location)
+            in Location? location)
         {
             Value = value;
             Location = location;

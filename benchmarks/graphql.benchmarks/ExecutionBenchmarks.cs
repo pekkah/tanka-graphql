@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 using GraphQLParser.AST;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.TypeSystem;
@@ -11,16 +12,16 @@ using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Benchmarks
 {
-    [MarkdownExporterAttribute.GitHub()]
-    public class Benchmarks
+    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
+    [RankColumn]
+    [MemoryDiagnoser]
+    [MarkdownExporterAttribute.GitHub]
+    public class ExecutionBenchmarks
     {
         private GraphQLDocument _query;
         private ISchema _schema;
         private GraphQLDocument _mutation;
         private GraphQLDocument _subscription;
-        private IEnumerable<CombineRule> _defaultRulesMap;
-        private Resolver _resolverChain;
-        private Resolver _resolver;
 
         [GlobalSetup]
         public void Setup()
@@ -29,26 +30,6 @@ namespace Tanka.GraphQL.Benchmarks
             _query = Utils.InitializeQuery();
             _mutation = Utils.InitializeMutation();
             _subscription = Utils.InitializeSubscription();
-            _defaultRulesMap = ExecutionRules.All;
-            _resolverChain = new ResolverBuilder()
-                .Use((context, next) => next(context))
-                .Use((context, next) => next(context))
-                .Run(context => new ValueTask<IResolverResult>(Resolve.As(42)))
-                .Build();
-
-            _resolver = context => new ValueTask<IResolverResult>(Resolve.As(42));
-        }
-        
-        [Benchmark]
-        public async Task Query_with_defaults()
-        {
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Document = _query,
-                Schema = _schema
-            });
-
-            AssertResult(result.Errors);
         }
 
         [Benchmark(Baseline = true)]
@@ -59,6 +40,18 @@ namespace Tanka.GraphQL.Benchmarks
                 Document = _query,
                 Schema = _schema,
                 Validate = null
+            });
+
+            AssertResult(result.Errors);
+        }
+        
+        [Benchmark]
+        public async Task Query_with_defaults()
+        {
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            {
+                Document = _query,
+                Schema = _schema
             });
 
             AssertResult(result.Errors);
@@ -133,39 +126,6 @@ namespace Tanka.GraphQL.Benchmarks
             var value = await result.Source.Reader.ReadAsync(cts.Token);
             AssertResult(value.Errors);
             cts.Cancel();
-        }
-        
-        [Benchmark]
-        public void Validate_with_defaults()
-        {
-            var result = Validator.Validate(
-                _defaultRulesMap,
-                _schema,
-                _query);
-
-            if (!result.IsValid)
-            {
-                throw new InvalidOperationException(
-                    $"Validation failed. {result}");
-            }
-        }
-
-        [Benchmark]
-        public void Validate_100times_with_defaults()
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                var result = Validator.Validate(
-                    _defaultRulesMap,
-                    _schema,
-                    _query);
-
-                if (!result.IsValid)
-                {
-                    throw new InvalidOperationException(
-                        $"Validation failed. {result}");
-                }
-            }
         }
 
         private static void AssertResult(IEnumerable<ExecutionError> errors)

@@ -4,19 +4,12 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class InterfaceDefinition : ITypeDefinition
     {
-        public StringValue? Description { get; }
-        public Name Name { get; }
-        public IReadOnlyCollection<NamedType>? Interfaces { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
-        public IReadOnlyCollection<FieldDefinition>? Fields { get; }
-        public Location? Location { get; }
-
         public InterfaceDefinition(
-            StringValue? description, 
-            Name name, 
-            IReadOnlyCollection<NamedType>? interfaces, 
-            IReadOnlyCollection<Directive>? directives, 
-            IReadOnlyCollection<FieldDefinition>? fields, 
+            StringValue? description,
+            Name name,
+            IReadOnlyCollection<NamedType>? interfaces,
+            IReadOnlyCollection<Directive>? directives,
+            IReadOnlyCollection<FieldDefinition>? fields,
             in Location? location)
         {
             Description = description;
@@ -26,5 +19,12 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             Fields = fields;
             Location = location;
         }
+
+        public StringValue? Description { get; }
+        public Name Name { get; }
+        public IReadOnlyCollection<NamedType>? Interfaces { get; }
+        public IReadOnlyCollection<Directive>? Directives { get; }
+        public IReadOnlyCollection<FieldDefinition>? Fields { get; }
+        public Location? Location { get; }
     }
 }

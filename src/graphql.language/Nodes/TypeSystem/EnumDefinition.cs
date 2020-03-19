@@ -4,16 +4,10 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class EnumDefinition : ITypeDefinition
     {
-        public StringValue? Description { get; }
-        public Name Name { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
-        public IReadOnlyCollection<EnumValueDefinition>? Values { get; }
-        public Location? Location { get; }
-
         public EnumDefinition(
-            StringValue? description, 
-            Name name, 
-            IReadOnlyCollection<Directive>? directives, 
+            StringValue? description,
+            Name name,
+            IReadOnlyCollection<Directive>? directives,
             IReadOnlyCollection<EnumValueDefinition>? values,
             in Location? location)
         {
@@ -23,5 +17,11 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             Values = values;
             Location = location;
         }
+
+        public StringValue? Description { get; }
+        public Name Name { get; }
+        public IReadOnlyCollection<Directive>? Directives { get; }
+        public IReadOnlyCollection<EnumValueDefinition>? Values { get; }
+        public Location? Location { get; }
     }
 }

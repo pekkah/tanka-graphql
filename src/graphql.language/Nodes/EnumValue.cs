@@ -2,16 +2,15 @@
 {
     public sealed class EnumValue : IValue
     {
+        public readonly Location? Location;
         public readonly Name Value;
-        public readonly Location Location;
 
         public EnumValue(
             Name value,
-            in Location location)
+            in Location? location)
         {
             Value = value;
             Location = location;
         }
-
     }
 }

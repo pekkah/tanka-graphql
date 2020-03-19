@@ -15,13 +15,13 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public static IReadOnlyCollection<string> All = new List<string>
         {
-            QUERY, 
-            MUTATION, 
-            SUBSCRIPTION, 
-            FIELD, 
-            FRAGMENT_SPREAD, 
-            FRAGMENT_SPREAD, 
-            INLINE_FRAGMENT, 
+            QUERY,
+            MUTATION,
+            SUBSCRIPTION,
+            FIELD,
+            FRAGMENT_SPREAD,
+            FRAGMENT_SPREAD,
+            INLINE_FRAGMENT,
             VARIABLE_DEFINITION
         };
     }

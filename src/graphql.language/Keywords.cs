@@ -5,7 +5,7 @@ using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Language
 {
-    public static class Extensions 
+    public static class Extensions
     {
         public static bool Match(this in ReadOnlyMemory<byte> memory, in ReadOnlySpan<byte> value)
         {

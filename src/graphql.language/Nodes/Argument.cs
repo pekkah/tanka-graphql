@@ -2,14 +2,14 @@
 {
     public sealed class Argument
     {
+        public readonly Location? Location;
         public readonly Name Name;
         public readonly IValue Value;
-        public readonly Location Location;
 
         public Argument(
             Name name,
             IValue value,
-            in Location location)
+            in Location? location)
         {
             Name = name;
             Value = value;

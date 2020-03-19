@@ -86,30 +86,25 @@ namespace Tanka.GraphQL.Language.Internal
         public bool TrySkipNext(in byte maybeNext)
         {
             if (TryPeek(out var value))
-            {
                 if (maybeNext == value)
                 {
                     Advance();
                     return true;
                 }
-            }
 
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryReadWhileAny(
-            out ReadOnlySpan<byte> data, 
+            out ReadOnlySpan<byte> data,
             in bool[] matchTable)
         {
             var start = Position + 1;
             var length = 0;
-            while(TryPeek(out var value))
+            while (TryPeek(out var value))
             {
-                if (!matchTable[value])
-                {
-                    break;
-                }
+                if (!matchTable[value]) break;
 
                 Advance();
                 length++;
@@ -127,17 +122,14 @@ namespace Tanka.GraphQL.Language.Internal
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryReadWhileNotAny(
-            out ReadOnlySpan<byte> data, 
+            out ReadOnlySpan<byte> data,
             in bool[] matchTable)
         {
             var start = Position + 1;
             var length = 0;
-            while(TryPeek(out var value))
+            while (TryPeek(out var value))
             {
-                if (matchTable[value])
-                {
-                    break;
-                }
+                if (matchTable[value]) break;
 
                 Advance();
                 length++;

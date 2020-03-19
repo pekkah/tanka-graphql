@@ -82,7 +82,6 @@ namespace Tanka.GraphQL.Language.Tests
         [InlineData("#comment\r\n")]
         public void ReadComment(string comment)
         {
-#if GQL_COMMENTS
             /* Given */
             var source = comment;
 
@@ -91,6 +90,7 @@ namespace Tanka.GraphQL.Language.Tests
             /* When */
             sut.Advance();
 
+#if GQL_COMMENTS
             /* Then */
             Assert.Equal(TokenKind.Comment, sut.Kind);
             Assert.Equal("comment", Encoding.UTF8.GetString(sut.Value));

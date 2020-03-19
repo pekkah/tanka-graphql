@@ -4,12 +4,12 @@ namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class SelectionSet
     {
-        public readonly Location Location;
+        public readonly Location? Location;
         public readonly IReadOnlyCollection<ISelection> Selections;
 
         public SelectionSet(
             IReadOnlyCollection<ISelection> selections,
-            in Location location)
+            in Location? location)
         {
             Selections = selections;
             Location = location;

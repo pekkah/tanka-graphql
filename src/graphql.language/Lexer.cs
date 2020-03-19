@@ -171,9 +171,7 @@ namespace Tanka.GraphQL.Language
                     _reader.Advance();
                     if (_reader.TryPeek(out var nextCode))
                         if (Constants.IsDigit[nextCode])
-                        {
                             isExponent = true;
-                        }
                 }
 
                 if (code == Constants.Dot)
@@ -181,9 +179,7 @@ namespace Tanka.GraphQL.Language
                     _reader.Advance();
                     if (_reader.TryPeek(out var nextCode))
                         if (Constants.IsDigit[nextCode])
-                        {
                             isFloat = true;
-                        }
                 }
             }
 
@@ -277,11 +273,11 @@ namespace Tanka.GraphQL.Language
             while (_reader.TryPeek(out var code))
                 switch (code)
                 {
-                    #if !GQL_COMMENTS
+#if !GQL_COMMENTS
                     case Constants.Hash:
                         _reader.TryReadWhileNotAny(out _, Constants.IsReturnOrNewLine);
                         break;
-                    #endif
+#endif
                     case Constants.NewLine:
                         _reader.Advance();
                         StartNewLine();

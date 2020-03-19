@@ -4,12 +4,12 @@ namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class OperationDefinition
     {
-        public readonly Location Location;
+        public readonly IReadOnlyCollection<Directive>? Directives;
+        public readonly Location? Location;
         public readonly Name? Name;
         public readonly OperationType Operation;
-        public readonly IReadOnlyCollection<VariableDefinition>? VariableDefinitions;
-        public readonly IReadOnlyCollection<Directive>? Directives;
         public readonly SelectionSet SelectionSet;
+        public readonly IReadOnlyCollection<VariableDefinition>? VariableDefinitions;
 
         public OperationDefinition(
             OperationType operation,
@@ -17,8 +17,7 @@ namespace Tanka.GraphQL.Language.Nodes
             IReadOnlyCollection<VariableDefinition>? variableDefinitions,
             IReadOnlyCollection<Directive>? directives,
             SelectionSet selectionSet,
-            Location location
-        )
+            in Location? location)
         {
             Operation = operation;
             Name = name;

@@ -2,12 +2,12 @@
 {
     public sealed class BooleanValue : IValue
     {
+        public readonly Location? Location;
         public readonly bool Value;
-        public readonly Location Location;
 
         public BooleanValue(
             bool value,
-            in Location location)
+            in Location? location)
         {
             Value = value;
             Location = location;

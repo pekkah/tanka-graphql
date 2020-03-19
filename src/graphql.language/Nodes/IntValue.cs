@@ -2,12 +2,12 @@
 {
     public sealed class IntValue : IValue
     {
+        public readonly Location? Location;
         public readonly int Value;
-        public readonly Location Location;
 
         public IntValue(
             int value,
-            in Location location)
+            in Location? location)
         {
             Value = value;
             Location = location;

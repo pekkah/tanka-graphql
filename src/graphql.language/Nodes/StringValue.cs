@@ -1,13 +1,13 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class StringValue: IValue
+    public sealed class StringValue : IValue
     {
+        public readonly Location? Location;
         public readonly string Value;
-        public readonly Location Location;
 
         public StringValue(
             string value,
-            in Location location)
+            in Location? location)
         {
             Value = value;
             Location = location;
@@ -29,5 +29,4 @@
             return $"\"{Value}\"{location}";
         }
     }
-
 }

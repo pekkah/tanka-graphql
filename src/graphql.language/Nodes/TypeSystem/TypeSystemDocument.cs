@@ -4,12 +4,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class TypeSystemDocument
     {
-        public IReadOnlyCollection<SchemaDefinition>? SchemaDefinitions { get; }
-        public IReadOnlyCollection<ITypeDefinition>? TypeDefinitions { get; }
-        public IReadOnlyCollection<DirectiveDefinition>? DirectiveDefinitions { get; }
-        public IReadOnlyCollection<ISchemaExtension>? SchemaExtensions { get; }
-        public IReadOnlyCollection<ITypeExtension>? TypeExtensions { get; }
-
         public TypeSystemDocument(
             IReadOnlyCollection<SchemaDefinition>? schemaDefinitions,
             IReadOnlyCollection<ITypeDefinition>? typeDefinitions,
@@ -23,20 +17,23 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             SchemaExtensions = schemaExtensions;
             TypeExtensions = typeExtensions;
         }
+
+        public IReadOnlyCollection<SchemaDefinition>? SchemaDefinitions { get; }
+        public IReadOnlyCollection<ITypeDefinition>? TypeDefinitions { get; }
+        public IReadOnlyCollection<DirectiveDefinition>? DirectiveDefinitions { get; }
+        public IReadOnlyCollection<ISchemaExtension>? SchemaExtensions { get; }
+        public IReadOnlyCollection<ITypeExtension>? TypeExtensions { get; }
     }
 
     public interface ISchemaExtension
     {
-
     }
 
     public interface ITypeExtension
     {
-
     }
 
     public interface ITypeDefinition
     {
-
     }
 }
