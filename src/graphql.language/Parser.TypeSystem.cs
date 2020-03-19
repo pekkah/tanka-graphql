@@ -14,8 +14,8 @@ namespace Tanka.GraphQL.Language
             var schemaDefinitions = new List<SchemaDefinition>();
             var typeDefinitions = new List<ITypeDefinition>();
             var directiveDefinitions = new List<DirectiveDefinition>();
-            var schemaExtensions = new List<ISchemaExtension>();
-            var typeExtensions = new List<ITypeExtension>();
+            var schemaExtensions = new List<SchemaExtension>();
+            var typeExtensions = new List<ITypeDefinition>();
 
             while (_lexer.Kind != TokenKind.End)
             {
@@ -32,13 +32,38 @@ namespace Tanka.GraphQL.Language
                             typeDefinitions.Add(ParseTypeDefinition());
                             continue;
                         }
+                        else if (Keywords.Schema.Match(_lexer.Value))
+                        {
+                            schemaDefinitions.Add(ParseSchemaDefinition());
+                            continue;
+                        }
+                        else if (Keywords.Directive.Match(_lexer.Value))
+                        {
+                            directiveDefinitions.Add(ParseDirectiveDefinition());
+                            continue;
+                        }
+                        // extend
+                        else if (Keywords.Extend.Match(_lexer.Value))
+                        {
+                            _lexer.Advance();
+                            // types
+                            if (Keywords.IsTypeDefinition(_lexer.Value))
+                            {
+                                typeExtensions.Add(ParseTypeDefinition());
+                                continue;
+                            }
+                            else if (Keywords.Schema.Match(_lexer.Value))
+                            {
+                                schemaExtensions.Add(ParseSchemaExtension());
+                                continue;
+                            }
+                        }
 
                         break;
-                    default:
-                        throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
+                        
                 }
 
-                _lexer.Advance();
+                throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
             }
 
             return new TypeSystemDocument(
@@ -87,6 +112,30 @@ namespace Tanka.GraphQL.Language
                 directives,
                 operations,
                 location);
+        }
+
+        public SchemaExtension ParseSchemaExtension()
+        {
+            /* Description? schema Directives? { RootOperationTypeDefinition[] } */
+            var location = GetLocation();
+            var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Schema.Span);
+            var directives = ParseOptionalDirectives(true);
+            var operations = ParseOptionalRootOperationDefinitions();
+
+            return new SchemaExtension(
+                description,
+                directives,
+                operations,
+                location);
+        }
+
+        public IReadOnlyCollection<(OperationType Operation, NamedType NamedType)>? ParseOptionalRootOperationDefinitions()
+        {
+            if (_lexer.Kind != TokenKind.LeftBrace)
+                return null;
+
+            return ParseRootOperationDefinitions();
         }
 
         public IReadOnlyCollection<(OperationType Operation, NamedType NamedType)> ParseRootOperationDefinitions()

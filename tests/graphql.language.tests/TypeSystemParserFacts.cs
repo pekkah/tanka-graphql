@@ -779,5 +779,95 @@ input Input {
                         && input.Description == "Input"
                         && input.Fields?.Single().Description == "Field");
         }
+
+        [Fact]
+        public void TypeSystemDocument_TypeExtensions()
+        {
+            /* Given */
+            var sut = Parser.Create(@"
+""""""
+Scalar
+""""""
+extend scalar Scalar
+
+""""""
+Object
+""""""
+extend type Object {
+    field: Scalar!
+}
+
+""""""
+Interface
+""""""
+extend interface Interface {
+    ""Field""
+    field: Scalar!
+}
+
+""""""
+Union
+""""""
+extend union Union = A | B
+
+""""""
+Enum
+""""""
+extend enum Enum { 
+    ""A""
+    A
+    ""B""
+    B 
+}
+
+""""""
+Input
+""""""
+extend input Input {
+    ""Field""
+    field: Scalar
+}
+            ");
+
+            /* When */
+            var document = sut.ParseTypeSystemDocument();
+
+            /* Then */
+            Assert.NotNull(document.TypeExtensions);
+            Assert.NotEmpty(document.TypeExtensions);
+
+            // scalar
+            Assert.Single(document.TypeExtensions,
+                type => type is ScalarDefinition scalar
+                && scalar.Description == "Scalar");
+
+            // object
+            Assert.Single(document.TypeExtensions,
+                type => type is ObjectDefinition obj
+                        && obj.Description == "Object");
+
+            // interface
+            Assert.Single(document.TypeExtensions,
+                type => type is InterfaceDefinition inf
+                        && inf.Description == "Interface"
+                        && inf.Fields?.Single().Description == "Field");
+            
+            // union
+            Assert.Single(document.TypeExtensions,
+                type => type is UnionDefinition union
+                        && union.Description == "Union");
+
+            // enum
+            Assert.Single(document.TypeExtensions,
+                type => type is EnumDefinition en
+                        && en.Description == "Enum"
+                        && en.Values?.Last().Description == "B");
+
+            // input
+            Assert.Single(document.TypeExtensions,
+                type => type is InputObjectDefinition input
+                        && input.Description == "Input"
+                        && input.Fields?.Single().Description == "Field");
+        }
     }
 }

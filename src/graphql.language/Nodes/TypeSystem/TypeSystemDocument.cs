@@ -8,8 +8,8 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             IReadOnlyCollection<SchemaDefinition>? schemaDefinitions,
             IReadOnlyCollection<ITypeDefinition>? typeDefinitions,
             IReadOnlyCollection<DirectiveDefinition>? directiveDefinitions,
-            IReadOnlyCollection<ISchemaExtension>? schemaExtensions,
-            IReadOnlyCollection<ITypeExtension>? typeExtensions)
+            IReadOnlyCollection<SchemaExtension>? schemaExtensions,
+            IReadOnlyCollection<ITypeDefinition>? typeExtensions)
         {
             SchemaDefinitions = schemaDefinitions;
             TypeDefinitions = typeDefinitions;
@@ -21,19 +21,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public IReadOnlyCollection<SchemaDefinition>? SchemaDefinitions { get; }
         public IReadOnlyCollection<ITypeDefinition>? TypeDefinitions { get; }
         public IReadOnlyCollection<DirectiveDefinition>? DirectiveDefinitions { get; }
-        public IReadOnlyCollection<ISchemaExtension>? SchemaExtensions { get; }
-        public IReadOnlyCollection<ITypeExtension>? TypeExtensions { get; }
-    }
-
-    public interface ISchemaExtension
-    {
-    }
-
-    public interface ITypeExtension
-    {
-    }
-
-    public interface ITypeDefinition
-    {
+        public IReadOnlyCollection<SchemaExtension>? SchemaExtensions { get; }
+        public IReadOnlyCollection<ITypeDefinition>? TypeExtensions { get; }
     }
 }
