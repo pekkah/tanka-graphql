@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class UnionDefinition
+    public sealed class UnionDefinition : ITypeDefinition
     {
         public StringValue? Description { get; }
         

@@ -1,4 +1,5 @@
-﻿using Tanka.GraphQL.Language.Nodes;
+﻿using System.Linq;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
 
@@ -687,6 +688,96 @@ schema { query: TypeName }");
             Assert.Single(definition.Operations, op => op.Operation == OperationType.Query);
             Assert.Single(definition.Operations, op => op.Operation == OperationType.Mutation);
             Assert.Single(definition.Operations, op => op.Operation == OperationType.Subscription);
+        }
+
+        [Fact]
+        public void TypeSystemDocument_TypeDefinitions()
+        {
+            /* Given */
+            var sut = Parser.Create(@"
+""""""
+Scalar
+""""""
+scalar Scalar
+
+""""""
+Object
+""""""
+type Object {
+    field: Scalar!
+}
+
+""""""
+Interface
+""""""
+interface Interface {
+    ""Field""
+    field: Scalar!
+}
+
+""""""
+Union
+""""""
+union Union = A | B
+
+""""""
+Enum
+""""""
+enum Enum { 
+    ""A""
+    A
+    ""B""
+    B 
+}
+
+""""""
+Input
+""""""
+input Input {
+    ""Field""
+    field: Scalar
+}
+            ");
+
+            /* When */
+            var document = sut.ParseTypeSystemDocument();
+
+            /* Then */
+            Assert.NotNull(document.TypeDefinitions);
+            Assert.NotEmpty(document.TypeDefinitions);
+
+            // scalar
+            Assert.Single(document.TypeDefinitions,
+                type => type is ScalarDefinition scalar
+                && scalar.Description == "Scalar");
+
+            // object
+            Assert.Single(document.TypeDefinitions,
+                type => type is ObjectDefinition obj
+                        && obj.Description == "Object");
+
+            // interface
+            Assert.Single(document.TypeDefinitions,
+                type => type is InterfaceDefinition inf
+                        && inf.Description == "Interface"
+                        && inf.Fields?.Single().Description == "Field");
+            
+            // union
+            Assert.Single(document.TypeDefinitions,
+                type => type is UnionDefinition union
+                        && union.Description == "Union");
+
+            // enum
+            Assert.Single(document.TypeDefinitions,
+                type => type is EnumDefinition en
+                        && en.Description == "Enum"
+                        && en.Values?.Last().Description == "B");
+
+            // input
+            Assert.Single(document.TypeDefinitions,
+                type => type is InputObjectDefinition input
+                        && input.Description == "Input"
+                        && input.Fields?.Single().Description == "Field");
         }
     }
 }

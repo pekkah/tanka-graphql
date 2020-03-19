@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class InterfaceDefinition
+    public sealed class InterfaceDefinition : ITypeDefinition
     {
         public StringValue? Description { get; }
         public Name Name { get; }

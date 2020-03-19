@@ -14,9 +14,11 @@ namespace Tanka.GraphQL.Language
     public ref struct Parser
     {
         private Lexer _lexer;
+        private StringValue? _description;
 
         public Parser(in ReadOnlySpan<byte> span)
         {
+            _description = null;
             _lexer = Lexer.Create(span);
             _lexer.Advance();
         }
@@ -30,17 +32,7 @@ namespace Tanka.GraphQL.Language
         {
             return Create(Encoding.UTF8.GetBytes(data));
         }
-
-        public TypeSystemDocument ParseTypeDefinitions()
-        {
-            return new TypeSystemDocument(
-                null,
-                null,
-                null,
-                null,
-                null);
-        }
-
+        
         public SchemaDefinition ParseSchemaDefinition()
         {
             /* Description? schema Directives? { RootOperationTypeDefinition[] } */
@@ -469,15 +461,27 @@ namespace Tanka.GraphQL.Language
             return Skip(TokenKind.Name);
         }
 
+        private void PreParseOptionalDescription()
+        {
+            _description = ParseOptionalDescription();
+        }
+
         public StringValue? ParseOptionalDescription()
         {
+            if (_description != null)
+            {
+                var value = _description;
+                _description = null;
+                return value;
+            }
+
             if (_lexer.Kind != TokenKind.StringValue 
                 && _lexer.Kind != TokenKind.BlockStringValue)
                 return null;
 
             if (_lexer.Kind == TokenKind.BlockStringValue)
                 return ParseBlockStringValue();
-
+            
             return ParseStringValue();
         }
 
@@ -491,13 +495,21 @@ namespace Tanka.GraphQL.Language
                 {
                     case TokenKind.Name:
                         if (Keywords.IsOperation(_lexer.Value, out var operationType))
+                        {
                             operations.Add(ParseOperationDefinition(operationType));
+                            continue;
+                        }
                         else if (Keywords.IsFragment(_lexer.Value))
+                        {
                             fragmentDefinitions.Add(ParseFragmentDefinition());
+                            continue;
+                        }
+
                         break;
                     case TokenKind.LeftBrace:
                         operations.Add(ParseShortOperationDefinition());
-                        break;
+                        
+                        continue;
                     default:
                         throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
                 }
@@ -509,6 +521,69 @@ namespace Tanka.GraphQL.Language
             return new ExecutableDocument(
                 operations,
                 fragmentDefinitions);
+        }
+
+        public TypeSystemDocument ParseTypeSystemDocument()
+        {
+            var schemaDefinitions = new List<SchemaDefinition>();
+            var typeDefinitions = new List<ITypeDefinition>();
+            var directiveDefinitions = new List<DirectiveDefinition>();
+            var schemaExtensions = new List<ISchemaExtension>();
+            var typeExtensions = new List<ITypeExtension>();
+
+            while (_lexer.Kind != TokenKind.End)
+            {
+                switch (_lexer.Kind)
+                {
+                    case TokenKind.StringValue:
+                    case TokenKind.BlockStringValue:
+                        // this will reserve the description
+                        PreParseOptionalDescription();
+                        continue;
+                    case TokenKind.Name:
+                        if (Keywords.IsTypeDefinition(_lexer.Value))
+                        {
+                            typeDefinitions.Add(ParseTypeDefinition());
+                            continue;
+                        }
+                        break;
+                    default:
+                        throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
+                }
+
+                _lexer.Advance();
+            }
+
+            return new TypeSystemDocument(
+                schemaDefinitions,
+                typeDefinitions,
+                directiveDefinitions,
+                schemaExtensions,
+                typeExtensions);
+        }
+
+        private ITypeDefinition ParseTypeDefinition()
+        {
+            if (Keywords.Scalar.Match(_lexer.Value))
+                return ParseScalarDefinition();
+
+            if (Keywords.Type.Match(_lexer.Value))
+                return ParseObjectDefinition();
+
+            if (Keywords.Interface.Match(_lexer.Value))
+                return ParseInterfaceDefinition();
+
+            if (Keywords.Union.Match(_lexer.Value))
+                return ParseUnionDefinition();
+
+            if (Keywords.Enum.Match(_lexer.Value))
+                return ParseEnumDefinition();
+
+            if (Keywords.Input.Match(_lexer.Value))
+                return ParseInputObjectDefinition();
+
+            throw new Exception(
+                $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
         }
 
         public FragmentDefinition ParseFragmentDefinition()

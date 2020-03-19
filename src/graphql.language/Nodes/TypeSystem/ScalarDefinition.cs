@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class ScalarDefinition
+    public sealed class ScalarDefinition : ITypeDefinition
     {
         public StringValue? Description { get; }
         public Name Name { get; }

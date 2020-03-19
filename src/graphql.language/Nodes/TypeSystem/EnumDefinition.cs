@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class EnumDefinition
+    public sealed class EnumDefinition : ITypeDefinition
     {
         public StringValue? Description { get; }
         public Name Name { get; }

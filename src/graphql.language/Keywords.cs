@@ -5,6 +5,14 @@ using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Language
 {
+    public static class Extensions 
+    {
+        public static bool Match(this in ReadOnlyMemory<byte> memory, in ReadOnlySpan<byte> value)
+        {
+            return memory.Span.SequenceEqual(value);
+        }
+    }
+
     public static class Keywords
     {
         public static ReadOnlyMemory<byte> Query
@@ -136,6 +144,30 @@ namespace Tanka.GraphQL.Language
         public static bool IsImplements(in ReadOnlySpan<byte> value)
         {
             return Implements.Span.SequenceEqual(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsTypeDefinition(in ReadOnlySpan<byte> value)
+        {
+            if (Scalar.Match(value))
+                return true;
+
+            if (Type.Match(value))
+                return true;
+
+            if (Interface.Match(value))
+                return true;
+
+            if (Union.Match(value))
+                return true;
+
+            if (Enum.Match(value))
+                return true;
+
+            if (Input.Match(value))
+                return true;
+
+            return false;
         }
     }
 }
