@@ -13,8 +13,8 @@ namespace Tanka.GraphQL.Language
 {
     public ref struct Parser
     {
-        private Lexer _lexer;
         private StringValue? _description;
+        private Lexer _lexer;
 
         public Parser(in ReadOnlySpan<byte> span)
         {
@@ -32,16 +32,16 @@ namespace Tanka.GraphQL.Language
         {
             return Create(Encoding.UTF8.GetBytes(data));
         }
-        
+
         public SchemaDefinition ParseSchemaDefinition()
         {
             /* Description? schema Directives? { RootOperationTypeDefinition[] } */
             var location = GetLocation();
             var description = ParseOptionalDescription();
             SkipKeyword(Keywords.Schema.Span);
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
             var operations = ParseRootOperationDefinitions();
-            
+
             return new SchemaDefinition(
                 description,
                 directives,
@@ -76,7 +76,7 @@ namespace Tanka.GraphQL.Language
             /* Description? directive @Name ArgumentsDefinition[]? repeatable? on DirectiveLocations*/
             var location = GetLocation();
             var description = ParseOptionalDescription();
-            
+
             // skip: directive
             SkipKeyword(Keywords.Directive.Span);
 
@@ -86,7 +86,7 @@ namespace Tanka.GraphQL.Language
             // name
             var name = ParseName();
             var argumentDefinitions = ParseOptionalArgumentDefinitions();
-            
+
             // repeatable?
             var isRepeatable = false;
             if (Keywords.IsRepeatable(_lexer.Value))
@@ -125,7 +125,7 @@ namespace Tanka.GraphQL.Language
                 var location = Encoding.UTF8.GetString(_lexer.Value);
 
                 var isValid = ExecutableDirectiveLocations.All.Contains(location)
-                    || TypeSystemDirectiveLocations.All.Contains(location);
+                              || TypeSystemDirectiveLocations.All.Contains(location);
 
                 if (!isValid)
                     break;
@@ -170,7 +170,7 @@ namespace Tanka.GraphQL.Language
             Skip(TokenKind.Colon);
             var type = ParseType();
             var defaultValue = ParseOptionalDefaultValue();
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
 
             return new InputValueDefinition(
                 description,
@@ -188,7 +188,7 @@ namespace Tanka.GraphQL.Language
             var description = ParseOptionalDescription();
             SkipKeyword(Keywords.Scalar.Span);
             var name = ParseName();
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
 
             return new ScalarDefinition(
                 description,
@@ -205,7 +205,7 @@ namespace Tanka.GraphQL.Language
             SkipKeyword(Keywords.Type.Span);
             var name = ParseName();
             var interfaces = ParseOptionalImplementsInterfaces();
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
             var fields = ParseOptionalFieldDefinitions();
 
             return new ObjectDefinition(
@@ -225,7 +225,7 @@ namespace Tanka.GraphQL.Language
             SkipKeyword(Keywords.Interface.Span);
             var name = ParseName();
             var interfaces = ParseOptionalImplementsInterfaces();
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
             var fields = ParseOptionalFieldDefinitions();
 
             return new InterfaceDefinition(
@@ -244,7 +244,7 @@ namespace Tanka.GraphQL.Language
             var description = ParseOptionalDescription();
             SkipKeyword(Keywords.Union.Span);
             var name = ParseName();
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
             var members = ParseOptionalUnionMembers();
 
             return new UnionDefinition(
@@ -262,7 +262,7 @@ namespace Tanka.GraphQL.Language
             var description = ParseOptionalDescription();
             SkipKeyword(Keywords.Enum.Span);
             var name = ParseName();
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
             var values = ParseOptionalEnumValueDefinitions();
 
             return new EnumDefinition(
@@ -298,7 +298,7 @@ namespace Tanka.GraphQL.Language
             var location = GetLocation();
             var description = ParseOptionalDescription();
             var value = ParseEnumValue();
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
 
             return new EnumValueDefinition(
                 description,
@@ -314,7 +314,7 @@ namespace Tanka.GraphQL.Language
             var description = ParseOptionalDescription();
             SkipKeyword(Keywords.Input.Span);
             var name = ParseName();
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
             var fields = ParseOptionalInputObjectFields();
 
             return new InputObjectDefinition(
@@ -403,7 +403,7 @@ namespace Tanka.GraphQL.Language
             var argumentDefinitions = ParseOptionalArgumentDefinitions();
             Skip(TokenKind.Colon);
             var type = ParseType();
-            var directives = ParseOptionalDirectives(constant: true);
+            var directives = ParseOptionalDirectives(true);
 
 
             return new FieldDefinition(
@@ -475,13 +475,13 @@ namespace Tanka.GraphQL.Language
                 return value;
             }
 
-            if (_lexer.Kind != TokenKind.StringValue 
+            if (_lexer.Kind != TokenKind.StringValue
                 && _lexer.Kind != TokenKind.BlockStringValue)
                 return null;
 
             if (_lexer.Kind == TokenKind.BlockStringValue)
                 return ParseBlockStringValue();
-            
+
             return ParseStringValue();
         }
 
@@ -508,7 +508,7 @@ namespace Tanka.GraphQL.Language
                         break;
                     case TokenKind.LeftBrace:
                         operations.Add(ParseShortOperationDefinition());
-                        
+
                         continue;
                     default:
                         throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
@@ -546,6 +546,7 @@ namespace Tanka.GraphQL.Language
                             typeDefinitions.Add(ParseTypeDefinition());
                             continue;
                         }
+
                         break;
                     default:
                         throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
@@ -817,8 +818,8 @@ namespace Tanka.GraphQL.Language
             return new EnumValue(enumName, enumName.Location);
         }
 
-       public StringValue ParseBlockStringValue()
-       {
+        public StringValue ParseBlockStringValue()
+        {
             Ensure(TokenKind.BlockStringValue);
             var value = BlockStringValue(_lexer.Value);
             var location = Skip(TokenKind.BlockStringValue);
