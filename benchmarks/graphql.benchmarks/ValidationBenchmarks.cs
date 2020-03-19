@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 using GraphQLParser.AST;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Benchmarks
 {
+    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
+    [MemoryDiagnoser]
+    [MarkdownExporterAttribute.GitHub]
     public class ValidationBenchmarks
     {
         private ISchema _schema;

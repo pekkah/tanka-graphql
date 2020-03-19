@@ -13,7 +13,6 @@ using Tanka.GraphQL.Validation;
 namespace Tanka.GraphQL.Benchmarks
 {
     [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-    [RankColumn]
     [MemoryDiagnoser]
     [MarkdownExporterAttribute.GitHub]
     public class ExecutionBenchmarks
