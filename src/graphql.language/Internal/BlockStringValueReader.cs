@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers;
 
 namespace Tanka.GraphQL.Language.Internal
 {
@@ -14,11 +13,12 @@ namespace Tanka.GraphQL.Language.Internal
 
         public ReadOnlySpan<byte> Read()
         {
-            var commonIndent = CommonIndent(_rawValue);
-            var trimWriter = new ArrayBufferWriter<byte>(_rawValue.Length);
+            var commonIndent = CommonIndent(in _rawValue);
+            using var trimWriter = new BufferWriter(_rawValue.Length);
             var lineReader = new LineReader(_rawValue);
 
-            if (!lineReader.TryReadLine(out var firstLine)) throw new Exception("Could not read line starting");
+            if (!lineReader.TryReadLine(out var firstLine))
+                return ReadOnlySpan<byte>.Empty;
 
             // trim
             trimWriter.Write(firstLine);
@@ -34,6 +34,8 @@ namespace Tanka.GraphQL.Language.Internal
                 }
 
             var trimmedValue = trimWriter.WrittenSpan;
+
+            //todo: check if Trim is better
             var leadingWhiteSpace = LeadingWhiteSpace(trimmedValue);
             var trailingWhiteSpace = TrailingWhitespace(trimmedValue);
             var finalValue = trimmedValue

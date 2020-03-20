@@ -719,7 +719,7 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             var stringValue = Assert.IsType<StringValue>(value);
-            Assert.Equal(expected, stringValue.Value);
+            Assert.Equal(expected, stringValue);
         }
 
         [Theory]
@@ -749,7 +749,7 @@ namespace Tanka.GraphQL.Language.Tests
 
             /* Then */
             var blockStringValue = Assert.IsType<StringValue>(value);
-            Assert.Equal(expected, blockStringValue.Value);
+            Assert.Equal(expected, blockStringValue);
         }
 
         [Fact]

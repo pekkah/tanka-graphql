@@ -56,6 +56,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.language.tests", "t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.language", "src\graphql.language\graphql.language.csproj", "{BE7F1B1C-7455-43CB-8316-60B2BC7BF807}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graphql.dev.allocations", "dev\graphql.dev.allocations\graphql.dev.allocations.csproj", "{44CA7F79-94E3-4DAD-BB73-39FA98D86902}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -282,6 +284,18 @@ Global
 		{BE7F1B1C-7455-43CB-8316-60B2BC7BF807}.Release|x64.Build.0 = Release|Any CPU
 		{BE7F1B1C-7455-43CB-8316-60B2BC7BF807}.Release|x86.ActiveCfg = Release|Any CPU
 		{BE7F1B1C-7455-43CB-8316-60B2BC7BF807}.Release|x86.Build.0 = Release|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Debug|x64.Build.0 = Debug|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Debug|x86.Build.0 = Debug|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Release|x64.ActiveCfg = Release|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Release|x64.Build.0 = Release|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Release|x86.ActiveCfg = Release|Any CPU
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -289,6 +303,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
 		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
+		{44CA7F79-94E3-4DAD-BB73-39FA98D86902} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6EC1BBAB-620C-44FB-A12E-E68F69D689B6}

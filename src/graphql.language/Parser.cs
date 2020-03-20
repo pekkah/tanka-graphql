@@ -325,7 +325,8 @@ namespace Tanka.GraphQL.Language
 
         public StringValue ParseStringValue()
         {
-            var value = Encoding.UTF8.GetString(_lexer.Value);
+            Ensure(TokenKind.StringValue);
+            var value = _lexer.Value.ToArray();
             var location = Skip(TokenKind.StringValue);
             return new StringValue(value, location);
         }
@@ -598,7 +599,7 @@ namespace Tanka.GraphQL.Language
         {
             var location = Ensure(TokenKind.Name);
 
-            var value = Encoding.UTF8.GetString(_lexer.Value);
+            var value = _lexer.Value.ToArray();
             _lexer.Advance();
 
             return new Name(value, location);
@@ -645,11 +646,11 @@ namespace Tanka.GraphQL.Language
             return location;
         }
 
-        private string BlockStringValue(ReadOnlySpan<byte> value)
+        private byte[] BlockStringValue(in ReadOnlySpan<byte> value)
         {
             var reader = new BlockStringValueReader(value);
             var blockStringValue = reader.Read();
-            return Encoding.UTF8.GetString(blockStringValue);
+            return blockStringValue.ToArray();
         }
     }
 }

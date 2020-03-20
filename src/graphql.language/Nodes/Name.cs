@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
@@ -6,9 +7,11 @@ namespace Tanka.GraphQL.Language.Nodes
     {
         public readonly Location? Location;
 
-        public readonly string Value;
+        public readonly byte[] Value;
 
-        public Name(string value, in Location? location)
+        public ReadOnlySpan<byte> ValueSpan => Value;
+
+        public Name(in byte[] value, in Location? location)
         {
             Value = value;
             Location = location;
@@ -16,23 +19,27 @@ namespace Tanka.GraphQL.Language.Nodes
 
         public bool Equals(Name other)
         {
-            return Value == other.Value;
+            if (ValueSpan.IsEmpty && !other.ValueSpan.IsEmpty)
+                return false;
+
+            return ValueSpan.SequenceEqual(other.ValueSpan);
         }
 
         public static implicit operator Name(string value)
         {
-            return new Name(value, default);
+            return new Name(Encoding.UTF8.GetBytes(value), default);
         }
 
         public static implicit operator string(Name value)
         {
-            return value.Value;
+            return Encoding.UTF8.GetString(value.ValueSpan);
         }
 
         public override string ToString()
         {
             var location = Location.Equals(default) ? Location.ToString() : string.Empty;
-            return $"{Value}{location}";
+            string name = this;
+            return $"{name}{location}";
         }
 
         public override bool Equals(object? obj)
