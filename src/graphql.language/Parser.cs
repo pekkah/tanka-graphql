@@ -191,7 +191,7 @@ namespace Tanka.GraphQL.Language
             if (_lexer.Kind != TokenKind.At)
                 return null;
 
-            var directives = new List<Directive>();
+            var directives = new List<Directive>(1);
             while (_lexer.Kind == TokenKind.At)
             {
                 var directive = ParseDirective(constant);

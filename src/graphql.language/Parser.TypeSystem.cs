@@ -443,7 +443,7 @@ namespace Tanka.GraphQL.Language
 
             Skip(TokenKind.LeftBrace);
 
-            var values = new List<InputValueDefinition>();
+            var values = new List<InputValueDefinition>(5);
             while (_lexer.Kind != TokenKind.RightBrace)
             {
                 var value = ParseInputValueDefinition();
@@ -468,7 +468,7 @@ namespace Tanka.GraphQL.Language
             if (_lexer.Kind == TokenKind.Pipe)
                 _lexer.Advance();
 
-            var namedTypes = new List<NamedType>();
+            var namedTypes = new List<NamedType>(2);
             while (_lexer.Kind == TokenKind.Name)
             {
                 var nameType = ParseNamedType();
@@ -492,7 +492,7 @@ namespace Tanka.GraphQL.Language
 
             Skip(TokenKind.LeftBrace);
 
-            var fields = new List<FieldDefinition>(1);
+            var fields = new List<FieldDefinition>(5);
             while (_lexer.Kind != TokenKind.RightBrace)
             {
                 var field = ParseFieldDefinition();
