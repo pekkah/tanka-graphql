@@ -4,15 +4,20 @@ namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class FloatValue : IValue
     {
+        public readonly bool IsExponent;
         public readonly Location? Location;
         public readonly ReadOnlyMemory<byte> Value;
 
         public FloatValue(
-            in ReadOnlySpan<byte> value,
+            in byte[] value,
+            bool isExponent,
             in Location? location)
         {
-            Value = new ReadOnlyMemory<byte>(value.ToArray());
+            Value = value;
+            IsExponent = isExponent;
             Location = location;
         }
+
+        public ReadOnlySpan<byte> ValueSpan => Value.Span;
     }
 }

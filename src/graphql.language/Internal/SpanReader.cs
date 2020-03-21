@@ -144,5 +144,18 @@ namespace Tanka.GraphQL.Language.Internal
             data = Span.Slice(start, length);
             return true;
         }
+
+        public bool TryRead(out ReadOnlySpan<byte> value, int count)
+        {
+            if (Position + count >= Length)
+            {
+                value = default;
+                return false;
+            }
+
+            Position++;
+            value = Span.Slice(Position, count);
+            return true;
+        }
     }
 }

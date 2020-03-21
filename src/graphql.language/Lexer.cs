@@ -24,6 +24,8 @@ namespace Tanka.GraphQL.Language
 
         public ReadOnlySpan<byte> Value { get; private set; }
 
+        public bool IsExponential;
+
         public Lexer(in ReadOnlySpan<byte> span)
         {
             _reader = new SpanReader(span);
@@ -32,6 +34,7 @@ namespace Tanka.GraphQL.Language
             Value = ReadOnlySpan<byte>.Empty;
             Line = 1;
             Start = 0;
+            IsExponential = false;
         }
 
         public static Lexer Create(in ReadOnlySpan<byte> span)
@@ -154,7 +157,7 @@ namespace Tanka.GraphQL.Language
         {
             Kind = TokenKind.IntValue;
             Start = Position + 1;
-            var isExponent = false;
+            IsExponential = false;
             var isFloat = false;
             if (_reader.TryPeek(out var code))
                 if (code == Constants.Minus)
@@ -171,7 +174,7 @@ namespace Tanka.GraphQL.Language
                     _reader.Advance();
                     if (_reader.TryPeek(out var nextCode))
                         if (Constants.IsDigit[nextCode])
-                            isExponent = true;
+                            IsExponential = true;
                 }
 
                 if (code == Constants.Dot)
@@ -183,7 +186,7 @@ namespace Tanka.GraphQL.Language
                 }
             }
 
-            if (isExponent || isFloat)
+            if (IsExponential || isFloat)
             {
                 Kind = TokenKind.FloatValue;
 
@@ -198,7 +201,7 @@ namespace Tanka.GraphQL.Language
                         if (_reader.TryPeek(out var nextCode))
                             if (Constants.IsDigit[nextCode])
                             {
-                                isExponent = true;
+                                IsExponential = true;
                                 _reader.TryReadWhileAny(
                                     out _,
                                     Constants.IsDigit);
@@ -207,6 +210,7 @@ namespace Tanka.GraphQL.Language
             }
 
             Value = _reader.Span.Slice(Start, Position - Start + 1);
+            IsExponential = true;
         }
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]

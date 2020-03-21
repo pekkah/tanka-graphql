@@ -211,7 +211,7 @@ name: Int");
 
             /* Then */
             Assert.NotNull(interfaces);
-            Assert.Single(interfaces, i => i.Name == expectedInterface);
+            Assert.Single(interfaces, i => (string)i.Name == expectedInterface);
         }
 
         [Fact]

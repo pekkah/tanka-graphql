@@ -3,7 +3,7 @@ using System.Buffers;
 
 namespace Tanka.GraphQL.Language.Internal
 {
-    internal class BufferWriter: IDisposable
+    public class BufferWriter: IDisposable
     {
         private readonly byte[] _buffer;
         private int _index;

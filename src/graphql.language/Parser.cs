@@ -333,7 +333,11 @@ namespace Tanka.GraphQL.Language
 
         public FloatValue ParseFloatValue()
         {
-            var value = new FloatValue(_lexer.Value, GetLocation());
+            var value = new FloatValue(
+                _lexer.Value.ToArray(), 
+                _lexer.IsExponential,
+                GetLocation());
+
             Skip(TokenKind.FloatValue);
             return value;
         }
@@ -509,7 +513,7 @@ namespace Tanka.GraphQL.Language
             var selectionSet = ParseOptionalSelectionSet();
 
             return new FieldSelection(
-                hasAlias ? nameOrAlias : null,
+                hasAlias ? nameOrAlias : default,
                 name,
                 arguments,
                 directives,
@@ -598,7 +602,7 @@ namespace Tanka.GraphQL.Language
         public Name ParseName()
         {
             var location = Ensure(TokenKind.Name);
-
+            
             var value = _lexer.Value.ToArray();
             _lexer.Advance();
 

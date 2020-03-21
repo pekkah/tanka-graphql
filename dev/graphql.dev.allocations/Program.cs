@@ -16,7 +16,6 @@ namespace Tanka.GraphQL.Dev.Allocations
                 throw new Exception("It has types");
 
             Console.WriteLine("Parsed");
-            Console.ReadKey();
         }
     }
 }

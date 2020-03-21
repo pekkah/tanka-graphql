@@ -1,11 +1,12 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class StringValue : IValue
     {
         public readonly Location? Location;
-        public readonly byte[] Value;
+        public readonly ReadOnlyMemory<byte> Value;
 
         public StringValue(
             in byte[] value,
@@ -15,6 +16,8 @@ namespace Tanka.GraphQL.Language.Nodes
             Location = location;
         }
 
+        public ReadOnlySpan<byte> ValueSpan => Value.Span;
+
         public static implicit operator StringValue(string value)
         {
             return new StringValue(Encoding.UTF8.GetBytes(value), default);
@@ -22,7 +25,7 @@ namespace Tanka.GraphQL.Language.Nodes
 
         public static implicit operator string(StringValue value)
         {
-            return Encoding.UTF8.GetString(value.Value);
+            return Encoding.UTF8.GetString(value.ValueSpan);
         }
 
         public override string ToString()
