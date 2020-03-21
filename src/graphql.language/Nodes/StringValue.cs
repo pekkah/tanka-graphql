@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class StringValue : IValue
+    public readonly struct StringValue : IValue
     {
         public readonly Location? Location;
         public readonly ReadOnlyMemory<byte> Value;
