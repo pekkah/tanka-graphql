@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
@@ -7,7 +9,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public InputValueDefinition(
             StringValue? description,
             Name name,
-            IType type,
+            Type type,
             DefaultValue? defaultValue,
             IReadOnlyCollection<Directive>? directives,
             in Location? location)
@@ -24,12 +26,23 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public Name Name { get; }
 
-        public IType Type { get; }
+        public Type Type { get; }
 
         public DefaultValue? DefaultValue { get; }
 
         public IReadOnlyCollection<Directive>? Directives { get; }
 
         public Location? Location { get; }
+
+        public static implicit operator InputValueDefinition(string value)
+        {
+            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            return parser.ParseInputValueDefinition();
+        }
+
+        public static implicit operator string(InputValueDefinition value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

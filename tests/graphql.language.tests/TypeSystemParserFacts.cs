@@ -193,7 +193,7 @@ name: Int");
             var definition = sut.ParseFieldDefinition();
 
             /* Then */
-            Assert.Equal(2, definition.ArgumentDefinitions?.Count);
+            Assert.Equal(2, definition.Arguments?.Count);
         }
 
         [Theory]

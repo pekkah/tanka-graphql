@@ -1,6 +1,6 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class NamedType : IType
+    public sealed class NamedType : Type
     {
         public readonly Location? Location;
         public readonly Name Name;
