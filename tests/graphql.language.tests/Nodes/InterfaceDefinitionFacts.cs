@@ -6,20 +6,20 @@ using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes
 {
-    public class ObjectDefinitionFacts
+    public class InterfaceDefinitionFacts
     {
         [Fact]
         public void FromString()
         {
             /* Given */
             /* When */
-            ObjectDefinition original =
-                @"type Obj {
+            InterfaceDefinition original =
+                @"interface Inf {
                     field1: String
                 }";
 
             /* Then */
-            Assert.Equal("Obj", original.Name);
+            Assert.Equal("Inf", original.Name);
             Assert.NotNull(original.Fields);
         }
 
@@ -27,7 +27,7 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
         public void WithDescription()
         {
             /* Given */
-            ObjectDefinition original = @"type Obj";
+            InterfaceDefinition original = @"interface Inf";
 
             /* When */
             var modified = original
@@ -39,25 +39,30 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
         }
 
         [Fact]
-        public void WithName()
+        public void WithDirectives()
         {
             /* Given */
-            ObjectDefinition original = @"type Obj";
+            InterfaceDefinition original = @"interface Inf";
 
             /* When */
             var modified = original
-                .WithName("Renamed");
+                .WithDirectives(new List<Directive>
+                {
+                    "@a"
+                });
 
             /* Then */
-            Assert.Equal("Obj", original.Name);
-            Assert.Equal("Renamed", modified.Name);
+            Assert.Null(original.Directives);
+            Assert.NotNull(modified.Directives);
+            var a = Assert.Single(modified.Directives);
+            Assert.Equal("a", a?.Name);
         }
 
         [Fact]
         public void WithFields()
         {
             /* Given */
-            ObjectDefinition original = @"type Obj";
+            InterfaceDefinition original = @"interface Inf";
 
             /* When */
             var modified = original
@@ -76,7 +81,7 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
         public void WithFields_Modify()
         {
             /* Given */
-            ObjectDefinition original = @"type Obj { field: String }";
+            InterfaceDefinition original = @"interface Inf { field: String }";
 
             /* When */
             var modified = original
@@ -94,30 +99,10 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
         }
 
         [Fact]
-        public void WithDirectives()
-        {
-            /* Given */
-            ObjectDefinition original = @"type Obj";
-
-            /* When */
-            var modified = original
-                .WithDirectives(new List<Directive>
-                {
-                    "@a"
-                });
-
-            /* Then */
-            Assert.Null(original.Directives);
-            Assert.NotNull(modified.Directives);
-            var a = Assert.Single(modified.Directives);
-            Assert.Equal("a", a?.Name);
-        }
-
-        [Fact]
         public void WithInterfaces()
         {
             /* Given */
-            ObjectDefinition original = @"type Obj";
+            InterfaceDefinition original = @"interface Inf";
 
             /* When */
             var modified = original
@@ -131,6 +116,21 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
             Assert.Null(original.Interfaces);
             Assert.NotNull(modified.Interfaces);
             Assert.Equal(2, modified.Interfaces?.Count);
+        }
+
+        [Fact]
+        public void WithName()
+        {
+            /* Given */
+            InterfaceDefinition original = @"interface Inf";
+
+            /* When */
+            var modified = original
+                .WithName("Renamed");
+
+            /* Then */
+            Assert.Equal("Inf", original.Name);
+            Assert.Equal("Renamed", modified.Name);
         }
     }
 }

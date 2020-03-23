@@ -1,4 +1,7 @@
-﻿namespace Tanka.GraphQL.Language.Nodes
+﻿using System;
+using System.Text;
+
+namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class NamedType : Type
     {
@@ -11,6 +14,17 @@
         {
             Name = name;
             Location = location;
+        }
+
+        public static implicit operator NamedType(string value)
+        {
+            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            return parser.ParseNamedType();
+        }
+
+        public static implicit operator string(NamedType value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

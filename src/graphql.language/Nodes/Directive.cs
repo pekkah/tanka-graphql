@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
@@ -16,6 +18,17 @@ namespace Tanka.GraphQL.Language.Nodes
             Name = name;
             Arguments = arguments;
             Location = location;
+        }
+
+        public static implicit operator Directive(string value)
+        {
+            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            return parser.ParseDirective(true);
+        }
+
+        public static implicit operator string(Directive value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

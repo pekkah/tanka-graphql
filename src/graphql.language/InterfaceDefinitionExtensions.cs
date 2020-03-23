@@ -4,12 +4,12 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Language
 {
-    public static class ObjectDefinitionExtensions
+    public static class InterfaceDefinitionExtensions
     {
-        public static ObjectDefinition WithDescription(this ObjectDefinition definition, 
+        public static InterfaceDefinition WithDescription(this InterfaceDefinition definition, 
             in StringValue? description)
         {
-            return new ObjectDefinition(
+            return new InterfaceDefinition(
                 description,
                 definition.Name,
                 definition.Interfaces,
@@ -18,10 +18,10 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
 
-        public static ObjectDefinition WithName(this ObjectDefinition definition, 
+        public static InterfaceDefinition WithName(this InterfaceDefinition definition, 
             in Name name)
         {
-            return new ObjectDefinition(
+            return new InterfaceDefinition(
                 definition.Description,
                 name,
                 definition.Interfaces,
@@ -30,10 +30,10 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
 
-        public static ObjectDefinition WithInterfaces(this ObjectDefinition definition,
+        public static InterfaceDefinition WithInterfaces(this InterfaceDefinition definition,
             IReadOnlyCollection<NamedType>? interfaces)
         {
-            return new ObjectDefinition(
+            return new InterfaceDefinition(
                 definition.Description,
                 definition.Name,
                 interfaces,
@@ -42,10 +42,10 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
 
-        public static ObjectDefinition WithDirectives(this ObjectDefinition definition,
+        public static InterfaceDefinition WithDirectives(this InterfaceDefinition definition,
             IReadOnlyCollection<Directive>? directives)
         {
-            return new ObjectDefinition(
+            return new InterfaceDefinition(
                 definition.Description,
                 definition.Name,
                 definition.Interfaces,
@@ -54,10 +54,10 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
 
-        public static ObjectDefinition WithFields(this ObjectDefinition definition,
+        public static InterfaceDefinition WithFields(this InterfaceDefinition definition,
             IReadOnlyCollection<FieldDefinition>? fields)
         {
-            return new ObjectDefinition(
+            return new InterfaceDefinition(
                 definition.Description,
                 definition.Name,
                 definition.Interfaces,
