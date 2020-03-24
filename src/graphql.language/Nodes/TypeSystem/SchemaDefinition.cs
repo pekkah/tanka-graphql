@@ -10,7 +10,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             StringValue? description,
             IReadOnlyCollection<Directive>? directives,
             IReadOnlyCollection<(OperationType Operation, NamedType NamedType)> operations,
-            in Location? location)
+            in Location? location = default)
         {
             Description = description;
             Directives = directives;

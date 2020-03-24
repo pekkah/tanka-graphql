@@ -17,7 +17,7 @@ namespace Tanka.GraphQL.Language.Nodes
             IReadOnlyCollection<VariableDefinition>? variableDefinitions,
             IReadOnlyCollection<Directive>? directives,
             SelectionSet selectionSet,
-            in Location? location)
+            in Location? location = default)
         {
             Operation = operation;
             Name = name;

@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class FloatValue : IValue
+    public sealed class FloatValue : Value
     {
         public readonly bool IsExponent;
         public readonly Location? Location;
@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.Language.Nodes
         public FloatValue(
             in byte[] value,
             bool isExponent,
-            in Location? location)
+            in Location? location = default)
         {
             Value = value;
             IsExponent = isExponent;

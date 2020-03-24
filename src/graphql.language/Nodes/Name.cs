@@ -9,7 +9,7 @@ namespace Tanka.GraphQL.Language.Nodes
 
         public readonly ReadOnlyMemory<byte> Value;
 
-        public Name(in byte[] value, in Location? location)
+        public Name(in byte[] value, in Location? location = default)
         {
             Value = value;
             Location = location;

@@ -3,14 +3,14 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public readonly struct StringValue : IValue
+    public sealed class StringValue : Value
     {
         public readonly Location? Location;
         public readonly ReadOnlyMemory<byte> Value;
 
         public StringValue(
             in byte[] value,
-            in Location? location)
+            in Location? location = default)
         {
             Value = value;
             Location = location;

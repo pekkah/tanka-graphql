@@ -1,4 +1,6 @@
-﻿using Tanka.GraphQL.Language.Nodes;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Tanka.GraphQL.Language.Nodes;
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes
@@ -16,6 +18,42 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
             Assert.Equal("a", original.Name);
             Assert.NotNull(original.Arguments);
             Assert.Equal(2, original.Arguments?.Count);
+        }
+
+        [Fact]
+        public void WithArguments()
+        {
+            /* Given */
+            Directive original = "@a(x: 100, y: 100)";
+
+            /* When */
+            var modified = original
+                .WithArguments(
+                    new List<Argument>(original.Arguments ?? Enumerable.Empty<Argument>())
+                        .Concat(new []
+                        {
+                            new Argument("x", new IntValue(100, default), default), 
+                        }).ToList()
+                    );
+
+            /* Then */
+            Assert.Equal(2, original.Arguments?.Count);
+            Assert.Equal(3, modified.Arguments?.Count);
+        }
+
+        [Fact]
+        public void WithName()
+        {
+            /* Given */
+            Directive original = "@a(x: 100, y: 100)";
+
+            /* When */
+            var modified = original
+                .WithName("b");
+
+            /* Then */
+            Assert.Equal("a", original.Name);
+            Assert.Equal("b", modified.Name);
         }
     }
 }

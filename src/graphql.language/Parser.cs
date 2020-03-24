@@ -269,7 +269,7 @@ namespace Tanka.GraphQL.Language
             return new DefaultValue(value, location);
         }
 
-        public IValue ParseValue(bool constant = false)
+        public Value ParseValue(bool constant = false)
         {
             /* Value :
                 if not const Variable
@@ -302,7 +302,7 @@ namespace Tanka.GraphQL.Language
         ///     Parse NullValue, BooleanValue or EnumValue
         /// </summary>
         /// <returns></returns>
-        public IValue ParseNameValue()
+        public Value ParseNameValue()
         {
             var location = Ensure(TokenKind.Name);
             if (Keywords.IsNull(_lexer.Value))
@@ -391,7 +391,7 @@ namespace Tanka.GraphQL.Language
         {
             var location = Skip(TokenKind.LeftBracket);
 
-            var values = new List<IValue>();
+            var values = new List<Value>();
             while (_lexer.Kind != TokenKind.RightBracket)
             {
                 var value = ParseValue(constant);

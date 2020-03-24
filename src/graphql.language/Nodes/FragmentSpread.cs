@@ -12,7 +12,7 @@ namespace Tanka.GraphQL.Language.Nodes
         public FragmentSpread(
             Name fragmentName,
             IReadOnlyCollection<Directive>? directives,
-            in Location? location)
+            in Location? location = default)
         {
             FragmentName = fragmentName;
             Directives = directives;

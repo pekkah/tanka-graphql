@@ -7,7 +7,7 @@
 
         public ListType(
             Type ofType,
-            in Location? location)
+            in Location? location = default)
         {
             OfType = ofType;
             Location = location;

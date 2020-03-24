@@ -9,7 +9,7 @@ namespace Tanka.GraphQL.Language.Nodes
 
         public SelectionSet(
             IReadOnlyCollection<ISelection> selections,
-            in Location? location)
+            in Location? location = default)
         {
             Selections = selections;
             Location = location;

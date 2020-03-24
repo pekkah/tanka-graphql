@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             IReadOnlyCollection<InputValueDefinition>? arguments,
             Type type,
             IReadOnlyCollection<Directive>? directives,
-            in Location? location)
+            in Location? location = default)
         {
             Description = description;
             Name = name;

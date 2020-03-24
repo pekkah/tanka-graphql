@@ -15,7 +15,7 @@ namespace Tanka.GraphQL.Language.Nodes
             Type type,
             DefaultValue? defaultValue,
             IReadOnlyCollection<Directive>? directives,
-            in Location? location)
+            in Location? location = default)
         {
             Variable = variable;
             Type = type;

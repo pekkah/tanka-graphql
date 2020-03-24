@@ -4,12 +4,12 @@
     {
         public readonly Location? Location;
         public readonly Name Name;
-        public readonly IValue Value;
+        public readonly Value Value;
 
         public ObjectField(
             Name name,
-            IValue value,
-            in Location? location)
+            Value value,
+            in Location? location = default)
         {
             Name = name;
             Value = value;

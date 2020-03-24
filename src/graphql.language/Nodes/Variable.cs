@@ -1,13 +1,13 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class Variable : IValue
+    public sealed class Variable : Value
     {
         public readonly Location? Location;
         public readonly Name Name;
 
         public Variable(
             Name name,
-            in Location? location)
+            in Location? location = default)
         {
             Name = name;
             Location = location;

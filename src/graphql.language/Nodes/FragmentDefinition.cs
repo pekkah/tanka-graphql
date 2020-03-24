@@ -15,7 +15,7 @@ namespace Tanka.GraphQL.Language.Nodes
             NamedType typeCondition,
             IReadOnlyCollection<Directive>? directives,
             SelectionSet selectionSet,
-            in Location? location)
+            in Location? location = default)
         {
             FragmentName = fragmentName;
             TypeCondition = typeCondition;

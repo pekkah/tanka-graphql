@@ -1,4 +1,5 @@
-﻿using Tanka.GraphQL.Language.Nodes;
+﻿using System.Collections.Generic;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Language
@@ -14,6 +15,40 @@ namespace Tanka.GraphQL.Language
                 definition.Type,
                 definition.DefaultValue,
                 definition.Directives,
+                definition.Location);
+        }
+
+        public static InputValueDefinition WithName(this InputValueDefinition definition, in Name name)
+        {
+            return new InputValueDefinition(
+                definition.Description,
+                name,
+                definition.Type,
+                definition.DefaultValue,
+                definition.Directives,
+                definition.Location);
+        }
+
+        public static InputValueDefinition WithType(this InputValueDefinition definition, Type type)
+        {
+            return new InputValueDefinition(
+                definition.Description,
+                definition.Name,
+                type,
+                definition.DefaultValue,
+                definition.Directives,
+                definition.Location);
+        }
+
+        public static InputValueDefinition WithDirectives(this InputValueDefinition definition,
+            IReadOnlyCollection<Directive>? directives)
+        {
+            return new InputValueDefinition(
+                definition.Description,
+                definition.Name,
+                definition.Type,
+                definition.DefaultValue,
+                directives,
                 definition.Location);
         }
     }
