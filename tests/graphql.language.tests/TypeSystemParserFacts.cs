@@ -32,7 +32,7 @@ namespace Tanka.GraphQL.Language.Tests
             var definition = sut.ParseDirectiveDefinition();
 
             /* Then */
-            Assert.Equal(2, definition.ArgumentDefinitions?.Count);
+            Assert.Equal(2, definition.Arguments?.Count);
         }
 
         [Fact]

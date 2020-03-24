@@ -9,14 +9,14 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public DirectiveDefinition(
             StringValue? description,
             Name name,
-            IReadOnlyCollection<InputValueDefinition>? argumentDefinitions,
+            IReadOnlyCollection<InputValueDefinition>? arguments,
             in bool isRepeatable,
             IReadOnlyCollection<string> directiveLocations,
             in Location? location)
         {
             Description = description;
             Name = name;
-            ArgumentDefinitions = argumentDefinitions;
+            Arguments = arguments;
             IsRepeatable = isRepeatable;
             DirectiveLocations = directiveLocations;
             Location = location;
@@ -24,7 +24,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue? Description { get; }
         public Name Name { get; }
-        public IReadOnlyCollection<InputValueDefinition>? ArgumentDefinitions { get; }
+        public IReadOnlyCollection<InputValueDefinition>? Arguments { get; }
         public bool IsRepeatable { get; }
         public IReadOnlyCollection<string> DirectiveLocations { get; }
         public Location? Location { get; }
