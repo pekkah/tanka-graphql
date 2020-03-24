@@ -12,10 +12,10 @@ namespace Tanka.GraphQL.Language
         public TypeSystemDocument ParseTypeSystemDocument()
         {
             var schemaDefinitions = new List<SchemaDefinition>();
-            var typeDefinitions = new List<ITypeDefinition>();
+            var typeDefinitions = new List<TypeDefinition>();
             var directiveDefinitions = new List<DirectiveDefinition>();
             var schemaExtensions = new List<SchemaExtension>();
-            var typeExtensions = new List<ITypeDefinition>();
+            var typeExtensions = new List<TypeDefinition>();
 
             while (_lexer.Kind != TokenKind.End)
             {
@@ -46,15 +46,16 @@ namespace Tanka.GraphQL.Language
                         else if (Keywords.Extend.Match(_lexer.Value))
                         {
                             _lexer.Advance();
+
                             // types
                             if (Keywords.IsTypeDefinition(_lexer.Value))
                             {
-                                typeExtensions.Add(ParseTypeDefinition());
+                                typeExtensions.Add(ParseTypeExtension(hasExtend: false));
                                 continue;
                             }
                             else if (Keywords.Schema.Match(_lexer.Value))
                             {
-                                schemaExtensions.Add(ParseSchemaExtension());
+                                schemaExtensions.Add(ParseSchemaExtension(hasExtend: false));
                                 continue;
                             }
                         }
@@ -74,7 +75,7 @@ namespace Tanka.GraphQL.Language
                 typeExtensions);
         }
 
-        public ITypeDefinition ParseTypeDefinition()
+        public TypeDefinition ParseTypeDefinition()
         {
             if (Keywords.Scalar.Match(_lexer.Value))
                 return ParseScalarDefinition();
@@ -98,6 +99,30 @@ namespace Tanka.GraphQL.Language
                 $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
         }
 
+        public TypeDefinition ParseTypeExtension(bool hasExtend = true)
+        {
+            if (Keywords.Scalar.Match(_lexer.Value))
+                return ParseScalarExtension(hasExtend);
+
+            if (Keywords.Type.Match(_lexer.Value))
+                return ParseObjectExtension(hasExtend);
+
+            if (Keywords.Interface.Match(_lexer.Value))
+                return ParseInterfaceExtension(hasExtend);
+
+            if (Keywords.Union.Match(_lexer.Value))
+                return ParseUnionExtension(hasExtend);
+
+            if (Keywords.Enum.Match(_lexer.Value))
+                return ParseEnumExtension(hasExtend);
+
+            if (Keywords.Input.Match(_lexer.Value))
+                return ParseInputObjectExtension(hasExtend);
+
+            throw new Exception(
+                $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
+        }
+
         public SchemaDefinition ParseSchemaDefinition()
         {
             /* Description? schema Directives? { RootOperationTypeDefinition[] } */
@@ -114,11 +139,12 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public SchemaExtension ParseSchemaExtension()
+        public SchemaExtension ParseSchemaExtension(bool hasExtend)
         {
-            /* Description? schema Directives? { RootOperationTypeDefinition[] } */
+            /* Description? extend schema Directives? { RootOperationTypeDefinition[] } */
             var location = GetLocation();
             var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
             SkipKeyword(Keywords.Schema.Span);
             var directives = ParseOptionalDirectives(true);
             var operations = ParseOptionalRootOperationDefinitions();
@@ -286,11 +312,49 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
+        public ScalarDefinition ParseScalarExtension(bool hasExtend = true)
+        {
+            /* Description? extend scalar Name Directives? */
+            var location = GetLocation();
+            var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
+            SkipKeyword(Keywords.Scalar.Span);
+            var name = ParseName();
+            var directives = ParseOptionalDirectives(true);
+
+            return new ScalarDefinition(
+                description,
+                name,
+                directives,
+                location);
+        }
+
         public ObjectDefinition ParseObjectDefinition()
         {
             /* Description? type Name ImplementsInterfaces? Directives? FieldsDefinition? */
             var location = GetLocation();
             var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Type.Span);
+            var name = ParseName();
+            var interfaces = ParseOptionalImplementsInterfaces();
+            var directives = ParseOptionalDirectives(true);
+            var fields = ParseOptionalFieldDefinitions();
+
+            return new ObjectDefinition(
+                description,
+                name,
+                interfaces,
+                directives,
+                fields,
+                location);
+        }
+
+        public ObjectDefinition ParseObjectExtension(bool hasExtend = true)
+        {
+            /* Description? extend type Name ImplementsInterfaces? Directives? FieldsDefinition? */
+            var location = GetLocation();
+            var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
             SkipKeyword(Keywords.Type.Span);
             var name = ParseName();
             var interfaces = ParseOptionalImplementsInterfaces();
@@ -326,6 +390,27 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
+        public InterfaceDefinition ParseInterfaceExtension(bool hasExtend = true)
+        {
+            /* Description extend interface Name ImplementsInterfaces? Directives? FieldsDefinition? */
+            var location = GetLocation();
+            var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
+            SkipKeyword(Keywords.Interface.Span);
+            var name = ParseName();
+            var interfaces = ParseOptionalImplementsInterfaces();
+            var directives = ParseOptionalDirectives(true);
+            var fields = ParseOptionalFieldDefinitions();
+
+            return new InterfaceDefinition(
+                description,
+                name,
+                interfaces,
+                directives,
+                fields,
+                location);
+        }
+
         public UnionDefinition ParseUnionDefinition()
         {
             /* Description? union Name Directives? UnionMemberTypes? */
@@ -344,11 +429,49 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
+        public UnionDefinition ParseUnionExtension(bool hasExtend = true)
+        {
+            /* Description? extend union Name Directives? UnionMemberTypes? */
+            var location = GetLocation();
+            var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
+            SkipKeyword(Keywords.Union.Span);
+            var name = ParseName();
+            var directives = ParseOptionalDirectives(true);
+            var members = ParseOptionalUnionMembers();
+
+            return new UnionDefinition(
+                description,
+                name,
+                directives,
+                members,
+                location);
+        }
+
         public EnumDefinition ParseEnumDefinition()
         {
             /* Description? enum Name Directives? EnumValuesDefinition? */
             var location = GetLocation();
             var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Enum.Span);
+            var name = ParseName();
+            var directives = ParseOptionalDirectives(true);
+            var values = ParseOptionalEnumValueDefinitions();
+
+            return new EnumDefinition(
+                description,
+                name,
+                directives,
+                values,
+                location);
+        }
+
+        public EnumDefinition ParseEnumExtension(bool hasExtend = true)
+        {
+            /* Description? extend enum Name Directives? EnumValuesDefinition? */
+            var location = GetLocation();
+            var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
             SkipKeyword(Keywords.Enum.Span);
             var name = ParseName();
             var directives = ParseOptionalDirectives(true);
@@ -398,9 +521,28 @@ namespace Tanka.GraphQL.Language
 
         public InputObjectDefinition ParseInputObjectDefinition()
         {
-            /* Description input Name Directives? InputFieldsDefinition? */
+            /* Description? input Name Directives? InputFieldsDefinition? */
             var location = GetLocation();
             var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Input.Span);
+            var name = ParseName();
+            var directives = ParseOptionalDirectives(true);
+            var fields = ParseOptionalInputObjectFields();
+
+            return new InputObjectDefinition(
+                description,
+                name,
+                directives,
+                fields,
+                location);
+        }
+
+        public InputObjectDefinition ParseInputObjectExtension(bool hasExtend = true)
+        {
+            /* Description? extend input Name Directives? InputFieldsDefinition? */
+            var location = GetLocation();
+            var description = ParseOptionalDescription();
+            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
             SkipKeyword(Keywords.Input.Span);
             var name = ParseName();
             var directives = ParseOptionalDirectives(true);

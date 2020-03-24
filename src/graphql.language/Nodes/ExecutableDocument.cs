@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
@@ -13,6 +15,17 @@ namespace Tanka.GraphQL.Language.Nodes
         {
             OperationDefinitions = operationDefinitions;
             FragmentDefinitions = fragmentDefinitions;
+        }
+
+        public static implicit operator ExecutableDocument(string value)
+        {
+            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            return parser.ParseExecutableDocument();
+        }
+
+        public static implicit operator string(ExecutableDocument value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

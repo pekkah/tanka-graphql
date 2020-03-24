@@ -33,16 +33,27 @@ namespace Tanka.GraphQL.Language
         }
 
 
-        private Location SkipKeyword(in ReadOnlySpan<byte> keyword)
+        private Location SkipKeyword(in ReadOnlySpan<byte> keyword, bool optional = false)
         {
             if (_lexer.Kind != TokenKind.Name)
+            {
+                if (optional)
+                    return GetLocation();
+
                 throw new Exception($"Unexpected token: '{_lexer.Kind}'. " +
                                     $"Expected: '{TokenKind.Name}'");
+            }
 
             if (!keyword.SequenceEqual(_lexer.Value))
+            {
+                if (optional)
+                    return GetLocation();
+
                 throw new Exception(
                     $"Unexpected keyword: '{Encoding.UTF8.GetString(_lexer.Value)}'. " +
                     $"Expected: '{Encoding.UTF8.GetString(keyword)}'.");
+            }
+
 
             return Skip(TokenKind.Name);
         }

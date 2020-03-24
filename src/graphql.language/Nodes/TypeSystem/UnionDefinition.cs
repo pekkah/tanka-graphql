@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class UnionDefinition : ITypeDefinition
+    public sealed class UnionDefinition : TypeDefinition
     {
         public UnionDefinition(
             StringValue? description,
@@ -27,5 +29,16 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public IReadOnlyCollection<NamedType>? Members { get; }
 
         public Location? Location { get; }
+
+        public static implicit operator UnionDefinition(string value)
+        {
+            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            return parser.ParseUnionDefinition();
+        }
+
+        public static implicit operator string(UnionDefinition value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

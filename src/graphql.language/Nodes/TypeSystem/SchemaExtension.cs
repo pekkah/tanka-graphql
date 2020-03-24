@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
@@ -20,5 +22,16 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public IReadOnlyCollection<Directive>? Directives { get; }
         public IReadOnlyCollection<(OperationType Operation, NamedType NamedType)>? Operations { get; }
         public Location? Location { get; }
+
+        public static implicit operator SchemaExtension(string value)
+        {
+            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            return parser.ParseSchemaExtension(hasExtend:true);
+        }
+
+        public static implicit operator string(SchemaExtension value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

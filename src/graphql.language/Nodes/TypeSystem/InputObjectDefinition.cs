@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class InputObjectDefinition : ITypeDefinition
+    public sealed class InputObjectDefinition : TypeDefinition
     {
         public InputObjectDefinition(
             StringValue? description,
@@ -23,5 +25,16 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public IReadOnlyCollection<Directive>? Directives { get; }
         public IReadOnlyCollection<InputValueDefinition>? Fields { get; }
         public Location? Location { get; }
+
+        public static implicit operator InputObjectDefinition(string value)
+        {
+            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            return parser.ParseInputObjectDefinition();
+        }
+
+        public static implicit operator string(InputObjectDefinition value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

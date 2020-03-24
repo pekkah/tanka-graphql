@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class InterfaceDefinition : ITypeDefinition
+    public sealed class InterfaceDefinition : TypeDefinition
     {
         public InterfaceDefinition(
             StringValue? description,
