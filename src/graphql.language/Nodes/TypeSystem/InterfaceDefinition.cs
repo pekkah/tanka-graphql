@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     {
         public InterfaceDefinition(
             StringValue? description,
-            Name name,
+            in Name name,
             IReadOnlyCollection<NamedType>? interfaces,
             IReadOnlyCollection<Directive>? directives,
             IReadOnlyCollection<FieldDefinition>? fields,

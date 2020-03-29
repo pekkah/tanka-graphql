@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Language.Nodes
 
         public FieldSelection(
             Name alias,
-            Name name,
+            in Name name,
             IReadOnlyCollection<Argument>? arguments,
             IReadOnlyCollection<Directive>? directives,
             SelectionSet? selectionSet,

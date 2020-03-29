@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     {
         public InputObjectDefinition(
             StringValue? description,
-            Name name,
+            in Name name,
             IReadOnlyCollection<Directive>? directives,
             IReadOnlyCollection<InputValueDefinition>? fields,
             in Location? location = default)

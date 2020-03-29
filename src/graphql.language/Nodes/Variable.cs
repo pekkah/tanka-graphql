@@ -6,7 +6,7 @@
         public readonly Name Name;
 
         public Variable(
-            Name name,
+            in Name name,
             in Location? location = default)
         {
             Name = name;

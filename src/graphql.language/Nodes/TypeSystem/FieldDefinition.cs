@@ -7,7 +7,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     public sealed class FieldDefinition
     {
         public FieldDefinition(StringValue? description,
-            Name name,
+            in Name name,
             IReadOnlyCollection<InputValueDefinition>? arguments,
             Type type,
             IReadOnlyCollection<Directive>? directives,

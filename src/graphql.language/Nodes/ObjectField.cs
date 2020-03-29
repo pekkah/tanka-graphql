@@ -7,7 +7,7 @@
         public readonly Value Value;
 
         public ObjectField(
-            Name name,
+            in Name name,
             Value value,
             in Location? location = default)
         {

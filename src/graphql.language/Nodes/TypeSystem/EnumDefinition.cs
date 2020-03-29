@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     {
         public EnumDefinition(
             StringValue? description,
-            Name name,
+            in Name name,
             IReadOnlyCollection<Directive>? directives,
             IReadOnlyCollection<EnumValueDefinition>? values,
             in Location? location = default)

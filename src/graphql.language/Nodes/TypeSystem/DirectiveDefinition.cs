@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     {
         public DirectiveDefinition(
             StringValue? description,
-            Name name,
+            in Name name,
             IReadOnlyCollection<InputValueDefinition>? arguments,
             in bool isRepeatable,
             IReadOnlyCollection<string> directiveLocations,

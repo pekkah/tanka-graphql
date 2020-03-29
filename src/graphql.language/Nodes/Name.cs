@@ -3,16 +3,18 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public readonly struct Name : IEquatable<Name>
+    public struct Name : IEquatable<Name>
     {
         public readonly Location? Location;
 
         public readonly ReadOnlyMemory<byte> Value;
+        private string _value;
 
         public Name(in byte[] value, in Location? location = default)
         {
             Value = value;
             Location = location;
+            _value = string.Empty;
         }
 
         public ReadOnlySpan<byte> ValueSpan => Value.Span;
@@ -22,27 +24,30 @@ namespace Tanka.GraphQL.Language.Nodes
             if (string.IsNullOrEmpty(value))
                 return default;
 
-            return new Name(Encoding.UTF8.GetBytes(value), default);
+            return new Name(Encoding.UTF8.GetBytes(value));
         }
 
         public static implicit operator string(Name value)
         {
-            if (value.ValueSpan.IsEmpty)
-                return string.Empty;
+            return value.ToString();
+        }
 
-            return Encoding.UTF8.GetString(value.ValueSpan);
+        public string AsString()
+        {
+            if (_value != string.Empty)
+                return _value;
+
+            return _value = Encoding.UTF8.GetString(ValueSpan);
         }
 
         public override string ToString()
         {
-            var location = Location.Equals(default) ? Location.ToString() : string.Empty;
-            string name = (string)this;
-            return $"{name}{location}";
+            return AsString();
         }
 
         public bool Equals(Name other)
         {
-            return Value.Equals(other.Value);
+            return ValueSpan.SequenceEqual(other.ValueSpan);
         }
 
         public override bool Equals(object? obj)

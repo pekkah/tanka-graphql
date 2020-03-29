@@ -9,7 +9,7 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly Name Name;
 
         public NamedType(
-            Name name,
+            in Name name,
             in Location? location = default)
         {
             Name = name;

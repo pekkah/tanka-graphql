@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     {
         public UnionDefinition(
             StringValue? description,
-            Name name,
+            in Name name,
             IReadOnlyCollection<Directive>? directives,
             IReadOnlyCollection<NamedType>? members,
             in Location? location = default)

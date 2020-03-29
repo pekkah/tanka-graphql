@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     {
         public InputValueDefinition(
             StringValue? description,
-            Name name,
+            in Name name,
             Type type,
             DefaultValue? defaultValue,
             IReadOnlyCollection<Directive>? directives,

@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     {
         public ScalarDefinition(
             StringValue? description,
-            Name name,
+            in Name name,
             IReadOnlyCollection<Directive>? directives,
             in Location? location = default)
         {

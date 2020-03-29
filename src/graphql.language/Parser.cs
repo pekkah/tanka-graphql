@@ -118,6 +118,33 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
+        public OperationDefinition ParseOperationDefinition()
+        {
+            // is short
+            if (_lexer.Kind == TokenKind.LeftBrace)
+                return ParseShortOperationDefinition();
+
+            // OperationType Name? VariableDefinitions? Directives? SelectionSet
+
+            // OperationType
+            if (!Keywords.IsOperation(_lexer.Value, out var operationType))
+                throw new Exception($"Unexpected operation type: '{Encoding.UTF8.GetString(_lexer.Value)}'");
+            var location = Skip(TokenKind.Name);
+
+            var name = ParseOptionalName();
+            var variableDefinitions = ParseOptionalVariableDefinitions();
+            var directives = ParseOptionalDirectives();
+            var selectionSet = ParseSelectionSet();
+
+            return new OperationDefinition(
+                operationType,
+                name,
+                variableDefinitions,
+                directives,
+                selectionSet,
+                location);
+        }
+
         public OperationDefinition ParseOperationDefinition(OperationType operationType)
         {
             // OperationType Name? VariableDefinitions? Directives? SelectionSet
