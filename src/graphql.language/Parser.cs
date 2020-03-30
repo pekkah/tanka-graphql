@@ -411,7 +411,7 @@ namespace Tanka.GraphQL.Language
             Skip(TokenKind.Colon);
             var value = ParseValue(constant);
 
-            return new ObjectField(name, value, name.Location);
+            return new ObjectField(in name, value, name.Location);
         }
 
         public ListValue ParseListValue(bool constant)
@@ -465,7 +465,7 @@ namespace Tanka.GraphQL.Language
         public NamedType ParseNamedType()
         {
             var name = ParseName();
-            return new NamedType(name, name.Location);
+            return new NamedType(in name, name.Location);
         }
 
         public Variable ParseVariable()

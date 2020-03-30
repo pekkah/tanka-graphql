@@ -119,7 +119,7 @@ namespace Tanka.GraphQL.Language.Visitors
                 visitor.Leave(selection);
         }
 
-        public void Visit(NamedType? namedType)
+        public void Visit(in NamedType? namedType)
         {
             if (namedType == null)
                 return;
@@ -265,8 +265,11 @@ namespace Tanka.GraphQL.Language.Visitors
                 visitor.Leave(defaultValue);
         }
 
-        private void Visit(Type type)
+        private void Visit(Type? type)
         {
+            if (type == null)
+                return;
+            
             // enter
             foreach (var visitor in _options.Type)
                 visitor.Enter(type);

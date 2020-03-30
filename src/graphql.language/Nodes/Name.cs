@@ -27,7 +27,7 @@ namespace Tanka.GraphQL.Language.Nodes
             return new Name(Encoding.UTF8.GetBytes(value));
         }
 
-        public static implicit operator string(Name value)
+        public static implicit operator string(in Name value)
         {
             return value.ToString();
         }
