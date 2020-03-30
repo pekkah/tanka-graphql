@@ -35,6 +35,12 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             return parser.ParseDirectiveDefinition();
         }
 
+        public static implicit operator DirectiveDefinition(in ReadOnlySpan<byte> value)
+        {
+            var parser = new Parser(value);
+            return parser.ParseDirectiveDefinition();
+        }
+
         public static implicit operator string(DirectiveDefinition value)
         {
             throw new NotImplementedException();

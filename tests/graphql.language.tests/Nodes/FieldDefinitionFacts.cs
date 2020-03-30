@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
@@ -7,6 +8,19 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
 {
     public class FieldDefinitionFacts
     {
+        [Fact]
+        public void FromBytes()
+        {
+            /* Given */
+            /* When */
+            FieldDefinition original = Encoding.UTF8.GetBytes("field: String")
+                .AsReadOnlySpan();
+
+            /* Then */
+            Assert.Equal("field", original.Name);
+            Assert.IsType<NamedType>(original.Type);
+        }
+        
         [Fact]
         public void FromString()
         {

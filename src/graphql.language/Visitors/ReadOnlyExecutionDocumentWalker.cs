@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Transactions;
+﻿using System.Collections.Generic;
 using Tanka.GraphQL.Language.Nodes;
-using Type = Tanka.GraphQL.Language.Nodes.Type;
 
 namespace Tanka.GraphQL.Language.Visitors
 {
@@ -59,10 +55,7 @@ namespace Tanka.GraphQL.Language.Visitors
             foreach (var visitor in _options.SelectionSet)
                 visitor.Enter(selectionSet);
 
-            foreach (var selection in selectionSet.Selections)
-            {
-                Visit(selection);
-            }
+            foreach (var selection in selectionSet.Selections) Visit(selection);
 
             // leave
             foreach (var visitor in _options.SelectionSet)
@@ -79,13 +72,13 @@ namespace Tanka.GraphQL.Language.Visitors
             switch (selection.SelectionType)
             {
                 case SelectionType.Field:
-                    Visit((FieldSelection)selection);
+                    Visit((FieldSelection) selection);
                     break;
                 case SelectionType.InlineFragment:
-                    Visit((InlineFragment)selection);
+                    Visit((InlineFragment) selection);
                     break;
                 case SelectionType.FragmentSpread:
-                    Visit((FragmentSpread)selection);
+                    Visit((FragmentSpread) selection);
                     break;
             }
 
@@ -104,48 +97,10 @@ namespace Tanka.GraphQL.Language.Visitors
             Visit(selection.Arguments);
             Visit(selection.Directives);
             Visit(selection.SelectionSet);
-            
+
             // leave
             foreach (var visitor in _options.FieldSelection)
                 visitor.Leave(selection);
-        }
-
-        private void Visit(IReadOnlyCollection<Argument>? arguments)
-        {
-            if (arguments == null)
-                return;
-
-            foreach (var argument in arguments)
-            {
-                Visit(argument);
-            }
-        }
-
-        private void Visit(Argument argument)
-        {
-            // enter
-            foreach (var visitor in _options.Argument)
-                visitor.Enter(argument);
-
-            // children
-            Visit(argument.Value);
-            
-            // leave
-            foreach (var visitor in _options.Argument)
-                visitor.Leave(argument);
-        }
-
-        private void Visit(Value value)
-        {
-            // enter
-            foreach (var visitor in _options.Value)
-                visitor.Enter(value);
-
-            // children
-
-            // leave
-            foreach (var visitor in _options.Value)
-                visitor.Leave(value);
         }
 
         public void Visit(InlineFragment selection)
@@ -188,18 +143,10 @@ namespace Tanka.GraphQL.Language.Visitors
 
             // children
             Visit(selection.Directives);
-            
+
             // leave
             foreach (var visitor in _options.FragmentSpread)
                 visitor.Leave(selection);
-        }
-
-        private void Visit(IReadOnlyCollection<Directive>? directives)
-        {
-            if (directives == null)
-                return;
-
-            foreach (var definition in directives) Visit(definition);
         }
 
         public void Visit(Directive directive)
@@ -232,15 +179,6 @@ namespace Tanka.GraphQL.Language.Visitors
                 visitor.Leave(definition);
         }
 
-        private void Visit(IReadOnlyCollection<VariableDefinition>? definitions)
-        {
-            if (definitions == null)
-                return;
-
-            foreach (var definition in definitions)
-                Visit(definition);
-        }
-
         public void Visit(VariableDefinition definition)
         {
             // enter
@@ -256,6 +194,58 @@ namespace Tanka.GraphQL.Language.Visitors
             // leave
             foreach (var visitor in _options.VariableDefinition)
                 visitor.Leave(definition);
+        }
+
+        private void Visit(IReadOnlyCollection<Argument>? arguments)
+        {
+            if (arguments == null)
+                return;
+
+            foreach (var argument in arguments) Visit(argument);
+        }
+
+        private void Visit(Argument argument)
+        {
+            // enter
+            foreach (var visitor in _options.Argument)
+                visitor.Enter(argument);
+
+            // children
+            Visit(argument.Value);
+
+            // leave
+            foreach (var visitor in _options.Argument)
+                visitor.Leave(argument);
+        }
+
+        private void Visit(Value value)
+        {
+            // enter
+            foreach (var visitor in _options.Value)
+                visitor.Enter(value);
+
+            // children
+
+            // leave
+            foreach (var visitor in _options.Value)
+                visitor.Leave(value);
+        }
+
+        private void Visit(IReadOnlyCollection<Directive>? directives)
+        {
+            if (directives == null)
+                return;
+
+            foreach (var definition in directives) Visit(definition);
+        }
+
+        private void Visit(IReadOnlyCollection<VariableDefinition>? definitions)
+        {
+            if (definitions == null)
+                return;
+
+            foreach (var definition in definitions)
+                Visit(definition);
         }
 
         private void Visit(DefaultValue? defaultValue)

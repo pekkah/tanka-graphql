@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Xunit;
 
@@ -7,6 +8,20 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
 {
     public class DirectiveFacts
     {
+        [Fact]
+        public void FromBytes()
+        {
+            /* Given */
+            /* When */
+            Directive original = Encoding.UTF8.GetBytes("@a(x: 100, y: 100)")
+                .AsReadOnlySpan();
+
+            /* Then */
+            Assert.Equal("a", original.Name);
+            Assert.NotNull(original.Arguments);
+            Assert.Equal(2, original.Arguments?.Count);
+        }
+        
         [Fact]
         public void FromString()
         {

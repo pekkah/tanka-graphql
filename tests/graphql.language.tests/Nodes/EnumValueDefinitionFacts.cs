@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
@@ -7,6 +8,18 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
 {
     public class EnumValueDefinitionFacts
     {
+        [Fact]
+        public void FromBytes()
+        {
+            /* Given */
+            /* When */
+            EnumValueDefinition original = Encoding.UTF8.GetBytes("V1")
+                .AsReadOnlySpan();
+
+            /* Then */
+            Assert.Equal("V1", original.Value.Value);
+        }
+        
         [Fact]
         public void FromString()
         {

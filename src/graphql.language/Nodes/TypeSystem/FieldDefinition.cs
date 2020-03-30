@@ -30,7 +30,13 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public static implicit operator FieldDefinition(string value)
         {
-            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
+            return parser.ParseFieldDefinition();
+        }
+
+        public static implicit operator FieldDefinition(in ReadOnlySpan<byte> value)
+        {
+            var parser = Parser.Create(value);
             return parser.ParseFieldDefinition();
         }
 

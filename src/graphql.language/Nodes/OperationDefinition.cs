@@ -15,7 +15,7 @@ namespace Tanka.GraphQL.Language.Nodes
 
         public OperationDefinition(
             OperationType operation,
-            Name? name,
+            in Name? name,
             IReadOnlyCollection<VariableDefinition>? variableDefinitions,
             IReadOnlyCollection<Directive>? directives,
             SelectionSet selectionSet,

@@ -31,7 +31,13 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public static implicit operator InterfaceDefinition(string value)
         {
-            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
+            return parser.ParseInterfaceDefinition();
+        }
+
+        public static implicit operator InterfaceDefinition(in ReadOnlySpan<byte> value)
+        {
+            var parser = Parser.Create(value);
             return parser.ParseInterfaceDefinition();
         }
 

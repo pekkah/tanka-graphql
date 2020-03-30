@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
@@ -8,6 +9,21 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
 {
     public class ObjectDefinitionFacts
     {
+        [Fact]
+        public void FromBytes()
+        {
+            /* Given */
+            /* When */
+            ObjectDefinition original =
+                Encoding.UTF8.GetBytes(@"type Obj {
+                    field1: String
+                }").AsReadOnlySpan();
+
+            /* Then */
+            Assert.Equal("Obj", original.Name);
+            Assert.NotNull(original.Fields);
+        }
+        
         [Fact]
         public void FromString()
         {

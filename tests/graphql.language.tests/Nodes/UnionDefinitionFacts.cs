@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
@@ -7,6 +8,19 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
 {
     public class UnionDefinitionFacts
     {
+        [Fact]
+        public void FromBytes()
+        {
+            /* Given */
+            /* When */
+            UnionDefinition original = Encoding.UTF8.GetBytes("union Name = MemberA | MemberB")
+                .AsReadOnlySpan();
+
+            /* Then */
+            Assert.Equal("Name", original.Name);
+            Assert.Equal(2, original.Members?.Count);
+        }
+        
         [Fact]
         public void FromString()
         {

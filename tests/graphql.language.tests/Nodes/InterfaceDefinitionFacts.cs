@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
@@ -8,6 +9,21 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
 {
     public class InterfaceDefinitionFacts
     {
+        [Fact]
+        public void FromBytes()
+        {
+            /* Given */
+            /* When */
+            InterfaceDefinition original =
+                Encoding.UTF8.GetBytes(@"interface Inf {
+                    field1: String
+                }").AsReadOnlySpan();
+
+            /* Then */
+            Assert.Equal("Inf", original.Name);
+            Assert.NotNull(original.Fields);
+        }
+        
         [Fact]
         public void FromString()
         {

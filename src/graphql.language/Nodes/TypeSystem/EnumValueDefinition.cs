@@ -25,7 +25,13 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public static implicit operator EnumValueDefinition(string value)
         {
-            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
+            return parser.ParseEnumValueDefinition();
+        }
+
+        public static implicit operator EnumValueDefinition(in ReadOnlySpan<byte> value)
+        {
+            var parser = Parser.Create(value);
             return parser.ParseEnumValueDefinition();
         }
 

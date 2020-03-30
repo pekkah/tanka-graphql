@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.Language.Internal
 
         public long Length => Span.Length;
 
-        public SpanReader(ReadOnlySpan<byte> span)
+        public SpanReader(in ReadOnlySpan<byte> span)
         {
             Span = span;
             Position = -1;

@@ -1,10 +1,24 @@
-﻿using Tanka.GraphQL.Language.Nodes;
+﻿using System.Text;
+using Tanka.GraphQL.Language.Nodes;
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes
 {
     public class ExecutableDocumentFacts
     {
+        [Fact]
+        public void FromBytes()
+        {
+            /* Given */
+            /* When */
+            ExecutableDocument original = Encoding.UTF8.GetBytes("{ field1 field2 }")
+                .AsReadOnlySpan();
+
+            /* Then */
+            Assert.NotNull(original.OperationDefinitions);
+            Assert.Single(original.OperationDefinitions);
+        }
+        
         [Fact]
         public void FromString()
         {

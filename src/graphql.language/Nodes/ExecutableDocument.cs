@@ -19,7 +19,13 @@ namespace Tanka.GraphQL.Language.Nodes
 
         public static implicit operator ExecutableDocument(string value)
         {
-            var parser = new Parser(Encoding.UTF8.GetBytes(value));
+            var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
+            return parser.ParseExecutableDocument();
+        }
+
+        public static implicit operator ExecutableDocument(ReadOnlySpan<byte> value)
+        {
+            var parser = Parser.Create(value);
             return parser.ParseExecutableDocument();
         }
 

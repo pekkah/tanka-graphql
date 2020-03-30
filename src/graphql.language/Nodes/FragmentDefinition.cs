@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Language.Nodes
         public readonly NamedType TypeCondition;
 
         public FragmentDefinition(
-            Name fragmentName,
+            in Name fragmentName,
             NamedType typeCondition,
             IReadOnlyCollection<Directive>? directives,
             SelectionSet selectionSet,

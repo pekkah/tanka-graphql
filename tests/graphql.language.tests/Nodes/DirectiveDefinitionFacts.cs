@@ -1,10 +1,24 @@
-﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
+﻿using System;
+using System.Text;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes
 {
     public class DirectiveDefinitionFacts
     {
+        [Fact]
+        public void FromBytes()
+        {
+            /* Given */
+            /* When */
+            DirectiveDefinition original = Encoding.UTF8.GetBytes("directive @a(x: Int, y: Float) on FIELD")
+                .AsReadOnlySpan();
+
+            /* Then */
+            Assert.Equal("a", original.Name);
+        }
+        
         [Fact]
         public void FromString()
         {
