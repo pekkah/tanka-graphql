@@ -1,8 +1,9 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class Argument
+    public sealed class Argument : INode
     {
-        public readonly Location? Location;
+        public NodeKind Kind => NodeKind.Argument;
+        public Location? Location {get;}
         public readonly Name Name;
         public readonly Value Value;
 

@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 
 namespace Tanka.GraphQL.Language.ImportProviders
 {
@@ -16,16 +16,16 @@ namespace Tanka.GraphQL.Language.ImportProviders
             return _match.IsMatch(path);
         }
 
-        public async ValueTask<IEnumerable<ASTNode>> ImportAsync(string path, string[] types, ParserOptions options)
+        public async ValueTask<IEnumerable<object>> ImportAsync(string path, string[] types, ParserOptions options)
         {
             var matches = _match.Match(path);
             var assembly = matches.Groups["assembly"].Value;
             var resourceName = matches.Groups["resourceName"].Value;
 
             var source = GetSource(assembly, resourceName);
-            var document = await Parser.ParseDocumentAsync(source, options);
+            var document = await GraphQL.Parser.ParseTypeSystemDocumentAsync(source, options);
 
-            return document.Definitions;
+            return document.TypeDefinitions;
         }
 
         private string GetSource(string assemblyName, string resourceName)

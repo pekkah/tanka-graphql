@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
 
@@ -13,10 +15,10 @@ namespace Tanka.GraphQL.SDL
     {
         private readonly List<Action<SchemaBuilder>> _afterTypeDefinitions = new List<Action<SchemaBuilder>>();
         private readonly SchemaBuilder _builder;
-        private readonly GraphQLDocument _document;
+        private readonly TypeSystemDocument _document;
 
 
-        public SdlReader(GraphQLDocument document, SchemaBuilder builder = null)
+        public SdlReader(TypeSystemDocument document, SchemaBuilder builder = null)
         {
             _document = document;
             _builder = builder ?? new SchemaBuilder();
@@ -24,70 +26,74 @@ namespace Tanka.GraphQL.SDL
 
         public SchemaBuilder Read()
         {
-            var definitions = _document.Definitions.ToList();
+            var definitions = _document.TypeDefinitions ?? Array.Empty<TypeDefinition>();
 
-            foreach (var definition in definitions.OfType<GraphQLScalarTypeDefinition>())
+            foreach (var definition in definitions.OfType<ScalarDefinition>())
                 Scalar(definition);
 
-            foreach (var directiveDefinition in definitions.OfType<GraphQLDirectiveDefinition>())
-                DirectiveType(directiveDefinition);
+            if (_document.DirectiveDefinitions != null)
+                foreach (var directiveDefinition in _document.DirectiveDefinitions)
+                    DirectiveType(directiveDefinition);
 
-            foreach (var definition in definitions.OfType<GraphQLInputObjectTypeDefinition>())
+            foreach (var definition in definitions.OfType<InputObjectDefinition>())
                 InputObject(definition);
 
-            foreach (var definition in definitions.OfType<GraphQLEnumTypeDefinition>())
+            foreach (var definition in definitions.OfType<EnumDefinition>())
                 Enum(definition);
 
-            foreach (var definition in definitions.OfType<GraphQLInterfaceTypeDefinition>())
+            foreach (var definition in definitions.OfType<InterfaceDefinition>())
                 Interface(definition);
 
-            foreach (var definition in definitions.OfType<GraphQLObjectTypeDefinition>())
+            foreach (var definition in definitions.OfType<ObjectDefinition>())
                 Object(definition);
 
-            foreach (var definition in definitions.OfType<GraphQLUnionTypeDefinition>())
+            foreach (var definition in definitions.OfType<UnionDefinition>())
                 Union(definition);
 
-            foreach (var definition in definitions.OfType<GraphQLTypeExtensionDefinition>())
-                Extend(definition);
+            if (_document.TypeExtensions != null)
+                foreach (var definition in _document.TypeExtensions)
+                 Extend(definition);
 
             foreach (var action in _afterTypeDefinitions) action(_builder);
 
-            var schemaDefinition = definitions.OfType<GraphQLSchemaDefinition>()
-                .SingleOrDefault();
+            var schemaDefinition = _document
+                .SchemaDefinitions
+                ?.SingleOrDefault();
 
             if (schemaDefinition?.Directives != null)
             {
                 var directives = Directives(schemaDefinition.Directives);
                 _builder.Schema(
-                    schemaDefinition.Comment?.Text,
+                    schemaDefinition.Description,
                     directives);
             }
 
             return _builder;
         }
 
-        protected ScalarType Scalar(GraphQLScalarTypeDefinition definition)
+        protected ScalarType Scalar(ScalarDefinition definition)
         {
             _builder.Scalar(
-                definition.Name.Value,
+                definition.Name,
                 out var scalar,
-                definition.Comment?.Text,
+                definition.Description,
                 Directives(definition.Directives));
 
             return scalar;
         }
 
-        protected DirectiveType DirectiveType(GraphQLDirectiveDefinition definition)
+        protected DirectiveType DirectiveType(DirectiveDefinition definition)
         {
-            var locations = definition.Locations
+            var locations = definition
+                .DirectiveLocations
                 .Select(location =>
-                    (DirectiveLocation) System.Enum.Parse(typeof(DirectiveLocation), location.Value))
+                    (DirectiveLocation) System.Enum.Parse(typeof(DirectiveLocation), location))
                 .ToList();
 
             var args = Args(definition.Arguments).ToList();
 
             _builder.DirectiveType(
-                definition.Name.Value,
+                definition.Name,
                 out var directiveType,
                 locations,
                 null,
@@ -97,7 +103,7 @@ namespace Tanka.GraphQL.SDL
         }
 
         protected IEnumerable<(string Name, IType Type, object DefaultValue, string Description)> Args(
-            IEnumerable<GraphQLInputValueDefinition> definitions)
+            IEnumerable<InputValueDefinition>? definitions)
         {
             var args = new List<(string Name, IType Type, object DefaultValue, string Description)>();
 
@@ -107,7 +113,7 @@ namespace Tanka.GraphQL.SDL
             foreach (var definition in definitions)
             {
                 var type = InputType(definition.Type);
-                object defaultValue = null;
+                object? defaultValue = null;
 
                 try
                 {
@@ -125,28 +131,28 @@ namespace Tanka.GraphQL.SDL
                     defaultValue = null;
                 }
 
-                args.Add((definition.Name.Value, type, defaultValue, default));
+                args.Add((definition.Name, type, defaultValue, default));
             }
 
             return args;
         }
 
-        protected IType InputType(GraphQLType typeDefinition)
+        protected IType InputType(TypeBase type)
         {
-            if (typeDefinition.Kind == ASTNodeKind.NonNullType)
+            if (type.Kind == NodeKind.NonNullType)
             {
-                var innerType = InputType(((GraphQLNonNullType) typeDefinition).Type);
-                return innerType != null ? new NonNull(innerType) : null;
+                var innerType = InputType(((NonNullType) type).OfType);
+                return new NonNull(innerType);
             }
 
-            if (typeDefinition.Kind == ASTNodeKind.ListType)
+            if (type.Kind == NodeKind.ListType)
             {
-                var innerType = InputType(((GraphQLListType) typeDefinition).Type);
-                return innerType != null ? new List(innerType) : null;
+                var innerType = InputType(((ListType) type).OfType);
+                return new List(innerType);
             }
 
-            var namedTypeDefinition = (GraphQLNamedType) typeDefinition;
-            var typeName = namedTypeDefinition.Name.Value;
+            var namedTypeDefinition = (NamedType) type;
+            var typeName = namedTypeDefinition.Name.AsString();
 
             // is type already known by the builder?
             if (_builder.TryGetType<INamedType>(typeName, out var knownType))
@@ -154,8 +160,7 @@ namespace Tanka.GraphQL.SDL
 
             // type is not known so we need to get the
             // definition and build it
-            var definition = _document.Definitions
-                .OfType<GraphQLTypeDefinition>()
+            var definition = _document.TypeDefinitions!
                 .InputType(typeName);
 
             if (definition == null)
@@ -164,11 +169,11 @@ namespace Tanka.GraphQL.SDL
 
             switch (definition)
             {
-                case GraphQLScalarTypeDefinition scalarTypeDefinition:
+                case ScalarDefinition scalarTypeDefinition:
                     return Scalar(scalarTypeDefinition);
-                case GraphQLEnumTypeDefinition enumTypeDefinition:
+                case EnumDefinition enumTypeDefinition:
                     return Enum(enumTypeDefinition);
-                case GraphQLInputObjectTypeDefinition inputObjectTypeDefinition:
+                case InputObjectDefinition inputObjectTypeDefinition:
                     return InputObject(inputObjectTypeDefinition);
             }
 
@@ -176,22 +181,22 @@ namespace Tanka.GraphQL.SDL
             return null;
         }
 
-        protected IType OutputType(GraphQLType typeDefinition)
+        protected IType OutputType(TypeBase type)
         {
-            if (typeDefinition.Kind == ASTNodeKind.NonNullType)
+            if (type.Kind == NodeKind.NonNullType)
             {
-                var innerType = OutputType(((GraphQLNonNullType) typeDefinition).Type);
-                return innerType != null ? new NonNull(innerType) : null;
+                var innerType = OutputType(((NonNullType) type).OfType);
+                return new NonNull(innerType);
             }
 
-            if (typeDefinition.Kind == ASTNodeKind.ListType)
+            if (type.Kind == NodeKind.ListType)
             {
-                var innerType = OutputType(((GraphQLListType) typeDefinition).Type);
-                return innerType != null ? new List(innerType) : null;
+                var innerType = OutputType(((ListType) type).OfType);
+                return new List(innerType);
             }
 
-            var namedTypeDefinition = (GraphQLNamedType) typeDefinition;
-            var typeName = namedTypeDefinition.Name.Value;
+            var namedTypeDefinition = (NamedType) type;
+            var typeName = namedTypeDefinition.Name;
 
             // is type already known by the builder?
             if (_builder.TryGetType<INamedType>(typeName, out var knownType))
@@ -199,8 +204,7 @@ namespace Tanka.GraphQL.SDL
 
             // type is not known so we need to get the
             // definition and build it
-            var definition = _document.Definitions
-                .OfType<GraphQLTypeDefinition>()
+            var definition = _document.TypeDefinitions!
                 .OutputType(typeName);
 
             if (definition == null)
@@ -209,32 +213,32 @@ namespace Tanka.GraphQL.SDL
 
             switch (definition)
             {
-                case GraphQLScalarTypeDefinition scalarTypeDefinition:
+                case ScalarDefinition scalarTypeDefinition:
                     return Scalar(scalarTypeDefinition);
-                case GraphQLEnumTypeDefinition enumTypeDefinition:
+                case EnumDefinition enumTypeDefinition:
                     return Enum(enumTypeDefinition);
-                case GraphQLObjectTypeDefinition objectType:
+                case ObjectDefinition objectType:
                     return Object(objectType);
-                case GraphQLInterfaceTypeDefinition interfaceType:
+                case InterfaceDefinition interfaceType:
                     return Interface(interfaceType);
-                case GraphQLUnionTypeDefinition unionType:
+                case UnionDefinition unionType:
                     return Union(unionType);
             }
 
             return null;
         }
 
-        protected EnumType Enum(GraphQLEnumTypeDefinition definition)
+        protected EnumType Enum(EnumDefinition definition)
         {
             var directives = Directives(definition.Directives);
 
-            _builder.Enum(definition.Name.Value, out var enumType,
+            _builder.Enum(definition.Name, out var enumType,
                 directives: directives,
                 description: null,
                 values: values => 
                     definition.Values.ToList()
                         .ForEach(value => values.Value(
-                            value.Name.Value,
+                            value.Value,
                             string.Empty,
                             Directives(value.Directives),
                             null)));
@@ -243,7 +247,7 @@ namespace Tanka.GraphQL.SDL
         }
 
         protected IEnumerable<DirectiveInstance> Directives(
-            IEnumerable<GraphQLDirective> directives)
+            IEnumerable<Directive>? directives)
         {
             if (directives == null)
                 yield break;
@@ -254,9 +258,9 @@ namespace Tanka.GraphQL.SDL
         }
 
         protected IEnumerable<DirectiveInstance> DirectiveInstance(
-            GraphQLDirective directiveDefinition)
+            Directive directiveDefinition)
         {
-            var name = directiveDefinition.Name.Value;
+            var name = directiveDefinition.Name;
 
             _builder.TryGetDirective(name, out var directiveType);
 
@@ -265,14 +269,14 @@ namespace Tanka.GraphQL.SDL
                     $"Could not find DirectiveType with name '{name}'",
                     directiveDefinition);
 
-            var arguments = new Dictionary<string, object>();
+            var arguments = new Dictionary<string, object?>();
             foreach (var argument in directiveType.Arguments)
             {
                 var type = argument.Value.Type;
                 var defaultValue = argument.Value.DefaultValue;
 
                 var definition = directiveDefinition.Arguments?
-                    .SingleOrDefault(a => a.Name.Value == argument.Key);
+                    .SingleOrDefault(a => a.Name == argument.Key);
 
                 var hasValue = definition != null;
                 var value = definition?.Value;
@@ -307,15 +311,15 @@ namespace Tanka.GraphQL.SDL
             yield return directiveType.CreateInstance(arguments);
         }
 
-        protected InputObjectType InputObject(GraphQLInputObjectTypeDefinition definition)
+        protected InputObjectType InputObject(InputObjectDefinition definition)
         {
-            if (_builder.TryGetType<InputObjectType>(definition.Name.Value, out var inputObject)) return inputObject;
+            if (_builder.TryGetType<InputObjectType>(definition.Name, out var inputObject)) return inputObject;
 
             var directives = Directives(definition.Directives);
             _builder.InputObject(
-                definition.Name.Value, 
+                definition.Name, 
                 out inputObject,
-                description: definition.Comment?.Text,
+                description: definition.Description?.ToString(),
                 directives: directives);
             
             _builder.Connections(connect =>
@@ -334,7 +338,7 @@ namespace Tanka.GraphQL.SDL
             return inputObject;
         }
 
-        protected InputFields InputValues(IEnumerable<GraphQLInputValueDefinition> definitions)
+        protected InputFields InputValues(IEnumerable<InputValueDefinition>? definitions)
         {
             var fields = new InputFields();
 
@@ -348,10 +352,9 @@ namespace Tanka.GraphQL.SDL
                 if (!TypeIs.IsInputType(type))
                     throw new DocumentException(
                         "Type of input value definition is not valid input value type. " +
-                        $"Definition: '{definition.Name.Value}' Type: {definition.Type.Kind}",
-                        definition);
+                        $"Definition: '{definition.Name}' Type: {definition.Type.Kind}");
 
-                object defaultValue = default;
+                object? defaultValue = default;
 
                 _builder.Connections(connect =>
                 {
@@ -374,35 +377,35 @@ namespace Tanka.GraphQL.SDL
                 switch (type)
                 {
                     case ScalarType scalarType:
-                        fields[definition.Name.Value] = new InputObjectField(
+                        fields[definition.Name] = new InputObjectField(
                             scalarType,
                             string.Empty,
                             defaultValue,
                             directives);
                         break;
                     case EnumType enumType:
-                        fields[definition.Name.Value] = new InputObjectField(
+                        fields[definition.Name] = new InputObjectField(
                             enumType,
                             string.Empty,
                             defaultValue,
                             directives);
                         break;
                     case InputObjectType inputObjectType:
-                        fields[definition.Name.Value] = new InputObjectField(
+                        fields[definition.Name] = new InputObjectField(
                             inputObjectType,
                             string.Empty,
                             defaultValue,
                             directives);
                         break;
                     case NonNull nonNull:
-                        fields[definition.Name.Value] = new InputObjectField(
+                        fields[definition.Name] = new InputObjectField(
                             nonNull,
                             string.Empty,
                             defaultValue,
                             directives);
                         break;
                     case List list:
-                        fields[definition.Name.Value] = new InputObjectField(
+                        fields[definition.Name] = new InputObjectField(
                             list,
                             string.Empty,
                             defaultValue,
@@ -414,13 +417,13 @@ namespace Tanka.GraphQL.SDL
             return fields;
         }
 
-        protected InterfaceType Interface(GraphQLInterfaceTypeDefinition definition)
+        protected InterfaceType Interface(InterfaceDefinition definition)
         {
-            if (_builder.TryGetType<InterfaceType>(definition.Name.Value, out var interfaceType)) return interfaceType;
+            if (_builder.TryGetType<InterfaceType>(definition.Name, out var interfaceType)) return interfaceType;
 
             var directives = Directives(definition.Directives);
 
-            _builder.Interface(definition.Name.Value, out interfaceType,
+            _builder.Interface(definition.Name, out interfaceType,
                 directives: directives);
 
             AfterTypeDefinitions(_ => { Fields(interfaceType, definition.Fields); });
@@ -428,14 +431,14 @@ namespace Tanka.GraphQL.SDL
             return interfaceType;
         }
 
-        protected ObjectType Object(GraphQLObjectTypeDefinition definition)
+        protected ObjectType Object(ObjectDefinition definition)
         {
-            if (_builder.TryGetType<ObjectType>(definition.Name.Value, out var objectType)) return objectType;
+            if (_builder.TryGetType<ObjectType>(definition.Name, out var objectType)) return objectType;
 
             var directives = Directives(definition.Directives);
             var interfaces = Interfaces(definition.Interfaces);
 
-            _builder.Object(definition.Name.Value, out objectType,
+            _builder.Object(definition.Name, out objectType,
                 interfaces: interfaces,
                 directives: directives);
 
@@ -444,15 +447,19 @@ namespace Tanka.GraphQL.SDL
             return objectType;
         }
 
-        protected void Extend(GraphQLTypeExtensionDefinition definition)
+        protected void Extend(TypeExtension extension)
         {
             AfterTypeDefinitions(_ =>
             {
-                if (!_builder.TryGetType<ObjectType>(definition.Definition.Name.Value, out var type))
+                if (extension.ExtendedKind != NodeKind.ObjectDefinition)
+                    throw new Exception($"Only object type extensions supported");
+                
+                if (!_builder.TryGetType<ObjectType>(extension.Name, out var type))
                     throw new InvalidOperationException(
-                        $"Cannot extend type '{definition.Definition.Name}'. Type to extend not found.");
+                        $"Cannot extend type '{extension.Name}'. Type to extend not found.");
 
-                Fields(type, definition.Definition.Fields);
+                var objectDefinition = (ObjectDefinition)extension.Definition;
+                Fields(type, objectDefinition.Fields);
             });
         }
 
@@ -461,23 +468,26 @@ namespace Tanka.GraphQL.SDL
             _afterTypeDefinitions.Add(action);
         }
 
-        private UnionType Union(GraphQLUnionTypeDefinition definition)
+        private UnionType Union(UnionDefinition definition)
         {
-            if (_builder.TryGetType<UnionType>(definition.Name.Value, out var unionType)) return unionType;
+            if (_builder.TryGetType<UnionType>(definition.Name, out var unionType)) return unionType;
 
             var possibleTypes = new List<ObjectType>();
-            foreach (var astType in definition.Types)
+            if (definition.Members != null)
             {
-                var type = (ObjectType) OutputType(astType);
-                possibleTypes.Add(type);
+                foreach (var astType in definition.Members)
+                {
+                    var type = (ObjectType) OutputType(astType);
+                    possibleTypes.Add(type);
+                }
             }
 
             var directives = Directives(definition.Directives);
-            _builder.Union(definition.Name.Value, out unionType, default, directives, possibleTypes.ToArray());
+            _builder.Union(definition.Name, out unionType, default, directives, possibleTypes.ToArray());
             return unionType;
         }
 
-        private IEnumerable<InterfaceType> Interfaces(IEnumerable<GraphQLNamedType> definitions)
+        private IEnumerable<InterfaceType> Interfaces(IEnumerable<NamedType> definitions)
         {
             var interfaces = new List<InterfaceType>();
 
@@ -495,7 +505,7 @@ namespace Tanka.GraphQL.SDL
             return interfaces;
         }
 
-        private void Fields(ComplexType owner, IEnumerable<GraphQLFieldDefinition> definitions)
+        private void Fields(ComplexType owner, IEnumerable<FieldDefinition>? definitions)
         {
             if (definitions == null)
                 return;
@@ -503,7 +513,7 @@ namespace Tanka.GraphQL.SDL
             foreach (var definition in definitions)
             {
                 var type = OutputType(definition.Type);
-                var name = definition.Name.Value;
+                var name = definition.Name;
                 var args = Args(definition.Arguments).ToList();
                 var directives = Directives(definition.Directives);
 

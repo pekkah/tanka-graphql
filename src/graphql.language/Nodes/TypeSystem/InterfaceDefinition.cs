@@ -6,6 +6,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class InterfaceDefinition : TypeDefinition
     {
+        public override NodeKind Kind => NodeKind.InterfaceDefinition;
         public InterfaceDefinition(
             StringValue? description,
             in Name name,
@@ -23,11 +24,11 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         }
 
         public StringValue? Description { get; }
-        public Name Name { get; }
+        public override Name Name { get; }
         public IReadOnlyCollection<NamedType>? Interfaces { get; }
         public IReadOnlyCollection<Directive>? Directives { get; }
         public IReadOnlyCollection<FieldDefinition>? Fields { get; }
-        public Location? Location { get; }
+        public override Location? Location { get; }
 
         public static implicit operator InterfaceDefinition(string value)
         {
@@ -39,11 +40,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = Parser.Create(value);
             return parser.ParseInterfaceDefinition();
-        }
-
-        public static implicit operator string(InterfaceDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

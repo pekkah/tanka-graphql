@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public abstract class TypeDefinition
+    public abstract class TypeDefinition: INode
     {
         public static implicit operator TypeDefinition(string value)
         {
@@ -16,10 +16,9 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             var parser = Parser.Create(value);
             return parser.ParseTypeDefinition();
         }
-
-        public static implicit operator string(TypeDefinition value)
-        {
-            throw new NotImplementedException();
-        }
+        
+        public abstract NodeKind Kind { get; }
+        public abstract Location? Location { get; }
+        public abstract Name Name { get; }
     }
 }

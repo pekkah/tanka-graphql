@@ -265,7 +265,7 @@ namespace Tanka.GraphQL.Language.Visitors
                 visitor.Leave(defaultValue);
         }
 
-        private void Visit(Type? type)
+        private void Visit(TypeBase? type)
         {
             if (type == null)
                 return;

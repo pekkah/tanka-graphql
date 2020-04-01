@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Tanka.GraphQL.Language.Internal;
 using Tanka.GraphQL.Language.Nodes;
-using Type = Tanka.GraphQL.Language.Nodes.Type;
 
 namespace Tanka.GraphQL.Language
 {
@@ -429,7 +428,7 @@ namespace Tanka.GraphQL.Language
             return new ListValue(values, location);
         }
 
-        public Type ParseType()
+        public TypeBase ParseType()
         {
             // Type
             // [Type]
@@ -439,7 +438,7 @@ namespace Tanka.GraphQL.Language
 
             // [Type]
             var location = GetLocation();
-            Type type;
+            TypeBase type;
             if (_lexer.Kind == TokenKind.LeftBracket)
             {
                 Skip(TokenKind.LeftBracket);

@@ -4,8 +4,10 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class EnumValueDefinition
+    public sealed class EnumValueDefinition: INode
     {
+        public NodeKind Kind => NodeKind.EnumValueDefinition;
+        
         public EnumValueDefinition(
             StringValue? description,
             EnumValue value,
@@ -33,11 +35,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = Parser.Create(value);
             return parser.ParseEnumValueDefinition();
-        }
-
-        public static implicit operator string(EnumValueDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

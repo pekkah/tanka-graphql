@@ -1,10 +1,12 @@
-﻿using GraphQLParser.AST;
+﻿using System;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Language
 {
-    public static class AstNodeExtensions
+    public static class NodeExtensions
     {
-        public static string ToGraphQL(this ASTNode node)
+        [Obsolete("Going to get replaced by the new language module renderer when it's ready")]
+        public static string ToGraphQL(this INode node)
         {
             return new Printer().Print(node);
         }

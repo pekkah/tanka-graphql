@@ -2,9 +2,10 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class SelectionSet
+    public sealed class SelectionSet: INode
     {
-        public readonly Location? Location;
+        public NodeKind Kind => NodeKind.SelectionSet;
+        public Location? Location {get;}
         public readonly IReadOnlyCollection<ISelection> Selections;
 
         public SelectionSet(

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.TypeSystem;
@@ -107,7 +107,7 @@ namespace Tanka.GraphQL.Tests.Validation
         public ISchema Schema { get; }
 
         private ValidationResult Validate(
-            GraphQLDocument document,
+            ExecutableDocument document,
             CombineRule rule,
             Dictionary<string, object> variables = null)
         {
@@ -529,13 +529,13 @@ namespace Tanka.GraphQL.Tests.Validation
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R531FieldSelections 
-                         && error.Nodes.OfType<GraphQLFieldSelection>()
+                         && error.Nodes.OfType<FieldSelection>()
                              .Any(n => n.Name.Value == "name"));
 
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R531FieldSelections 
-                         && error.Nodes.OfType<GraphQLFieldSelection>()
+                         && error.Nodes.OfType<FieldSelection>()
                              .Any(n => n.Name.Value == "barkVolume"));
         }
 
@@ -651,7 +651,7 @@ namespace Tanka.GraphQL.Tests.Validation
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R532FieldSelectionMerging 
-                         && error.Nodes.OfType<GraphQLFieldSelection>()
+                         && error.Nodes.OfType<FieldSelection>()
                              .Any(n => n.Name.Value == "name"));
         }
         

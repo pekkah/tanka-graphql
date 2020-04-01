@@ -2,10 +2,11 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class InlineFragment : ISelection
+    public sealed class InlineFragment : ISelection, INode
     {
-        public readonly IReadOnlyCollection<Directive>? Directives;
-        public readonly Location? Location;
+        public NodeKind Kind => NodeKind.InlineFragment;
+        public IReadOnlyCollection<Directive>? Directives { get; }
+        public Location? Location {get;}
         public readonly SelectionSet SelectionSet;
 
         public readonly NamedType? TypeCondition;

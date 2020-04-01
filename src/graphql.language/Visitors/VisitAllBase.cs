@@ -17,7 +17,7 @@ namespace Tanka.GraphQL.Language.Visitors
         IVisit<DefaultValue>,
         IVisit<Value>,
         IVisit<Directive>,
-        IVisit<Type>
+        IVisit<TypeBase>
     {
         public virtual void Enter(ExecutableDocument document)
         {
@@ -91,7 +91,7 @@ namespace Tanka.GraphQL.Language.Visitors
         {
         }
 
-        public virtual void Enter(Type type)
+        public virtual void Enter(TypeBase type)
         {
         }
 
@@ -135,7 +135,7 @@ namespace Tanka.GraphQL.Language.Visitors
         {
         }
 
-        public virtual void Leave(Type defaultValue)
+        public virtual void Leave(TypeBase defaultValue)
         {
         }
     }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
@@ -296,7 +296,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
                         parseValue: value => new Uri(value.ToString()),
                         parseLiteral: value =>
                         {
-                            if (value.Kind == ASTNodeKind.StringValue)
+                            if (value.Kind == NodeKind.StringValue)
                             {
                                 return new Uri(value.Value);
                             }

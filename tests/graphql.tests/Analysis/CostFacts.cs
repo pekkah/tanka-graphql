@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
@@ -36,7 +36,7 @@ namespace Tanka.GraphQL.Tests.Analysis
         public ISchema Schema { get; }
 
         private ValidationResult Validate(
-            GraphQLDocument document,
+            ExecutableDocument document,
             CombineRule rule,
             Dictionary<string, object> variables = null)
         {

@@ -2,7 +2,7 @@
 {
     public interface IDeprecable
     {
-        string DeprecationReason { get; }
+        string? DeprecationReason { get; }
 
         bool IsDeprecated { get; }
     }

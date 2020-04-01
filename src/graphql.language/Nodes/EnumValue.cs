@@ -1,15 +1,16 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class EnumValue : Value
+    public sealed class EnumValue : Value, INode
     {
-        public readonly Location? Location;
-        public readonly Name Value;
+        public override NodeKind Kind => NodeKind.EnumValue;
+        public override Location? Location {get;}
+        public readonly Name Name;
 
         public EnumValue(
-            in Name value,
+            in Name name,
             in Location? location = default)
         {
-            Value = value;
+            Name = name;
             Location = location;
         }
     }

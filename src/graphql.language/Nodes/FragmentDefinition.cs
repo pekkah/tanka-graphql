@@ -4,11 +4,12 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class FragmentDefinition
+    public sealed class FragmentDefinition: INode
     {
+        public NodeKind Kind => NodeKind.FragmentDefinition;
         public readonly IReadOnlyCollection<Directive>? Directives;
         public readonly Name FragmentName;
-        public readonly Location? Location;
+        public Location? Location {get;}
         public readonly SelectionSet SelectionSet;
         public readonly NamedType TypeCondition;
 
@@ -30,11 +31,6 @@ namespace Tanka.GraphQL.Language.Nodes
         {
             var parser = new Parser(Encoding.UTF8.GetBytes(value));
             return parser.ParseFragmentDefinition();
-        }
-
-        public static implicit operator string(FragmentDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

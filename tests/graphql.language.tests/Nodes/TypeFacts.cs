@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
         {
             /* Given */
             /* When */
-            Type original = Encoding.UTF8.GetBytes("String")
+            TypeBase original = Encoding.UTF8.GetBytes("String")
                 .AsReadOnlySpan();
 
             /* Then */
@@ -23,7 +23,7 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
         {
             /* Given */
             /* When */
-            Type original = "String";
+            TypeBase original = "String";
 
             /* Then */
             Assert.IsType<NamedType>(original);

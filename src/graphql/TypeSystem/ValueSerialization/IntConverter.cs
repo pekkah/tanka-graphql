@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
+
 
 namespace Tanka.GraphQL.TypeSystem.ValueSerialization
 {
@@ -22,19 +23,16 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToInt32(input, NumberFormatInfo.InvariantInfo);
         }
 
-        public object ParseLiteral(GraphQLScalarValue input)
+        public object ParseLiteral(Value input)
         {
-            if (input.Kind == ASTNodeKind.NullValue)
+            if (input.Kind == NodeKind.NullValue)
             {
                 return null;
             }
 
-            if (input.Kind == ASTNodeKind.IntValue)
+            if (input.Kind == NodeKind.IntValue)
             {
-                if (input.Value == null)
-                    return null;
-
-                return Convert.ToInt32(input.Value);
+                return ((IntValue) input).Value;
             }
 
             throw new FormatException(

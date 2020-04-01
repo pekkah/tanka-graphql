@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Execution
@@ -10,12 +10,12 @@ namespace Tanka.GraphQL.Execution
         private readonly List<Exception> _errors;
 
         public ExecutorContext(ISchema schema,
-            GraphQLDocument document,
+            ExecutableDocument document,
             ExtensionsRunner extensionsRunner,
             IExecutionStrategy strategy,
-            GraphQLOperationDefinition operation,
-            IDictionary<string, GraphQLFragmentDefinition> fragments, 
-            IReadOnlyDictionary<string, object> coercedVariableValues)
+            OperationDefinition operation,
+            IDictionary<string, FragmentDefinition> fragments, 
+            IReadOnlyDictionary<string, object?> coercedVariableValues)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             Document = document ?? throw new ArgumentNullException(nameof(document));
@@ -27,15 +27,15 @@ namespace Tanka.GraphQL.Execution
             _errors = new List<Exception>();
         }
 
-        public GraphQLOperationDefinition Operation { get; }
+        public OperationDefinition Operation { get; }
 
-        public IDictionary<string, GraphQLFragmentDefinition> Fragments { get; }
+        public IDictionary<string, FragmentDefinition> Fragments { get; }
 
-        public IReadOnlyDictionary<string, object> CoercedVariableValues { get; }
+        public IReadOnlyDictionary<string, object?> CoercedVariableValues { get; }
 
         public ISchema Schema { get; }
 
-        public GraphQLDocument Document { get; }
+        public ExecutableDocument Document { get; }
 
         public ExtensionsRunner ExtensionsRunner { get; }
 

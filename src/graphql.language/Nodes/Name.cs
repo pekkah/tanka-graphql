@@ -3,21 +3,19 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public struct Name : IEquatable<Name>
+    public readonly struct Name : IEquatable<Name>
     {
-        public readonly Location? Location;
+        public Location? Location {get;}
 
         public readonly ReadOnlyMemory<byte> Value;
-        private string _value;
 
         public Name(in byte[] value, in Location? location = default)
         {
             Value = value;
             Location = location;
-            _value = string.Empty;
         }
 
-        public ReadOnlySpan<byte> ValueSpan => Value.Span;
+        public readonly ReadOnlySpan<byte> ValueSpan => Value.Span;
 
         public static implicit operator Name(string value)
         {
@@ -32,12 +30,9 @@ namespace Tanka.GraphQL.Language.Nodes
             return value.ToString();
         }
 
-        public string AsString()
+        public readonly string AsString()
         {
-            if (_value != string.Empty)
-                return _value;
-
-            return _value = Encoding.UTF8.GetString(ValueSpan);
+            return Encoding.UTF8.GetString(ValueSpan);
         }
 
         public override string ToString()

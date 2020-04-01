@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Microsoft.AspNetCore.SignalR.Client;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Server.Links.DTOs;
@@ -43,7 +43,7 @@ namespace Tanka.GraphQL.Server.Links
         public static ExecutionResultLink Http(
             string url,
             Func<HttpClient> createClient = null,
-            Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
+            Func<(ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
                 HttpRequestMessage> transformRequest = null,
             Func<HttpResponseMessage, ValueTask<ExecutionResult>> transformResponse = null)
         {
@@ -78,7 +78,7 @@ namespace Tanka.GraphQL.Server.Links
                 }, cancellationToken);
 
                 // stop when done
-                var isSubscription = document.Definitions.OfType<GraphQLOperationDefinition>()
+                var isSubscription = document.Definitions.OfType<OperationDefinition>()
                     .Any(op => op.Operation == OperationType.Subscription);
 
                 _ = Task.Factory.StartNew(async () =>

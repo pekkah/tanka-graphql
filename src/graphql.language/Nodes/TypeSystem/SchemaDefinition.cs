@@ -4,8 +4,9 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class SchemaDefinition
+    public sealed class SchemaDefinition: INode
     {
+        public NodeKind Kind => NodeKind.SchemaDefinition;
         public SchemaDefinition(
             StringValue? description,
             IReadOnlyCollection<Directive>? directives,
@@ -33,11 +34,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = Parser.Create(value);
             return parser.ParseSchemaDefinition();
-        }
-
-        public static implicit operator string(SchemaDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

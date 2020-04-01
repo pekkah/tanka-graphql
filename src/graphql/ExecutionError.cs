@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL
 {
@@ -12,7 +12,7 @@ namespace Tanka.GraphQL
 
         public string Message { get; set; }
 
-        public List<GraphQLLocation> Locations { get; set; }
+        public List<Location> Locations { get; set; }
 
         public List<object> Path { get; set; }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Validation;
 using Tanka.GraphQL.Language.Visitors;
@@ -19,7 +19,7 @@ namespace Tanka.GraphQL.Benchmarks
     {
         private List<CombineRule> _comparisonRules;
         private List<CombineRule> _defaultRulesMap;
-        private GraphQLDocument _query;
+        private ExecutableDocument _query;
         private ExecutableDocument _query2;
         private ISchema _schema;
 

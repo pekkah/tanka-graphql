@@ -6,6 +6,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class UnionDefinition : TypeDefinition
     {
+        public override NodeKind Kind => NodeKind.UnionDefinition;
         public UnionDefinition(
             StringValue? description,
             in Name name,
@@ -22,13 +23,13 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue? Description { get; }
 
-        public Name Name { get; }
+        public override Name Name { get; }
 
         public IReadOnlyCollection<Directive>? Directives { get; }
 
         public IReadOnlyCollection<NamedType>? Members { get; }
 
-        public Location? Location { get; }
+        public override Location? Location { get; }
 
         public static implicit operator UnionDefinition(string value)
         {
@@ -40,11 +41,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = Parser.Create(value);
             return parser.ParseUnionDefinition();
-        }
-
-        public static implicit operator string(UnionDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

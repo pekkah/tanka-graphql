@@ -8,9 +8,9 @@ namespace Tanka.GraphQL.TypeSystem
 
         public EnumValue(
             string value,
-            string description = null, 
-            IEnumerable<DirectiveInstance> directives = null,
-            string deprecationReason = null)
+            string? description = null, 
+            IEnumerable<DirectiveInstance>? directives = null,
+            string? deprecationReason = null)
         {
             Description = description ?? string.Empty;
             Value = value;

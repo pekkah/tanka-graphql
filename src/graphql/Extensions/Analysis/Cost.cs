@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 
@@ -22,19 +23,19 @@ namespace Tanka.GraphQL.Extensions.Analysis
                 {"multipliers", new List(ScalarType.NonNullString)}
             });
 
-        internal static IEnumerable<ASTNode> CostDirectiveAst = Parser.ParseDocument(
+        internal static IEnumerable<INode> CostDirectiveAst = Parser.ParseTypeSystemDocument(
             @"directive @cost(
                     complexity: Int!
                     multipliers: [String!]
                ) on FIELD_DEFINITION 
-            ").Definitions;
+            ").DirectiveDefinitions!;
 
 
         public static CombineRule MaxCost(
             uint maxCost,
             uint defaultFieldComplexity = 1,
             bool addExtensionData = false,
-            Action<(IRuleVisitorContext Context, GraphQLOperationDefinition Operation, uint Cost, uint MaxCost)>
+            Action<(IRuleVisitorContext Context, OperationDefinition Operation, uint Cost, uint MaxCost)>?
                 onCalculated = null
         )
         {
@@ -66,7 +67,7 @@ namespace Tanka.GraphQL.Extensions.Analysis
                                         continue;
 
                                     var multiplierArg =
-                                        node.Arguments?.SingleOrDefault(a => a.Name.Value == multiplierName);
+                                        node.Arguments?.SingleOrDefault(a => a.Name == multiplierName);
 
                                     if (multiplierArg == null)
                                         continue;

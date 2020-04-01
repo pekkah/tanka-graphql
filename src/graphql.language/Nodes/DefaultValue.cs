@@ -1,8 +1,9 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class DefaultValue
+    public sealed class DefaultValue: INode
     {
-        public readonly Location? Location;
+        public NodeKind Kind => NodeKind.DefaultValue;
+        public Location? Location {get;}
         public readonly Value Value;
 
         public DefaultValue(

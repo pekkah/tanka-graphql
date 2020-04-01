@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public abstract class Value
+    public abstract class Value: INode
     {
         public static implicit operator Value(string value)
         {
@@ -21,5 +21,8 @@ namespace Tanka.GraphQL.Language.Nodes
         {
             throw new NotImplementedException();
         }
+
+        public abstract NodeKind Kind { get; }
+        public abstract Location? Location { get; }
     }
 }

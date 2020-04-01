@@ -1,71 +1,63 @@
 ﻿using System.Collections.Generic;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Language
 {
     public class Visitor
     {
-        private readonly List<GraphQLFragmentDefinition> _fragments = 
-            new List<GraphQLFragmentDefinition>();
+        private readonly List<FragmentDefinition> _fragments = 
+            new List<FragmentDefinition>();
 
-        public IEnumerable<GraphQLFragmentDefinition> Fragments => _fragments;
+        public IReadOnlyCollection<FragmentDefinition> Fragments => _fragments;
 
-        public virtual GraphQLName BeginVisitAlias(GraphQLName alias)
+
+        public virtual Argument BeginVisitArgument(Argument argument)
         {
-            return alias;
-        }
-
-        public virtual GraphQLArgument BeginVisitArgument(GraphQLArgument argument)
-        {
-            if (argument.Name != null)
-                BeginVisitNode(argument.Name);
             if (argument.Value != null)
                 BeginVisitNode(argument.Value);
+            
             return EndVisitArgument(argument);
         }
 
-        public virtual IEnumerable<GraphQLArgument> BeginVisitArguments(
-            IEnumerable<GraphQLArgument> arguments)
+        public virtual IEnumerable<Argument> BeginVisitArguments(
+            IEnumerable<Argument> arguments)
         {
-            foreach (ASTNode node in arguments)
+            foreach (var node in arguments)
                 BeginVisitNode(node);
+            
             return arguments;
         }
 
-        public virtual GraphQLScalarValue BeginVisitBooleanValue(
-            GraphQLScalarValue value)
+        public virtual BooleanValue BeginVisitBooleanValue(
+            BooleanValue value)
         {
             return value;
         }
 
-        public virtual GraphQLDirective BeginVisitDirective(GraphQLDirective directive)
+        public virtual Directive BeginVisitDirective(Directive directive)
         {
-            if (directive.Name != null)
-                BeginVisitNode(directive.Name);
             if (directive.Arguments != null)
                 BeginVisitArguments(directive.Arguments);
+            
             return directive;
         }
 
-        public virtual IEnumerable<GraphQLDirective> BeginVisitDirectives(
-            IEnumerable<GraphQLDirective> directives)
+        public virtual IEnumerable<Directive> BeginVisitDirectives(
+            IEnumerable<Directive> directives)
         {
-            foreach (ASTNode directive in directives)
+            foreach (var directive in directives)
                 BeginVisitNode(directive);
             return directives;
         }
 
-        public virtual GraphQLScalarValue BeginVisitEnumValue(GraphQLScalarValue value)
+        public virtual EnumValue BeginVisitEnumValue(EnumValue value)
         {
             return value;
         }
 
-        public virtual GraphQLFieldSelection BeginVisitFieldSelection(
-            GraphQLFieldSelection selection)
+        public virtual FieldSelection BeginVisitFieldSelection(
+            FieldSelection selection)
         {
-            BeginVisitNode(selection.Name);
-            if (selection.Alias != null)
-                BeginVisitAlias((GraphQLName) BeginVisitNode(selection.Alias));
             if (selection.Arguments != null)
                 BeginVisitArguments(selection.Arguments);
             if (selection.SelectionSet != null)
@@ -75,17 +67,16 @@ namespace Tanka.GraphQL.Language
             return EndVisitFieldSelection(selection);
         }
 
-        public virtual GraphQLScalarValue BeginVisitFloatValue(
-            GraphQLScalarValue value)
+        public virtual FloatValue BeginVisitFloatValue(
+            FloatValue value)
         {
             return value;
         }
 
-        public virtual GraphQLFragmentDefinition BeginVisitFragmentDefinition(
-            GraphQLFragmentDefinition node)
+        public virtual FragmentDefinition BeginVisitFragmentDefinition(
+            FragmentDefinition node)
         {
             BeginVisitNode(node.TypeCondition);
-            BeginVisitNode(node.Name);
             if (node.SelectionSet != null)
                 BeginVisitNode(node.SelectionSet);
 
@@ -93,15 +84,14 @@ namespace Tanka.GraphQL.Language
             return node;
         }
 
-        public virtual GraphQLFragmentSpread BeginVisitFragmentSpread(
-            GraphQLFragmentSpread fragmentSpread)
+        public virtual FragmentSpread BeginVisitFragmentSpread(
+            FragmentSpread fragmentSpread)
         {
-            BeginVisitNode(fragmentSpread.Name);
             return fragmentSpread;
         }
 
-        public virtual GraphQLInlineFragment BeginVisitInlineFragment(
-            GraphQLInlineFragment inlineFragment)
+        public virtual InlineFragment BeginVisitInlineFragment(
+            InlineFragment inlineFragment)
         {
             if (inlineFragment.TypeCondition != null)
                 BeginVisitNode(inlineFragment.TypeCondition);
@@ -112,181 +102,165 @@ namespace Tanka.GraphQL.Language
             return inlineFragment;
         }
 
-        public virtual GraphQLScalarValue BeginVisitIntValue(GraphQLScalarValue value)
+        public virtual IntValue BeginVisitIntValue(IntValue value)
         {
             return value;
         }
 
-        public virtual GraphQLName BeginVisitName(GraphQLName name)
-        {
-            return name;
-        }
-
-        public virtual GraphQLNamedType BeginVisitNamedType(
-            GraphQLNamedType typeCondition)
+        public virtual NamedType BeginVisitNamedType(
+            NamedType typeCondition)
         {
             return typeCondition;
         }
 
-        public virtual ASTNode BeginVisitNode(ASTNode node)
+        public virtual INode BeginVisitNode(INode node)
         {
             switch (node.Kind)
             {
-                case ASTNodeKind.Name:
-                    return BeginVisitName((GraphQLName) node);
-                case ASTNodeKind.OperationDefinition:
-                    return BeginVisitOperationDefinition((GraphQLOperationDefinition) node);
-                case ASTNodeKind.VariableDefinition:
-                    return BeginVisitVariableDefinition((GraphQLVariableDefinition) node);
-                case ASTNodeKind.Variable:
-                    return BeginVisitVariable((GraphQLVariable) node);
-                case ASTNodeKind.SelectionSet:
-                    return BeginVisitSelectionSet((GraphQLSelectionSet) node);
-                case ASTNodeKind.Field:
-                    return BeginVisitNonIntrospectionFieldSelection((GraphQLFieldSelection) node);
-                case ASTNodeKind.Argument:
-                    return BeginVisitArgument((GraphQLArgument) node);
-                case ASTNodeKind.FragmentSpread:
-                    return BeginVisitFragmentSpread((GraphQLFragmentSpread) node);
-                case ASTNodeKind.InlineFragment:
-                    return BeginVisitInlineFragment((GraphQLInlineFragment) node);
-                case ASTNodeKind.FragmentDefinition:
-                    return BeginVisitFragmentDefinition((GraphQLFragmentDefinition) node);
-                case ASTNodeKind.IntValue:
-                    return BeginVisitIntValue((GraphQLScalarValue) node);
-                case ASTNodeKind.FloatValue:
-                    return BeginVisitFloatValue((GraphQLScalarValue) node);
-                case ASTNodeKind.StringValue:
-                    return BeginVisitStringValue((GraphQLScalarValue) node);
-                case ASTNodeKind.BooleanValue:
-                    return BeginVisitBooleanValue((GraphQLScalarValue) node);
-                case ASTNodeKind.EnumValue:
-                    return BeginVisitEnumValue((GraphQLScalarValue) node);
-                case ASTNodeKind.ListValue:
-                    return BeginVisitListValue((GraphQLListValue) node);
-                case ASTNodeKind.ObjectValue:
-                    return BeginVisitObjectValue((GraphQLObjectValue) node);
-                case ASTNodeKind.ObjectField:
-                    return BeginVisitObjectField((GraphQLObjectField) node);
-                case ASTNodeKind.Directive:
-                    return BeginVisitDirective((GraphQLDirective) node);
-                case ASTNodeKind.NamedType:
-                    return BeginVisitNamedType((GraphQLNamedType) node);
+                case NodeKind.OperationDefinition:
+                    return BeginVisitOperationDefinition((OperationDefinition) node);
+                case NodeKind.VariableDefinition:
+                    return BeginVisitVariableDefinition((VariableDefinition) node);
+                case NodeKind.Variable:
+                    return BeginVisitVariable((Variable) node);
+                case NodeKind.SelectionSet:
+                    return BeginVisitSelectionSet((SelectionSet) node);
+                case NodeKind.FieldSelection:
+                    return BeginVisitNonIntrospectionFieldSelection((FieldSelection) node);
+                case NodeKind.Argument:
+                    return BeginVisitArgument((Argument) node);
+                case NodeKind.FragmentSpread:
+                    return BeginVisitFragmentSpread((FragmentSpread) node);
+                case NodeKind.InlineFragment:
+                    return BeginVisitInlineFragment((InlineFragment) node);
+                case NodeKind.FragmentDefinition:
+                    return BeginVisitFragmentDefinition((FragmentDefinition) node);
+                case NodeKind.IntValue:
+                    return BeginVisitIntValue((IntValue) node);
+                case NodeKind.FloatValue:
+                    return BeginVisitFloatValue((FloatValue) node);
+                case NodeKind.StringValue:
+                    return BeginVisitStringValue((StringValue) node);
+                case NodeKind.BooleanValue:
+                    return BeginVisitBooleanValue((BooleanValue) node);
+                case NodeKind.EnumValue:
+                    return BeginVisitEnumValue((EnumValue) node);
+                case NodeKind.ListValue:
+                    return BeginVisitListValue((ListValue) node);
+                case NodeKind.ObjectValue:
+                    return BeginVisitObjectValue((ObjectValue) node);
+                case NodeKind.Directive:
+                    return BeginVisitDirective((Directive) node);
+                case NodeKind.NamedType:
+                    return BeginVisitNamedType((NamedType) node);
                 default:
                     return null;
             }
         }
 
-        public virtual GraphQLOperationDefinition BeginVisitOperationDefinition(
-            GraphQLOperationDefinition definition)
+        public virtual OperationDefinition BeginVisitOperationDefinition(
+            OperationDefinition definition)
         {
-            if (definition.Name != null)
-                BeginVisitNode(definition.Name);
             if (definition.VariableDefinitions != null)
                 BeginVisitVariableDefinitions(definition.VariableDefinitions);
             BeginVisitNode(definition.SelectionSet);
             return EndVisitOperationDefinition(definition);
         }
 
-        public virtual GraphQLOperationDefinition EndVisitOperationDefinition(
-            GraphQLOperationDefinition definition)
+        public virtual OperationDefinition EndVisitOperationDefinition(
+            OperationDefinition definition)
         {
             return definition;
         }
 
-        public virtual GraphQLSelectionSet BeginVisitSelectionSet(
-            GraphQLSelectionSet selectionSet)
+        public virtual SelectionSet BeginVisitSelectionSet(
+            SelectionSet selectionSet)
         {
             foreach (var selection in selectionSet.Selections)
                 BeginVisitNode(selection);
+            
             return selectionSet;
         }
 
-        public virtual GraphQLScalarValue BeginVisitStringValue(
-            GraphQLScalarValue value)
+        public virtual StringValue BeginVisitStringValue(
+            StringValue value)
         {
             return value;
         }
 
-        public virtual GraphQLVariable BeginVisitVariable(GraphQLVariable variable)
+        public virtual Variable BeginVisitVariable(Variable variable)
         {
-            if (variable.Name != null)
-                BeginVisitNode(variable.Name);
             return EndVisitVariable(variable);
         }
 
-        public virtual GraphQLVariableDefinition BeginVisitVariableDefinition(
-            GraphQLVariableDefinition node)
+        public virtual VariableDefinition BeginVisitVariableDefinition(
+            VariableDefinition node)
         {
             BeginVisitNode(node.Type);
             return node;
         }
 
-        public virtual IEnumerable<GraphQLVariableDefinition> BeginVisitVariableDefinitions(
-            IEnumerable<GraphQLVariableDefinition> variableDefinitions)
+        public virtual IEnumerable<VariableDefinition> BeginVisitVariableDefinitions(
+            IEnumerable<VariableDefinition> variableDefinitions)
         {
-            foreach (ASTNode variableDefinition in variableDefinitions)
+            foreach (var variableDefinition in variableDefinitions)
                 BeginVisitNode(variableDefinition);
+            
             return variableDefinitions;
         }
 
-        public virtual GraphQLArgument EndVisitArgument(GraphQLArgument argument)
+        public virtual Argument EndVisitArgument(Argument argument)
         {
             return argument;
         }
 
-        public virtual GraphQLFieldSelection EndVisitFieldSelection(
-            GraphQLFieldSelection selection)
+        public virtual FieldSelection EndVisitFieldSelection(
+            FieldSelection selection)
         {
             return selection;
         }
 
-        public virtual GraphQLVariable EndVisitVariable(GraphQLVariable variable)
+        public virtual Variable EndVisitVariable(Variable variable)
         {
             return variable;
         }
 
-        public virtual void Visit(GraphQLDocument ast)
+        public virtual void Visit(ExecutableDocument ast)
         {
-            foreach (var definition in ast.Definitions)
-                BeginVisitNode(definition);
+            if (ast.FragmentDefinitions != null)
+                foreach (var definition in ast.FragmentDefinitions)
+                    BeginVisitNode(definition);
+
+            if (ast.OperationDefinitions != null)
+                foreach (var definition in ast.OperationDefinitions)
+                    BeginVisitNode(definition);
         }
 
-        public virtual GraphQLObjectField BeginVisitObjectField(
-            GraphQLObjectField node)
+        public virtual ObjectValue BeginVisitObjectValue(
+            ObjectValue node)
         {
-            BeginVisitNode(node.Name);
-            BeginVisitNode(node.Value);
-            return node;
-        }
-
-        public virtual GraphQLObjectValue BeginVisitObjectValue(
-            GraphQLObjectValue node)
-        {
-            foreach (ASTNode field in node.Fields)
-                BeginVisitNode(field);
             return EndVisitObjectValue(node);
         }
 
-        public virtual GraphQLObjectValue EndVisitObjectValue(GraphQLObjectValue node)
+        public virtual ObjectValue EndVisitObjectValue(ObjectValue node)
         {
             return node;
         }
 
-        public virtual GraphQLListValue EndVisitListValue(GraphQLListValue node)
+        public virtual ListValue EndVisitListValue(ListValue node)
         {
             return node;
         }
 
-        public virtual GraphQLListValue BeginVisitListValue(GraphQLListValue node)
+        public virtual ListValue BeginVisitListValue(ListValue node)
         {
-            foreach (ASTNode node1 in node.Values)
+            foreach (var node1 in node.Values)
                 BeginVisitNode(node1);
 
             return EndVisitListValue(node);
         }
 
-        private ASTNode BeginVisitNonIntrospectionFieldSelection(GraphQLFieldSelection selection)
+        private FieldSelection BeginVisitNonIntrospectionFieldSelection(FieldSelection selection)
         {
             return BeginVisitFieldSelection(selection);
         }

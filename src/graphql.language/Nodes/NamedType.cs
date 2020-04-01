@@ -3,9 +3,10 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class NamedType : Type
+    public sealed class NamedType : TypeBase
     {
-        public readonly Location? Location;
+        public override NodeKind Kind => NodeKind.NamedType;
+        public override Location? Location {get;}
         public readonly Name Name;
 
         public NamedType(
@@ -20,11 +21,6 @@ namespace Tanka.GraphQL.Language.Nodes
         {
             var parser = new Parser(Encoding.UTF8.GetBytes(value));
             return parser.ParseNamedType();
-        }
-
-        public static implicit operator string(NamedType value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

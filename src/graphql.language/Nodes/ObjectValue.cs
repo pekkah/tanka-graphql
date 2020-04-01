@@ -2,10 +2,11 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class ObjectValue : Value
+    public sealed class ObjectValue : Value, INode
     {
+        public override NodeKind Kind => NodeKind.ObjectValue;
         public readonly IReadOnlyCollection<ObjectField> Fields;
-        public readonly Location? Location;
+        public override Location? Location {get;}
 
         public ObjectValue(
             IReadOnlyCollection<ObjectField> fields,

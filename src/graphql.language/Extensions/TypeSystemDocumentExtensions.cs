@@ -50,7 +50,7 @@ namespace Tanka.GraphQL.Language
         }
 
         public static TypeSystemDocument WithTypeExtensions(
-            this TypeSystemDocument document, IReadOnlyCollection<TypeDefinition>? definitions)
+            this TypeSystemDocument document, IReadOnlyCollection<TypeExtension>? definitions)
         {
             return new TypeSystemDocument(
                 document.SchemaDefinitions,

@@ -1,34 +1,36 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
+
 
 namespace Tanka.GraphQL.Validation
 {
     public class ValidationError
     {
-        private readonly List<ASTNode> _nodes = new List<ASTNode>();
+        private readonly List<INode> _nodes = new List<INode>();
 
-        public ValidationError(string message, params ASTNode[] nodes)
+        public ValidationError(string message, params INode[] nodes)
         {
             Message = message;
             _nodes.AddRange(nodes);
         }
 
-        public ValidationError(string code, string message, IEnumerable<ASTNode> nodes)
-            : this(message, nodes?.ToArray() ?? new ASTNode[0])
+        public ValidationError(string code, string message, IEnumerable<INode> nodes)
+            : this(message, nodes?.ToArray() ?? Array.Empty<INode>())
         {
             Code = code;
         }
 
-        public ValidationError(string code, string message, ASTNode node)
+        public ValidationError(string code, string message, INode node)
             : this(code, message, new[] {node})
         {
         }
 
         public string Message { get; set; }
 
-        public IEnumerable<ASTNode> Nodes => _nodes;
+        public IEnumerable<INode> Nodes => _nodes;
 
         public string Code { get; set; }
 
@@ -46,7 +48,15 @@ namespace Tanka.GraphQL.Validation
 
                 foreach (var node in Nodes)
                 {
-                    builder.Append($"{node.Kind}@{node.Location.Start}:{node.Location.End}");
+                    if (node.Location != null)
+                    {
+                        builder.Append($"{node.Kind}@{node.Location}");
+                    }
+                    else
+                    {
+                        builder.Append($"{node.Kind}");
+                    }
+
                     builder.Append(", ");
                 }
             }
@@ -59,7 +69,7 @@ namespace Tanka.GraphQL.Validation
             return new ExecutionError()
             {
                 Message = ToString(),
-                Locations = Nodes.Select(n => n.Location).ToList(),
+                Locations = Nodes.Where(n => n.Location != null).Select(n => n.Location.Value).ToList(),
                 Extensions = new Dictionary<string, object>
                 {
                     {

@@ -1,5 +1,6 @@
-﻿using GraphQLParser.AST;
+﻿
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.ValueResolution
 {
@@ -9,7 +10,7 @@ namespace Tanka.GraphQL.ValueResolution
             string type,
             string field,
             NodePath path,
-            params ASTNode[] nodes)
+            params INode[] nodes)
             : base($"Cannot return null for non-nullable field '{type}.{field}'.", path, nodes)
         {
         }

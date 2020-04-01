@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
+using Argument = Tanka.GraphQL.TypeSystem.Argument;
 
 namespace Tanka.GraphQL.Validation
 {
@@ -12,7 +14,7 @@ namespace Tanka.GraphQL.Validation
     {
         public static IEnumerable<CombineRule> All = new[]
         {
-            R511ExecutableDefinitions(),
+            /* R511ExecutableDefinitions(),*/
             
             R5211OperationNameUniqueness(),
             R5221LoneAnonymousOperation(),
@@ -56,6 +58,7 @@ namespace Tanka.GraphQL.Validation
         ///     For each definition definition in the document.
         ///     definition must be OperationDefinition or FragmentDefinition (it must not be TypeSystemDefinition).
         /// </summary>
+        /* Not required as executable document can only contain operations or fragments or both
         public static CombineRule R511ExecutableDefinitions()
         {
             return (context, rule) =>
@@ -64,8 +67,8 @@ namespace Tanka.GraphQL.Validation
                 {
                     foreach (var definition in document.Definitions)
                     {
-                        var valid = definition.Kind == ASTNodeKind.OperationDefinition
-                                    || definition.Kind == ASTNodeKind.FragmentDefinition;
+                        var valid = definition.Kind == NodeKind.OperationDefinition
+                                    || definition.Kind == NodeKind.FragmentDefinition;
 
                         if (!valid)
                             context.Error(
@@ -80,6 +83,7 @@ namespace Tanka.GraphQL.Validation
                 };
             };
         }
+        */
 
         /// <summary>
         ///     Formal Specification
@@ -96,7 +100,7 @@ namespace Tanka.GraphQL.Validation
                 var known = new List<string>();
                 rule.EnterOperationDefinition += definition =>
                 {
-                    var operationName = definition.Name?.Value;
+                    var operationName = definition.Name;
 
                     if (string.IsNullOrWhiteSpace(operationName))
                         return;
@@ -125,12 +129,13 @@ namespace Tanka.GraphQL.Validation
             {
                 rule.EnterDocument += document =>
                 {
-                    var operations = document.Definitions
-                        .OfType<GraphQLOperationDefinition>()
-                        .ToList();
+                    var operations = document.OperationDefinitions;
 
+                    if (operations == null)
+                        return;
+                    
                     var anonymous = operations
-                        .Count(op => string.IsNullOrEmpty(op.Name?.Value));
+                        .Count(op => string.IsNullOrEmpty(op.Name));
 
                     if (operations.Count() > 1)
                         if (anonymous > 0)
@@ -158,12 +163,13 @@ namespace Tanka.GraphQL.Validation
             {
                 rule.EnterDocument += document =>
                 {
-                    var subscriptions = document.Definitions
-                        .OfType<GraphQLOperationDefinition>()
+                    var subscriptions = document
+                        ?.OperationDefinitions
                         .Where(op => op.Operation == OperationType.Subscription)
                         .ToList();
-
-                    if (!subscriptions.Any())
+                    
+                    
+                    if (subscriptions == null || !subscriptions.Any())
                         return;
 
                     var schema = context.Schema;
@@ -205,9 +211,9 @@ namespace Tanka.GraphQL.Validation
             {
                 rule.EnterFieldSelection += selection =>
                 {
-                    var fieldName = selection.Name.Value;
+                    var fieldName = selection.Name;
 
-                    if (fieldName == "__typename")
+                    if (fieldName == "__typename") //todo: to constant
                         return;
 
                     if (context.Tracker.GetFieldDef() == null)
@@ -256,9 +262,9 @@ namespace Tanka.GraphQL.Validation
             {
                 rule.EnterFieldSelection += selection =>
                 {
-                    var fieldName = selection.Name.Value;
+                    var fieldName = selection.Name;
 
-                    if (fieldName == "__typename")
+                    if (fieldName == "__typename") //todo: to constant
                         return;
 
                     var field = context.Tracker.GetFieldDef();
@@ -354,7 +360,7 @@ namespace Tanka.GraphQL.Validation
         {
             IEnumerable<KeyValuePair<string, Argument>> GetFieldArgumentDefinitions(IRuleVisitorContext context)
             {
-                var definitions = context
+                IEnumerable<KeyValuePair<string, Argument>>? definitions = context
                     .Tracker
                     .GetFieldDef()
                     ?.Field
@@ -381,7 +387,7 @@ namespace Tanka.GraphQL.Validation
 
             void ValidateArguments(
                 IEnumerable<KeyValuePair<string, Argument>> keyValuePairs,
-                List<GraphQLArgument> graphQLArguments, 
+                List<Language.Nodes.Argument> arguments, 
                 IRuleVisitorContext ruleVisitorContext)
             {
                 foreach (var argumentDefinition in keyValuePairs)
@@ -393,8 +399,8 @@ namespace Tanka.GraphQL.Validation
                         continue;
 
                     var argumentName = argumentDefinition.Key;
-                    var argument = graphQLArguments?
-                        .SingleOrDefault(a => a.Name.Value == argumentName);
+                    var argument = arguments?
+                        .SingleOrDefault(a => a.Name == argumentName);
 
                     if (argument == null)
                     {
@@ -404,23 +410,23 @@ namespace Tanka.GraphQL.Validation
                             "if the argument type is non‐null and does not have a default " +
                             "value. Otherwise, the argument is optional. " +
                             $"Argument '{argumentName}' not given",
-                            graphQLArguments);
+                            arguments);
 
                         return;
                     }
 
                     // variables should be valid
-                    if (argument.Value is GraphQLVariable)
+                    if (argument.Value is Variable)
                         continue;
 
-                    if (argument.Value == null || argument.Value.Kind == ASTNodeKind.NullValue)
+                    if (argument.Value == null || argument.Value.Kind == NodeKind.NullValue)
                         ruleVisitorContext.Error(
                             ValidationErrorCodes.R5421RequiredArguments,
                             "Arguments is required. An argument is required " +
                             "if the argument type is non‐null and does not have a default " +
                             "value. Otherwise, the argument is optional. " +
                             $"Value of argument '{argumentName}' cannot be null",
-                            graphQLArguments);
+                            arguments);
                 }
             }
 
@@ -468,7 +474,7 @@ namespace Tanka.GraphQL.Validation
                 rule.EnterDirective += _ => knownArgs = new List<string>();
                 rule.EnterArgument += argument =>
                 {
-                    if (knownArgs.Contains(argument.Name.Value))
+                    if (knownArgs.Contains(argument.Name))
                         context.Error(
                             ValidationErrorCodes.R542ArgumentUniqueness,
                             "Fields and directives treat arguments as a mapping of " +
@@ -477,7 +483,7 @@ namespace Tanka.GraphQL.Validation
                             $"Argument: '{argument.Name.Value}'",
                             argument);
 
-                    knownArgs.Add(argument.Name.Value);
+                    knownArgs.Add(argument.Name);
                 };
             };
         }
@@ -495,15 +501,15 @@ namespace Tanka.GraphQL.Validation
                 var knownFragments = new List<string>();
                 rule.EnterFragmentDefinition += fragment =>
                 {
-                    if (knownFragments.Contains(fragment.Name.Value))
+                    if (knownFragments.Contains(fragment.FragmentName))
                         context.Error(
                             ValidationErrorCodes.R5511FragmentNameUniqueness,
                             "Fragment definitions are referenced in fragment spreads by name. To avoid " +
                             "ambiguity, each fragment’s name must be unique within a document. " +
-                            $"Fragment: '{fragment.Name.Value}'",
+                            $"Fragment: '{fragment.FragmentName}'",
                             fragment);
 
-                    knownFragments.Add(fragment.Name.Value);
+                    knownFragments.Add(fragment.FragmentName);
                 };
             };
         }
@@ -526,7 +532,7 @@ namespace Tanka.GraphQL.Validation
                             ValidationErrorCodes.R5512FragmentSpreadTypeExistence,
                             "Fragments must be specified on types that exist in the schema. This " +
                             "applies for both named and inline fragments. " +
-                            $"Fragment: '{node.Name?.Value}'",
+                            $"Fragment: '{node.FragmentName}'",
                             node);
                 };
                 rule.EnterInlineFragment += node =>
@@ -564,7 +570,7 @@ namespace Tanka.GraphQL.Validation
                     context.Error(
                         ValidationErrorCodes.R5513FragmentsOnCompositeTypes,
                         "Fragments can only be declared on unions, interfaces, and objects. " +
-                        $"Fragment: '{node.Name?.Value}'",
+                        $"Fragment: '{node.FragmentName}'",
                         node);
                 };
                 rule.EnterInlineFragment += node =>
@@ -593,11 +599,11 @@ namespace Tanka.GraphQL.Validation
         {
             return (context, rule) =>
             {
-                var fragments = new Dictionary<string, GraphQLFragmentDefinition>();
+                var fragments = new Dictionary<string, FragmentDefinition>();
                 var fragmentSpreads = new List<string>();
 
-                rule.EnterFragmentDefinition += fragment => { fragments.Add(fragment.Name.Value, fragment); };
-                rule.EnterFragmentSpread += spread => { fragmentSpreads.Add(spread.Name.Value); };
+                rule.EnterFragmentDefinition += fragment => { fragments.Add(fragment.FragmentName, fragment); };
+                rule.EnterFragmentSpread += spread => { fragmentSpreads.Add(spread.FragmentName); };
                 rule.LeaveDocument += document =>
                 {
                     foreach (var fragment in fragments)
@@ -620,7 +626,7 @@ namespace Tanka.GraphQL.Validation
             {
                 rule.EnterFragmentSpread += node =>
                 {
-                    var fragment = context.GetFragment(node.Name.Value);
+                    var fragment = context.GetFragment(node.FragmentName);
 
                     if (fragment == null)
                     {
@@ -628,7 +634,7 @@ namespace Tanka.GraphQL.Validation
                             ValidationErrorCodes.R5521FragmentSpreadTargetDefined,
                             $"Named fragment spreads must refer to fragments " +
                             $"defined within the document. " +
-                            $"Fragment '{node.Name.Value}' not found");
+                            $"Fragment '{node.FragmentName}' not found");
                     }
                 };
             };
@@ -639,14 +645,12 @@ namespace Tanka.GraphQL.Validation
             return (context, rule) =>
             {
                 var visitedFrags = new List<string>();
-                var spreadPath = new Stack<GraphQLFragmentSpread>();
+                var spreadPath = new Stack<FragmentSpread>();
 
                 // Position in the spread path
                 var spreadPathIndexByName = new Dictionary<string, int?>();
-
-                var fragments = context.Document.Definitions.OfType<GraphQLFragmentDefinition>()
-                    .ToList();
-
+                var fragments = context.Document.FragmentDefinitions;
+                
                 rule.EnterFragmentDefinition += node =>
                 {
                     DetectCycleRecursive(
@@ -668,20 +672,20 @@ namespace Tanka.GraphQL.Validation
                        $"Cannot spread fragment \"{fragName}\" within itself {via}.";
             }
 
-            IEnumerable<GraphQLFragmentSpread> GetFragmentSpreads(GraphQLSelectionSet node)
+            IEnumerable<FragmentSpread> GetFragmentSpreads(SelectionSet node)
             {
-                var spreads = new List<GraphQLFragmentSpread>();
+                var spreads = new List<FragmentSpread>();
 
-                var setsToVisit = new Stack<GraphQLSelectionSet>(new[] {node});
+                var setsToVisit = new Stack<SelectionSet>(new[] {node});
 
                 while (setsToVisit.Any())
                 {
                     var set = setsToVisit.Pop();
 
                     foreach (var selection in set.Selections)
-                        if (selection is GraphQLFragmentSpread spread)
+                        if (selection is FragmentSpread spread)
                             spreads.Add(spread);
-                        else if (selection is GraphQLFieldSelection fieldSelection)
+                        else if (selection is FieldSelection fieldSelection)
                             if (fieldSelection.SelectionSet != null)
                                 setsToVisit.Push(fieldSelection.SelectionSet);
                 }
@@ -690,14 +694,17 @@ namespace Tanka.GraphQL.Validation
             }
 
             void DetectCycleRecursive(
-                GraphQLFragmentDefinition fragment,
-                Stack<GraphQLFragmentSpread> spreadPath,
+                FragmentDefinition fragment,
+                Stack<FragmentSpread> spreadPath,
                 List<string> visitedFrags,
                 Dictionary<string, int?> spreadPathIndexByName,
                 IRuleVisitorContext context,
-                List<GraphQLFragmentDefinition> fragments)
+                IReadOnlyCollection<FragmentDefinition>? fragments)
             {
-                var fragmentName = fragment.Name.Value;
+                if (fragments == null)
+                    return;
+                
+                var fragmentName = fragment.FragmentName;
                 if (visitedFrags.Contains(fragmentName))
                     return;
 
@@ -712,7 +719,7 @@ namespace Tanka.GraphQL.Validation
                 for (var i = 0; i < spreadNodes.Length; i++)
                 {
                     var spreadNode = spreadNodes[i];
-                    var spreadName = spreadNode.Name.Value;
+                    var spreadName = spreadNode.FragmentName;
                     var cycleIndex = spreadPathIndexByName.ContainsKey(spreadName)
                         ? spreadPathIndexByName[spreadName]
                         : default;
@@ -721,7 +728,7 @@ namespace Tanka.GraphQL.Validation
 
                     if (cycleIndex == null)
                     {
-                        var spreadFragment = fragments.SingleOrDefault(f => f.Name.Value == spreadName);
+                        var spreadFragment = fragments.SingleOrDefault(f => f.FragmentName == spreadName);
 
                         if (spreadFragment != null)
                             DetectCycleRecursive(
@@ -736,7 +743,7 @@ namespace Tanka.GraphQL.Validation
                     {
                         var cyclePath = spreadPath.Skip(cycleIndex.Value).ToList();
                         var fragmentNames = cyclePath.Take(cyclePath.Count() - 1)
-                            .Select(s => s.Name.Value)
+                            .Select(s => s.FragmentName.AsString())
                             .ToArray();
 
                         context.Error(
@@ -765,12 +772,12 @@ namespace Tanka.GraphQL.Validation
         {
             return (context, rule) =>
             {
-                var fragments = context.Document.Definitions.OfType<GraphQLFragmentDefinition>()
-                    .ToDictionary(f => f.Name.Value);
+                var fragments = context.Document.FragmentDefinitions
+                    ?.ToDictionary(f => f.FragmentName);
 
                 rule.EnterFragmentSpread += node =>
                 {
-                    var fragment = fragments[node.Name.Value];
+                    var fragment = fragments[node.FragmentName];
                     var fragmentType = Ast.TypeFromAst(context.Schema, fragment.TypeCondition);
                     var parentType = context.Tracker.GetParentType();
                     var applicableTypes = GetPossibleTypes(fragmentType, context.Schema)
@@ -784,7 +791,7 @@ namespace Tanka.GraphQL.Validation
                             "also are spread within the context of a parent type. A fragment " +
                             "spread is only valid if its type condition could ever apply within " +
                             "the parent type. " +
-                            $"FragmentSpread: '{node.Name?.Value}'",
+                            $"FragmentSpread: '{node.FragmentName}'",
                             node);
                 };
 
@@ -826,7 +833,7 @@ namespace Tanka.GraphQL.Validation
         {
             return (context, rule) =>
             {
-                //todo: there's an astnodekind for nullvalue but no type
+                //todo: there's an objectkind for nullvalue but no type
                 //rule.EnterNullValue += node => { };
 
                 rule.EnterListValue += node =>
@@ -849,7 +856,7 @@ namespace Tanka.GraphQL.Validation
                     }
 
                     var fieldNodeMap = node.Fields.ToDictionary(
-                        f => f.Name.Value);
+                        f => f.Name);
 
                     foreach (var fieldDef in context.Schema.GetInputFields(
                         inputType.Name))
@@ -876,7 +883,7 @@ namespace Tanka.GraphQL.Validation
                             ValidationErrorCodes.R561ValuesOfCorrectType,
                             UnknownFieldMessage(
                                 parentType.ToString(),
-                                node.Name.Value,
+                                node.Name,
                                 string.Empty),
                             node);
                 };
@@ -887,7 +894,8 @@ namespace Tanka.GraphQL.Validation
 
                     if (!(maybeEnumType is EnumType type))
                         IsValidScalar(context, node);
-                    else if (type.ParseValue(node.Value) == null)
+                    
+                    else if (type.ParseValue(node) == null)
                         context.Error(
                             ValidationErrorCodes.R561ValuesOfCorrectType,
                             BadValueMessage(
@@ -933,7 +941,7 @@ namespace Tanka.GraphQL.Validation
 
             void IsValidScalar(
                 IRuleVisitorContext context,
-                GraphQLValue node)
+                Value node)
             {
                 var locationType = context.Tracker.GetInputType();
 
@@ -960,7 +968,7 @@ namespace Tanka.GraphQL.Validation
                 try
                 {
                     var converter = context.Schema.GetValueConverter(type.Name);
-                    converter.ParseLiteral((GraphQLScalarValue) node);
+                    converter.ParseLiteral((Value) node);
                 }
                 catch (Exception e)
                 {
@@ -980,7 +988,7 @@ namespace Tanka.GraphQL.Validation
             {
                 rule.EnterObjectField += inputField =>
                 {
-                    var inputFieldName = inputField.Name.Value;
+                    var inputFieldName = inputField.Name;
 
                     if (!(context.Tracker
                         .GetParentInputType() is InputObjectType parentType))
@@ -995,7 +1003,7 @@ namespace Tanka.GraphQL.Validation
                             "Every input field provided in an input object " +
                             "value must be defined in the set of possible fields of " +
                             "that input object’s expected type. " +
-                            $"Field: '{inputField.Name?.Value}'",
+                            $"Field: '{inputField.Name}'",
                             inputField);
                 };
             };
@@ -1011,15 +1019,15 @@ namespace Tanka.GraphQL.Validation
 
                     foreach (var inputField in fields)
                     {
-                        var name = inputField.Name.Value;
-                        if (fields.Count(f => f.Name.Value == name) > 1)
+                        var name = inputField.Name;
+                        if (fields.Count(f => f.Name == name) > 1)
                             context.Error(
                                 ValidationErrorCodes.R563InputObjectFieldUniqueness,
                                 "Input objects must not contain more than one field " +
                                 "of the same name, otherwise an ambiguity would exist which " +
                                 "includes an ignored portion of syntax. " +
                                 $"Field: '{name}'",
-                                fields.Where(f => f.Name.Value == name));
+                                fields.Where(f => f.Name == name));
                     }
                 };
             };
@@ -1036,7 +1044,7 @@ namespace Tanka.GraphQL.Validation
                     if (inputObject == null)
                         return;
 
-                    var fields = node.Fields.ToDictionary(f => f.Name.Value);
+                    var fields = node.Fields.ToDictionary(f => f.Name);
                     var fieldDefinitions = context.Schema.GetInputFields(inputObject.Name);
 
                     foreach (var fieldDefinition in fieldDefinitions)
@@ -1062,7 +1070,7 @@ namespace Tanka.GraphQL.Validation
                                 return;
                             }
 
-                            if (field.Value.Kind == ASTNodeKind.NullValue)
+                            if (field.Value.Kind == NodeKind.NullValue)
                                 context.Error(
                                     ValidationErrorCodes.R564InputObjectRequiredFields,
                                     "Input object fields may be required. Much like a field " +
@@ -1088,7 +1096,7 @@ namespace Tanka.GraphQL.Validation
             {
                 rule.EnterDirective += directive =>
                 {
-                    var directiveName = directive.Name.Value;
+                    var directiveName = directive.Name;
                     var directiveDefinition = context.Schema.GetDirectiveType(directiveName);
 
                     if (directiveDefinition == null)
@@ -1109,7 +1117,7 @@ namespace Tanka.GraphQL.Validation
             };
 
             // 5.7.3
-            void CheckDirectives(IRuleVisitorContext context, IEnumerable<GraphQLDirective> directives)
+            void CheckDirectives(IRuleVisitorContext context, IEnumerable<Directive> directives)
             {
                 if (directives == null)
                     return;
@@ -1118,7 +1126,7 @@ namespace Tanka.GraphQL.Validation
 
                 foreach (var directive in directives)
                 {
-                    if (knownDirectives.Contains(directive.Name.Value))
+                    if (knownDirectives.Contains(directive.Name))
                         context.Error(
                             ValidationErrorCodes.R573DirectivesAreUniquePerLocation,
                             "For each usage of a directive, the directive must be used in a " +
@@ -1126,7 +1134,7 @@ namespace Tanka.GraphQL.Validation
                             $"Directive '{directive.Name.Value}' is used multiple times on same location",
                             directive);
 
-                    knownDirectives.Add(directive.Name.Value);
+                    knownDirectives.Add(directive.Name);
                 }
             }
         }
@@ -1145,8 +1153,8 @@ namespace Tanka.GraphQL.Validation
             // 5.7.2
             void CheckDirectives(
                 IRuleVisitorContext context,
-                ASTNode node,
-                IEnumerable<GraphQLDirective> directives)
+                INode node,
+                IEnumerable<Directive> directives)
             {
                 if (directives == null)
                     return;
@@ -1155,7 +1163,7 @@ namespace Tanka.GraphQL.Validation
                 foreach (var directive in directives)
                 {
                     var directiveType = context.Schema.GetDirectiveType(
-                        directive.Name.Value);
+                        directive.Name);
 
                     var validLocations = directiveType.Locations
                         .ToArray();
@@ -1175,12 +1183,12 @@ namespace Tanka.GraphQL.Validation
                 }
             }
 
-            DirectiveLocation GetLocation(ASTNode appliedTo)
+            DirectiveLocation GetLocation(INode appliedTo)
             {
                 switch (appliedTo.Kind)
                 {
-                    case ASTNodeKind.OperationDefinition:
-                        switch (((GraphQLOperationDefinition) appliedTo).Operation)
+                    case NodeKind.OperationDefinition:
+                        switch (((OperationDefinition) appliedTo).Operation)
                         {
                             case OperationType.Query:
                                 return DirectiveLocation.QUERY;
@@ -1191,44 +1199,44 @@ namespace Tanka.GraphQL.Validation
                         }
 
                         break;
-                    case ASTNodeKind.Field:
+                    case NodeKind.FieldSelection:
                         return DirectiveLocation.FIELD;
-                    case ASTNodeKind.FragmentSpread:
+                    case NodeKind.FragmentSpread:
                         return DirectiveLocation.FRAGMENT_SPREAD;
-                    case ASTNodeKind.InlineFragment:
+                    case NodeKind.InlineFragment:
                         return DirectiveLocation.INLINE_FRAGMENT;
-                    case ASTNodeKind.FragmentDefinition:
+                    case NodeKind.FragmentDefinition:
                         return DirectiveLocation.FRAGMENT_DEFINITION;
-                    case ASTNodeKind.VariableDefinition:
+                    case NodeKind.VariableDefinition:
                         throw new InvalidOperationException($"Not supported");
-                    case ASTNodeKind.SchemaDefinition:
-                        //case ASTNodeKind.SCHEMA_EXTENSION:
+                    case NodeKind.SchemaDefinition:
+                        //case NodeKind.SCHEMA_EXTENSION:
                         return DirectiveLocation.SCHEMA;
-                    case ASTNodeKind.ScalarTypeDefinition:
-                        //case ASTNodeKind.SCALAR_TYPE_EXTENSION:
+                    case NodeKind.ScalarDefinition:
+                        //case NodeKind.SCALAR_TYPE_EXTENSION:
                         return DirectiveLocation.SCALAR;
-                    case ASTNodeKind.ObjectTypeDefinition:
-                        //case ASTNodeKind.OBJECT_TYPE_EXTENSION:
+                    case NodeKind.ObjectDefinition:
+                        //case NodeKind.OBJECT_TYPE_EXTENSION:
                         return DirectiveLocation.OBJECT;
-                    case ASTNodeKind.FieldDefinition:
+                    case NodeKind.FieldDefinition:
                         return DirectiveLocation.FIELD_DEFINITION;
-                    case ASTNodeKind.InterfaceTypeDefinition:
-                        //case ASTNodeKind.INTERFACE_TYPE_EXTENSION:
+                    case NodeKind.InterfaceDefinition:
+                        //case NodeKind.INTERFACE_TYPE_EXTENSION:
                         return DirectiveLocation.INTERFACE;
-                    case ASTNodeKind.UnionTypeDefinition:
-                        //case ASTNodeKind.UNION_TYPE_EXTENSION:
+                    case NodeKind.UnionDefinition:
+                        //case NodeKind.UNION_TYPE_EXTENSION:
                         return DirectiveLocation.UNION;
-                    case ASTNodeKind.EnumTypeDefinition:
-                        //case ASTNodeKind.ENUM_TYPE_EXTENSION:
+                    case NodeKind.EnumDefinition:
+                        //case NodeKind.ENUM_TYPE_EXTENSION:
                         return DirectiveLocation.ENUM;
-                    case ASTNodeKind.EnumValueDefinition:
+                    case NodeKind.EnumValueDefinition:
                         return DirectiveLocation.ENUM_VALUE;
-                    case ASTNodeKind.InputObjectTypeDefinition:
-                        //case ASTNodeKind.INPUT_OBJECT_TYPE_EXTENSION:
+                    case NodeKind.InputObjectDefinition:
+                        //case NodeKind.INPUT_OBJECT_TYPE_EXTENSION:
                         return DirectiveLocation.INPUT_OBJECT;
-                    case ASTNodeKind.Argument:
+                    case NodeKind.Argument:
                         return DirectiveLocation.ARGUMENT_DEFINITION; //todo: is this correct?
-                    case ASTNodeKind.InputValueDefinition:
+                    case NodeKind.InputValueDefinition:
                         return DirectiveLocation.INPUT_FIELD_DEFINITION;
                 }
 
@@ -1253,7 +1261,7 @@ namespace Tanka.GraphQL.Validation
                     foreach (var variableUsage in node.VariableDefinitions)
                     {
                         var variable = variableUsage.Variable;
-                        var variableName = variable.Name.Value;
+                        var variableName = variable.Name;
 
                         // 5.8.1 Variable Uniqueness
                         if (knownVariables.Contains(variableName))
@@ -1286,7 +1294,7 @@ namespace Tanka.GraphQL.Validation
         {
             return (context, rule) =>
             {
-                var variableDefinitions = new List<GraphQLVariableDefinition>();
+                var variableDefinitions = new List<VariableDefinition>();
 
                 rule.EnterVariableDefinition += node => variableDefinitions.Add(node);
                 rule.EnterOperationDefinition += node =>
@@ -1324,10 +1332,10 @@ namespace Tanka.GraphQL.Validation
         {
             return (context, rule) =>
             {
-                var variableDefinitions = new Dictionary<string, GraphQLVariableDefinition>();
+                var variableDefinitions = new Dictionary<string, VariableDefinition>();
 
                 rule.EnterVariableDefinition += node => 
-                    variableDefinitions[node.Variable.Name.Value] = node;
+                    variableDefinitions[node.Variable.Name] = node;
                 rule.EnterOperationDefinition += node =>
                 {
                     variableDefinitions.Clear();
@@ -1338,7 +1346,7 @@ namespace Tanka.GraphQL.Validation
 
                     foreach (var usage in usages)
                     {
-                        var variableName = usage.Node.Name.Value;
+                        var variableName = usage.Node.Name;
 
                         if (!variableDefinitions.TryGetValue(variableName, out var variableDefinition))
                         {

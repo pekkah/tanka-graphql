@@ -838,34 +838,34 @@ extend input Input {
 
             // scalar
             Assert.Single(document.TypeExtensions,
-                type => type is ScalarDefinition scalar
+                type => type.Definition is ScalarDefinition scalar
                 && scalar.Description == "Scalar");
 
             // object
             Assert.Single(document.TypeExtensions,
-                type => type is ObjectDefinition obj
+                type => type.Definition is ObjectDefinition obj
                         && obj.Description == "Object");
 
             // interface
             Assert.Single(document.TypeExtensions,
-                type => type is InterfaceDefinition inf
+                type => type.Definition is InterfaceDefinition inf
                         && inf.Description == "Interface"
                         && inf.Fields?.Single().Description == "Field");
             
             // union
             Assert.Single(document.TypeExtensions,
-                type => type is UnionDefinition union
+                type => type.Definition is UnionDefinition union
                         && union.Description == "Union");
 
             // enum
             Assert.Single(document.TypeExtensions,
-                type => type is EnumDefinition en
+                type => type.Definition is EnumDefinition en
                         && en.Description == "Enum"
                         && en.Values?.Last().Description == "B");
 
             // input
             Assert.Single(document.TypeExtensions,
-                type => type is InputObjectDefinition input
+                type => type.Definition is InputObjectDefinition input
                         && input.Description == "Input"
                         && input.Fields?.Single().Description == "Field");
         }

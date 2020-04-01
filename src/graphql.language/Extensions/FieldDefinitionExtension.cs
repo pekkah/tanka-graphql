@@ -40,7 +40,7 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
 
-        public static FieldDefinition WithType(this FieldDefinition definition, Type type)
+        public static FieldDefinition WithType(this FieldDefinition definition, TypeBase type)
         {
             return new FieldDefinition(
                 definition.Description,

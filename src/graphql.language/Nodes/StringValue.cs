@@ -3,9 +3,10 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class StringValue : Value
+    public sealed class StringValue : Value, INode
     {
-        public readonly Location? Location;
+        public override NodeKind Kind => NodeKind.StringValue;
+        public override Location? Location {get;}
         public readonly ReadOnlyMemory<byte> Value;
 
         public StringValue(

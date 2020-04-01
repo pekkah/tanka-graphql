@@ -1,8 +1,9 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class Variable : Value
+    public sealed class Variable : Value, INode
     {
-        public readonly Location? Location;
+        public override NodeKind Kind => NodeKind.Variable;
+        public override Location? Location {get;}
         public readonly Name Name;
 
         public Variable(

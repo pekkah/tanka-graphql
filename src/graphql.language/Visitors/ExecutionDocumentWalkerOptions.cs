@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Tanka.GraphQL.Language.Nodes;
-using Type = Tanka.GraphQL.Language.Nodes.Type;
 
 namespace Tanka.GraphQL.Language.Visitors
 {
@@ -49,8 +48,8 @@ namespace Tanka.GraphQL.Language.Visitors
         public List<IVisit<Directive>> Directive { get; set; }
             = new List<IVisit<Directive>>();
 
-        public List<IVisit<Type>> Type { get; set; }
-            = new List<IVisit<Type>>();
+        public List<IVisit<TypeBase>> Type { get; set; }
+            = new List<IVisit<TypeBase>>();
 
         public ExecutionDocumentWalkerOptions Add(object visitor)
         {
@@ -97,7 +96,7 @@ namespace Tanka.GraphQL.Language.Visitors
             if (visitor is IVisit<Directive> d)
                 Directive.Add(d);
 
-            if (visitor is IVisit<Type> t)
+            if (visitor is IVisit<TypeBase> t)
                 Type.Add(t);
 
             return this;

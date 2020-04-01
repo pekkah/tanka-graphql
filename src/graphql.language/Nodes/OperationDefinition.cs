@@ -4,10 +4,11 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class OperationDefinition
+    public sealed class OperationDefinition: INode
     {
+        public NodeKind Kind => NodeKind.OperationDefinition;
         public readonly IReadOnlyCollection<Directive>? Directives;
-        public readonly Location? Location;
+        public Location? Location {get;}
         public readonly Name? Name;
         public readonly OperationType Operation;
         public readonly SelectionSet SelectionSet;
@@ -33,11 +34,6 @@ namespace Tanka.GraphQL.Language.Nodes
         {
             var parser = new Parser(Encoding.UTF8.GetBytes(value));
             return parser.ParseOperationDefinition();
-        }
-
-        public static implicit operator string(OperationDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

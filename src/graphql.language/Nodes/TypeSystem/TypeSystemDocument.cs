@@ -4,14 +4,14 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class TypeSystemDocument
+    public sealed class TypeSystemDocument : INode
     {
         public TypeSystemDocument(
             IReadOnlyCollection<SchemaDefinition>? schemaDefinitions,
             IReadOnlyCollection<TypeDefinition>? typeDefinitions,
             IReadOnlyCollection<DirectiveDefinition>? directiveDefinitions,
             IReadOnlyCollection<SchemaExtension>? schemaExtensions,
-            IReadOnlyCollection<TypeDefinition>? typeExtensions)
+            IReadOnlyCollection<TypeExtension>? typeExtensions)
         {
             SchemaDefinitions = schemaDefinitions;
             TypeDefinitions = typeDefinitions;
@@ -20,11 +20,19 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             TypeExtensions = typeExtensions;
         }
 
-        public IReadOnlyCollection<SchemaDefinition>? SchemaDefinitions { get; }
-        public IReadOnlyCollection<TypeDefinition>? TypeDefinitions { get; }
         public IReadOnlyCollection<DirectiveDefinition>? DirectiveDefinitions { get; }
+
+        public IReadOnlyCollection<SchemaDefinition>? SchemaDefinitions { get; }
+        
         public IReadOnlyCollection<SchemaExtension>? SchemaExtensions { get; }
-        public IReadOnlyCollection<TypeDefinition>? TypeExtensions { get; }
+        
+        public IReadOnlyCollection<TypeDefinition>? TypeDefinitions { get; }
+        
+        public IReadOnlyCollection<TypeExtension>? TypeExtensions { get; }
+        
+        public NodeKind Kind => NodeKind.TypeSystemDocument;
+        
+        public Location? Location => null;
 
         public static implicit operator TypeSystemDocument(string value)
         {
@@ -36,11 +44,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = Parser.Create(value);
             return parser.ParseTypeSystemDocument();
-        }
-
-        public static implicit operator string(TypeSystemDocument value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

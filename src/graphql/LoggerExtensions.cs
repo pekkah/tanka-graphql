@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
-using GraphQLParser.AST;
+
 using Microsoft.Extensions.Logging;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL
@@ -53,12 +54,12 @@ namespace Tanka.GraphQL
             return BeginAction(logger, operationName);
         }
 
-        internal static void Operation(this ILogger logger, GraphQLOperationDefinition operation)
+        internal static void Operation(this ILogger logger, OperationDefinition operation)
         {
             OperationAction(
                 logger,
                 operation.Operation.ToString().ToLowerInvariant(),
-                operation.Name?.Value, null);
+                operation.Name, null);
         }
 
         internal static void Validate(this ILogger logger, bool validate)

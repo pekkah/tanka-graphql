@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
 using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
+using Argument = Tanka.GraphQL.Language.Nodes.Argument;
+using EnumValue = Tanka.GraphQL.Language.Nodes.EnumValue;
 
 namespace Tanka.GraphQL.Validation
 {
@@ -11,18 +13,18 @@ namespace Tanka.GraphQL.Validation
         private readonly List<ValidationError> _errors =
             new List<ValidationError>();
 
-        private readonly Dictionary<GraphQLOperationDefinition, List<GraphQLFragmentDefinition>> _fragments =
-            new Dictionary<GraphQLOperationDefinition, List<GraphQLFragmentDefinition>>();
+        private readonly Dictionary<OperationDefinition, List<FragmentDefinition>> _fragments =
+            new Dictionary<OperationDefinition, List<FragmentDefinition>>();
 
 
-        private readonly Dictionary<GraphQLOperationDefinition, List<VariableUsage>> _variables
-            = new Dictionary<GraphQLOperationDefinition, List<VariableUsage>>();
+        private readonly Dictionary<OperationDefinition, List<VariableUsage>> _variables
+            = new Dictionary<OperationDefinition, List<VariableUsage>>();
 
         public RulesWalker(
             IEnumerable<CombineRule> rules,
             ISchema schema,
-            GraphQLDocument document,
-            IReadOnlyDictionary<string, object> variableValues = null)
+            ExecutableDocument document,
+            IReadOnlyDictionary<string, object?>? variableValues = null)
         {
             Schema = schema;
             Document = document;
@@ -30,9 +32,9 @@ namespace Tanka.GraphQL.Validation
             CreateVisitors(rules);
         }
 
-        public GraphQLDocument Document { get; }
+        public ExecutableDocument Document { get; }
 
-        public IReadOnlyDictionary<string, object> VariableValues { get; }
+        public IReadOnlyDictionary<string, object?>? VariableValues { get; }
 
         public TypeTracker Tracker { get; protected set; }
 
@@ -40,23 +42,23 @@ namespace Tanka.GraphQL.Validation
 
         public ISchema Schema { get; }
 
-        public void Error(string code, string message, params ASTNode[] nodes)
+        public void Error(string code, string message, params INode[] nodes)
         {
             _errors.Add(new ValidationError(code, message, nodes));
         }
 
-        public void Error(string code, string message, ASTNode node)
+        public void Error(string code, string message, INode node)
         {
             _errors.Add(new ValidationError(code, message, node));
         }
 
-        public void Error(string code, string message, IEnumerable<ASTNode> nodes)
+        public void Error(string code, string message, IEnumerable<INode> nodes)
         {
             _errors.Add(new ValidationError(code, message, nodes));
         }
 
         public List<VariableUsage> GetVariables(
-            ASTNode rootNode)
+            INode rootNode)
         {
             var usages = new List<VariableUsage>();
 
@@ -86,7 +88,7 @@ namespace Tanka.GraphQL.Validation
         }
 
         public IEnumerable<VariableUsage> GetRecursiveVariables(
-            GraphQLOperationDefinition operation)
+            OperationDefinition operation)
         {
             if (_variables.TryGetValue(operation, out var results)) return results;
 
@@ -100,17 +102,17 @@ namespace Tanka.GraphQL.Validation
             return usages;
         }
 
-        public GraphQLFragmentDefinition GetFragment(string name)
+        public FragmentDefinition? GetFragment(string name)
         {
-            return Document.Definitions.OfType<GraphQLFragmentDefinition>()
-                .SingleOrDefault(f => f.Name.Value == name);
+            return Document.FragmentDefinitions
+                ?.SingleOrDefault(f => f.FragmentName == name);
         }
 
-        public List<GraphQLFragmentSpread> GetFragmentSpreads(GraphQLSelectionSet node)
+        public List<FragmentSpread> GetFragmentSpreads(SelectionSet node)
         {
-            var spreads = new List<GraphQLFragmentSpread>();
+            var spreads = new List<FragmentSpread>();
 
-            var setsToVisit = new Stack<GraphQLSelectionSet>(new[] {node});
+            var setsToVisit = new Stack<SelectionSet>(new[] {node});
 
             while (setsToVisit.Count > 0)
             {
@@ -119,24 +121,24 @@ namespace Tanka.GraphQL.Validation
                 foreach (var selection in set.Selections)
                     switch (selection)
                     {
-                        case GraphQLFragmentSpread spread:
+                        case FragmentSpread spread:
                             spreads.Add(spread);
                             break;
-                        case GraphQLInlineFragment inlineFragment:
+                        case InlineFragment inlineFragment:
                         {
                             if (inlineFragment.SelectionSet != null)
                                 setsToVisit.Push(inlineFragment.SelectionSet);
                             break;
                         }
-
-                        case GraphQLOperationDefinition operationDefinition:
+                        /*
+                        case OperationDefinition operationDefinition:
                         {
                             if (operationDefinition.SelectionSet != null)
                                 setsToVisit.Push(operationDefinition.SelectionSet);
                             break;
                         }
-
-                        case GraphQLFieldSelection fieldSelection:
+                        */
+                        case FieldSelection fieldSelection:
                         {
                             if (fieldSelection.SelectionSet != null) setsToVisit.Push(fieldSelection.SelectionSet);
                             break;
@@ -147,17 +149,18 @@ namespace Tanka.GraphQL.Validation
             return spreads;
         }
 
-        public IEnumerable<GraphQLFragmentDefinition> GetRecursivelyReferencedFragments(
-            GraphQLOperationDefinition operation)
+        public IEnumerable<FragmentDefinition> GetRecursivelyReferencedFragments(
+            OperationDefinition operation)
         {
-            if (_fragments.TryGetValue(operation, out var results)) return results;
+            if (_fragments.TryGetValue(operation, out var results))
+                return results;
 
-            var fragments = new List<GraphQLFragmentDefinition>();
-            var nodesToVisit = new Stack<GraphQLSelectionSet>(new[]
+            var fragments = new List<FragmentDefinition>();
+            var nodesToVisit = new Stack<SelectionSet>(new[]
             {
                 operation.SelectionSet
             });
-            var collectedNames = new Dictionary<string, bool>();
+            var collectedNames = new Dictionary<Name, bool>();
 
             while (nodesToVisit.Count > 0)
             {
@@ -165,7 +168,7 @@ namespace Tanka.GraphQL.Validation
 
                 foreach (var spread in GetFragmentSpreads(node))
                 {
-                    var fragName = spread.Name.Value;
+                    var fragName = spread.FragmentName;
                     if (!collectedNames.ContainsKey(fragName))
                     {
                         collectedNames[fragName] = true;
@@ -185,31 +188,7 @@ namespace Tanka.GraphQL.Validation
             return fragments;
         }
 
-        public ValidationResult Validate()
-        {
-            Visit(Document);
-            return BuildResult();
-        }
-
-        public override void Visit(GraphQLDocument document)
-        {
-            Tracker.EnterDocument?.Invoke(document);
-
-            base.Visit(document);
-
-            Tracker.LeaveDocument?.Invoke(document);
-        }
-
-        public override GraphQLName BeginVisitAlias(GraphQLName alias)
-        {
-            {
-                Tracker.EnterAlias?.Invoke(alias);
-            }
-
-            return base.BeginVisitAlias(alias);
-        }
-
-        public override GraphQLArgument BeginVisitArgument(GraphQLArgument argument)
+        public override Argument BeginVisitArgument(Argument argument)
         {
             {
                 Tracker.EnterArgument?.Invoke(argument);
@@ -218,8 +197,8 @@ namespace Tanka.GraphQL.Validation
             return base.BeginVisitArgument(argument);
         }
 
-        public override GraphQLScalarValue BeginVisitBooleanValue(
-            GraphQLScalarValue value)
+        public override BooleanValue BeginVisitBooleanValue(
+            BooleanValue value)
         {
             {
                 Tracker.EnterBooleanValue?.Invoke(value);
@@ -228,7 +207,7 @@ namespace Tanka.GraphQL.Validation
             return base.BeginVisitBooleanValue(value);
         }
 
-        public override GraphQLDirective BeginVisitDirective(GraphQLDirective directive)
+        public override Directive BeginVisitDirective(Directive directive)
         {
             Tracker.EnterDirective?.Invoke(directive);
 
@@ -238,7 +217,7 @@ namespace Tanka.GraphQL.Validation
             return _;
         }
 
-        public override GraphQLScalarValue BeginVisitEnumValue(GraphQLScalarValue value)
+        public override EnumValue BeginVisitEnumValue(EnumValue value)
         {
             {
                 Tracker.EnterEnumValue?.Invoke(value);
@@ -254,16 +233,16 @@ namespace Tanka.GraphQL.Validation
             return _;
         }
 
-        public override GraphQLFieldSelection BeginVisitFieldSelection(
-            GraphQLFieldSelection selection)
+        public override FieldSelection BeginVisitFieldSelection(
+            FieldSelection selection)
         {
             Tracker.EnterFieldSelection?.Invoke(selection);
 
             return base.BeginVisitFieldSelection(selection);
         }
 
-        public override GraphQLScalarValue BeginVisitFloatValue(
-            GraphQLScalarValue value)
+        public override FloatValue BeginVisitFloatValue(
+            FloatValue value)
         {
             {
                 Tracker.EnterFloatValue?.Invoke(value);
@@ -272,8 +251,8 @@ namespace Tanka.GraphQL.Validation
             return base.BeginVisitFloatValue(value);
         }
 
-        public override GraphQLFragmentDefinition BeginVisitFragmentDefinition(
-            GraphQLFragmentDefinition node)
+        public override FragmentDefinition BeginVisitFragmentDefinition(
+            FragmentDefinition node)
         {
             {
                 Tracker.EnterFragmentDefinition?.Invoke(node);
@@ -289,8 +268,8 @@ namespace Tanka.GraphQL.Validation
             return result;
         }
 
-        public override GraphQLFragmentSpread BeginVisitFragmentSpread(
-            GraphQLFragmentSpread fragmentSpread)
+        public override FragmentSpread BeginVisitFragmentSpread(
+            FragmentSpread fragmentSpread)
         {
             {
                 Tracker.EnterFragmentSpread?.Invoke(fragmentSpread);
@@ -299,8 +278,8 @@ namespace Tanka.GraphQL.Validation
             return base.BeginVisitFragmentSpread(fragmentSpread);
         }
 
-        public override GraphQLInlineFragment BeginVisitInlineFragment(
-            GraphQLInlineFragment inlineFragment)
+        public override InlineFragment BeginVisitInlineFragment(
+            InlineFragment inlineFragment)
         {
             {
                 Tracker.EnterInlineFragment?.Invoke(inlineFragment);
@@ -316,7 +295,7 @@ namespace Tanka.GraphQL.Validation
             return _;
         }
 
-        public override GraphQLScalarValue BeginVisitIntValue(GraphQLScalarValue value)
+        public override IntValue BeginVisitIntValue(IntValue value)
         {
             {
                 Tracker.EnterIntValue?.Invoke(value);
@@ -325,17 +304,17 @@ namespace Tanka.GraphQL.Validation
             return base.BeginVisitIntValue(value);
         }
 
-        public override GraphQLName BeginVisitName(GraphQLName name)
+        public override ListValue BeginVisitListValue(ListValue node)
         {
             {
-                Tracker.EnterName?.Invoke(name);
+                Tracker.EnterListValue?.Invoke(node);
             }
 
-            return base.BeginVisitName(name);
+            return base.BeginVisitListValue(node);
         }
-
-        public override GraphQLNamedType BeginVisitNamedType(
-            GraphQLNamedType typeCondition)
+        
+        public override NamedType BeginVisitNamedType(
+            NamedType typeCondition)
         {
             {
                 Tracker.EnterNamedType?.Invoke(typeCondition);
@@ -344,8 +323,24 @@ namespace Tanka.GraphQL.Validation
             return base.BeginVisitNamedType(typeCondition);
         }
 
-        public override GraphQLOperationDefinition BeginVisitOperationDefinition(
-            GraphQLOperationDefinition definition)
+        public override INode BeginVisitNode(INode node)
+        {
+            Tracker.EnterNode?.Invoke(node);
+            return base.BeginVisitNode(node);
+        }
+
+        public override ObjectValue BeginVisitObjectValue(
+            ObjectValue node)
+        {
+            {
+                Tracker.EnterObjectValue?.Invoke(node);
+            }
+
+            return base.BeginVisitObjectValue(node);
+        }
+
+        public override OperationDefinition BeginVisitOperationDefinition(
+            OperationDefinition definition)
         {
             {
                 Tracker.EnterOperationDefinition?.Invoke(definition);
@@ -354,18 +349,8 @@ namespace Tanka.GraphQL.Validation
             return base.BeginVisitOperationDefinition(definition);
         }
 
-        public override GraphQLOperationDefinition EndVisitOperationDefinition(
-            GraphQLOperationDefinition definition)
-        {
-            {
-                Tracker.LeaveOperationDefinition?.Invoke(definition);
-            }
-
-            return base.EndVisitOperationDefinition(definition);
-        }
-
-        public override GraphQLSelectionSet BeginVisitSelectionSet(
-            GraphQLSelectionSet selectionSet)
+        public override SelectionSet BeginVisitSelectionSet(
+            SelectionSet selectionSet)
         {
             {
                 Tracker.EnterSelectionSet?.Invoke(selectionSet);
@@ -381,8 +366,8 @@ namespace Tanka.GraphQL.Validation
             return _;
         }
 
-        public override GraphQLScalarValue BeginVisitStringValue(
-            GraphQLScalarValue value)
+        public override StringValue BeginVisitStringValue(
+            StringValue value)
         {
             {
                 Tracker.EnterStringValue?.Invoke(value);
@@ -391,14 +376,14 @@ namespace Tanka.GraphQL.Validation
             return base.BeginVisitStringValue(value);
         }
 
-        public override GraphQLVariable BeginVisitVariable(GraphQLVariable variable)
+        public override Variable BeginVisitVariable(Variable variable)
         {
             Tracker.EnterVariable?.Invoke(variable);
             return base.BeginVisitVariable(variable);
         }
 
-        public override GraphQLVariableDefinition BeginVisitVariableDefinition(
-            GraphQLVariableDefinition node)
+        public override VariableDefinition BeginVisitVariableDefinition(
+            VariableDefinition node)
         {
             Tracker.EnterVariableDefinition?.Invoke(node);
 
@@ -408,7 +393,7 @@ namespace Tanka.GraphQL.Validation
             return _;
         }
 
-        public override GraphQLArgument EndVisitArgument(GraphQLArgument argument)
+        public override Argument EndVisitArgument(Argument argument)
         {
             {
                 Tracker.LeaveArgument?.Invoke(argument);
@@ -417,8 +402,8 @@ namespace Tanka.GraphQL.Validation
             return base.EndVisitArgument(argument);
         }
 
-        public override GraphQLFieldSelection EndVisitFieldSelection(
-            GraphQLFieldSelection selection)
+        public override FieldSelection EndVisitFieldSelection(
+            FieldSelection selection)
         {
             {
                 Tracker.LeaveFieldSelection?.Invoke(selection);
@@ -427,40 +412,16 @@ namespace Tanka.GraphQL.Validation
             return base.EndVisitFieldSelection(selection);
         }
 
-        public override GraphQLVariable EndVisitVariable(GraphQLVariable variable)
-        {
-            Tracker.LeaveVariable?.Invoke(variable);
-            return base.EndVisitVariable(variable);
-        }
-
-        public override GraphQLObjectField BeginVisitObjectField(
-            GraphQLObjectField node)
+        public override ListValue EndVisitListValue(ListValue node)
         {
             {
-                Tracker.EnterObjectField?.Invoke(node);
+                Tracker.LeaveListValue?.Invoke(node);
             }
 
-            var _ = base.BeginVisitObjectField(node);
-
-
-            {
-                Tracker.LeaveObjectField?.Invoke(node);
-            }
-
-            return _;
+            return base.EndVisitListValue(node);
         }
 
-        public override GraphQLObjectValue BeginVisitObjectValue(
-            GraphQLObjectValue node)
-        {
-            {
-                Tracker.EnterObjectValue?.Invoke(node);
-            }
-
-            return base.BeginVisitObjectValue(node);
-        }
-
-        public override GraphQLObjectValue EndVisitObjectValue(GraphQLObjectValue node)
+        public override ObjectValue EndVisitObjectValue(ObjectValue node)
         {
             {
                 Tracker.LeaveObjectValue?.Invoke(node);
@@ -469,28 +430,35 @@ namespace Tanka.GraphQL.Validation
             return base.EndVisitObjectValue(node);
         }
 
-        public override ASTNode BeginVisitNode(ASTNode node)
-        {
-            Tracker.EnterNode?.Invoke(node);
-            return base.BeginVisitNode(node);
-        }
-
-        public override GraphQLListValue BeginVisitListValue(GraphQLListValue node)
+        public override OperationDefinition EndVisitOperationDefinition(
+            OperationDefinition definition)
         {
             {
-                Tracker.EnterListValue?.Invoke(node);
+                Tracker.LeaveOperationDefinition?.Invoke(definition);
             }
 
-            return base.BeginVisitListValue(node);
+            return base.EndVisitOperationDefinition(definition);
         }
 
-        public override GraphQLListValue EndVisitListValue(GraphQLListValue node)
+        public override Variable EndVisitVariable(Variable variable)
         {
-            {
-                Tracker.LeaveListValue?.Invoke(node);
-            }
+            Tracker.LeaveVariable?.Invoke(variable);
+            return base.EndVisitVariable(variable);
+        }
 
-            return base.EndVisitListValue(node);
+        public ValidationResult Validate()
+        {
+            Visit(Document);
+            return BuildResult();
+        }
+
+        public override void Visit(ExecutableDocument document)
+        {
+            Tracker.EnterDocument?.Invoke(document);
+
+            base.Visit(document);
+
+            Tracker.LeaveDocument?.Invoke(document);
         }
 
         protected void CreateVisitors(IEnumerable<CombineRule> rules)

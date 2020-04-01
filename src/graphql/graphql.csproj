@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>tanka.graphql</AssemblyName>
     <RootNamespace>Tanka.GraphQL</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,5 +13,9 @@
     <PackageReference Include="System.Text.Json" Version="4.7.1" />
     <PackageReference Include="System.Threading.Channels" Version="4.7.0" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\graphql.language\graphql.language.csproj" />
   </ItemGroup>
 </Project>

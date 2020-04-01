@@ -10,11 +10,11 @@ namespace Tanka.GraphQL.TypeSystem
 
         public Field(
             IType type,
-            Args arguments = null,
-            string description = null,
-            object defaultValue = null,
-            IEnumerable<DirectiveInstance> directives = null,
-            string deprecationReason = null)
+            Args? arguments = null,
+            string? description = null,
+            object? defaultValue = null,
+            IEnumerable<DirectiveInstance>? directives = null,
+            string? deprecationReason = null)
         {
             Type = type;
             Description = description ?? string.Empty;
@@ -27,18 +27,17 @@ namespace Tanka.GraphQL.TypeSystem
                     _arguments[argument.Key] = argument.Value;
         }
 
-        public object DefaultValue { get; set; }
+        public object? DefaultValue { get; set; }
 
+        public Resolver? Resolve { get; set; }
 
-        public Resolver Resolve { get; set; }
+        public Subscriber? Subscribe { get; set; }
 
-        public Subscriber Subscribe { get; set; }
-
-        public string DeprecationReason { get; }
+        public string? DeprecationReason { get; }
 
         public bool IsDeprecated => !string.IsNullOrEmpty(DeprecationReason);
 
-        public string Description { get; }
+        public string? Description { get; }
 
 
         public IEnumerable<DirectiveInstance> Directives => _directives;

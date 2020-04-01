@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Validation
@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Validation
     {
         ISchema Schema { get; }
 
-        GraphQLDocument Document { get; }
+        ExecutableDocument Document { get; }
 
         IReadOnlyDictionary<string, object> VariableValues { get; }
 
@@ -16,22 +16,22 @@ namespace Tanka.GraphQL.Validation
 
         ExtensionData Extensions { get; }
 
-        void Error(string code, string message, params ASTNode[] nodes);
+        void Error(string code, string message, params INode[] nodes);
 
-        void Error(string code, string message, ASTNode node);
+        void Error(string code, string message, INode node);
 
-        void Error(string code, string message, IEnumerable<ASTNode> nodes);
+        void Error(string code, string message, IEnumerable<INode> nodes);
 
         List<VariableUsage> GetVariables(
-            ASTNode rootNode);
+            INode rootNode);
 
         IEnumerable<VariableUsage> GetRecursiveVariables(
-            GraphQLOperationDefinition operation);
+            OperationDefinition operation);
 
-        GraphQLFragmentDefinition GetFragment(string name);
-        List<GraphQLFragmentSpread> GetFragmentSpreads(GraphQLSelectionSet node);
+        FragmentDefinition GetFragment(string name);
+        List<FragmentSpread> GetFragmentSpreads(SelectionSet node);
 
-        IEnumerable<GraphQLFragmentDefinition> GetRecursivelyReferencedFragments(
-            GraphQLOperationDefinition operation);
+        IEnumerable<FragmentDefinition> GetRecursivelyReferencedFragments(
+            OperationDefinition operation);
     }
 }

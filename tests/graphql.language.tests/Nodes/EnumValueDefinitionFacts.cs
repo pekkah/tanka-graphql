@@ -17,7 +17,7 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
                 .AsReadOnlySpan();
 
             /* Then */
-            Assert.Equal("V1", original.Value.Value);
+            Assert.Equal("V1", original.Value.Name);
         }
         
         [Fact]
@@ -28,7 +28,7 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
             EnumValueDefinition original = "V1";
 
             /* Then */
-            Assert.Equal("V1", original.Value.Value);
+            Assert.Equal("V1", original.Value.Name);
         }
 
         [Fact]
@@ -57,8 +57,8 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
                 .WithValue(new EnumValue("RENAMED"));
 
             /* Then */
-            Assert.Equal("V1", original.Value.Value);
-            Assert.Equal("RENAMED", modified.Value.Value);
+            Assert.Equal("V1", original.Value.Name);
+            Assert.Equal("RENAMED", modified.Value.Name);
         }
 
         [Fact]

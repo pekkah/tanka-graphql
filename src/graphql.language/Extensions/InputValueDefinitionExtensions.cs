@@ -29,7 +29,7 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
 
-        public static InputValueDefinition WithType(this InputValueDefinition definition, Type type)
+        public static InputValueDefinition WithType(this InputValueDefinition definition, TypeBase type)
         {
             return new InputValueDefinition(
                 definition.Description,

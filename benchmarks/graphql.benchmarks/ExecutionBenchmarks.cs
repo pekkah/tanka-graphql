@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
@@ -17,10 +17,10 @@ namespace Tanka.GraphQL.Benchmarks
     [MarkdownExporterAttribute.GitHub]
     public class ExecutionBenchmarks
     {
-        private GraphQLDocument _query;
+        private ExecutableDocument _query;
         private ISchema _schema;
-        private GraphQLDocument _mutation;
-        private GraphQLDocument _subscription;
+        private ExecutableDocument _mutation;
+        private ExecutableDocument _subscription;
 
         [GlobalSetup]
         public void Setup()

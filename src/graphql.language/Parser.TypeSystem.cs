@@ -15,7 +15,7 @@ namespace Tanka.GraphQL.Language
             var typeDefinitions = new List<TypeDefinition>();
             var directiveDefinitions = new List<DirectiveDefinition>();
             var schemaExtensions = new List<SchemaExtension>();
-            var typeExtensions = new List<TypeDefinition>();
+            var typeExtensions = new List<TypeExtension>();
 
             while (_lexer.Kind != TokenKind.End)
             {
@@ -99,7 +99,7 @@ namespace Tanka.GraphQL.Language
                 $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
         }
 
-        public TypeDefinition ParseTypeExtension(bool hasExtend = true)
+        public TypeExtension ParseTypeExtension(bool hasExtend = true)
         {
             if (Keywords.Scalar.Match(_lexer.Value))
                 return ParseScalarExtension(hasExtend);
@@ -312,7 +312,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public ScalarDefinition ParseScalarExtension(bool hasExtend = true)
+        public TypeExtension ParseScalarExtension(bool hasExtend = true)
         {
             /* Description? extend scalar Name Directives? */
             var location = GetLocation();
@@ -322,10 +322,11 @@ namespace Tanka.GraphQL.Language
             var name = ParseName();
             var directives = ParseOptionalDirectives(true);
 
-            return new ScalarDefinition(
+            return new TypeExtension(new ScalarDefinition(
                 description,
                 name,
                 directives,
+                location),
                 location);
         }
 
@@ -349,7 +350,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public ObjectDefinition ParseObjectExtension(bool hasExtend = true)
+        public TypeExtension ParseObjectExtension(bool hasExtend = true)
         {
             /* Description? extend type Name ImplementsInterfaces? Directives? FieldsDefinition? */
             var location = GetLocation();
@@ -361,12 +362,13 @@ namespace Tanka.GraphQL.Language
             var directives = ParseOptionalDirectives(true);
             var fields = ParseOptionalFieldDefinitions();
 
-            return new ObjectDefinition(
+            return new TypeExtension(new ObjectDefinition(
                 description,
                 name,
                 interfaces,
                 directives,
                 fields,
+                location),
                 location);
         }
 
@@ -390,7 +392,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public InterfaceDefinition ParseInterfaceExtension(bool hasExtend = true)
+        public TypeExtension ParseInterfaceExtension(bool hasExtend = true)
         {
             /* Description extend interface Name ImplementsInterfaces? Directives? FieldsDefinition? */
             var location = GetLocation();
@@ -402,12 +404,13 @@ namespace Tanka.GraphQL.Language
             var directives = ParseOptionalDirectives(true);
             var fields = ParseOptionalFieldDefinitions();
 
-            return new InterfaceDefinition(
+            return new TypeExtension(new InterfaceDefinition(
                 description,
                 name,
                 interfaces,
                 directives,
                 fields,
+                location),
                 location);
         }
 
@@ -429,7 +432,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public UnionDefinition ParseUnionExtension(bool hasExtend = true)
+        public TypeExtension ParseUnionExtension(bool hasExtend = true)
         {
             /* Description? extend union Name Directives? UnionMemberTypes? */
             var location = GetLocation();
@@ -440,11 +443,12 @@ namespace Tanka.GraphQL.Language
             var directives = ParseOptionalDirectives(true);
             var members = ParseOptionalUnionMembers();
 
-            return new UnionDefinition(
+            return new TypeExtension(new UnionDefinition(
                 description,
                 name,
                 directives,
                 members,
+                location),
                 location);
         }
 
@@ -466,7 +470,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public EnumDefinition ParseEnumExtension(bool hasExtend = true)
+        public TypeExtension ParseEnumExtension(bool hasExtend = true)
         {
             /* Description? extend enum Name Directives? EnumValuesDefinition? */
             var location = GetLocation();
@@ -477,11 +481,12 @@ namespace Tanka.GraphQL.Language
             var directives = ParseOptionalDirectives(true);
             var values = ParseOptionalEnumValueDefinitions();
 
-            return new EnumDefinition(
+            return new TypeExtension(new EnumDefinition(
                 description,
                 name,
                 directives,
                 values,
+                location),
                 location);
         }
 
@@ -537,7 +542,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public InputObjectDefinition ParseInputObjectExtension(bool hasExtend = true)
+        public TypeExtension ParseInputObjectExtension(bool hasExtend = true)
         {
             /* Description? extend input Name Directives? InputFieldsDefinition? */
             var location = GetLocation();
@@ -548,11 +553,12 @@ namespace Tanka.GraphQL.Language
             var directives = ParseOptionalDirectives(true);
             var fields = ParseOptionalInputObjectFields();
 
-            return new InputObjectDefinition(
+            return new TypeExtension(new InputObjectDefinition(
                 description,
                 name,
                 directives,
                 fields,
+                location),
                 location);
         }
 

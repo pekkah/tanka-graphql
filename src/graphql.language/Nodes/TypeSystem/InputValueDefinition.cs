@@ -4,12 +4,14 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class InputValueDefinition
+    public sealed class InputValueDefinition: INode
     {
+        public NodeKind Kind => NodeKind.InputValueDefinition;
+        
         public InputValueDefinition(
             StringValue? description,
             in Name name,
-            Type type,
+            TypeBase type,
             DefaultValue? defaultValue,
             IReadOnlyCollection<Directive>? directives,
             in Location? location = default)
@@ -26,7 +28,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public Name Name { get; }
 
-        public Type Type { get; }
+        public TypeBase Type { get; }
 
         public DefaultValue? DefaultValue { get; }
 
@@ -44,11 +46,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = Parser.Create(value);
             return parser.ParseInputValueDefinition();
-        }
-
-        public static implicit operator string(InputValueDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

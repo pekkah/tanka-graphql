@@ -1,12 +1,13 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class NonNullType : Type
+    public sealed class NonNullType : TypeBase
     {
-        public readonly Location? Location;
-        public readonly Type OfType;
+        public override NodeKind Kind => NodeKind.NonNullType;
+        public override Location? Location {get;}
+        public readonly TypeBase OfType;
 
         public NonNullType(
-            Type ofType,
+            TypeBase ofType,
             in Location? location = default)
         {
             OfType = ofType;

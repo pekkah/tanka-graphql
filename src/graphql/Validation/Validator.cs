@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Validation
@@ -9,7 +9,7 @@ namespace Tanka.GraphQL.Validation
         public static ValidationResult Validate(
             IEnumerable<CombineRule> rules,
             ISchema schema,
-            GraphQLDocument document,
+            ExecutableDocument document,
             IReadOnlyDictionary<string, object> variableValues = null)
         {
             var visitor = new RulesWalker(

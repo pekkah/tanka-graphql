@@ -811,7 +811,7 @@ Description
 
             /* Then */
             var enumValue = Assert.IsType<EnumValue>(value);
-            Assert.Equal(expected, enumValue.Value);
+            Assert.Equal(expected, enumValue.Name);
         }
 
         [Fact]
@@ -825,7 +825,7 @@ Description
 
             /* Then */
             var listValue = Assert.IsType<ListValue>(value);
-            Assert.Equal(0, listValue.Value.Count);
+            Assert.Equal(0, listValue.Values.Count);
         }
 
         [Fact]
@@ -839,8 +839,8 @@ Description
 
             /* Then */
             var listValue = Assert.IsType<ListValue>(value);
-            Assert.Equal(3, listValue.Value.Count);
-            Assert.All(listValue.Value, v => Assert.IsType<IntValue>(v));
+            Assert.Equal(3, listValue.Values.Count);
+            Assert.All(listValue.Values, v => Assert.IsType<IntValue>(v));
         }
 
         [Fact]

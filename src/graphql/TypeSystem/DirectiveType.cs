@@ -114,7 +114,7 @@ namespace Tanka.GraphQL.TypeSystem
             return _arguments.ContainsKey(name);
         }
 
-        public DirectiveInstance CreateInstance(Dictionary<string, object> argumentValues = null)
+        public DirectiveInstance CreateInstance(Dictionary<string, object?>? argumentValues = null)
         {
             return new DirectiveInstance(this, argumentValues);
         }

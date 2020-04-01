@@ -30,11 +30,11 @@ namespace Tanka.GraphQL.SchemaBuilding
             ComplexType owner,
             string fieldName,
             IType to,
-            string description = null,
-            Action<ResolverBuilder> resolve = null,
-            Action<SubscriberBuilder> subscribe = null,
-            IEnumerable<DirectiveInstance> directives = null,
-            Action<ArgsBuilder> args = null)
+            string? description = null,
+            Action<ResolverBuilder>? resolve = null,
+            Action<SubscriberBuilder>? subscribe = null,
+            IEnumerable<DirectiveInstance>? directives = null,
+            Action<ArgsBuilder>? args = null)
         {
             if (owner == null) throw new ArgumentNullException(nameof(owner));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
@@ -87,9 +87,9 @@ namespace Tanka.GraphQL.SchemaBuilding
             InputObjectType owner,
             string fieldName,
             IType to,
-            object defaultValue = null,
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null)
+            object? defaultValue = null,
+            string? description = null,
+            IEnumerable<DirectiveInstance>? directives = null)
         {
             if (owner == null) throw new ArgumentNullException(nameof(owner));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));

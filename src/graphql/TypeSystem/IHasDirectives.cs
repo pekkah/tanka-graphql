@@ -6,7 +6,7 @@ namespace Tanka.GraphQL.TypeSystem
     {
         IEnumerable<DirectiveInstance> Directives { get; }
 
-        DirectiveInstance GetDirective(string name);
+        DirectiveInstance? GetDirective(string name);
 
         bool HasDirective(string name);
     }

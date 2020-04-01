@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 
 namespace Tanka.GraphQL.Language
 {
@@ -11,6 +11,6 @@ namespace Tanka.GraphQL.Language
     {
         bool CanImport(string path, string[] types);
 
-        ValueTask<IEnumerable<ASTNode>> ImportAsync(string path, string[] types, ParserOptions options);
+        ValueTask<IEnumerable<object>> ImportAsync(string path, string[] types, ParserOptions options);
     }
 }

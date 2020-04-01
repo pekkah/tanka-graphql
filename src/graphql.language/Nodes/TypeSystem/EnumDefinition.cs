@@ -21,10 +21,11 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         }
 
         public StringValue? Description { get; }
-        public Name Name { get; }
         public IReadOnlyCollection<Directive>? Directives { get; }
+        public override Name Name { get; }
         public IReadOnlyCollection<EnumValueDefinition>? Values { get; }
-        public Location? Location { get; }
+        public override NodeKind Kind => NodeKind.EnumDefinition;
+        public override Location? Location { get; }
 
         public static implicit operator EnumDefinition(string value)
         {
@@ -36,11 +37,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = Parser.Create(value);
             return parser.ParseEnumDefinition();
-        }
-
-        public static implicit operator string(EnumDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -4,8 +4,10 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class ExecutableDocument
+    public sealed class ExecutableDocument: INode
     {
+        public NodeKind Kind => NodeKind.ExecutableDocument;
+        public Location? Location => null;
         public readonly IReadOnlyCollection<FragmentDefinition>? FragmentDefinitions;
         public readonly IReadOnlyCollection<OperationDefinition>? OperationDefinitions;
 
@@ -27,11 +29,6 @@ namespace Tanka.GraphQL.Language.Nodes
         {
             var parser = Parser.Create(value);
             return parser.ParseExecutableDocument();
-        }
-
-        public static implicit operator string(ExecutableDocument value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

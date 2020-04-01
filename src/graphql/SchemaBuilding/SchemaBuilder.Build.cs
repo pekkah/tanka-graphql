@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
@@ -59,7 +59,7 @@ namespace Tanka.GraphQL.SchemaBuilding
                     errors.Add(new ValidationError(
                         "SCHEMA_VALUE_CONVERTER_MISSING",
                         $"Could not find value converter for type '{scalarType.Name}'",
-                        Enumerable.Empty<ASTNode>()));
+                        Enumerable.Empty<INode>()));
                 }
             }
 
@@ -69,7 +69,7 @@ namespace Tanka.GraphQL.SchemaBuilding
                 errors.Add(new ValidationError(
                     "SCHEMA_QUERY_ROOT_MISSING",
                     $"Could not find Query root",
-                    Enumerable.Empty<ASTNode>()));
+                    Enumerable.Empty<INode>()));
             }
 
             return new ValidationResult()

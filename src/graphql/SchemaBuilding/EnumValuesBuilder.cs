@@ -9,9 +9,9 @@ namespace Tanka.GraphQL.SchemaBuilding
 
         public EnumValuesBuilder Value(
             string value,
-            string description,
+            string? description,
             IEnumerable<DirectiveInstance> directives,
-            string deprecationReason)
+            string? deprecationReason)
         {
             _values.Add(value, description, directives, deprecationReason);
             return this;

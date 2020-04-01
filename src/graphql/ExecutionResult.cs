@@ -9,11 +9,11 @@ namespace Tanka.GraphQL
     /// </summary>
     public class ExecutionResult : IExecutionResult
     {
-        private Dictionary<string, object> _data;
-        private List<ExecutionError> _errors;
-        private Dictionary<string, object> _extensions;
+        private Dictionary<string, object>? _data;
+        private List<ExecutionError>? _errors;
+        private Dictionary<string, object>? _extensions;
 
-        public Dictionary<string, object> Data
+        public Dictionary<string, object>? Data
         {
             get => _data;
             set
@@ -28,7 +28,7 @@ namespace Tanka.GraphQL
             }
         }
 
-        public Dictionary<string, object> Extensions
+        public Dictionary<string, object>? Extensions
         {
             get => _extensions;
             set
@@ -43,7 +43,7 @@ namespace Tanka.GraphQL
             }
         }
 
-        public List<ExecutionError> Errors
+        public List<ExecutionError>? Errors
         {
             get => _errors;
             set

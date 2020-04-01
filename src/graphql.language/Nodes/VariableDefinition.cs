@@ -2,17 +2,18 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class VariableDefinition
+    public sealed class VariableDefinition: INode
     {
+        public NodeKind Kind => NodeKind.VariableDefinition;
         public readonly DefaultValue? DefaultValue;
         public readonly IReadOnlyCollection<Directive>? Directives;
-        public readonly Location? Location;
-        public readonly Type Type;
+        public Location? Location {get;}
+        public readonly TypeBase Type;
         public readonly Variable Variable;
 
         public VariableDefinition(
             Variable variable,
-            Type type,
+            TypeBase type,
             DefaultValue? defaultValue,
             IReadOnlyCollection<Directive>? directives,
             in Location? location = default)

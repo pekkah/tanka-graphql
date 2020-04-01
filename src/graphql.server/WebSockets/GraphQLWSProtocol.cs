@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Channels;
@@ -131,7 +131,7 @@ namespace Tanka.GraphQL.Server.WebSockets
 
             using var logScope = _logger.BeginScope("Query: '{operationName}'", payload.OperationName);
 
-            var document = await Parser.ParseDocumentAsync(payload.Query, _parserOptions);
+            var document = await Parser.ParseTypeSystemDocumentAsync(payload.Query, _parserOptions);
             var unsubscribeSource = new CancellationTokenSource();
             var queryStream = await _queryStreamService.QueryAsync(new Query
             {
@@ -152,7 +152,7 @@ namespace Tanka.GraphQL.Server.WebSockets
                 false);
 
             // has mutation or query
-            var hasMutationOrQuery = document.Definitions.OfType<GraphQLOperationDefinition>()
+            var hasMutationOrQuery = document.Definitions.OfType<OperationDefinition>()
                 .Any(op => op.Operation != OperationType.Subscription);
 
             if (hasMutationOrQuery)

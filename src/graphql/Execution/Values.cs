@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
@@ -10,10 +10,10 @@ namespace Tanka.GraphQL.Execution
 {
     public static class Values
     {
-        public static object CoerceValue(
+        public static object? CoerceValue(
             Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
             Func<string, IValueConverter> getValueConverter,
-            object value,
+            object? value,
             IType valueType)
         {
             if (valueType is NonNull nonNull)
@@ -47,18 +47,18 @@ namespace Tanka.GraphQL.Execution
                 valueType);
         }
 
-        private static IDictionary<string, object> CoerceInputValue(
+        private static IDictionary<string, object?>? CoerceInputValue(
             Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
             Func<string, IValueConverter> getValueConverter, 
-            object value,
+            object? value,
             InputObjectType input)
         {
             if (value == null)
                 return null;
 
-            var result = new Dictionary<string, object>();
+            var result = new Dictionary<string, object?>();
 
-            if (value is GraphQLObjectValue objectValue)
+            if (value is ObjectValue objectValue)
                 return CoerceInputValueAst(getInputObjectFields, getValueConverter, input, objectValue, result);
 
             if (value is IDictionary<string, object> dictionaryValues)
@@ -83,12 +83,12 @@ namespace Tanka.GraphQL.Execution
             return result;
         }
 
-        private static IDictionary<string, object> CoerceInputValueAst(
+        private static IDictionary<string, object?> CoerceInputValueAst(
             Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
             Func<string, IValueConverter> getValueConverter,
             InputObjectType input,
-            GraphQLObjectValue graphQLObjectValue,
-            Dictionary<string, object> result)
+            ObjectValue objectValue,
+            Dictionary<string, object?> result)
         {
             var fields = getInputObjectFields(input.Name);
             foreach (var inputField in fields)
@@ -97,7 +97,7 @@ namespace Tanka.GraphQL.Execution
                 var field = inputField.Value;
                 var fieldType = field.Type;
 
-                var astValue = graphQLObjectValue.Fields.SingleOrDefault(v => v.Name.Value == fieldName);
+                var astValue = objectValue.Fields.SingleOrDefault(v => v.Name == fieldName);
                 var coercedFieldValue =
                     CoerceValue(getInputObjectFields, getValueConverter, astValue?.Value, fieldType);
 
@@ -122,28 +122,28 @@ namespace Tanka.GraphQL.Execution
             return coercedValue;
         }
 
-        private static object CoerceEnumValue(object value, EnumType enumType1)
+        private static object? CoerceEnumValue(object value, EnumType enumType1)
         {
-            if (value is GraphQLScalarValue astValue)
+            if (value is Value astValue)
                 return enumType1.ParseLiteral(astValue);
 
             return enumType1.ParseValue(value);
         }
 
-        private static object CoerceScalarValue(
+        private static object? CoerceScalarValue(
             Func<string, IValueConverter> getValueConverter,
             object value,
             ScalarType scalarType)
         {
             var serializer = getValueConverter(scalarType.Name);
 
-            if (value is GraphQLScalarValue astValue)
+            if (value is Value astValue)
                 return serializer.ParseLiteral(astValue);
 
             return serializer.ParseValue(value);
         }
 
-        private static object CoerceListValues(
+        private static object? CoerceListValues(
             Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
             Func<string, IValueConverter> getValueConverter,
             IType listWrappedType,
@@ -152,8 +152,8 @@ namespace Tanka.GraphQL.Execution
             if (value == null)
                 return null;
 
-            var coercedListValues = new List<object>();
-            if (value is GraphQLListValue listValue)
+            var coercedListValues = new List<object?>();
+            if (value is ListValue listValue)
             {
                 foreach (var listValueValue in listValue.Values)
                 {

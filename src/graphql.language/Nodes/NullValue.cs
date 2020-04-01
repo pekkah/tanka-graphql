@@ -1,8 +1,9 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class NullValue : Value
+    public sealed class NullValue : Value, INode
     {
-        public readonly Location? Location;
+        public override NodeKind Kind => NodeKind.NullValue;
+        public override Location? Location {get;}
 
         public NullValue(
             in Location? location = default)

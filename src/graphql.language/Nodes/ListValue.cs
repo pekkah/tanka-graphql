@@ -4,14 +4,15 @@ namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class ListValue : Value
     {
-        public readonly Location? Location;
-        public readonly IReadOnlyCollection<Value> Value;
+        public override NodeKind Kind => NodeKind.ListValue;
+        public override Location? Location {get;}
+        public readonly IReadOnlyCollection<Value> Values;
 
         public ListValue(
-            IReadOnlyCollection<Value> value,
+            IReadOnlyCollection<Value> values,
             in Location? location = default)
         {
-            Value = value;
+            Values = values;
             Location = location;
         }
     }

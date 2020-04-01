@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
@@ -13,7 +14,7 @@ namespace Tanka.GraphQL.ValueResolution
 
         IField Field { get; }
 
-        GraphQLFieldSelection Selection { get; }
+        FieldSelection Selection { get; }
 
         IReadOnlyDictionary<string, object> Arguments { get; }
 
@@ -25,6 +26,6 @@ namespace Tanka.GraphQL.ValueResolution
 
         IDictionary<object, object> Items { get; }
 
-        IReadOnlyCollection<GraphQLFieldSelection> Fields { get; }
+        IReadOnlyCollection<FieldSelection> Fields { get; }
     }
 }

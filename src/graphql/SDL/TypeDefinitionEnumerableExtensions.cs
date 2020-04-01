@@ -1,55 +1,57 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 
 namespace Tanka.GraphQL.SDL
 {
     public static class TypeDefinitionEnumerableExtensions
     {
-        private static readonly IReadOnlyCollection<ASTNodeKind> InputTypeKinds = new List<ASTNodeKind>
+        private static readonly IReadOnlyCollection<NodeKind> InputTypeKinds = new List<NodeKind>
         {
-            ASTNodeKind.InputObjectTypeDefinition,
-            ASTNodeKind.ScalarTypeDefinition,
-            ASTNodeKind.EnumTypeDefinition
+            NodeKind.InputObjectDefinition,
+            NodeKind.ScalarDefinition,
+            NodeKind.EnumDefinition
         };
 
 
-        public static GraphQLTypeDefinition InputType(
-            this IEnumerable<ASTNode> definitions,
+        public static TypeDefinition? InputType(
+            this IEnumerable<TypeDefinition> definitions,
             string name)
         {
             foreach (var inputDefinition in definitions.Where(def => InputTypeKinds.Contains(def.Kind)))
                 switch (inputDefinition)
                 {
-                    case GraphQLInputObjectTypeDefinition inputObject when inputObject.Name.Value == name:
+                    case InputObjectDefinition inputObject when inputObject.Name == name:
                         return inputObject;
-                    case GraphQLScalarTypeDefinition scalarType when scalarType.Name.Value == name:
+                    case ScalarDefinition scalarType when scalarType.Name == name:
                         return scalarType;
-                    case GraphQLEnumTypeDefinition enumType when enumType.Name.Value == name:
+                    case EnumDefinition enumType when enumType.Name == name:
                         return enumType;
                 }
 
             return null;
         }
 
-        public static ASTNode OutputType(
-            this IEnumerable<ASTNode> definitions,
+        public static TypeDefinition OutputType(
+            this IEnumerable<TypeDefinition> definitions,
             string name)
         {
             foreach (var inputDefinition in definitions)
                 switch (inputDefinition)
                 {
-                    case GraphQLInputObjectTypeDefinition inputObject when inputObject.Name.Value == name:
+                    case InputObjectDefinition inputObject when inputObject.Name == name:
                         return inputObject;
-                    case GraphQLScalarTypeDefinition scalarType when scalarType.Name.Value == name:
+                    case ScalarDefinition scalarType when scalarType.Name == name:
                         return scalarType;
-                    case GraphQLEnumTypeDefinition enumType when enumType.Name.Value == name:
+                    case EnumDefinition enumType when enumType.Name == name:
                         return enumType;
-                    case GraphQLObjectTypeDefinition objectType when objectType.Name.Value == name:
+                    case ObjectDefinition objectType when objectType.Name == name:
                         return objectType;
-                    case GraphQLInterfaceTypeDefinition interfaceType when interfaceType.Name.Value == name:
+                    case InterfaceDefinition interfaceType when interfaceType.Name == name:
                         return interfaceType;
-                    case GraphQLUnionTypeDefinition unionType when unionType.Name.Value == name:
+                    case UnionDefinition unionType when unionType.Name == name:
                         return unionType;
                 }
 

@@ -1,4 +1,4 @@
-﻿using GraphQLParser.AST;
+﻿
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -56,7 +56,7 @@ namespace Tanka.GraphQL.Server
                 };
 
                 // is subscription
-                if (document.Definitions.OfType<GraphQLOperationDefinition>()
+                if (document.Definitions.OfType<OperationDefinition>()
                     .Any(op => op.Operation == OperationType.Subscription))
                     return await SubscribeAsync(
                         executionOptions,

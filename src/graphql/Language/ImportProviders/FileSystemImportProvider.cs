@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 
 namespace Tanka.GraphQL.Language.ImportProviders
 {
@@ -26,7 +26,7 @@ namespace Tanka.GraphQL.Language.ImportProviders
             return File.Exists(path);
         }
 
-        public async ValueTask<IEnumerable<ASTNode>> ImportAsync(string path, string[] types, ParserOptions options)
+        public async ValueTask<IEnumerable<object>> ImportAsync(string path, string[] types, ParserOptions options)
         {
             path = GetFullPath(path);
             var source = File.ReadAllText(path);
@@ -39,8 +39,8 @@ namespace Tanka.GraphQL.Language.ImportProviders
                     new FileSystemImportProvider(rootPath));
 
             // parse normally
-            var document = await Parser.ParseDocumentAsync(source, newOptions);
-            return document.Definitions;
+            var document = await GraphQL.Parser.ParseTypeSystemDocumentAsync(source, newOptions);
+            return document.TypeDefinitions;
         }
 
         private string GetFullPath(string path)

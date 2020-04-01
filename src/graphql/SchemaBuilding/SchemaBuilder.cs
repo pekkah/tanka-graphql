@@ -15,7 +15,7 @@ namespace Tanka.GraphQL.SchemaBuilding
         private readonly Dictionary<string, INamedType> _types =
             new Dictionary<string, INamedType>();
 
-        private string _schemaDescription;
+        private string? _schemaDescription;
         private readonly Dictionary<string, IValueConverter> _valueConverters = new Dictionary<string, IValueConverter>();
 
         public string QueryTypeName { get; private set; } = "Query";
@@ -51,9 +51,9 @@ namespace Tanka.GraphQL.SchemaBuilding
         public SchemaBuilder Object(
             string name,
             out ObjectType definition,
-            string description = null,
-            IEnumerable<InterfaceType> interfaces = null,
-            IEnumerable<DirectiveInstance> directives = null)
+            string? description = null,
+            IEnumerable<InterfaceType>? interfaces = null,
+            IEnumerable<DirectiveInstance>? directives = null)
         {
             definition = new ObjectType(
                 name,
@@ -68,8 +68,8 @@ namespace Tanka.GraphQL.SchemaBuilding
         public SchemaBuilder Interface(
             string name,
             out InterfaceType definition,
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null)
+            string? description = null,
+            IEnumerable<DirectiveInstance>? directives = null)
         {
             definition = new InterfaceType(
                 name,
@@ -83,8 +83,8 @@ namespace Tanka.GraphQL.SchemaBuilding
         public SchemaBuilder InputObject(
             string name,
             out InputObjectType definition,
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null)
+            string? description = null,
+            IEnumerable<DirectiveInstance>? directives = null)
         {
             definition = new InputObjectType(name, description, directives);
             Include(definition);
@@ -93,9 +93,9 @@ namespace Tanka.GraphQL.SchemaBuilding
 
         public SchemaBuilder Enum(string name,
             out EnumType enumType,
-            string description = null,
-            Action<EnumValuesBuilder> values = null,
-            IEnumerable<DirectiveInstance> directives = null)
+            string? description = null,
+            Action<EnumValuesBuilder>? values = null,
+            IEnumerable<DirectiveInstance>? directives = null)
         {
             var valuesBuilder = new EnumValuesBuilder();
             values?.Invoke(valuesBuilder);
@@ -113,8 +113,8 @@ namespace Tanka.GraphQL.SchemaBuilding
             string name,
             out DirectiveType directiveType,
             IEnumerable<DirectiveLocation> locations,
-            string description = null,
-            Action<ArgsBuilder> args = null)
+            string? description = null,
+            Action<ArgsBuilder>? args = null)
         {
             var argsBuilder = new ArgsBuilder();
             args?.Invoke(argsBuilder);
@@ -126,8 +126,8 @@ namespace Tanka.GraphQL.SchemaBuilding
         public SchemaBuilder Union(
             string name,
             out UnionType unionType,
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null,
+            string? description = null,
+            IEnumerable<DirectiveInstance>? directives = null,
             params ObjectType[] possibleTypes)
         {
             unionType = new UnionType(name, possibleTypes, description, directives);
@@ -139,8 +139,8 @@ namespace Tanka.GraphQL.SchemaBuilding
             string name,
             out ScalarType scalarType,
             IValueConverter converter,
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null)
+            string? description = null,
+            IEnumerable<DirectiveInstance>? directives = null)
         {
             scalarType = new ScalarType(name, description, directives);
             Include(scalarType);
@@ -151,8 +151,8 @@ namespace Tanka.GraphQL.SchemaBuilding
         public SchemaBuilder Scalar(
             string name,
             out ScalarType scalarType,
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null)
+            string? description = null,
+            IEnumerable<DirectiveInstance>? directives = null)
         {
             scalarType = new ScalarType(name, description, directives);
             Include(scalarType);
@@ -169,8 +169,8 @@ namespace Tanka.GraphQL.SchemaBuilding
         }
 
         public SchemaBuilder Schema(
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null)
+            string? description = null,
+            IEnumerable<DirectiveInstance>? directives = null)
         {
             _schemaDescription = description;
             if (directives != null)

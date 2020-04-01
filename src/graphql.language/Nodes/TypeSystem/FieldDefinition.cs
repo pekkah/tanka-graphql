@@ -4,12 +4,14 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class FieldDefinition
+    public sealed class FieldDefinition: INode
     {
+        public NodeKind Kind => NodeKind.FieldDefinition;
+        
         public FieldDefinition(StringValue? description,
             in Name name,
             IReadOnlyCollection<InputValueDefinition>? arguments,
-            Type type,
+            TypeBase type,
             IReadOnlyCollection<Directive>? directives,
             in Location? location = default)
         {
@@ -24,7 +26,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public StringValue? Description { get; }
         public Name Name { get; }
         public IReadOnlyCollection<InputValueDefinition>? Arguments { get; }
-        public Type Type { get; }
+        public TypeBase Type { get; }
         public IReadOnlyCollection<Directive>? Directives { get; }
         public Location? Location { get; }
 
@@ -38,11 +40,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = Parser.Create(value);
             return parser.ParseFieldDefinition();
-        }
-
-        public static implicit operator string(FieldDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

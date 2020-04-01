@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using NSubstitute;
 using Tanka.GraphQL.Language;
 using Xunit;
@@ -17,11 +17,11 @@ namespace Tanka.GraphQL.Tests
             var provider = Substitute.For<IImportProvider>();
             provider.CanImport(null, null).ReturnsForAnyArgs(true);
             provider.ImportAsync(null, null, null).ReturnsForAnyArgs(
-                new List<ASTNode>
+                new List<object>
                 {
-                    new GraphQLObjectTypeDefinition
+                    new ObjectDefinition
                     {
-                        Name = new GraphQLName
+                        Name = new Name
                         {
                             Value = "Imported"
                         }
@@ -38,7 +38,7 @@ namespace Tanka.GraphQL.Tests
 
 
             /* When */
-            var document = await Parser.ParseDocumentAsync(
+            var document = await Parser.ParseTypeSystemDocumentAsync(
                 sdl,
                 new ParserOptions
                 {
@@ -50,7 +50,7 @@ namespace Tanka.GraphQL.Tests
 
             /* Then */
             Assert.Single(
-                document.Definitions.OfType<GraphQLObjectTypeDefinition>(),
+                document.Definitions.OfType<ObjectDefinition>(),
                 objectTypeDef => objectTypeDef.Name.Value == "Imported");
         }
     }

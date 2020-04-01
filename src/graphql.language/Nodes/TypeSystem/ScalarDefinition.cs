@@ -6,6 +6,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class ScalarDefinition : TypeDefinition
     {
+        public override NodeKind Kind => NodeKind.ScalarDefinition;
         public ScalarDefinition(
             StringValue? description,
             in Name name,
@@ -19,9 +20,9 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         }
 
         public StringValue? Description { get; }
-        public Name Name { get; }
+        public override Name Name { get; }
         public IReadOnlyCollection<Directive>? Directives { get; }
-        public Location? Location { get; }
+        public override Location? Location { get; }
 
         public static implicit operator ScalarDefinition(string value)
         {
@@ -33,11 +34,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = Parser.Create(value);
             return parser.ParseScalarDefinition();
-        }
-
-        public static implicit operator string(ScalarDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Language.ImportProviders;
 using Xunit;
 
@@ -42,7 +42,7 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
 
             /* Then */
             Assert.Single(
-                typeDefs.OfType<GraphQLDirectiveDefinition>(),
+                typeDefs.OfType<DirectiveDefinition>(),
                 dt => dt.Name.Value == "directive");
         }
     }

@@ -1,4 +1,4 @@
-﻿using GraphQLParser.AST;
+﻿
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
@@ -35,7 +35,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         public void ParseLiteral(string input, double expected)
         {
             /* Given */
-            var astValue = new GraphQLScalarValue(ASTNodeKind.FloatValue)
+            var astValue = new Value(NodeKind.FloatValue)
             {
                 Value = input
             };
@@ -52,7 +52,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         public void ParseIntLiteral(string input, double expected)
         {
             /* Given */
-            var astValue = new GraphQLScalarValue(ASTNodeKind.IntValue)
+            var astValue = new Value(NodeKind.IntValue)
             {
                 Value = input
             };

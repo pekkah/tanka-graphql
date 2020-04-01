@@ -1,5 +1,6 @@
 ﻿using System;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
+
 
 namespace Tanka.GraphQL.Language
 {
@@ -7,19 +8,19 @@ namespace Tanka.GraphQL.Language
     {
         public DocumentException(
             string message,
-            params ASTNode[] nodes): this(message, innerException: null, nodes)
+            params INode[] nodes): this(message, innerException: null, nodes)
         {
             
         }
 
         public DocumentException(
             string message,
-            Exception innerException,
-            params ASTNode[] nodes): base(message, innerException)
+            Exception? innerException,
+            params INode[] nodes): base(message, innerException)
         {
             Nodes = nodes;
         }
 
-        public ASTNode[] Nodes { get; set; }
+        public INode[] Nodes { get; set; }
     }
 }

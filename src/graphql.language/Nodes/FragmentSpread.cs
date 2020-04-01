@@ -2,12 +2,13 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class FragmentSpread : ISelection
+    public sealed class FragmentSpread : ISelection, INode
     {
-        public readonly IReadOnlyCollection<Directive>? Directives;
+        public NodeKind Kind => NodeKind.FragmentSpread;
+        public IReadOnlyCollection<Directive>? Directives {get;}
 
         public readonly Name FragmentName;
-        public readonly Location? Location;
+        public Location? Location {get;}
 
         public FragmentSpread(
             in Name fragmentName,

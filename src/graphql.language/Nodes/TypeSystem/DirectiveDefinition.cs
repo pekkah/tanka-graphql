@@ -4,8 +4,9 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class DirectiveDefinition
+    public sealed class DirectiveDefinition: INode
     {
+        public NodeKind Kind => NodeKind.DirectiveDefinition;
         public DirectiveDefinition(
             StringValue? description,
             in Name name,
@@ -39,11 +40,6 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         {
             var parser = new Parser(value);
             return parser.ParseDirectiveDefinition();
-        }
-
-        public static implicit operator string(DirectiveDefinition value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

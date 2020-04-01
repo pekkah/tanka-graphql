@@ -7,12 +7,12 @@ namespace Tanka.GraphQL.TypeSystem
     {
         public DirectiveType Type { get; }
 
-        private readonly Dictionary<string, object> _arguments;
+        private readonly Dictionary<string, object?> _arguments;
 
-        public DirectiveInstance(DirectiveType directiveType, Dictionary<string, object> argumentValues = null)
+        public DirectiveInstance(DirectiveType directiveType, Dictionary<string, object?>? argumentValues = null)
         {
             Type = directiveType ?? throw new ArgumentNullException(nameof(directiveType));
-            _arguments = argumentValues ?? new Dictionary<string, object>();
+            _arguments = argumentValues ?? new Dictionary<string, object?>();
         }
 
         public string Name => Type.Name;
@@ -33,7 +33,7 @@ namespace Tanka.GraphQL.TypeSystem
             }
 
             if (rawValue == null || rawValue.Equals(null))
-                return default(T);
+                return default;
 
             return (T)rawValue;
         }

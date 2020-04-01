@@ -4,10 +4,11 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class Directive
+    public sealed class Directive: INode
     {
+        public NodeKind Kind => NodeKind.Directive;
         public readonly IReadOnlyCollection<Argument>? Arguments;
-        public readonly Location? Location;
+        public Location? Location {get;}
         public readonly Name Name;
 
         public Directive(
@@ -30,11 +31,6 @@ namespace Tanka.GraphQL.Language.Nodes
         {
             var parser = Parser.Create(value);
             return parser.ParseDirective(true);
-        }
-        
-        public static implicit operator string(Directive value)
-        {
-            throw new NotImplementedException();
         }
     }
 }
