@@ -72,6 +72,12 @@ namespace Tanka.GraphQL.Language
         public static ReadOnlyMemory<byte> Input = new ReadOnlyMemory<byte>(
             Encoding.UTF8.GetBytes("input"));
 
+        public static ReadOnlyMemory<byte> Import = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("tanka_import"));
+
+        public static ReadOnlyMemory<byte> From = new ReadOnlyMemory<byte>(
+            Encoding.UTF8.GetBytes("from"));
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsOperation(in ReadOnlySpan<byte> span, out OperationType operation)
         {

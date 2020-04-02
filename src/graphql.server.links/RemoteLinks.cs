@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.SignalR.Client;
 using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace Tanka.GraphQL.Server.Links
@@ -78,8 +79,8 @@ namespace Tanka.GraphQL.Server.Links
                 }, cancellationToken);
 
                 // stop when done
-                var isSubscription = document.Definitions.OfType<OperationDefinition>()
-                    .Any(op => op.Operation == OperationType.Subscription);
+                var isSubscription = document.OperationDefinitions
+                    ?.Any(op => op.Operation == OperationType.Subscription) ?? false;
 
                 _ = Task.Factory.StartNew(async () =>
                 {

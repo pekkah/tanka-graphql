@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;

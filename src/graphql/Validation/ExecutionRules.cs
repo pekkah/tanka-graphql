@@ -5,7 +5,6 @@ using System.Linq;
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Argument = Tanka.GraphQL.TypeSystem.Argument;
 
 namespace Tanka.GraphQL.Validation

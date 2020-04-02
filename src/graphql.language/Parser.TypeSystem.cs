@@ -16,6 +16,7 @@ namespace Tanka.GraphQL.Language
             var directiveDefinitions = new List<DirectiveDefinition>();
             var schemaExtensions = new List<SchemaExtension>();
             var typeExtensions = new List<TypeExtension>();
+            var imports = new List<Import>();
 
             while (_lexer.Kind != TokenKind.End)
             {
@@ -27,16 +28,19 @@ namespace Tanka.GraphQL.Language
                         PreParseOptionalDescription();
                         continue;
                     case TokenKind.Name:
+                        // type, scalar etc.
                         if (Keywords.IsTypeDefinition(_lexer.Value))
                         {
                             typeDefinitions.Add(ParseTypeDefinition());
                             continue;
                         }
+                        // schema
                         else if (Keywords.Schema.Match(_lexer.Value))
                         {
                             schemaDefinitions.Add(ParseSchemaDefinition());
                             continue;
                         }
+                        // directive
                         else if (Keywords.Directive.Match(_lexer.Value))
                         {
                             directiveDefinitions.Add(ParseDirectiveDefinition());
@@ -59,7 +63,11 @@ namespace Tanka.GraphQL.Language
                                 continue;
                             }
                         }
-
+                        else if (Keywords.Import.Match(_lexer.Value))
+                        {
+                            imports.Add(ParseTankaImport());
+                            continue;
+                        }
                         break;
                         
                 }
@@ -73,6 +81,38 @@ namespace Tanka.GraphQL.Language
                 directiveDefinitions,
                 schemaExtensions,
                 typeExtensions);
+        }
+
+        public Import ParseTankaImport()
+        {
+            /* tanka_import Types[]? from From */
+
+            /* From: StringValue */
+            
+            /* ex. tanka_import from "./types/person" */
+            /* ex. tanka_import Person from "./types/person" */
+            var location = SkipKeyword(Keywords.Import.Span);
+
+            var types = new List<Name>();
+            if (!Keywords.From.Match(_lexer.Value))
+            {
+                // types
+                while (!Keywords.From.Match(_lexer.Value) && _lexer.Kind == TokenKind.Name)
+                {
+                    types.Add(ParseName());
+                }
+            }
+
+            // from
+            SkipKeyword(Keywords.From.Span);
+            
+            // from
+            var from = ParseStringValue();
+            
+            return new Import(
+                types.Any() ? types: null,
+                from,
+                location);
         }
 
         public TypeDefinition ParseTypeDefinition()

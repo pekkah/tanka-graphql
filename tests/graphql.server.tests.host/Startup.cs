@@ -51,7 +51,7 @@ namespace Tanka.GraphQL.Server.Tests.Host
                 ";
 
             var builder = new SchemaBuilder()
-                .Sdl(Parser.ParseDocument(sdl));
+                .Sdl(Parser.ParseTypeSystemDocument(sdl));
 
             var resolvers = new ObjectTypeMap
             {

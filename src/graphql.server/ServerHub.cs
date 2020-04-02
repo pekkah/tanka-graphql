@@ -10,15 +10,10 @@ namespace Tanka.GraphQL.Server
     public class ServerHub : Hub
     {
         private readonly IQueryStreamService _queryStreamService;
-        private readonly ParserOptions _parserOptions;
 
         public ServerHub(IQueryStreamService queryStreamService)
         {
             _queryStreamService = queryStreamService;
-            _parserOptions = new ParserOptions()
-            {
-                ImportProviders = null // we don't want accidental imports
-            }; //todo: inject
         }
 
         [HubMethodName("query")]
@@ -31,7 +26,7 @@ namespace Tanka.GraphQL.Server
             {
                 var result = await _queryStreamService.QueryAsync(new Query()
                 {
-                    Document = await Parser.ParseTypeSystemDocumentAsync(query.Query, _parserOptions),
+                    Document = Parser.ParseDocument(query.Query),
                     OperationName = query.OperationName,
                     Extensions = query.Extensions,
                     Variables = query.Variables

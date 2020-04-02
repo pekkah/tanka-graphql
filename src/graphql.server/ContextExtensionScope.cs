@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 

@@ -9,6 +9,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 
 using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace Tanka.GraphQL.Server.Links

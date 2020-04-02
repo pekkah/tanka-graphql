@@ -8,6 +8,37 @@ namespace Tanka.GraphQL.Language.Tests
     public class TypeSystemParserFacts
     {
         [Fact]
+        public void Import()
+        {
+            /* Given */
+            var sut = Parser.Create(@"tanka_import from ""./from""");
+
+            /* When */
+            var import = sut.ParseTankaImport();
+
+            /* Then */
+            Assert.Null(import.Types);
+            Assert.Equal("./from", import.From);
+        }
+
+        [Fact]
+        public void Import_Types()
+        {
+            /* Given */
+            var sut = Parser.Create(@"tanka_import A,B,C from ""./from""");
+
+            /* When */
+            var import = sut.ParseTankaImport();
+
+            /* Then */
+            Assert.NotNull(import.Types);
+            Assert.Single(import.Types, t => t == "A");
+            Assert.Single(import.Types, t => t == "B");
+            Assert.Single(import.Types, t => t == "C");
+            Assert.Equal("./from", import.From);
+        }
+        
+        [Fact]
         public void DirectiveDefinition()
         {
             /* Given */
