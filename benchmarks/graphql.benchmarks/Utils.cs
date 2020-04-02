@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
@@ -14,7 +14,7 @@ namespace Tanka.GraphQL.Benchmarks
         {
             var events = new SingleValueEventChannel();
             var builder = new SchemaBuilder()
-                .Sdl(Parser.ParseDocument(
+                .Sdl(Parser.ParseTypeSystemDocument(
                 @"
                     type Query {
                         simple: String
