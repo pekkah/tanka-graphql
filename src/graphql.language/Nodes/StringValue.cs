@@ -24,15 +24,14 @@ namespace Tanka.GraphQL.Language.Nodes
             return new StringValue(Encoding.UTF8.GetBytes(value), default);
         }
 
-        public static implicit operator string(StringValue value)
+        public static implicit operator string?(StringValue? value)
         {
-            return Encoding.UTF8.GetString(value.ValueSpan);
+            return value?.ToString();
         }
 
         public override string ToString()
         {
-            var location = Location.Equals(default) ? Location.ToString() : string.Empty;
-            return $"\"{Value}\"{location}";
+            return Encoding.UTF8.GetString(ValueSpan);
         }
     }
 }

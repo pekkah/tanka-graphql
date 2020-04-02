@@ -19,6 +19,7 @@ namespace Tanka.GraphQL.TypeSystem
         }
 
         public string Value { get; }
+        
         public string DeprecationReason { get; }
 
         public bool IsDeprecated => !string.IsNullOrEmpty(DeprecationReason);

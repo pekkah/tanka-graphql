@@ -149,6 +149,8 @@ namespace Tanka.GraphQL.Language
                     return BeginVisitListValue((ListValue) node);
                 case NodeKind.ObjectValue:
                     return BeginVisitObjectValue((ObjectValue) node);
+                case NodeKind.ObjectField:
+                    return BeginVisitObjectField((ObjectField) node);
                 case NodeKind.Directive:
                     return BeginVisitDirective((Directive) node);
                 case NodeKind.NamedType:
@@ -156,6 +158,12 @@ namespace Tanka.GraphQL.Language
                 default:
                     return null;
             }
+        }
+
+        public virtual ObjectField BeginVisitObjectField(ObjectField node)
+        {
+            BeginVisitNode(node.Value);
+            return node;
         }
 
         public virtual OperationDefinition BeginVisitOperationDefinition(
@@ -239,6 +247,10 @@ namespace Tanka.GraphQL.Language
         public virtual ObjectValue BeginVisitObjectValue(
             ObjectValue node)
         {
+            foreach (var objectField in node.Fields)
+            {
+                BeginVisitNode(objectField);
+            }
             return EndVisitObjectValue(node);
         }
 

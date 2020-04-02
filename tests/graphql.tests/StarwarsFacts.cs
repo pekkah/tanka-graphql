@@ -486,6 +486,26 @@ namespace Tanka.GraphQL.Tests
               ""description"": """"
             }
           ]
+        },
+        {
+          ""name"": ""deprecated"",
+          ""description"": """",
+          ""locations"": [
+            ""FIELD_DEFINITION"",
+            ""ENUM_VALUE""
+          ],
+          ""args"": [
+            {
+              ""name"": ""reason"",
+              ""description"": """",
+              ""type"": {
+                ""kind"": ""SCALAR"",
+                ""name"": ""String"",
+                ""ofType"": null
+              },
+              ""defaultValue"": null
+            }
+          ]
         }
       ],
       ""mutationType"": {

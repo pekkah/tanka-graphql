@@ -122,7 +122,7 @@ namespace Tanka.GraphQL.SDL
                         defaultValue = Values.CoerceValue(
                             connections.GetInputFields,
                             _builder.GetValueConverter,
-                            definition.DefaultValue,
+                            definition.DefaultValue?.Value,
                             type);
                     });
                 }
@@ -152,7 +152,7 @@ namespace Tanka.GraphQL.SDL
             }
 
             var namedTypeDefinition = (NamedType) type;
-            var typeName = namedTypeDefinition.Name.AsString();
+            var typeName = namedTypeDefinition.Name;
 
             // is type already known by the builder?
             if (_builder.TryGetType<INamedType>(typeName, out var knownType))
@@ -230,15 +230,18 @@ namespace Tanka.GraphQL.SDL
 
         protected EnumType Enum(EnumDefinition definition)
         {
+            if (_builder.TryGetType<EnumType>(definition.Name, out var enumType)) 
+                return enumType;
+            
             var directives = Directives(definition.Directives);
 
-            _builder.Enum(definition.Name, out var enumType,
+            _builder.Enum(definition.Name, out enumType,
                 directives: directives,
                 description: null,
                 values: values => 
                     definition.Values.ToList()
                         .ForEach(value => values.Value(
-                            value.Value,
+                            value.Value.Name,
                             string.Empty,
                             Directives(value.Directives),
                             null)));

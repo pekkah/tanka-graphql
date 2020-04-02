@@ -13,6 +13,9 @@
 
         public override string ToString()
         {
+            if (Equals(default(Location)))
+                return "@";
+            
             return $"@{Line}:{Column}";
         }
     }

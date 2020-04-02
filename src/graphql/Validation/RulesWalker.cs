@@ -339,6 +339,12 @@ namespace Tanka.GraphQL.Validation
             return base.BeginVisitObjectValue(node);
         }
 
+        public override ObjectField BeginVisitObjectField(ObjectField node)
+        {
+            Tracker.EnterObjectField?.Invoke(node);
+            return base.BeginVisitObjectField(node);
+        }
+
         public override OperationDefinition BeginVisitOperationDefinition(
             OperationDefinition definition)
         {

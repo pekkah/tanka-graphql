@@ -32,9 +32,9 @@ namespace Tanka.GraphQL.Validation
 
         public NodeVisitor<ListValue> EnterListValue { get; set; }
         
-        public NodeVisitor<FieldSelection> EnterObjectField { get; set; }
+        public NodeVisitor<ObjectField> EnterObjectField { get; set; }
         
-        public NodeVisitor<FieldSelection> LeaveObjectField { get; set; }
+        public NodeVisitor<ObjectField> LeaveObjectField { get; set; }
 
         public NodeVisitor<NamedType> EnterNamedType{ get; set; }
 

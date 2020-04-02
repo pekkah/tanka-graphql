@@ -61,7 +61,7 @@ namespace Tanka.GraphQL.Execution
                 executionStrategy,
                 OperationDefinition,
                 Document.FragmentDefinitions
-                    .ToDictionary(f => f.FragmentName.AsString(), f => f),
+                    ?.ToDictionary(f => f.FragmentName.ToString(), f => f),
                 CoercedVariableValues);
         }
     }

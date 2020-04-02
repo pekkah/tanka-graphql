@@ -113,7 +113,7 @@ namespace Tanka.GraphQL.Execution
             );
 
             var fields = groupedFieldSet.Values.First();
-            var fieldName = fields.First().Name.AsString();
+            var fieldName = fields.First().Name;
             var fieldSelection = fields.First();
 
             var coercedArgumentValues = Arguments.CoerceArgumentValues(

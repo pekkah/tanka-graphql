@@ -23,7 +23,7 @@ namespace Tanka.GraphQL.Execution
 
             var schema = context.Schema;
             var fieldSelection = fields.First();
-            var fieldName = fieldSelection.Name.AsString();
+            var fieldName = fieldSelection.Name;
             var field = schema.GetField(objectType.Name, fieldName);
             object? completedValue = null;
 
@@ -99,7 +99,7 @@ namespace Tanka.GraphQL.Execution
         {
             var schema = context.Schema;
             var fields = fieldGroup.Value;
-            var fieldName = fields.First().Name.AsString();
+            var fieldName = fields.First().Name;
             path.Append(fieldName);
 
             // __typename hack

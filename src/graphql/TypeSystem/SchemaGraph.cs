@@ -105,8 +105,13 @@ namespace Tanka.GraphQL.TypeSystem
             return null;
         }
 
-        public IQueryable<DirectiveType> QueryDirectiveTypes(Predicate<DirectiveType> filter = null)
+        public IQueryable<DirectiveType> QueryDirectiveTypes(Predicate<DirectiveType>? filter = null)
         {
+            if (filter != null)
+                return _directiveTypes.Select(v => v.Value)
+                    .Where(d => filter(d))
+                    .AsQueryable();
+            
             return _directiveTypes.Select(v => v.Value).AsQueryable();
         }
 

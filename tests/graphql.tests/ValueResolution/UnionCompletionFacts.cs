@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using NSubstitute;
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
@@ -66,10 +67,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             var mockValue = new object();
             var context = Substitute.For<IResolverContext>();
             context.ExecutionContext.Schema.Returns(Substitute.For<ISchema>());
-            context.ExecutionContext.Document.Returns(new ExecutableDocument()
-            {
-                Definitions = new List<object>()
-            });
+            context.ExecutionContext.Document.Returns(new ExecutableDocument(null, null));
             context.Path.Returns(new NodePath());
             context.FieldName.Returns("field");
             context.Field.Returns(new Field(result));
@@ -94,10 +92,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             var mockValue = new object();
             var context = Substitute.For<IResolverContext>();
             context.ExecutionContext.Schema.Returns(Substitute.For<ISchema>());
-            context.ExecutionContext.Document.Returns(new ExecutableDocument()
-            {
-                Definitions = new List<object>()
-            });
+            context.ExecutionContext.Document.Returns(new ExecutableDocument(null, null));
             context.Path.Returns(new NodePath());
             context.FieldName.Returns("field");
             context.Field.Returns(new Field(result));

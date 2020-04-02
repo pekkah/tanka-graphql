@@ -77,7 +77,7 @@ namespace Tanka.GraphQL.TypeSystem
                 return null;
             
             var enumValue = (Language.Nodes.EnumValue) input;
-            var value = _values.SingleOrDefault(v => v.Key == enumValue.Name.AsString());
+            var value = _values.SingleOrDefault(v => v.Key == enumValue.Name.ToString().ToUpperInvariant());
             return value.Key;
         }
 

@@ -81,7 +81,7 @@ namespace Tanka.GraphQL.Execution
 
                 if (selection is FieldSelection fieldSelection)
                 {
-                    var name = fieldSelection.Alias ?? fieldSelection.Name;
+                    var name = fieldSelection.AliasOrName;
                     if (!groupedFields.ContainsKey(name))
                         groupedFields[name] = new List<FieldSelection>();
 

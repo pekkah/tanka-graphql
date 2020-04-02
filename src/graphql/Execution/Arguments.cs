@@ -74,7 +74,7 @@ namespace Tanka.GraphQL.Execution
             var coercedValues = new Dictionary<string, object?>();
 
             var argumentValues = field.Arguments ?? new List<Language.Nodes.Argument>();
-            var fieldName = field.Name.AsString();
+            var fieldName = field.Name;
             var argumentDefinitions = schema.GetField(objectType.Name, fieldName)
                 .Arguments;
 

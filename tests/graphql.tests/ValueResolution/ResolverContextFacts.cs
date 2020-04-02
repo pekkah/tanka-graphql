@@ -2,6 +2,7 @@
 using System.Linq;
 
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
@@ -16,7 +17,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             _objectType = new ObjectType("Test");
             _objectValue = null;
             _field = new Field(ScalarType.ID);
-            _selection = new FieldSelection();
+            _selection = new FieldSelection(null, "test", null, null, null, null);
             _schema = new SchemaBuilder()
                 .Query(out _)
                 .Build();

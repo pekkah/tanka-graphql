@@ -1,28 +1,25 @@
 ﻿using System;
-using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
     public readonly struct Name : IEquatable<Name>
     {
-        public Location? Location {get;}
+        public Location? Location { get; }
 
-        public readonly ReadOnlyMemory<byte> Value;
+        public readonly string Value;
 
-        public Name(in byte[] value, in Location? location = default)
+        public Name(string value, in Location? location = default)
         {
-            Value = value;
+            Value = value ?? throw new ArgumentNullException(nameof(value));
             Location = location;
         }
-
-        public readonly ReadOnlySpan<byte> ValueSpan => Value.Span;
 
         public static implicit operator Name(string value)
         {
             if (string.IsNullOrEmpty(value))
                 return default;
 
-            return new Name(Encoding.UTF8.GetBytes(value));
+            return new Name(value);
         }
 
         public static implicit operator string(in Name value)
@@ -30,29 +27,34 @@ namespace Tanka.GraphQL.Language.Nodes
             return value.ToString();
         }
 
-        public readonly string AsString()
-        {
-            return Encoding.UTF8.GetString(ValueSpan);
-        }
-
         public override string ToString()
         {
-            return AsString();
+            return Value;
         }
 
         public bool Equals(Name other)
         {
-            return ValueSpan.SequenceEqual(other.ValueSpan);
+            return Value == other.Value;
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             return obj is Name other && Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return Value.GetHashCode();
+            return Value != null ? Value.GetHashCode() : 0;
+        }
+
+        public static bool operator ==(in Name left, in Name right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(in Name left, in Name right)
+        {
+            return !left.Equals(right);
         }
     }
 }

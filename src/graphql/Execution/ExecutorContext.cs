@@ -14,7 +14,7 @@ namespace Tanka.GraphQL.Execution
             ExtensionsRunner extensionsRunner,
             IExecutionStrategy strategy,
             OperationDefinition operation,
-            IDictionary<string, FragmentDefinition> fragments, 
+            IDictionary<string, FragmentDefinition>? fragments, 
             IReadOnlyDictionary<string, object?> coercedVariableValues)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
@@ -22,7 +22,7 @@ namespace Tanka.GraphQL.Execution
             ExtensionsRunner = extensionsRunner ?? throw new ArgumentNullException(nameof(extensionsRunner));
             Strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
             Operation = operation;
-            Fragments = fragments;
+            Fragments = fragments ?? new Dictionary<string, FragmentDefinition>();
             CoercedVariableValues = coercedVariableValues;
             _errors = new List<Exception>();
         }

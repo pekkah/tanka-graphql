@@ -87,8 +87,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
                       ""locations"": [
                         {
-                          ""end"": 50,
-                          ""start"": 30
+                          ""line"": 4,
+                          ""column"": 9
                         }
                       ],
                       ""path"": [
@@ -135,8 +135,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
                       ""locations"": [
                         {
-                          ""end"": 64,
-                          ""start"": 45
+                          ""line"": 5,
+                          ""column"": 10
                         }
                       ],
                       ""path"": [
@@ -181,8 +181,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
                       ""locations"": [
                         {
-                          ""end"": 51,
-                          ""start"": 31
+                          ""line"": 4,
+                          ""column"": 9
                         }
                       ],
                       ""path"": [
@@ -223,8 +223,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""Cannot return null for non-nullable field 'Query.nonNull'."",
                       ""locations"": [
                         {
-                          ""end"": 16,
-                          ""start"": 7
+                          ""line"": 3,
+                          ""column"": 6
                         }
                       ],
                       ""path"": [

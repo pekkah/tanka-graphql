@@ -743,7 +743,7 @@ namespace Tanka.GraphQL.Validation
                     {
                         var cyclePath = spreadPath.Skip(cycleIndex.Value).ToList();
                         var fragmentNames = cyclePath.Take(cyclePath.Count() - 1)
-                            .Select(s => s.FragmentName.AsString())
+                            .Select(s => s.FragmentName.ToString())
                             .ToArray();
 
                         context.Error(
@@ -968,7 +968,7 @@ namespace Tanka.GraphQL.Validation
                 try
                 {
                     var converter = context.Schema.GetValueConverter(type.Name);
-                    converter.ParseLiteral((Value) node);
+                    converter.ParseLiteral(node);
                 }
                 catch (Exception e)
                 {

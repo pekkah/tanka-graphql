@@ -19,7 +19,7 @@ namespace Tanka.GraphQL.Execution
 
         IExecutionStrategy Strategy { get; }
 
-        IReadOnlyDictionary<string, object> CoercedVariableValues { get; }
+        IReadOnlyDictionary<string, object?> CoercedVariableValues { get; }
 
         void AddError(Exception error);
     }

@@ -17,11 +17,6 @@ namespace Tanka.GraphQL.Language.Nodes
             return parser.ParseValue(true);
         }
 
-        public static implicit operator string(Value value)
-        {
-            throw new NotImplementedException();
-        }
-
         public abstract NodeKind Kind { get; }
         public abstract Location? Location { get; }
     }

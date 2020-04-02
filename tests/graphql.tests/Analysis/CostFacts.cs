@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Tanka.GraphQL.Extensions.Analysis;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.TypeSystem;

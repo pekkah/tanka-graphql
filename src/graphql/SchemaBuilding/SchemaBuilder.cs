@@ -36,6 +36,7 @@ namespace Tanka.GraphQL.SchemaBuilding
 
             Include(TypeSystem.DirectiveType.Include);
             Include(TypeSystem.DirectiveType.Skip);
+            Include(TypeSystem.DirectiveType.Deprecated);
         }
 
         public SchemaBuilder Connections(Action<ConnectionBuilder> connections)

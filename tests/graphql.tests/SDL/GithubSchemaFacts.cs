@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Tests.SDL
         private static string GetGitHubSchema()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceStream = assembly.GetManifestResourceStream("tanka.graphql.tests.github.graphql");
+            var resourceStream = assembly.GetManifestResourceStream("Tanka.GraphQL.Tests.github.graphql");
             using (var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
             {
@@ -21,15 +21,16 @@ namespace Tanka.GraphQL.Tests.SDL
             }
         }
 
-        [Fact(Skip = "Parser does not yet support descriptions in sdl")]
+        [Fact]
         public void LoadSchema()
         {
             /* Given */
             var sdl = GetGitHubSchema();
 
             /* When */
-            var schema = new SchemaBuilder().Sdl(Parser.ParseDocument(sdl))
-                .Build();
+            var schema = new SchemaBuilder()
+                .Sdl(sdl)
+                .Build(false);
 
             /* Then */
             Assert.NotNull(schema);

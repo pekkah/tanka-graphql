@@ -490,8 +490,8 @@ namespace Tanka.GraphQL.Language
 
                 Selection
                     Field
-                    FragmentSpread
-                    InlineFragment
+                    InlineFragment ...TypeCondition? Directives? SelectionSet
+                    FragmentSpread ...FragmentName Directives?
             */
             var location = GetLocation();
 
@@ -509,8 +509,7 @@ namespace Tanka.GraphQL.Language
                 if (_lexer.Kind == TokenKind.Spread)
                 {
                     Skip(TokenKind.Spread);
-                    Ensure(TokenKind.Name);
-                    if (Keywords.IsOn(_lexer.Value))
+                    if (Keywords.IsOn(_lexer.Value) || _lexer.Kind == TokenKind.LeftBrace || _lexer.Kind == TokenKind.At)
                         selection = ParseInlineFragment(false);
                     else
                         selection = ParseFragmentSpread(false);
@@ -640,8 +639,8 @@ namespace Tanka.GraphQL.Language
         public Name ParseName()
         {
             var location = Ensure(TokenKind.Name);
-            
-            var value = _lexer.Value.ToArray();
+
+            var value = Encoding.UTF8.GetString(_lexer.Value);
             _lexer.Advance();
 
             return new Name(value, location);

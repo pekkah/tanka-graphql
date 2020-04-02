@@ -42,8 +42,14 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
                 return d;
             }
 
+            if (input.Kind == NodeKind.IntValue)
+            {
+                var intValue = (IntValue) input;
+                return (double)intValue.Value;
+            }
+
             throw new FormatException(
-                $"Cannot coerce Long value from '{input.Kind}'");
+                $"Cannot coerce Float value from '{input.Kind}'");
         }
     }
 }

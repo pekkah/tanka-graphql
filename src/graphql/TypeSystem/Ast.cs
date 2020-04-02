@@ -26,7 +26,7 @@ namespace Tanka.GraphQL.TypeSystem
             if (type.Kind == NodeKind.NamedType)
             {
                 var namedType = (NamedType) type;
-                return schema.GetNamedType(namedType.Name.AsString());
+                return schema.GetNamedType(namedType.Name);
             }
 
             throw new DocumentException(

@@ -337,7 +337,7 @@ namespace Tanka.GraphQL.Language
             if (name == null)
                 return string.Empty;
             
-            return name.Value.AsString();
+            return name.Value;
         }
 
         private string PrintNamedType(NamedType node)
