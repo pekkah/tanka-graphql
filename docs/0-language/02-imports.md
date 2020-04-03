@@ -1,5 +1,7 @@
 ## Imports
 
+Todo: fix syntax
+
 GraphQL specification does not yet provide a way of importing types
 from SDL from other sources. There is some [discussion][] on
 this topic but nothing concrete and "official" is yet released. 
