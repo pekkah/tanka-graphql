@@ -1,5 +1,3 @@
-tanka_import from "./Nested"
-
 directive @directive(
 	name: String!
 ) on FIELD_DEFINITION

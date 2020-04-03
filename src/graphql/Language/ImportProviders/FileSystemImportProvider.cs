@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 
 namespace Tanka.GraphQL.Language.ImportProviders
@@ -26,7 +28,7 @@ namespace Tanka.GraphQL.Language.ImportProviders
             return File.Exists(path);
         }
 
-        public async ValueTask<IEnumerable<object>> ImportAsync(string path, string[] types, ParserOptions options)
+        public async ValueTask<TypeSystemDocument> ImportAsync(string path, string[]? types, ParserOptions options)
         {
             path = GetFullPath(path);
             var source = File.ReadAllText(path);
@@ -40,14 +42,29 @@ namespace Tanka.GraphQL.Language.ImportProviders
 
             // parse normally
             var document = await GraphQL.Parser.ParseTypeSystemDocumentAsync(source, newOptions);
-            return document.TypeDefinitions;
+
+            // if no type filter provided import all
+            if (types == null || types.Length == 0)
+            {
+                return document;
+            }
+
+            return document
+                .WithDirectiveDefinitions(document.DirectiveDefinitions
+                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
+                .WithTypeDefinitions(document.TypeDefinitions
+                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
+                .WithTypeExtensions(document.TypeExtensions
+                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList());
+            
         }
 
         private string GetFullPath(string path)
         {
             if (!Path.HasExtension(path)) path += FileExtension;
-
-            if (!Path.IsPathRooted(path)) path = Path.Combine(_rootPath, path);
+            
+            if (!Path.IsPathRooted(path)) 
+                path = Path.Combine(_rootPath, path);
 
             return path;
         }

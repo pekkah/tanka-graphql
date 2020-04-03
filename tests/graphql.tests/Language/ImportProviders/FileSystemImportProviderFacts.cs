@@ -42,8 +42,9 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
             var typeDefs = await _sut.ImportAsync(path, null, _options);
 
             /* Then */
+            Assert.NotNull(typeDefs.DirectiveDefinitions);
             Assert.Single(
-                typeDefs.OfType<DirectiveDefinition>(),
+                typeDefs.DirectiveDefinitions,
                 dt => dt.Name == "directive");
         }
     }

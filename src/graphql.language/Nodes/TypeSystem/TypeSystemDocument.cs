@@ -6,18 +6,19 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class TypeSystemDocument : INode
     {
-        public TypeSystemDocument(
-            IReadOnlyCollection<SchemaDefinition>? schemaDefinitions,
+        public TypeSystemDocument(IReadOnlyCollection<SchemaDefinition>? schemaDefinitions,
             IReadOnlyCollection<TypeDefinition>? typeDefinitions,
             IReadOnlyCollection<DirectiveDefinition>? directiveDefinitions,
             IReadOnlyCollection<SchemaExtension>? schemaExtensions,
-            IReadOnlyCollection<TypeExtension>? typeExtensions)
+            IReadOnlyCollection<TypeExtension>? typeExtensions,
+            IReadOnlyCollection<Import>? imports = null)
         {
             SchemaDefinitions = schemaDefinitions;
             TypeDefinitions = typeDefinitions;
             DirectiveDefinitions = directiveDefinitions;
             SchemaExtensions = schemaExtensions;
             TypeExtensions = typeExtensions;
+            Imports = imports;
         }
 
         public IReadOnlyCollection<DirectiveDefinition>? DirectiveDefinitions { get; }
@@ -30,6 +31,8 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         
         public IReadOnlyCollection<TypeExtension>? TypeExtensions { get; }
         
+        public IReadOnlyCollection<Import>? Imports { get; }
+
         public NodeKind Kind => NodeKind.TypeSystemDocument;
         
         public Location? Location => null;

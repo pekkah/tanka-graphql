@@ -12,9 +12,9 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
     {
         public EmbeddedResourceImportProviderFacts()
         {
-            _options = new ParserOptions();
+            _options = ParserOptions.Sdl;
             _sut = new EmbeddedResourceImportProvider();
-            _embeddedResourceName = "Tanka.GraphQL.Tests.Files.Import.graphql";
+            _embeddedResourceName = "Tanka.GraphQL.Tests.Files.Embedded.graphql";
         }
 
         private readonly EmbeddedResourceImportProvider _sut;
@@ -42,8 +42,9 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
             var typeDefs = await _sut.ImportAsync(importPath, null, _options);
 
             /* Then */
+            Assert.NotNull(typeDefs.DirectiveDefinitions);
             Assert.Single(
-                typeDefs.OfType<DirectiveDefinition>(),
+                typeDefs.DirectiveDefinitions,
                 dt => dt.Name == "directive");
         }
     }

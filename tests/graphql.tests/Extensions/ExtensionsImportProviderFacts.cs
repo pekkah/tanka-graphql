@@ -38,7 +38,8 @@ namespace Tanka.GraphQL.Tests.Extensions
             var typeDefs = await _sut.ImportAsync(path, null, _options);
 
             /* Then */
-            Assert.NotEmpty(typeDefs);
+            Assert.NotNull(typeDefs.DirectiveDefinitions);
+            Assert.NotEmpty(typeDefs.DirectiveDefinitions);
         }
     }
 }

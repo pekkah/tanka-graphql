@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 
@@ -23,12 +23,12 @@ namespace Tanka.GraphQL.Extensions.Analysis
                 {"multipliers", new List(ScalarType.NonNullString)}
             });
 
-        internal static IEnumerable<INode> CostDirectiveAst = Parser.ParseTypeSystemDocument(
+        internal static TypeSystemDocument CostDirectiveAst = 
             @"directive @cost(
                     complexity: Int!
                     multipliers: [String!]
                ) on FIELD_DEFINITION 
-            ").DirectiveDefinitions!;
+            ";
 
 
         public static CombineRule MaxCost(

@@ -80,7 +80,8 @@ namespace Tanka.GraphQL.Language
                 typeDefinitions,
                 directiveDefinitions,
                 schemaExtensions,
-                typeExtensions);
+                typeExtensions,
+                imports);
         }
 
         public Import ParseTankaImport()

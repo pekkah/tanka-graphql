@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Extensions
 {
@@ -11,8 +12,8 @@ namespace Tanka.GraphQL.Extensions
     {
         private static readonly Regex _match = new Regex(@"tanka:\/\/(?<extension>\w.+)");
 
-        private static readonly Dictionary<string, IEnumerable<object>> _extensions =
-            new Dictionary<string, IEnumerable<object>>
+        private static readonly Dictionary<string, TypeSystemDocument> _extensions =
+            new Dictionary<string, TypeSystemDocument>
             {
                 ["cost-analysis"] = CostAnalyzer.CostDirectiveAst
             };
@@ -28,12 +29,12 @@ namespace Tanka.GraphQL.Extensions
             return _extensions.ContainsKey(extension);
         }
 
-        public ValueTask<IEnumerable<object>> ImportAsync(string path, string[] types, ParserOptions options)
+        public ValueTask<TypeSystemDocument> ImportAsync(string path, string[]? types, ParserOptions options)
         {
             var match = _match.Match(path);
 
             var extension = match.Groups["extension"].Value;
-            return new ValueTask<IEnumerable<object>>(_extensions[extension]);
+            return new ValueTask<TypeSystemDocument>(_extensions[extension]);
         }
     }
 }

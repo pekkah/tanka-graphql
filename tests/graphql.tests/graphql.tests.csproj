@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Files\Embedded.graphql" />
     <None Remove="Files\Import.graphql" />
     <None Remove="Files\Nested.graphql" />
   </ItemGroup>
@@ -36,11 +37,14 @@
   </ItemGroup>
  
   <ItemGroup>
+    <EmbeddedResource Include="Files\Embedded.graphql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Files\Nested.graphql">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Files\Import.graphql">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="github.graphql" />
   </ItemGroup>
