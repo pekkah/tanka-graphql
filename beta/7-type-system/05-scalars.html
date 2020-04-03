@@ -317,7 +317,7 @@ is also needed when building schema with custom scalar in it.</p>
 <p>Converter:
 <pre><code class="language-csharp">    public class IdConverter : IValueConverter
     {
-        public object Serialize(object value)
+        public object? Serialize(object value)
         {
             if (value == null)
                 return null;
@@ -325,7 +325,7 @@ is also needed when building schema with custom scalar in it.</p>
             return Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
-        public object ParseValue(object input)
+        public object? ParseValue(object input)
         {
             if (input == null)
                 return null;
@@ -333,18 +333,18 @@ is also needed when building schema with custom scalar in it.</p>
             return Convert.ToString(input, CultureInfo.InvariantCulture);
         }
 
-        public object ParseLiteral(GraphQLScalarValue input)
+        public object? ParseLiteral(Value input)
         {
-            if (input.Kind == ASTNodeKind.NullValue)
+            if (input.Kind == NodeKind.NullValue)
             {
                 return null;
             }
 
-            if (input.Kind == ASTNodeKind.StringValue) 
-                return input.Value;
+            if (input.Kind == NodeKind.StringValue) 
+                return (StringValue)input.ToString();
 
             throw new FormatException(
-                $&quot;Cannot coerce Long value from '{input.Kind}'&quot;);
+                $&quot;Cannot coerce Id value from '{input.Kind}'&quot;);
         }
     }
 </code></pre></p>

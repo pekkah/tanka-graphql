@@ -321,7 +321,7 @@
         {
             /* Given */
             var builder = new SchemaBuilder()
-                .Sdl(Parser.ParseDocument(@&quot;
+                .Sdl(Parser.ParseTypeSystemDocument(@&quot;
                 directive @authorize(
                     role: String =&quot;&quot;user&quot;&quot;
                 ) on FIELD_DEFINITION
@@ -383,8 +383,8 @@
                       &quot;&quot;message&quot;&quot;: &quot;&quot;requires admin role. &quot;&quot;,
                       &quot;&quot;locations&quot;&quot;: [
                         {
-                          &quot;&quot;end&quot;&quot;: 28,
-                          &quot;&quot;start&quot;&quot;: 2
+                          &quot;&quot;line&quot;&quot;: 1,
+                          &quot;&quot;column&quot;&quot;: 3
                         }
                       ],
                       &quot;&quot;path&quot;&quot;: [

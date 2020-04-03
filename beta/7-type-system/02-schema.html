@@ -278,11 +278,11 @@
 <p>Schema is implemented as class <code>GraphSchema</code> and it implements the <code>ISchema</code> interface.</p>
 <p><pre><code class="language-csharp">    public interface ISchema : IHasDirectives
     {
-        ObjectType Subscription { get; }
+        ObjectType? Subscription { get; }
 
         ObjectType Query { get; }
 
-        ObjectType Mutation { get; }
+        ObjectType? Mutation { get; }
 
         INamedType GetNamedType(string name);
 
@@ -290,7 +290,7 @@
 
         IEnumerable&lt;KeyValuePair&lt;string, IField&gt;&gt; GetFields(string type);
 
-        IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt; filter = null) where T : INamedType;
+        IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt;? filter = null) where T : INamedType;
 
         DirectiveType GetDirectiveType(string name);
 
@@ -423,10 +423,12 @@
             }
 
             /* When */
-            var directives = Schema.QueryDirectiveTypes(AppliesToField);
+            var directives = Schema.QueryDirectiveTypes(AppliesToField)
+                .ToList();
 
             /* Then */
-            foreach (var directiveType in directives) Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
+            foreach (var directiveType in directives) 
+                Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
         }
 </code></pre></p>
 <p>Query fields

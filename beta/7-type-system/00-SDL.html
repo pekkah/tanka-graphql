@@ -299,7 +299,7 @@ or GraphQL documents.</p>
                   subscription: Subscription
                 }&quot;;
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var actual = new SchemaBuilder().Sdl(document)
@@ -434,7 +434,7 @@ or GraphQL documents.</p>
                 }
                 &quot;;
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var actual = new SchemaBuilder().Sdl(document).Build();

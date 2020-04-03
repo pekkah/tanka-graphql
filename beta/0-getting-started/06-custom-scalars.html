@@ -320,9 +320,9 @@ logic.</p>
                         parseValue: value =&gt; new Uri(value.ToString()),
                         parseLiteral: value =&gt;
                         {
-                            if (value.Kind == ASTNodeKind.StringValue)
+                            if (value.Kind == NodeKind.StringValue)
                             {
-                                return new Uri(value.Value);
+                                return new Uri((StringValue)value);
                             }
 
                             throw new ArgumentOutOfRangeException(

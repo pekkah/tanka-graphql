@@ -278,7 +278,7 @@
 <h3 id="execution">Execution</h3>
 <p><pre><code class="language-csharp">
         private ValidationResult Validate(
-            GraphQLDocument document,
+            ExecutableDocument document,
             CombineRule rule,
             Dictionary&lt;string, object&gt; variables = null)
         {
@@ -296,7 +296,7 @@
 <p>All execution rules</p>
 <p><pre><code class="language-csharp">All = new[]
         {
-            R511ExecutableDefinitions(),
+            /* R511ExecutableDefinitions(),*/
             
             R5211OperationNameUniqueness(),
             R5221LoneAnonymousOperation(),

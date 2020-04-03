@@ -272,6 +272,7 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h2 id="imports">Imports</h2>
+<p>Todo: fix syntax</p>
 <p>GraphQL specification does not yet provide a way of importing types
 from SDL from other sources. There is some <a href="https://github.com/graphql/graphql-wg/blob/master/notes/2018-02-01.md#present-graphql-import">discussion</a> on
 this topic but nothing concrete and &quot;official&quot; is yet released.</p>
@@ -344,7 +345,7 @@ same parser options as the main file and can also contain other imports.</p>
         {
             /* Given */
             var sdl = 
-                  @&quot;# @import(path:&quot;&quot;Files/Import&quot;&quot;)
+                  @&quot;tanka_import from &quot;&quot;Files/Import&quot;&quot;
 
                     type Query {
                         imported: ImportedType
