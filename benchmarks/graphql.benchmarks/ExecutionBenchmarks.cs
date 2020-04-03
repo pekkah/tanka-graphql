@@ -20,7 +20,7 @@ namespace Tanka.GraphQL.Benchmarks
         private ISchema _schema;
         private ExecutableDocument _subscription;
 
-        [Params(1, 100)] public int ExecutionCount { get; set; } = 1;
+        [Params(1)] public int ExecutionCount { get; set; } = 1;
 
         [Benchmark]
         public async Task Mutation_with_defaults()
