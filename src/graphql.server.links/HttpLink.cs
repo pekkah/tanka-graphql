@@ -7,8 +7,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace Tanka.GraphQL.Server.Links
@@ -29,13 +30,13 @@ namespace Tanka.GraphQL.Server.Links
         private readonly string _url;
 
         private readonly
-            Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
+            Func<(ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
                 HttpRequestMessage> _transformRequest;
 
         public HttpLink(
             string url,
             Func<HttpClient> createClient = null,
-            Func<(GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
+            Func<(ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
                 HttpRequestMessage> transformRequest = null,
             Func<HttpResponseMessage, ValueTask<ExecutionResult>> transformResponse = null)
         {
@@ -55,7 +56,7 @@ namespace Tanka.GraphQL.Server.Links
         }
 
         public static HttpRequestMessage DefaultTransformRequest(
-            (GraphQLDocument Document, IReadOnlyDictionary<string, object> Variables, string Url) operation)
+            (ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url) operation)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, operation.Url);
             var query = new QueryRequest
@@ -78,7 +79,7 @@ namespace Tanka.GraphQL.Server.Links
             return JsonSerializer.Deserialize<ExecutionResult>(bytes, _jsonOptions);
         }
 
-        public async ValueTask<ChannelReader<ExecutionResult>> Execute(GraphQLDocument document,
+        public async ValueTask<ChannelReader<ExecutionResult>> Execute(ExecutableDocument document,
             IReadOnlyDictionary<string, object> variables, CancellationToken cancellationToken)
         {
             var request = _transformRequest((document, variables, _url));

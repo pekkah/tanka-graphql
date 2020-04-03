@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.TypeSystem

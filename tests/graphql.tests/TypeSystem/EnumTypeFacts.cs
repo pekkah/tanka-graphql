@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
@@ -56,10 +56,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         public void ParseLiteral(string input, string expected)
         {
             /* Given */
-            var astValue = new GraphQLScalarValue(ASTNodeKind.EnumValue)
-            {
-                Value = input
-            };
+            Value astValue = input;
 
             var Enum = new EnumType("TestResult", new EnumValues
             {

@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 
 namespace Tanka.GraphQL.Language.ImportProviders
 {
@@ -16,21 +18,33 @@ namespace Tanka.GraphQL.Language.ImportProviders
             return _match.IsMatch(path);
         }
 
-        public async ValueTask<IEnumerable<ASTNode>> ImportAsync(string path, string[] types, ParserOptions options)
+        public async ValueTask<TypeSystemDocument> ImportAsync(string path, string[]? types, ParserOptions options)
         {
             var matches = _match.Match(path);
             var assembly = matches.Groups["assembly"].Value;
             var resourceName = matches.Groups["resourceName"].Value;
 
             var source = GetSource(assembly, resourceName);
-            var document = await Parser.ParseDocumentAsync(source, options);
+            var document = await GraphQL.Parser.ParseTypeSystemDocumentAsync(source, options);
 
-            return document.Definitions;
+            // if no type filter provided import all
+            if (types == null || types.Length == 0)
+            {
+                return document;
+            }
+
+            return document
+                .WithDirectiveDefinitions(document.DirectiveDefinitions
+                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
+                .WithTypeDefinitions(document.TypeDefinitions
+                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
+                .WithTypeExtensions(document.TypeExtensions
+                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList());
         }
 
         private string GetSource(string assemblyName, string resourceName)
         {
-            Assembly assembly = null;
+            Assembly? assembly = null;
 
             if (Assembly.GetExecutingAssembly().FullName.StartsWith($"{assemblyName},"))
                 assembly = Assembly.GetExecutingAssembly();
@@ -38,6 +52,9 @@ namespace Tanka.GraphQL.Language.ImportProviders
             if (assembly == null) assembly = Assembly.Load(assemblyName);
 
             using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+                throw new InvalidOperationException($"Could not load manifest stream from '{assemblyName}' with name '{resourceName}'.");
+            
             using var reader = new StreamReader(stream);
             return reader.ReadToEnd();
         }

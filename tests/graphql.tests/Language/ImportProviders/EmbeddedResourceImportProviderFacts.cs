@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Language.ImportProviders;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.Language.ImportProviders
@@ -11,9 +12,9 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
     {
         public EmbeddedResourceImportProviderFacts()
         {
-            _options = new ParserOptions();
+            _options = ParserOptions.Sdl;
             _sut = new EmbeddedResourceImportProvider();
-            _embeddedResourceName = "Tanka.GraphQL.Tests.Files.Import.graphql";
+            _embeddedResourceName = "Tanka.GraphQL.Tests.Files.Embedded.graphql";
         }
 
         private readonly EmbeddedResourceImportProvider _sut;
@@ -41,9 +42,10 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
             var typeDefs = await _sut.ImportAsync(importPath, null, _options);
 
             /* Then */
+            Assert.NotNull(typeDefs.DirectiveDefinitions);
             Assert.Single(
-                typeDefs.OfType<GraphQLDirectiveDefinition>(),
-                dt => dt.Name.Value == "directive");
+                typeDefs.DirectiveDefinitions,
+                dt => dt.Name == "directive");
         }
     }
 }

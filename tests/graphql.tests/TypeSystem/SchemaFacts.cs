@@ -118,10 +118,12 @@ namespace Tanka.GraphQL.Tests.TypeSystem
             }
 
             /* When */
-            var directives = Schema.QueryDirectiveTypes(AppliesToField);
+            var directives = Schema.QueryDirectiveTypes(AppliesToField)
+                .ToList();
 
             /* Then */
-            foreach (var directiveType in directives) Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
+            foreach (var directiveType in directives) 
+                Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
         }
 
         [Fact]

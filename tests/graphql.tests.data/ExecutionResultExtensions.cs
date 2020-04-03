@@ -26,7 +26,8 @@ namespace Tanka.GraphQL.Tests.Data
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 }));
 
-            Assert.True(JToken.DeepEquals(expectedJsonObject, actualJson),
+            var jsonEqual = JToken.DeepEquals(expectedJsonObject, actualJson);
+            Assert.True(jsonEqual,
                 $"Expected: {expectedJsonObject}\r\nActual: {actualJson}");
         }
     }

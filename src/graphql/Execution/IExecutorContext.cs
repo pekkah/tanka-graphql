@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Execution
 {
     public interface IExecutorContext
     {
-        GraphQLOperationDefinition Operation { get; }
+        OperationDefinition Operation { get; }
 
         ISchema Schema { get; }
 
-        GraphQLDocument Document { get; }
+        ExecutableDocument Document { get; }
 
         ExtensionsRunner ExtensionsRunner { get; }
 
@@ -19,7 +19,7 @@ namespace Tanka.GraphQL.Execution
 
         IExecutionStrategy Strategy { get; }
 
-        IReadOnlyDictionary<string, object> CoercedVariableValues { get; }
+        IReadOnlyDictionary<string, object?> CoercedVariableValues { get; }
 
         void AddError(Exception error);
     }

@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
+using Type = System.Type;
 
 namespace Tanka.GraphQL
 {
@@ -55,7 +56,7 @@ namespace Tanka.GraphQL
             return Task.WhenAll(_scopes.Select(e => e.BeginParseDocumentAsync().AsTask()));
         }
 
-        public async Task EndParseDocumentAsync(GraphQLDocument document)
+        public async Task EndParseDocumentAsync(ExecutableDocument document)
         {
             foreach (var extension in _scopes) await extension.EndParseDocumentAsync(document);
         }

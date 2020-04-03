@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using GraphQLParser.AST;
+using System.Text;
+using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 
 namespace Tanka.GraphQL.Language
 {
@@ -10,60 +15,57 @@ namespace Tanka.GraphQL.Language
     /// </summary>
     public class Printer
     {
-        public string Print(ASTNode node)
+        public string Print(INode node)
         {
             if (node == null) return string.Empty;
 
             switch (node.Kind)
             {
-                case ASTNodeKind.Document: return PrintDocument((GraphQLDocument) node);
-                case ASTNodeKind.OperationDefinition:
-                    return PrintOperationDefinition((GraphQLOperationDefinition) node);
-                case ASTNodeKind.SelectionSet: return PrintSelectionSet((GraphQLSelectionSet) node);
-                case ASTNodeKind.Field: return PrintFieldSelection((GraphQLFieldSelection) node);
-                case ASTNodeKind.Name: return PrintName((GraphQLName) node);
-                case ASTNodeKind.Argument: return PrintArgument((GraphQLArgument) node);
-                case ASTNodeKind.FragmentSpread: return PrintFragmentSpread((GraphQLFragmentSpread) node);
-                case ASTNodeKind.FragmentDefinition: return PrintFragmentDefinition((GraphQLFragmentDefinition) node);
-                case ASTNodeKind.InlineFragment: return PrintInlineFragment((GraphQLInlineFragment) node);
-                case ASTNodeKind.NamedType: return PrintNamedType((GraphQLNamedType) node);
-                case ASTNodeKind.Directive: return PrintDirective((GraphQLDirective) node);
-                case ASTNodeKind.Variable: return PrintVariable((GraphQLVariable) node);
-                case ASTNodeKind.IntValue: return PrintIntValue((GraphQLScalarValue) node);
-                case ASTNodeKind.FloatValue: return PrintFloatValue((GraphQLScalarValue) node);
-                case ASTNodeKind.StringValue: return PrintStringValue((GraphQLScalarValue) node);
-                case ASTNodeKind.BooleanValue: return PrintBooleanValue((GraphQLScalarValue) node);
-                case ASTNodeKind.EnumValue: return PrintEnumValue((GraphQLScalarValue) node);
-                case ASTNodeKind.ListValue: return PrintListValue((GraphQLListValue) node);
-                case ASTNodeKind.ObjectValue: return PrintObjectValue((GraphQLObjectValue) node);
-                case ASTNodeKind.ObjectField: return PrintObjectField((GraphQLObjectField) node);
-                case ASTNodeKind.VariableDefinition: return PrintVariableDefinition((GraphQLVariableDefinition) node);
-                case ASTNodeKind.NullValue: return PrintNullValue((GraphQLScalarValue) node);
-                case ASTNodeKind.SchemaDefinition: return PrintSchemaDefinition((GraphQLSchemaDefinition) node);
-                case ASTNodeKind.ListType: return PrintListType((GraphQLListType) node);
-                case ASTNodeKind.NonNullType: return PrintNonNullType((GraphQLNonNullType) node);
-                case ASTNodeKind.OperationTypeDefinition:
-                    return PrintOperationTypeDefinition((GraphQLOperationTypeDefinition) node);
-                case ASTNodeKind.ScalarTypeDefinition:
-                    return PrintScalarTypeDefinition((GraphQLScalarTypeDefinition) node);
-                case ASTNodeKind.ObjectTypeDefinition:
-                    return PrintObjectTypeDefinition((GraphQLObjectTypeDefinition) node);
-                case ASTNodeKind.FieldDefinition: return PrintFieldDefinition((GraphQLFieldDefinition) node);
-                case ASTNodeKind.InputValueDefinition:
-                    return PrintInputValueDefinition((GraphQLInputValueDefinition) node);
-                case ASTNodeKind.InterfaceTypeDefinition:
-                    return PrintInterfaceTypeDefinition((GraphQLInterfaceTypeDefinition) node);
-                case ASTNodeKind.UnionTypeDefinition:
-                    return PrintUnionTypeDefinition((GraphQLUnionTypeDefinition) node);
-                case ASTNodeKind.EnumTypeDefinition: return PrintEnumTypeDefinition((GraphQLEnumTypeDefinition) node);
-                case ASTNodeKind.EnumValueDefinition:
-                    return PrintEnumValueDefinition((GraphQLEnumValueDefinition) node);
-                case ASTNodeKind.InputObjectTypeDefinition:
-                    return PrintInputObjectTypeDefinition((GraphQLInputObjectTypeDefinition) node);
-                case ASTNodeKind.TypeExtensionDefinition:
-                    return PrintTypeExtensionDefinition((GraphQLTypeExtensionDefinition) node);
-                case ASTNodeKind.DirectiveDefinition:
-                    return PrintDirectiveDefinition((GraphQLDirectiveDefinition) node);
+                case NodeKind.ExecutableDocument: return PrintDocument((ExecutableDocument) node);
+                case NodeKind.OperationDefinition:
+                    return PrintOperationDefinition((OperationDefinition) node);
+                case NodeKind.SelectionSet: return PrintSelectionSet((SelectionSet) node);
+                case NodeKind.FieldSelection: return PrintFieldSelection((FieldSelection) node);
+                case NodeKind.Argument: return PrintArgument((Argument) node);
+                case NodeKind.FragmentSpread: return PrintFragmentSpread((FragmentSpread) node);
+                case NodeKind.FragmentDefinition: return PrintFragmentDefinition((FragmentDefinition) node);
+                case NodeKind.InlineFragment: return PrintInlineFragment((InlineFragment) node);
+                case NodeKind.NamedType: return PrintNamedType((NamedType) node);
+                case NodeKind.Directive: return PrintDirective((Directive) node);
+                case NodeKind.Variable: return PrintVariable((Variable) node);
+                case NodeKind.IntValue: return PrintIntValue((IntValue) node);
+                case NodeKind.FloatValue: return PrintFloatValue((FloatValue) node);
+                case NodeKind.StringValue: return PrintStringValue((StringValue) node);
+                case NodeKind.BooleanValue: return PrintBooleanValue((BooleanValue) node);
+                case NodeKind.EnumValue: return PrintEnumValue((EnumValue) node);
+                case NodeKind.ListValue: return PrintListValue((ListValue) node);
+                case NodeKind.ObjectValue: return PrintObjectValue((ObjectValue) node);
+                case NodeKind.ObjectField: return PrintObjectField((ObjectField) node);
+                case NodeKind.VariableDefinition: return PrintVariableDefinition((VariableDefinition) node);
+                case NodeKind.NullValue: return PrintNullValue((NullValue) node);
+                case NodeKind.SchemaDefinition: return PrintSchemaDefinition((SchemaDefinition) node);
+                case NodeKind.ListType: return PrintListType((ListType) node);
+                case NodeKind.NonNullType: return PrintNonNullType((NonNullType) node);
+                case NodeKind.ScalarDefinition:
+                    return PrintScalarTypeDefinition((ScalarDefinition) node);
+                case NodeKind.ObjectDefinition:
+                    return PrintObjectTypeDefinition((ObjectDefinition) node);
+                case NodeKind.FieldDefinition: return PrintFieldDefinition((FieldDefinition) node);
+                case NodeKind.InputValueDefinition:
+                    return PrintInputValueDefinition((InputValueDefinition) node);
+                case NodeKind.InterfaceDefinition:
+                    return PrintInterfaceTypeDefinition((InterfaceDefinition) node);
+                case NodeKind.UnionDefinition:
+                    return PrintUnionTypeDefinition((UnionDefinition) node);
+                case NodeKind.EnumDefinition: return PrintEnumTypeDefinition((EnumDefinition) node);
+                case NodeKind.EnumValueDefinition:
+                    return PrintEnumValueDefinition((EnumValueDefinition) node);
+                case NodeKind.InputObjectDefinition:
+                    return PrintInputObjectTypeDefinition((InputObjectDefinition) node);
+                case NodeKind.TypeExtension:
+                    return PrintTypeExtensionDefinition((TypeDefinition) node);
+                case NodeKind.DirectiveDefinition:
+                    return PrintDirectiveDefinition((DirectiveDefinition) node);
             }
 
             return string.Empty;
@@ -92,7 +94,7 @@ namespace Tanka.GraphQL.Language
                 : string.Empty;
         }
 
-        private string PrintArgument(GraphQLArgument argument)
+        private string PrintArgument(Argument argument)
         {
             var name = PrintName(argument.Name);
             var value = Print(argument.Value);
@@ -100,12 +102,12 @@ namespace Tanka.GraphQL.Language
             return $"{name}: {value}";
         }
 
-        private string PrintBooleanValue(GraphQLScalarValue node)
+        private string PrintBooleanValue(BooleanValue node)
         {
-            return node.Value;
+            return node.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        private string PrintDirective(GraphQLDirective directive)
+        private string PrintDirective(Directive directive)
         {
             var name = PrintName(directive.Name);
             var args = directive.Arguments?.Select(PrintArgument);
@@ -113,11 +115,11 @@ namespace Tanka.GraphQL.Language
             return $"@{name}{Wrap("(", Join(args, ", "), ")")}";
         }
 
-        private string PrintDirectiveDefinition(GraphQLDirectiveDefinition node)
+        private string PrintDirectiveDefinition(DirectiveDefinition node)
         {
             var name = PrintName(node.Name);
             var args = node.Arguments?.Select(Print);
-            var locations = node.Locations?.Select(PrintName);
+            var locations = node.DirectiveLocations;
 
             return Join(new[]
             {
@@ -134,14 +136,20 @@ namespace Tanka.GraphQL.Language
             });
         }
 
-        private string PrintDocument(GraphQLDocument node)
+        private string PrintDocument(ExecutableDocument node)
         {
-            var definitions = node.Definitions?.Select(Print);
+            var nodes = new List<INode>();
+            if (node.OperationDefinitions != null)
+                nodes.AddRange(node.OperationDefinitions);
+            
+            if (node.FragmentDefinitions != null)
+                nodes.AddRange(node.FragmentDefinitions);
 
-            return Join(definitions, $"{Environment.NewLine}{Environment.NewLine}");
+            var definitions = nodes.Select(Print);
+            return Join(definitions, $"{Environment.NewLine}");
         }
 
-        private string PrintEnumTypeDefinition(GraphQLEnumTypeDefinition node)
+        private string PrintEnumTypeDefinition(EnumDefinition node)
         {
             var name = PrintName(node.Name);
             var directives = node.Directives?.Select(PrintDirective);
@@ -157,15 +165,16 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintEnumValue(GraphQLScalarValue node)
+        private string PrintEnumValue(EnumValue node)
         {
-            return node.Value;
+            return node.Name;
         }
 
-        private string PrintEnumValueDefinition(GraphQLEnumValueDefinition node)
+        private string PrintEnumValueDefinition(EnumValueDefinition node)
         {
-            var name = PrintName(node.Name);
-            var directives = node.Directives?.Select(PrintDirective);
+            var name = PrintName(node.Value.Name);
+            var directives = node.Directives?
+                .Select(PrintDirective) ?? Array.Empty<string>();
 
             return Join(new[]
                 {
@@ -175,11 +184,15 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintFieldDefinition(GraphQLFieldDefinition node)
+        private string PrintFieldDefinition(FieldDefinition node)
         {
             var name = PrintName(node.Name);
-            var directives = node.Directives?.Select(PrintDirective);
-            var args = node.Arguments?.Select(PrintInputValueDefinition);
+            var directives = node.Directives?
+                .Select(PrintDirective) ?? Array.Empty<string>();
+            
+            var args = node.Arguments?
+                .Select(PrintInputValueDefinition) ?? Array.Empty<string>();
+            
             var type = Print(node.Type);
 
             return Join(new[]
@@ -197,13 +210,13 @@ namespace Tanka.GraphQL.Language
             });
         }
 
-        private string PrintFieldSelection(GraphQLFieldSelection node)
+        private string PrintFieldSelection(FieldSelection node)
         {
-            var alias = PrintName(node.Alias);
+            var alias = node.Alias != null ? PrintName(node.Alias.Value): string.Empty;
             var name = PrintName(node.Name);
-            var args = node.Arguments?.Select(PrintArgument);
-            var directives = node.Directives?.Select(PrintDirective);
-            var selectionSet = PrintSelectionSet(node.SelectionSet);
+            var args = node.Arguments?.Select(PrintArgument) ?? Array.Empty<string>();
+            var directives = node.Directives?.Select(PrintDirective) ?? Array.Empty<string>();
+            var selectionSet = node.SelectionSet != null ? PrintSelectionSet(node.SelectionSet): string.Empty;
 
             return Join(new[]
             {
@@ -213,33 +226,33 @@ namespace Tanka.GraphQL.Language
             });
         }
 
-        private string PrintFloatValue(GraphQLScalarValue node)
+        private string PrintFloatValue(FloatValue node)
         {
-            return node.Value;
+            return Encoding.UTF8.GetString(node.ValueSpan);
         }
 
-        private string PrintFragmentDefinition(GraphQLFragmentDefinition node)
+        private string PrintFragmentDefinition(FragmentDefinition node)
         {
-            var name = PrintName(node.Name);
+            var name = PrintName(node.FragmentName);
             var typeCondition = PrintNamedType(node.TypeCondition);
-            var directives = node.Directives?.Select(PrintDirective);
+            var directives = node.Directives?.Select(PrintDirective) ?? Array.Empty<string>();
             var selectionSet = PrintSelectionSet(node.SelectionSet);
 
             return $"fragment {name} on {typeCondition} {Wrap(string.Empty, Join(directives, " "), " ")}{selectionSet}";
         }
 
-        private string PrintFragmentSpread(GraphQLFragmentSpread node)
+        private string PrintFragmentSpread(FragmentSpread node)
         {
-            var name = PrintName(node.Name);
-            var directives = node.Directives?.Select(PrintDirective);
+            var name = PrintName(node.FragmentName);
+            var directives = node.Directives?.Select(PrintDirective) ?? Array.Empty<string>();
 
             return $"...{name}{Wrap(string.Empty, Join(directives, " "))}";
         }
 
-        private string PrintInlineFragment(GraphQLInlineFragment node)
+        private string PrintInlineFragment(InlineFragment node)
         {
-            var typeCondition = PrintNamedType(node.TypeCondition);
-            var directives = node.Directives?.Select(PrintDirective);
+            var typeCondition = node.TypeCondition != null ? PrintNamedType(node.TypeCondition): string.Empty;
+            var directives = node.Directives?.Select(PrintDirective) ?? Array.Empty<string>();
             var selectionSet = PrintSelectionSet(node.SelectionSet);
 
             return Join(new[]
@@ -252,7 +265,7 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintInputObjectTypeDefinition(GraphQLInputObjectTypeDefinition node)
+        private string PrintInputObjectTypeDefinition(InputObjectDefinition node)
         {
             var name = PrintName(node.Name);
             var directives = node.Directives?.Select(PrintDirective);
@@ -268,7 +281,7 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintInputValueDefinition(GraphQLInputValueDefinition node)
+        private string PrintInputValueDefinition(InputValueDefinition node)
         {
             var name = PrintName(node.Name);
             var type = Print(node.Type);
@@ -284,7 +297,7 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintInterfaceTypeDefinition(GraphQLInterfaceTypeDefinition node)
+        private string PrintInterfaceTypeDefinition(InterfaceDefinition node)
         {
             var name = PrintName(node.Name);
             var directives = node.Directives?.Select(PrintDirective);
@@ -300,50 +313,53 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintIntValue(GraphQLScalarValue node)
+        private string PrintIntValue(IntValue node)
         {
-            return node.Value;
-        }
+            return node.Value.ToString(NumberFormatInfo.InvariantInfo);
+;        }
 
-        private string PrintListType(GraphQLListType node)
+        private string PrintListType(ListType node)
         {
-            var type = Print(node.Type);
+            var type = Print(node.OfType);
 
             return $"[{type}]";
         }
 
-        private string PrintListValue(GraphQLListValue node)
+        private string PrintListValue(ListValue node)
         {
             var values = node.Values?.Select(Print);
 
             return $"[{Join(values, ", ")}]";
         }
 
-        private string PrintName(GraphQLName name)
+        private string PrintName(Name? name)
         {
-            return name?.Value ?? string.Empty;
+            if (name == null)
+                return string.Empty;
+            
+            return name.Value;
         }
 
-        private string PrintNamedType(GraphQLNamedType node)
+        private string PrintNamedType(NamedType node)
         {
             if (node == null) return string.Empty;
 
             return PrintName(node.Name);
         }
 
-        private string PrintNonNullType(GraphQLNonNullType node)
+        private string PrintNonNullType(NonNullType node)
         {
-            var type = Print(node.Type);
+            var type = Print(node.OfType);
 
             return $"{type}!";
         }
 
-        private string PrintNullValue(GraphQLScalarValue node)
+        private string PrintNullValue(NullValue node)
         {
             return "null";
         }
 
-        private string PrintObjectField(GraphQLObjectField node)
+        private string PrintObjectField(ObjectField node)
         {
             var name = PrintName(node.Name);
             var value = Print(node.Value);
@@ -351,12 +367,12 @@ namespace Tanka.GraphQL.Language
             return $"{name}: {value}";
         }
 
-        private string PrintObjectTypeDefinition(GraphQLObjectTypeDefinition node)
+        private string PrintObjectTypeDefinition(ObjectDefinition node)
         {
             var name = PrintName(node.Name);
-            var interfaces = node.Interfaces?.Select(PrintNamedType);
-            var directives = node.Directives?.Select(PrintDirective);
-            var fields = node.Fields?.Select(PrintFieldDefinition);
+            var interfaces = node.Interfaces?.Select(PrintNamedType) ?? Array.Empty<string>();
+            var directives = node.Directives?.Select(PrintDirective) ?? Array.Empty<string>();
+            var fields = node.Fields?.Select(PrintFieldDefinition) ?? Array.Empty<string>();
 
             return Join(new[]
                 {
@@ -369,22 +385,22 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintObjectValue(GraphQLObjectValue node)
+        private string PrintObjectValue(ObjectValue node)
         {
-            var fields = node.Fields?.Select(PrintObjectField);
+            var fields = node.Fields?.Select(PrintObjectField) ?? Array.Empty<string>();
 
             return "{" + Join(fields, ", ") + "}";
         }
 
-        private string PrintOperationDefinition(GraphQLOperationDefinition definition)
+        private string PrintOperationDefinition(OperationDefinition definition)
         {
             var name = PrintName(definition.Name);
-            var directives = Join(definition.Directives?.Select(PrintDirective), " ");
+            var directives = Join(definition.Directives?.Select(PrintDirective) ?? Array.Empty<string>(), " ");
             var selectionSet = PrintSelectionSet(definition.SelectionSet);
 
             var variableDefinitions = Wrap(
                 "(",
-                Join(definition.VariableDefinitions?.Select(PrintVariableDefinition), ", "), ")");
+                Join(definition.VariableDefinitions?.Select(PrintVariableDefinition) ?? Array.Empty<string>(), ", "), ")");
 
             var operation = definition.Operation
                 .ToString()
@@ -406,23 +422,16 @@ namespace Tanka.GraphQL.Language
                     " ");
         }
 
-        private string PrintOperationType(GraphQLOperationTypeDefinition operationType)
+        private string PrintOperationType(OperationType operationType, NamedType namedType)
         {
-            var operation = operationType.Operation.ToString().ToLower();
-            var type = PrintNamedType(operationType.Type);
+            var operation = operationType.ToString().ToLower();
+            var type = PrintNamedType(namedType);
 
             return $"{operation}: {type}";
         }
+        
 
-        private string PrintOperationTypeDefinition(GraphQLOperationTypeDefinition node)
-        {
-            var operation = node.Operation.ToString();
-            var type = PrintNamedType(node.Type);
-
-            return $"{operation}: {type}";
-        }
-
-        private string PrintScalarTypeDefinition(GraphQLScalarTypeDefinition node)
+        private string PrintScalarTypeDefinition(ScalarDefinition node)
         {
             var name = PrintName(node.Name);
             var directives = node.Directives?.Select(PrintDirective);
@@ -436,10 +445,11 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintSchemaDefinition(GraphQLSchemaDefinition node)
+        private string PrintSchemaDefinition(SchemaDefinition node)
         {
-            var directives = node.Directives?.Select(PrintDirective);
-            var operationTypes = node.OperationTypes?.Select(PrintOperationType);
+            var directives = node.Directives?.Select(PrintDirective) ?? Array.Empty<string>();
+            var operationTypes = node.Operations
+                .Select(op => PrintOperationType(op.Operation, op.NamedType));
 
             return Join(new[]
                 {
@@ -450,28 +460,28 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintSelectionSet(GraphQLSelectionSet selectionSet)
+        private string PrintSelectionSet(SelectionSet selectionSet)
         {
             if (selectionSet == null) return string.Empty;
 
-            return Block(selectionSet.Selections?.Select(Print));
+            return Block(selectionSet.Selections?.Select(Print) ?? Array.Empty<string>());
         }
 
-        private string PrintStringValue(GraphQLScalarValue node)
+        private string PrintStringValue(StringValue node)
         {
-            return $"\"{node.Value}\"";
+            return $"\"{node}\"";
         }
 
-        private string PrintTypeExtensionDefinition(GraphQLTypeExtensionDefinition node)
+        private string PrintTypeExtensionDefinition(TypeDefinition node)
         {
-            return $"extend {Print(node.Definition)}";
+            return $"extend {Print(node)}";
         }
 
-        private string PrintUnionTypeDefinition(GraphQLUnionTypeDefinition node)
+        private string PrintUnionTypeDefinition(UnionDefinition node)
         {
             var name = PrintName(node.Name);
-            var directives = node.Directives?.Select(PrintDirective);
-            var types = node.Types?.Select(PrintNamedType);
+            var directives = node.Directives?.Select(PrintDirective) ?? Array.Empty<string>();
+            var types = node.Members?.Select(PrintNamedType).ToArray() ?? Array.Empty<string>();
 
             return Join(new[]
                 {
@@ -485,12 +495,12 @@ namespace Tanka.GraphQL.Language
                 " ");
         }
 
-        private string PrintVariable(GraphQLVariable variable)
+        private string PrintVariable(Variable variable)
         {
             return $"${variable.Name.Value}";
         }
 
-        private string PrintVariableDefinition(GraphQLVariableDefinition variableDefinition)
+        private string PrintVariableDefinition(VariableDefinition variableDefinition)
         {
             var variable = PrintVariable(variableDefinition.Variable);
             var type = Print(variableDefinition.Type);
@@ -508,7 +518,7 @@ namespace Tanka.GraphQL.Language
         private string Wrap(string start, string maybeString, string end = "")
         {
             return string.IsNullOrWhiteSpace(maybeString)
-                ? null
+                ? string.Empty
                 : $"{start}{maybeString}{end}";
         }
     }

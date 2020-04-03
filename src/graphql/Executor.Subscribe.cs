@@ -2,8 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL
 {

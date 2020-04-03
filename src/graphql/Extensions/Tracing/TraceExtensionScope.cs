@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.Validation;
 
@@ -89,7 +89,7 @@ namespace Tanka.GraphQL.Extensions.Tracing
             return default;
         }
 
-        public ValueTask EndParseDocumentAsync(GraphQLDocument document)
+        public ValueTask EndParseDocumentAsync(ExecutableDocument document)
         {
             _parsingEnded = _stopwatch.Elapsed;
             return default;

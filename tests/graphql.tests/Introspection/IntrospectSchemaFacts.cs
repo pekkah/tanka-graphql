@@ -113,6 +113,9 @@ namespace Tanka.GraphQL.Tests.Introspection
                         },
                         {
                           ""name"": ""skip""
+                        },
+                        {
+                          ""name"": ""deprecated""
                         }
                       ]
                     }
@@ -270,6 +273,19 @@ namespace Tanka.GraphQL.Tests.Introspection
                           ""args"": [
                             {
                               ""name"": ""if""
+                            }
+                          ]
+                        },
+                        {
+                          ""name"": ""deprecated"",
+                          ""description"": """",
+                          ""locations"": [
+                            ""FIELD_DEFINITION"",
+                            ""ENUM_VALUE""
+                          ],
+                          ""args"": [
+                            {
+                              ""name"": ""reason""
                             }
                           ]
                         }

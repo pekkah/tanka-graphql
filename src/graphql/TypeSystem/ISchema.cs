@@ -8,11 +8,11 @@ namespace Tanka.GraphQL.TypeSystem
 {
     public interface ISchema : IHasDirectives
     {
-        ObjectType Subscription { get; }
+        ObjectType? Subscription { get; }
 
         ObjectType Query { get; }
 
-        ObjectType Mutation { get; }
+        ObjectType? Mutation { get; }
 
         INamedType GetNamedType(string name);
 
@@ -20,7 +20,7 @@ namespace Tanka.GraphQL.TypeSystem
 
         IEnumerable<KeyValuePair<string, IField>> GetFields(string type);
 
-        IQueryable<T> QueryTypes<T>(Predicate<T> filter = null) where T : INamedType;
+        IQueryable<T> QueryTypes<T>(Predicate<T>? filter = null) where T : INamedType;
 
         DirectiveType GetDirectiveType(string name);
 

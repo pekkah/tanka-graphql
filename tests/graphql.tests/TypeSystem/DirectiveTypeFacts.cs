@@ -121,8 +121,8 @@ namespace Tanka.GraphQL.Tests.TypeSystem
                       ""message"": ""requires admin role. "",
                       ""locations"": [
                         {
-                          ""end"": 28,
-                          ""start"": 2
+                          ""line"": 1,
+                          ""column"": 3
                         }
                       ],
                       ""path"": [
@@ -142,7 +142,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         {
             /* Given */
             var builder = new SchemaBuilder()
-                .Sdl(Parser.ParseDocument(@"
+                .Sdl(Parser.ParseTypeSystemDocument(@"
                 directive @authorize(
                     role: String =""user""
                 ) on FIELD_DEFINITION
@@ -204,8 +204,8 @@ namespace Tanka.GraphQL.Tests.TypeSystem
                       ""message"": ""requires admin role. "",
                       ""locations"": [
                         {
-                          ""end"": 28,
-                          ""start"": 2
+                          ""line"": 1,
+                          ""column"": 3
                         }
                       ],
                       ""path"": [

@@ -56,7 +56,7 @@ namespace Tanka.GraphQL.Tests.Execution
         {
             Query = new Query();
             var builder = new SchemaBuilder()
-                .Sdl(Parser.ParseDocument(
+                .Sdl(
                 @"
                     type Container {
                         nonNullWithNull: String!
@@ -80,7 +80,7 @@ namespace Tanka.GraphQL.Tests.Execution
                     schema {
                         query : Query
                     }
-                "));
+                ");
 
             var resolvers = new ObjectTypeMap()
             {
@@ -142,8 +142,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""Cannot return null for non-nullable field 'Container.nonNullWithNull'."",
                       ""locations"": [
                         {
-                          ""end"": 112,
-                          ""start"": 75
+                          ""line"": 4,
+                          ""column"": 26
                         }
                       ],
                       ""path"": [
@@ -190,8 +190,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""Cannot return null for non-nullable field 'Container.nonNullListAsNull'."",
                       ""locations"": [
                         {
-                          ""end"": 114,
-                          ""start"": 75
+                          ""line"": 4,
+                          ""column"": 26
                         }
                       ],
                       ""path"": [
@@ -274,8 +274,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""Cannot return null for non-nullable field 'Container.nonNullListWithNonNullItem'."",
                       ""locations"": [
                         {
-                          ""end"": 123,
-                          ""start"": 75
+                          ""line"": 4,
+                          ""column"": 26
                         }
                       ],
                       ""path"": [
@@ -324,8 +324,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""error"",
                       ""locations"": [
                         {
-                          ""end"": 116,
-                          ""start"": 72
+                          ""line"": 4,
+                          ""column"": 26
                         }
                       ],
                       ""path"": [
@@ -376,8 +376,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""error"",
                       ""locations"": [
                         {
-                          ""end"": 117,
-                          ""start"": 72
+                          ""line"": 4,
+                          ""column"": 26
                         }
                       ],
                       ""path"": [
@@ -426,8 +426,8 @@ namespace Tanka.GraphQL.Tests.Execution
                       ""message"": ""error"",
                       ""locations"": [
                         {
-                          ""end"": 120,
-                          ""start"": 72
+                          ""line"": 4,
+                          ""column"": 26
                         }
                       ],
                       ""path"": [

@@ -1,5 +1,5 @@
 ﻿using System;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Execution
@@ -11,8 +11,8 @@ namespace Tanka.GraphQL.Execution
             ObjectType objectType,
             string fieldName,
             IType fieldType,
-            GraphQLFieldSelection fieldSelection,
-            object completedValue,
+            FieldSelection fieldSelection,
+            object? completedValue,
             Exception error,
             NodePath path)
         {

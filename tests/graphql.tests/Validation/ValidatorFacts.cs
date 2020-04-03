@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.TypeSystem;
@@ -107,7 +108,7 @@ namespace Tanka.GraphQL.Tests.Validation
         public ISchema Schema { get; }
 
         private ValidationResult Validate(
-            GraphQLDocument document,
+            ExecutableDocument document,
             CombineRule rule,
             Dictionary<string, object> variables = null)
         {
@@ -121,11 +122,11 @@ namespace Tanka.GraphQL.Tests.Validation
                 variables);
         }
 
-        [Fact]
+        [Fact(Skip = "Not required by new language module")]
         public void Rule_511_Executable_Definitions()
         {
             /* Given */
-            var document = Parser.ParseDocument(
+            /*var document = Parser.ParseDocument(
                 @"query getDogName {
                   dog {
                     name
@@ -135,18 +136,18 @@ namespace Tanka.GraphQL.Tests.Validation
 
                 extend type Dog {
                   color: String
-                }");
+                }");*/
 
             /* When */
-            var result = Validate(
+            /*var result = Validate(
                 document,
-                ExecutionRules.R511ExecutableDefinitions());
+                ExecutionRules.R511ExecutableDefinitions());*/
 
             /* Then */
-            Assert.False(result.IsValid);
+            /*Assert.False(result.IsValid);
             Assert.Single(
                 result.Errors,
-                error => error.Code == ValidationErrorCodes.R511ExecutableDefinitions);
+                error => error.Code == ValidationErrorCodes.R511ExecutableDefinitions);*/
         }
 
         [Fact]
@@ -529,14 +530,14 @@ namespace Tanka.GraphQL.Tests.Validation
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R531FieldSelections 
-                         && error.Nodes.OfType<GraphQLFieldSelection>()
-                             .Any(n => n.Name.Value == "name"));
+                         && error.Nodes.OfType<FieldSelection>()
+                             .Any(n => n.Name == "name"));
 
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R531FieldSelections 
-                         && error.Nodes.OfType<GraphQLFieldSelection>()
-                             .Any(n => n.Name.Value == "barkVolume"));
+                         && error.Nodes.OfType<FieldSelection>()
+                             .Any(n => n.Name == "barkVolume"));
         }
 
         [Fact]
@@ -651,8 +652,8 @@ namespace Tanka.GraphQL.Tests.Validation
             Assert.Single(
                 result.Errors,
                 error => error.Code == ValidationErrorCodes.R532FieldSelectionMerging 
-                         && error.Nodes.OfType<GraphQLFieldSelection>()
-                             .Any(n => n.Name.Value == "name"));
+                         && error.Nodes.OfType<FieldSelection>()
+                             .Any(n => n.Name == "name"));
         }
         
         [Fact]
@@ -1095,8 +1096,8 @@ namespace Tanka.GraphQL.Tests.Validation
         {
             /* Given */
             var document = Parser.ParseDocument(
-                @"fragment correctType on Dog {
-                      name
+                    @"fragment correctType on Dog {
+                        name
                     }
 
                     fragment inlineFragment on Dog {

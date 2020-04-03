@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
@@ -14,19 +14,18 @@ namespace Tanka.GraphQL.Execution
             IExecutorContext context,
             ObjectType objectType,
             object objectValue,
-            IReadOnlyCollection<GraphQLFieldSelection> fields,
+            IReadOnlyCollection<FieldSelection> fields,
             IType fieldType,
             NodePath path)
         {
-            if (objectType == null) throw new ArgumentNullException(nameof(objectType));
             if (fields == null) throw new ArgumentNullException(nameof(fields));
             if (fieldType == null) throw new ArgumentNullException(nameof(fieldType));
 
             var schema = context.Schema;
             var fieldSelection = fields.First();
-            var fieldName = fieldSelection.Name.Value;
+            var fieldName = fieldSelection.Name;
             var field = schema.GetField(objectType.Name, fieldName);
-            object completedValue = null;
+            object? completedValue = null;
 
             var argumentValues = Arguments.CoerceArgumentValues(
                 schema,
@@ -95,14 +94,12 @@ namespace Tanka.GraphQL.Execution
             IExecutorContext context,
             ObjectType objectType,
             object objectValue,
-            KeyValuePair<string, IReadOnlyCollection<GraphQLFieldSelection>> fieldGroup,
+            KeyValuePair<string, IReadOnlyCollection<FieldSelection>> fieldGroup,
             NodePath path)
         {
-            if (objectType == null) throw new ArgumentNullException(nameof(objectType));
-
             var schema = context.Schema;
             var fields = fieldGroup.Value;
-            var fieldName = fields.First().Name.Value;
+            var fieldName = fields.First().Name;
             path.Append(fieldName);
 
             // __typename hack

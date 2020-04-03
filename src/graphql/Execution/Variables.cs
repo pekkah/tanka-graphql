@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Execution
 {
     public static class Variables
     {
-        public static IReadOnlyDictionary<string, object> CoerceVariableValues(
+        public static IReadOnlyDictionary<string, object?> CoerceVariableValues(
             ISchema schema,
-            GraphQLOperationDefinition operation, 
+            OperationDefinition operation, 
             Dictionary<string, object> variableValues)
         {
-            var coercedValues = new Dictionary<string, object>();
+            var coercedValues = new Dictionary<string, object?>();
             var variableDefinitions = operation.VariableDefinitions;
 
             if (variableDefinitions == null)
@@ -19,7 +19,7 @@ namespace Tanka.GraphQL.Execution
 
             foreach (var variableDefinition in variableDefinitions)
             {
-                var variableName = variableDefinition.Variable.Name.Value;
+                var variableName = variableDefinition.Variable.Name;
                 var variableType = Ast.TypeFromAst(schema, variableDefinition.Type);
 
                 //  should be assert?

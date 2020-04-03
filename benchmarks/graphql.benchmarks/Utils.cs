@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
@@ -14,7 +14,7 @@ namespace Tanka.GraphQL.Benchmarks
         {
             var events = new SingleValueEventChannel();
             var builder = new SchemaBuilder()
-                .Sdl(Parser.ParseDocument(
+                .Sdl(Parser.ParseTypeSystemDocument(
                 @"
                     type Query {
                         simple: String
@@ -68,7 +68,7 @@ namespace Tanka.GraphQL.Benchmarks
             return schema;
         }
 
-        public static GraphQLDocument InitializeQuery()
+        public static ExecutableDocument InitializeQuery()
         {
             return Parser.ParseDocument(@"
 {
@@ -76,7 +76,7 @@ namespace Tanka.GraphQL.Benchmarks
 }");
         }
 
-        public static GraphQLDocument InitializeMutation()
+        public static ExecutableDocument InitializeMutation()
         {
             return Parser.ParseDocument(@"
 mutation {
@@ -84,7 +84,7 @@ mutation {
 }");
         }
 
-        public static GraphQLDocument InitializeSubscription()
+        public static ExecutableDocument InitializeSubscription()
         {
             return Parser.ParseDocument(@"
 subscription {

@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
         {
             /* Given */
             var sdl = 
-                  @"# @import(path:""Files/Import"")
+                  @"tanka_import from ""Files/Import""
 
                     type Query {
                         imported: ImportedType

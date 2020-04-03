@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Buffers.Text;
 using System.Globalization;
-using GraphQLParser.AST;
+using System.Text;
+using Tanka.GraphQL.Language.Nodes;
+
 
 namespace Tanka.GraphQL.TypeSystem.ValueSerialization
 {
     public class DoubleConverter : IValueConverter
     {
-        public object Serialize(object value)
+        public object? Serialize(object value)
         {
             if (value == null)
                 return null;
@@ -14,7 +17,7 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToDouble(value, NumberFormatInfo.InvariantInfo);
         }
 
-        public object ParseValue(object input)
+        public object? ParseValue(object input)
         {
             if (input == null)
                 return null;
@@ -22,23 +25,31 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToDouble(input, NumberFormatInfo.InvariantInfo);
         }
 
-        public object ParseLiteral(GraphQLScalarValue input)
+        public object? ParseLiteral(Value input)
         {
-            if (input.Kind == ASTNodeKind.NullValue)
+            if (input.Kind == NodeKind.NullValue)
             {
                 return null;
             }
 
-            if (input.Kind == ASTNodeKind.FloatValue || input.Kind == ASTNodeKind.IntValue)
+            if (input.Kind == NodeKind.FloatValue)
             {
-                if (input.Value == null)
-                    return null;
+                var doubleValue = (FloatValue) input;
 
-                return Convert.ToDouble(input.Value, NumberFormatInfo.InvariantInfo);
+                if (!Utf8Parser.TryParse(doubleValue.ValueSpan, out double d, out _))
+                    throw new FormatException($"Could not parse value '{Encoding.UTF8.GetString(doubleValue.ValueSpan)}' as double");
+                
+                return d;
+            }
+
+            if (input.Kind == NodeKind.IntValue)
+            {
+                var intValue = (IntValue) input;
+                return (double)intValue.Value;
             }
 
             throw new FormatException(
-                $"Cannot coerce Long value from '{input.Kind}'");
+                $"Cannot coerce Float value from '{input.Kind}'");
         }
     }
 }

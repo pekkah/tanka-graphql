@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
+using Argument = Tanka.GraphQL.TypeSystem.Argument;
 
 namespace Tanka.GraphQL.Validation
 {
@@ -52,7 +54,7 @@ namespace Tanka.GraphQL.Validation
 
             EnterDirective = directive =>
             {
-                _directive = schema.GetDirectiveType(directive.Name.Value);
+                _directive = schema.GetDirectiveType(directive.Name);
             };
 
             EnterOperationDefinition = definition =>
@@ -115,12 +117,12 @@ namespace Tanka.GraphQL.Validation
 
                 if (GetDirective() != null)
                 {
-                    argDef = GetDirective()?.GetArgument(argument.Name.Value);
+                    argDef = GetDirective()?.GetArgument(argument.Name);
                     argType = argDef?.Type;
                 }
                 else if (GetFieldDef() != null)
                 {
-                    argDef = GetFieldDef()?.Field.GetArgument(argument.Name.Value);
+                    argDef = GetFieldDef()?.Field.GetArgument(argument.Name);
                     argType = argDef?.Type;
                 }
 
@@ -149,7 +151,7 @@ namespace Tanka.GraphQL.Validation
                 {
                     inputField = schema.GetInputField(
                         inputObjectType.Name,
-                        node.Name.Value);
+                        node.Name);
 
                     if (inputField != null)
                         inputFieldType = inputField.Type;
@@ -288,9 +290,9 @@ namespace Tanka.GraphQL.Validation
         public (string Name, IField Field)? GetFieldDef(
             ISchema schema,
             IType parentType,
-            GraphQLFieldSelection fieldNode)
+            FieldSelection fieldNode)
         {
-            var name = fieldNode.Name.Value;
+            var name = fieldNode.Name;
             /*if (name == SchemaMetaFieldDef.name 
                          && schema.getQueryType() == parentType) 
             {

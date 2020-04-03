@@ -6,7 +6,7 @@ namespace Tanka.GraphQL.TypeSystem
     {
         IType Type { get; set; }
 
-        IEnumerable<KeyValuePair<string, Argument>> Arguments { get; set; }
+        IEnumerable<KeyValuePair<string, Argument>>? Arguments { get; set; }
 
         Argument GetArgument(string name);
     }

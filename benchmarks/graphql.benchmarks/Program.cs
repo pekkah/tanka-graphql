@@ -6,7 +6,8 @@ namespace Tanka.GraphQL.Benchmarks
     {
         private static void Main(string[] args)
         {
-            var runner = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly);
+            var runner = BenchmarkSwitcher
+                .FromAssembly(typeof(Program).Assembly);
 
             if (args.Length == 0)
                 runner.RunAll();

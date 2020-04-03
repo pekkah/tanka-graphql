@@ -143,7 +143,7 @@ namespace Tanka.GraphQL.Tests
             };
 
             Schema = SchemaTools.MakeExecutableSchema(
-                new SchemaBuilder().Sdl(Parser.ParseDocument(Sdl)),
+                new SchemaBuilder().Sdl(Sdl),
                 Resolvers,
                 Resolvers);
         }

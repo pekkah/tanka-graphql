@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
@@ -12,9 +13,9 @@ namespace Tanka.GraphQL.ValueResolution
             ObjectType objectType,
             object objectValue,
             IField field,
-            GraphQLFieldSelection selection,
-            IReadOnlyCollection<GraphQLFieldSelection> fields,
-            IReadOnlyDictionary<string, object> arguments,
+            FieldSelection selection,
+            IReadOnlyCollection<FieldSelection> fields,
+            IReadOnlyDictionary<string, object?> arguments,
             NodePath path,
             IExecutorContext executionContext)
         {
@@ -38,8 +39,9 @@ namespace Tanka.GraphQL.ValueResolution
 
         public IField Field { get; }
 
-        public GraphQLFieldSelection Selection { get; }
-        public IReadOnlyCollection<GraphQLFieldSelection> Fields { get; }
+        public FieldSelection Selection { get; }
+        
+        public IReadOnlyCollection<FieldSelection> Fields { get; }
 
         public IReadOnlyDictionary<string, object> Arguments { get; }
 
@@ -47,6 +49,6 @@ namespace Tanka.GraphQL.ValueResolution
 
         public IExecutorContext ExecutionContext { get; }
 
-        public string FieldName => Selection.Name?.Value;
+        public string FieldName => Selection.Name;
     }
 }

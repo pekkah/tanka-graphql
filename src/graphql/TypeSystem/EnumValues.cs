@@ -15,9 +15,9 @@ namespace Tanka.GraphQL.TypeSystem
 
         public void Add(
             string value,
-            string description = null,
-            IEnumerable<DirectiveInstance> directives = null,
-            string deprecationReason = null)
+            string? description = null,
+            IEnumerable<DirectiveInstance>? directives = null,
+            string? deprecationReason = null)
         {
             Add(value, new EnumValue(value, description, directives, deprecationReason));
         }

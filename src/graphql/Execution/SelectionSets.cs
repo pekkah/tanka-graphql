@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using static Tanka.GraphQL.TypeSystem.Ast;
+using Argument = Tanka.GraphQL.TypeSystem.Argument;
 
 namespace Tanka.GraphQL.Execution
 {
@@ -12,14 +13,13 @@ namespace Tanka.GraphQL.Execution
     {
         public static async Task<IDictionary<string, object>> ExecuteSelectionSetAsync(
             IExecutorContext executorContext,
-            GraphQLSelectionSet selectionSet,
+            SelectionSet selectionSet,
             ObjectType objectType,
             object objectValue,
             NodePath path)
         {
             if (executorContext == null) throw new ArgumentNullException(nameof(executorContext));
             if (selectionSet == null) throw new ArgumentNullException(nameof(selectionSet));
-            if (objectType == null) throw new ArgumentNullException(nameof(objectType));
             if (path == null) throw new ArgumentNullException(nameof(path));
 
             var groupedFieldSet = CollectFields(
@@ -40,9 +40,9 @@ namespace Tanka.GraphQL.Execution
         }
 
 
-        public static GraphQLSelectionSet MergeSelectionSets(IReadOnlyCollection<GraphQLFieldSelection> fields)
+        public static SelectionSet MergeSelectionSets(IReadOnlyCollection<FieldSelection> fields)
         {
-            var selectionSet = new List<ASTNode>();
+            var selectionSet = new List<ISelection>();
             foreach (var field in fields)
             {
                 var fieldSelectionSet = field.SelectionSet;
@@ -51,58 +51,52 @@ namespace Tanka.GraphQL.Execution
                 selectionSet.AddRange(fieldSelectionSet.Selections);
             }
 
-            return new GraphQLSelectionSet
-            {
-                Selections = selectionSet
-            };
+            return new SelectionSet(selectionSet);
         }
 
-        public static IReadOnlyDictionary<string, List<GraphQLFieldSelection>> CollectFields(
+        public static IReadOnlyDictionary<string, List<FieldSelection>> CollectFields(
             ISchema schema,
-            GraphQLDocument document,
+            ExecutableDocument document,
             ObjectType objectType,
-            GraphQLSelectionSet selectionSet,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
-            List<string> visitedFragments = null)
+            SelectionSet selectionSet,
+            IReadOnlyDictionary<string, object?> coercedVariableValues,
+            List<string>? visitedFragments = null)
         {
-            if (visitedFragments == null)
-                visitedFragments = new List<string>();
+            visitedFragments ??= new List<string>();
 
-            var fragments = document.Definitions
-                .OfType<GraphQLFragmentDefinition>()
-                .ToList();
+            var fragments = document.FragmentDefinitions;
 
-            var groupedFields = new Dictionary<string, List<GraphQLFieldSelection>>();
+            var groupedFields = new Dictionary<string, List<FieldSelection>>();
             foreach (var selection in selectionSet.Selections)
             {
                 var directives = GetDirectives(selection).ToList();
 
-                var skipDirective = directives.FirstOrDefault(d => d.Name.Value == "skip");
+                var skipDirective = directives.FirstOrDefault(d => d.Name == "skip"); //todo: skip to constant
                 if (SkipSelection(skipDirective, coercedVariableValues, schema, objectType, selection))
                     continue;
 
-                var includeDirective = directives.FirstOrDefault(d => d.Name.Value == "include");
+                var includeDirective = directives.FirstOrDefault(d => d.Name == "include"); //todo: include to constant
                 if (!IncludeSelection(includeDirective, coercedVariableValues, schema, objectType, selection))
                     continue;
 
-                if (selection is GraphQLFieldSelection fieldSelection)
+                if (selection is FieldSelection fieldSelection)
                 {
-                    var name = fieldSelection.Alias?.Value ?? fieldSelection.Name.Value;
+                    var name = fieldSelection.AliasOrName;
                     if (!groupedFields.ContainsKey(name))
-                        groupedFields[name] = new List<GraphQLFieldSelection>();
+                        groupedFields[name] = new List<FieldSelection>();
 
                     groupedFields[name].Add(fieldSelection);
                 }
 
-                if (selection is GraphQLFragmentSpread fragmentSpread)
+                if (selection is FragmentSpread fragmentSpread)
                 {
-                    var fragmentSpreadName = fragmentSpread.Name.Value;
+                    var fragmentSpreadName = fragmentSpread.FragmentName;
 
                     if (visitedFragments.Contains(fragmentSpreadName)) continue;
 
                     visitedFragments.Add(fragmentSpreadName);
 
-                    var fragment = fragments.SingleOrDefault(f => f.Name.Value == fragmentSpreadName);
+                    var fragment = fragments.SingleOrDefault(f => f.FragmentName == fragmentSpreadName);
 
                     if (fragment == null)
                         continue;
@@ -127,13 +121,13 @@ namespace Tanka.GraphQL.Execution
                         var responseKey = fragmentGroup.Key;
 
                         if (!groupedFields.ContainsKey(responseKey))
-                            groupedFields[responseKey] = new List<GraphQLFieldSelection>();
+                            groupedFields[responseKey] = new List<FieldSelection>();
 
                         groupedFields[responseKey].AddRange(fragmentGroup.Value);
                     }
                 }
 
-                if (selection is GraphQLInlineFragment inlineFragment)
+                if (selection is InlineFragment inlineFragment)
                 {
                     var fragmentTypeAst = inlineFragment.TypeCondition;
                     var fragmentType = TypeFromAst(schema, fragmentTypeAst);
@@ -155,7 +149,7 @@ namespace Tanka.GraphQL.Execution
                         var responseKey = fragmentGroup.Key;
 
                         if (!groupedFields.ContainsKey(responseKey))
-                            groupedFields[responseKey] = new List<GraphQLFieldSelection>();
+                            groupedFields[responseKey] = new List<FieldSelection>();
 
                         groupedFields[responseKey].AddRange(fragmentGroup.Value);
                     }
@@ -165,60 +159,57 @@ namespace Tanka.GraphQL.Execution
             return groupedFields;
         }
 
-        private static bool IncludeSelection(GraphQLDirective includeDirective,
-            IReadOnlyDictionary<string, object> coercedVariableValues, ISchema schema, ObjectType objectType, ASTNode selection)
+        private static bool IncludeSelection(Directive includeDirective,
+            IReadOnlyDictionary<string, object?> coercedVariableValues, ISchema schema, ObjectType objectType, object selection)
         {
-            if (includeDirective == null)
+            if (includeDirective?.Arguments == null)
                 return true;
 
-            var ifArgument = includeDirective.Arguments.SingleOrDefault(a => a.Name?.Value == "if");
+            var ifArgument = includeDirective.Arguments.SingleOrDefault(a => a.Name == "if"); //todo: if to constants
             return GetIfArgumentValue(schema, includeDirective, coercedVariableValues, ifArgument);
         }
 
-        private static bool SkipSelection(GraphQLDirective skipDirective,
-            IReadOnlyDictionary<string, object> coercedVariableValues, ISchema schema, ObjectType objectType, ASTNode selection)
+        private static bool SkipSelection(Directive skipDirective,
+            IReadOnlyDictionary<string, object?> coercedVariableValues, ISchema schema, ObjectType objectType, object selection)
         {
-            if (skipDirective == null)
+            if (skipDirective?.Arguments == null)
                 return false;
 
-            var ifArgument = skipDirective.Arguments.SingleOrDefault(a => a.Name?.Value == "if");
+            var ifArgument = skipDirective.Arguments.SingleOrDefault(a => a.Name == "if"); //todo: if to constants
             return GetIfArgumentValue(schema, skipDirective, coercedVariableValues, ifArgument);
         }
 
         private static bool GetIfArgumentValue(
             ISchema schema,
-            GraphQLDirective directive,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
-            GraphQLArgument argument)
+            Directive directive,
+            IReadOnlyDictionary<string, object?> coercedVariableValues,
+            Language.Nodes.Argument argument)
         {
             if (directive == null) throw new ArgumentNullException(nameof(directive));
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
 
-            switch (argument.Value)
+            switch (argument.Value.Kind)
             {
-                case GraphQLScalarValue scalarValue:
-                    return (bool) Values.CoerceValue(schema.GetInputFields, schema.GetValueConverter, scalarValue, ScalarType.NonNullBoolean);
-                case GraphQLVariable variable:
-                    var variableValue = coercedVariableValues[variable.Name.Value];
+                case NodeKind.BooleanValue:
+                    return (bool) Values.CoerceValue(schema.GetInputFields, schema.GetValueConverter, (BooleanValue)argument.Value, ScalarType.NonNullBoolean);
+                case NodeKind.Variable:
+                    var variable = (Variable) argument.Value;
+                    var variableValue = coercedVariableValues[variable.Name];
+                    
+                    if (variableValue == null)
+                        throw new QueryExecutionException(
+                            $"If argument of {directive} is null. Variable value should not be null",
+                            new NodePath(), argument);
+                    
                     return (bool) variableValue;
                 default:
                     return false;
             }
         }
 
-        private static IEnumerable<GraphQLDirective> GetDirectives(ASTNode node)
+        private static IEnumerable<Directive> GetDirectives(ISelection selection)
         {
-            switch (node)
-            {
-                case GraphQLFieldSelection fieldSelection:
-                    return fieldSelection.Directives ?? Enumerable.Empty<GraphQLDirective>();
-                case GraphQLFragmentSpread fragmentSpread:
-                    return fragmentSpread.Directives ?? Enumerable.Empty<GraphQLDirective>();
-                case GraphQLInlineFragment inlineFragment:
-                    return inlineFragment.Directives ?? Enumerable.Empty<GraphQLDirective>();
-                default:
-                    return Enumerable.Empty<GraphQLDirective>();
-            }
+            return selection.Directives ?? Array.Empty<Directive>();
         }
 
         private static bool DoesFragmentTypeApply(ObjectType objectType, IType fragmentType)

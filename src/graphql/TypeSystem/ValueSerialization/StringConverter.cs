@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
+
 
 namespace Tanka.GraphQL.TypeSystem.ValueSerialization
 {
@@ -22,18 +23,18 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToString(input, CultureInfo.InvariantCulture);
         }
 
-        public object ParseLiteral(GraphQLScalarValue input)
+        public object ParseLiteral(Value input)
         {
-            if (input.Kind == ASTNodeKind.NullValue)
+            if (input.Kind == NodeKind.NullValue)
             {
                 return null;
             }
 
-            if (input.Kind == ASTNodeKind.StringValue) 
-                return input.Value;
+            if (input.Kind == NodeKind.StringValue) 
+                return ((StringValue)input).ToString();
 
             throw new FormatException(
-                $"Cannot coerce Long value from '{input.Kind}'");
+                $"Cannot coerce String value from '{input.Kind}'");
         }
     }
 }

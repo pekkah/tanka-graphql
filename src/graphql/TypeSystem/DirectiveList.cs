@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.TypeSystem
         private readonly Dictionary<string, DirectiveInstance>
             _directives = new Dictionary<string, DirectiveInstance>();
 
-        public DirectiveList(IEnumerable<DirectiveInstance> directives = null)
+        public DirectiveList(IEnumerable<DirectiveInstance>? directives = null)
         {
             if (directives != null)
                 foreach (var directiveInstance in directives)
@@ -17,7 +17,7 @@ namespace Tanka.GraphQL.TypeSystem
 
         public IEnumerable<DirectiveInstance> Directives => _directives.Values;
 
-        public DirectiveInstance GetDirective(string name)
+        public DirectiveInstance? GetDirective(string name)
         {
             return _directives.ContainsKey(name) ? _directives[name] : null;
         }

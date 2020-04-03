@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.Validation;
 
@@ -15,7 +15,7 @@ namespace Tanka.GraphQL
 
         ValueTask BeginParseDocumentAsync();
 
-        ValueTask EndParseDocumentAsync(GraphQLDocument document);
+        ValueTask EndParseDocumentAsync(ExecutableDocument document);
 
         ValueTask BeginResolveAsync(IResolverContext context);
 

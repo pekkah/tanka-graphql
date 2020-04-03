@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
@@ -16,7 +17,7 @@ namespace Tanka.GraphQL.Tests.ValueResolution
             _objectType = new ObjectType("Test");
             _objectValue = null;
             _field = new Field(ScalarType.ID);
-            _selection = new GraphQLFieldSelection();
+            _selection = new FieldSelection(null, "test", null, null, null, null);
             _schema = new SchemaBuilder()
                 .Query(out _)
                 .Build();
@@ -25,9 +26,9 @@ namespace Tanka.GraphQL.Tests.ValueResolution
         private readonly IField _field;
         private readonly ObjectType _objectType;
         private readonly object _objectValue;
-        private readonly GraphQLFieldSelection _selection;
+        private readonly FieldSelection _selection;
         private readonly ISchema _schema;
-        private IReadOnlyCollection<GraphQLFieldSelection> _fields;
+        private IReadOnlyCollection<FieldSelection> _fields;
 
         private class InputArg : IReadFromObjectDictionary
         {

@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 
@@ -32,7 +33,7 @@ namespace Tanka.GraphQL
         /// <summary>
         ///     Query validator function
         /// </summary>
-        public Func<ISchema, GraphQLDocument, IReadOnlyDictionary<string, object>, ValueTask<ValidationResult>>
+        public Func<ISchema, ExecutableDocument, IReadOnlyDictionary<string, object>, ValueTask<ValidationResult>>
             Validate { get; set; }
 
         /// <summary>
@@ -43,7 +44,7 @@ namespace Tanka.GraphQL
         /// <summary>
         ///     Query, mutation or subscription
         /// </summary>
-        public GraphQLDocument Document { get; set; }
+        public ExecutableDocument Document { get; set; }
 
         /// <summary>
         ///     Optional operation name
@@ -69,7 +70,7 @@ namespace Tanka.GraphQL
         public static ValueTask<ValidationResult> DefaultValidate(
             IEnumerable<CombineRule> rules,
             ISchema schema,
-            GraphQLDocument document,
+            ExecutableDocument document,
             IReadOnlyDictionary<string, object> variableValues = null)
         {
             var result = Validator.Validate(
@@ -98,7 +99,11 @@ namespace Tanka.GraphQL
             if (!(exception is QueryExecutionException graphQLError))
                 return error;
 
-            error.Locations = graphQLError.Nodes?.Select(n => n.Location).ToList();
+            error.Locations = graphQLError.Nodes?
+                .Where(n => n.Location != null)
+                .Select(n => n.Location.Value)
+                .ToList();
+            
             error.Path = graphQLError.Path?.Segments.ToList();
 
             if (graphQLError.Extensions != null)

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.TypeSystem
@@ -57,7 +57,7 @@ namespace Tanka.GraphQL.TypeSystem
             return enumValue.Key;
         }
 
-        public object ParseValue(object input)
+        public object? ParseValue(object input)
         {
             if (input == null)
                 return null;
@@ -71,9 +71,13 @@ namespace Tanka.GraphQL.TypeSystem
             return value.Key;
         }
 
-        public object ParseLiteral(GraphQLScalarValue input)
+        public object? ParseLiteral(Value input)
         {
-            var value = _values.SingleOrDefault(v => v.Key == input.Value?.ToUpperInvariant());
+            if (input.Kind == NodeKind.NullValue)
+                return null;
+            
+            var enumValue = (Language.Nodes.EnumValue) input;
+            var value = _values.SingleOrDefault(v => v.Key == enumValue.Name.ToString().ToUpperInvariant());
             return value.Key;
         }
 

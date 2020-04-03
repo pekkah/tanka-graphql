@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 
@@ -41,7 +41,7 @@ namespace Tanka.GraphQL.Server
             return default;
         }
 
-        public ValueTask EndParseDocumentAsync(GraphQLDocument document)
+        public ValueTask EndParseDocumentAsync(ExecutableDocument document)
         {
             return default;
         }

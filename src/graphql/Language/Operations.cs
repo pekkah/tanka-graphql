@@ -1,13 +1,17 @@
 ﻿using System.Linq;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
+
 
 namespace Tanka.GraphQL.Language
 {
     public static class Operations
     {
-        public static GraphQLOperationDefinition GetOperation(GraphQLDocument document, string operationName)
+        public static OperationDefinition GetOperation(ExecutableDocument document, string operationName)
         {
-            var operations = document.Definitions.OfType<GraphQLOperationDefinition>().ToList();
+            var operations = document.OperationDefinitions;
+            
+            if (operations == null)
+                throw new DocumentException($"Document does not contain operations");
 
             if (string.IsNullOrEmpty(operationName))
             {

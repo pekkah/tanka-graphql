@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -99,7 +100,7 @@ namespace Tanka.GraphQL.Server.Links
                     context.Selection);
             };
 
-            GraphQLDocument CreateDocument(IResolverContext context)
+            ExecutableDocument CreateDocument(IResolverContext context)
             {
                 return context.ExecutionContext.Document;
             }
@@ -148,7 +149,7 @@ namespace Tanka.GraphQL.Server.Links
                 return Resolve.Subscribe(stream, unsubscribe);
             };
 
-            GraphQLDocument CreateDocument(IResolverContext context)
+            ExecutableDocument CreateDocument(IResolverContext context)
             {
                 return context.ExecutionContext.Document;
             }

@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
+
 using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Execution
@@ -63,9 +64,10 @@ namespace Tanka.GraphQL.Execution
         public static SubscriptionResult MapSourceToResponseEventAsync(
             IExecutorContext context,
             ISubscriberResult subscriberResult,
-            GraphQLOperationDefinition subscription,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
-            Func<Exception, ExecutionError> formatError, CancellationToken cancellationToken)
+            OperationDefinition subscription,
+            IReadOnlyDictionary<string, object?> coercedVariableValues,
+            Func<Exception, ExecutionError> formatError, 
+            CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (subscriberResult == null) throw new ArgumentNullException(nameof(subscriberResult));
@@ -89,8 +91,8 @@ namespace Tanka.GraphQL.Execution
 
         public static async Task<ISubscriberResult> CreateSourceEventStreamAsync(
             IExecutorContext context,
-            GraphQLOperationDefinition subscription,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
+            OperationDefinition subscription,
+            IReadOnlyDictionary<string, object?> coercedVariableValues,
             object initialValue,
             CancellationToken cancellationToken)
         {
@@ -111,7 +113,7 @@ namespace Tanka.GraphQL.Execution
             );
 
             var fields = groupedFieldSet.Values.First();
-            var fieldName = fields.First().Name.Value;
+            var fieldName = fields.First().Name;
             var fieldSelection = fields.First();
 
             var coercedArgumentValues = Arguments.CoerceArgumentValues(
@@ -147,8 +149,8 @@ namespace Tanka.GraphQL.Execution
 
         private static async Task<ExecutionResult> ExecuteSubscriptionEventAsync(
             IExecutorContext context,
-            GraphQLOperationDefinition subscription,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
+            OperationDefinition subscription,
+            IReadOnlyDictionary<string, object?> coercedVariableValues,
             object evnt,
             Func<Exception, ExecutionError> formatError)
         {

@@ -1,11 +1,12 @@
-﻿using GraphQLParser.AST;
+﻿
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Validation
 {
     public struct VariableUsage
     {
-        public GraphQLVariable Node;
+        public Variable Node;
 
         public IType Type;
 

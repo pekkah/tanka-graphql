@@ -9,9 +9,9 @@ namespace Tanka.GraphQL.TypeSystem
 
         public ObjectType(
             string name,
-            string description = null,
-            IEnumerable<InterfaceType> implements = null,
-            IEnumerable<DirectiveInstance> directives = null)
+            string? description = null,
+            IEnumerable<InterfaceType>? implements = null,
+            IEnumerable<DirectiveInstance>? directives = null)
             : base(name, description, directives)
         {
             if (implements != null)
@@ -21,7 +21,7 @@ namespace Tanka.GraphQL.TypeSystem
 
         public IEnumerable<InterfaceType> Interfaces => _interfaces.Values;
 
-        public bool Equals(ObjectType other)
+        public bool Equals(ObjectType? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -39,7 +39,7 @@ namespace Tanka.GraphQL.TypeSystem
             return $"{Name}";
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;

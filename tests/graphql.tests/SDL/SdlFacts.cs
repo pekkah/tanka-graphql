@@ -140,7 +140,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
             var reader = new SdlReader(document);
 
             /* When */
@@ -177,7 +177,7 @@ namespace Tanka.GraphQL.Tests.SDL
                   subscription: Subscription
                 }";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var actual = new SchemaBuilder().Sdl(document)
@@ -212,7 +212,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var actual = new SchemaBuilder().Sdl(document)
@@ -315,7 +315,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
             var reader = new SdlReader(document);
 
             /* When */
@@ -347,7 +347,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var actual = new SchemaBuilder().Sdl(document)
@@ -381,7 +381,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var schema = new SchemaBuilder().Sdl(document)
@@ -418,7 +418,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var actual = new SchemaBuilder().Sdl(document)
@@ -452,7 +452,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var actual = new SchemaBuilder().Sdl(document).Build();
@@ -484,7 +484,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var schema = new SchemaBuilder().Sdl(document).Build();
@@ -520,7 +520,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var actual = new SchemaBuilder().Sdl(document).Build();
@@ -553,7 +553,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var actual = new SchemaBuilder().Sdl(document).Build();
@@ -585,7 +585,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var schema = new SchemaBuilder().Sdl(document).Build();
@@ -614,7 +614,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var schema = new SchemaBuilder().Sdl(document).Build();
@@ -643,7 +643,7 @@ namespace Tanka.GraphQL.Tests.SDL
                     query: Query
                 }
                 ";
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var schema = new SchemaBuilder().Sdl(document).Build();
@@ -672,7 +672,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 }
                 ";
 
-            var document = Parser.ParseDocument(idl);
+            var document = Parser.ParseTypeSystemDocument(idl);
 
             /* When */
             var schema = new SchemaBuilder().Sdl(document).Build();

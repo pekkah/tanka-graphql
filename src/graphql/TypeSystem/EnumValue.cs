@@ -8,9 +8,9 @@ namespace Tanka.GraphQL.TypeSystem
 
         public EnumValue(
             string value,
-            string description = null, 
-            IEnumerable<DirectiveInstance> directives = null,
-            string deprecationReason = null)
+            string? description = null, 
+            IEnumerable<DirectiveInstance>? directives = null,
+            string? deprecationReason = null)
         {
             Description = description ?? string.Empty;
             Value = value;
@@ -19,6 +19,7 @@ namespace Tanka.GraphQL.TypeSystem
         }
 
         public string Value { get; }
+        
         public string DeprecationReason { get; }
 
         public bool IsDeprecated => !string.IsNullOrEmpty(DeprecationReason);

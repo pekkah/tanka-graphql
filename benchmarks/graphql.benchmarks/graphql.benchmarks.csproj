@@ -2,17 +2,29 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp3.0;netcoreapp3.1;net472</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>graphql.benchmarks</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Benchmarks</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.12.0" />
+    <None Remove="RealWorldSchemas\github.graphql" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="RealWorldSchemas\github.graphql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.12.0" />
+    <PackageReference Include="GraphQL-Parser" Version="5.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\graphql.language\graphql.language.csproj" />
     <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
   </ItemGroup>
 

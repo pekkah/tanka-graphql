@@ -1,31 +1,32 @@
-﻿using GraphQLParser.AST;
+﻿
 using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.TypeSystem
 {
     public static class Ast
     {
-        public static IType TypeFromAst(ISchema schema, GraphQLType type)
+        public static IType TypeFromAst(ISchema schema, TypeBase type)
         {
             if (type == null)
                 return null;
 
-            if (type.Kind == ASTNodeKind.NonNullType)
+            if (type.Kind == NodeKind.NonNullType)
             {
-                var innerType = TypeFromAst(schema, ((GraphQLNonNullType)type).Type);
-                return innerType != null ? new NonNull(innerType) : null;
+                var innerType = TypeFromAst(schema, ((NonNullType)type).OfType);
+                return new NonNull(innerType);
             }
 
-            if (type.Kind == ASTNodeKind.ListType)
+            if (type.Kind == NodeKind.ListType)
             {
-                var innerType = TypeFromAst(schema, ((GraphQLListType)type).Type);
-                return innerType != null ? new List(innerType) : null;
+                var innerType = TypeFromAst(schema, ((ListType)type).OfType);
+                return new List(innerType);
             }
 
-            if (type.Kind == ASTNodeKind.NamedType)
+            if (type.Kind == NodeKind.NamedType)
             {
-                var namedType = (GraphQLNamedType) type;
-                return schema.GetNamedType(namedType.Name.Value);
+                var namedType = (NamedType) type;
+                return schema.GetNamedType(namedType.Name);
             }
 
             throw new DocumentException(

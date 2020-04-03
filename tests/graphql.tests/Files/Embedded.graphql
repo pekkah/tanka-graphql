@@ -1,0 +1,8 @@
+directive @directive(
+	name: String!
+) on FIELD_DEFINITION
+
+type ImportedType {
+	field: String
+	nested: NestedObject!
+}

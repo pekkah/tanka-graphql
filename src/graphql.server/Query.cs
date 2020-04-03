@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
-using GraphQLParser.AST;
+using Tanka.GraphQL.Language.Nodes;
+
 
 namespace Tanka.GraphQL.Server
 {
     public class Query
     {
-        public GraphQLDocument Document { get; set; }
+        public ExecutableDocument Document { get; set; }
 
         public Dictionary<string, object> Variables { get; set; }
 

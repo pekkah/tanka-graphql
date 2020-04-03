@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Tests.Extensions
         {
             /* Given */
             var sdl = 
-                  @"# @import(path:""tanka://cost-analysis"")
+                  @"tanka_import from ""tanka://cost-analysis""
 
                     type ObjectType {
 	                    property: Int! @cost(complexity: 1)

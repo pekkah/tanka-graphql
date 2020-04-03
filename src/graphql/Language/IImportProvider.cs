@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using GraphQLParser.AST;
+﻿using System.Threading.Tasks;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Language
 {
@@ -9,8 +8,8 @@ namespace Tanka.GraphQL.Language
     /// </summary>
     public interface IImportProvider
     {
-        bool CanImport(string path, string[] types);
+        bool CanImport(string path, string[]? types);
 
-        ValueTask<IEnumerable<ASTNode>> ImportAsync(string path, string[] types, ParserOptions options);
+        ValueTask<TypeSystemDocument> ImportAsync(string path, string[]? types, ParserOptions options);
     }
 }

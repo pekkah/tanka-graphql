@@ -4,8 +4,8 @@ namespace Tanka.GraphQL
 {
     public interface IExecutionResult
     {
-        List<ExecutionError> Errors { get; set; }
+        List<ExecutionError>? Errors { get; set; }
 
-        Dictionary<string, object> Extensions { get; set; }
+        Dictionary<string, object>? Extensions { get; set; }
     }
 }
