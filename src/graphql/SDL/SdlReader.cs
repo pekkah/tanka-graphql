@@ -18,7 +18,7 @@ namespace Tanka.GraphQL.SDL
         private readonly TypeSystemDocument _document;
 
 
-        public SdlReader(TypeSystemDocument document, SchemaBuilder builder = null)
+        public SdlReader(TypeSystemDocument document, SchemaBuilder? builder = null)
         {
             _document = document;
             _builder = builder ?? new SchemaBuilder();
@@ -26,14 +26,15 @@ namespace Tanka.GraphQL.SDL
 
         public SchemaBuilder Read()
         {
-            var definitions = _document.TypeDefinitions ?? Array.Empty<TypeDefinition>();
-
-            foreach (var definition in definitions.OfType<ScalarDefinition>())
-                Scalar(definition);
 
             if (_document.DirectiveDefinitions != null)
                 foreach (var directiveDefinition in _document.DirectiveDefinitions)
                     DirectiveType(directiveDefinition);
+
+            var definitions = _document.TypeDefinitions ?? Array.Empty<TypeDefinition>();
+
+            foreach (var definition in definitions.OfType<ScalarDefinition>())
+                Scalar(definition);
 
             foreach (var definition in definitions.OfType<InputObjectDefinition>())
                 InputObject(definition);

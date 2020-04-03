@@ -90,7 +90,7 @@ namespace Tanka.GraphQL.Generator.Core
         
         private async Task<SchemaBuilder> LoadSchema()
         {
-            var content = File.ReadAllText(_inputFile);
+            var content = await File.ReadAllTextAsync(_inputFile);
             var builder = await new SchemaBuilder()
                 //.Sdl(CodeDirectivesSdl)
                 .SdlAsync(content);
