@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <Content Include="RealWorldSchemas\github.graphql">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
