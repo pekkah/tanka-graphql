@@ -91,7 +91,7 @@ Set-Location $Location
 
 "----------------------------------------"
 "Benchmarks"
-$BechmarkCmd = "dotnet run --project ./benchmarks/graphql.benchmarks/graphql.benchmarks.csproj --configuration Release --framework netcoreapp31 -- -i -m --filter *"
+$BechmarkCmd = "dotnet run --project ./benchmarks/graphql.benchmarks/graphql.benchmarks.csproj -c Release --framework netcoreapp31 -- -i -m --filter *execution*"
 
 if ($IsPreRelease) {
     $BechmarkCmd += " --job short"
