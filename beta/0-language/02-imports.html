@@ -104,9 +104,12 @@
     </ul>
 <ul class="nav flex-column" style="margin-left: 0.5rem; font-size: 96%;">
 </ul><h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted">
-    <a class="d-flex align-items-center text-muted" href="0-language/02-imports.html">Language</a>
+    <a class="d-flex align-items-center text-muted" href="0-language/01-parser.html">Language</a>
 </h6>
     <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="0-language/01-parser.html">Parser</a>
+        </li>
         <li class="nav-item">
             <a class="nav-link active bg-light" href="0-language/02-imports.html">Imports</a>
         </li>
@@ -277,38 +280,27 @@
 from SDL from other sources. There is some <a href="https://github.com/graphql/graphql-wg/blob/master/notes/2018-02-01.md#present-graphql-import">discussion</a> on
 this topic but nothing concrete and &quot;official&quot; is yet released.</p>
 <blockquote>
-<p><a href="https://github.com/ardatan/graphql-import">graphql-import</a> solves this, but the syntax does not feel like
-GraphQL and also would require additional syntax support from
-parsers.</p>
+<p><a href="https://github.com/ardatan/graphql-import">graphql-import</a> solves this with a JS style syntax</p>
 </blockquote>
-<p>Tanka GraphQL solves this problem by providing a type system
-level directive which allows specifying path and list of types
-to import. The actual details of how the import is fulfilled is
-delegated to import providers. Few providers are provided out of the box
-and others can be added.</p>
+<p>Tanka GraphQL solves this by providing a similar syntax to
+<a href="https://github.com/ardatan/graphql-import">graphql-import</a> but not implementing it fully.</p>
 <h3 id="syntax">Syntax</h3>
-<p>GraphQL does not allows specifying type system level directives.
-TGQL goes around this limitation by putting them inside a comment
-in the beginning of SDL content. Parser will check each comment line
-in the beginning of the SDL for <code>@import</code> directive.</p>
-<p>Example import</p>
-<pre><code class="lang-graphql"># @import(path: &quot;/query&quot;)
+<p>Syntax of the import requires providing a keyword, optional type filters
+and the location from which to import. Location does not need to be a file
+system.</p>
+<p>Example: import all types from &quot;/query&quot;</p>
+<pre><code class="lang-graphql">tanka_import from &quot;/query&quot;
 </code></pre>
-<p>Import directive is defined as path and list of types. On part omitted
-as GraphQL does not provide a suitable target yet.</p>
-<pre><code class="lang-graphql">directive @import(
-    path: String!
-    types: [String!]
-)
+<p>Example: import <code>Person</code> from <code>&quot;/types/Person&quot;</code></p>
+<pre><code class="lang-graphql">tanka_import Person from &quot;/types/Person&quot;
 </code></pre>
-<blockquote>
-<p>Filtering using the <code>types</code> is not yet supported. All types will be
-imported.</p>
-</blockquote>
+<p>Example: import <code>Person</code>, <code>Pet</code> from <code>&quot;/types/Person&quot;</code></p>
+<pre><code class="lang-graphql">tanka_import Person, Pet from &quot;/types/Person&quot;
+</code></pre>
 <h3 id="providers">Providers</h3>
 <p><code>Parser.ParseDocumentAsync</code> allows providing <code>ParserOptions</code> which allows
 setting a list of import providers. Parser will query these providers when
-it finds the <code>@import</code> directives. Provider can tell the parser that it can
+it finds the <code>tanka_import</code>-keyword. Provider can tell the parser that it can
 complete the import by returning true from <code>CanImport</code> function. If multiple
 providers can import the import then the parser will pick the first one.</p>
 <p>Built in providers: (these are added to options by default)</p>
@@ -330,13 +322,13 @@ extensions only include:</p>
 <li><a href="5-extensions/5-query-cost-analysis.html">cost-analysis</a>: <code>@cost</code> directive.</li>
 </ul>
 <p>Syntax</p>
-<pre><code class="lang-graphql"># @import(path: &quot;tanka://&lt;extension&gt;&quot;)
+<pre><code class="lang-graphql">tanka_import from &quot;tanka://&lt;extension&gt;&quot;
 </code></pre>
 <h4 id="filesystemimportprovider"><code>FileSystemImportProvider</code></h4>
 <p>This import provider allows importing files. These files are parsed using the
 same parser options as the main file and can also contain other imports.</p>
 <p>Syntax</p>
-<pre><code class="lang-graphql"># @import(path: &quot;path/to/file&quot;)
+<pre><code class="lang-graphql">tanka_import from &quot;path/to/file&quot;
 </code></pre>
 <p>If no file extension provided then &quot;.graphql&quot; will be appended to the path.</p>
 <p>Example
@@ -372,7 +364,7 @@ same parser options as the main file and can also contain other imports.</p>
 <p>This import provider allows importing files embedded into the assembly. These files are parsed using the
 same parser options as the main file and can also contain other imports.</p>
 <p>Syntax</p>
-<pre><code class="lang-graphql"># @import(path: &quot;embedded://&lt;assembly&gt;/&lt;resourceName&gt;&quot;)
+<pre><code class="lang-graphql">tanka_import from &quot;embedded://&lt;assembly&gt;/&lt;resourceName&gt;&quot;
 </code></pre>
 <h3 id="other-examples">Other Examples</h3>
 <p>See <a href="5-extensions/5-query-cost-analysis.html">cost-analysis</a> for example import from the TGQL extensions.</p>
