@@ -6,49 +6,42 @@ GraphQL specification does not yet provide a way of importing types
 from SDL from other sources. There is some [discussion][] on
 this topic but nothing concrete and "official" is yet released. 
 
-> [graphql-import][] solves this, but the syntax does not feel like
-> GraphQL and also would require additional syntax support from 
-> parsers.
+> [graphql-import][] solves this with a JS style syntax
 
-Tanka GraphQL solves this problem by providing a type system
-level directive which allows specifying path and list of types 
-to import. The actual details of how the import is fulfilled is
-delegated to import providers. Few providers are provided out of the box
-and others can be added.
+Tanka GraphQL solves this by providing a similar syntax to
+[graphql-import][] but not implementing it fully.
 
 
 ### Syntax
 
-GraphQL does not allows specifying type system level directives.
-TGQL goes around this limitation by putting them inside a comment
-in the beginning of SDL content. Parser will check each comment line
-in the beginning of the SDL for `@import` directive.
+Syntax of the import requires providing a keyword, optional type filters
+and the location from which to import. Location does not need to be a file
+system.
 
-Example import
-
-```graphql
-# @import(path: "/query")
-```
-
-Import directive is defined as path and list of types. On part omitted
-as GraphQL does not provide a suitable target yet.
+Example: import all types from "/query"
 
 ```graphql
-directive @import(
-    path: String!
-    types: [String!]
-)
+tanka_import from "/query"
 ```
 
-> Filtering using the `types` is not yet supported. All types will be
-> imported.
+Example: import `Person` from `"/types/Person"`
+
+```graphql
+tanka_import Person from "/types/Person"
+```
+
+Example: import `Person`, `Pet` from `"/types/Person"`
+
+```graphql
+tanka_import Person, Pet from "/types/Person"
+```
 
 
 ### Providers
 
 `Parser.ParseDocumentAsync` allows providing `ParserOptions` which allows 
 setting a list of import providers. Parser will query these providers when
-it finds the `@import` directives. Provider can tell the parser that it can
+it finds the `tanka_import`-keyword. Provider can tell the parser that it can
 complete the import by returning true from `CanImport` function. If multiple
 providers can import the import then the parser will pick the first one.
 
@@ -71,7 +64,7 @@ extensions only include:
 
 Syntax
 ```graphql
-# @import(path: "tanka://<extension>")
+tanka_import from "tanka://<extension>"
 ```
 
 
@@ -81,9 +74,11 @@ This import provider allows importing files. These files are parsed using the
 same parser options as the main file and can also contain other imports.
 
 Syntax
+
 ```graphql
-# @import(path: "path/to/file")
+tanka_import from "path/to/file"
 ```
+
 If no file extension provided then ".graphql" will be appended to the path.
 
 Example
@@ -97,7 +92,7 @@ same parser options as the main file and can also contain other imports.
 
 Syntax
 ```graphql
-# @import(path: "embedded://<assembly>/<resourceName>")
+tanka_import from "embedded://<assembly>/<resourceName>"
 ```
 
 
