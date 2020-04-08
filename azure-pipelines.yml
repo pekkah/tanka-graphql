@@ -45,6 +45,7 @@ stages:
       displayName: build-docs.ps1
       inputs:
         filePath: ./build-docs.ps1
+        arguments: -Output $(Build.StagingDirectory)
         errorActionPreference: 'continue'
         failOnStderr: false
         pwsh: true
