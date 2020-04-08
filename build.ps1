@@ -65,7 +65,7 @@ $IsPreRelease = $PreReleaseTag -ne ''
 dotnet build -c Release
 EnsureLastExitCode("dotnet build failed")
 
-dotnet test -c Release -l trx -r $Output
+dotnet test -c Release --logger trx -r $Output
 EnsureLastExitCode("dotnet test failed")
 
 "----------------------------------------"
