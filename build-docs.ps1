@@ -1,5 +1,5 @@
 param (
-    [string]$Output = "./artifacts",
+    [string]$Output = "./artifacts/gh-pages",
     [string]$CurrentBranch = $Env:BUILD_SOURCEBRANCH
  )
 
@@ -22,6 +22,7 @@ if ((Test-Path $output) -eq $True) {
 }
 
 # Git Information
+"----------------------------------------"
 if ($CurrentBranch -eq '') {
     $CurrentBranch = git branch --show-current | Out-String
     EnsureLastExitCode("git branch --show-current failed")
@@ -29,7 +30,6 @@ if ($CurrentBranch -eq '') {
 
 $CurrentBranch = $CurrentBranch.Trim()
 
-"----------------------------------------"
 "CurrentBranch: $CurrentBranch"
 
 if ($CurrentBranch -eq '') {
@@ -59,35 +59,21 @@ $PreReleaseTag = $PreReleaseTag.Trim()
 $IsPreRelease = $PreReleaseTag -ne ''
 "PreReleaseTag: $PreReleaseTag, IsPreRelease: $IsPreRelease"
 
-# Build and test
 "----------------------------------------"
-"Build Dotnet"
-dotnet build -c Release
-EnsureLastExitCode("dotnet build failed")
+"Docs"
+$DocsOutput = $Output
+$Basepath = "/tanka-graphql/"
 
-dotnet test -c Release -l trx -r $Output
-EnsureLastExitCode("dotnet test failed")
+if ($IsPreRelease) {
+    $DocsOutput += "/beta"
+    $Basepath += "beta/"
+}
 
-"----------------------------------------"
-"Pack NuGet"
-dotnet pack -c Release -o $Output -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
-EnsureLastExitCode("dotnet pack failed")
+"Output: $DocsOutput"
+"BasePath: $Basepath"
 
-"----------------------------------------"
-"Pack NPM"
-$Exclude = [string[]]@("node_modules")
-Copy-Item -Recurse -Exclude $Exclude ./src/graphql.server.link/ $Output/graphql.server.link
-Set-Location $Output/graphql.server.link
-npm i
-npm run build
-EnsureLastExitCode("npm run build failed")
-npm --no-git-tag-version --allow-same-version version $Version
-Set-Location $Location
-Set-Location $Output
-npm pack ./graphql.server.link
-EnsureLastExitCode("npm pack failed")
-
-Set-Location $Location
+dotnet tanka-docs --output $DocsOutput --basepath $Basepath
+EnsureLastExitCode("dotnet tanka-docs failed")
 
 "----------------------------------------"
 "DONE"

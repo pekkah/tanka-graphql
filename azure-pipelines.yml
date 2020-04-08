@@ -33,6 +33,22 @@ stages:
         failOnStderr: false
         pwsh: true
 
+    - task: PowerShell@2
+      displayName: run-benchmarks.ps1
+      inputs:
+        filePath: ./run-benchmarks.ps1
+        errorActionPreference: 'continue'
+        failOnStderr: false
+        pwsh: true
+    
+    - task: PowerShell@2
+      displayName: build-docs.ps1
+      inputs:
+        filePath: ./build-docs.ps1
+        errorActionPreference: 'continue'
+        failOnStderr: false
+        pwsh: true
+
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: VSTest
