@@ -54,7 +54,7 @@ stages:
       inputs:
         testResultsFormat: VSTest
         searchFolder: '$(Build.StagingDirectory)'
-        testResultsFiles: '**/*.trx' 
+        testResultsFiles: '*.trx' 
         mergeTestResults: false
 
     - task: PublishBuildArtifacts@1
