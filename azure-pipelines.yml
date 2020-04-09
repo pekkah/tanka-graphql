@@ -28,7 +28,24 @@ stages:
       displayName: build.ps1
       inputs:
         filePath: ./build.ps1
-        arguments: -Output $(Build.StagingDirectory)
+        arguments: -Output $(Build.StagingDirectory)/build
+        errorActionPreference: 'continue'
+        failOnStderr: false
+        pwsh: true
+
+    - task: PowerShell@2
+      displayName: run-benchmarks.ps1
+      inputs:
+        filePath: ./run-benchmarks.ps1
+        errorActionPreference: 'continue'
+        failOnStderr: false
+        pwsh: true
+    
+    - task: PowerShell@2
+      displayName: build-docs.ps1
+      inputs:
+        filePath: ./build-docs.ps1
+        arguments: -Output $(Build.StagingDirectory)/gh-pages
         errorActionPreference: 'continue'
         failOnStderr: false
         pwsh: true
@@ -36,7 +53,7 @@ stages:
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: VSTest
-        searchFolder: '$(Build.StagingDirectory)'
+        searchFolder: '$(Build.StagingDirectory)/build'
         testResultsFiles: '**/*.trx' 
         mergeTestResults: false
 
@@ -71,7 +88,7 @@ stages:
             displayName: 'NuGet push'
             inputs:
               command: push
-              packagesToPush: '$(Pipeline.Workspace)/artifacts/**/*.nupkg'
+              packagesToPush: '$(Pipeline.Workspace)/artifacts/build/**/*.nupkg'
               nuGetFeedType: external
               publishFeedCredentials: 'NuGet-TankaGraphQL'
               allowPackageConflicts: true
@@ -79,7 +96,7 @@ stages:
           - task: ExtractFiles@1
             displayName: 'Extract files '
             inputs:
-              archiveFilePatterns: '$(Pipeline.Workspace)/artifacts/*.tgz'
+              archiveFilePatterns: '$(Pipeline.Workspace)/artifacts/build/*.tgz'
               destinationFolder: '$(Pipeline.Workspace)/packages/'
             continueOnError: true
 

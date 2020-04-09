@@ -1,5 +1,4 @@
 param (
-    [string]$Output = "./artifacts",
     [string]$CurrentBranch = $Env:BUILD_SOURCEBRANCH
  )
 
@@ -8,17 +7,6 @@ function EnsureLastExitCode($message){
     if ($LASTEXITCODE -ne 0) {
         throw $message
     } 
-}
-
-# Parameters
-"----------------------------------------"
-"Output: $Output"
-$Location = Get-Location
-"Location: $Location"
-
-if ((Test-Path $output) -eq $True) {
-    "Clean: $Output"
-    Remove-Item -Recurse -Force $Output
 }
 
 # Git Information
@@ -59,36 +47,14 @@ $PreReleaseTag = $PreReleaseTag.Trim()
 $IsPreRelease = $PreReleaseTag -ne ''
 "PreReleaseTag: $PreReleaseTag, IsPreRelease: $IsPreRelease"
 
-# Build and test
-"----------------------------------------"
-"Build Dotnet"
-dotnet build -c Release
-EnsureLastExitCode("dotnet build failed")
-
-dotnet test -c Release --logger trx -r $Output
-EnsureLastExitCode("dotnet test failed")
 
 "----------------------------------------"
-"Pack NuGet"
-dotnet pack -c Release -o $Output -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
-EnsureLastExitCode("dotnet pack failed")
+"Benchmarks"
+$BechmarkCmd = "dotnet run --project ./benchmarks/graphql.benchmarks/graphql.benchmarks.csproj -c Release --framework netcoreapp31 -- -i -m --filter *execution*"
 
-"----------------------------------------"
-"Pack NPM"
-$Exclude = [string[]]@("node_modules")
-Copy-Item -Recurse -Exclude $Exclude ./src/graphql.server.link/ $Output/graphql.server.link
-Set-Location $Output/graphql.server.link
-npm i
-npm run build
-EnsureLastExitCode("npm run build failed")
-npm --no-git-tag-version --allow-same-version version $Version
-Set-Location $Location
-Set-Location $Output
-npm pack ./graphql.server.link
-EnsureLastExitCode("npm pack failed")
+if ($IsPreRelease) {
+    $BechmarkCmd += " --job short"
+}
 
-Set-Location $Location
-
-"----------------------------------------"
-"DONE"
-Set-Location $Location
+Invoke-Expression $BechmarkCmd
+EnsureLastExitCode("dotnet benchmarks failed")
