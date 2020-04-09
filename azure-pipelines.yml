@@ -53,8 +53,8 @@ stages:
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: VSTest
-        searchFolder: '$(Build.StagingDirectory)'
-        testResultsFiles: '*.trx' 
+        searchFolder: '$(Build.StagingDirectory)/build'
+        testResultsFiles: '**/*.trx' 
         mergeTestResults: false
 
     - task: PublishBuildArtifacts@1
@@ -84,41 +84,41 @@ stages:
           - task: NuGetToolInstaller@1
             displayName: 'Use NuGet '
 
-          - task: NuGetCommand@2
-            displayName: 'NuGet push'
-            inputs:
-              command: push
-              packagesToPush: '$(Pipeline.Workspace)/artifacts/**/*.nupkg'
-              nuGetFeedType: external
-              publishFeedCredentials: 'NuGet-TankaGraphQL'
-              allowPackageConflicts: true
+          #- task: NuGetCommand@2
+          #  displayName: 'NuGet push'
+          #  inputs:
+          #    command: push
+          #    packagesToPush: '$(Pipeline.Workspace)/artifacts/build/**/*.nupkg'
+          #    nuGetFeedType: external
+          #    publishFeedCredentials: 'NuGet-TankaGraphQL'
+          #    allowPackageConflicts: true
           
           - task: ExtractFiles@1
             displayName: 'Extract files '
             inputs:
-              archiveFilePatterns: '$(Pipeline.Workspace)/artifacts/*.tgz'
+              archiveFilePatterns: '$(Pipeline.Workspace)/artifacts/build/*.tgz'
               destinationFolder: '$(Pipeline.Workspace)/packages/'
             continueOnError: true
 
-          - task: Npm@1
-            enabled: true
-            displayName: publish beta
-            condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
-            inputs:
-              command: 'custom'
-              workingDir: '$(Pipeline.Workspace)/packages/package'
-              customCommand: 'publish --tag beta'
-              customEndpoint: 'NPM'
+          #- task: Npm@1
+          #  enabled: true
+          #  displayName: publish beta
+          #  condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+          #  inputs:
+          #    command: 'custom'
+          #    workingDir: '$(Pipeline.Workspace)/packages/package'
+          #    customCommand: 'publish --tag beta'
+          #    customEndpoint: 'NPM'
 
-          - task: Npm@1
-            enabled: true
-            displayName: 'npm publish latest'
-            condition: startsWith(variables['Build.SourceBranch'], 'refs/tags')
-            inputs:
-              command: 'custom'
-              workingDir: '$(Pipeline.Workspace)/packages/package'
-              customCommand: 'publish'
-              customEndpoint: 'NPM'
+          #- task: Npm@1
+          #  enabled: true
+          #  displayName: 'npm publish latest'
+          #  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags')
+          #  inputs:
+          #    command: 'custom'
+          #    workingDir: '$(Pipeline.Workspace)/packages/package'
+          #    customCommand: 'publish'
+          #    customEndpoint: 'NPM'
 
   - deployment: ghpages
     displayName: Publish gh-pages
@@ -155,7 +155,7 @@ stages:
             displayName: Commit
           - script: |
               cd $(Build.SourcesDirectory)
-              git push
+              # git push
               git status
             enabled: true
             displayName: Push
