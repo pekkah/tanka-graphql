@@ -28,7 +28,7 @@ stages:
       displayName: build.ps1
       inputs:
         filePath: ./build.ps1
-        arguments: -Output $(Build.StagingDirectory)
+        arguments: -Output $(Build.StagingDirectory)/build
         errorActionPreference: 'continue'
         failOnStderr: false
         pwsh: true
@@ -45,7 +45,7 @@ stages:
       displayName: build-docs.ps1
       inputs:
         filePath: ./build-docs.ps1
-        arguments: -Output $(Build.StagingDirectory)
+        arguments: -Output $(Build.StagingDirectory)/gh-pages
         errorActionPreference: 'continue'
         failOnStderr: false
         pwsh: true
