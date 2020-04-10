@@ -5,7 +5,7 @@
     <AssemblyName>tanka.graphql.language</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Language</RootNamespace>
     <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
 </Project>
