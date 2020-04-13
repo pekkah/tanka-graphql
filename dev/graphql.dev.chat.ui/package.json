@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "apollo-link": "^1.2.13",
-    "apollo-link-retry": "^2.2.15",
+    "apollo-link-retry": "^2.2.16",
     "graphiql": "0.17.5",
     "graphql": "^14.6.0",
     "react": "^16.13.1",
