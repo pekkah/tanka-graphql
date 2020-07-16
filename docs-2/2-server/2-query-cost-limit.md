@@ -14,4 +14,6 @@ See the detailed explanation and schema configuration in
 
 Add cost limiting validation rule to options
 
-[{Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_Rules}]
+```csharp
+#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_Rules
+```

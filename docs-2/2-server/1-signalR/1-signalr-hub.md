@@ -7,7 +7,11 @@ used with the provided hub.
 ### GraphQL Server
 
 Configure SignalR server
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddSignalRServer}]
 
-Use SignalR server
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseSignalRServer}]
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddSignalRServer
+```
+
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseSignalRServer
+```
