@@ -10,3 +10,5 @@ branches:
       - docs-2
       - src
       - tests
+      - tutorials
+      - dev

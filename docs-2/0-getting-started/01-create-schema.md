@@ -13,4 +13,6 @@ Schema creation includes following steps:
 2. Create query root type
 3. Build schema
 
-[{Tanka.GraphQL.Tutorials.GettingStarted.GettingStarted.Part1_CreateSchema}]
+```csharp
+#include::xref://tutorials:GettingStarted.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.GettingStarted.Part1_CreateSchema
+```

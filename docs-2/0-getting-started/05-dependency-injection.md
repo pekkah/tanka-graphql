@@ -22,13 +22,21 @@ Steps
 #### 1. Add service
 
 Define service
-[{Tanka.GraphQL.Tutorials.GettingStarted.ResolverController}]
+
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.ResolverController
+```
 
 Add service
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddExecutionScopedService}]
+
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddExecutionScopedService
+```
 
 #### 3. Use service in resolver
 
 See [Server](xref://04-server.md) for usage for below method.
 
-[{Tanka.GraphQL.Tutorials.GettingStarted.SchemaCache.UseService}]
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.SchemaCache.UseService
+```

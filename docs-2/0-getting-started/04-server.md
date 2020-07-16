@@ -26,7 +26,9 @@ Following steps are required to get the server running with your schema.
 First step for either server is to configure your schema options
 for execution. Schema should be built only once and cached as singleton.
 
-[{Tanka.GraphQL.Tutorials.GettingStarted.SchemaCache.Create}]
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.SchemaCache.Create
+```
 
 ### 2. Configure
 
@@ -35,7 +37,9 @@ the executor where to get the schema and also allows configuring the validation
 rules for the execution. By default all validation rules from the GraphQL
 specification are included.
 
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddTanka}]
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddTanka
+```
 
 ### 3. Configure server
 
@@ -44,16 +48,28 @@ services and configure their options. Depending on the server also
 middleware needs to be configured using the paired `Use*` methods.
 
 Configure SignalR server
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddSignalRServer}]
+
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddSignalRServer
+```
 
 Use SignalR server
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseSignalRServer}]
+
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseSignalRServer
+```
 
 Configure GraphQL WS server
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddWebSocketsServer}]
+
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddWebSocketsServer
+```
 
 Use GraphQL WS Server
-[{Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseWebSocketsServer}]
+
+```csharp
+#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseWebSocketsServer
+```
 
 ### 4. HTTP API
 
@@ -68,3 +84,7 @@ and is also used by the SignalR and GraphQL-WS based servers to
 execute the queries.
 
 [{Tanka.GraphQL.Samples.Chat.Web.Controllers.QueryController}]
+
+```csharp
+#include::xref://dev:graphql.dev.chat.web\Controllers\QueryController.cs?s=Tanka.GraphQL.Samples.Chat.Web.Controllers.QueryController
+```
