@@ -1,0 +1,5 @@
+﻿id: codegen
+title: "Code Generation"
+index_page: xref://codegen:1-installation.md
+nav:
+  - xref://nav.md

@@ -4,8 +4,8 @@ Schema defines the structure against which your queries are executed.
 
 > See also
 >
-> * [Specification](https://graphql.github.io/graphql-spec/June2018/#sec-Schema)
-> * [Schema](7-type-system/02-schema.html)
+> - [Specification](https://graphql.github.io/graphql-spec/June2018/#sec-Schema)
+> - [Schema](xref://types:02-schema.md)
 
 Schema creation includes following steps:
 
@@ -14,8 +14,3 @@ Schema creation includes following steps:
 3. Build schema
 
 [{Tanka.GraphQL.Tutorials.GettingStarted.GettingStarted.Part1_CreateSchema}]
-
-
-
-
-

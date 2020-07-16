@@ -8,8 +8,7 @@ this type of attack is to limit the query cost based on complexity.
 ## Query Cost Analysis
 
 See the detailed explanation and schema configuration in
-[Query Cost Analysis](5-extensions/5-query-cost-analysis.html).
-
+[Query Cost Analysis](xref://server:5-extensions/5-query-cost-analysis.md).
 
 ## Usage with server
 

@@ -6,14 +6,13 @@ required then you can implement your own server.
 
 > See also
 >
-> * [Server](2-server/0-common.html)
+> - [Server](xref://server:0-common.md)
 
 Tanka Server provides two server components which can be used together
-or separately. 
+or separately.
 
-* SignalR - server built on top of SignalR Core
-* GraphQL-WS - custom WebSockets server supporting `graphql-ws` messages
-
+- SignalR - server built on top of SignalR Core
+- GraphQL-WS - custom WebSockets server supporting `graphql-ws` messages
 
 Following steps are required to get the server running with your schema.
 
@@ -22,14 +21,12 @@ Following steps are required to get the server running with your schema.
 3. Configure server
 4. HTTP API
 
-
 ### 1. Build schema
 
 First step for either server is to configure your schema options
 for execution. Schema should be built only once and cached as singleton.
 
 [{Tanka.GraphQL.Tutorials.GettingStarted.SchemaCache.Create}]
-
 
 ### 2. Configure
 
@@ -39,7 +36,6 @@ rules for the execution. By default all validation rules from the GraphQL
 specification are included.
 
 [{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddTanka}]
-
 
 ### 3. Configure server
 
@@ -53,24 +49,22 @@ Configure SignalR server
 Use SignalR server
 [{Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseSignalRServer}]
 
-
 Configure GraphQL WS server
 [{Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddWebSocketsServer}]
 
 Use GraphQL WS Server
 [{Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseWebSocketsServer}]
 
-
 ### 4. HTTP API
 
 Tanka Server does not provide out of the box "server" for basic
 HTTP/JSON API as that can be easily implemented.
 
-Here's an example of ASP.NET Core MVC Controller taken from the 
+Here's an example of ASP.NET Core MVC Controller taken from the
 `Tanka.GraphQL.Samples.Chat.Web` project included in the solution.
 
 `IQueryStreamService` is registered by the `AddTankaGraphQL`
-and is also used by the SignalR and GraphQL-WS based servers to 
+and is also used by the SignalR and GraphQL-WS based servers to
 execute the queries.
 
 [{Tanka.GraphQL.Samples.Chat.Web.Controllers.QueryController}]

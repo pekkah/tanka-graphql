@@ -1,0 +1,2 @@
+- [Introspection](xref://6-introspection/5-schema.md)
+  - [Type name](xref://6-introspection/4-type-name.md)

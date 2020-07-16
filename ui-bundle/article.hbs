@@ -73,11 +73,31 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-            {{#sections Section.Version}}
+            {{#section Section.Version "start"}}
                 <li class="nav-item">
                     <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
                 </li>
-            {{/sections}}
+            {{/section}}
+            {{#section Section.Version "exe"}}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
+                </li>
+            {{/section}}
+            {{#section Section.Version "server"}}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
+                </li>
+            {{/section}}
+            {{#section Section.Version "codegen"}}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
+                </li>
+            {{/section}}
+            {{#section Section.Version "types"}}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
+                </li>
+            {{/section}}
         </ul>
         <ul class="navbar-nav ml-auto">
              <li class="nav-item">
