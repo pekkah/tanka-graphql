@@ -4,18 +4,26 @@
 
 ### Execution
 
-[{Tanka.GraphQL.Tests.ExecutorFacts.Mutation1}]
+```csharp
+#include::xref://tests:graphql.tests/ExecutorFacts.cs?s=Tanka.GraphQL.Tests.ExecutorFacts.Mutation1
+```
 
-[{Tanka.GraphQL.Tests.ExecutorFacts.Mutation2}]
-
+```csharp
+#include::xref://tests:graphql.tests/ExecutorFacts.cs?s=Tanka.GraphQL.Tests.ExecutorFacts.Mutation2
+```
 
 ### Example
 
 These are the schema and resolvers used in the above section.
 
 Schema
-[{Tanka.GraphQL.Tests.ExecutorFacts.Sdl}]
+
+```csharp
+#include::xref://tests:graphql.tests/ExecutorFacts.cs?s=Tanka.GraphQL.Tests.ExecutorFacts.Sdl
+```
 
 Initialization
 
-[{Tanka.GraphQL.Tests.ExecutorFacts.ExecutorFacts}]
+```csharp
+#include::xref://tests:graphql.tests/ExecutorFacts.cs?s=Tanka.GraphQL.Tests.ExecutorFacts.ExecutorFacts
+```

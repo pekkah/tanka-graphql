@@ -2,18 +2,16 @@
 
 > [Specification](https://facebook.github.io/graphql/June2018/#sec-Validation)
 
-
 ### Execution
 
-[{Tanka.GraphQL.Tests.Validation.ValidatorFacts.Validate}]
-
+```csharp
+#include::xref://tests:graphql.tests/Validation/ValidatorFacts.cs?s=Tanka.GraphQL.Tests.Validation.ValidatorFacts.Validate
+```
 
 ### Rules
 
 All execution rules
 
-[{Tanka.GraphQL.Validation.ExecutionRules.All}]
-
-
-
-
+```csharp
+#include::xref://src:graphql/Validation/ExecutionRules.cs?s=Tanka.GraphQL.Validation.ExecutionRules.All
+```
