@@ -1,0 +1,5 @@
+﻿id: root
+title: "Home"
+index_page: xref://root:index.md
+nav:
+  - xref://root:nav.md

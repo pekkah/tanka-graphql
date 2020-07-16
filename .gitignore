@@ -268,3 +268,4 @@ coverage/
 BenchmarkDotNet.Artifacts/
 gh-pages/
 *.saved.bak
+_build/
