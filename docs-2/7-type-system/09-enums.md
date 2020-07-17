@@ -2,26 +2,32 @@
 
 > [Specification](https://facebook.github.io/graphql/June2018/#sec-Enums)
 
-Enums are created as instances of `EnumType`. 
-
+Enums are created as instances of `EnumType`.
 
 ### Creating enum
 
 Direction enum
 
-[{Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.Define_enum}]
-
+```csharp
+#include::xref://tests:graphql.tests/TypeSystem/EnumTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.Define_enum
+```
 
 ### Serialization
 
 From input value
 
-[{Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.ParseValue}]
+```csharp
+#include::xref://tests:graphql.tests/TypeSystem/EnumTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.ParseValue
+```
 
 From AST node value
 
-[{Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.ParseLiteral}]
+```csharp
+#include::xref://tests:graphql.tests/TypeSystem/EnumTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.ParseLiteral
+```
 
 Serialize
 
-[{Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.Serialize}]
+```csharp
+#include::xref://tests:graphql.tests/TypeSystem/EnumTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.Serialize
+```

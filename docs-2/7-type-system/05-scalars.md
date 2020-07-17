@@ -2,7 +2,7 @@
 
 > [Specification](https://facebook.github.io/graphql/June2018/#sec-Scalars)
 
-Scalars are created as instances of `ScalarType`. 
+Scalars are created as instances of `ScalarType`.
 
 ### Built-in
 
@@ -24,8 +24,9 @@ In addition following non-null instances are provided for convenience.
 
 Also standard collection is provided
 
-[{Tanka.GraphQL.TypeSystem.ScalarType.Standard}]
-
+```csharp
+#include::xref://src:graphql/TypeSystem/ScalarType.cs?s=Tanka.GraphQL.TypeSystem.ScalarType.Standard
+```
 
 ### Custom scalars
 
@@ -35,7 +36,13 @@ is also needed when building schema with custom scalar in it.
 #### Example:
 
 Scalar:
-[{Tanka.GraphQL.TypeSystem.ScalarType.ID}]
+
+```csharp
+#include::xref://src:graphql/TypeSystem/ScalarType.cs?s=Tanka.GraphQL.TypeSystem.ScalarType.ID
+```
 
 Converter:
-[{Tanka.GraphQL.TypeSystem.ValueSerialization.IdConverter}]
+
+```csharp
+#include::xref://src:graphql/TypeSystem/ValueSerialization/IdConverter.cs
+```

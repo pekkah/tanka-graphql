@@ -6,4 +6,6 @@ Any query can include the `__typename` meta-field. It returns the name of the ob
 
 ### Query the actual type name of when querying on interface
 
-[{Tanka.GraphQL.Tests.StarwarsFacts.Query_typename_of_characters}]
+```csharp
+#include::xref://tests:graphql.tests/StarwarsFacts.cs?s=Tanka.GraphQL.Tests.StarwarsFacts.Query_typename_of_characters
+```

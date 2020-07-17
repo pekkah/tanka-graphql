@@ -9,21 +9,24 @@ or GraphQL documents.
 
 Schema
 
-[{Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_Document_as_Schema}]
+```csharp
+#include::xref://tests:graphql.tests/SDL/SdlFacts.cs?s=Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_Document_as_Schema
+```
 
 Types
 
-[{Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_Document_with_types}]
+```csharp
+#include::xref://tests:graphql.tests/SDL/SdlFacts.cs?s=Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_Document_with_types
+```
 
 Custom scalars
 
-[{Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_custom_scalar}]
+```csharp
+#include::xref://tests:graphql.tests/SDL/SdlFacts.cs?s=Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_custom_scalar
+```
 
 Types can be extended
 
-[{Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_ObjectType_with_extension}]
-
-
-
-
-
+```csharp
+#include::xref://tests:graphql.tests/SDL/SdlFacts.cs?s=Tanka.GraphQL.Tests.SDL.SdlFacts.Parse_ObjectType_with_extension
+```
