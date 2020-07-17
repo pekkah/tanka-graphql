@@ -1,0 +1,4 @@
+﻿id: dev
+type: src
+includes:
+  - "**/*.cs"

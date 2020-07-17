@@ -1,0 +1,6 @@
+﻿id: types
+title: "Type System"
+index_page: xref://types:02-schema.md
+nav:
+  - xref://nav.md
+  - xref://6-introspection/nav.md

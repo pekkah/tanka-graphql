@@ -1,0 +1,8 @@
+<li class="nav-item">
+    {{#link_to DisplayLink}}<a class="nav-link" href={{url}}>{{title}}</a>{{/link_to}}
+    <ul>
+        {{#each Children}}
+            {{>partials/NavigationItem.hbs}}
+        {{/each}}
+    </ul>
+</li>

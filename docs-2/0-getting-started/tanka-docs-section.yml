@@ -1,0 +1,6 @@
+﻿id: start
+title: "Getting Started"
+index_page: xref://start:01-create-schema.md
+nav:
+  - xref://root:nav.md
+  - xref://nav.md

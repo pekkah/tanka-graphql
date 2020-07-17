@@ -1,0 +1,4 @@
+﻿id: tests
+type: src
+includes:
+  - "**/*.cs"

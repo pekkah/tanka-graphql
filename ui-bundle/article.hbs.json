@@ -1,0 +1,30 @@
+{
+  "Site": {
+    "BasePath": "",
+    "Title": "Tanka Docs Generator v2"
+  },
+  "Page": {
+    "Title": "Index"
+  },
+  "PageHtml": "<p>Content</p>",
+  "Section": {
+    "Navigation": [
+      {
+        "link": "parent",
+        "children": [
+          {
+            "link": "child"
+          }
+        ]
+      },
+      {
+        "link": "parent",
+        "children": [
+          {
+            "link": "child"
+          }
+        ]
+      }
+    ]
+  }
+}

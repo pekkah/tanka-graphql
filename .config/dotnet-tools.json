@@ -8,10 +8,10 @@
         "dotnet-gitversion"
       ]
     },
-    "tanka.generate.docs": {
-      "version": "0.7.0",
+    "tanka.docsgen": {
+      "version": "0.9.0",
       "commands": [
-        "dotnet-tanka-docs"
+        "tanka-docs"
       ]
     }
   }

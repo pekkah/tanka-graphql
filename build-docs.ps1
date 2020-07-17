@@ -64,15 +64,10 @@ $IsPreRelease = $PreReleaseTag -ne ''
 $DocsOutput = $Output
 $Basepath = "/tanka-graphql/"
 
-if ($IsPreRelease) {
-    $DocsOutput += "/beta"
-    $Basepath += "beta/"
-}
-
 "Output: $DocsOutput"
 "BasePath: $Basepath"
 
-dotnet tanka-docs --output $DocsOutput --basepath $Basepath
+dotnet tanka-docs --output $DocsOutput --base $Basepath
 EnsureLastExitCode("dotnet tanka-docs failed")
 
 "----------------------------------------"
