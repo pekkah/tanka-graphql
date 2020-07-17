@@ -1,24 +1,16 @@
-Tanka GraphQL library (TGQL)
-=====================================
+# Tanka GraphQL library (TGQL)
 
-* Execute queries, mutations and subscriptions
-* Validation (new implementation in v0.3.0)
-* SignalR hub for streaming queries, mutations and subscriptions
-* ApolloLink for the provided SignalR hub
-* Apollo GraphQL WebSockets (apollo-link-ws) compatible web socket server (since v0.8.0)
-* Code generation
-* New and improved parser for executable and type system documents (since v2.0.0)
-
+- Execute queries, mutations and subscriptions
+- Validation (new implementation in v0.3.0)
+- SignalR hub for streaming queries, mutations and subscriptions
+- ApolloLink for the provided SignalR hub
+- Apollo GraphQL WebSockets (apollo-link-ws) compatible web socket server (since v0.8.0)
+- Code generation
+- New and improved parser for executable and type system documents (since v2.0.0)
 
 ## Documentation and packages
 
-Beta 
-
-* [Documentation](https://pekkah.github.io/tanka-graphql/beta/)
-
-Release
-
-* [Documentation](https://pekkah.github.io/tanka-graphql/)
+- [Documentation](https://pekkah.github.io/tanka-graphql/)
 
 Both beta and release packages are available from NuGet and NPM
 
@@ -33,7 +25,7 @@ Both beta and release packages are available from NuGet and NPM
 Complete sample with codegeration
 See [Sample](https://github.com/pekkah/tanka-graphql-samples)
 
-## Install 
+## Install
 
 ```bash
 dotnet package add tanka.graphql
@@ -41,7 +33,6 @@ dotnet package add tanka.graphql.server
 
 npm install @tanka/tanka-graphql-server-link
 ```
-
 
 ## Develop
 
@@ -73,7 +64,6 @@ dev\graphql.dev.chat.ui> yarn link @tanka/tanka-graphql-server-link
 # Watch for source changes and recompile the sample
 dev\graphql.dev.chat.ui> yarn start
 ```
-
 
 ### Run benchmarks
 
