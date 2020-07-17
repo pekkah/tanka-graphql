@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/tanka-graphql/">
+    <title>00-SDL - Tanka GraphQL</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="master/prism.css" />
+    <style>
+        body {
+            height: 100%;
+            width: 100%;         
+        }
+
+        a {
+            color: rgba(0,0,0,.65);
+        }
+
+        a:hover {
+            color: rgba(8, 8, 8, 0.65);
+        }
+
+        blockquote {
+            border: 1px solid rgba(94, 94, 94, 0.65);
+            border-left: 5px solid rgba(94, 94, 94, 0.65);
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;            
+        }
+
+        .sidebar {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .nav-item {
+            list-style: none;
+        }
+
+        .sidebar .nav-link {
+            display: block;
+            padding: .25rem 1.5rem;
+            font-size: 90%;
+            color: rgba(0,0,0,.65);
+        }
+
+        .sidebar .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .content h1,
+        .content h2,
+        .content h3,
+        .content h4,
+        .content h5,
+        .content h6 {
+            font-weight: 300;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Tanka GraphQL</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="master/0-getting-started/01-create-schema.html">Getting Started</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/0-language/01-parser.html">Language</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/1-execution/01-resolvers.html">Execution</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/2-server/0-common.html">Server</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/3-code-generator/1-installation.html">Code Generation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/7-type-system/02-schema.html">Type System</a>
+                </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+             <li class="nav-item">
+                <a class="nav-link" href="https://github.com/pekkah/tanka-docs-gen">GitHub</a>
+            </li>
+            <li class="nav-item dropdown justify-content-end">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    master
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/tanka-graphql/master">master</a>
+                </div>
+            </li>
+        </ul>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row flex-xl-nowrap">
+            <nav class="col-12 col-md-3 col-xl-2 sidebar">
+                <div class="sidebar-sticky">
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/02-schema.html>Schema</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/00-SDL.html>SDL</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/01-builder.html>Builder</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/04-types.html>Types</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/05-scalars.html>Scalars</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/06-objects.html>Objects</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/07-interfaces.html>Interfaces</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/08-unions.html>Unions</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/09-enums.html>Enums</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/10-input-objects.html>Input Objects</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/11-list.html>List</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/12-non-null.html>Non-null</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/13-directives.html>Directives</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/6-introspection/5-schema.html>Introspection</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/6-introspection/4-type-name.html>Type name</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+                </div>
+            </nav>
+            <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
+                <h2 id="schema-definition-language">Schema Definition Language</h2>
+<p>Defining <code>Schema</code> in IDL/SDL can greatly speed up and simplify code base.</p>
+<h3 id="load-schema-from-sdl">Load schema from SDL</h3>
+<p><code>SchemaBuilder</code> class has an extension method for loading types from SDL strings
+or GraphQL documents.</p>
+<p>Schema</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public void Parse_Document_as_Schema()
+        {
+            /* Given */
+            var idl = @&quot;
+                type Query {
+                }
+
+                type Mutation {
+                }
+
+                type Subscription {
+
+                }
+
+                schema {
+                  query: Query
+                  mutation: Mutation
+                  subscription: Subscription
+                }&quot;;
+
+            var document = Parser.ParseTypeSystemDocument(idl);
+
+            /* When */
+            var actual = new SchemaBuilder().Sdl(document)
+                .Build();
+
+            /* Then */
+            Assert.NotNull(actual);
+            Assert.NotNull(actual.Query);
+            Assert.NotNull(actual.Mutation);
+            Assert.NotNull(actual.Subscription);
+        }
+
+</code></pre>
+<p>Types</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public void Parse_Document_with_types()
+        {
+            /* Given */
+            var idl = @&quot;
+                scalar JediPowerLevel
+                scalar JediTrickLevel
+
+                enum Episode { NEWHOPE, EMPIRE, JEDI }
+
+                interface Character {
+                  id: String!
+                  name: String
+                  friends: [Character]
+                  appearsIn: [Episode]
+                }
+
+                type Human implements Character {
+                  id: String!
+                  name: String
+                  friends: [Character]
+                  appearsIn: [Episode]
+                  homePlanet: String
+                }
+
+                type Droid implements Character {
+                  id: String!
+                  name: String
+                  friends: [Character]
+                  appearsIn: [Episode]
+                  primaryFunction: String
+                }
+
+                input JediPowerInput {
+                    power: String
+                    level: JediPowerLevel
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                &quot;;
+
+            var builder = new SchemaBuilder()
+                .Sdl(idl);
+
+            builder.TryGetType&lt;ScalarType&gt;(&quot;JediPowerLevel&quot;, out var jediPowerLevel);
+            builder.TryGetType&lt;ScalarType&gt;(&quot;JediTrickLevel&quot;, out var jediTrickLevel);
+
+            builder.Include(&quot;JediPowerLevel&quot;, new IntConverter())
+                .Include(&quot;JediTrickLevel&quot;, new IntConverter());
+
+            /* When */
+            var schema = builder.Build();
+            var actual = schema.QueryTypes&lt;INamedType&gt;();
+
+            /* Then */
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Episode&quot; &amp;&amp; type is EnumType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Character&quot; &amp;&amp; type is InterfaceType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Human&quot; &amp;&amp; type is ObjectType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;Droid&quot; &amp;&amp; type is ObjectType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;JediPowerInput&quot; &amp;&amp; type is InputObjectType);
+            Assert.Contains(actual, type =&gt; type.Name == &quot;JediPowerLevel&quot; &amp;&amp; type.GetType() == typeof(ScalarType));
+            Assert.Contains(actual, type =&gt; type.Name == &quot;JediTrickLevel&quot; &amp;&amp; type.GetType() == typeof(ScalarType));
+
+            var jediPowerInput = (InputObjectType) actual.Single(t =&gt; t.Name == &quot;JediPowerInput&quot;);
+            var level = schema.GetInputField(jediPowerInput.Name, &quot;level&quot;);
+            Assert.Equal(jediPowerLevel, level.Type);
+        }
+
+</code></pre>
+<p>Custom scalars</p>
+<pre><code class="language-csharp">        [Fact]
+        public void Parse_custom_scalar()
+        {
+            /* Given */
+            var idl = @&quot;
+                scalar Url
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                &quot;;
+
+            var builder = new SchemaBuilder()
+                .Sdl(idl);
+
+
+            /* When */
+            builder.TryGetType&lt;ScalarType&gt;(&quot;Url&quot;, out var actual);
+
+            /* Then */
+            Assert.Equal(&quot;Url&quot;, actual.Name);
+        }
+
+</code></pre>
+<p>Types can be extended</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public void Parse_ObjectType_with_extension()
+        {
+            /* Given */
+            var idl = @&quot;
+                extend type Human {
+                    second: Boolean
+                }
+
+                type Human {
+                    first: Int
+                }
+
+                type Query {
+                }
+                schema {
+                    query: Query
+                }
+                &quot;;
+
+            var document = Parser.ParseTypeSystemDocument(idl);
+
+            /* When */
+            var actual = new SchemaBuilder().Sdl(document).Build();
+
+            /* Then */
+            var human = actual.GetNamedType&lt;ObjectType&gt;(&quot;Human&quot;);
+            var humanFields = actual.GetFields(human.Name);
+
+            Assert.NotNull(human);
+            Assert.Equal(&quot;Human&quot;, human.Name);
+            Assert.Single(humanFields, f =&gt; f.Key == &quot;first&quot;);
+            Assert.Single(humanFields, f =&gt; f.Key == &quot;second&quot;);
+        }
+
+</code></pre>
+                    
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="master/prism.js"></script>
+</body>
+</html>

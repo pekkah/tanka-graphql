@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/tanka-graphql/">
+    <title>13-directives - Tanka GraphQL</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="master/prism.css" />
+    <style>
+        body {
+            height: 100%;
+            width: 100%;         
+        }
+
+        a {
+            color: rgba(0,0,0,.65);
+        }
+
+        a:hover {
+            color: rgba(8, 8, 8, 0.65);
+        }
+
+        blockquote {
+            border: 1px solid rgba(94, 94, 94, 0.65);
+            border-left: 5px solid rgba(94, 94, 94, 0.65);
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;            
+        }
+
+        .sidebar {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .nav-item {
+            list-style: none;
+        }
+
+        .sidebar .nav-link {
+            display: block;
+            padding: .25rem 1.5rem;
+            font-size: 90%;
+            color: rgba(0,0,0,.65);
+        }
+
+        .sidebar .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .content h1,
+        .content h2,
+        .content h3,
+        .content h4,
+        .content h5,
+        .content h6 {
+            font-weight: 300;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Tanka GraphQL</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="master/0-getting-started/01-create-schema.html">Getting Started</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/0-language/01-parser.html">Language</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/1-execution/01-resolvers.html">Execution</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/2-server/0-common.html">Server</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/3-code-generator/1-installation.html">Code Generation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/7-type-system/02-schema.html">Type System</a>
+                </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+             <li class="nav-item">
+                <a class="nav-link" href="https://github.com/pekkah/tanka-docs-gen">GitHub</a>
+            </li>
+            <li class="nav-item dropdown justify-content-end">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    master
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/tanka-graphql/master">master</a>
+                </div>
+            </li>
+        </ul>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row flex-xl-nowrap">
+            <nav class="col-12 col-md-3 col-xl-2 sidebar">
+                <div class="sidebar-sticky">
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/02-schema.html>Schema</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/00-SDL.html>SDL</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/01-builder.html>Builder</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/04-types.html>Types</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/05-scalars.html>Scalars</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/06-objects.html>Objects</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/07-interfaces.html>Interfaces</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/08-unions.html>Unions</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/09-enums.html>Enums</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/10-input-objects.html>Input Objects</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/11-list.html>List</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/12-non-null.html>Non-null</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/13-directives.html>Directives</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/6-introspection/5-schema.html>Introspection</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/6-introspection/4-type-name.html>Type name</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+                </div>
+            </nav>
+            <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
+                <h2 id="directives">Directives</h2>
+<blockquote class="blockquote">
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-System.Directives">Specification</a></p>
+</blockquote>
+<p>Directives are created as instance of <code>DirectiveType</code>. When adding to target instance of <code>DirectiveInstance</code> is used. It contains a reference back to the original type.</p>
+<p>Following directives are provided as static properties of <code>DirectiveType</code></p>
+<pre><code class="language-csharp">Skip = new DirectiveType(
+            &quot;skip&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args
+            {
+                {&quot;if&quot;, ScalarType.NonNullBoolean}
+            })
+</code></pre>
+<pre><code class="language-csharp">Include = new DirectiveType(
+            &quot;include&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD,
+                DirectiveLocation.FRAGMENT_SPREAD,
+                DirectiveLocation.INLINE_FRAGMENT
+            },
+            new Args()
+            {
+                {&quot;if&quot;, ScalarType.NonNullBoolean}
+            })
+</code></pre>
+<pre><code class="language-csharp">Deprecated = new DirectiveType(
+            &quot;deprecated&quot;,
+            new[]
+            {
+                DirectiveLocation.FIELD_DEFINITION,
+                DirectiveLocation.ENUM_VALUE
+            },
+            new Args()
+            {
+                {&quot;reason&quot;, ScalarType.String}
+            })
+</code></pre>
+<h3 id="create-custom-directive">Create custom directive</h3>
+<p>Create simple <code>DirectiveType</code> and apply instance of it to a field and modify resolver logic to execute custom logic if it has the directive present.</p>
+<p>This example will require a role from user when trying to resolve a field value</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public async Task Authorize_field_directive_sdl()
+        {
+            /* Given */
+            var builder = new SchemaBuilder()
+                .Sdl(Parser.ParseTypeSystemDocument(@&quot;
+                directive @authorize(
+                    role: String =&quot;&quot;user&quot;&quot;
+                ) on FIELD_DEFINITION
+
+                type Query {
+                    requiresAdmin: String @authorize(role:&quot;&quot;admin&quot;&quot;)
+                    requiresUser: String @authorize
+                }
+
+                schema {
+                    query: Query
+                }
+                &quot;));
+
+            var resolvers = new ObjectTypeMap
+            {
+                {
+                    &quot;Query&quot;, new FieldResolversMap
+                    {
+                        {&quot;requiresAdmin&quot;, context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(&quot;Hello Admin!&quot;))},
+                        {&quot;requiresUser&quot;, context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(&quot;Hello User!&quot;))}
+                    }
+                }
+            };
+
+            // mock user and user store
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new []
+            {
+                new Claim(&quot;role&quot;, &quot;user&quot;),
+            }));
+
+            ClaimsPrincipal FetchUser(int id) =&gt; user;
+
+            /* When */
+            var schema = SchemaTools.MakeExecutableSchema(
+                builder,
+                resolvers,
+                directives: new Dictionary&lt;string, CreateDirectiveVisitor&gt;
+                {
+                    // register directive visitor to be used when authorizeType.Name present
+                    [&quot;authorize&quot;] = AuthorizeVisitor(FetchUser)
+                });
+
+            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            {
+                Document = Parser.ParseDocument(@&quot;{ requiresAdmin requiresUser }&quot;),
+                Schema = schema
+            });
+
+            /* Then */
+            result.ShouldMatchJson(@&quot;
+                  {
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;requiresAdmin&quot;&quot;: null,
+                    &quot;&quot;requiresUser&quot;&quot;: &quot;&quot;Hello User!&quot;&quot;
+                  },
+                  &quot;&quot;errors&quot;&quot;: [
+                    {
+                      &quot;&quot;message&quot;&quot;: &quot;&quot;requires admin role. &quot;&quot;,
+                      &quot;&quot;locations&quot;&quot;: [
+                        {
+                          &quot;&quot;line&quot;&quot;: 1,
+                          &quot;&quot;column&quot;&quot;: 3
+                        }
+                      ],
+                      &quot;&quot;path&quot;&quot;: [
+                        &quot;&quot;requiresAdmin&quot;&quot;
+                      ],
+                      &quot;&quot;extensions&quot;&quot;: {
+                        &quot;&quot;code&quot;&quot;: &quot;&quot;EXCEPTION&quot;&quot;
+                      }
+                    }
+                  ]
+                }
+                &quot;);
+        }
+
+</code></pre>
+<p>DirectiveVisitor applies the actual middleware to the resolver chain</p>
+<pre><code class="language-csharp">        public static CreateDirectiveVisitor AuthorizeVisitor(Func&lt;int, ClaimsPrincipal&gt; fetchUser)
+        {
+            return builder =&gt; new DirectiveVisitor
+            {
+                FieldDefinition = (directive, fieldDefinition) =&gt;
+                {
+                    return fieldDefinition.WithResolver(resolver =&gt; resolver.Use((context, next) =&gt;
+                    {
+                        var requiredRole = directive.GetArgument&lt;string&gt;(&quot;role&quot;);
+                        var user = fetchUser(42);
+                        
+                        if (!user.HasClaim(&quot;role&quot;, requiredRole))
+                            throw new Exception(
+                                &quot;requires admin role. &quot;
+                            );
+
+                        return next(context);
+                    }).Run(fieldDefinition.Resolver));
+                }
+            };
+        }
+
+</code></pre>
+                    
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="master/prism.js"></script>
+</body>
+</html>
