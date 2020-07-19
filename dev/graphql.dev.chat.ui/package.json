@@ -5,8 +5,8 @@
   "dependencies": {
     "apollo-link": "^1.2.14",
     "apollo-link-retry": "^2.2.16",
-    "graphiql": "0.17.5",
-    "graphql": "^14.6.0",
+    "graphiql": "1.0.3",
+    "graphql": "^15.3.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1"

@@ -100,12 +100,6 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             app.UseStaticFiles();
             app.UseWebSockets();
 
-            app.UseGraphQLPlayground(new GraphQLPlaygroundOptions
-            {
-                GraphQLEndPoint = "/api/graphql",
-                Path = "/ui"
-            });
-
             // websockets server
             app.UseTankaGraphQLWebSockets("/api/graphql");
 

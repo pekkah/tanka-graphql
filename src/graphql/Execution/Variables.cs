@@ -28,7 +28,7 @@ namespace Tanka.GraphQL.Execution
 
                 var defaultValue = variableDefinition.DefaultValue;
                 var hasValue = variableValues.ContainsKey(variableName);
-                var value = variableValues[variableName];
+                var value = hasValue ? variableValues[variableName]: null;
 
                 if (!hasValue && defaultValue != null) 
                     coercedValues[variableName] = defaultValue;
