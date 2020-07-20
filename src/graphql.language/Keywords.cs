@@ -36,6 +36,12 @@ namespace Tanka.GraphQL.Language
         public static ReadOnlyMemory<byte> False
             = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("false"));
 
+        public static ReadOnlyMemory<byte> True2
+            = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("True"));
+
+        public static ReadOnlyMemory<byte> False2
+            = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("False"));
+
         public static ReadOnlyMemory<byte> On
             = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("on"));
 
@@ -112,13 +118,13 @@ namespace Tanka.GraphQL.Language
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsBoolean(in ReadOnlySpan<byte> span, out bool value)
         {
-            if (True.Span.SequenceEqual(span))
+            if (True.Match(span) || True2.Match(span))
             {
                 value = true;
                 return true;
             }
 
-            if (False.Span.SequenceEqual(span))
+            if (False.Match(span) || False2.Match(span))
             {
                 value = false;
                 return true;

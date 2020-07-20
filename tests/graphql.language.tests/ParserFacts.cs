@@ -784,6 +784,8 @@ Description
         [Theory]
         [InlineData("true", true)]
         [InlineData("false", false)]
+        [InlineData("True", true)]
+        [InlineData("False", false)]
         public void Value_BooleanValue(string source, bool expected)
         {
             /* Given */
