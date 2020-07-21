@@ -7,7 +7,7 @@ branches:
   HEAD:
     input_path:
       - ui-bundle
-      - docs-2
+      - docs
       - src
       - tests
       - tutorials

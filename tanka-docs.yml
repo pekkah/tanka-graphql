@@ -7,7 +7,7 @@ branches:
   master:
     input_path:
       - ui-bundle
-      - docs-2
+      - docs
       - src
       - tests
       - tutorials
@@ -16,7 +16,7 @@ tags:
   2.*:
     input_path:
       - ui-bundle
-      - docs-2
+      - docs
       - src
       - tests
       - tutorials
