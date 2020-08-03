@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.Language.Tests
     public class ParserFacts
     {
         [Fact]
-        public void Document()
+        public void ExecutableDocument()
         {
             /* Given */
             var source = @"query {
