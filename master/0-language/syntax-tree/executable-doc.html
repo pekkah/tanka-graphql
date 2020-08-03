@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>01-parser - Tanka GraphQL</title>
+    <title>executable-doc - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -123,58 +123,25 @@
     <ul>
     </ul>
 </li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/0-language/syntax-tree/tree.html>Syntax Tree</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/0-language/syntax-tree/executable-doc.html>ExecutableDocument</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/0-language/syntax-tree/type-system-doc.html>TypeSystemDocument</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="language">Language</h2>
-<p>Tanka GraphQL implements lexer and parser for GraphQL. Implementation
-is done following the latest <a href="http://spec.graphql.org/draft/">draft</a> specification (2020).</p>
-<p>Lexer reads stream of tokens from UTF8 byte array (<a href="https://docs.microsoft.com">ReadOnlySpan<byte></a>)
-and parser turns these tokens into syntax tree.</p>
-<h3 id="example-parser-usage">Example: Parser usage</h3>
-<pre><code class="language-csharp">        [Fact]
-        public void ExecutableDocument()
-        {
-            /* Given */
-            var source = @&quot;query {
-                                field
-                            }
-                            mutation {
-                                field
-                            }
-                            subscription {
-                                field
-                            }
-                            &quot;;
-
-            var sut = Parser.Create(source);
-            
-            /* When */
-            var actual = sut.ParseExecutableDocument();
-
-            /* Then */
-            Assert.Equal(3, actual.OperationDefinitions?.Count);
-        }
-
-</code></pre>
-<h3 id="example-parser-usage-simplified">Example: Parser usage simplified</h3>
-<pre><code class="language-csharp">        
-        [Fact]
-        public void FromString()
-        {
-            /* Given */
-            /* When */
-            ObjectDefinition original =
-                @&quot;type Obj {
-                    field1: String
-                }&quot;;
-
-            /* Then */
-            Assert.Equal(&quot;Obj&quot;, original.Name);
-            Assert.NotNull(original.Fields);
-        }
-
-</code></pre>
+                <h2 id="executable-document">Executable Document</h2>
+<p>TODO:</p>
                     
             </main>
         </div>
