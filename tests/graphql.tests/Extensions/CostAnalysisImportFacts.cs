@@ -12,8 +12,11 @@ namespace Tanka.GraphQL.Tests.Extensions
         public async Task Parse_Sdl()
         {
             /* Given */
-            var sdl = 
-                  @"tanka_import from ""tanka://cost-analysis""
+            var sdl =
+                  @"
+                    """"""
+                    tanka_import from ""tanka://cost-analysis""
+                    """"""
 
                     type ObjectType {
 	                    property: Int! @cost(complexity: 1)

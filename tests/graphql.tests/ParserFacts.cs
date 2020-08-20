@@ -21,7 +21,9 @@ namespace Tanka.GraphQL.Tests
             );
 
             var sdl = @"
+                """"""
                 tanka_import from ""./Imported""
+                """"""
 
                 type Query {
                     field: Imported

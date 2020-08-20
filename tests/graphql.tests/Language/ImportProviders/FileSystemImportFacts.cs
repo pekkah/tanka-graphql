@@ -12,8 +12,11 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
         public async Task Parse_Sdl()
         {
             /* Given */
-            var sdl = 
-                  @"tanka_import from ""Files/Import""
+            var sdl =
+                  @"
+                    """"""
+                    tanka_import from ""Files/Import""
+                    """"""
 
                     type Query {
                         imported: ImportedType
