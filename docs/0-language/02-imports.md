@@ -15,24 +15,31 @@ Tanka GraphQL solves this by providing a similar syntax to
 
 Syntax of the import requires providing a keyword, optional type filters
 and the location from which to import. Location does not need to be a file
-system.
+system. Imports need to be wrapped into block string and need to be at the
+beginning of the document.
 
 Example: import all types from "/query"
 
 ```graphql
+"""
 tanka_import from "/query"
+"""
 ```
 
 Example: import `Person` from `"/types/Person"`
 
 ```graphql
+"""
 tanka_import Person from "/types/Person"
+"""
 ```
 
 Example: import `Person`, `Pet` from `"/types/Person"`
 
 ```graphql
+"""
 tanka_import Person, Pet from "/types/Person"
+"""
 ```
 
 ### Providers
@@ -65,7 +72,9 @@ extensions only include:
 Syntax
 
 ```graphql
+"""
 tanka_import from "tanka://<extension>"
+"""
 ```
 
 #### `FileSystemImportProvider`
@@ -76,7 +85,9 @@ same parser options as the main file and can also contain other imports.
 Syntax
 
 ```graphql
+"""
 tanka_import from "path/to/file"
+"""
 ```
 
 If no file extension provided then ".graphql" will be appended to the path.
@@ -96,13 +107,14 @@ same parser options as the main file and can also contain other imports.
 Syntax
 
 ```graphql
+"""
 tanka_import from "embedded://<assembly>/<resourceName>"
+"""
 ```
 
 ### Other Examples
 
-See [cost-analysis][] for example import from the TGQL extensions.
+See [cost-analysis](xref://server:5-extensions/5-query-cost-analysis.md) for example import from the TGQL extensions.
 
 [discussion]: https://github.com/graphql/graphql-wg/blob/master/notes/2018-02-01.md#present-graphql-import
 [graphql-import]: https://github.com/ardatan/graphql-import
-[cost-analysis]: 5-extensions/5-query-cost-analysis.html
