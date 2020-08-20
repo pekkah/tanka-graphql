@@ -18,6 +18,15 @@ namespace Tanka.GraphQL.Language
             var typeExtensions = new List<TypeExtension>();
             var imports = new List<Import>();
 
+            // check for tanka imports
+            if (_lexer.Kind == TokenKind.BlockStringValue)
+            {
+                if (TryParseTankaImports(out var foundImports))
+                {
+                    imports.AddRange(foundImports ?? Enumerable.Empty<Import>());
+                }
+            }
+
             while (_lexer.Kind != TokenKind.End)
             {
                 switch (_lexer.Kind)
@@ -86,12 +95,58 @@ namespace Tanka.GraphQL.Language
 
         public Import ParseTankaImport()
         {
-            /* tanka_import Types[]? from From */
+            /* """
+             * tanka_import Types[]? from From
+             * """
+             */
 
             /* From: StringValue */
-            
+
             /* ex. tanka_import from "./types/person" */
             /* ex. tanka_import Person from "./types/person" */
+
+            Ensure(TokenKind.BlockStringValue);
+            var blockStringValue = _lexer.Value;
+
+            var importParser = Parser.Create(blockStringValue);
+            var import = importParser.ParseTankaImportInternal();
+            Skip(TokenKind.BlockStringValue);
+            
+            return import;
+        }
+
+        public bool TryParseTankaImports(out IReadOnlyList<Import>? imports)
+        {
+            if (_lexer.Kind != TokenKind.BlockStringValue)
+            {
+                imports = null;
+                return false;
+            }
+
+            var blockStringValue = _lexer.Value;
+
+            var importParser = Parser.Create(blockStringValue);
+
+            if (!Keywords.Import.Match(importParser._lexer.Value))
+            {
+                imports = null;
+                return false;
+            }
+
+            var _imports = new List<Import>();
+            while (Keywords.Import.Match(importParser._lexer.Value))
+            {
+                var import = importParser.ParseTankaImportInternal();
+                _imports.Add(import);
+            }
+
+            Skip(TokenKind.BlockStringValue);
+            imports = _imports;
+            return true;
+        }
+
+        private Import ParseTankaImportInternal()
+        {
             var location = SkipKeyword(Keywords.Import.Span);
 
             var types = new List<Name>();
@@ -106,12 +161,12 @@ namespace Tanka.GraphQL.Language
 
             // from
             SkipKeyword(Keywords.From.Span);
-            
+
             // from
             var from = ParseStringValue();
-            
+
             return new Import(
-                types.Any() ? types: null,
+                types.Any() ? types : null,
                 from,
                 location);
         }
@@ -726,6 +781,8 @@ namespace Tanka.GraphQL.Language
 
         public StringValue? ParseOptionalDescription()
         {
+            // use preparsed description if it has
+            // been cached
             if (_description != null)
             {
                 var value = _description;
