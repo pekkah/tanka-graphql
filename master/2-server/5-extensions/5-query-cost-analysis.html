@@ -274,8 +274,11 @@ value of the argument can be used as mulpliplier for the complexity.</p>
         public async Task Parse_Sdl()
         {
             /* Given */
-            var sdl = 
-                  @&quot;tanka_import from &quot;&quot;tanka://cost-analysis&quot;&quot;
+            var sdl =
+                  @&quot;
+                    &quot;&quot;&quot;&quot;&quot;&quot;
+                    tanka_import from &quot;&quot;tanka://cost-analysis&quot;&quot;
+                    &quot;&quot;&quot;&quot;&quot;&quot;
 
                     type ObjectType {
 	                    property: Int! @cost(complexity: 1)
