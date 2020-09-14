@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
-    <PackageReference Include="GraphQL-Parser" Version="5.2.0" />
+    <PackageReference Include="GraphQL-Parser" Version="5.3.0" />
   </ItemGroup>
 
   <ItemGroup>
