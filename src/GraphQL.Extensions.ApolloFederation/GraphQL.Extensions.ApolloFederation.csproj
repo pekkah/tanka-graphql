@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>Tanka.GraphQL.Extensions.ApolloFederation</AssemblyName>
+    <RootNamespace>Tanka.GraphQL.Extensions.ApolloFederation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\graphql.language\graphql.language.csproj" />
+    <ProjectReference Include="..\graphql\graphql.csproj" />
+  </ItemGroup>
+
+</Project>
