@@ -2,6 +2,18 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
+    public sealed class Directives : CollectionNodeBase<Directive>
+    {
+        public Directives(
+            IReadOnlyCollection<Directive> items, 
+            in Location? location = default) 
+            : base(items, in location)
+        {
+        }
+
+        public override NodeKind Kind => NodeKind.Directives;
+    }
+
     public sealed class VariableDefinition: INode
     {
         public NodeKind Kind => NodeKind.VariableDefinition;

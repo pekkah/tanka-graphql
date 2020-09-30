@@ -45,6 +45,8 @@
         EnumValueDefinition,
         FieldDefinition,
         InputValueDefinition,
-        TypeExtension
+        TypeExtension,
+        TankaImport,
+        Directives
     }
 }

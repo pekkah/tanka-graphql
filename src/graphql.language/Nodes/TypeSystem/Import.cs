@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class Import
+    public sealed class Import : INode
     {
         public Import(
             IReadOnlyCollection<Name>? types,
@@ -16,6 +16,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue From { get; }
 
+        public NodeKind Kind => NodeKind.TankaImport;
         public Location? Location { get; }
         public IReadOnlyCollection<Name>? Types { get; }
     }

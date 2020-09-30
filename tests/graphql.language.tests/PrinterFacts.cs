@@ -2,7 +2,9 @@
 using System.Buffers.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using Tanka.GraphQL.Language.Internal;
 using Tanka.GraphQL.Language.Nodes;
 using Xunit;
 using Type = System.Type;
@@ -15,13 +17,17 @@ namespace Tanka.GraphQL.Language.Tests
         {
             string Normalize(string str)
             {
-                return Regex.Replace(str, @"\s+", " ");
+                str = str
+                    .Replace("\r", string.Empty)
+                    .Replace("\n", string.Empty);
+                
+                return Regex.Replace(str, @"\s+", "");
             }
 
             Assert.Equal(
-                expected, 
-                actual, 
-                ignoreCase: true, 
+                Normalize(expected), 
+                Normalize(actual), 
+                ignoreCase: false, 
                 ignoreLineEndingDifferences: true,
                 ignoreWhiteSpaceDifferences: true
                 );
@@ -42,11 +48,11 @@ namespace Tanka.GraphQL.Language.Tests
                             }
                             ";
 
-            var sut = Parser.Create(source)
+            var node = Parser.Create(source)
                 .ParseExecutableDocument();
             
             /* When */
-            var actual = new Printer().Print(sut);
+            var actual = Printer.Print(node);
 
             /* Then */
             AssertPrinterEquals(source, actual);
@@ -58,13 +64,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = @"fragment address on Person { field }";
 
-            var sut = Parser.Create(source);
+            var node = Parser.Create(source)
+                .ParseExecutableDocument();
             
             /* When */
-            var actual = sut.ParseExecutableDocument();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(1, actual.FragmentDefinitions?.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -73,13 +80,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "query { }";
 
-            var sut = Parser.Create(source);
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
             
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(OperationType.Query, actual.Operation);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -88,13 +96,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "{ }";
 
-            var sut = Parser.Create(source);
+            var node = Parser.Create(source)
+                .ParseShortOperationDefinition();
             
             /* When */
-            var actual = sut.ParseShortOperationDefinition();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(OperationType.Query, actual.Operation);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -110,13 +119,14 @@ namespace Tanka.GraphQL.Language.Tests
                             }
                            }";
 
-            var sut = Parser.Create(source);
+            var node = Parser.Create(source)
+                .ParseShortOperationDefinition();
             
             /* When */
-            var actual = sut.ParseShortOperationDefinition();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(2, actual.SelectionSet.Selections.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -125,13 +135,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "query { field }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
+            
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Single(actual.SelectionSet.Selections);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -144,14 +155,14 @@ namespace Tanka.GraphQL.Language.Tests
                             }
                          }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
+            
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Single(actual.SelectionSet.Selections);
-            Assert.IsType<InlineFragment>(actual.SelectionSet.Selections.Single());
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -162,14 +173,14 @@ namespace Tanka.GraphQL.Language.Tests
                             ...fragmentName
                          }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
+            
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Single(actual.SelectionSet.Selections);
-            Assert.IsType<FragmentSpread>(actual.SelectionSet.Selections.Single());
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -182,13 +193,14 @@ namespace Tanka.GraphQL.Language.Tests
                         field 
                     }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
+            
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Single(actual.SelectionSet.Selections);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -201,13 +213,14 @@ namespace Tanka.GraphQL.Language.Tests
                         field 
                     }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
+            
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Single(actual.SelectionSet.Selections);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -220,13 +233,14 @@ namespace Tanka.GraphQL.Language.Tests
                         # comment 
                     }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
+            
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Single(actual.SelectionSet.Selections);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -240,13 +254,14 @@ namespace Tanka.GraphQL.Language.Tests
                         field2
                     }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
+            
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.True(actual.SelectionSet.Selections.Count == 2);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -256,13 +271,14 @@ namespace Tanka.GraphQL.Language.Tests
             var source = 
                 @"query ($name: String!, $version: Float!) {}";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
+            
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(2, actual.VariableDefinitions?.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -272,104 +288,119 @@ namespace Tanka.GraphQL.Language.Tests
             var source = 
                 @"query @a @b(a: -0, b:-54.0) {}";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseOperationDefinition(OperationType.Query);
+            
             /* When */
-            var actual = sut.ParseOperationDefinition(OperationType.Query);
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(2, actual.Directives?.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void FragmentDefinition()
         {
             /* Given */
-            var sut = Parser.Create("fragment name on Human { field }");
-
+            var source = "fragment name on Human { field }";
+            var node = Parser.Create(source)
+                .ParseFragmentDefinition();
+            
             /* When */
-            var fragmentDefinition = sut.ParseFragmentDefinition();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal("name", fragmentDefinition.FragmentName);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void FragmentDefinition_TypeCondition()
         {
             /* Given */
-            var sut = Parser.Create("fragment name on Human { field }");
-
+            var source = "fragment name on Human { field }";
+            var node = Parser.Create(source)
+                .ParseFragmentDefinition();
+            
             /* When */
-            var fragmentDefinition = sut.ParseFragmentDefinition();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal("Human", fragmentDefinition.TypeCondition.Name);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void FragmentDefinition_Directives()
         {
             /* Given */
-            var sut = Parser.Create("fragment name on Human @a @b { field }");
-
+            var source = "fragment name on Human @a @b { field }";
+            var node = Parser.Create(source)
+                .ParseFragmentDefinition();
+            
             /* When */
-            var fragmentDefinition = sut.ParseFragmentDefinition();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(2, fragmentDefinition.Directives.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void FragmentDefinition_SelectionSet()
         {
             /* Given */
-            var sut = Parser.Create("fragment name on Human @a @b { field }");
-
+            var source = "fragment name on Human @a @b { field }";
+            var node = Parser.Create(source)
+                .ParseFragmentDefinition();
+            
             /* When */
-            var fragmentDefinition = sut.ParseFragmentDefinition();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(1, fragmentDefinition.SelectionSet.Selections.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void Directive()
         {
             /* Given */
-            var sut = Parser.Create("@name");
-
+            var source = "@name";
+            var node = Parser.Create(source)
+                .ParseDirective();
+            
             /* When */
-            var directive = sut.ParseDirective();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal("name", directive.Name);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void Directive_Arguments()
         {
             /* Given */
-            var sut = Parser.Create("@name(a: 1, b: true, c: null)");
-
+            var source = "@name(a: 1, b: true, c: null)";
+            var node = Parser.Create(source)
+                .ParseDirective();
+            
             /* When */
-            var directive = sut.ParseDirective();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(3, directive.Arguments?.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void Directives()
         {
             /* Given */
-            var sut = Parser.Create("@name(a: 1, b: true, c: null) @version {");
-
+            var source = "@name(a: 1, b: true, c: null) @version {";
+            var nodes = Parser.Create(source)
+                .ParseOptionalDirectives();
+            
             /* When */
-            var directives = sut.ParseOptionalDirectives();
+            var actual = Printer.Print(nodes);
 
             /* Then */
-            Assert.Equal(2, directives?.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
@@ -377,28 +408,29 @@ namespace Tanka.GraphQL.Language.Tests
         [InlineData("another: -123.123", "another", typeof(FloatValue))]
         public void Argument(string source, string name, Type valueType)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseArgument();
+            
             /* When */
-            var argument = sut.ParseArgument();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(name, argument.Name);
-            Assert.IsType(valueType, argument.Value);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void Arguments()
         {
             /* Given */
-            var sut = Parser.Create("(arg1: 123, arg2: -32, arg3: $variable)");
-
+            var source = "(arg1: 123, arg2: -32, arg3: $variable)";
+            var nodes = Parser.Create(source)
+                .ParseOptionalArguments();
+            
             /* When */
-            var arguments = sut.ParseOptionalArguments();
+            var actual = Printer.Print(nodes!);
 
             /* Then */
-            Assert.Equal(3, arguments?.Count);
+            AssertPrinterEquals(source, actual);
         }
         
         [Fact]
@@ -407,13 +439,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "field";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseFieldSelection();
+            
             /* When */
-            var actual = sut.ParseFieldSelection();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal("field", actual.Name);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -422,13 +455,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "...name";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseFragmentSpread();
+            
             /* When */
-            var actual = sut.ParseFragmentSpread();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal("name", actual.FragmentName);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -437,13 +471,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "...name @a @b @c";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseFragmentSpread();
+            
             /* When */
-            var actual = sut.ParseFragmentSpread();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(3, actual.Directives?.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -452,13 +487,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "... on Human {}";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseInlineFragment();
+            
             /* When */
-            var actual = sut.ParseInlineFragment();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal("Human", actual.TypeCondition?.Name);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -467,13 +503,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "... on Human @a @b {}";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseInlineFragment();
+            
             /* When */
-            var actual = sut.ParseInlineFragment();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(2, actual.Directives?.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -482,13 +519,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "... on Human { field }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseInlineFragment();
+            
             /* When */
-            var actual = sut.ParseInlineFragment();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(1, actual.SelectionSet.Selections.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -497,13 +535,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "... { field }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseInlineFragment();
+            
             /* When */
-            var actual = sut.ParseInlineFragment();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(1, actual.SelectionSet.Selections.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -512,14 +551,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "alias: field";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseFieldSelection();
+            
             /* When */
-            var actual = sut.ParseFieldSelection();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal("alias", actual.Alias);
-            Assert.Equal("field", actual.Name);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -528,14 +567,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "field { subField }";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseFieldSelection();
+            
             /* When */
-            var actual = sut.ParseFieldSelection();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.NotNull(actual.SelectionSet?.Selections);
-            Assert.NotEmpty(actual.SelectionSet.Selections);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -544,13 +583,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = @"($name: String! = ""tanka"", $Version: Float = 2.0)";
 
-            var sut = Parser.Create(source);
-
+            var nodes = Parser.Create(source)
+                .ParseVariableDefinitions();
+            
             /* When */
-            var variableDefinitions = sut.ParseVariableDefinitions();
+            var actual = Printer.Print(nodes);
 
             /* Then */
-            Assert.Equal(2, variableDefinitions.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
@@ -558,16 +598,14 @@ namespace Tanka.GraphQL.Language.Tests
         [InlineData("$variable2: String", "variable2", "String")]
         public void VariableDefinition(string source, string name, string typeName)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseVariableDefinition();
+            
             /* When */
-            var actual = sut.ParseVariableDefinition();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.Equal(name, actual.Variable.Name);
-            var namedType = Assert.IsType<NamedType>(actual.Type);
-            Assert.Equal(typeName, namedType.Name);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
@@ -575,14 +613,14 @@ namespace Tanka.GraphQL.Language.Tests
         [InlineData(@"$variable2: String = ""Test""", typeof(StringValue))]
         public void VariableDefinition_DefaultValue(string source, Type expectedDefaultValueType)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseVariableDefinition();
+            
             /* When */
-            var actual = sut.ParseVariableDefinition();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.IsType(expectedDefaultValueType, actual.DefaultValue?.Value);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -591,15 +629,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "TypeName";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseType();
+            
             /* When */
-            var type = sut.ParseType();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.NotNull(type);
-            Assert.IsType<NamedType>(type);
-            Assert.Equal("TypeName", ((NamedType)type).Name);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -608,15 +645,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "TypeName!";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseType();
+            
             /* When */
-            var type = sut.ParseType();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.NotNull(type);
-            Assert.IsType<NonNullType>(type);
-            Assert.IsType<NamedType>(((NonNullType)type).OfType);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -625,15 +661,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "[TypeName]";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseType();
+            
             /* When */
-            var type = sut.ParseType();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.NotNull(type);
-            Assert.IsType<ListType>(type);
-            Assert.IsType<NamedType>(((ListType)type).OfType);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -642,15 +677,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "[TypeName]!";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseType();
+            
             /* When */
-            var type = sut.ParseType();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.NotNull(type);
-            Assert.IsType<NonNullType>(type);
-            Assert.IsType<ListType>(((NonNullType)type).OfType);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
@@ -659,34 +693,14 @@ namespace Tanka.GraphQL.Language.Tests
             /* Given */
             var source = "[TypeName!]";
 
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseType();
+            
             /* When */
-            var type = sut.ParseType();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.NotNull(type);
-            Assert.IsType<ListType>(type);
-            Assert.IsType<NonNullType>(((ListType)type).OfType);
-        }
-
-        [Fact]
-        public void Type_NonNull_ListOf_NonNullOf_NamedType()
-        {
-            /* Given */
-            var source = "[TypeName!]!";
-
-            var sut = Parser.Create(source);
-
-            /* When */
-            var type = sut.ParseType();
-
-            /* Then */
-            Assert.NotNull(type);
-            var nonNullOf = Assert.IsType<NonNullType>(type);
-            var listOf = Assert.IsType<ListType>(nonNullOf.OfType);
-            var nonNullItemOf = Assert.IsType<NonNullType>(listOf.OfType);
-            Assert.IsType<NamedType>(nonNullItemOf.OfType);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
@@ -694,15 +708,14 @@ namespace Tanka.GraphQL.Language.Tests
         [InlineData("-123", -123)]
         public void Value_Int(string source, int expected)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var intValue = Assert.IsType<IntValue>(value);
-            Assert.Equal(expected, intValue.Value);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
@@ -711,16 +724,14 @@ namespace Tanka.GraphQL.Language.Tests
         [InlineData("123e20", 123e20)]
         public void Value_Float(string source, double expected)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var floatValue = Assert.IsType<FloatValue>(value);
-            Assert.True(Utf8Parser.TryParse(floatValue.Value.Span, out double d, out _));
-            Assert.Equal(expected, d);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
@@ -729,92 +740,90 @@ namespace Tanka.GraphQL.Language.Tests
         [InlineData("\"test_test\"", "test_test")]
         public void Value_String(string source, string expected)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var stringValue = Assert.IsType<StringValue>(value);
-            Assert.Equal(expected, stringValue);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
-        [InlineData("\"\"\"test\"\"\"", "test")]
-        [InlineData("\"\"\"test test\"\"\"", "test test")]
-        [InlineData("\"\"\"test_test\"\"\"", "test_test")]
         [InlineData(@"""""""
-                        test
-                      """"""", 
-                    "test")]
-        [InlineData(@"""""""
-                      Cat
-                        - not a dog
-                        - not a goat
+                     Cat
+                       - not a dog
+                       - not a goat
 
-                      Might be part demon.
+                     Might be part demon.
 
-                      """"""", 
+                     """"""", 
             "Cat\n  - not a dog\n  - not a goat\n\nMight be part demon.")]
         public void Value_BlockString(string source, string expected)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var blockStringValue = Assert.IsType<StringValue>(value);
-            Assert.Equal(expected, blockStringValue);
+            var parsedSource = Encoding.UTF8.GetString(new BlockStringValueReader(
+                Encoding.UTF8.GetBytes(source))
+                .Read());
+            
+            AssertPrinterEquals(parsedSource, actual);
         }
 
         [Fact]
         public void Value_BlockString_AsDescription()
         {
             /* Given */
-            var sut = Parser.Create(@"
+            var source = @"
 """"""
 Description
+multiple lines
 """"""
-");
+";
+            var node = Parser.Create(source)
+                .ParseOptionalDescription();
+            
             /* When */
-            var value = sut.ParseOptionalDescription();
+            var actual = Printer.Print(node!);
 
             /* Then */
-            Assert.Equal("Description", value);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void Value_Null()
         {
             /* Given */
-            var sut = Parser.Create("null");
-
+            var source = "null";
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            Assert.IsType<NullValue>(value);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
         [InlineData("true", true)]
         [InlineData("false", false)]
-        [InlineData("True", true)]
-        [InlineData("False", false)]
         public void Value_BooleanValue(string source, bool expected)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var booleanValue = Assert.IsType<BooleanValue>(value);
-            Assert.Equal(expected, booleanValue.Value);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
@@ -823,91 +832,108 @@ Description
         [InlineData("ZERO", "ZERO")]
         public void Value_EnumValue(string source, string expected)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var enumValue = Assert.IsType<EnumValue>(value);
-            Assert.Equal(expected, enumValue.Name);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void Value_ListValue_Empty()
         {
             /* Given */
-            var sut = Parser.Create("[]");
-
+            var source = "[]";
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var listValue = Assert.IsType<ListValue>(value);
-            Assert.Equal(0, listValue.Values.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void Value_ListValue_with_IntValues()
         {
             /* Given */
-            var sut = Parser.Create("[1,2,3]");
-
+            var source = "[1,2,3]";
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var listValue = Assert.IsType<ListValue>(value);
-            Assert.Equal(3, listValue.Values.Count);
-            Assert.All(listValue.Values, v => Assert.IsType<IntValue>(v));
+            AssertPrinterEquals(source, actual);
+        }
+        
+        [Theory]
+        [InlineData("[1,2,3]")]
+        [InlineData("[1.1,2.1,3.1]")]
+        [InlineData("[\"1\",\"2\",\"3\"]")]
+        public void Value_ListValue_with_Values(string source)
+        {
+            /* Given */
+            var node = Parser.Create(source)
+                .ParseValue();
+            
+            /* When */
+            var actual = Printer.Print(node);
+
+            /* Then */
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void Value_ObjectValue_Empty()
         {
             /* Given */
-            var sut = Parser.Create("{}");
-
+            var source = "{}";
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var listValue = Assert.IsType<ObjectValue>(value);
-            Assert.Equal(0, listValue.Fields.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Fact]
         public void Value_ObjectValue_with_Fields()
         {
             /* Given */
-            var sut = Parser.Create(@"{ name:""tanka"", version: 2.0 }");
-
+            var source = @"{ name:""tanka"", version: 2.0 }";
+            var node = Parser.Create(source)
+                .ParseValue();
+            
             /* When */
-            var value = sut.ParseValue();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var listValue = Assert.IsType<ObjectValue>(value);
-            Assert.Equal(2, listValue.Fields.Count);
+            AssertPrinterEquals(source, actual);
         }
 
         [Theory]
-        [InlineData("name: 1.0", "name", typeof(FloatValue))]
-        [InlineData(@"x: ""string""", "x", typeof(StringValue))]
-        [InlineData(@"empty: null", "empty", typeof(NullValue))]
-        [InlineData(@"list: [1,2,3]", "list", typeof(ListValue))]
+        [InlineData("{name: 1.0}", "name", typeof(FloatValue))]
+        [InlineData(@"{x: ""string""}", "x", typeof(StringValue))]
+        [InlineData(@"{empty: null}", "empty", typeof(NullValue))]
+        [InlineData(@"{list: [1,2,3]}", "list", typeof(ListValue))]
         public void Value_ObjectValue_ObjectField(string source, string expectedName, Type typeOf)
         {
-            /* Given */
-            var sut = Parser.Create(source);
-
+            var node = Parser.Create(source)
+                .ParseObjectValue();
+            
             /* When */
-            var value = sut.ParseObjectField();
+            var actual = Printer.Print(node);
 
             /* Then */
-            var field = Assert.IsType<ObjectField>(value);
-            Assert.Equal(expectedName, field.Name);
-            Assert.IsType(typeOf, field.Value);
+            AssertPrinterEquals(source, actual);
         }
     }
 }

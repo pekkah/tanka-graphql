@@ -5,16 +5,40 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Language
 {
-    public class ReadOnlyDocumentWalker<TContext>
+    public abstract class DocumentWalkerContextBase
     {
-        private readonly IReadOnlyList<IReadOnlyDocumentVisitor> _visitors;
+        private Stack<INode> _nodes { get; } = new Stack<INode>();
 
-        public ReadOnlyDocumentWalker(IReadOnlyList<IReadOnlyDocumentVisitor> visitors, TContext context)
+        public IEnumerable<INode> Nodes => _nodes;
+        public INode Top => _nodes.Peek();
+
+        public INode? Parent { get; private set; }
+
+        public void Push(INode node)
+        {
+            if (_nodes.Count > 0)
+                Parent = _nodes.Peek();
+            
+            _nodes.Push(node);
+        }
+
+        public INode Pop() => _nodes.Pop();
+        public bool Contains(INode node) => _nodes.Contains(node);
+    }
+
+    public class ReadOnlyDocumentWalker<TContext>
+        where TContext : DocumentWalkerContextBase
+    {
+        private readonly IReadOnlyList<IReadOnlyDocumentVisitor<TContext>> _visitors;
+        private readonly TContext _context;
+
+        public ReadOnlyDocumentWalker(IReadOnlyList<IReadOnlyDocumentVisitor<TContext>> visitors, TContext context)
         {
             _visitors = visitors;
+            _context = context;
         }
-        
-        public void Visit(INode node)
+
+        public virtual void Visit(INode node)
         {
             switch (node)
             {
@@ -142,6 +166,9 @@ namespace Tanka.GraphQL.Language
         private void VisitArgument(Argument node)
         {
             EnterNode(node);
+
+            Visit(node.Value);
+
             ExitNode(node);
         }
 
@@ -154,6 +181,7 @@ namespace Tanka.GraphQL.Language
         private void VisitDefaultValue(DefaultValue node)
         {
             EnterNode(node);
+            Visit(node.Value);
             ExitNode(node);
         }
 
@@ -166,18 +194,32 @@ namespace Tanka.GraphQL.Language
         private void VisitDirective(Directive node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Arguments);
+
             ExitNode(node);
         }
 
         private void VisitExecutableDocument(ExecutableDocument node)
         {
             EnterNode(node);
+
+            VisitCollection(node.FragmentDefinitions);
+            VisitCollection(node.OperationDefinitions);
+
             ExitNode(node);
         }
 
         private void VisitFieldSelection(FieldSelection node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Arguments);
+            VisitCollection(node.Directives);
+
+            if (node.SelectionSet != null)
+                Visit(node.SelectionSet);
+
             ExitNode(node);
         }
 
@@ -190,18 +232,35 @@ namespace Tanka.GraphQL.Language
         private void VisitFragmentDefinition(FragmentDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Directives);
+
+            Visit(node.TypeCondition);
+            Visit(node.SelectionSet);
+
             ExitNode(node);
         }
 
         private void VisitFragmentSpread(FragmentSpread node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Directives);
+
             ExitNode(node);
         }
 
         private void VisitInlineFragment(InlineFragment node)
         {
             EnterNode(node);
+
+            if (node.TypeCondition != null)
+                Visit(node.TypeCondition);
+
+            VisitCollection(node.Directives);
+
+            Visit(node.SelectionSet);
+
             ExitNode(node);
         }
 
@@ -214,12 +273,16 @@ namespace Tanka.GraphQL.Language
         private void VisitListType(ListType node)
         {
             EnterNode(node);
+            Visit(node.OfType);
             ExitNode(node);
         }
 
         private void VisitListValue(ListValue node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Values);
+
             ExitNode(node);
         }
 
@@ -232,6 +295,7 @@ namespace Tanka.GraphQL.Language
         private void VisitNonNullType(NonNullType node)
         {
             EnterNode(node);
+            Visit(node.OfType);
             ExitNode(node);
         }
 
@@ -244,24 +308,38 @@ namespace Tanka.GraphQL.Language
         private void VisitObjectField(ObjectField node)
         {
             EnterNode(node);
+            Visit(node.Value);
             ExitNode(node);
         }
 
         private void VisitObjectValue(ObjectValue node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Fields);
+
             ExitNode(node);
         }
 
         private void VisitOperationDefinition(OperationDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.VariableDefinitions);
+
+            VisitCollection(node.Directives);
+
+            Visit(node.SelectionSet);
+
             ExitNode(node);
         }
 
         private void VisitSelectionSet(SelectionSet node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Selections);
+
             ExitNode(node);
         }
 
@@ -274,18 +352,31 @@ namespace Tanka.GraphQL.Language
         private void VisitDirectiveDefinition(DirectiveDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Arguments);
+
             ExitNode(node);
         }
 
         private void VisitEnumDefinition(EnumDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Directives);
+
+            VisitCollection(node.Values);
+
             ExitNode(node);
         }
 
         private void VisitEnumValueDefinition(EnumValueDefinition node)
         {
             EnterNode(node);
+
+            Visit(node.Value);
+
+            VisitCollection(node.Directives);
+
             ExitNode(node);
         }
 
@@ -298,60 +389,122 @@ namespace Tanka.GraphQL.Language
         private void VisitFieldDefinition(FieldDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Arguments);
+
+            Visit(node.Type);
+
+            VisitCollection(node.Directives);
+
             ExitNode(node);
         }
 
         private void VisitInputValueDefinition(InputValueDefinition node)
         {
             EnterNode(node);
+
+            Visit(node.Type);
+
+            if (node.DefaultValue != null)
+                Visit(node.DefaultValue);
+
+            VisitCollection(node.Directives);
+
             ExitNode(node);
         }
 
         private void VisitInterfaceDefinition(InterfaceDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Interfaces);
+            VisitCollection(node.Directives);
+            VisitCollection(node.Fields);
+
             ExitNode(node);
         }
 
         private void VisitInputObjectDefinition(InputObjectDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Directives);
+
+            VisitCollection(node.Fields);
+
             ExitNode(node);
         }
 
         private void VisitScalarDefinition(ScalarDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Directives);
+
             ExitNode(node);
         }
 
         private void VisitSchemaDefinition(SchemaDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Directives);
+
+            foreach (var operation in node.Operations)
+            {
+                Visit(operation.NamedType);
+            }
+
             ExitNode(node);
         }
 
         private void VisitSchemaExtension(SchemaExtension node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Directives);
+
+            if (node.Operations != null)
+                foreach (var operation in node.Operations)
+                {
+                    Visit(operation.NamedType);
+                }
+
             ExitNode(node);
         }
 
         private void VisitUnionDefinition(UnionDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Directives);
+            VisitCollection(node.Members);
+
             ExitNode(node);
         }
 
         private void VisitTypeExtension(TypeExtension node)
         {
             EnterNode(node);
+
+            Visit(node.Definition);
+
             ExitNode(node);
         }
 
         private void VisitTypeSystemDocument(TypeSystemDocument node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Imports);
+            
+            VisitCollection(node.DirectiveDefinitions);
+            VisitCollection(node.TypeDefinitions);
+            VisitCollection(node.SchemaDefinitions);
+            
+            VisitCollection(node.TypeExtensions);
+            VisitCollection(node.SchemaExtensions);
+
             ExitNode(node);
         }
 
@@ -364,22 +517,44 @@ namespace Tanka.GraphQL.Language
         private void VisitVariableDefinition(VariableDefinition node)
         {
             EnterNode(node);
+
+            VisitCollection(node.Directives);
+
             ExitNode(node);
         }
 
-        private void ExitNode(INode node)
+        public void VisitCollection(IReadOnlyCollection<INode>? nodes)
         {
-            foreach (var visitor in _visitors)
+            if (nodes == null)
+                return;
+
+            var wrapper = (IReadOnlyCollectionNode<INode>)new ReadOnlyCollectionNode<INode>(nodes);
+            EnterNode(wrapper);
+
+            foreach (var node in nodes)
             {
-                visitor.ExitNode(node);
+                Visit(node);
             }
+            
+            ExitNode(wrapper);
         }
 
-        private void EnterNode(INode node)
+        protected virtual void ExitNode(INode node)
         {
             foreach (var visitor in _visitors)
             {
-                visitor.EnterNode(node);
+                visitor.ExitNode(_context, node);
+            }
+
+            _context.Pop();
+        }
+
+        protected virtual void EnterNode(INode node)
+        {
+            _context.Push(node);
+            foreach (var visitor in _visitors)
+            {
+                visitor.EnterNode(_context, node);
             }
         }
     }
