@@ -1,25 +1,9 @@
-﻿using System.Collections.Generic;
-
-namespace Tanka.GraphQL.Language.Nodes
+﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class Directives : CollectionNodeBase<Directive>
+    public sealed class VariableDefinition : INode
     {
-        public Directives(
-            IReadOnlyCollection<Directive> items, 
-            in Location? location = default) 
-            : base(items, in location)
-        {
-        }
-
-        public override NodeKind Kind => NodeKind.Directives;
-    }
-
-    public sealed class VariableDefinition: INode
-    {
-        public NodeKind Kind => NodeKind.VariableDefinition;
         public readonly DefaultValue? DefaultValue;
-        public readonly IReadOnlyCollection<Directive>? Directives;
-        public Location? Location {get;}
+        public readonly Directives? Directives;
         public readonly TypeBase Type;
         public readonly Variable Variable;
 
@@ -27,7 +11,7 @@ namespace Tanka.GraphQL.Language.Nodes
             Variable variable,
             TypeBase type,
             DefaultValue? defaultValue,
-            IReadOnlyCollection<Directive>? directives,
+            Directives? directives,
             in Location? location = default)
         {
             Variable = variable;
@@ -36,5 +20,8 @@ namespace Tanka.GraphQL.Language.Nodes
             Directives = directives;
             Location = location;
         }
+
+        public NodeKind Kind => NodeKind.VariableDefinition;
+        public Location? Location { get; }
     }
 }

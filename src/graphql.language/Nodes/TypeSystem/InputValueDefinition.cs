@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             in Name name,
             TypeBase type,
             DefaultValue? defaultValue,
-            IReadOnlyCollection<Directive>? directives,
+            Directives? directives,
             in Location? location = default)
         {
             Description = description;
@@ -32,7 +32,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public DefaultValue? DefaultValue { get; }
 
-        public IReadOnlyCollection<Directive>? Directives { get; }
+        public Directives? Directives { get; }
 
         public Location? Location { get; }
 

@@ -23,7 +23,7 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToString(input, CultureInfo.InvariantCulture);
         }
 
-        public object ParseLiteral(Value input)
+        public object ParseLiteral(ValueBase input)
         {
             if (input.Kind == NodeKind.NullValue)
             {

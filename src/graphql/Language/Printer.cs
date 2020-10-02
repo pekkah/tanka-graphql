@@ -449,7 +449,7 @@ namespace Tanka.GraphQL.Language
         {
             var directives = node.Directives?.Select(PrintDirective) ?? Array.Empty<string>();
             var operationTypes = node.Operations
-                .Select(op => PrintOperationType(op.Operation, op.NamedType));
+                .Select(op => PrintOperationType(op.OperationType, op.NamedType));
 
             return Join(new[]
                 {

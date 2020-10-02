@@ -26,12 +26,12 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
         public static ScalarDefinition WithDirectives(this ScalarDefinition definition,
-            IReadOnlyCollection<Directive>? directives)
+            IReadOnlyList<Directive>? directives)
         {
             return new ScalarDefinition(
                 definition.Description,
                 definition.Name,
-                directives,
+                Directives.From(directives),
                 definition.Location);
         }
     }

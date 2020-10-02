@@ -21,7 +21,7 @@ namespace Tanka.GraphQL.Language.Tests
                     .Replace("\r", string.Empty)
                     .Replace("\n", string.Empty);
                 
-                return Regex.Replace(str, @"\s+", "");
+                return Regex.Replace(str, @"\s+", " ");
             }
 
             Assert.Equal(
@@ -45,8 +45,7 @@ namespace Tanka.GraphQL.Language.Tests
                             }
                             subscription {
                                 field
-                            }
-                            ";
+                            }";
 
             var node = Parser.Create(source)
                 .ParseExecutableDocument();
@@ -94,7 +93,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void OperationDefinition_Short_Empty()
         {
             /* Given */
-            var source = "{ }";
+            var source = " { }";
 
             var node = Parser.Create(source)
                 .ParseShortOperationDefinition();
@@ -110,7 +109,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void OperationDefinition_Short_Selection()
         {
             /* Given */
-            var source = @"{ 
+            var source = @" { 
                             field
                             field2 {
                                 ... on Human {
@@ -200,7 +199,7 @@ namespace Tanka.GraphQL.Language.Tests
             var actual = Printer.Print(node);
 
             /* Then */
-            AssertPrinterEquals(source, actual);
+            AssertPrinterEquals("query { field }", actual);
         }
 
         [Fact]
@@ -220,7 +219,7 @@ namespace Tanka.GraphQL.Language.Tests
             var actual = Printer.Print(node);
 
             /* Then */
-            AssertPrinterEquals(source, actual);
+            AssertPrinterEquals("query { field }", actual);
         }
 
         [Fact]
@@ -240,7 +239,7 @@ namespace Tanka.GraphQL.Language.Tests
             var actual = Printer.Print(node);
 
             /* Then */
-            AssertPrinterEquals(source, actual);
+            AssertPrinterEquals("query { field }", actual);
         }
 
         [Fact]
@@ -261,7 +260,7 @@ namespace Tanka.GraphQL.Language.Tests
             var actual = Printer.Print(node);
 
             /* Then */
-            AssertPrinterEquals(source, actual);
+            AssertPrinterEquals("query { field1 field2 }", actual);
         }
 
         [Fact]
@@ -269,7 +268,7 @@ namespace Tanka.GraphQL.Language.Tests
         {
             /* Given */
             var source = 
-                @"query ($name: String!, $version: Float!) {}";
+                @"query($name: String!, $version: Float!) { }";
 
             var node = Parser.Create(source)
                 .ParseOperationDefinition(OperationType.Query);
@@ -286,7 +285,7 @@ namespace Tanka.GraphQL.Language.Tests
         {
             /* Given */
             var source = 
-                @"query @a @b(a: -0, b:-54.0) {}";
+                @"query @a @b(a: 0, b: -54.0) { }";
 
             var node = Parser.Create(source)
                 .ParseOperationDefinition(OperationType.Query);
@@ -392,7 +391,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void Directives()
         {
             /* Given */
-            var source = "@name(a: 1, b: true, c: null) @version {";
+            var source = "@name(a: 1, b: true, c: null) @version";
             var nodes = Parser.Create(source)
                 .ParseOptionalDirectives();
             
@@ -485,7 +484,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void InlineFragment()
         {
             /* Given */
-            var source = "... on Human {}";
+            var source = "... on Human { }";
 
             var node = Parser.Create(source)
                 .ParseInlineFragment();
@@ -501,7 +500,7 @@ namespace Tanka.GraphQL.Language.Tests
         public void InlineFragment_Directives()
         {
             /* Given */
-            var source = "... on Human @a @b {}";
+            var source = "... on Human @a @b { }";
 
             var node = Parser.Create(source)
                 .ParseInlineFragment();
@@ -578,10 +577,26 @@ namespace Tanka.GraphQL.Language.Tests
         }
 
         [Fact]
+        public void FieldSelection_SelectionSet_MultipleFields()
+        {
+            /* Given */
+            var source = "field { subField field2 }";
+
+            var node = Parser.Create(source)
+                .ParseFieldSelection();
+
+            /* When */
+            var actual = Printer.Print(node);
+
+            /* Then */
+            AssertPrinterEquals(source, actual);
+        }
+
+        [Fact]
         public void VariableDefinitions()
         {
             /* Given */
-            var source = @"($name: String! = ""tanka"", $Version: Float = 2.0)";
+            var source = @"($name: String! = ""tanka"", $version: Float = 2.0)";
 
             var nodes = Parser.Create(source)
                 .ParseVariableDefinitions();
@@ -594,9 +609,9 @@ namespace Tanka.GraphQL.Language.Tests
         }
 
         [Theory]
-        [InlineData("$variable: Int", "variable", "Int")]
-        [InlineData("$variable2: String", "variable2", "String")]
-        public void VariableDefinition(string source, string name, string typeName)
+        [InlineData("$variable: Int")]
+        [InlineData("$variable2: String")]
+        public void VariableDefinition(string source)
         {
             var node = Parser.Create(source)
                 .ParseVariableDefinition();
@@ -609,9 +624,9 @@ namespace Tanka.GraphQL.Language.Tests
         }
 
         [Theory]
-        [InlineData("$variable: Int=123", typeof(IntValue))]
-        [InlineData(@"$variable2: String = ""Test""", typeof(StringValue))]
-        public void VariableDefinition_DefaultValue(string source, Type expectedDefaultValueType)
+        [InlineData("$variable: Int = 123")]
+        [InlineData(@"$variable2: String = ""Test""")]
+        public void VariableDefinition_DefaultValue(string source)
         {
             var node = Parser.Create(source)
                 .ParseVariableDefinition();
@@ -893,7 +908,7 @@ multiple lines
         public void Value_ObjectValue_Empty()
         {
             /* Given */
-            var source = "{}";
+            var source = "{ }";
             var node = Parser.Create(source)
                 .ParseValue();
             
@@ -908,7 +923,7 @@ multiple lines
         public void Value_ObjectValue_with_Fields()
         {
             /* Given */
-            var source = @"{ name:""tanka"", version: 2.0 }";
+            var source = @"{ name: ""tanka"", version: 2.0 }";
             var node = Parser.Create(source)
                 .ParseValue();
             
@@ -920,10 +935,10 @@ multiple lines
         }
 
         [Theory]
-        [InlineData("{name: 1.0}", "name", typeof(FloatValue))]
-        [InlineData(@"{x: ""string""}", "x", typeof(StringValue))]
-        [InlineData(@"{empty: null}", "empty", typeof(NullValue))]
-        [InlineData(@"{list: [1,2,3]}", "list", typeof(ListValue))]
+        [InlineData("{ name: 1.0 }", "name", typeof(FloatValue))]
+        [InlineData(@"{ x: ""string"" }", "x", typeof(StringValue))]
+        [InlineData(@"{ empty: null }", "empty", typeof(NullValue))]
+        [InlineData(@"{ list: [1,2,3] }", "list", typeof(ListValue))]
         public void Value_ObjectValue_ObjectField(string source, string expectedName, Type typeOf)
         {
             var node = Parser.Create(source)

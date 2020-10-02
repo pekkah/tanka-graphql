@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class EnumValueDefinition: INode
+    public sealed class EnumValueDefinition : INode
     {
-        public NodeKind Kind => NodeKind.EnumValueDefinition;
-        
         public EnumValueDefinition(
             StringValue? description,
             EnumValue value,
-            IReadOnlyCollection<Directive>? directives,
+            Directives? directives,
             in Location? location = default)
         {
             Description = description;
@@ -22,7 +19,8 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue? Description { get; }
         public EnumValue Value { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
+        public Directives? Directives { get; }
+        public NodeKind Kind => NodeKind.EnumValueDefinition;
         public Location? Location { get; }
 
         public static implicit operator EnumValueDefinition(string value)

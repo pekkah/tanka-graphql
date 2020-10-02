@@ -5,16 +5,15 @@ namespace Tanka.GraphQL.Language.Nodes
 {
     public abstract class CollectionNodeBase<T> : ICollectionNode<T> where T : INode
     {
-        private readonly IReadOnlyCollection<T> _items;
+        private readonly IReadOnlyList<T> _items;
 
         protected CollectionNodeBase(
-            IReadOnlyCollection<T> items,
+            IReadOnlyList<T> items,
             in Location? location = default)
         {
             _items = items;
             Location = location;
         }
-
 
         public abstract NodeKind Kind { get; }
 
@@ -31,5 +30,7 @@ namespace Tanka.GraphQL.Language.Nodes
         }
 
         public int Count => _items.Count;
+
+        public T this[int index] => _items[index];
     }
 }

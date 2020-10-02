@@ -25,7 +25,7 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToDouble(input, NumberFormatInfo.InvariantInfo);
         }
 
-        public object? ParseLiteral(Value input)
+        public object? ParseLiteral(ValueBase input)
         {
             if (input.Kind == NodeKind.NullValue)
             {

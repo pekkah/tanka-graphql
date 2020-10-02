@@ -91,8 +91,8 @@ namespace Tanka.GraphQL.Language
 
 
             return new ExecutableDocument(
-                operations,
-                fragmentDefinitions);
+                new OperationDefinitions(operations), 
+                new FragmentDefinitions(fragmentDefinitions));
         }
 
         public FragmentDefinition ParseFragmentDefinition()
@@ -175,10 +175,11 @@ namespace Tanka.GraphQL.Language
                 null,
                 null,
                 selectionSet,
-                selectionSet.Location);
+                selectionSet.Location,
+                isShort: true);
         }
 
-        public IReadOnlyCollection<VariableDefinition>? ParseOptionalVariableDefinitions()
+        public VariableDefinitions? ParseOptionalVariableDefinitions()
         {
             SkipComment();
 
@@ -188,7 +189,7 @@ namespace Tanka.GraphQL.Language
             return ParseVariableDefinitions();
         }
 
-        public IReadOnlyCollection<VariableDefinition> ParseVariableDefinitions()
+        public VariableDefinitions ParseVariableDefinitions()
         {
             // (VariableDefinition[])
             Skip(TokenKind.LeftParenthesis);
@@ -204,7 +205,7 @@ namespace Tanka.GraphQL.Language
 
             Skip(TokenKind.RightParenthesis);
 
-            return variableDefinitions;
+            return new VariableDefinitions(variableDefinitions);
         }
 
         public VariableDefinition ParseVariableDefinition()
@@ -224,7 +225,7 @@ namespace Tanka.GraphQL.Language
                 variable.Location);
         }
 
-        public IReadOnlyCollection<Directive>? ParseOptionalDirectives(bool constant = false)
+        public Directives? ParseOptionalDirectives(bool constant = false)
         {
             if (_lexer.Kind != TokenKind.At)
                 return null;
@@ -236,7 +237,7 @@ namespace Tanka.GraphQL.Language
                 directives.Add(directive);
             }
 
-            return directives;
+            return new Directives(directives);
         }
 
         public Directive ParseDirective(bool constant = false)
@@ -252,7 +253,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public IReadOnlyCollection<Argument>? ParseOptionalArguments(bool constant = false)
+        public Arguments? ParseOptionalArguments(bool constant = false)
         {
             /* (Argument[]) */
             if (_lexer.Kind != TokenKind.LeftParenthesis)
@@ -268,7 +269,7 @@ namespace Tanka.GraphQL.Language
             }
 
             Skip(TokenKind.RightParenthesis);
-            return arguments;
+            return new Arguments(arguments);
         }
 
         public Argument ParseArgument(bool constant = false)
@@ -295,7 +296,7 @@ namespace Tanka.GraphQL.Language
             return new DefaultValue(value, location);
         }
 
-        public Value ParseValue(bool constant = false)
+        public ValueBase ParseValue(bool constant = false)
         {
             /* Value :
                 if not const Variable
@@ -328,7 +329,7 @@ namespace Tanka.GraphQL.Language
         ///     Parse NullValue, BooleanValue or EnumValue
         /// </summary>
         /// <returns></returns>
-        public Value ParseNameValue()
+        public ValueBase ParseNameValue()
         {
             var location = Ensure(TokenKind.Name);
             if (Keywords.IsNull(_lexer.Value))
@@ -417,7 +418,7 @@ namespace Tanka.GraphQL.Language
         {
             var location = Skip(TokenKind.LeftBracket);
 
-            var values = new List<Value>();
+            var values = new List<ValueBase>();
             while (_lexer.Kind != TokenKind.RightBracket)
             {
                 var value = ParseValue(constant);

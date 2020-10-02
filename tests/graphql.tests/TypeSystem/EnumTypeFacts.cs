@@ -56,7 +56,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         public void ParseLiteral(string input, string expected)
         {
             /* Given */
-            Value astValue = input;
+            ValueBase astValue = input;
 
             var Enum = new EnumType("TestResult", new EnumValues
             {

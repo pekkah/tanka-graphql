@@ -5,11 +5,11 @@
         public NodeKind Kind => NodeKind.ObjectField;
         public Location? Location {get;}
         public readonly Name Name;
-        public readonly Value Value;
+        public readonly ValueBase Value;
 
         public ObjectField(
             in Name name,
-            Value value,
+            ValueBase value,
             in Location? location = default)
         {
             Name = name;

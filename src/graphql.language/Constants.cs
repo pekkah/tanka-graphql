@@ -46,6 +46,7 @@ namespace Tanka.GraphQL.Language
         public static readonly bool[] IsLetterOrDigitOrUnderscore = new bool[256];
         public static readonly bool[] IsReturnOrNewLine = new bool[256];
         public static readonly bool[] IsMinusOrNonZeroDigit = new bool[256];
+        public static readonly bool[] IsMinusOrZeroOrDigit = new bool[256];
         public static readonly bool[] IsDigit = new bool[256];
 
         public static ReadOnlyMemory<byte> Bom = new ReadOnlyMemory<byte>(
@@ -127,9 +128,17 @@ namespace Tanka.GraphQL.Language
             for (var d = '0'; d <= '9'; d++) IsDigit[d] = true;
 
             /* Minus Or Digit */
-            for (var d = '1'; d <= '9'; d++) IsMinusOrNonZeroDigit[d] = true;
+            for (var d = '1'; d <= '9'; d++)
+            {
+                IsMinusOrNonZeroDigit[d] = true;
+                IsMinusOrZeroOrDigit[d] = true;
+            }
 
             IsMinusOrNonZeroDigit[Minus] = true;
+            IsMinusOrZeroOrDigit[Minus] = true;
+
+            /* Minus, Zero Or Digit */
+            IsMinusOrZeroOrDigit['0'] = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -169,7 +178,7 @@ namespace Tanka.GraphQL.Language
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNumberStart(in byte value)
         {
-            return IsMinusOrNonZeroDigit[value];
+            return IsMinusOrZeroOrDigit[value];
         }
     }
 }

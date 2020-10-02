@@ -124,7 +124,7 @@ namespace Tanka.GraphQL.Execution
 
         private static object? CoerceEnumValue(object value, EnumType enumType1)
         {
-            if (value is Value astValue)
+            if (value is ValueBase astValue)
                 return enumType1.ParseLiteral(astValue);
 
             return enumType1.ParseValue(value);
@@ -137,7 +137,7 @@ namespace Tanka.GraphQL.Execution
         {
             var serializer = getValueConverter(scalarType.Name);
 
-            if (value is Value astValue)
+            if (value is ValueBase astValue)
                 return serializer.ParseLiteral(astValue);
 
             return serializer.ParseValue(value);

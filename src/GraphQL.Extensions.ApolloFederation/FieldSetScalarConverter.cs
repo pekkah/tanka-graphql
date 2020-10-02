@@ -15,7 +15,7 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
             return input;
         }
 
-        public object? ParseLiteral(Value input)
+        public object? ParseLiteral(ValueBase input)
         {
             return input;
         }

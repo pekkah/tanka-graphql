@@ -642,7 +642,7 @@ input Name @a @b  {
             /* Then */
             Assert.Null(definition.Description);
             Assert.Null(definition.Directives);
-            Assert.Single(definition.Operations, op => op.Operation == OperationType.Query);
+            Assert.Single(definition.Operations, op => op.OperationType == OperationType.Query);
         }
 
         [Fact]
@@ -685,9 +685,9 @@ schema { query: TypeName }");
             /* Then */
             Assert.Null(definition.Description);
             Assert.Null(definition.Directives);
-            Assert.Single(definition.Operations, op => op.Operation == OperationType.Query);
-            Assert.Single(definition.Operations, op => op.Operation == OperationType.Mutation);
-            Assert.Single(definition.Operations, op => op.Operation == OperationType.Subscription);
+            Assert.Single(definition.Operations, op => op.OperationType == OperationType.Query);
+            Assert.Single(definition.Operations, op => op.OperationType == OperationType.Mutation);
+            Assert.Single(definition.Operations, op => op.OperationType == OperationType.Subscription);
         }
 
         [Fact]

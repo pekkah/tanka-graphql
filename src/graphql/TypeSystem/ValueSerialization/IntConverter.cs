@@ -23,7 +23,7 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToInt32(input, NumberFormatInfo.InvariantInfo);
         }
 
-        public object ParseLiteral(Value input)
+        public object ParseLiteral(ValueBase input)
         {
             if (input.Kind == NodeKind.NullValue)
             {

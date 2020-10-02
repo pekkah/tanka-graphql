@@ -31,38 +31,38 @@ namespace Tanka.GraphQL.Language
         }
 
         public static ObjectDefinition WithInterfaces(this ObjectDefinition definition,
-            IReadOnlyCollection<NamedType>? interfaces)
+            IReadOnlyList<NamedType>? interfaces)
         {
             return new ObjectDefinition(
                 definition.Description,
                 definition.Name,
-                interfaces,
+                ImplementsInterfaces.From(interfaces), 
                 definition.Directives,
                 definition.Fields,
                 definition.Location);
         }
 
         public static ObjectDefinition WithDirectives(this ObjectDefinition definition,
-            IReadOnlyCollection<Directive>? directives)
+            IReadOnlyList<Directive>? directives)
         {
             return new ObjectDefinition(
                 definition.Description,
                 definition.Name,
                 definition.Interfaces,
-                directives,
+                Directives.From(directives), 
                 definition.Fields,
                 definition.Location);
         }
 
         public static ObjectDefinition WithFields(this ObjectDefinition definition,
-            IReadOnlyCollection<FieldDefinition>? fields)
+            IReadOnlyList<FieldDefinition>? fields)
         {
             return new ObjectDefinition(
                 definition.Description,
                 definition.Name,
                 definition.Interfaces,
                 definition.Directives,
-                fields,
+                FieldsDefinition.From(fields),
                 definition.Location);
         }
     }

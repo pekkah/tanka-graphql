@@ -8,6 +8,10 @@ namespace Tanka.GraphQL.Language
     {
         public virtual void EnterNode(TContext context, INode node)
         {
+            //todo: should include ability to enter base value
+            if (node is ValueBase value)
+                EnterValue(context, value);
+            
             switch (node)
             {
                 case null:
@@ -24,6 +28,9 @@ namespace Tanka.GraphQL.Language
                 case Directive directive:
                     EnterDirective(context, directive);
                     break;
+                case Directives directives:
+                    EnterDirectives(context, directives);
+                    break;
                 case EnumValue enumValue:
                     EnterEnumValue(context, enumValue);
                     break;
@@ -38,6 +45,9 @@ namespace Tanka.GraphQL.Language
                     break;
                 case FragmentDefinition fragmentDefinition:
                     EnterFragmentDefinition(context, fragmentDefinition);
+                    break;
+                case FragmentDefinitions fragmentDefinitions:
+                    EnterFragmentDefinitions(context, fragmentDefinitions);
                     break;
                 case FragmentSpread fragmentSpread:
                     EnterFragmentSpread(context, fragmentSpread);
@@ -72,11 +82,17 @@ namespace Tanka.GraphQL.Language
                 case OperationDefinition operationDefinition:
                     EnterOperationDefinition(context, operationDefinition);
                     break;
+                case OperationDefinitions operationDefinitions:
+                    EnterOperationDefinitions(context, operationDefinitions);
+                    break;
                 case SelectionSet selectionSet:
                     EnterSelectionSet(context, selectionSet);
                     break;
                 case StringValue stringValue:
                     EnterStringValue(context, stringValue);
+                    break;
+                case ArgumentsDefinition argumentsDefinition:
+                    EnterArgumentsDefinition(context, argumentsDefinition);
                     break;
                 case DirectiveDefinition directiveDefinition:
                     EnterDirectiveDefinition(context, directiveDefinition);
@@ -87,8 +103,17 @@ namespace Tanka.GraphQL.Language
                 case EnumValueDefinition enumValueDefinition:
                     EnterEnumValueDefinition(context, enumValueDefinition);
                     break;
+                case EnumValuesDefinition enumValuesDefinition:
+                    EnterEnumValuesDefinition(context, enumValuesDefinition);
+                    break;
                 case FieldDefinition fieldDefinition:
                     EnterFieldDefinition(context, fieldDefinition);
+                    break;
+                case FieldsDefinition fieldsDefinition:
+                    EnterFieldsDefinition(context, fieldsDefinition);
+                    break;
+                case ImplementsInterfaces implementsInterfaces:
+                    EnterImplementsInterfaces(context, implementsInterfaces);
                     break;
                 case Import import:
                     EnterImport(context, import);
@@ -105,6 +130,9 @@ namespace Tanka.GraphQL.Language
                 case ObjectDefinition objectDefinition:
                     EnterObjectDefinition(context, objectDefinition);
                     break;
+                case RootOperationTypeDefinition rootOperationTypeDefinition:
+                    EnterRootOperationTypeDefintion(context, rootOperationTypeDefinition);
+                    break;
                 case ScalarDefinition scalarDefinition:
                     EnterScalarDefinition(context, scalarDefinition);
                     break;
@@ -116,6 +144,9 @@ namespace Tanka.GraphQL.Language
                     break;
                 case UnionDefinition unionDefinition:
                     EnterUnionDefinition(context, unionDefinition);
+                    break;
+                case UnionMemberTypes unionMemberTypes:
+                    EnterUnionMemberTypes(context, unionMemberTypes);
                     break;
                 case TypeExtension typeExtension:
                     EnterTypeExtension(context, typeExtension);
@@ -129,7 +160,10 @@ namespace Tanka.GraphQL.Language
                 case VariableDefinition variableDefinition:
                     EnterVariableDefinition(context, variableDefinition);
                     break;
-                case IReadOnlyCollectionNode<Argument> arguments:
+                case VariableDefinitions variableDefinitions:
+                    EnterVariableDefinitions(context, variableDefinitions);
+                    break;
+                case Arguments arguments:
                     EnterArguments(context, arguments);
                     break;
                 default:
@@ -137,7 +171,51 @@ namespace Tanka.GraphQL.Language
             }
         }
 
-        protected virtual void EnterArguments(TContext context, IReadOnlyCollectionNode<Argument> arguments)
+        protected virtual void EnterValue(TContext context, ValueBase value)
+        {
+        }
+
+        protected virtual void EnterDirectives(TContext context, Directives directives)
+        {
+        }
+
+        protected virtual void EnterFragmentDefinitions(TContext context, FragmentDefinitions fragmentDefinitions)
+        {
+        }
+
+        protected virtual void EnterOperationDefinitions(TContext context, OperationDefinitions operationDefinitions)
+        {
+        }
+
+        protected virtual void EnterArgumentsDefinition(TContext context, ArgumentsDefinition argumentsDefinition)
+        {
+        }
+
+        protected virtual void EnterEnumValuesDefinition(TContext context, EnumValuesDefinition enumValuesDefinition)
+        {
+        }
+
+        protected virtual void EnterFieldsDefinition(TContext context, FieldsDefinition fieldsDefinition)
+        {
+        }
+
+        protected virtual void EnterImplementsInterfaces(TContext context, ImplementsInterfaces implementsInterfaces)
+        {
+        }
+
+        protected virtual void EnterRootOperationTypeDefintion(TContext context, RootOperationTypeDefinition rootOperationTypeDefinition)
+        {
+        }
+
+        protected virtual void EnterUnionMemberTypes(TContext context, UnionMemberTypes unionMemberTypes)
+        {
+        }
+
+        protected virtual void EnterVariableDefinitions(TContext context, VariableDefinitions variableDefinitions)
+        {
+        }
+
+        protected virtual void EnterArguments(TContext context, Arguments arguments)
         {
         }
 
@@ -316,6 +394,9 @@ namespace Tanka.GraphQL.Language
                 case Directive directive:
                     ExitDirective(context, directive);
                     break;
+                case Directives directives:
+                    ExitDirectives(context, directives);
+                    break;
                 case EnumValue enumValue:
                     ExitEnumValue(context, enumValue);
                     break;
@@ -330,6 +411,9 @@ namespace Tanka.GraphQL.Language
                     break;
                 case FragmentDefinition fragmentDefinition:
                     ExitFragmentDefinition(context, fragmentDefinition);
+                    break;
+                case FragmentDefinitions fragmentDefinitions:
+                    ExitFragmentDefinitions(context, fragmentDefinitions);
                     break;
                 case FragmentSpread fragmentSpread:
                     ExitFragmentSpread(context, fragmentSpread);
@@ -364,11 +448,17 @@ namespace Tanka.GraphQL.Language
                 case OperationDefinition operationDefinition:
                     ExitOperationDefinition(context, operationDefinition);
                     break;
+                case OperationDefinitions operationDefinitions:
+                    ExitOperationDefinitions(context, operationDefinitions);
+                    break;
                 case SelectionSet selectionSet:
                     ExitSelectionSet(context, selectionSet);
                     break;
                 case StringValue stringValue:
                     ExitStringValue(context, stringValue);
+                    break;
+                case ArgumentsDefinition argumentsDefinition:
+                    ExitArgumentsDefinition(context, argumentsDefinition);
                     break;
                 case DirectiveDefinition directiveDefinition:
                     ExitDirectiveDefinition(context, directiveDefinition);
@@ -379,8 +469,17 @@ namespace Tanka.GraphQL.Language
                 case EnumValueDefinition enumValueDefinition:
                     ExitEnumValueDefinition(context, enumValueDefinition);
                     break;
+                case EnumValuesDefinition enumValuesDefinition:
+                    ExitEnumValuesDefinition(context, enumValuesDefinition);
+                    break;
                 case FieldDefinition fieldDefinition:
                     ExitFieldDefinition(context, fieldDefinition);
+                    break;
+                case FieldsDefinition fieldsDefinition:
+                    ExitFieldsDefinition(context, fieldsDefinition);
+                    break;
+                case ImplementsInterfaces implementsInterfaces:
+                    ExitImplementsInterfaces(context, implementsInterfaces);
                     break;
                 case Import import:
                     ExitImport(context, import);
@@ -397,6 +496,9 @@ namespace Tanka.GraphQL.Language
                 case ObjectDefinition objectDefinition:
                     ExitObjectDefinition(context, objectDefinition);
                     break;
+                case RootOperationTypeDefinition rootOperationTypeDefinition:
+                    ExitRootOperationTypeDefintion(context, rootOperationTypeDefinition);
+                    break;
                 case ScalarDefinition scalarDefinition:
                     ExitScalarDefinition(context, scalarDefinition);
                     break;
@@ -408,6 +510,9 @@ namespace Tanka.GraphQL.Language
                     break;
                 case UnionDefinition unionDefinition:
                     ExitUnionDefinition(context, unionDefinition);
+                    break;
+                case UnionMemberTypes unionMemberTypes:
+                    ExitUnionMemberTypes(context, unionMemberTypes);
                     break;
                 case TypeExtension typeExtension:
                     ExitTypeExtension(context, typeExtension);
@@ -421,15 +526,67 @@ namespace Tanka.GraphQL.Language
                 case VariableDefinition variableDefinition:
                     ExitVariableDefinition(context, variableDefinition);
                     break;
-                case ReadOnlyCollectionNode<Argument> arguments:
+                case VariableDefinitions variableDefinitions:
+                    ExitVariableDefinitions(context, variableDefinitions);
+                    break;
+                case Arguments arguments:
                     ExitArguments(context, arguments);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(node));
             }
+
+            //todo: should include ability to exit base value
+            if (node is ValueBase value)
+                ExitValue(context, value);
+
         }
 
-        protected virtual void ExitArguments(TContext context, ReadOnlyCollectionNode<Argument> arguments)
+        protected virtual void ExitValue(TContext context, ValueBase value)
+        {
+        }
+
+        protected virtual void ExitDirectives(TContext context, Directives directives)
+        {
+        }
+
+        protected virtual void ExitFragmentDefinitions(TContext context, FragmentDefinitions fragmentDefinitions)
+        {
+        }
+
+        protected virtual void ExitOperationDefinitions(TContext context, OperationDefinitions operationDefinitions)
+        {
+        }
+
+        protected virtual void ExitArgumentsDefinition(TContext context, ArgumentsDefinition argumentsDefinition)
+        {
+        }
+
+        protected virtual void ExitEnumValuesDefinition(TContext context, EnumValuesDefinition enumValuesDefinition)
+        {
+        }
+
+        protected virtual void ExitFieldsDefinition(TContext context, FieldsDefinition fieldsDefinition)
+        {
+        }
+
+        protected virtual void ExitImplementsInterfaces(TContext context, ImplementsInterfaces implementsInterfaces)
+        {
+        }
+
+        protected virtual void ExitRootOperationTypeDefintion(TContext context, RootOperationTypeDefinition rootOperationTypeDefinition)
+        {
+        }
+
+        protected virtual void ExitUnionMemberTypes(TContext context, UnionMemberTypes unionMemberTypes)
+        {
+        }
+
+        protected virtual void ExitVariableDefinitions(TContext context, VariableDefinitions variableDefinitions)
+        {
+        }
+
+        protected virtual void ExitArguments(TContext context, Arguments arguments)
         {
         }
 

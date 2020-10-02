@@ -4,15 +4,14 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class DirectiveDefinition: INode
+    public sealed class DirectiveDefinition : INode
     {
-        public NodeKind Kind => NodeKind.DirectiveDefinition;
         public DirectiveDefinition(
             StringValue? description,
             in Name name,
-            IReadOnlyCollection<InputValueDefinition>? arguments,
+            ArgumentsDefinition? arguments,
             in bool isRepeatable,
-            IReadOnlyCollection<string> directiveLocations,
+            IReadOnlyList<string> directiveLocations,
             in Location? location = default)
         {
             Description = description;
@@ -25,9 +24,10 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue? Description { get; }
         public Name Name { get; }
-        public IReadOnlyCollection<InputValueDefinition>? Arguments { get; }
+        public ArgumentsDefinition? Arguments { get; }
         public bool IsRepeatable { get; }
-        public IReadOnlyCollection<string> DirectiveLocations { get; }
+        public IReadOnlyList<string> DirectiveLocations { get; }
+        public NodeKind Kind => NodeKind.DirectiveDefinition;
         public Location? Location { get; }
 
         public static implicit operator DirectiveDefinition(string value)

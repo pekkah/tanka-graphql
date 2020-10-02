@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using Tanka.GraphQL.Language.Nodes;
 
-namespace Tanka.GraphQL.Language
+namespace Tanka.GraphQL.Language.Nodes
 {
-    public interface ICollectionNode<out T> : INode, IReadOnlyCollection<T> where T : INode
+    public interface ICollectionNode<out T> : INode, IReadOnlyList<T> where T : INode
     {
     }
 }

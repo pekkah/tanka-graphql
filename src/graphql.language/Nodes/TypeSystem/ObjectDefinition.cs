@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class ObjectDefinition : TypeDefinition
     {
-        public override NodeKind Kind => NodeKind.ObjectDefinition;
         public ObjectDefinition(
             StringValue? description,
             in Name name,
-            IReadOnlyCollection<NamedType>? interfaces,
-            IReadOnlyCollection<Directive>? directives,
-            IReadOnlyCollection<FieldDefinition>? fields,
+            ImplementsInterfaces? interfaces,
+            Directives? directives,
+            FieldsDefinition? fields,
             in Location? location = default)
         {
             Description = description;
@@ -23,11 +21,13 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             Location = location;
         }
 
+        public override NodeKind Kind => NodeKind.ObjectDefinition;
+
         public StringValue? Description { get; }
         public override Name Name { get; }
-        public IReadOnlyCollection<NamedType>? Interfaces { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
-        public IReadOnlyCollection<FieldDefinition>? Fields { get; }
+        public ImplementsInterfaces? Interfaces { get; }
+        public Directives? Directives { get; }
+        public FieldsDefinition? Fields { get; }
         public override Location? Location { get; }
 
         public static implicit operator ObjectDefinition(string value)

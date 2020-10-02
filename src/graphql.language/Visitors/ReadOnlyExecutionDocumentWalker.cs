@@ -196,7 +196,7 @@ namespace Tanka.GraphQL.Language.Visitors
                 visitor.Leave(definition);
         }
 
-        private void Visit(IReadOnlyCollection<Argument>? arguments)
+        private void Visit(Arguments? arguments)
         {
             if (arguments == null)
                 return;
@@ -218,7 +218,7 @@ namespace Tanka.GraphQL.Language.Visitors
                 visitor.Leave(argument);
         }
 
-        private void Visit(Value value)
+        private void Visit(ValueBase value)
         {
             // enter
             foreach (var visitor in _options.Value)
@@ -231,7 +231,7 @@ namespace Tanka.GraphQL.Language.Visitors
                 visitor.Leave(value);
         }
 
-        private void Visit(IReadOnlyCollection<Directive>? directives)
+        private void Visit(Directives? directives)
         {
             if (directives == null)
                 return;
@@ -239,7 +239,7 @@ namespace Tanka.GraphQL.Language.Visitors
             foreach (var definition in directives) Visit(definition);
         }
 
-        private void Visit(IReadOnlyCollection<VariableDefinition>? definitions)
+        private void Visit(VariableDefinitions? definitions)
         {
             if (definitions == null)
                 return;

@@ -252,7 +252,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public IReadOnlyCollection<(OperationType Operation, NamedType NamedType)>? ParseOptionalRootOperationDefinitions()
+        public IReadOnlyList<RootOperationTypeDefinition>? ParseOptionalRootOperationDefinitions()
         {
             if (_lexer.Kind != TokenKind.LeftBrace)
                 return null;
@@ -260,11 +260,11 @@ namespace Tanka.GraphQL.Language
             return ParseRootOperationDefinitions();
         }
 
-        public IReadOnlyCollection<(OperationType Operation, NamedType NamedType)> ParseRootOperationDefinitions()
+        public IReadOnlyList<RootOperationTypeDefinition> ParseRootOperationDefinitions()
         {
             Skip(TokenKind.LeftBrace);
 
-            var operations = new List<(OperationType Operation, NamedType NamedType)>();
+            var operations = new List<RootOperationTypeDefinition>();
             while (_lexer.Kind != TokenKind.RightBrace)
             {
                 /* OperationType: NamedType */
@@ -275,7 +275,7 @@ namespace Tanka.GraphQL.Language
                 Skip(TokenKind.Name);
                 Skip(TokenKind.Colon);
                 var namedType = ParseNamedType();
-                operations.Add((operation, namedType));
+                operations.Add(new RootOperationTypeDefinition(operation, namedType));
             }
 
             Skip(TokenKind.RightBrace);
@@ -318,7 +318,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public IReadOnlyCollection<string> ParseDirectiveLocations()
+        public IReadOnlyList<string> ParseDirectiveLocations()
         {
             /*
             on DirectiveLocations | DirectiveLocation
@@ -354,7 +354,7 @@ namespace Tanka.GraphQL.Language
             return locations;
         }
 
-        public IReadOnlyCollection<InputValueDefinition>? ParseOptionalArgumentDefinitions()
+        public ArgumentsDefinition? ParseOptionalArgumentDefinitions()
         {
             if (_lexer.Kind != TokenKind.LeftParenthesis)
                 return null;
@@ -369,7 +369,7 @@ namespace Tanka.GraphQL.Language
             }
 
             Skip(TokenKind.RightParenthesis);
-            return definitions;
+            return new ArgumentsDefinition(definitions);
         }
 
         public InputValueDefinition ParseInputValueDefinition()
@@ -586,7 +586,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public IReadOnlyCollection<EnumValueDefinition>? ParseOptionalEnumValueDefinitions()
+        public EnumValuesDefinition? ParseOptionalEnumValueDefinitions()
         {
             /* { EnumValueDefinition[] } */
             if (_lexer.Kind != TokenKind.LeftBrace)
@@ -602,7 +602,7 @@ namespace Tanka.GraphQL.Language
             }
 
             Skip(TokenKind.RightBrace);
-            return values;
+            return new EnumValuesDefinition(values);
         }
 
         public EnumValueDefinition ParseEnumValueDefinition()
@@ -680,7 +680,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        internal IReadOnlyCollection<InputValueDefinition>? ParseOptionalInputObjectFields()
+        internal InputFieldsDefinition? ParseOptionalInputObjectFields()
         {
             if (_lexer.Kind != TokenKind.LeftBrace)
                 return null;
@@ -695,10 +695,10 @@ namespace Tanka.GraphQL.Language
             }
 
             Skip(TokenKind.RightBrace);
-            return values;
+            return new InputFieldsDefinition(values);
         }
 
-        internal IReadOnlyCollection<NamedType>? ParseOptionalUnionMembers()
+        internal UnionMemberTypes? ParseOptionalUnionMembers()
         {
             /*  UnionMemberTypes | NamedType
                 = |? NamedType 
@@ -724,10 +724,10 @@ namespace Tanka.GraphQL.Language
                     break;
             }
 
-            return namedTypes;
+            return new UnionMemberTypes(namedTypes);
         }
 
-        internal IReadOnlyCollection<FieldDefinition>? ParseOptionalFieldDefinitions()
+        internal FieldsDefinition? ParseOptionalFieldDefinitions()
         {
             /* { FieldDefinition } */
 
@@ -745,10 +745,10 @@ namespace Tanka.GraphQL.Language
 
             Skip(TokenKind.RightBrace);
 
-            return fields;
+            return new FieldsDefinition(fields);
         }
 
-        internal IReadOnlyCollection<NamedType>? ParseOptionalImplementsInterfaces()
+        internal ImplementsInterfaces? ParseOptionalImplementsInterfaces()
         {
             /*  ImplementsInterfaces & NamedType
                 implements &? NamedType
@@ -776,7 +776,7 @@ namespace Tanka.GraphQL.Language
                     break;
             }
 
-            return namedTypes;
+            return new ImplementsInterfaces(namedTypes);
         }
 
         public StringValue? ParseOptionalDescription()

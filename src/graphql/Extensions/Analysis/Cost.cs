@@ -72,7 +72,7 @@ namespace Tanka.GraphQL.Extensions.Analysis
                                     if (multiplierArg == null)
                                         continue;
 
-                                    var multiplierValue = (int) Arguments.CoerceArgumentValue(
+                                    var multiplierValue = (int) ArgumentCoercion.CoerceArgumentValue(
                                         context.Schema,
                                         context.VariableValues,
                                         multiplierName,

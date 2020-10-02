@@ -159,9 +159,28 @@ namespace Tanka.GraphQL.Language
             Start = Position + 1;
             IsExponential = false;
             var isFloat = false;
+
+            // starts with minus
             if (_reader.TryPeek(out var code))
                 if (code == Constants.Minus)
                     _reader.Advance();
+
+            // starts with zero cannot follow with zero
+            if (_reader.TryPeek(out code))
+            {
+                if (code == '0')
+                {
+                    _reader.Advance();
+
+                    if (_reader.TryPeek(out code))
+                    {
+                        if (code == '0')
+                            throw new Exception(
+                                $"Invalid number value starting at {Start}. " +
+                                $"Number starting with zero cannot be followed by zero.");
+                    }
+                }
+            }
 
             _reader.TryReadWhileAny(
                 out var integerPart,

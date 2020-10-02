@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Mime;
 using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
@@ -47,7 +48,7 @@ namespace Tanka.GraphQL.Language
             return context.ToString();
         }
 
-        public static string Print(IReadOnlyCollection<INode> nodes)
+        public static string Print(ICollectionNode<INode> nodes)
         {
             var printer = new Printer();
             var context = new PrinterContext();
@@ -56,18 +57,18 @@ namespace Tanka.GraphQL.Language
                 context
             );
 
-            walker.VisitCollection(nodes);
+            walker.Visit(nodes);
 
             return context.ToString();
         }
 
-        public override void ExitNode(PrinterContext context, INode node)
+        protected override void ExitValue(PrinterContext context, ValueBase value)
         {
-            base.ExitNode(context, node);
-            
-            if (node is Value && node != context.Parent && node.Kind != NodeKind.ObjectValue)
-                if (context.Parent?.Kind == NodeKind.ListValue)
-                    context.Append(",");
+            if (context.Parent is ICollectionNode<INode>)
+            {
+                if (context.CurrentArray?.Count > 0 && !context.CurrentArray.IsLast)
+                    context.Append(',');
+            }
         }
 
         protected override void ExitIntValue(PrinterContext context, IntValue intValue)
@@ -119,23 +120,17 @@ namespace Tanka.GraphQL.Language
 
         protected override void ExitListValue(PrinterContext context, ListValue listValue)
         {
-            if (context.EndsWith(','))
-                context.Rewind();
-            
             context.Append("]");
         }
 
         protected override void EnterObjectValue(PrinterContext context, ObjectValue objectValue)
         {
-            context.Append("{");
+            context.Append("{ ");
         }
 
         protected override void ExitObjectValue(PrinterContext context, ObjectValue objectValue)
         {
-            if (context.EndsWith(','))
-                context.Rewind();
-            
-            context.Append("}");
+            context.Append(" }");
         }
 
         protected override void ExitNamedType(PrinterContext context, NamedType namedType)
@@ -165,25 +160,156 @@ namespace Tanka.GraphQL.Language
 
         protected override void ExitObjectField(PrinterContext context, ObjectField objectField)
         {
-            context.Append(",");
+            if (context.Parent is ObjectValue)
+            {
+                if (context.CurrentArray?.Count > 1 && !context.CurrentArray.IsLast)
+                    context.Append(", ");
+            }
         }
 
-        protected override void EnterArguments(PrinterContext context, IReadOnlyCollectionNode<Argument> arguments)
+        protected override void EnterArguments(PrinterContext context, Arguments arguments)
         {
             context.Append('(');
         }
 
         protected override void EnterArgument(PrinterContext context, Argument argument)
         {
-            context.Append($"{argument.Name}:");
+            context.Append($"{argument.Name}: ");
         }
 
-        protected override void ExitArguments(PrinterContext context, ReadOnlyCollectionNode<Argument> arguments)
+        protected override void ExitArgument(PrinterContext context, Argument argument)
         {
-            if(context.EndsWith(','))
-                context.Rewind();
-            
+            if (context.CurrentArray?.Array is Arguments arguments)
+            {
+                if (arguments.Count > 1 && !context.CurrentArray.IsLast)
+                    context.Append(", ");
+            }
+        }
+
+        protected override void ExitArguments(PrinterContext context, Arguments arguments)
+        {
             context.Append(')');
+        }
+
+        protected override void EnterVariable(PrinterContext context, Variable variable)
+        {
+            context.Append($"${variable.Name.Value}");
+
+            if (context.Parent is VariableDefinition definition)
+            {
+                context.Append(": ");
+            }
+        }
+
+        protected override void EnterDirective(PrinterContext context, Directive directive)
+        {
+            context.Append($"@{directive.Name.Value}");
+        }
+
+        protected override void ExitDirective(PrinterContext context, Directive directive)
+        {
+            if (context.Parent is Directives)
+            {
+                if (context.CurrentArray?.Count > 1 && !context.CurrentArray.IsLast)
+                    context.Append(' ');
+            }
+        }
+
+        protected override void EnterDefaultValue(PrinterContext context, DefaultValue defaultValue)
+        {
+            context.Append(" = ");
+        }
+
+        protected override void ExitVariableDefinition(PrinterContext context, VariableDefinition variableDefinition)
+        {
+            if (context.Parent is VariableDefinitions)
+            {
+                if (context.CurrentArray?.Count > 1 && !context.CurrentArray.IsLast)
+                    context.Append(", ");
+            }
+        }
+
+        protected override void EnterVariableDefinitions(PrinterContext context, VariableDefinitions variableDefinition)
+        {
+            context.Append('(');
+        }
+
+        protected override void ExitVariableDefinitions(PrinterContext context, VariableDefinitions variableDefinition)
+        {
+            context.Append(')');
+        }
+
+        protected override void EnterInlineFragment(PrinterContext context, InlineFragment inlineFragment)
+        {
+            context.Append("... ");
+
+            if (inlineFragment.TypeCondition != null)
+                context.Append("on ");
+        }
+
+        protected override void EnterSelectionSet(PrinterContext context, SelectionSet selectionSet)
+        {
+            context.Append(" { ");
+        }
+
+        protected override void ExitSelectionSet(PrinterContext context, SelectionSet selectionSet)
+        {
+            context.Append(" }");
+        }
+
+        protected override void EnterDirectives(PrinterContext context, Directives directives)
+        {
+            if (context.Parent != null)
+                context.Append(' ');
+        }
+
+        protected override void EnterFieldSelection(PrinterContext context, FieldSelection fieldSelection)
+        {
+            if (fieldSelection.Alias != default)
+            {
+                context.Append(fieldSelection.Alias);
+                context.Append(": ");
+            }
+
+            context.Append($"{fieldSelection.Name}");
+
+            if (context.Parent is SelectionSet)
+            {
+                if (context.CurrentArray?.Count > 0 && !context.CurrentArray.IsLast)
+                    context.Append(' ');
+            }
+        }
+
+        protected override void EnterFragmentDefinition(PrinterContext context, FragmentDefinition fragmentDefinition)
+        {
+            context.Append("fragment");
+            context.Append(' ');
+            context.Append(fragmentDefinition.FragmentName);
+
+            context.Append(' ');
+            context.Append("on");
+            context.Append(' ');
+        }
+
+        protected override void EnterFragmentSpread(PrinterContext context, FragmentSpread fragmentSpread)
+        {
+            context.Append("...");
+            context.Append(fragmentSpread.FragmentName);
+        }
+
+        protected override void EnterOperationDefinition(PrinterContext context, OperationDefinition operationDefinition)
+        {
+            if (!operationDefinition.IsShort)
+                context.Append(operationDefinition.Operation.ToString().ToLowerInvariant());
+        }
+
+        protected override void ExitOperationDefinition(PrinterContext context, OperationDefinition operationDefinition)
+        {
+            if (context.Parent is ICollectionNode<OperationDefinition>)
+            {
+                if (context.CurrentArray?.Count > 0 && !context.CurrentArray.IsLast)
+                    context.Append(" ");
+            }
         }
     }
 }

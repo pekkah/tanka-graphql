@@ -71,7 +71,7 @@ namespace Tanka.GraphQL.TypeSystem
             return value.Key;
         }
 
-        public object? ParseLiteral(Value input)
+        public object? ParseLiteral(ValueBase input)
         {
             if (input.Kind == NodeKind.NullValue)
                 return null;

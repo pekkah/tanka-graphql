@@ -6,11 +6,11 @@ using Argument = Tanka.GraphQL.TypeSystem.Argument;
 
 namespace Tanka.GraphQL.Execution
 {
-    public static class Arguments
+    public static class ArgumentCoercion
     {
         public static object? CoerceArgumentValue(
             ISchema schema,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object>? coercedVariableValues,
             string argumentName,
             Argument argumentDefinition,
             Language.Nodes.Argument argument)
@@ -73,7 +73,7 @@ namespace Tanka.GraphQL.Execution
         {
             var coercedValues = new Dictionary<string, object?>();
 
-            var argumentValues = field.Arguments ?? new List<Language.Nodes.Argument>();
+            var argumentValues = field.Arguments ?? Arguments.None;
             var fieldName = field.Name;
             var argumentDefinitions = schema.GetField(objectType.Name, fieldName)
                 .Arguments;

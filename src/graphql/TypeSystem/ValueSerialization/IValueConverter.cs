@@ -30,6 +30,6 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        object? ParseLiteral(Value input);
+        object? ParseLiteral(ValueBase input);
     }
 }

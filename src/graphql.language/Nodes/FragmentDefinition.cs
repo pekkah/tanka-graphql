@@ -7,7 +7,7 @@ namespace Tanka.GraphQL.Language.Nodes
     public sealed class FragmentDefinition: INode
     {
         public NodeKind Kind => NodeKind.FragmentDefinition;
-        public readonly IReadOnlyCollection<Directive>? Directives;
+        public readonly Directives? Directives;
         public readonly Name FragmentName;
         public Location? Location {get;}
         public readonly SelectionSet SelectionSet;
@@ -16,7 +16,7 @@ namespace Tanka.GraphQL.Language.Nodes
         public FragmentDefinition(
             in Name fragmentName,
             NamedType typeCondition,
-            IReadOnlyCollection<Directive>? directives,
+            Directives? directives,
             SelectionSet selectionSet,
             in Location? location = default)
         {
