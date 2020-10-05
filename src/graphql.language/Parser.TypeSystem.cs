@@ -252,7 +252,7 @@ namespace Tanka.GraphQL.Language
                 location);
         }
 
-        public IReadOnlyList<RootOperationTypeDefinition>? ParseOptionalRootOperationDefinitions()
+        public RootOperationTypeDefinitions? ParseOptionalRootOperationDefinitions()
         {
             if (_lexer.Kind != TokenKind.LeftBrace)
                 return null;
@@ -260,9 +260,9 @@ namespace Tanka.GraphQL.Language
             return ParseRootOperationDefinitions();
         }
 
-        public IReadOnlyList<RootOperationTypeDefinition> ParseRootOperationDefinitions()
+        public RootOperationTypeDefinitions ParseRootOperationDefinitions()
         {
-            Skip(TokenKind.LeftBrace);
+            var location = Skip(TokenKind.LeftBrace);
 
             var operations = new List<RootOperationTypeDefinition>();
             while (_lexer.Kind != TokenKind.RightBrace)
@@ -279,7 +279,7 @@ namespace Tanka.GraphQL.Language
             }
 
             Skip(TokenKind.RightBrace);
-            return operations;
+            return new RootOperationTypeDefinitions(operations, location);
         }
 
         public DirectiveDefinition ParseDirectiveDefinition()

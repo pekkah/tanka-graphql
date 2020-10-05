@@ -174,14 +174,21 @@ namespace Tanka.GraphQL.Language
                 case VariableDefinitions variableDefinitions:
                     VisitCollection(variableDefinitions);
                     break;
+                case InputFieldsDefinition inputFieldsDefinition:
+                    VisitCollection(inputFieldsDefinition);
+                    break;
+                case RootOperationTypeDefinitions rootOperationTypeDefinitions:
+                    VisitCollection(rootOperationTypeDefinitions);
+                    break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(node));
+                    throw new ArgumentOutOfRangeException(nameof(node), node.GetType().Name, "Node not supported");
             }
         }
 
         private void VisitRootOperationTypeDefinition(RootOperationTypeDefinition node)
         {
             EnterNode(node);
+            Visit(node.NamedType);
             ExitNode(node);
         }
 
@@ -398,6 +405,9 @@ namespace Tanka.GraphQL.Language
         private void VisitObjectDefinition(ObjectDefinition node)
         {
             EnterNode(node);
+            Visit(node.Interfaces);
+            Visit(node.Directives);
+            Visit(node.Fields);
             ExitNode(node);
         }
 
@@ -464,12 +474,8 @@ namespace Tanka.GraphQL.Language
             EnterNode(node);
 
             Visit(node.Directives);
-
-            foreach (var operation in node.Operations)
-            {
-                Visit(operation.NamedType);
-            }
-
+            Visit(node.Operations);
+            
             ExitNode(node);
         }
 
@@ -478,12 +484,7 @@ namespace Tanka.GraphQL.Language
             EnterNode(node);
 
             Visit(node.Directives);
-
-            if (node.Operations != null)
-                foreach (var operation in node.Operations)
-                {
-                    Visit(operation.NamedType);
-                }
+            Visit(node.Operations);
 
             ExitNode(node);
         }

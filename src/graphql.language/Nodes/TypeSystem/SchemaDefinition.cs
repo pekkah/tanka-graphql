@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
@@ -11,7 +10,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public SchemaDefinition(
             StringValue? description,
             Directives? directives,
-            IReadOnlyList<RootOperationTypeDefinition> operations,
+            RootOperationTypeDefinitions operations,
             in Location? location = default)
         {
             Description = description;
@@ -24,7 +23,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public Directives? Directives { get; }
 
-        public IReadOnlyList<RootOperationTypeDefinition> Operations { get; }
+        public RootOperationTypeDefinitions Operations { get; }
 
         public Location? Location { get; }
 

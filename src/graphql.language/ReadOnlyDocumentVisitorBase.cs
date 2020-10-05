@@ -131,7 +131,7 @@ namespace Tanka.GraphQL.Language
                     EnterObjectDefinition(context, objectDefinition);
                     break;
                 case RootOperationTypeDefinition rootOperationTypeDefinition:
-                    EnterRootOperationTypeDefintion(context, rootOperationTypeDefinition);
+                    EnterRootOperationTypeDefinition(context, rootOperationTypeDefinition);
                     break;
                 case ScalarDefinition scalarDefinition:
                     EnterScalarDefinition(context, scalarDefinition);
@@ -166,9 +166,23 @@ namespace Tanka.GraphQL.Language
                 case Arguments arguments:
                     EnterArguments(context, arguments);
                     break;
+                case InputFieldsDefinition inputFieldsDefinition:
+                    EnterInputFieldsDefinition(context, inputFieldsDefinition);
+                    break;
+                case RootOperationTypeDefinitions rootOperationTypeDefinitions:
+                    EnterRootOperationTypeDefinitions(context, rootOperationTypeDefinitions);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(node));
             }
+        }
+
+        protected virtual void EnterRootOperationTypeDefinitions(TContext context, RootOperationTypeDefinitions rootOperationTypeDefinitions)
+        {
+        }
+
+        protected virtual void EnterInputFieldsDefinition(TContext context, InputFieldsDefinition inputFieldsDefinition)
+        {
         }
 
         protected virtual void EnterValue(TContext context, ValueBase value)
@@ -203,7 +217,7 @@ namespace Tanka.GraphQL.Language
         {
         }
 
-        protected virtual void EnterRootOperationTypeDefintion(TContext context, RootOperationTypeDefinition rootOperationTypeDefinition)
+        protected virtual void EnterRootOperationTypeDefinition(TContext context, RootOperationTypeDefinition rootOperationTypeDefinition)
         {
         }
 
@@ -497,7 +511,7 @@ namespace Tanka.GraphQL.Language
                     ExitObjectDefinition(context, objectDefinition);
                     break;
                 case RootOperationTypeDefinition rootOperationTypeDefinition:
-                    ExitRootOperationTypeDefintion(context, rootOperationTypeDefinition);
+                    ExitRootOperationTypeDefinition(context, rootOperationTypeDefinition);
                     break;
                 case ScalarDefinition scalarDefinition:
                     ExitScalarDefinition(context, scalarDefinition);
@@ -529,8 +543,14 @@ namespace Tanka.GraphQL.Language
                 case VariableDefinitions variableDefinitions:
                     ExitVariableDefinitions(context, variableDefinitions);
                     break;
+                case InputFieldsDefinition inputFieldsDefinition:
+                    ExitInputFieldsDefinition(context, inputFieldsDefinition);
+                    break;
                 case Arguments arguments:
                     ExitArguments(context, arguments);
+                    break;
+                case RootOperationTypeDefinitions rootOperationTypeDefinitions:
+                    ExitRootOperationTypeDefinitions(context, rootOperationTypeDefinitions);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(node));
@@ -540,6 +560,15 @@ namespace Tanka.GraphQL.Language
             if (node is ValueBase value)
                 ExitValue(context, value);
 
+        }
+
+        protected virtual void ExitRootOperationTypeDefinitions(TContext context, RootOperationTypeDefinitions rootOperationTypeDefinitions)
+        {
+        }
+
+        protected virtual void ExitInputFieldsDefinition(TContext fieldsDefinition,
+            InputFieldsDefinition inputFieldsDefinition)
+        {
         }
 
         protected virtual void ExitValue(TContext context, ValueBase value)
@@ -574,7 +603,7 @@ namespace Tanka.GraphQL.Language
         {
         }
 
-        protected virtual void ExitRootOperationTypeDefintion(TContext context, RootOperationTypeDefinition rootOperationTypeDefinition)
+        protected virtual void ExitRootOperationTypeDefinition(TContext context, RootOperationTypeDefinition rootOperationTypeDefinition)
         {
         }
 

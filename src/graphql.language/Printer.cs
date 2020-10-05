@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
 using System.Text;
 using Tanka.GraphQL.Language.Nodes;
@@ -29,7 +30,19 @@ namespace Tanka.GraphQL.Language
         
         public override string ToString()
         {
-            return _builder.ToString();
+            return _builder.ToString().Trim(' ');
+        }
+
+        public void AppendDescription(StringValue? description)
+        {
+            if (description == null)
+                return;
+
+            var str = description.ToString();
+            Append("\"\"\"");
+            Append(str);
+            Append("\"\"\"");
+            Append(" ");
         }
     }
 
@@ -130,12 +143,28 @@ namespace Tanka.GraphQL.Language
 
         protected override void ExitObjectValue(PrinterContext context, ObjectValue objectValue)
         {
-            context.Append(" }");
+            context.Append(" } ");
         }
 
         protected override void ExitNamedType(PrinterContext context, NamedType namedType)
         {
             context.Append(namedType.Name.Value);
+
+            if (context.Parent is ImplementsInterfaces)
+            {
+                if (context.CurrentArray?.Count > 1 && !context.CurrentArray.IsLast)
+                {
+                    context.Append(" & ");
+                }
+            }
+
+            if (context.Parent is UnionMemberTypes)
+            {
+                if (context.CurrentArray?.Count > 1 && !context.CurrentArray.IsLast)
+                {
+                    context.Append(" | ");
+                }
+            }
         }
 
         protected override void EnterListType(PrinterContext context, ListType listType)
@@ -254,7 +283,7 @@ namespace Tanka.GraphQL.Language
 
         protected override void ExitSelectionSet(PrinterContext context, SelectionSet selectionSet)
         {
-            context.Append(" }");
+            context.Append(" } ");
         }
 
         protected override void EnterDirectives(PrinterContext context, Directives directives)
@@ -310,6 +339,248 @@ namespace Tanka.GraphQL.Language
                 if (context.CurrentArray?.Count > 0 && !context.CurrentArray.IsLast)
                     context.Append(" ");
             }
+        }
+
+        protected override void EnterDirectiveDefinition(PrinterContext context, DirectiveDefinition directiveDefinition)
+        {
+            context.AppendDescription(directiveDefinition.Description);
+            context.Append("directive");
+            context.Append(' ');
+            context.Append($"@{directiveDefinition.Name}");
+
+            if (directiveDefinition.IsRepeatable)
+            {
+                context.Append(' ');
+                context.Append("repeatable");
+            }
+        }
+
+        protected override void EnterArgumentsDefinition(PrinterContext context, ArgumentsDefinition argumentsDefinition)
+        {
+            context.Append('(');
+        }
+
+        protected override void EnterInputValueDefinition(PrinterContext context, InputValueDefinition inputValueDefinition)
+        {
+            context.AppendDescription(inputValueDefinition.Description);
+            context.Append(inputValueDefinition.Name);
+            context.Append(": ");
+        }
+
+        protected override void ExitInputValueDefinition(PrinterContext context, InputValueDefinition inputValueDefinition)
+        {
+            if (context.Parent is ArgumentsDefinition)
+            {
+                if (context.CurrentArray?.Count > 1 && !context.CurrentArray.IsLast)
+                    context.Append(", ");
+            }
+
+            if (context.Parent is InputFieldsDefinition)
+            {
+                if (context.CurrentArray?.Count > 1 && !context.CurrentArray.IsLast)
+                    context.Append(" ");
+            }
+        }
+
+        protected override void ExitArgumentsDefinition(PrinterContext context, ArgumentsDefinition argumentsDefinition)
+        {
+            context.Append(")");
+
+            if (context.Parent is FieldDefinition)
+            {
+                context.Append(": ");
+            }
+        }
+
+        protected override void ExitDirectiveDefinition(PrinterContext context, DirectiveDefinition directiveDefinition)
+        {
+            context.Append(" on");
+            context.Append(' ');
+
+            var locations = directiveDefinition.DirectiveLocations;
+            for (var i = 0; i < locations.Count; i++)
+            {
+                var location = locations[i];
+
+                context.Append(location);
+
+                if (i != locations.Count - 1 && location.Length > 1)
+                    context.Append(" | ");
+            }
+        }
+
+        protected override void EnterScalarDefinition(PrinterContext context, ScalarDefinition scalarDefinition)
+        {
+            context.AppendDescription(scalarDefinition.Description);
+            context.Append("scalar");
+            context.Append(' ');
+            context.Append(scalarDefinition.Name);
+        }
+
+        protected override void EnterFieldDefinition(PrinterContext context, FieldDefinition fieldDefinition)
+        {
+            context.AppendDescription(fieldDefinition.Description);
+            context.Append(fieldDefinition.Name);
+
+            if (fieldDefinition.Arguments == null || fieldDefinition.Arguments.Count == 0)
+                context.Append(": ");
+        }
+
+        protected override void ExitFieldDefinition(PrinterContext context, FieldDefinition fieldDefinition)
+        {
+            if (context.Parent is FieldsDefinition)
+            {
+                if (context.CurrentArray?.Count > 0 && !context.CurrentArray.IsLast)
+                    context.Append(" ");
+            }
+        }
+
+        protected override void EnterImplementsInterfaces(PrinterContext context, ImplementsInterfaces implementsInterfaces)
+        {
+            if (implementsInterfaces.Count == 0)
+                return;
+
+            context.Append("implements ");
+        }
+
+        protected override void EnterObjectDefinition(PrinterContext context, ObjectDefinition objectDefinition)
+        {
+            context.AppendDescription(objectDefinition.Description);
+            context.Append("type ");
+            context.Append(objectDefinition.Name);
+            context.Append(" ");
+        }
+
+        protected override void EnterFieldsDefinition(PrinterContext context, FieldsDefinition fieldsDefinition)
+        {
+            context.Append(" { ");
+        }
+
+        protected override void ExitFieldsDefinition(PrinterContext context, FieldsDefinition fieldsDefinition)
+        {
+            context.Append(" } ");
+        }
+
+        protected override void EnterInterfaceDefinition(PrinterContext context, InterfaceDefinition interfaceDefinition)
+        {
+            context.AppendDescription(interfaceDefinition.Description);
+            context.Append("interface ");
+            context.Append(interfaceDefinition.Name);
+            context.Append(" ");
+        }
+
+        protected override void EnterUnionDefinition(PrinterContext context, UnionDefinition unionDefinition)
+        {
+            context.AppendDescription(unionDefinition.Description);
+            context.Append("union ");
+            context.Append(unionDefinition.Name);
+            context.Append(" ");
+        }
+
+        protected override void EnterUnionMemberTypes(PrinterContext context, UnionMemberTypes unionMemberTypes)
+        {
+            context.Append(" = ");
+        }
+
+        protected override void ExitUnionMemberTypes(PrinterContext context, UnionMemberTypes unionMemberTypes)
+        {
+            context.Append(" ");
+        }
+
+        protected override void EnterEnumDefinition(PrinterContext context, EnumDefinition enumDefinition)
+        {
+            context.AppendDescription(enumDefinition.Description);
+            context.Append("enum ");
+            context.Append(enumDefinition.Name);
+            context.Append(" ");
+        }
+
+        protected override void EnterEnumValuesDefinition(PrinterContext context, EnumValuesDefinition enumValuesDefinition)
+        {
+            context.Append(" { ");
+        }
+
+        protected override void EnterEnumValueDefinition(PrinterContext context, EnumValueDefinition enumValueDefinition)
+        {
+            context.AppendDescription(enumValueDefinition.Description);
+        }
+
+        protected override void ExitEnumValuesDefinition(PrinterContext context, EnumValuesDefinition enumValuesDefinition)
+        {
+            context.Append(" } ");
+        }
+
+        protected override void ExitEnumValueDefinition(PrinterContext context, EnumValueDefinition enumValueDefinition)
+        {
+            context.Append(" ");
+        }
+
+        protected override void EnterInputObjectDefinition(PrinterContext context, InputObjectDefinition inputObjectDefinition)
+        {
+            context.AppendDescription(inputObjectDefinition.Description);
+            context.Append("input ");
+            context.Append(inputObjectDefinition.Name);
+            context.Append(" ");
+        }
+
+        protected override void EnterInputFieldsDefinition(PrinterContext context, InputFieldsDefinition inputFieldsDefinition)
+        {
+            context.Append(" { ");
+        }
+
+        protected override void ExitInputFieldsDefinition(PrinterContext context, InputFieldsDefinition inputFieldsDefinition)
+        {
+            context.Append(" } ");
+        }
+
+        protected override void EnterSchemaDefinition(PrinterContext context, SchemaDefinition schemaDefinition)
+        {
+            context.AppendDescription(schemaDefinition.Description);
+            context.Append("schema ");
+        }
+
+        protected override void EnterRootOperationTypeDefinitions(PrinterContext context,
+            RootOperationTypeDefinitions rootOperationTypeDefinitions)
+        {
+            context.Append(" { ");
+        }
+
+        protected override void EnterRootOperationTypeDefinition(PrinterContext context, RootOperationTypeDefinition rootOperationTypeDefinition)
+        {
+            switch (rootOperationTypeDefinition.OperationType)
+            {
+                case OperationType.Query:
+                    context.Append("query: ");
+                    break;
+                case OperationType.Mutation:
+                    context.Append("mutation: ");
+                    break;
+                case OperationType.Subscription:
+                    context.Append("subscription: ");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        protected override void ExitRootOperationTypeDefinition(PrinterContext context, RootOperationTypeDefinition rootOperationTypeDefinition)
+        {
+            if (context.Parent is RootOperationTypeDefinitions)
+            {
+                if (context.CurrentArray?.Count > 1 && !context.CurrentArray.IsLast)
+                    context.Append(" ");
+            }
+        }
+
+        protected override void ExitRootOperationTypeDefinitions(PrinterContext context,
+            RootOperationTypeDefinitions rootOperationTypeDefinitions)
+        {
+            context.Append(" } ");
+        }
+
+        protected override void EnterTypeExtension(PrinterContext context, TypeExtension typeExtension)
+        {
+            context.Append(" extend ");
         }
     }
 }

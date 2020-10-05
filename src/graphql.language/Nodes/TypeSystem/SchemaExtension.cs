@@ -10,7 +10,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public SchemaExtension(
             StringValue? description,
             Directives? directives,
-            IReadOnlyList<RootOperationTypeDefinition>? operations,
+            RootOperationTypeDefinitions? operations,
             in Location? location = default)
         {
             Description = description;
@@ -21,7 +21,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue? Description { get; }
         public Directives? Directives { get; }
-        public IReadOnlyList<RootOperationTypeDefinition>? Operations { get; }
+        public RootOperationTypeDefinitions? Operations { get; }
         public Location? Location { get; }
 
         public static implicit operator SchemaExtension(string value)

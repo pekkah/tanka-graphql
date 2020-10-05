@@ -26,7 +26,7 @@ namespace Tanka.GraphQL.Language
         }
 
         public static SchemaDefinition WithOperations(this SchemaDefinition definition,
-            IReadOnlyList<RootOperationTypeDefinition> operations)
+            RootOperationTypeDefinitions operations)
         {
             return new SchemaDefinition(
                 definition.Description,

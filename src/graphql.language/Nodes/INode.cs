@@ -59,6 +59,7 @@
         FieldsDefinition,
         RootOperationTypeDefinition,
         UnionMemberTypes,
-        InputFieldsDefinition
+        InputFieldsDefinition,
+        RootOperationTypeDefinitions
     }
 }
