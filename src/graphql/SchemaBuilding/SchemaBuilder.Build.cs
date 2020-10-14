@@ -36,7 +36,7 @@ namespace Tanka.GraphQL.SchemaBuilding
                 _schemaDirectives);
         }
 
-        public (ISchema Schema, ValidationResult ValidationResult) BuildAndValidate()
+        public (ISchema? Schema, ValidationResult ValidationResult) BuildAndValidate()
         {
             var validationResult = Validate();
 

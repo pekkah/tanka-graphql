@@ -119,7 +119,13 @@ namespace Tanka.GraphQL.SchemaBuilding
         {
             var argsBuilder = new ArgsBuilder();
             args?.Invoke(argsBuilder);
-            directiveType = new DirectiveType(name, locations, argsBuilder.Build());
+            directiveType = new DirectiveType(
+                name, 
+                locations, 
+                argsBuilder.Build(),
+                description
+                );
+
             Include(directiveType);
             return this;
         }

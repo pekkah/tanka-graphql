@@ -649,6 +649,24 @@ input Name {
         }
 
         [Fact]
+        public void InputObjectDefinition_Fields2()
+        {
+            /* Given */
+            var source = @"
+input Name {
+    name: String! = ""test""
+    nullable: String
+ }";
+            var sut = Parser.Create(source);
+
+            /* When */
+            var actual = Printer.Print(sut.ParseInputObjectDefinition());
+
+            /* Then */
+            AssertPrintedEquals(source, actual);
+        }
+
+        [Fact]
         public void InputObjectDefinition_All()
         {
             /* Given */

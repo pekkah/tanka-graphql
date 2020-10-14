@@ -35,7 +35,7 @@ namespace Tanka.GraphQL.Language
 
         public void AppendDescription(StringValue? description)
         {
-            if (description == null)
+            if (string.IsNullOrEmpty(description))
                 return;
 
             var str = description.ToString();
@@ -123,7 +123,10 @@ namespace Tanka.GraphQL.Language
 
         protected override void ExitNullValue(PrinterContext context, NullValue nullValue)
         {
-            context.Append("null");
+            if (!(context.Parent is DefaultValue defaultValue))
+            {
+                context.Append("null");
+            }
         }
 
         protected override void EnterListValue(PrinterContext context, ListValue listValue)
@@ -200,7 +203,7 @@ namespace Tanka.GraphQL.Language
         {
             context.Append('(');
         }
-
+        
         protected override void EnterArgument(PrinterContext context, Argument argument)
         {
             context.Append($"{argument.Name}: ");
@@ -246,7 +249,8 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterDefaultValue(PrinterContext context, DefaultValue defaultValue)
         {
-            context.Append(" = ");
+            if (defaultValue.Value.Kind != NodeKind.NullValue)
+                    context.Append(" = ");
         }
 
         protected override void ExitVariableDefinition(PrinterContext context, VariableDefinition variableDefinition)
@@ -357,7 +361,8 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterArgumentsDefinition(PrinterContext context, ArgumentsDefinition argumentsDefinition)
         {
-            context.Append('(');
+            if (argumentsDefinition.Count > 0)
+                context.Append('(');
         }
 
         protected override void EnterInputValueDefinition(PrinterContext context, InputValueDefinition inputValueDefinition)
@@ -384,7 +389,8 @@ namespace Tanka.GraphQL.Language
 
         protected override void ExitArgumentsDefinition(PrinterContext context, ArgumentsDefinition argumentsDefinition)
         {
-            context.Append(")");
+            if (argumentsDefinition.Count > 0)
+                context.Append(")");
 
             if (context.Parent is FieldDefinition)
             {

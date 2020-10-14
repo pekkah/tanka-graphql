@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 
 
@@ -7,7 +8,7 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
 {
     public class StringConverter : IValueConverter
     {
-        public object Serialize(object value)
+        public object? Serialize(object? value)
         {
             if (value == null)
                 return null;
@@ -15,7 +16,16 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
-        public object ParseValue(object input)
+        public ValueBase SerializeLiteral(object? value)
+        {
+            var serializedValue = Serialize(value);
+            if (serializedValue == null)
+                return new NullValue();
+
+            return new StringValue(Encoding.UTF8.GetBytes((string)serializedValue));
+        }
+
+        public object? ParseValue(object? input)
         {
             if (input == null)
                 return null;
@@ -23,7 +33,7 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToString(input, CultureInfo.InvariantCulture);
         }
 
-        public object ParseLiteral(ValueBase input)
+        public object? ParseLiteral(ValueBase input)
         {
             if (input.Kind == NodeKind.NullValue)
             {

@@ -49,12 +49,24 @@ namespace Tanka.GraphQL.TypeSystem
 
         public string Name { get; }
 
-        public object Serialize(object value)
+        public object? Serialize(object? value)
         {
+            if (value == null)
+                return null;
+
             var enumValue = _values.SingleOrDefault(v => v.Key == value?
                                                              .ToString()
                                                              .ToUpperInvariant());
             return enumValue.Key;
+        }
+
+        public ValueBase SerializeLiteral(object? value)
+        {
+            var serializedValue = Serialize(value);
+            if (serializedValue == null)
+                return new NullValue();
+
+            return new Language.Nodes.EnumValue((string) serializedValue);
         }
 
         public object? ParseValue(object input)

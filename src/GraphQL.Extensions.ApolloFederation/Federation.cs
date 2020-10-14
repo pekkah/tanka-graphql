@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
@@ -164,8 +165,7 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
         {
             return context =>
             {
-                //todo: print schema with federation directives
-                return ResolveSync.As("schema {}");
+                return ResolveSync.As("sdl");
             };
         }
     }

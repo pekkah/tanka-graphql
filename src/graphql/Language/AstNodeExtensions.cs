@@ -8,7 +8,7 @@ namespace Tanka.GraphQL.Language
         [Obsolete("Going to get replaced by the new language module renderer when it's ready")]
         public static string ToGraphQL(this INode node)
         {
-            return new Printer().Print(node);
+            return Printer.Print(node);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
 {
     public class BooleanConverter : IValueConverter
     {
-        public object? Serialize(object value)
+        public object? Serialize(object? value)
         {
             if (value == null)
                 return null;
@@ -24,7 +24,16 @@ namespace Tanka.GraphQL.TypeSystem.ValueSerialization
             return Convert.ToBoolean(value, NumberFormatInfo.InvariantInfo);
         }
 
-        public object? ParseValue(object input)
+        public ValueBase SerializeLiteral(object? value)
+        {
+            var serializedValue = Serialize(value);
+            if (serializedValue == null)
+                return new NullValue();
+
+            return new BooleanValue((bool)serializedValue);
+        }
+
+        public object? ParseValue(object? input)
         {
             if (input == null)
                 return null;

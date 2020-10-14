@@ -17,7 +17,6 @@ namespace Tanka.GraphQL.SDL
         private readonly SchemaBuilder _builder;
         private readonly TypeSystemDocument _document;
 
-
         public SdlReader(TypeSystemDocument document, SchemaBuilder? builder = null)
         {
             _document = document;
@@ -97,7 +96,7 @@ namespace Tanka.GraphQL.SDL
                 definition.Name,
                 out var directiveType,
                 locations,
-                null,
+                definition.Description,
                 argsBuilder => args.ForEach(a => argsBuilder.Arg(a.Name, a.Type, a.DefaultValue, a.Description)));
 
             return directiveType;
@@ -129,10 +128,11 @@ namespace Tanka.GraphQL.SDL
                 }
                 catch (Exception)
                 {
+                    //todo: this behaviour is bit shade...
                     defaultValue = null;
                 }
 
-                args.Add((definition.Name, type, defaultValue, default));
+                args.Add((definition.Name, type, defaultValue, definition.Description));
             }
 
             return args;
@@ -238,7 +238,7 @@ namespace Tanka.GraphQL.SDL
 
             _builder.Enum(definition.Name, out enumType,
                 directives: directives,
-                description: null,
+                description: definition.Description,
                 values: values => 
                     definition.Values.ToList()
                         .ForEach(value => values.Value(
@@ -367,7 +367,7 @@ namespace Tanka.GraphQL.SDL
                         defaultValue = Values.CoerceValue(
                             connect.GetInputFields,
                             _builder.GetValueConverter,
-                            definition.DefaultValue,
+                            definition.DefaultValue?.Value,
                             type);
                     }
                     catch (Exception)
@@ -423,12 +423,18 @@ namespace Tanka.GraphQL.SDL
 
         protected InterfaceType Interface(InterfaceDefinition definition)
         {
-            if (_builder.TryGetType<InterfaceType>(definition.Name, out var interfaceType)) return interfaceType;
+            if (_builder.TryGetType<InterfaceType>(definition.Name, out var interfaceType)) 
+                return interfaceType;
+
+            if (definition?.Interfaces != null && definition.Interfaces.Any())
+                throw new NotSupportedException(
+                    $"Cannot read type '{definition.Name}'. Interfaces implementing interfaces is not currently supported");
 
             var directives = Directives(definition.Directives);
 
             _builder.Interface(definition.Name, out interfaceType,
-                directives: directives);
+                directives: directives,
+                description:definition.Description);
 
             AfterTypeDefinitions(_ => { Fields(interfaceType, definition.Fields); });
 
@@ -444,7 +450,8 @@ namespace Tanka.GraphQL.SDL
 
             _builder.Object(definition.Name, out objectType,
                 interfaces: interfaces,
-                directives: directives);
+                directives: directives,
+                description: definition.Description);
 
             AfterTypeDefinitions(_ => { Fields(objectType, definition.Fields); });
 
@@ -474,7 +481,8 @@ namespace Tanka.GraphQL.SDL
 
         private UnionType Union(UnionDefinition definition)
         {
-            if (_builder.TryGetType<UnionType>(definition.Name, out var unionType)) return unionType;
+            if (_builder.TryGetType<UnionType>(definition.Name, out var unionType)) 
+                return unionType;
 
             var possibleTypes = new List<ObjectType>();
             if (definition.Members != null)
@@ -487,7 +495,13 @@ namespace Tanka.GraphQL.SDL
             }
 
             var directives = Directives(definition.Directives);
-            _builder.Union(definition.Name, out unionType, default, directives, possibleTypes.ToArray());
+            _builder.Union(
+                definition.Name, 
+                out unionType, 
+                definition.Description, 
+                directives, 
+                possibleTypes.ToArray());
+
             return unionType;
         }
 
