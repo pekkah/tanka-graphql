@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
+using Argument = Tanka.GraphQL.TypeSystem.Argument;
+using EnumValue = Tanka.GraphQL.Language.Nodes.EnumValue;
 
-namespace Tanka.GraphQL.TypeSystem
+namespace Tanka.GraphQL.SDL
 {
     public delegate bool TrySerializeValue(IType type, object value, out ValueBase? valueNode);
 
-    public class SdlPrinterOptions
+    public class SchemaPrinterOptions
     {
         protected static IReadOnlyList<IType> IgnoredStandardTypes =
             Enumerable.Empty<IType>()
@@ -22,7 +25,7 @@ namespace Tanka.GraphQL.TypeSystem
                 })
                 .ToList();
 
-        public SdlPrinterOptions(ISchema schema)
+        public SchemaPrinterOptions(ISchema schema)
         {
             Schema = schema;
             TrySerializeValue = TrySerializeValueDefault;
@@ -30,10 +33,10 @@ namespace Tanka.GraphQL.TypeSystem
 
         public ISchema Schema { get; set; }
 
-        public Func<IType, bool> ShouldPrintType { get; set; } = 
+        public Func<IType, bool> ShouldPrintType { get; set; } =
             type =>
             {
-                if(IgnoredStandardTypes.Contains(type))
+                if (IgnoredStandardTypes.Contains(type))
                     return false;
 
                 if (type.Unwrap()?.Name.StartsWith("__") == true)
@@ -66,14 +69,14 @@ namespace Tanka.GraphQL.TypeSystem
         }
     }
 
-    public class SdlPrinterContext
+    public class SchemaPrinterContext
     {
-        public SdlPrinterContext(SdlPrinterOptions options)
+        public SchemaPrinterContext(SchemaPrinterOptions options)
         {
             Options = options;
         }
 
-        public SdlPrinterOptions Options { get; }
+        public SchemaPrinterOptions Options { get; }
 
         public List<DirectiveDefinition> DirectiveDefinitions { get; } = new List<DirectiveDefinition>();
 
@@ -96,7 +99,7 @@ namespace Tanka.GraphQL.TypeSystem
         }
     }
 
-    public class SdlPrinter
+    public class SchemaPrinter
     {
         private static readonly IReadOnlyList<string> RootTypeNames = new List<string>
         {
@@ -105,20 +108,20 @@ namespace Tanka.GraphQL.TypeSystem
             "Subscription"
         };
 
-        private SdlPrinter(SdlPrinterOptions options)
+        private SchemaPrinter(SchemaPrinterOptions options)
         {
-            Context = new SdlPrinterContext(options);
+            Context = new SchemaPrinterContext(options);
         }
 
-        protected SdlPrinterContext Context { get; }
+        protected SchemaPrinterContext Context { get; }
 
-        protected SdlPrinterOptions Options => Context.Options;
+        protected SchemaPrinterOptions Options => Context.Options;
 
         protected ISchema Schema => Options.Schema;
 
-        public static TypeSystemDocument Print(SdlPrinterOptions options)
+        public static TypeSystemDocument Print(SchemaPrinterOptions options)
         {
-            var printer = new SdlPrinter(options);
+            var printer = new SchemaPrinter(options);
             return printer.Print(options.Schema);
         }
 
@@ -200,7 +203,7 @@ namespace Tanka.GraphQL.TypeSystem
             var possibleTypes = Schema.GetPossibleTypes(unionType)
                 .Select(t => new NamedType(t.Name))
                 .ToList();
-            
+
             Context.TypeDefinitions.Add(new UnionDefinition(
                     unionType.Description,
                     unionType.Name,
@@ -251,7 +254,7 @@ namespace Tanka.GraphQL.TypeSystem
 
             var namedTypes = new List<NamedType>();
 
-            foreach (var interfaceType in interfaces) 
+            foreach (var interfaceType in interfaces)
                 namedTypes.Add(interfaceType.Name);
 
             return new ImplementsInterfaces(namedTypes);
@@ -266,7 +269,7 @@ namespace Tanka.GraphQL.TypeSystem
                 .Values
                 .Select(v => new EnumValueDefinition(
                     v.Value.Description,
-                    new Language.Nodes.EnumValue(v.Key),
+                    new EnumValue(v.Key),
                     Directives(v.Value.Directives)))
                 .ToList();
 
@@ -360,7 +363,7 @@ namespace Tanka.GraphQL.TypeSystem
             {
                 if (!Options.ShouldPrintDirective(directive))
                     continue;
-                
+
                 directiveNodes.Add(new Directive(
                     directive.Name,
                     Arguments(directive))

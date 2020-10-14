@@ -3,7 +3,6 @@ using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-
 namespace Tanka.GraphQL.SDL
 {
     public static class TypeDefinitionEnumerableExtensions

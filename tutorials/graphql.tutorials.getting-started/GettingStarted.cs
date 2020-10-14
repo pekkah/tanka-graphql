@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 using Tanka.GraphQL.Directives;
@@ -305,7 +306,8 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
                             throw new ArgumentOutOfRangeException(
                                 nameof(value),
                                 $"Cannot coerce Uri from value kind: '{value.Kind}'");
-                        })
+                        },
+                        serializeLiteral: value => new StringValue(Encoding.UTF8.GetBytes(value.ToString())))
                 });
 
 

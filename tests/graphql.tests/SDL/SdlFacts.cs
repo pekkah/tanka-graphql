@@ -141,7 +141,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 ";
 
             var document = Parser.ParseTypeSystemDocument(idl);
-            var reader = new SdlReader(document);
+            var reader = new SchemaReader(document);
 
             /* When */
             var schema = reader.Read().Build();
@@ -316,7 +316,7 @@ namespace Tanka.GraphQL.Tests.SDL
                 ";
 
             var document = Parser.ParseTypeSystemDocument(idl);
-            var reader = new SdlReader(document);
+            var reader = new SchemaReader(document);
 
             /* When */
             var actual = reader.Read().Build().GetNamedType<EnumType>("Episode");

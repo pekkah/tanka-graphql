@@ -1,33 +1,12 @@
 ﻿using Tanka.GraphQL.Language;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
-using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-
-namespace Tanka.GraphQL.Tests.TypeSystem
+namespace Tanka.GraphQL.Tests.SDL
 {
-    public class SdlPrinterFacts
+    public class SchemaPrinterFacts
     {
-        [Fact]
-        public void ScalarType()
-        {
-            /* Given */
-            var source = @"
-""""""description""""""
-scalar Custom";
-            var schema = new SchemaBuilder()
-                .Sdl(source)
-                .Build(false);
-
-            /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
-
-            /* Then */
-            Gql.AssertEqual(source, Printer.Print(actual));
-        }
-
         [Theory]
         [InlineData("Boolean", "true")]
         [InlineData("Float", "123.123")]
@@ -43,8 +22,8 @@ scalar Custom";
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
@@ -62,30 +41,8 @@ directive @custom(arg1: Int = 123) on SCALAR";
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
-
-            /* Then */
-            Gql.AssertEqual(source, Printer.Print(actual));
-        }
-
-        [Fact]
-        public void InputObjectType()
-        {
-            /* Given */
-            var source = @"
-""""""description""""""
-input Custom {
-    field1: Int!
-    field2: String! = ""test""
- }";
-            var schema = new SchemaBuilder()
-                .Sdl(source)
-                .Build(false);
-
-            /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
@@ -106,8 +63,30 @@ enum Custom {
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
+
+            /* Then */
+            Gql.AssertEqual(source, Printer.Print(actual));
+        }
+
+        [Fact]
+        public void InputObjectType()
+        {
+            /* Given */
+            var source = @"
+""""""description""""""
+input Custom {
+    field1: Int!
+    field2: String! = ""test""
+ }";
+            var schema = new SchemaBuilder()
+                .Sdl(source)
+                .Build(false);
+
+            /* When */
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
@@ -130,8 +109,8 @@ interface Custom {
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
@@ -155,8 +134,8 @@ interface Custom implements Implemented {
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
@@ -179,8 +158,8 @@ type Custom {
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
@@ -204,30 +183,8 @@ type Custom implements Implemented {
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
-
-            /* Then */
-            Gql.AssertEqual(source, Printer.Print(actual));
-        }
-
-        [Fact]
-        public void UnionType()
-        {
-            /* Given */
-            var source = @"
-type A
-type B
-
-""""""description""""""
-union Custom = A | B";
-            var schema = new SchemaBuilder()
-                .Sdl(source)
-                .Build(false);
-
-            /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
@@ -248,8 +205,8 @@ schema {
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
@@ -272,8 +229,8 @@ schema {
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
@@ -298,8 +255,49 @@ schema {
                 .Build(false);
 
             /* When */
-            var actual = SdlPrinter
-                .Print(new SdlPrinterOptions(schema));
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
+
+            /* Then */
+            Gql.AssertEqual(source, Printer.Print(actual));
+        }
+
+        [Fact]
+        public void ScalarType()
+        {
+            /* Given */
+            var source = @"
+""""""description""""""
+scalar Custom";
+            var schema = new SchemaBuilder()
+                .Sdl(source)
+                .Build(false);
+
+            /* When */
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
+
+            /* Then */
+            Gql.AssertEqual(source, Printer.Print(actual));
+        }
+
+        [Fact]
+        public void UnionType()
+        {
+            /* Given */
+            var source = @"
+type A
+type B
+
+""""""description""""""
+union Custom = A | B";
+            var schema = new SchemaBuilder()
+                .Sdl(source)
+                .Build(false);
+
+            /* When */
+            var actual = SchemaPrinter
+                .Print(new SchemaPrinterOptions(schema));
 
             /* Then */
             Gql.AssertEqual(source, Printer.Print(actual));
