@@ -157,35 +157,47 @@ namespace Tanka.GraphQL.SDL
             var rootOperationTypeDefs = new List<RootOperationTypeDefinition>();
             if (schema.Query != null)
             {
-                VisitObjectType(schema.Query);
-                rootOperationTypeDefs.Add(
-                    new RootOperationTypeDefinition(
-                        OperationType.Query,
-                        new NamedType(schema.Query.Name)
-                    )
-                );
+                var fields = Schema.GetFields(schema.Query.Name);
+
+                if (fields.Any(
+                    f => Options.ShouldPrintField(f.Key, f.Value)))
+                {
+                    VisitObjectType(schema.Query);
+                    rootOperationTypeDefs.Add(
+                        new RootOperationTypeDefinition(
+                            OperationType.Query,
+                            new NamedType(schema.Query.Name)));
+                }
             }
 
             if (schema.Mutation != null)
             {
-                VisitObjectType(schema.Mutation);
-                rootOperationTypeDefs.Add(
-                    new RootOperationTypeDefinition(
-                        OperationType.Mutation,
-                        new NamedType(schema.Mutation.Name)
-                    )
-                );
+                var fields = Schema.GetFields(schema.Mutation.Name);
+
+                if (fields.Any(
+                    f => Options.ShouldPrintField(f.Key, f.Value)))
+                {
+                    VisitObjectType(schema.Mutation);
+                    rootOperationTypeDefs.Add(
+                        new RootOperationTypeDefinition(
+                            OperationType.Mutation,
+                            new NamedType(schema.Mutation.Name)));
+                }
             }
 
             if (schema.Subscription != null)
             {
-                VisitObjectType(schema.Subscription);
-                rootOperationTypeDefs.Add(
-                    new RootOperationTypeDefinition(
-                        OperationType.Subscription,
-                        new NamedType(schema.Subscription.Name)
-                    )
-                );
+                var fields = Schema.GetFields(schema.Subscription.Name);
+
+                if (fields.Any(
+                    f => Options.ShouldPrintField(f.Key, f.Value)))
+                {
+                    VisitObjectType(schema.Subscription);
+                    rootOperationTypeDefs.Add(
+                        new RootOperationTypeDefinition(
+                            OperationType.Subscription,
+                            new NamedType(schema.Subscription.Name)));
+                }
             }
 
             if (rootOperationTypeDefs.Any())
@@ -219,13 +231,13 @@ namespace Tanka.GraphQL.SDL
                 return;
 
             var implements = Implements(objectType.Interfaces.ToList());
-
+            var fields = FieldsDefinition(objectType);
             var objectNode = new ObjectDefinition(
                 objectType.Description,
                 objectType.Name,
                 implements,
                 Directives(objectType.Directives),
-                FieldsDefinition(objectType)
+                fields
             );
 
             Context.TypeDefinitions.Add(objectNode);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
@@ -8,12 +9,13 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
     {
         public object? Serialize(object value)
         {
-            return value;
+            return value.ToString();
         }
 
         public ValueBase SerializeLiteral(object? value)
         {
-            throw new NotSupportedException("FieldSet scalar value cannot be printed");
+            var bytes = Encoding.UTF8.GetBytes(value.ToString());
+            return new StringValue(bytes);
         }
 
         public object? ParseValue(object input)

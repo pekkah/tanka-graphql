@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
 
         public ValueBase SerializeLiteral(object? value)
         {
-            throw new NotImplementedException("AnyScalar value cannot be printed");
+            return new NullValue();
         }
 
         public object? ParseValue(object input)

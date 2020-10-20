@@ -43,16 +43,17 @@ namespace Tanka.GraphQL.Tools
 
         public static ISchema MakeExecutableSchemaWithIntrospection(
             SchemaBuilder builder,
-            IResolverMap resolvers,
-            ISubscriberMap subscribers = null,
-            IReadOnlyDictionary<string, IValueConverter> converters = null,
-            IReadOnlyDictionary<string, CreateDirectiveVisitor> directives = null)
+            IResolverMap? resolvers = null,
+            ISubscriberMap? subscribers = null,
+            IReadOnlyDictionary<string, IValueConverter>? converters = null,
+            IReadOnlyDictionary<string, CreateDirectiveVisitor>? directives = null)
         {
             // add converters
             if (converters != null)
                 UseConverters(builder, converters);
 
-            builder.UseResolversAndSubscribers(resolvers, subscribers);
+            if (resolvers != null)
+                builder.UseResolversAndSubscribers(resolvers, subscribers);
 
             if (directives != null)
                 builder.ApplyDirectives(directives);

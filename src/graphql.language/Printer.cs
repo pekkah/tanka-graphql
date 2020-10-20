@@ -201,7 +201,10 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterArguments(PrinterContext context, Arguments arguments)
         {
-            context.Append('(');
+            if (arguments.Count > 0)
+            {
+                context.Append('(');
+            }
         }
         
         protected override void EnterArgument(PrinterContext context, Argument argument)
@@ -220,7 +223,10 @@ namespace Tanka.GraphQL.Language
 
         protected override void ExitArguments(PrinterContext context, Arguments arguments)
         {
-            context.Append(')');
+            if (arguments.Count > 0)
+            {
+                context.Append(')');
+            }
         }
 
         protected override void EnterVariable(PrinterContext context, Variable variable)
@@ -347,6 +353,7 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterDirectiveDefinition(PrinterContext context, DirectiveDefinition directiveDefinition)
         {
+            context.Append(' ');
             context.AppendDescription(directiveDefinition.Description);
             context.Append("directive");
             context.Append(' ');
@@ -367,6 +374,7 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterInputValueDefinition(PrinterContext context, InputValueDefinition inputValueDefinition)
         {
+            context.Append(' ');
             context.AppendDescription(inputValueDefinition.Description);
             context.Append(inputValueDefinition.Name);
             context.Append(": ");
@@ -417,6 +425,7 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterScalarDefinition(PrinterContext context, ScalarDefinition scalarDefinition)
         {
+            context.Append(' ');
             context.AppendDescription(scalarDefinition.Description);
             context.Append("scalar");
             context.Append(' ');
@@ -451,6 +460,7 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterObjectDefinition(PrinterContext context, ObjectDefinition objectDefinition)
         {
+            context.Append(' ');
             context.AppendDescription(objectDefinition.Description);
             context.Append("type ");
             context.Append(objectDefinition.Name);
@@ -469,6 +479,7 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterInterfaceDefinition(PrinterContext context, InterfaceDefinition interfaceDefinition)
         {
+            context.Append(' ');
             context.AppendDescription(interfaceDefinition.Description);
             context.Append("interface ");
             context.Append(interfaceDefinition.Name);
@@ -477,6 +488,7 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterUnionDefinition(PrinterContext context, UnionDefinition unionDefinition)
         {
+            context.Append(' ');
             context.AppendDescription(unionDefinition.Description);
             context.Append("union ");
             context.Append(unionDefinition.Name);
@@ -495,6 +507,7 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterEnumDefinition(PrinterContext context, EnumDefinition enumDefinition)
         {
+            context.Append(' ');
             context.AppendDescription(enumDefinition.Description);
             context.Append("enum ");
             context.Append(enumDefinition.Name);
@@ -523,6 +536,7 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterInputObjectDefinition(PrinterContext context, InputObjectDefinition inputObjectDefinition)
         {
+            context.Append(' ');
             context.AppendDescription(inputObjectDefinition.Description);
             context.Append("input ");
             context.Append(inputObjectDefinition.Name);
@@ -541,14 +555,21 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterSchemaDefinition(PrinterContext context, SchemaDefinition schemaDefinition)
         {
-            context.AppendDescription(schemaDefinition.Description);
-            context.Append("schema ");
+            if (schemaDefinition.Operations.Any() || schemaDefinition.Directives?.Any() == true)
+            {
+                context.Append(' ');
+                context.AppendDescription(schemaDefinition.Description);
+                context.Append("schema ");
+            }
         }
 
         protected override void EnterRootOperationTypeDefinitions(PrinterContext context,
             RootOperationTypeDefinitions rootOperationTypeDefinitions)
         {
-            context.Append(" { ");
+            if (rootOperationTypeDefinitions.Any())
+            {
+                context.Append(" { ");
+            }
         }
 
         protected override void EnterRootOperationTypeDefinition(PrinterContext context, RootOperationTypeDefinition rootOperationTypeDefinition)
@@ -581,7 +602,10 @@ namespace Tanka.GraphQL.Language
         protected override void ExitRootOperationTypeDefinitions(PrinterContext context,
             RootOperationTypeDefinitions rootOperationTypeDefinitions)
         {
-            context.Append(" } ");
+            if (rootOperationTypeDefinitions.Any())
+            {
+                context.Append(" } ");
+            }
         }
 
         protected override void EnterTypeExtension(PrinterContext context, TypeExtension typeExtension)

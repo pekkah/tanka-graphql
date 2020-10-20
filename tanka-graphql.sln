@@ -59,9 +59,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.language", "src\gra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.dev.allocations", "dev\graphql.dev.allocations\graphql.dev.allocations.csproj", "{44CA7F79-94E3-4DAD-BB73-39FA98D86902}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Extensions.ApolloFederation", "src\GraphQL.Extensions.ApolloFederation\GraphQL.Extensions.ApolloFederation.csproj", "{E6AD4890-44A0-4A7A-BEB2-BA4F8F9F97BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Extensions.ApolloFederation", "src\GraphQL.Extensions.ApolloFederation\GraphQL.Extensions.ApolloFederation.csproj", "{E6AD4890-44A0-4A7A-BEB2-BA4F8F9F97BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Extensions.ApolloFederation.Tests", "tests\GraphQL.Extensions.ApolloFederation.Tests\GraphQL.Extensions.ApolloFederation.Tests.csproj", "{DE3E558B-EF58-4A3A-920D-DABEDE92FDF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Extensions.ApolloFederation.Tests", "tests\GraphQL.Extensions.ApolloFederation.Tests\GraphQL.Extensions.ApolloFederation.Tests.csproj", "{DE3E558B-EF58-4A3A-920D-DABEDE92FDF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Dev.Reviews", "dev\GraphQL.Dev.Reviews\GraphQL.Dev.Reviews.csproj", "{60709A73-4981-4973-8AF7-752B24E425B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -325,6 +327,18 @@ Global
 		{DE3E558B-EF58-4A3A-920D-DABEDE92FDF2}.Release|x64.Build.0 = Release|Any CPU
 		{DE3E558B-EF58-4A3A-920D-DABEDE92FDF2}.Release|x86.ActiveCfg = Release|Any CPU
 		{DE3E558B-EF58-4A3A-920D-DABEDE92FDF2}.Release|x86.Build.0 = Release|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Debug|x64.Build.0 = Debug|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Debug|x86.Build.0 = Debug|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Release|x64.ActiveCfg = Release|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Release|x64.Build.0 = Release|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Release|x86.ActiveCfg = Release|Any CPU
+		{60709A73-4981-4973-8AF7-752B24E425B7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -333,6 +347,7 @@ Global
 		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
 		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
 		{44CA7F79-94E3-4DAD-BB73-39FA98D86902} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
+		{60709A73-4981-4973-8AF7-752B24E425B7} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6EC1BBAB-620C-44FB-A12E-E68F69D689B6}

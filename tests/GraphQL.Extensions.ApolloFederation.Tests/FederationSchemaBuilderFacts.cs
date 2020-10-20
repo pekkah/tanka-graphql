@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
@@ -120,5 +121,59 @@ _entities(representations: $reps) {
             /* Then */
             Assert.Null(result.Errors);
         }
+
+        [Fact]
+        public async Task Query_sdl()
+        {
+            /* Given */
+            var builder = new SchemaBuilder()
+                .AddFederationDirectives()
+                .Sdl($@"
+type Review {{
+  product: Product
+}}
+
+
+extend type Product @key(fields: ""upc"") {{
+  upc: String! @external
+}}")
+                .UseResolversAndSubscribers((new ObjectTypeMap()
+                {
+                    ["Review"] = new FieldResolversMap()
+                    {
+                        {"product", context =>
+                            {
+                                var review = context.GetObjectArgument<ReviewInput>("review");
+                            }
+                        }
+                    }
+                }));
+
+            /* When */
+            var schema = builder.Build();
+            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+            {
+                Schema = schema,
+                Document = @"
+{
+    _service {
+        sdl
+    }
+}"
+            });
+
+            /* Then */
+            Assert.Null(result.Errors);
+        }
+    }
+
+    public class Review
+    {
+        public string Upc { get; set; }
+    }
+
+    public class Product
+    {
+        public string Upc { get; set; }
     }
 }
