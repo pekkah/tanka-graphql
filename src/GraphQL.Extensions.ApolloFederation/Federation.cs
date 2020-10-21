@@ -70,8 +70,7 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
 
         public static SchemaBuilder AddFederationSchemaExtensions(
             this SchemaBuilder builder,
-            //todo: change following to IReferenceResolversMap
-            Dictionary<string, ResolveReference> referenceResolvers)
+            IReferenceResolversMap referenceResolvers)
         {
             builder.Include(_Any);
             builder.Include(_Any.Name, new AnyScalarConverter());
@@ -118,7 +117,7 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
         }
 
         private static Resolver CreateEntitiesResolver(
-            IReadOnlyDictionary<string, ResolveReference> referenceResolversMap)
+            IReferenceResolversMap referenceResolversMap)
         {
             return async context =>
             {
@@ -136,7 +135,12 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
                             context.Path,
                             context.Selection);
 
-                    var typename = typenameObj.ToString();
+                    var typename = typenameObj.ToString() ?? 
+                        throw new QueryExecutionException(
+                            $"Representation is missing __typename",
+                            context.Path,
+                            context.Selection);
+
                     var objectType = context
                         .ExecutionContext
                         .Schema
@@ -148,13 +152,13 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
                             context.Path,
                             context.Selection);
 
-                    if (!referenceResolversMap.TryGetValue(typename, out var resolveReference))
+                    if (!referenceResolversMap.TryGetReferenceResolver(typename, out var resolveReference))
                         throw new QueryExecutionException(
                             $"Could not find reference resolvers for  __typename: '{typename}'",
                             context.Path,
                             context.Selection);
 
-                    var (reference, namedType) = await resolveReference(context, representation, objectType);
+                    var (namedType, reference) = await resolveReference(context, objectType, representation);
                     result.Add(reference);
 
                     // this will fail if for same type there's multiple named types

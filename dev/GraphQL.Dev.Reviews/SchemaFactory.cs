@@ -16,6 +16,8 @@ namespace GraphQL.Dev.Reviews
     {
         public static async ValueTask<ISchema> Create()
         {
+            await Task.Delay(0);
+
             var typeDefs = @"
 type Review @key(fields: ""id"") {
     id: ID!
@@ -40,10 +42,8 @@ type Product @key(fields: ""upc"") @extends {
 
             builder.Sdl(typeDefs);
 
-            await Task.Delay(0);
-
             builder.AddFederationSchemaExtensions(
-                new Dictionary<string, ResolveReference>
+                new DictionaryReferenceResolversMap()
                 {
                     ["User"] = UserReference,
                     ["Product"] = ProductReference
@@ -82,8 +82,8 @@ type Product @key(fields: ""upc"") @extends {
             return ResolveSync.As(user.Username);
         }
 
-        private static async ValueTask<(object Reference, INamedType? NamedType)> ProductReference(
-            IResolverContext context, IReadOnlyDictionary<string, object> representation, INamedType type)
+        private static async ValueTask<ResolveReferenceResult> ProductReference(
+            IResolverContext context, INamedType type, IReadOnlyDictionary<string, object> representation)
         {
             await Task.Delay(0);
 
@@ -93,7 +93,7 @@ type Product @key(fields: ""upc"") @extends {
                 Upc = upc
             };
 
-            return (product, type);
+            return new ResolveReferenceResult(type, product);
         }
 
         private static ValueTask<IResolverResult> ProductReviews(IResolverContext context)
@@ -127,8 +127,10 @@ type Product @key(fields: ""upc"") @extends {
             return ResolveSync.As(reviews);
         }
 
-        private static async ValueTask<(object Reference, INamedType? NamedType)> UserReference(
-            IResolverContext context, IReadOnlyDictionary<string, object> representation, INamedType type)
+        private static async ValueTask<ResolveReferenceResult> UserReference(
+            IResolverContext context, 
+            INamedType type, 
+            IReadOnlyDictionary<string, object> representation)
         {
             await Task.Delay(0);
 
@@ -150,7 +152,7 @@ type Product @key(fields: ""upc"") @extends {
                 Username = username
             };
 
-            return (user, type);
+            return new ResolveReferenceResult(type, user);
         }
     }
 
