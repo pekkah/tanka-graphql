@@ -16,7 +16,7 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
             builder.Include(FederationTypes.Provides);
             builder.Include(FederationTypes.Key);
             builder.Include(FederationTypes.Extends);
-            
+
             return builder;
         }
     }

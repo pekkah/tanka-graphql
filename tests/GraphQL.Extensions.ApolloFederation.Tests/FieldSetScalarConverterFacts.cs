@@ -7,10 +7,38 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
     {
         public FieldSetScalarConverterFacts()
         {
-            Sut = new FieldSetScalarConverter();    
+            Sut = new FieldSetScalarConverter();
         }
 
         protected FieldSetScalarConverter Sut { get; }
+
+        [Fact]
+        public void ParseLiteral()
+        {
+            /* Given */
+            StringValue input = "one two";
+
+            /* When */
+            var actual = Sut.ParseLiteral(input)
+                as string;
+
+            /* Then */
+            Assert.Equal("one two", actual);
+        }
+
+        [Fact]
+        public void ParseValue()
+        {
+            /* Given */
+            var input = "one two";
+
+            /* When */
+            var actual = Sut.ParseValue(input)
+                as string;
+
+            /* Then */
+            Assert.Equal(input, actual);
+        }
 
         [Fact]
         public void Serialize()
@@ -37,34 +65,6 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
 
             /* Then */
             Assert.Equal("one two", actual.ToString());
-        }
-
-        [Fact]
-        public void ParseValue()
-        {
-            /* Given */
-            var input = "one two";
-
-            /* When */
-            var actual = Sut.ParseValue(input)
-                as string;
-
-            /* Then */
-            Assert.Equal(input, actual);
-        }
-
-        [Fact]
-        public void ParseLiteral()
-        {
-            /* Given */
-            StringValue input = "one two";
-
-            /* When */
-            var actual = Sut.ParseLiteral(input)
-                as string;
-
-            /* Then */
-            Assert.Equal("one two", actual);
         }
     }
 }

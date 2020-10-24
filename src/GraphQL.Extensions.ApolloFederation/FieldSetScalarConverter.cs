@@ -5,6 +5,7 @@ using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation
 {
+    //todo: should this parse as SelectionSet?
     public class FieldSetScalarConverter : IValueConverter
     {
         public object? Serialize(object value)
@@ -37,7 +38,7 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
                 var str = ((StringValue) input).ToString();
                 return ParseValue(str);
             }
-            
+
             throw new FormatException(
                 $"Invalid literal value for FieldSet scalar. Expected StringValue but got {input.Kind}");
         }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
@@ -168,8 +167,8 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
                             context.Selection);
 
                     var (namedType, reference) = await resolveReference(
-                        context, 
-                        objectType, 
+                        context,
+                        objectType,
                         representation);
 
                     result.Add(reference);

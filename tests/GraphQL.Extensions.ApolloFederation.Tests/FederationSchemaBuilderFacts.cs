@@ -28,8 +28,8 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
 
             /* When */
             var schema = Federation.ServiceFrom(
-                builder.Build(), 
-                new DictionaryReferenceResolversMap())
+                    builder.Build(),
+                    new DictionaryReferenceResolversMap())
                 .Build();
 
             var entityUnion = schema.GetNamedType<UnionType>("_Entity");
@@ -87,12 +87,13 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
                         {"name", context => ResolveSync.As("Name 123")}
                     }
                 })
-                .Query(out _);;
+                .Query(out _);
+            ;
 
             /* When */
             var schema = Federation.ServiceFrom(
                     builder.Build(),
-                    new DictionaryReferenceResolversMap()
+                    new DictionaryReferenceResolversMap
                     {
                         ["Person"] = (context, type, representation) => new ValueTask<ResolveReferenceResult>(
                             new ResolveReferenceResult(type, representation))
