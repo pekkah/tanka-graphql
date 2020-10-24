@@ -24,11 +24,14 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
                     type Address {
                         street: String
                     }")
-                .Query(out var query)
-                .AddFederationSchemaExtensions(new DictionaryReferenceResolversMap());
+                .Query(out var query);
 
             /* When */
-            var schema = builder.Build();
+            var schema = Federation.ServiceFrom(
+                builder.Build(), 
+                new DictionaryReferenceResolversMap())
+                .Build();
+
             var entityUnion = schema.GetNamedType<UnionType>("_Entity");
             var entities = schema.GetPossibleTypes(entityUnion)
                 .ToList();
@@ -47,11 +50,14 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
                     type Person @key(fields: ""id"") {
                         id: ID!
                     }")
-                .Query(out var query)
-                .AddFederationSchemaExtensions(new DictionaryReferenceResolversMap());
+                .Query(out var query);
 
             /* When */
-            var schema = builder.Build();
+            var schema = Federation.ServiceFrom(
+                    builder.Build(),
+                    new DictionaryReferenceResolversMap())
+                .Build();
+
             var entityUnion = schema.GetNamedType<UnionType>("_Entity");
             var entities = schema.GetPossibleTypes(entityUnion);
 
@@ -81,15 +87,18 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
                         {"name", context => ResolveSync.As("Name 123")}
                     }
                 })
-                .Query(out _)
-                .AddFederationSchemaExtensions(new DictionaryReferenceResolversMap
-                {
-                    ["Person"] = (context, type, representation) => new ValueTask<ResolveReferenceResult>(
-                        new ResolveReferenceResult(type, representation))
-                });
+                .Query(out _);;
 
             /* When */
-            var schema = builder.Build();
+            var schema = Federation.ServiceFrom(
+                    builder.Build(),
+                    new DictionaryReferenceResolversMap()
+                    {
+                        ["Person"] = (context, type, representation) => new ValueTask<ResolveReferenceResult>(
+                            new ResolveReferenceResult(type, representation))
+                    })
+                .Build();
+
             var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
                 Schema = schema,
@@ -134,10 +143,14 @@ type Product @key(fields: ""upc"") @extends {
   upc: String! @external
 }")
                 .UseResolversAndSubscribers(new ObjectTypeMap())
-                .AddFederationSchemaExtensions(new DictionaryReferenceResolversMap());
+                .Query(out _);
 
             /* When */
-            var schema = builder.Build();
+            var schema = Federation.ServiceFrom(
+                    builder.Build(),
+                    new DictionaryReferenceResolversMap())
+                .Build();
+
             var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
                 Schema = schema,
@@ -152,15 +165,5 @@ type Product @key(fields: ""upc"") @extends {
             /* Then */
             Assert.Null(result.Errors);
         }
-    }
-
-    public class Review
-    {
-        public string Upc { get; set; }
-    }
-
-    public class Product
-    {
-        public string Upc { get; set; }
     }
 }

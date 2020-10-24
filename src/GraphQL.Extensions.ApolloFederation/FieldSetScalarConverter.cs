@@ -9,23 +9,37 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
     {
         public object? Serialize(object value)
         {
-            return value.ToString();
+            return value as string;
         }
 
         public ValueBase SerializeLiteral(object? value)
         {
-            var bytes = Encoding.UTF8.GetBytes(value.ToString());
+            if (value == null)
+                return new NullValue();
+
+            if (!(value is string fields))
+                return new NullValue();
+
+            var bytes = Encoding.UTF8.GetBytes(fields);
             return new StringValue(bytes);
         }
 
-        public object? ParseValue(object input)
+        public object? ParseValue(object? input)
         {
-            return input;
+            var fields = input as string;
+            return fields;
         }
 
         public object? ParseLiteral(ValueBase input)
         {
-            return input;
+            if (input.Kind == NodeKind.StringValue)
+            {
+                var str = ((StringValue) input).ToString();
+                return ParseValue(str);
+            }
+            
+            throw new FormatException(
+                $"Invalid literal value for FieldSet scalar. Expected StringValue but got {input.Kind}");
         }
     }
 }

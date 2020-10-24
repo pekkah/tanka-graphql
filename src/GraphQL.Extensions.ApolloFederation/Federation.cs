@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
@@ -8,11 +9,8 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation
 {
-    public static class FederationSchemaBuilderExtensions
+    public static class Federation
     {
-        private static readonly ScalarType _Any = new ScalarType("_Any");
-        private static readonly ScalarType _FieldSet = new ScalarType("_FieldSet");
-
         private static readonly IReadOnlyList<string> IgnoredTypeNames = new List<string>
         {
             "external",
@@ -26,54 +24,12 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
             "_FieldSet"
         };
 
-        public static SchemaBuilder AddFederationDirectives(this SchemaBuilder builder)
-        {
-            builder.Include(_FieldSet);
-            builder.Include(_FieldSet.Name, new FieldSetScalarConverter());
-            //todo: directives
-
-            builder.DirectiveType(
-                "external",
-                out _,
-                new[] {DirectiveLocation.FIELD_DEFINITION}
-            );
-
-            builder.DirectiveType(
-                "requires",
-                out _,
-                new[] {DirectiveLocation.FIELD_DEFINITION},
-                args: args => args.Arg("fields", _FieldSet, null, null)
-            );
-
-            builder.DirectiveType(
-                "provides",
-                out _,
-                new[] {DirectiveLocation.FIELD_DEFINITION},
-                args: args => args.Arg("fields", _FieldSet, null, null)
-            );
-
-            builder.DirectiveType(
-                "key",
-                out _,
-                new[] {DirectiveLocation.FIELD_DEFINITION},
-                args: args => args.Arg("fields", _FieldSet, null, null)
-            );
-
-            builder.DirectiveType(
-                "extends",
-                out _,
-                new[] {DirectiveLocation.OBJECT, DirectiveLocation.INTERFACE}
-            );
-
-            return builder;
-        }
-
-        public static SchemaBuilder AddFederationSchemaExtensions(
-            this SchemaBuilder builder,
+        public static SchemaBuilder ServiceFrom(
+            ISchema schema,
             IReferenceResolversMap referenceResolvers)
         {
-            builder.Include(_Any);
-            builder.Include(_Any.Name, new AnyScalarConverter());
+            var builder = new SchemaBuilder()
+                .Import(schema);
 
             builder.Union("_Entity", out var entityUnion, possibleTypes: GetEntities(builder));
             builder.Object("_Service", out var serviceObject);
@@ -92,7 +48,7 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
                     {
                         args.Arg(
                             "representations",
-                            new NonNull(new List(new NonNull(_Any))),
+                            new NonNull(new List(new NonNull(FederationTypes._Any))),
                             null,
                             "Representations");
                     },
@@ -114,59 +70,6 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
             });
 
             return builder;
-        }
-
-        private static Resolver CreateEntitiesResolver(
-            IReferenceResolversMap referenceResolversMap)
-        {
-            return async context =>
-            {
-                var representations = context
-                    .GetArgument<IReadOnlyCollection<object>>("representations");
-
-                var result = new List<object>();
-                var types = new Dictionary<object, INamedType>();
-                foreach (var representationObj in representations)
-                {
-                    var representation = (IReadOnlyDictionary<string, object>) representationObj;
-                    if (!representation.TryGetValue("__typename", out var typenameObj))
-                        throw new QueryExecutionException(
-                            "Typename not found for representation",
-                            context.Path,
-                            context.Selection);
-
-                    var typename = typenameObj.ToString() ?? 
-                        throw new QueryExecutionException(
-                            $"Representation is missing __typename",
-                            context.Path,
-                            context.Selection);
-
-                    var objectType = context
-                        .ExecutionContext
-                        .Schema
-                        .GetNamedType<ObjectType>(typename);
-
-                    if (objectType == null)
-                        throw new QueryExecutionException(
-                            $"Could not resolve type form __typename: '{typename}'",
-                            context.Path,
-                            context.Selection);
-
-                    if (!referenceResolversMap.TryGetReferenceResolver(typename, out var resolveReference))
-                        throw new QueryExecutionException(
-                            $"Could not find reference resolvers for  __typename: '{typename}'",
-                            context.Path,
-                            context.Selection);
-
-                    var (namedType, reference) = await resolveReference(context, objectType, representation);
-                    result.Add(reference);
-
-                    // this will fail if for same type there's multiple named types
-                    types.TryAdd(reference, namedType);
-                }
-
-                return Resolve.As(result, reference => types[reference]);
-            };
         }
 
         private static ObjectType[] GetEntities(SchemaBuilder builder)
@@ -219,6 +122,63 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation
                 var document = SchemaPrinter.Print(options);
                 var sdl = Printer.Print(document);
                 return ResolveSync.As(sdl);
+            };
+        }
+
+        private static Resolver CreateEntitiesResolver(
+            IReferenceResolversMap referenceResolversMap)
+        {
+            return async context =>
+            {
+                var representations = context
+                    .GetArgument<IReadOnlyCollection<object>>("representations");
+
+                var result = new List<object>();
+                var types = new Dictionary<object, INamedType>();
+                foreach (var representationObj in representations)
+                {
+                    var representation = (IReadOnlyDictionary<string, object>) representationObj;
+                    if (!representation.TryGetValue("__typename", out var typenameObj))
+                        throw new QueryExecutionException(
+                            "Typename not found for representation",
+                            context.Path,
+                            context.Selection);
+
+                    var typename = typenameObj.ToString() ??
+                                   throw new QueryExecutionException(
+                                       "Representation is missing __typename",
+                                       context.Path,
+                                       context.Selection);
+
+                    var objectType = context
+                        .ExecutionContext
+                        .Schema
+                        .GetNamedType<ObjectType>(typename);
+
+                    if (objectType == null)
+                        throw new QueryExecutionException(
+                            $"Could not resolve type form __typename: '{typename}'",
+                            context.Path,
+                            context.Selection);
+
+                    if (!referenceResolversMap.TryGetReferenceResolver(typename, out var resolveReference))
+                        throw new QueryExecutionException(
+                            $"Could not find reference resolvers for  __typename: '{typename}'",
+                            context.Path,
+                            context.Selection);
+
+                    var (namedType, reference) = await resolveReference(
+                        context, 
+                        objectType, 
+                        representation);
+
+                    result.Add(reference);
+
+                    // this will fail if for same type there's multiple named types
+                    types.TryAdd(reference, namedType);
+                }
+
+                return Resolve.As(result, reference => types[reference]);
             };
         }
     }
