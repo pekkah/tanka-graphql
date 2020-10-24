@@ -755,7 +755,7 @@ Scalar
 """"""
  scalar Scalar
 
-""""""
+ """"""
 Object
 """"""
  type Object {

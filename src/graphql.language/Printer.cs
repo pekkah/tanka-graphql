@@ -374,7 +374,6 @@ namespace Tanka.GraphQL.Language
 
         protected override void EnterInputValueDefinition(PrinterContext context, InputValueDefinition inputValueDefinition)
         {
-            context.Append(' ');
             context.AppendDescription(inputValueDefinition.Description);
             context.Append(inputValueDefinition.Name);
             context.Append(": ");

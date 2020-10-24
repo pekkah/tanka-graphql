@@ -195,7 +195,10 @@ type Custom implements Implemented {
         {
             /* Given */
             var source = @"
-type Query
+type Query {
+    field: Int!
+}
+
 
 schema {
     query: Query
@@ -217,8 +220,13 @@ schema {
         {
             /* Given */
             var source = @"
-type Query
-type Mutation
+type Query {
+    field: Int!
+}
+
+type Mutation {
+    field: Int!
+}
 
 schema {
     query: Query
@@ -241,9 +249,17 @@ schema {
         {
             /* Given */
             var source = @"
-type Query
-type Mutation
-type Subscription
+type Query {
+    field: Int!
+}
+
+type Mutation {
+    field: Int!
+}
+
+type Subscription {
+    field: Int!
+}
 
 schema {
     query: Query
