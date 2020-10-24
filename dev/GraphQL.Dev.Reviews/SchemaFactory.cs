@@ -16,8 +16,6 @@ namespace GraphQL.Dev.Reviews
     {
         public static async ValueTask<ISchema> Create()
         {
-            await Task.Delay(0);
-
             var typeDefs = @"
 type Review @key(fields: ""id"") {
     id: ID!
@@ -36,18 +34,14 @@ type Product @key(fields: ""upc"") @extends {
     upc: String! @external
     reviews: [Review]
 }
+
+type Query {
+}
 ";
             var builder = new SchemaBuilder()
                 .AddFederationDirectives();
 
-            builder.Sdl(typeDefs);
-
-            builder.AddFederationSchemaExtensions(
-                new DictionaryReferenceResolversMap()
-                {
-                    ["User"] = UserReference,
-                    ["Product"] = ProductReference
-                });
+            await builder.SdlAsync(typeDefs);
 
             builder.UseResolversAndSubscribers(
                 new ObjectTypeMap
@@ -72,7 +66,15 @@ type Product @key(fields: ""upc"") @extends {
                     }
                 });
 
-            return SchemaTools.MakeExecutableSchemaWithIntrospection(builder);
+            var federationBuilder = Federation
+                .ServiceFrom(builder.Build(),
+                    new DictionaryReferenceResolversMap()
+                    {
+                        ["User"] = UserReference,
+                        ["Product"] = ProductReference
+                    });
+
+            return SchemaTools.MakeExecutableSchemaWithIntrospection(federationBuilder);
         }
 
         private static ValueTask<IResolverResult> UserUsername(IResolverContext context)
