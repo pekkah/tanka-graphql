@@ -195,7 +195,7 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.TypeSystem
 {
-    public interface ISchema : IHasDirectives
+    public interface ISchema : IHasDirectives, IType
     {
         ObjectType? Subscription { get; }
 

@@ -208,7 +208,8 @@ logic.</p>
                             throw new ArgumentOutOfRangeException(
                                 nameof(value),
                                 $&quot;Cannot coerce Uri from value kind: '{value.Kind}'&quot;);
-                        })
+                        },
+                        serializeLiteral: value =&gt; new StringValue(Encoding.UTF8.GetBytes(value.ToString())))
                 });
 
 
