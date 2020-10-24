@@ -10,7 +10,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public ScalarDefinition(
             StringValue? description,
             in Name name,
-            IReadOnlyCollection<Directive>? directives,
+            Directives? directives,
             in Location? location = default)
         {
             Description = description;
@@ -21,7 +21,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue? Description { get; }
         public override Name Name { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
+        public Directives? Directives { get; }
         public override Location? Location { get; }
 
         public static implicit operator ScalarDefinition(string value)

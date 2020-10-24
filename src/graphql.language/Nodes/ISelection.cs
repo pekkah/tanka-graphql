@@ -6,6 +6,6 @@ namespace Tanka.GraphQL.Language.Nodes
     {
         public SelectionType SelectionType { get; }
         
-        public IReadOnlyCollection<Directive>? Directives { get; }
+        public Directives? Directives { get; }
     }
 }

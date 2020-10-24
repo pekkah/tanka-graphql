@@ -15,11 +15,11 @@ namespace Tanka.GraphQL.Language
         }
 
         public static Directive WithArguments(this Directive directive,
-            IReadOnlyCollection<Argument> arguments)
+            IReadOnlyList<Argument> arguments)
         {
             return new Directive(
                 directive.Name,
-                arguments,
+                new Arguments(arguments),
                 directive.Location);
         }
     }

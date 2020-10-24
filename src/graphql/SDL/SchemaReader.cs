@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
@@ -11,14 +10,13 @@ using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.SDL
 {
-    public class SdlReader
+    public class SchemaReader
     {
         private readonly List<Action<SchemaBuilder>> _afterTypeDefinitions = new List<Action<SchemaBuilder>>();
         private readonly SchemaBuilder _builder;
         private readonly TypeSystemDocument _document;
 
-
-        public SdlReader(TypeSystemDocument document, SchemaBuilder? builder = null)
+        public SchemaReader(TypeSystemDocument document, SchemaBuilder? builder = null)
         {
             _document = document;
             _builder = builder ?? new SchemaBuilder();
@@ -26,7 +24,6 @@ namespace Tanka.GraphQL.SDL
 
         public SchemaBuilder Read()
         {
-
             if (_document.DirectiveDefinitions != null)
                 foreach (var directiveDefinition in _document.DirectiveDefinitions)
                     DirectiveType(directiveDefinition);
@@ -53,7 +50,7 @@ namespace Tanka.GraphQL.SDL
 
             if (_document.TypeExtensions != null)
                 foreach (var definition in _document.TypeExtensions)
-                 Extend(definition);
+                    Extend(definition);
 
             foreach (var action in _afterTypeDefinitions) action(_builder);
 
@@ -97,7 +94,7 @@ namespace Tanka.GraphQL.SDL
                 definition.Name,
                 out var directiveType,
                 locations,
-                null,
+                definition.Description,
                 argsBuilder => args.ForEach(a => argsBuilder.Arg(a.Name, a.Type, a.DefaultValue, a.Description)));
 
             return directiveType;
@@ -129,10 +126,11 @@ namespace Tanka.GraphQL.SDL
                 }
                 catch (Exception)
                 {
+                    //todo: this behaviour is bit shade...
                     defaultValue = null;
                 }
 
-                args.Add((definition.Name, type, defaultValue, default));
+                args.Add((definition.Name, type, defaultValue, definition.Description));
             }
 
             return args;
@@ -231,15 +229,15 @@ namespace Tanka.GraphQL.SDL
 
         protected EnumType Enum(EnumDefinition definition)
         {
-            if (_builder.TryGetType<EnumType>(definition.Name, out var enumType)) 
+            if (_builder.TryGetType<EnumType>(definition.Name, out var enumType))
                 return enumType;
-            
+
             var directives = Directives(definition.Directives);
 
             _builder.Enum(definition.Name, out enumType,
                 directives: directives,
-                description: null,
-                values: values => 
+                description: definition.Description,
+                values: values =>
                     definition.Values.ToList()
                         .ForEach(value => values.Value(
                             value.Value.Name,
@@ -302,13 +300,13 @@ namespace Tanka.GraphQL.SDL
                 {
                     if (hasValue)
                         arguments.Add(argument.Key,
-                                value == null
-                                    ? defaultValue
-                                    : Values.CoerceValue(
-                                        connect.GetInputFields,
-                                        _builder.GetValueConverter,
-                                        value,
-                                        type));
+                            value == null
+                                ? defaultValue
+                                : Values.CoerceValue(
+                                    connect.GetInputFields,
+                                    _builder.GetValueConverter,
+                                    value,
+                                    type));
                 });
             }
 
@@ -321,11 +319,11 @@ namespace Tanka.GraphQL.SDL
 
             var directives = Directives(definition.Directives);
             _builder.InputObject(
-                definition.Name, 
+                definition.Name,
                 out inputObject,
-                description: definition.Description?.ToString(),
-                directives: directives);
-            
+                definition.Description?.ToString(),
+                directives);
+
             _builder.Connections(connect =>
             {
                 var fields = InputValues(definition.Fields);
@@ -367,7 +365,7 @@ namespace Tanka.GraphQL.SDL
                         defaultValue = Values.CoerceValue(
                             connect.GetInputFields,
                             _builder.GetValueConverter,
-                            definition.DefaultValue,
+                            definition.DefaultValue?.Value,
                             type);
                     }
                     catch (Exception)
@@ -423,12 +421,18 @@ namespace Tanka.GraphQL.SDL
 
         protected InterfaceType Interface(InterfaceDefinition definition)
         {
-            if (_builder.TryGetType<InterfaceType>(definition.Name, out var interfaceType)) return interfaceType;
+            if (_builder.TryGetType<InterfaceType>(definition.Name, out var interfaceType))
+                return interfaceType;
+
+            if (definition?.Interfaces != null && definition.Interfaces.Any())
+                throw new NotSupportedException(
+                    $"Cannot read type '{definition.Name}'. Interfaces implementing interfaces is not currently supported");
 
             var directives = Directives(definition.Directives);
 
             _builder.Interface(definition.Name, out interfaceType,
-                directives: directives);
+                directives: directives,
+                description: definition.Description);
 
             AfterTypeDefinitions(_ => { Fields(interfaceType, definition.Fields); });
 
@@ -444,7 +448,8 @@ namespace Tanka.GraphQL.SDL
 
             _builder.Object(definition.Name, out objectType,
                 interfaces: interfaces,
-                directives: directives);
+                directives: directives,
+                description: definition.Description);
 
             AfterTypeDefinitions(_ => { Fields(objectType, definition.Fields); });
 
@@ -456,13 +461,13 @@ namespace Tanka.GraphQL.SDL
             AfterTypeDefinitions(_ =>
             {
                 if (extension.ExtendedKind != NodeKind.ObjectDefinition)
-                    throw new Exception($"Only object type extensions supported");
-                
+                    throw new Exception("Only object type extensions supported");
+
                 if (!_builder.TryGetType<ObjectType>(extension.Name, out var type))
                     throw new InvalidOperationException(
                         $"Cannot extend type '{extension.Name}'. Type to extend not found.");
 
-                var objectDefinition = (ObjectDefinition)extension.Definition;
+                var objectDefinition = (ObjectDefinition) extension.Definition;
                 Fields(type, objectDefinition.Fields);
             });
         }
@@ -474,20 +479,25 @@ namespace Tanka.GraphQL.SDL
 
         private UnionType Union(UnionDefinition definition)
         {
-            if (_builder.TryGetType<UnionType>(definition.Name, out var unionType)) return unionType;
+            if (_builder.TryGetType<UnionType>(definition.Name, out var unionType))
+                return unionType;
 
             var possibleTypes = new List<ObjectType>();
             if (definition.Members != null)
-            {
                 foreach (var astType in definition.Members)
                 {
                     var type = (ObjectType) OutputType(astType);
                     possibleTypes.Add(type);
                 }
-            }
 
             var directives = Directives(definition.Directives);
-            _builder.Union(definition.Name, out unionType, default, directives, possibleTypes.ToArray());
+            _builder.Union(
+                definition.Name,
+                out unionType,
+                definition.Description,
+                directives,
+                possibleTypes.ToArray());
+
             return unionType;
         }
 
@@ -523,14 +533,14 @@ namespace Tanka.GraphQL.SDL
 
                 _builder.Connections(connect => connect
                     .Field(
-                        owner, 
-                        name, 
-                        type, 
-                        default, 
-                        null, 
-                        null, 
-                        directives, 
-                        args: argsBuilder => args.ForEach(a => 
+                        owner,
+                        name,
+                        type,
+                        default,
+                        null,
+                        null,
+                        directives,
+                        argsBuilder => args.ForEach(a =>
                             argsBuilder.Arg(a.Name, a.Type, a.DefaultValue, a.Description))));
             }
         }

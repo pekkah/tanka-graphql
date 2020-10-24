@@ -1,19 +1,36 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class ObjectValue : Value, INode
+    public sealed class ObjectValue : ValueBase, ICollectionNode<ObjectField>
     {
         public override NodeKind Kind => NodeKind.ObjectValue;
-        public readonly IReadOnlyCollection<ObjectField> Fields;
+
+        //todo: remove?
+        public readonly IReadOnlyList<ObjectField> Fields;
+
         public override Location? Location {get;}
 
         public ObjectValue(
-            IReadOnlyCollection<ObjectField> fields,
+            IReadOnlyList<ObjectField> fields,
             in Location? location = default)
         {
             Fields = fields;
             Location = location;
         }
+
+        public IEnumerator<ObjectField> GetEnumerator()
+        {
+            return Fields.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable) Fields).GetEnumerator();
+        }
+
+        public int Count => Fields.Count;
+        public ObjectField this[int index] => Fields[index];
     }
 }

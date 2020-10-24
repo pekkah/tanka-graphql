@@ -194,6 +194,7 @@ namespace Tanka.GraphQL.Language.Tests
         [Theory]
         [InlineData("123")]
         [InlineData("-123")]
+        [InlineData("0")]
         public void ReadInteger(string integer)
         {
             /* Given */

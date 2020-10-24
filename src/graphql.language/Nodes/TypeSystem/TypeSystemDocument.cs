@@ -6,12 +6,13 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
     public sealed class TypeSystemDocument : INode
     {
-        public TypeSystemDocument(IReadOnlyCollection<SchemaDefinition>? schemaDefinitions,
-            IReadOnlyCollection<TypeDefinition>? typeDefinitions,
-            IReadOnlyCollection<DirectiveDefinition>? directiveDefinitions,
-            IReadOnlyCollection<SchemaExtension>? schemaExtensions,
-            IReadOnlyCollection<TypeExtension>? typeExtensions,
-            IReadOnlyCollection<Import>? imports = null)
+        public TypeSystemDocument(
+            IReadOnlyList<SchemaDefinition>? schemaDefinitions,
+            IReadOnlyList<TypeDefinition>? typeDefinitions,
+            IReadOnlyList<DirectiveDefinition>? directiveDefinitions,
+            IReadOnlyList<SchemaExtension>? schemaExtensions,
+            IReadOnlyList<TypeExtension>? typeExtensions,
+            IReadOnlyList<Import>? imports = null)
         {
             SchemaDefinitions = schemaDefinitions;
             TypeDefinitions = typeDefinitions;
@@ -21,17 +22,17 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             Imports = imports;
         }
 
-        public IReadOnlyCollection<DirectiveDefinition>? DirectiveDefinitions { get; }
+        public IReadOnlyList<DirectiveDefinition>? DirectiveDefinitions { get; }
 
-        public IReadOnlyCollection<SchemaDefinition>? SchemaDefinitions { get; }
+        public IReadOnlyList<SchemaDefinition>? SchemaDefinitions { get; }
         
-        public IReadOnlyCollection<SchemaExtension>? SchemaExtensions { get; }
+        public IReadOnlyList<SchemaExtension>? SchemaExtensions { get; }
         
-        public IReadOnlyCollection<TypeDefinition>? TypeDefinitions { get; }
+        public IReadOnlyList<TypeDefinition>? TypeDefinitions { get; }
         
-        public IReadOnlyCollection<TypeExtension>? TypeExtensions { get; }
+        public IReadOnlyList<TypeExtension>? TypeExtensions { get; }
         
-        public IReadOnlyCollection<Import>? Imports { get; }
+        public IReadOnlyList<Import>? Imports { get; }
 
         public NodeKind Kind => NodeKind.TypeSystemDocument;
         

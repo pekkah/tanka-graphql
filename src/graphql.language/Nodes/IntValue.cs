@@ -1,6 +1,6 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class IntValue : Value, INode
+    public sealed class IntValue : ValueBase, INode
     {
         public override NodeKind Kind => NodeKind.IntValue;
         public override Location? Location {get;}

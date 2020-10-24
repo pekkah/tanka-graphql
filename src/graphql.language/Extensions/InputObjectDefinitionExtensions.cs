@@ -29,24 +29,24 @@ namespace Tanka.GraphQL.Language
         }
 
         public static InputObjectDefinition WithDirectives(this InputObjectDefinition definition,
-            IReadOnlyCollection<Directive>? directives)
+            IReadOnlyList<Directive>? directives)
         {
             return new InputObjectDefinition(
                 definition.Description,
                 definition.Name,
-                directives,
+                Directives.From(directives), 
                 definition.Fields,
                 definition.Location);
         }
 
         public static InputObjectDefinition WithFields(this InputObjectDefinition definition,
-            IReadOnlyCollection<InputValueDefinition>? fields)
+            IReadOnlyList<InputValueDefinition>? fields)
         {
             return new InputObjectDefinition(
                 definition.Description,
                 definition.Name,
                 definition.Directives,
-                fields,
+                InputFieldsDefinition.From(fields),
                 definition.Location);
         }
     }

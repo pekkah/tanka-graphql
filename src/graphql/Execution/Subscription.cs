@@ -116,7 +116,7 @@ namespace Tanka.GraphQL.Execution
             var fieldName = fields.First().Name;
             var fieldSelection = fields.First();
 
-            var coercedArgumentValues = Arguments.CoerceArgumentValues(
+            var coercedArgumentValues = ArgumentCoercion.CoerceArgumentValues(
                 schema,
                 subscriptionType,
                 fieldSelection,

@@ -27,12 +27,12 @@ namespace Tanka.GraphQL.Language
         }
 
         public static EnumValueDefinition WithDirectives(this EnumValueDefinition definition,
-            IReadOnlyCollection<Directive>? directives)
+            IReadOnlyList<Directive>? directives)
         {
             return new EnumValueDefinition(
                 definition.Description,
                 definition.Value,
-                directives,
+                directives != null ? new Directives(directives) : null,
                 definition.Location);
         }
     }

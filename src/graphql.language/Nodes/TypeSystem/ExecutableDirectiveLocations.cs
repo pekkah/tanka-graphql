@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public const string INLINE_FRAGMENT = nameof(INLINE_FRAGMENT);
         public const string VARIABLE_DEFINITION = nameof(VARIABLE_DEFINITION);
 
-        public static IReadOnlyCollection<string> All = new List<string>
+        public static IReadOnlyList<string> All = new List<string>
         {
             QUERY,
             MUTATION,

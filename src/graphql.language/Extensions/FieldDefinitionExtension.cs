@@ -29,12 +29,12 @@ namespace Tanka.GraphQL.Language
         }
 
         public static FieldDefinition WithArguments(this FieldDefinition definition,
-            IReadOnlyCollection<InputValueDefinition>? arguments)
+            IReadOnlyList<InputValueDefinition>? arguments)
         {
             return new FieldDefinition(
                 definition.Description,
                 definition.Name,
-                arguments,
+                ArgumentsDefinition.From(arguments), 
                 definition.Type,
                 definition.Directives,
                 definition.Location);
@@ -52,14 +52,14 @@ namespace Tanka.GraphQL.Language
         }
 
         public static FieldDefinition WithDirectives(this FieldDefinition definition,
-            IReadOnlyCollection<Directive>? directives)
+            IReadOnlyList<Directive>? directives)
         {
             return new FieldDefinition(
                 definition.Description,
                 definition.Name,
                 definition.Arguments,
                 definition.Type,
-                directives,
+                Directives.From(directives),
                 definition.Location);
         }
     }

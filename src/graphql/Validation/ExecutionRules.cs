@@ -143,7 +143,7 @@ namespace Tanka.GraphQL.Validation
                                 "GraphQL allows a short‐hand form for defining " +
                                 "query operations when only that one operation exists in " +
                                 "the document.",
-                                operations);
+                                (INode) operations);
                 };
             };
         }
@@ -868,7 +868,7 @@ namespace Tanka.GraphQL.Validation
                                     type.ToString(),
                                     fieldDef.Key,
                                     nonNull.ToString()),
-                                node);
+                                (INode) node);
                     }
                 };
                 rule.EnterObjectField += node =>
@@ -940,7 +940,7 @@ namespace Tanka.GraphQL.Validation
 
             void IsValidScalar(
                 IRuleVisitorContext context,
-                Value node)
+                ValueBase node)
             {
                 var locationType = context.Tracker.GetInputType();
 
@@ -1064,7 +1064,7 @@ namespace Tanka.GraphQL.Validation
                                     "does not have a default value. Otherwise, the input object field " +
                                     "is optional. " +
                                     $"Field '{nonNull}.{fieldName}' is required.",
-                                    node);
+                                    (INode) node);
 
                                 return;
                             }

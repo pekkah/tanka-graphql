@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class FieldDefinition: INode
+    public sealed class FieldDefinition : INode
     {
-        public NodeKind Kind => NodeKind.FieldDefinition;
-        
         public FieldDefinition(StringValue? description,
             in Name name,
-            IReadOnlyCollection<InputValueDefinition>? arguments,
+            ArgumentsDefinition? arguments,
             TypeBase type,
-            IReadOnlyCollection<Directive>? directives,
+            Directives? directives,
             in Location? location = default)
         {
             Description = description;
@@ -25,9 +22,10 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue? Description { get; }
         public Name Name { get; }
-        public IReadOnlyCollection<InputValueDefinition>? Arguments { get; }
+        public ArgumentsDefinition? Arguments { get; }
         public TypeBase Type { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
+        public Directives? Directives { get; }
+        public NodeKind Kind => NodeKind.FieldDefinition;
         public Location? Location { get; }
 
         public static implicit operator FieldDefinition(string value)

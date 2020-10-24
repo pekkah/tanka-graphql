@@ -9,9 +9,9 @@ namespace Tanka.GraphQL.ValueResolution
 {
     public class CompleteValueResult : IResolverResult
     {
-        private readonly object _value;
+        private readonly object? _value;
 
-        public CompleteValueResult(object value, IType actualType)
+        public CompleteValueResult(object? value, IType actualType)
         {
             _value = value;
             IsTypeOf = _ => actualType;
@@ -25,7 +25,7 @@ namespace Tanka.GraphQL.ValueResolution
 
         public Func<object, IType> IsTypeOf { get; }
 
-        public object Value => _value;
+        public object? Value => _value;
 
         public ValueTask<object> CompleteValueAsync(
             IResolverContext context)
@@ -34,7 +34,7 @@ namespace Tanka.GraphQL.ValueResolution
         }
 
         private ValueTask<object> CompleteValueAsync(
-            object value,
+            object? value,
             IType fieldType,
             NodePath path,
             IResolverContext context)

@@ -4,10 +4,10 @@
     {
         public NodeKind Kind => NodeKind.DefaultValue;
         public Location? Location {get;}
-        public readonly Value Value;
+        public readonly ValueBase Value;
 
         public DefaultValue(
-            Value value,
+            ValueBase value,
             in Location? location = default)
         {
             Value = value;

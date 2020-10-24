@@ -33,7 +33,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         public void ParseLiteral(string input, int expected)
         {
             /* Given */
-            Value astValue = input;
+            ValueBase astValue = input;
 
             /* When */
             var actual = _sut.ParseLiteral(astValue);

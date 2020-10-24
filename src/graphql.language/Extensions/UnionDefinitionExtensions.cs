@@ -28,24 +28,24 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
         public static UnionDefinition WithDirectives(this UnionDefinition definition,
-            IReadOnlyCollection<Directive>? directives)
+            IReadOnlyList<Directive>? directives)
         {
             return new UnionDefinition(
                 definition.Description,
                 definition.Name,
-                directives,
+                Directives.From(directives), 
                 definition.Members,
                 definition.Location);
         }
 
         public static UnionDefinition WithMembers(this UnionDefinition definition,
-            IReadOnlyCollection<NamedType>? members)
+            IReadOnlyList<NamedType>? members)
         {
             return new UnionDefinition(
                 definition.Description,
                 definition.Name,
                 definition.Directives,
-                members,
+                UnionMemberTypes.From(members),
                 definition.Location);
         }
     }

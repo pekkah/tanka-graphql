@@ -39,10 +39,7 @@ namespace Tanka.GraphQL.TypeSystem
             _scalarSerializers = scalarSerializers;
             _directives = new DirectiveList(directives);
 
-            Query = GetNamedType<ObjectType>(queryTypeName) ?? throw new ArgumentNullException(
-                        nameof(types),
-                        $"Could not find root type 'Query' from given types");
-
+            Query = GetNamedType<ObjectType>(queryTypeName);
             Mutation = GetNamedType<ObjectType>(mutationTypeName);
             Subscription = GetNamedType<ObjectType>(subscriptionTypeName);
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
@@ -7,10 +6,11 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
     public sealed class SchemaDefinition: INode
     {
         public NodeKind Kind => NodeKind.SchemaDefinition;
+
         public SchemaDefinition(
             StringValue? description,
-            IReadOnlyCollection<Directive>? directives,
-            IReadOnlyCollection<(OperationType Operation, NamedType NamedType)> operations,
+            Directives? directives,
+            RootOperationTypeDefinitions operations,
             in Location? location = default)
         {
             Description = description;
@@ -20,8 +20,11 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         }
 
         public StringValue? Description { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
-        public IReadOnlyCollection<(OperationType Operation, NamedType NamedType)> Operations { get; }
+
+        public Directives? Directives { get; }
+
+        public RootOperationTypeDefinitions Operations { get; }
+
         public Location? Location { get; }
 
         public static implicit operator SchemaDefinition(string value)

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class StringValue : Value, INode
+    public sealed class StringValue : ValueBase, INode
     {
         public override NodeKind Kind => NodeKind.StringValue;
         public override Location? Location {get;}

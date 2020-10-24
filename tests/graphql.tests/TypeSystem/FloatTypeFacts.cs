@@ -36,7 +36,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         public void ParseLiteral(string input, double expected)
         {
             /* Given */
-            Value astValue = input;
+            ValueBase astValue = input;
 
             /* When */
             var actual = _sut.ParseLiteral(astValue);
@@ -50,7 +50,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
         public void ParseIntLiteral(string input, double expected)
         {
             /* Given */
-            Value astValue = input;
+            ValueBase astValue = input;
 
             /* When */
             var actual = _sut.ParseLiteral(astValue);

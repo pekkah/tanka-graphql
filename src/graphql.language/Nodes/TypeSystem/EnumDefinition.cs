@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
@@ -9,8 +8,8 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public EnumDefinition(
             StringValue? description,
             in Name name,
-            IReadOnlyCollection<Directive>? directives,
-            IReadOnlyCollection<EnumValueDefinition>? values,
+            Directives? directives,
+            EnumValuesDefinition? values,
             in Location? location = default)
         {
             Description = description;
@@ -21,9 +20,9 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         }
 
         public StringValue? Description { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
+        public Directives? Directives { get; }
         public override Name Name { get; }
-        public IReadOnlyCollection<EnumValueDefinition>? Values { get; }
+        public EnumValuesDefinition? Values { get; }
         public override NodeKind Kind => NodeKind.EnumDefinition;
         public override Location? Location { get; }
 
