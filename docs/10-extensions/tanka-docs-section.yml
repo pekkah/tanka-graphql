@@ -1,0 +1,5 @@
+﻿id: extensions
+title: "Extensions"
+index_page: xref://extensions:apollo-federation.md
+nav:
+  - xref://nav.md
