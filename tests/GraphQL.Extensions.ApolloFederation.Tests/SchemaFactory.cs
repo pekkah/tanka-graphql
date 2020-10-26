@@ -87,18 +87,16 @@ type Query {
             return ResolveSync.As(user.Username);
         }
 
-        private static async ValueTask<ResolveReferenceResult> ProductReference(
+        private static ValueTask<ResolveReferenceResult> ProductReference(
             IResolverContext context, INamedType type, IReadOnlyDictionary<string, object> representation)
         {
-            await Task.Delay(0);
-
             var upc = representation["upc"].ToString();
             var product = new Product
             {
                 Upc = upc
             };
 
-            return new ResolveReferenceResult(type, product);
+            return new ValueTask<ResolveReferenceResult>(new ResolveReferenceResult(type, product));
         }
 
         private static ValueTask<IResolverResult> ProductReviews(IResolverContext context)
@@ -132,13 +130,11 @@ type Query {
             return ResolveSync.As(reviews);
         }
 
-        private static async ValueTask<ResolveReferenceResult> UserReference(
+        private static ValueTask<ResolveReferenceResult> UserReference(
             IResolverContext context,
             INamedType type,
             IReadOnlyDictionary<string, object> representation)
         {
-            await Task.Delay(0);
-
             if (!representation.TryGetValue("id", out var idObj))
                 throw new ArgumentOutOfRangeException("id", "Representation is missing the required 'id' value");
 
@@ -153,7 +149,7 @@ type Query {
                 Username = username
             };
 
-            return new ResolveReferenceResult(type, user);
+            return new ValueTask<ResolveReferenceResult>(new ResolveReferenceResult(type, user));
         }
     }
 
