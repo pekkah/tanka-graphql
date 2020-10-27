@@ -18,7 +18,7 @@ namespace Tanka.GraphQL.Extensions
                 ["cost-analysis"] = CostAnalyzer.CostDirectiveAst
             };
 
-        public bool CanImport(string path, string[] types)
+        public bool CanImport(string path, string[]? types)
         {
             var match = _match.Match(path);
 
