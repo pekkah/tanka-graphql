@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>08-unions - Tanka GraphQL</title>
+    <title>tracing - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -116,107 +116,44 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/02-schema.html>Schema</a>
-    <ul>
-<li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/00-SDL.html>SDL</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/01-builder.html>Builder</a>
-    <ul>
-    </ul>
-</li>    </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/04-types.html>Types</a>
-    <ul>
-<li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/05-scalars.html>Scalars</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/06-objects.html>Objects</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/07-interfaces.html>Interfaces</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/08-unions.html>Unions</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/09-enums.html>Enums</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/10-input-objects.html>Input Objects</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/11-list.html>List</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/12-non-null.html>Non-null</a>
-    <ul>
-    </ul>
-</li>    </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/13-directives.html>Directives</a>
+    <a class="nav-link" href=master/10-extensions/tracing.html>Tracing</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/6-introspection/5-schema.html>Introspection</a>
-    <ul>
-<li class="nav-item">
-    <a class="nav-link" href=master/7-type-system/6-introspection/4-type-name.html>Type name</a>
+    <a class="nav-link" href=master/10-extensions/apollo-federation.html>Apollo Federation</a>
     <ul>
     </ul>
-</li>    </ul>
 </li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="unions">Unions</h2>
+                <h2 id="tracing">Tracing</h2>
+<p>Add execution measurements to response extensions.</p>
 <blockquote class="blockquote">
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Unions">Specification</a></p>
+<p><a href="https://github.com/apollographql/apollo-tracing">Specification</a></p>
 </blockquote>
-<p>Unions are created as instances of <code>UnionType</code>.</p>
-<h3 id="creating-union">Creating union</h3>
-<p>Union with two possible values</p>
-<pre><code class="language-csharp">        [Fact]
-        public void Define_union()
+<h3 id="installation">Installation</h3>
+<p>Support is provided as an NuGet package.</p>
+<pre><code class="language-ps">dotnet add package Tanka.GraphQL.Extensions.Tracing
+</code></pre>
+<h3 id="usage">Usage</h3>
+<p>Add Tracing extension</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public void Add_Extension()
         {
-            /* Given */
-            var builder = new SchemaBuilder();
-
-            builder.Object(&quot;Person&quot;, out var person)
-                .Connections(connect =&gt; connect
-                    .Field(person, &quot;name&quot;, ScalarType.NonNullString));
-
-            builder.Object(&quot;Photo&quot;, out var photo)
-                .Connections(connect =&gt; connect
-                    .Field(photo, &quot;height&quot;, ScalarType.NonNullInt)
-                    .Field(photo, &quot;width&quot;, ScalarType.NonNullInt));
-
             /* When */
-            builder.Union(&quot;SearchResult&quot;, out var searchResult,
-                possibleTypes: new[] {person, photo});
-
-            var personIsPossible = searchResult.IsPossible(person);
-            var photoIsPossible = searchResult.IsPossible(photo);
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() =&gt; default)
+                // add trace execution extension
+                .AddExtension&lt;TraceExtension&gt;();
 
             /* Then */
-            Assert.True(personIsPossible);
-            Assert.True(photoIsPossible);
+            var provider = Services.BuildServiceProvider();
+            var executorExtensions = provider.GetService&lt;IEnumerable&lt;IExecutorExtension&gt;&gt;();
+            Assert.Contains(executorExtensions, extension =&gt; extension is TraceExtension);
         }
 
 </code></pre>
