@@ -1,5 +1,5 @@
 ﻿id: extensions
 title: "Extensions"
-index_page: xref://extensions:apollo-federation.md
+index_page: xref://extensions:tracing.md
 nav:
   - xref://nav.md

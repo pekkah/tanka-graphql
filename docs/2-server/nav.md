@@ -1,3 +1,2 @@
 - [Common](xref://0-common.md)
-- [Tracing](xref://1-tracing.md)
 - [Query Cost Limitting](xref://2-query-cost-limit.md)
