@@ -12,6 +12,7 @@ branches:
       - tests
       - tutorials
       - dev
+      - artifacts
 tags:
   2.*:
     input_path:
@@ -21,3 +22,4 @@ tags:
       - tests
       - tutorials
       - dev
+      - artifacts
