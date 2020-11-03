@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 		LICENSE = LICENSE
 		README.md = README.md
+		run-benchmarks.ps1 = run-benchmarks.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.tests.data", "tests\graphql.tests.data\graphql.tests.data.csproj", "{A284D636-220D-4754-958C-8D380E0B2277}"
@@ -65,7 +66,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Extensions.ApolloFe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Dev.Reviews", "dev\GraphQL.Dev.Reviews\GraphQL.Dev.Reviews.csproj", "{60709A73-4981-4973-8AF7-752B24E425B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Extensions.Tracing", "src\GraphQL.Extensions.Tracing\GraphQL.Extensions.Tracing.csproj", "{AF00A7C0-3EE4-4B7A-B109-48FC7A932714}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Extensions.Tracing", "src\GraphQL.Extensions.Tracing\GraphQL.Extensions.Tracing.csproj", "{AF00A7C0-3EE4-4B7A-B109-48FC7A932714}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
