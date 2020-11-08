@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using GraphQL.Server.Ui.Playground;
 using Microsoft.AspNetCore.Builder;
@@ -38,6 +39,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
                     // required to serialize 
                     options.JsonSerializerOptions.Converters
                         .Add(new ObjectDictionaryConverter());
+                    options.JsonSerializerOptions.IgnoreNullValues = true;
                 });
 
             // graphql
