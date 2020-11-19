@@ -204,9 +204,9 @@ for execution. Schema should be built only once and cached as singleton.</p>
             return SchemaTools
                 .MakeExecutableSchemaWithIntrospection(
                     builder,
-                    new ObjectTypeMap()
+                    new ObjectTypeMap
                     {
-                        [&quot;Query&quot;] = new FieldResolversMap()
+                        [&quot;Query&quot;] = new FieldResolversMap
                         {
                             {&quot;firstName&quot;, context =&gt; ResolveSync.As(&quot;Tanka&quot;)},
                             {&quot;lastName&quot;, UseService()}
@@ -257,10 +257,7 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
         private void AddWebSocketsServer(IServiceCollection services)
         {
             // Configure websockets
-            services.AddWebSockets(options =&gt;
-            {
-                options.AllowedOrigins.Add(&quot;https://localhost:5000&quot;);
-            });
+            services.AddWebSockets(options =&gt; { options.AllowedOrigins.Add(&quot;https://localhost:5000&quot;); });
 
             // Add Tanka GraphQL-WS server
             services.AddTankaGraphQL()
@@ -276,7 +273,7 @@ middleware needs to be configured using the paired <code>Use*</code> methods.</p
             app.UseWebSockets();
 
             // Add Tanka GraphQL-WS middleware
-            app.UseTankaGraphQLWebSockets(&quot;/graphql/ws&quot;);
+            app.UseEndpoints(endpoints =&gt; endpoints.MapTankaGraphQLWebSockets(&quot;/graphql/ws&quot;));
         }
 
 </code></pre>

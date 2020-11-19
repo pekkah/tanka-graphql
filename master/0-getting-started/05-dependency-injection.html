@@ -174,8 +174,8 @@ extensions methods of <code>IResolverContext</code>.</p>
 <pre><code class="language-csharp">
     public class ResolverController
     {
-        public ValueTask&lt;IResolverResult&gt; QueryLastName(IResolverContext context)
-        { 
+        public ValueTask&lt;IResolverResult&gt; QueryLastName()
+        {
             return ResolveSync.As(&quot;GraphQL&quot;);
         }
     }
@@ -196,7 +196,7 @@ extensions methods of <code>IResolverContext</code>.</p>
         {
             return context =&gt; context
                 .Use&lt;ResolverController&gt;()
-                .QueryLastName(context);
+                .QueryLastName();
         }
 
 </code></pre>
