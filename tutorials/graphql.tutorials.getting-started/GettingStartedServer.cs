@@ -1,24 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Tutorials.GettingStarted
 {
-    public class GettingStartedServer
-    {
-    }
-
     public class Startup
     {
         public void ConfigureServices(IServiceCollection services)
@@ -39,6 +32,13 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             AddExecutionScopedService(services);
         }
 
+        public void Configure(IApplicationBuilder app)
+        {
+            UseSignalRServer(app);
+
+            UseWebSocketsServer(app);
+        }
+
         private void AddExecutionScopedService(IServiceCollection services)
         {
             services.AddScoped<ResolverController>();
@@ -47,21 +47,11 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
         private void AddWebSocketsServer(IServiceCollection services)
         {
             // Configure websockets
-            services.AddWebSockets(options =>
-            {
-                options.AllowedOrigins.Add("https://localhost:5000");
-            });
+            services.AddWebSockets(options => { options.AllowedOrigins.Add("https://localhost:5000"); });
 
             // Add Tanka GraphQL-WS server
             services.AddTankaGraphQL()
                 .ConfigureWebSockets();
-        }
-
-        public void Configure(IApplicationBuilder app)
-        {
-            UseSignalRServer(app);
-
-            UseWebSocketsServer(app);
         }
 
         private void UseWebSocketsServer(IApplicationBuilder app)
@@ -96,8 +86,8 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
 
     public class ResolverController
     {
-        public ValueTask<IResolverResult> QueryLastName(IResolverContext context)
-        { 
+        public ValueTask<IResolverResult> QueryLastName()
+        {
             return ResolveSync.As("GraphQL");
         }
     }
@@ -143,9 +133,9 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             return SchemaTools
                 .MakeExecutableSchemaWithIntrospection(
                     builder,
-                    new ObjectTypeMap()
+                    new ObjectTypeMap
                     {
-                        ["Query"] = new FieldResolversMap()
+                        ["Query"] = new FieldResolversMap
                         {
                             {"firstName", context => ResolveSync.As("Tanka")},
                             {"lastName", UseService()}
@@ -157,7 +147,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
         {
             return context => context
                 .Use<ResolverController>()
-                .QueryLastName(context);
+                .QueryLastName();
         }
     }
 }
