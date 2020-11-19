@@ -70,7 +70,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             app.UseWebSockets();
 
             // Add Tanka GraphQL-WS middleware
-            app.UseTankaGraphQLWebSockets("/graphql/ws");
+            app.UseEndpoints(endpoints => endpoints.MapTankaGraphQLWebSockets("/graphql/ws"));
         }
 
         private static void UseSignalRServer(IApplicationBuilder app)
