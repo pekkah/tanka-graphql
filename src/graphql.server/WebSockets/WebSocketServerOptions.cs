@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Server.Links.DTOs;
@@ -8,7 +7,6 @@ using Tanka.GraphQL.Server.WebSockets.DTOs.Serialization.Converters;
 
 namespace Tanka.GraphQL.Server.WebSockets
 {
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class WebSocketServerOptions
     {
         /// <summary>
@@ -24,7 +22,7 @@ namespace Tanka.GraphQL.Server.WebSockets
             });
         };
 
-        public JsonSerializerOptions MessageSerializerOptions { get; set; } = new JsonSerializerOptions()
+        public JsonSerializerOptions MessageSerializerOptions { get; set; } = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters =

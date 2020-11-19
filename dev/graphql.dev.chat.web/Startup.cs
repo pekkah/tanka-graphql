@@ -102,15 +102,13 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             app.UseStaticFiles();
             app.UseWebSockets();
 
-            // websockets server
-            app.UseTankaGraphQLWebSockets("/api/graphql");
-
-            // signalr server
             app.UseRouting();
-            app.UseEndpoints(routes =>
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapTankaGraphQLSignalR("/graphql");
-                routes.MapControllers();
+                endpoints.MapTankaGraphQLSignalR("/graphql");
+                endpoints.MapTankaGraphQLWebSockets("/api/graphql");
+
+                endpoints.MapControllers();
             });
         }
     }
