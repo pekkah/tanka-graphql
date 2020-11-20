@@ -50,7 +50,7 @@ $IsPreRelease = $PreReleaseTag -ne ''
 
 "----------------------------------------"
 "Benchmarks"
-$BechmarkCmd = "dotnet run --project ./benchmarks/graphql.benchmarks/graphql.benchmarks.csproj -c Release --framework netcoreapp3.1 -- -i -m --filter *execution*"
+$BechmarkCmd = "dotnet run --project ./benchmarks/graphql.benchmarks/graphql.benchmarks.csproj -c Release --framework net5.0 -- -i -m --filter *execution*"
 
 if ($IsPreRelease) {
     $BechmarkCmd += " --job short"
