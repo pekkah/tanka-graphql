@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
     <AssemblyName>Tanka.GraphQL.Samples.Chat.Data</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Samples.Chat.Data</RootNamespace>
     <IsPackable>false</IsPackable>
