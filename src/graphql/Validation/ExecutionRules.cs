@@ -45,7 +45,7 @@ namespace Tanka.GraphQL.Validation
             R572DirectivesAreInValidLocations(),
 
             R581And582Variables(),
-            //todo: 5.8.3 All Variable Uses Defined
+            R583AllVariableUsesDefined(),
             R584AllVariablesUsed(),
             R585AllVariableUsagesAreAllowed(),
             
@@ -1286,6 +1286,14 @@ namespace Tanka.GraphQL.Validation
                                 node);
                     }
                 };
+            };
+        }
+
+        public static CombineRule R583AllVariableUsesDefined()
+        {
+            return (context, rule) =>
+            {
+
             };
         }
 
