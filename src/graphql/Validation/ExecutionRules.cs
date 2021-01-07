@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Net;
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
@@ -1293,7 +1293,35 @@ namespace Tanka.GraphQL.Validation
         {
             return (context, rule) =>
             {
+                var variableDefinitions = new List<string>();
+                rule.EnterOperationDefinition += node =>
+                {
+                    variableDefinitions.Clear();
+                    if (node.VariableDefinitions != null)
+                        variableDefinitions.AddRange(node.VariableDefinitions.Select(v => v.Variable.Name.Value));
+                };
 
+                rule.LeaveOperationDefinition += node =>
+                {
+                    var usages = context.GetRecursiveVariables(node)
+                        .Select(usage => usage.Node.Name.Value)
+                        .ToList();
+
+                    foreach (var usage in usages)
+                    {
+                        if (!variableDefinitions.Contains(usage))
+                        {
+                            context.Error(
+                                ValidationErrorCodes.R583AllVariableUsesDefined,
+                                $"Variables are scoped on a per‐operation basis. " +
+                                $"That means that any variable used within the context of " +
+                                $"an operation must be defined at the top level of that operation. " +
+                                $"Variable use '{usage}' is not defined.",
+                                node
+                            );
+                        }
+                    }
+                };
             };
         }
 
