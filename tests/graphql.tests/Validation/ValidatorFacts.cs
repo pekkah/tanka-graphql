@@ -1994,15 +1994,201 @@ namespace Tanka.GraphQL.Tests.Validation
                          && error.Message.StartsWith("Variables can only be input types. Objects, unions,"));
         }
 
-        [Fact(Skip = "todo")]
+        [Fact]
         public void Rule_583_AllVariableUsesDefined_valid1()
         {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query variableIsDefined($atOtherHomes: Boolean) {
+                      dog {
+                        isHousetrained(atOtherHomes: $atOtherHomes)
+                      }
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R583AllVariableUsesDefined());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+        
+        [Fact]
+        public void Rule_583_AllVariableUsesDefined_valid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query variableIsDefinedUsedInSingleFragment($atOtherHomes: Boolean) {
+                      dog {
+                        ...isHousetrainedFragment
+                      }
+                    }
+
+                    fragment isHousetrainedFragment on Dog {
+                      isHousetrained(atOtherHomes: $atOtherHomes)
+                    }");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R583AllVariableUsesDefined());
+
+            /* Then */
+            Assert.True(result.IsValid);
+        }
+        
+        [Fact]
+        public void Rule_583_AllVariableUsesDefined_valid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"query housetrainedQueryOne($atOtherHomes: Boolean) {
+                      dog {
+                        ...isHousetrainedFragment
+                      }
+                }
+
+                query housetrainedQueryTwo($atOtherHomes: Boolean) {
+                  dog {
+                    ...isHousetrainedFragment
+                  }
+                }
+
+                fragment isHousetrainedFragment on Dog {
+                  isHousetrained(atOtherHomes: $atOtherHomes)
+                }");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R583AllVariableUsesDefined());
+
+            /* Then */
+            Assert.True(result.IsValid);
         }
 
-        [Fact(Skip = "todo")]
+        [Fact]
         public void Rule_583_AllVariableUsesDefined_invalid1()
         {
-        }
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+            query variableIsNotDefined {
+              dog {
+                isHousetrained(atOtherHomes: $atOtherHomes)
+              }
+            }
+             ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R583AllVariableUsesDefined());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R583AllVariableUsesDefined);
+        }  
+        
+        [Fact]
+        public void Rule_583_AllVariableUsesDefined_invalid2()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+            query variableIsNotDefinedUsedInSingleFragment {
+              dog {
+                ...isHousetrainedFragment
+              }
+            }
+
+            fragment isHousetrainedFragment on Dog {
+              isHousetrained(atOtherHomes: $atOtherHomes)
+            }
+             ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R583AllVariableUsesDefined());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R583AllVariableUsesDefined);
+        } 
+        
+        [Fact]
+        public void Rule_583_AllVariableUsesDefined_invalid3()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+            query variableIsNotDefinedUsedInNestedFragment {
+              dog {
+                ...outerHousetrainedFragment
+              }
+            }
+
+            fragment outerHousetrainedFragment on Dog {
+              ...isHousetrainedFragment
+            }
+
+            fragment isHousetrainedFragment on Dog {
+              isHousetrained(atOtherHomes: $atOtherHomes)
+            }
+             ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R583AllVariableUsesDefined());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R583AllVariableUsesDefined);
+        } 
+        
+        [Fact]
+        public void Rule_583_AllVariableUsesDefined_invalid4()
+        {
+            /* Given */
+            var document = Parser.ParseDocument(
+                @"
+            query housetrainedQueryOne($atOtherHomes: Boolean) {
+              dog {
+                ...isHousetrainedFragment
+              }
+            }
+
+            query housetrainedQueryTwoNotDefined {
+              dog {
+                ...isHousetrainedFragment
+              }
+            }
+
+            fragment isHousetrainedFragment on Dog {
+              isHousetrained(atOtherHomes: $atOtherHomes)
+            }
+             ");
+
+            /* When */
+            var result = Validate(
+                document,
+                ExecutionRules.R583AllVariableUsesDefined());
+
+            /* Then */
+            Assert.False(result.IsValid);
+            Assert.Single(
+                result.Errors,
+                error => error.Code == ValidationErrorCodes.R583AllVariableUsesDefined);
+        } 
 
         [Fact]
         public void Rule_584_AllVariablesUsed_invalid1()
