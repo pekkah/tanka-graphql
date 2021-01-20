@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net50</TargetFramework>
     <RootNamespace>Tanka.GraphQL.Generator.Tool</RootNamespace>
     <AssemblyName>tanka.graphql.generator.tool</AssemblyName>
     <PackAsTool>true</PackAsTool>
