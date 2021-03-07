@@ -1,4 +1,4 @@
-import { TankaClient, TankaLink } from "../.";
+import { TankaClient, TankaLink } from ".";
 
 describe("exports", () => {
   test("Client", () => {

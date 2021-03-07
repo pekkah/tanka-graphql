@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@tanka/tanka-graphql-server-link": "file:../../src/graphql.server.link",
     "apollo-link": "^1.2.14",
     "apollo-link-retry": "^2.2.16",
-    "graphiql": "1.0.6",
-    "graphql": "^15.4.0",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-scripts": "4.0.0"
+    "graphiql": "1.4.0",
+    "graphql": "^15.5.0",
+    "react": "^16.14",
+    "react-dom": "^16.14",
+    "react-scripts": "4.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
