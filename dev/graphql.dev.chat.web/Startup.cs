@@ -80,7 +80,7 @@ namespace Tanka.GraphQL.Samples.Chat.Web
                     policy.AllowAnyHeader();
                     policy.AllowAnyMethod();
                     policy.AllowCredentials();
-                    policy.WithHeaders("X-Requested-With", "authorization");
+                    //policy.WithHeaders("X-Requested-With", "authorization");
                 });
             });
         }
