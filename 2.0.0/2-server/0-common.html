@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/tanka-graphql/">
+    <title>0-common - Tanka GraphQL</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="2.0.0/prism.css" />
+    <style>
+        body {
+            height: 100%;
+            width: 100%;         
+        }
+
+        a {
+            color: rgba(0,0,0,.65);
+        }
+
+        a:hover {
+            color: rgba(8, 8, 8, 0.65);
+        }
+
+        blockquote {
+            border: 1px solid rgba(94, 94, 94, 0.65);
+            border-left: 5px solid rgba(94, 94, 94, 0.65);
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;            
+        }
+
+        .sidebar {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .nav-item {
+            list-style: none;
+        }
+
+        .sidebar .nav-link {
+            display: block;
+            padding: .25rem 1.5rem;
+            font-size: 90%;
+            color: rgba(0,0,0,.65);
+        }
+
+        .sidebar .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .content h1,
+        .content h2,
+        .content h3,
+        .content h4,
+        .content h5,
+        .content h6 {
+            font-weight: 300;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Tanka GraphQL</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="2.0.0/0-getting-started/01-create-schema.html">Getting Started</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="2.0.0/0-language/01-parser.html">Language</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="2.0.0/1-execution/01-resolvers.html">Execution</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="2.0.0/2-server/0-common.html">Server</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="2.0.0/3-code-generator/1-installation.html">Code Generation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="2.0.0/7-type-system/02-schema.html">Type System</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="2.0.0/10-extensions/tracing.html">Extensions</a>
+                </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+             <li class="nav-item">
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
+            </li>
+            <li class="nav-item dropdown justify-content-end">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    2.0.0
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/tanka-graphql/2.0.0">2.0.0</a>
+                        <a class="dropdown-item" href="/tanka-graphql/master">master</a>
+                </div>
+            </li>
+        </ul>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row flex-xl-nowrap">
+            <nav class="col-12 col-md-3 col-xl-2 sidebar">
+                <div class="sidebar-sticky">
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=2.0.0/2-server/0-common.html>Common</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=2.0.0/2-server/2-query-cost-limit.html>Query Cost Limitting</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=2.0.0/2-server/1-signalR/1-signalr-hub.html>SignalR</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=2.0.0/2-server/1-signalR/2-apollo-link.html>Apollo Link</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=2.0.0/2-server/2-graphql-ws/3-graphql-ws.html>GraphQL-WS</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=2.0.0/2-server/5-extensions/5-query-cost-analysis.html>Extensions</a>
+    <ul>
+    </ul>
+</li>    </nav>
+                </div>
+            </nav>
+            <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
+                <h2 id="common-options">Common options</h2>
+<p>Tanka provides SignalR hub and websockets server. Both of these use
+same underlying services for query execution.</p>
+<h3 id="add-required-common-services">Add required common services</h3>
+<p>Add services required for executing GraphQL queries, mutations
+and subscriptions. Main service added is <code>IQueryStreamService</code>
+which handles the plumping of execution.</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public void AddTankaGraphQL()
+        {
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() =&gt; default);
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+
+            // Options is added by the AddTankaGraphQL
+            Assert.NotNull(provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;());
+
+            // Query stream service is added by AddTankaGraphQL
+            Assert.NotNull(provider.GetService&lt;IQueryStreamService&gt;());
+        }
+
+</code></pre>
+<h3 id="configure-schema">Configure schema</h3>
+<p>Configure <code>ISchema</code> for execution by providing a factory function (can be async)
+used to get the schema for execution.</p>
+<p>Simple without dependencies</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public async Task Configure_Schema()
+        {
+            /* Given */
+            var schema = Substitute.For&lt;ISchema&gt;();
+
+            /* When */
+            Services.AddTankaGraphQL()
+                // simple factory function for setting up the schema
+                .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema));
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
+            var actual = await options.GetSchema(null);
+            Assert.Same(schema, actual);
+        }
+
+</code></pre>
+<p>Overloads are provided for providing a function with dependencies resolved from
+services.</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public async Task Configure_Schema_with_dependency()
+        {
+            /* Given */
+            var schema = Substitute.For&lt;ISchema&gt;();
+
+            /* When */
+            Services.AddTankaGraphQL()
+                // factory function with one dependency resolved from service provider
+                .ConfigureSchema&lt;IMemoryCache&gt;(async cache =&gt;
+                    await cache.GetOrCreateAsync(&quot;schema&quot;, entry =&gt; Task.FromResult(schema)));
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
+            var actual = await options.GetSchema(null);
+            Assert.Same(schema, actual);
+        }
+
+</code></pre>
+<h3 id="configure-rules">Configure rules</h3>
+<p>Configure validation rules for execution. Note that by default all rules
+specified in the specification are included.</p>
+<p>Add MaxCost validation rule</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public void Configure_Rules()
+        {
+            /* Given */
+            var schema = Substitute.For&lt;ISchema&gt;();
+            var maxCost = CostAnalyzer.MaxCost(100);
+
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema))
+                // rules factory function with the default rules as the parameter
+                .ConfigureRules(rules =&gt; rules.Concat(new []
+                {
+                    // append max query cost validation rule
+                    maxCost
+                }).ToArray());
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
+            var actual = options.ValidationRules;
+            Assert.Contains(actual, rule =&gt; rule == maxCost);
+        }
+
+</code></pre>
+<p>Remove all rules</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public void Configure_Rules_remove_all()
+        {
+            /* Given */
+            var schema = Substitute.For&lt;ISchema&gt;();
+
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema))
+                // rules factory function with the default rules as the parameter
+                .ConfigureRules(rules =&gt; new CombineRule[0]);
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
+            var actual = options.ValidationRules;
+            Assert.Empty(actual);
+        }
+
+</code></pre>
+<p>With up to three dependencies resolved from service provider</p>
+<pre><code class="language-csharp">
+
+        [Fact]
+        public void Configure_Rules_with_dependency()
+        {
+            /* Given */
+            var schema = Substitute.For&lt;ISchema&gt;();
+
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema))
+                // rules factory function with default rules and dependency resolved from service provider
+                .ConfigureRules&lt;ILogger&lt;ServerBuilderUsageFacts&gt;&gt;((rules, logger) =&gt; new CombineRule[0]);
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
+            var actual = options.ValidationRules;
+            Assert.Empty(actual);
+        }
+
+</code></pre>
+<h3 id="add-extensions">Add extensions</h3>
+<p>Add Apollo tracing extension</p>
+<pre><code class="language-csharp">
+        [Fact]
+        public void Add_Extension()
+        {
+            /* When */
+            Services.AddTankaGraphQL()
+                .ConfigureSchema(() =&gt; default)
+                // add trace execution extension
+                .AddExtension&lt;TraceExtension&gt;();
+
+            /* Then */
+            var provider = Services.BuildServiceProvider();
+            var executorExtensions = provider.GetService&lt;IEnumerable&lt;IExecutorExtension&gt;&gt;();
+            Assert.Contains(executorExtensions, extension =&gt; extension is TraceExtension);
+        }
+
+</code></pre>
+                    
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="2.0.0/prism.js"></script>
+</body>
+</html>
