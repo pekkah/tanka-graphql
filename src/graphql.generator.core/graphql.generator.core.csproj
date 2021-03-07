@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net50</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Tanka.GraphQL.Generator.Core</RootNamespace>
     <AssemblyName>tanka.graphql.generator.core</AssemblyName>
     <IsPackable>false</IsPackable>

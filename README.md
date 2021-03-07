@@ -62,5 +62,5 @@ dev\graphql.dev.chat.ui> npm start
 ### Run benchmarks
 
 ```bash
-src\graphql.benchmarks> dotnet run --configuration release --framework net50
+src\graphql.benchmarks> dotnet run --configuration release --framework net5.0
 ```

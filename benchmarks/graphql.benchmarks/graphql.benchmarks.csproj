@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>graphql.benchmarks</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Benchmarks</RootNamespace>
     <IsPackable>false</IsPackable>
