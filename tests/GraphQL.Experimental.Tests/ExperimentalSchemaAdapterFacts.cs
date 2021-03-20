@@ -13,8 +13,7 @@ namespace Tanka.GraphQL.Experimental.Tests
         public async Task Execute()
         {
             /* Given */
-            var schema = new ExecutableSchemaBuilder()
-                .Add((TypeSystemDocument) @"
+            ExecutableSchema schema = (TypeSystemDocument) @"
                     type Query {
                         hello: String!
                     }
@@ -22,11 +21,10 @@ namespace Tanka.GraphQL.Experimental.Tests
                     schema {
                         query: Query
                     }
-                ")
-                .Add((TypeSystemDocument)@"
+
+                    # should be included by default
                     scalar String
-                    ")
-                .Build();
+                ";
 
             ObjectTypeMap resolvers = new () 
             {

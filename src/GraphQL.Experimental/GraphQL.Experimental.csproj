@@ -5,6 +5,7 @@
     <AssemblyName>Tanka.GraphQL.Experimental</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Experimental</RootNamespace>
     <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

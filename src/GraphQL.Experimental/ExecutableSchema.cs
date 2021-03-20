@@ -31,5 +31,12 @@ namespace Tanka.GraphQL.Experimental
 
             return null;
         }
+
+        public static implicit operator ExecutableSchema(TypeSystemDocument typeSystem)
+        {
+            return new ExecutableSchemaBuilder()
+                .Add(typeSystem)
+                .Build();
+        }
     }
 }
