@@ -22,7 +22,7 @@ namespace Tanka.GraphQL.Experimental.Tests
                         query: Query
                     }
 
-                    # should be included by default
+                    # todo: include by default
                     scalar String
                 ";
 
