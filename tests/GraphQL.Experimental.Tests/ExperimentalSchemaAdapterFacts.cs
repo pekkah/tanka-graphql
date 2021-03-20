@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Experimental.Tests
         public async Task Execute()
         {
             /* Given */
-            ExecutableSchema schema = (TypeSystemDocument) @"
+            ExecutableSchema schema = @"
                     type Query {
                         hello: String!
                     }
@@ -26,7 +26,7 @@ namespace Tanka.GraphQL.Experimental.Tests
                     scalar String
                 ";
 
-            ObjectTypeMap resolvers = new () 
+            Resolvers resolvers = new () 
             {
                 {"Query.hello", context => ResolveSync.As("World!")}
             };

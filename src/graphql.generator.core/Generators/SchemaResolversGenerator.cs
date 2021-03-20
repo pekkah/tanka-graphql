@@ -33,7 +33,7 @@ namespace Tanka.GraphQL.Generator.Core.Generators
                     BaseList(
                         SingletonSeparatedList<BaseTypeSyntax>(
                             SimpleBaseType(
-                                IdentifierName(nameof(ObjectTypeMap))))))
+                                IdentifierName(nameof(Resolvers))))))
                 .WithMembers(
                     List(WithMembers()));
         }
@@ -80,7 +80,7 @@ namespace Tanka.GraphQL.Generator.Core.Generators
             var resolversName = objectName.ToFieldResolversName();
             return ExpressionStatement(
                 InvocationExpression(
-                        IdentifierName(nameof(ObjectTypeMap.Add)))
+                        IdentifierName(nameof(Resolvers.Add)))
                     .WithArgumentList(
                         ArgumentList(
                             SeparatedList<ArgumentSyntax>(

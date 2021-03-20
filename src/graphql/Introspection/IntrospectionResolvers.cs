@@ -6,7 +6,7 @@ using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Introspection
 {
-    public class IntrospectionResolvers : ObjectTypeMap
+    public class IntrospectionResolvers : Resolvers
     {
         public IntrospectionResolvers(ISchema source)
         {

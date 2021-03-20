@@ -66,7 +66,7 @@ namespace Tanka.GraphQL.Server.Links.Tests
 
             var schemaTwo = SchemaTools.MakeExecutableSchema(
                 schemaTwoBuilder,
-                new ObjectTypeMap
+                new Resolvers
                 {
                     ["Address"] = new FieldResolversMap
                     {
@@ -178,7 +178,7 @@ namespace Tanka.GraphQL.Server.Links.Tests
 
             var schemaTwo = SchemaTools.MakeExecutableSchema(
                 schemaTwoBuilder,
-                new ObjectTypeMap
+                new Resolvers
                 {
                     ["Address"] = new FieldResolversMap
                     {

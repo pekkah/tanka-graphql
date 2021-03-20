@@ -43,7 +43,7 @@ type Query {
             builder.Sdl(typeDefs);
 
             builder.UseResolversAndSubscribers(
-                new ObjectTypeMap
+                new Resolvers
                 {
                     ["User"] = new FieldResolversMap
                     {

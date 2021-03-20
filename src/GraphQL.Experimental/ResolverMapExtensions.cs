@@ -5,7 +5,7 @@ namespace Tanka.GraphQL.Experimental
 {
     public static class ResolverMapExtensions
     {
-        public static void Add(this ObjectTypeMap map, string path, Resolver resolver)
+        public static void Add(this Resolvers map, string path, Resolver resolver)
         {
             var segments = path.Split('.');
             if (segments.Length != 2)
@@ -23,7 +23,7 @@ namespace Tanka.GraphQL.Experimental
             fields.Add(fieldName, resolver);
         }
 
-        public static void Add(this ObjectTypeMap map, string path, Subscriber subscriber, Resolver resolver)
+        public static void Add(this Resolvers map, string path, Subscriber subscriber, Resolver resolver)
         {
             var segments = path.Split('.');
             if (segments.Length != 2)

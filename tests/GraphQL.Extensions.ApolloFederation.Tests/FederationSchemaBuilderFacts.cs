@@ -79,7 +79,7 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
                     type Address @key(fields: ""street"") {
                         street: String
                     }")
-                .UseResolversAndSubscribers(new ObjectTypeMap
+                .UseResolversAndSubscribers(new Resolvers
                 {
                     ["Person"] = new FieldResolversMap
                     {
@@ -143,7 +143,7 @@ type Review  @key(fields: ""id"") {
 type Product @key(fields: ""upc"") @extends {
   upc: String! @external
 }")
-                .UseResolversAndSubscribers(new ObjectTypeMap())
+                .UseResolversAndSubscribers(new Resolvers())
                 .Query(out _);
 
             /* When */

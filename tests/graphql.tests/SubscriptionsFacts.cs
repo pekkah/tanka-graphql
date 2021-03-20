@@ -59,7 +59,7 @@ namespace Tanka.GraphQL.Tests
                 return ResolveSync.As(context.ObjectValue);
             }
 
-            var resolvers = new ObjectTypeMap
+            var resolvers = new Resolvers
             {
                 ["Query"] = new FieldResolversMap
                 {

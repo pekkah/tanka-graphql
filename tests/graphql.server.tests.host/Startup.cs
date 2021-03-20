@@ -53,7 +53,7 @@ namespace Tanka.GraphQL.Server.Tests.Host
             var builder = new SchemaBuilder()
                 .Sdl(Parser.ParseTypeSystemDocument(sdl));
 
-            var resolvers = new ObjectTypeMap
+            var resolvers = new Resolvers
             {
                 {
                     "Event", new FieldResolversMap

@@ -598,7 +598,7 @@ namespace Tanka.GraphQL.Tests.TypeSystem
                     "
                 );
 
-            var resolvers = new ObjectTypeMap
+            var resolvers = new Resolvers
             {
                 {
                     "Query", new FieldResolversMap

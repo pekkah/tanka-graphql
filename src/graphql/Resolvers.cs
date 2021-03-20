@@ -3,7 +3,7 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL
 {
-    public class ObjectTypeMap : Dictionary<string, FieldResolversMap>, IResolverMap, ISubscriberMap
+    public class Resolvers : Dictionary<string, FieldResolversMap>, IResolverMap, ISubscriberMap
     {
         public Resolver GetResolver(string typeName, string fieldName)
         {
@@ -23,16 +23,16 @@ namespace Tanka.GraphQL
             return resolver;
         }
 
-        public ObjectTypeMap Clone()
+        public Resolvers Clone()
         {
-            var result = new ObjectTypeMap();
+            var result = new Resolvers();
 
             foreach (var objectMap in this) result.Add(objectMap.Key, objectMap.Value.Clone());
 
             return result;
         }
 
-        public static ObjectTypeMap operator +(ObjectTypeMap a, ObjectTypeMap b)
+        public static Resolvers operator +(Resolvers a, Resolvers b)
         {
             var result = a.Clone();
 
@@ -42,7 +42,7 @@ namespace Tanka.GraphQL
             return result;
         }
 
-        public static ObjectTypeMap operator +(ObjectTypeMap a, (string Name, FieldResolversMap Fields) objectType)
+        public static Resolvers operator +(Resolvers a, (string Name, FieldResolversMap Fields) objectType)
         {
             var result = a.Clone();
 
@@ -54,7 +54,7 @@ namespace Tanka.GraphQL
             return result;
         }
 
-        public static ObjectTypeMap operator -(ObjectTypeMap a, string name)
+        public static Resolvers operator -(Resolvers a, string name)
         {
             var result = a.Clone();
 
@@ -64,7 +64,7 @@ namespace Tanka.GraphQL
             return result;
         }
 
-        public static ObjectTypeMap operator -(ObjectTypeMap a, ObjectTypeMap b)
+        public static Resolvers operator -(Resolvers a, Resolvers b)
         {
             var result = a.Clone();
 

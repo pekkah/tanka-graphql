@@ -133,7 +133,7 @@ namespace Tanka.GraphQL.Tutorials.GettingStarted
             return SchemaTools
                 .MakeExecutableSchemaWithIntrospection(
                     builder,
-                    new ObjectTypeMap
+                    new Resolvers
                     {
                         ["Query"] = new FieldResolversMap
                         {
