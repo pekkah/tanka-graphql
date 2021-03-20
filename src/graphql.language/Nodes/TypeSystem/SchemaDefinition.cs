@@ -26,17 +26,5 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public RootOperationTypeDefinitions Operations { get; }
 
         public Location? Location { get; }
-
-        public static implicit operator SchemaDefinition(string value)
-        {
-            var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
-            return parser.ParseSchemaDefinition();
-        }
-
-        public static implicit operator SchemaDefinition(in ReadOnlySpan<byte> value)
-        {
-            var parser = Parser.Create(value);
-            return parser.ParseSchemaDefinition();
-        }
     }
 }

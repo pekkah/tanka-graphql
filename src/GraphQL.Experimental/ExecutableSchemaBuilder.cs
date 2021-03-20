@@ -18,6 +18,56 @@ namespace Tanka.GraphQL.Experimental
         private readonly ConcurrentDictionary<string, TypeDefinition> _typeDefinitions = new();
         private readonly ConcurrentDictionary<string, ConcurrentBag<TypeExtension>> _typeExtensions = new();
 
+        public ExecutableSchemaBuilder()
+        {
+            Add((TypeSystemDocument)@"
+""""""
+The `Boolean` scalar type represents `true` or `false`
+""""""
+scalar Boolean
+
+""""""
+The `Float` scalar type represents signed double-precision fractional values
+as specified by '[IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)
+""""""
+scalar Float
+
+""""""
+The ID scalar type represents a unique identifier, often used to refetch an object
+or as the key for a cache. The ID type is serialized in the same way as a String;
+however, it is not intended to be human‐readable. While it is often numeric, it
+should always serialize as a String.
+""""""
+scalar ID
+
+""""""
+The `Int` scalar type represents non-fractional signed whole numeric values
+""""""
+scalar Int
+
+""""""
+The `String` scalar type represents textual data, represented as UTF-8
+character sequences. The String type is most often used by GraphQL to
+represent free-form human-readable text.
+""""""
+scalar String
+
+
+directive @deprecated(reason: String) on
+    | FIELD_DEFINITION
+    | ENUM_VALUE
+
+directive @include(if: Boolean!) on
+    | FIELD
+    | FRAGMENT_SPREAD
+    | INLINE_FRAGMENT
+
+directive @skip(if: Boolean!) on
+    | FIELD
+    | FRAGMENT_SPREAD
+    | INLINE_FRAGMENT
+            ");
+        }
 
         public ExecutableSchemaBuilder Add(TypeSystemDocument typeSystem)
         {
@@ -31,7 +81,7 @@ namespace Tanka.GraphQL.Experimental
 
             if (typeSystem.TypeDefinitions != null)
                 foreach (var typeDefinition in typeSystem.TypeDefinitions)
-                    TryAdd(typeDefinition);
+                    Add(typeDefinition);
 
             if (typeSystem.TypeExtensions != null)
                 foreach (var typeExtension in typeSystem.TypeExtensions)
@@ -52,32 +102,34 @@ namespace Tanka.GraphQL.Experimental
             return this;
         }
 
-        public bool TryAdd(TypeDefinition typeDefinition)
+        public void Add(TypeDefinition typeDefinition)
         {
-            return _typeDefinitions.TryAdd(typeDefinition.Name, typeDefinition);
+            if (!_typeDefinitions.TryAdd(typeDefinition.Name, typeDefinition))
+                throw TypeAlreadyExists(typeDefinition.Name);
         }
 
-        public bool TryAdd(TypeDefinition[] typeDefinitions)
+        private Exception TypeAlreadyExists(Name name)
+        {
+            return new InvalidOperationException(
+                $"Type '{name}' already added.");
+        }
+
+        public void Add(TypeDefinition[] typeDefinitions)
         {
             foreach (var typeDefinition in typeDefinitions)
-                if (!TryAdd(typeDefinition))
-                    return false;
-
-            return true;
+                Add(typeDefinition);
         }
 
-        public bool TryAdd(DirectiveDefinition directiveDefinition)
+        public void Add(DirectiveDefinition directiveDefinition)
         {
-            return _directiveDefinitions.TryAdd(directiveDefinition.Name, directiveDefinition);
+            if (!_directiveDefinitions.TryAdd(directiveDefinition.Name, directiveDefinition))
+                throw TypeAlreadyExists(directiveDefinition.Name);
         }
 
-        public bool TryAdd(DirectiveDefinition[] directiveDefinitions)
+        public void Add(DirectiveDefinition[] directiveDefinitions)
         {
             foreach (var directiveDefinition in directiveDefinitions)
-                if (!TryAdd(directiveDefinition))
-                    return false;
-
-            return true;
+                Add(directiveDefinition);
         }
 
         public ExecutableSchemaBuilder Add(TypeExtension typeExtension)
@@ -127,7 +179,7 @@ namespace Tanka.GraphQL.Experimental
                 operationDefinitions,
                 options.OverrideSubscriptionRootName
             );
-
+            
             return new ExecutableSchema(
                 queryRoot,
                 mutationRoot,

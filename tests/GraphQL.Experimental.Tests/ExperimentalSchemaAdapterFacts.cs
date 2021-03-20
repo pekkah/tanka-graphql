@@ -21,9 +21,6 @@ namespace Tanka.GraphQL.Experimental.Tests
                     schema {
                         query: Query
                     }
-
-                    # todo: include by default
-                    scalar String
                 ";
 
             Resolvers resolvers = new () 
