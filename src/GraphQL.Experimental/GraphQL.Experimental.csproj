@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>Tanka.GraphQL.Experimental</AssemblyName>
+    <RootNamespace>Tanka.GraphQL.Experimental</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\graphql.language\graphql.language.csproj" />
+    <ProjectReference Include="..\graphql\graphql.csproj" />
+  </ItemGroup>
+
+</Project>

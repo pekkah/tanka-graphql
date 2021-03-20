@@ -6,10 +6,10 @@ namespace Tanka.GraphQL.Language
 {
     public static class UnionDefinitionExtensions
     {
-        public static UnionDefinition WithDescription(this UnionDefinition definition, 
+        public static UnionDefinition WithDescription(this UnionDefinition definition,
             in StringValue? description)
         {
-            return new UnionDefinition(
+            return new(
                 description,
                 definition.Name,
                 definition.Directives,
@@ -17,23 +17,24 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
 
-        public static UnionDefinition WithName(this UnionDefinition definition, 
+        public static UnionDefinition WithName(this UnionDefinition definition,
             in Name name)
         {
-            return new UnionDefinition(
+            return new(
                 definition.Description,
                 name,
                 definition.Directives,
                 definition.Members,
                 definition.Location);
         }
+
         public static UnionDefinition WithDirectives(this UnionDefinition definition,
             IReadOnlyList<Directive>? directives)
         {
-            return new UnionDefinition(
+            return new(
                 definition.Description,
                 definition.Name,
-                Directives.From(directives), 
+                Directives.From(directives),
                 definition.Members,
                 definition.Location);
         }
@@ -41,7 +42,7 @@ namespace Tanka.GraphQL.Language
         public static UnionDefinition WithMembers(this UnionDefinition definition,
             IReadOnlyList<NamedType>? members)
         {
-            return new UnionDefinition(
+            return new(
                 definition.Description,
                 definition.Name,
                 definition.Directives,

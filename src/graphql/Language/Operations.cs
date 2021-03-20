@@ -10,7 +10,7 @@ namespace Tanka.GraphQL.Language
         {
             var operations = document.OperationDefinitions;
             
-            if (operations == null)
+            if (operations == null || operations.Count == 0)
                 throw new DocumentException($"Document does not contain operations");
 
             if (string.IsNullOrEmpty(operationName))
