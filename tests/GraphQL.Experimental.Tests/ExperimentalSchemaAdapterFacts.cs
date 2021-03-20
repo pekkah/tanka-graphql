@@ -28,10 +28,7 @@ namespace Tanka.GraphQL.Experimental.Tests
 
             ObjectTypeMap resolvers = new () 
             {
-                ["Query"] = new()
-                {
-                    {"hello", context => ResolveSync.As("World!")}
-                }
+                {"Query.hello", context => ResolveSync.As("World!")}
             };
 
             ExecutableDocument query = @"
