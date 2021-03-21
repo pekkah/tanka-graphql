@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
@@ -23,7 +22,7 @@ namespace Tanka.GraphQL.Experimental.Tests
                     }
                 ";
 
-            Resolvers resolvers = new () 
+            Resolvers resolvers = new()
             {
                 {"Query.hello", context => ResolveSync.As("World!")}
             };
