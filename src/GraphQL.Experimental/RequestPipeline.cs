@@ -26,6 +26,18 @@ namespace Tanka.GraphQL.Experimental
             _executorSelector = executorSelector;
         }
 
+        public async Task<OperationResult> ExecuteSingle(
+            RequestOptions options,
+            CancellationToken cancellationToken = default)
+        {
+            var stream = Execute(options, cancellationToken);
+            await using var iterator = stream.GetAsyncEnumerator(cancellationToken);
+
+            // get first item
+            await iterator.MoveNextAsync();
+            return iterator.Current;
+        }
+
         public async IAsyncEnumerable<OperationResult> Execute(
             RequestOptions options,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -45,7 +57,8 @@ namespace Tanka.GraphQL.Experimental
             var executor = operationContext.OperationExecutor;
 
             //todo: should be allow post processing of each result?
-            await foreach (var result in executor(operationContext, options, cancellationToken))
+            await foreach (var result in executor(operationContext, options, cancellationToken)
+                .WithCancellation(cancellationToken))
                 yield return result;
         }
 

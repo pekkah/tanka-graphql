@@ -5,9 +5,11 @@ namespace Tanka.GraphQL.Experimental
 {
     public record RequestOptions
     {
-        public ExecutableDocument? Document { get; init; }
+        public string? OperationName { get; init; }
 
-        public ExecutableSchema? Schema { get; init; }
+        public ExecutableDocument Document { get; init; } = null!;
+
+        public ExecutableSchema Schema { get; init; } = null!;
 
         public IReadOnlyDictionary<string, object>? VariableValues { get; init; }
     }

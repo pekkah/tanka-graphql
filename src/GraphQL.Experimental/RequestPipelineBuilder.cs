@@ -28,7 +28,7 @@ namespace Tanka.GraphQL.Experimental
             return this;
         }
 
-        public RequestPipelineBuilder UseOperationSelector(OperationExecutorSelector executorSelector)
+        public RequestPipelineBuilder UseOperationExecutorSelector(OperationExecutorSelector executorSelector)
         {
             _executorSelectors.Enqueue(executorSelector);
             return this;
