@@ -11,6 +11,6 @@ namespace Tanka.GraphQL.Experimental
 
         public ExecutableSchema Schema { get; init; } = null!;
 
-        public IReadOnlyDictionary<string, object>? VariableValues { get; init; }
+        public IReadOnlyDictionary<string, object?>? VariableValues { get; init; }
     }
 }

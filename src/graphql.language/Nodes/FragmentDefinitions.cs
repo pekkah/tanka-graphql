@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
@@ -9,5 +10,7 @@ namespace Tanka.GraphQL.Language.Nodes
         }
 
         public override NodeKind Kind => NodeKind.FragmentDefinitions;
+
+        public static FragmentDefinitions None = new (Array.Empty<FragmentDefinition>());
     }
 }

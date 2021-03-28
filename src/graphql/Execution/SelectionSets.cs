@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using static Tanka.GraphQL.TypeSystem.Ast;
-using Argument = Tanka.GraphQL.TypeSystem.Argument;
+using Argument = Tanka.GraphQL.Language.Nodes.Argument;
 
 namespace Tanka.GraphQL.Execution
 {
@@ -160,7 +160,8 @@ namespace Tanka.GraphQL.Execution
         }
 
         private static bool IncludeSelection(Directive includeDirective,
-            IReadOnlyDictionary<string, object?> coercedVariableValues, ISchema schema, ObjectType objectType, object selection)
+            IReadOnlyDictionary<string, object?> coercedVariableValues, ISchema schema, ObjectType objectType,
+            object selection)
         {
             if (includeDirective?.Arguments == null)
                 return true;
@@ -170,7 +171,8 @@ namespace Tanka.GraphQL.Execution
         }
 
         private static bool SkipSelection(Directive skipDirective,
-            IReadOnlyDictionary<string, object?> coercedVariableValues, ISchema schema, ObjectType objectType, object selection)
+            IReadOnlyDictionary<string, object?> coercedVariableValues, ISchema schema, ObjectType objectType,
+            object selection)
         {
             if (skipDirective?.Arguments == null)
                 return false;
@@ -183,7 +185,7 @@ namespace Tanka.GraphQL.Execution
             ISchema schema,
             Directive directive,
             IReadOnlyDictionary<string, object?> coercedVariableValues,
-            Language.Nodes.Argument argument)
+            Argument argument)
         {
             if (directive == null) throw new ArgumentNullException(nameof(directive));
             if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
@@ -191,16 +193,17 @@ namespace Tanka.GraphQL.Execution
             switch (argument.Value.Kind)
             {
                 case NodeKind.BooleanValue:
-                    return (bool) Values.CoerceValue(schema.GetInputFields, schema.GetValueConverter, (BooleanValue)argument.Value, ScalarType.NonNullBoolean);
+                    return (bool) Values.CoerceValue(schema.GetInputFields, schema.GetValueConverter,
+                        (BooleanValue) argument.Value, ScalarType.NonNullBoolean);
                 case NodeKind.Variable:
                     var variable = (Variable) argument.Value;
                     var variableValue = coercedVariableValues[variable.Name];
-                    
+
                     if (variableValue == null)
                         throw new QueryExecutionException(
                             $"If argument of {directive} is null. Variable value should not be null",
                             new NodePath(), argument);
-                    
+
                     return (bool) variableValue;
                 default:
                     return false;

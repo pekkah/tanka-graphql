@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Experimental
 {
-    public class FieldError
+    public class FieldError : Exception
     {
         public string Message { get; set; }
 

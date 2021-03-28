@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Experimental
@@ -42,6 +44,13 @@ namespace Tanka.GraphQL.Experimental
         public static implicit operator ExecutableSchema(string sdl)
         {
             return (TypeSystemDocument) sdl;
+        }
+
+        public FieldDefinition? GetField(ObjectDefinition objectDefinition, Name fieldName)
+        {
+            //todo: should we do caching of fields
+            return objectDefinition.Fields?.FirstOrDefault(
+                f => f.Name == fieldName);
         }
     }
 }

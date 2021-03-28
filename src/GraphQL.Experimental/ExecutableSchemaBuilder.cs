@@ -20,7 +20,7 @@ namespace Tanka.GraphQL.Experimental
 
         public ExecutableSchemaBuilder()
         {
-            Add((TypeSystemDocument)@"
+            Add((TypeSystemDocument) @"
 """"""
 The `Boolean` scalar type represents `true` or `false`
 """"""
@@ -179,7 +179,7 @@ directive @skip(if: Boolean!) on
                 operationDefinitions,
                 options.OverrideSubscriptionRootName
             );
-            
+
             return new ExecutableSchema(
                 queryRoot,
                 mutationRoot,
@@ -224,6 +224,10 @@ directive @skip(if: Boolean!) on
                 .SingleOrDefault(op => op.OperationType == OperationType.Query)
                 ?.NamedType;
 
+            // by convention
+            if (queryNamedType == null && _typeDefinitions.TryGetValue("Query", out var queryDefinition))
+                return (ObjectDefinition) queryDefinition;
+
             if (queryNamedType is null)
                 throw new InvalidOperationException("Could not find query operation");
 
@@ -242,6 +246,10 @@ directive @skip(if: Boolean!) on
                 .SingleOrDefault(op => op.OperationType == OperationType.Mutation)
                 ?.NamedType;
 
+            // by convention
+            if (mutationNamedType == null && _typeDefinitions.TryGetValue("Mutation", out var mutationDefinition))
+                return (ObjectDefinition) mutationDefinition;
+
             if (mutationNamedType is null)
                 return null;
 
@@ -259,6 +267,11 @@ directive @skip(if: Boolean!) on
             var subscriptionNamedType = operationDefinitions
                 .SingleOrDefault(op => op.OperationType == OperationType.Subscription)
                 ?.NamedType;
+
+            // by convention
+            if (subscriptionNamedType == null &&
+                _typeDefinitions.TryGetValue("Subscription", out var subscriptionDefinition))
+                return (ObjectDefinition) subscriptionDefinition;
 
             if (subscriptionNamedType is null)
                 return null;

@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class SelectionSet : CollectionNodeBase<ISelection>
     {
-        //todo: remove
+        [Obsolete("SelectionSet is enumerable")]
         public readonly IReadOnlyList<ISelection> Selections;
 
         public SelectionSet(

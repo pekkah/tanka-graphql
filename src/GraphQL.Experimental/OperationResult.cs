@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace Tanka.GraphQL.Experimental
 {
-    public class OperationResult
+    public record OperationResult
     {
-        private Dictionary<string, object>? _data;
-        private List<FieldError>? _errors;
-        private Dictionary<string, object>? _extensions;
+        private IReadOnlyDictionary<string, object>? _data;
+        private IReadOnlyList<FieldError>? _errors;
+        private IReadOnlyDictionary<string, object>? _extensions;
 
-        public Dictionary<string, object>? Data
+        public IReadOnlyDictionary<string, object>? Data
         {
             get => _data;
             set
@@ -24,7 +24,7 @@ namespace Tanka.GraphQL.Experimental
             }
         }
 
-        public Dictionary<string, object>? Extensions
+        public IReadOnlyDictionary<string, object>? Extensions
         {
             get => _extensions;
             set
@@ -39,7 +39,7 @@ namespace Tanka.GraphQL.Experimental
             }
         }
 
-        public List<FieldError>? Errors
+        public IReadOnlyList<FieldError>? Errors
         {
             get => _errors;
             set

@@ -4,9 +4,9 @@ namespace Tanka.GraphQL.Experimental
 {
     public class OperationValidationResult
     {
-        private readonly List<FieldError> _errors = new List<FieldError>();
+        private readonly List<FieldError> _errors = new();
 
-        public static OperationValidationResult Success { get; } = new ();
+        public static OperationValidationResult Success { get; } = new();
 
         public IEnumerable<FieldError> Errors => _errors.AsReadOnly();
 

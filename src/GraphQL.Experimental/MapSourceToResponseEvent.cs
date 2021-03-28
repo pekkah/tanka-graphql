@@ -3,10 +3,9 @@ using System.Threading;
 
 namespace Tanka.GraphQL.Experimental
 {
-    public delegate IAsyncEnumerable<OperationResult> OperationExecutor(
+    public delegate IAsyncEnumerable<OperationResult> MapSourceToResponseEvent(
         OperationContext context,
-        RequestOptions options,
-        object? objectValue,
+        IAsyncEnumerable<object?> sourceStream,
         CancellationToken cancellationToken
     );
 }

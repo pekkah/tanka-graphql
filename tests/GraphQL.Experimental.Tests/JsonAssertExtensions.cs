@@ -6,9 +6,9 @@ using Xunit;
 
 namespace Tanka.GraphQL.Experimental.Tests
 {
-    public static class ExecutionResultExtensions
+    public static class JsonAssertExtensions
     {
-        public static void ShouldMatchJson(this ExecutionResult actualResult, string expectedJson)
+        public static void ShouldMatchJson<T>(this T actualResult, string expectedJson)
         {
             if (expectedJson == null) throw new ArgumentNullException(nameof(expectedJson));
             if (actualResult == null) throw new ArgumentNullException(nameof(actualResult));

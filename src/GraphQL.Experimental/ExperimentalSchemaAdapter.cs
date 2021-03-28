@@ -12,8 +12,8 @@ namespace Tanka.GraphQL.Experimental
 {
     public class ExperimentalSchemaAdapter : ISchema
     {
-        private readonly IResolverMap _resolvers;
         private readonly IReadOnlyDictionary<string, IValueConverter> _converters;
+        private readonly IResolverMap _resolvers;
         private readonly ExecutableSchema _schema;
 
         public ExperimentalSchemaAdapter(
@@ -66,29 +66,6 @@ namespace Tanka.GraphQL.Experimental
             );
         }
 
-        private Args? Adapt(ArgumentsDefinition? nodes)
-        {
-            if (nodes == null)
-                return null;
-
-            var args = nodes
-                .ToDictionary(
-                    a => a.Name.Value, 
-                    Adapt);
-
-            return new Args(args);
-        }
-
-        private Argument Adapt(InputValueDefinition node)
-        {
-            return new Argument(
-                Adapt(node.Type),
-                null,
-                node.Description!,
-                node.Directives?.Select(Adapt)!
-            );
-        }
-
         public IEnumerable<KeyValuePair<string, IField>> GetFields(string type)
         {
             throw new NotImplementedException(nameof(GetFields));
@@ -128,32 +105,6 @@ namespace Tanka.GraphQL.Experimental
             );
         }
 
-        private IType Adapt(TypeBase type)
-        {
-            return type switch
-            {
-                ListType listType => Adapt(listType),
-                NamedType namedType => Adapt(namedType),
-                NonNullType nonNullType => Adapt(nonNullType),
-                _ => throw new ArgumentOutOfRangeException(nameof(type))
-            };
-        }
-
-        private NonNull Adapt(NonNullType nonNullType)
-        {
-            return new NonNull(Adapt(nonNullType.OfType));
-        }
-
-        private INamedType Adapt(NamedType namedType)
-        {
-            return GetNamedType(namedType.Name);
-        }
-
-        private List Adapt(ListType listType)
-        {
-            return new List(Adapt(listType.OfType));
-        }
-
         public IEnumerable<ObjectType> GetPossibleTypes(IAbstractType abstractType)
         {
             throw new NotImplementedException(nameof(GetPossibleTypes));
@@ -172,6 +123,55 @@ namespace Tanka.GraphQL.Experimental
         public IValueConverter GetValueConverter(string type)
         {
             return _converters[type];
+        }
+
+        private Args? Adapt(ArgumentsDefinition? nodes)
+        {
+            if (nodes == null)
+                return null;
+
+            var args = nodes
+                .ToDictionary(
+                    a => a.Name.Value,
+                    Adapt);
+
+            return new Args(args);
+        }
+
+        private Argument Adapt(InputValueDefinition node)
+        {
+            return new(
+                Adapt(node.Type),
+                null,
+                node.Description!,
+                node.Directives?.Select(Adapt)!
+            );
+        }
+
+        private IType Adapt(TypeBase type)
+        {
+            return type switch
+            {
+                ListType listType => Adapt(listType),
+                NamedType namedType => Adapt(namedType),
+                NonNullType nonNullType => Adapt(nonNullType),
+                _ => throw new ArgumentOutOfRangeException(nameof(type))
+            };
+        }
+
+        private NonNull Adapt(NonNullType nonNullType)
+        {
+            return new(Adapt(nonNullType.OfType));
+        }
+
+        private INamedType Adapt(NamedType namedType)
+        {
+            return GetNamedType(namedType.Name);
+        }
+
+        private List Adapt(ListType listType)
+        {
+            return new(Adapt(listType.OfType));
         }
 
         private INamedType? Adapt(TypeDefinition? node)

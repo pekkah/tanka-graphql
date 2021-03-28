@@ -9,16 +9,13 @@ namespace Tanka.GraphQL.Experimental
         public static OperationDefinition GetOperation(this ExecutableDocument document, string? operationName)
         {
             var operations = document.OperationDefinitions;
-            
+
             if (operations == null || operations.Count == 0)
-                throw new Exception($"Document does not contain operations");
+                throw new Exception("Document does not contain operations");
 
             if (string.IsNullOrEmpty(operationName))
             {
-                if (operations.Count == 1)
-                {
-                    return operations.Single();
-                }
+                if (operations.Count == 1) return operations.Single();
 
                 throw new Exception(
                     "Multiple operations found. Please provide OperationName");
@@ -27,10 +24,8 @@ namespace Tanka.GraphQL.Experimental
             var operation = operations.SingleOrDefault(op => op.Name.Value == operationName);
 
             if (operation == null)
-            {
                 throw new Exception(
                     $"Could not find operation with name {operationName}");
-            }
 
             return operation;
         }
