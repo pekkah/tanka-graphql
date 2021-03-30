@@ -52,8 +52,6 @@ type Query {
             var collectFields = BuildCollectFields(Coerce.CoerceValue);
             var coerceArgumentValues = BuildCoerceArgumentValues(Coerce.CoerceValue);
             SerializeValue serializeValue = (schema, definition, value) => new ValueTask<object?>(value);
-            MergeSelectionSets mergeSelectionSets = fields => default;
-
 
             ResolveFieldValue resolveFieldValue =
                 (context, objectDefinition, objectValue, fieldName, variableValues, path, token) =>
@@ -61,8 +59,7 @@ type Query {
                         fieldName, variableValues, path, token);
 
             var completeValue = BuildCompleteValue(
-                serializeValue,
-                mergeSelectionSets
+                serializeValue
             );
 
             var executeSelectionSet = BuildExecuteSelectionSet(

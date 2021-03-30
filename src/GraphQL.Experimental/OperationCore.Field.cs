@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -61,7 +62,6 @@ namespace Tanka.GraphQL.Experimental
             object? result,
             NodePath path,
             SerializeValue serializeValue,
-            MergeSelectionSets mergeSelectionSets,
             ResolveAbstractType resolveAbstractType,
             CancellationToken cancellationToken)
         {
@@ -77,7 +77,6 @@ namespace Tanka.GraphQL.Experimental
                     result,
                     path,
                     serializeValue,
-                    mergeSelectionSets,
                     resolveAbstractType,
                     cancellationToken);
 
@@ -130,7 +129,7 @@ namespace Tanka.GraphQL.Experimental
             if (objectDefinition is null)
                 throw new Exception($"Cannot complete field value. FieldType '{fieldType.Kind}' cannot be completed.");
 
-            var subSelectionSet = mergeSelectionSets(fields);
+            var subSelectionSet = fields.Merge();
             return context.ExecuteSelectionSet(
                 context,
                 objectDefinition,
@@ -155,7 +154,6 @@ namespace Tanka.GraphQL.Experimental
                         enumerator.Current,
                         itemPath,
                         serializeValue,
-                        mergeSelectionSets,
                         resolveAbstractType,
                         cancellationToken);
 

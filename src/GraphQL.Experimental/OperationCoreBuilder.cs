@@ -131,8 +131,7 @@
         }
 
         public static CompleteValue BuildCompleteValue(
-            SerializeValue serializeValue,
-            MergeSelectionSets mergeSelectionSets)
+            SerializeValue serializeValue)
         {
             return (context, fieldType, fields, resolvedValue, resolveAbstractType, path, cancellationToken) =>
                 OperationCore.CompleteValue(
@@ -142,7 +141,6 @@
                     resolvedValue,
                     path,
                     serializeValue,
-                    mergeSelectionSets,
                     resolveAbstractType,
                     cancellationToken);
         }
