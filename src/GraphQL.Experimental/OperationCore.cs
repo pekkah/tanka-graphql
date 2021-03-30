@@ -8,7 +8,6 @@ namespace Tanka.GraphQL.Experimental
     {
         public static async IAsyncEnumerable<OperationResult> ExecuteOperation(
             OperationContext context,
-            ExecuteSelectionSet executeSelectionSet,
             object? initialValue = null,
             [EnumeratorCancellation] CancellationToken cancellationToken = default
         )
@@ -19,7 +18,7 @@ namespace Tanka.GraphQL.Experimental
             var query = context.Schema.Query;
             var selectionSet = context.Operation.SelectionSet;
 
-            var result = await executeSelectionSet(
+            var result = await context.ExecuteSelectionSet(
                 context,
                 query,
                 initialValue,

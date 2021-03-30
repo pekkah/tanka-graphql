@@ -2,14 +2,11 @@
 {
     public class OperationCoreBuilder
     {
-        public static OperationExecutor BuildExecuteOperation(
-            ExecuteSelectionSet executeSelectionSet
-        )
+        public static OperationExecutor BuildExecuteOperation()
         {
             return (context, _, initialValue, cancellationToken) =>
                 OperationCore.ExecuteOperation(
                     context,
-                    executeSelectionSet,
                     initialValue,
                     cancellationToken);
         }
@@ -81,13 +78,13 @@
         public static CoerceArgumentValues BuildCoerceArgumentValues(
             CoerceValue coerceValue)
         {
-            return (schema, objectDefinition, field, variableValues, cancellationToken) =>
-                Coerce.CoerceArgumentValues(schema,
-                    objectDefinition,
-                    field,
-                    coerceValue,
-                    variableValues,
-                    cancellationToken);
+            return (schema, objectDefinition, field, variableValues, cancellationToken) => Coerce.CoerceArgumentValues(
+                schema,
+                objectDefinition,
+                field,
+                coerceValue,
+                variableValues,
+                cancellationToken);
         }
 
         public static CoerceVariableValues BuildCoerceVariableValues(
@@ -128,14 +125,25 @@
                     cancellationToken);
         }
 
-        public static ExecuteSubscriptionEvent BuildExecuteSubscriptionEvent(
-            ExecuteSelectionSet executeSelectionSet)
+        public static ExecuteSubscriptionEvent BuildExecuteSubscriptionEvent()
         {
-            return (context, @event, cancellationToken) =>
-                OperationCore.ExecuteSubscriptionEvent(
+            return OperationCore.ExecuteSubscriptionEvent;
+        }
+
+        public static CompleteValue BuildCompleteValue(
+            SerializeValue serializeValue,
+            MergeSelectionSets mergeSelectionSets)
+        {
+            return (context, fieldType, fields, resolvedValue, resolveAbstractType, path, cancellationToken) =>
+                OperationCore.CompleteValue(
                     context,
-                    @event,
-                    executeSelectionSet,
+                    fieldType,
+                    fields,
+                    resolvedValue,
+                    path,
+                    serializeValue,
+                    mergeSelectionSets,
+                    resolveAbstractType,
                     cancellationToken);
         }
     }

@@ -6,7 +6,7 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Experimental
 {
-    public delegate ValueTask<object?> ResolveFieldValue(
+    public delegate ValueTask<(object? Value, ResolveAbstractType? ResolveAbstractType)> ResolveFieldValue(
         OperationContext context,
         ObjectDefinition objectDefinition,
         object? objectValue,

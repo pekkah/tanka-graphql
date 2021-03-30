@@ -96,7 +96,6 @@ namespace Tanka.GraphQL.Experimental
         public static async Task<OperationResult> ExecuteSubscriptionEvent(
             OperationContext context,
             object? @event,
-            ExecuteSelectionSet executeSelectionSet,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -108,7 +107,7 @@ namespace Tanka.GraphQL.Experimental
                     "Schema does not support subscriptions. No subscription root provided.");
 
             var selectionSet = context.Operation.SelectionSet;
-            var result = await executeSelectionSet(
+            var result = await context.ExecuteSelectionSet(
                 context,
                 subscriptionType,
                 @event,

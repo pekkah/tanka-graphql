@@ -5,13 +5,13 @@ namespace Tanka.GraphQL.Experimental
 {
     public class OperationContext
     {
-        public OperationContext(
-            ExecutableSchema schema,
+        public OperationContext(ExecutableSchema schema,
             ExecutableDocument document,
             OperationDefinition operation,
-            IReadOnlyDictionary<string, object> coercedVariableValues,
+            IReadOnlyDictionary<string, object?> coercedVariableValues,
             OperationValidationResult validationResult,
-            OperationExecutor operationExecutor)
+            OperationExecutor operationExecutor, 
+            ExecuteSelectionSet executeSelectionSet)
         {
             Schema = schema;
             Document = document;
@@ -19,6 +19,8 @@ namespace Tanka.GraphQL.Experimental
             CoercedVariableValues = coercedVariableValues;
             ValidationResult = validationResult;
             OperationExecutor = operationExecutor;
+            ExecuteSelectionSet = executeSelectionSet;
+
         }
 
         public OperationDefinition Operation { get; }
@@ -32,5 +34,7 @@ namespace Tanka.GraphQL.Experimental
         public ExecutableSchema Schema { get; }
 
         public ExecutableDocument Document { get; }
+
+        public ExecuteSelectionSet ExecuteSelectionSet { get; }
     }
 }

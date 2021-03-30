@@ -38,13 +38,12 @@ namespace Tanka.GraphQL.Experimental
             }
         }
 
-        public static async Task<OperationContext> CreateOperationContext(
-            RequestOptions options,
+        public static async Task<OperationContext> CreateOperationContext(RequestOptions options,
             OperationSelector operationSelector,
             CoerceVariableValues coerceVariableValues,
             ValidateOperation validateOperation,
             OperationExecutorSelector executorSelector,
-            CoerceValue coerceValue,
+            ExecuteSelectionSetSelector executeSelectionSetSelector,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -58,7 +57,10 @@ namespace Tanka.GraphQL.Experimental
                 throw new InvalidOperationException("Operation is required");
 
             // coerce variables
-            await coerceVariableValues(options.Schema, plan.Operation, options.VariableValues, coerceValue,
+            await coerceVariableValues(
+                options.Schema,
+                plan.Operation, 
+                options.VariableValues,
                 cancellationToken);
 
             // validate operation
@@ -67,13 +69,17 @@ namespace Tanka.GraphQL.Experimental
             // select operation executor
             await executorSelector(plan, options, cancellationToken);
 
+            // select selection set executor
+            await executeSelectionSetSelector(plan, options, cancellationToken);
+
             return new OperationContext(
                 options.Schema,
                 options.Document,
                 plan.Operation,
-                plan.CoercedVariableValues ?? new Dictionary<string, object>(),
+                plan.CoercedVariableValues ?? new Dictionary<string, object?>(),
                 plan.ValidationResult ?? OperationValidationResult.Success,
-                plan.OperationExecutor ?? throw new InvalidOperationException("OperationExecutor is required")
+                plan.OperationExecutor ?? throw new InvalidOperationException("OperationExecutor is required"),
+                plan.ExecuteSelectionSet ?? throw new InvalidOperationException("ExecuteSelectionSet is required")
             );
         }
     }

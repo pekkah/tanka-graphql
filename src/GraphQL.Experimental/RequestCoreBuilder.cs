@@ -32,6 +32,7 @@
             CoerceVariableValues coerceVariableValues,
             ValidateOperation validateOperation,
             OperationExecutorSelector executorSelector,
+            ExecuteSelectionSetSelector executeSelectionSetSelector,
             CoerceValue coerceValue)
         {
             //todo: should pass initial value or not?
@@ -42,7 +43,7 @@
                     coerceVariableValues,
                     validateOperation,
                     executorSelector,
-                    coerceValue,
+                    executeSelectionSetSelector,
                     cancellationToken);
         }
     }

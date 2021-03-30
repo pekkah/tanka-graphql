@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +23,8 @@ namespace Tanka.GraphQL.Experimental
             CompleteValue completeValue,
             CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var field = fields.First();
             var fieldName = field.Name;
 
@@ -28,9 +32,10 @@ namespace Tanka.GraphQL.Experimental
                 context.Schema,
                 objectDefinition,
                 field,
+                context.CoercedVariableValues,
                 cancellationToken);
 
-            var resolvedValue = await resolveFieldValue(
+            var (resolvedValue, resolveAbstractType) = await resolveFieldValue(
                 context,
                 objectDefinition,
                 objectValue,
@@ -44,8 +49,132 @@ namespace Tanka.GraphQL.Experimental
                 fieldType,
                 fields,
                 resolvedValue,
+                resolveAbstractType,
                 path,
                 cancellationToken);
+        }
+
+        public static async Task<object?> CompleteValue(
+            OperationContext context,
+            TypeBase fieldType,
+            IReadOnlyList<FieldSelection> fields,
+            object? result,
+            NodePath path,
+            SerializeValue serializeValue,
+            MergeSelectionSets mergeSelectionSets,
+            ResolveAbstractType resolveAbstractType,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (fieldType is NonNullType nonNullType)
+            {
+                var innerType = nonNullType.OfType;
+                var completedResult = await CompleteValue(
+                    context,
+                    innerType,
+                    fields,
+                    result,
+                    path,
+                    serializeValue,
+                    mergeSelectionSets,
+                    resolveAbstractType,
+                    cancellationToken);
+
+                if (completedResult is null)
+                    //todo: throw field error
+                    throw new Exception($"Field value cannot be null. Field is non-null type.");
+
+                return completedResult;
+            }
+
+            if (result is null)
+                return null;
+
+            if (fieldType is ListType listType)
+            {
+                var innerType = listType.OfType;
+
+                return result switch
+                {
+                    IEnumerable enumerableValue => CompleteEnumerableValue(innerType, enumerableValue),
+                    //todo: async enumerable support?
+                    //todo: throw field error
+                    _ => throw new Exception($"Cannot complete list value. Resolved value is not known enumerable type. Value type is '{result.GetType().Name}'")
+                };
+            }
+
+            var namedType = (NamedType)fieldType;
+
+            var typeDefinition = context.Schema.GetNamedType<TypeDefinition>(namedType.Name);
+
+            if (typeDefinition is ScalarDefinition scalarDefinition)
+                return await CompleteScalarValue(result);
+
+            if (typeDefinition is EnumDefinition enumDefinition)
+                return await CompleteEnumValue(result);
+
+            var objectDefinition = typeDefinition switch
+            {
+                InterfaceDefinition interfaceDefinition => resolveAbstractType(
+                    context.Schema, 
+                    interfaceDefinition,
+                    result),
+                UnionDefinition unionDefinition => resolveAbstractType(
+                    context.Schema, 
+                    unionDefinition, 
+                    result),
+                _ => typeDefinition as ObjectDefinition
+            };
+
+            if (objectDefinition is null)
+                throw new Exception($"Cannot complete field value. FieldType '{fieldType.Kind}' cannot be completed.");
+
+            var subSelectionSet = mergeSelectionSets(fields);
+            return context.ExecuteSelectionSet(
+                context,
+                objectDefinition,
+                result,
+                subSelectionSet,
+                path,
+                cancellationToken
+            );
+
+            async Task<IReadOnlyCollection<object?>> CompleteEnumerableValue(TypeBase innerType, IEnumerable value)
+            {
+                List<object?> completeValues = new ();
+                var enumerator = value.GetEnumerator();
+                int count = 0;
+                while (enumerator.MoveNext())
+                {
+                    var itemPath = path.Fork().Append(count);
+                    var completedItem = await CompleteValue(
+                        context,
+                        innerType,
+                        fields,
+                        enumerator.Current,
+                        itemPath,
+                        serializeValue,
+                        mergeSelectionSets,
+                        resolveAbstractType,
+                        cancellationToken);
+
+                    completeValues.Add(completedItem);
+                    count++;
+                }
+
+                return completeValues;
+            }
+
+            ValueTask<object?> CompleteScalarValue(object value)
+            {
+                return serializeValue(context.Schema, scalarDefinition, value);
+            }
+
+            ValueTask<object?> CompleteEnumValue(object value)
+            {
+                return serializeValue(context.Schema, enumDefinition, value);
+            }
         }
     }
 }

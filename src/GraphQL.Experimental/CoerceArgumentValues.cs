@@ -10,7 +10,7 @@ namespace Tanka.GraphQL.Experimental
         ExecutableSchema schema,
         ObjectDefinition objectDefinition,
         FieldSelection field,
-        IReadOnlyDictionary<string, object?> coercedVariableValues,
+        IReadOnlyDictionary<string, object?> variableValues,
         CancellationToken cancellationToken
     );
 }

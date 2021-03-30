@@ -5,11 +5,12 @@ using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Experimental
 {
-    public delegate ValueTask<object?> CompleteValue(
+    public delegate Task<object?> CompleteValue(
         OperationContext context,
         TypeBase fieldType,
         IReadOnlyList<FieldSelection> fields,
         object? resolvedValue,
+        ResolveAbstractType resolveAbstractType,
         NodePath path,
         CancellationToken cancellationToken
     );
