@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Tanka.GraphQL.Experimental.Definitions;
 
 namespace Tanka.GraphQL.Experimental
 {

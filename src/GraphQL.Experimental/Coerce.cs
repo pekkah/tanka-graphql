@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Experimental.Definitions;
+using Tanka.GraphQL.Experimental.TypeSystem;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -30,7 +32,7 @@ namespace Tanka.GraphQL.Experimental
                 var variableName = variableDefinition.Variable.Name.Value;
                 var variableType = variableDefinition.Type;
 
-                if (!TypeIs.IsInputType(schema, variableType))
+                if (!Ast.IsInputType(schema, variableType))
                     throw new InvalidOperationException(
                         $"Type '{variableType}' of '{variableName}' is not an input type");
 

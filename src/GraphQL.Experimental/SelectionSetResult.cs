@@ -4,7 +4,7 @@ namespace Tanka.GraphQL.Experimental
 {
     public record SelectionSetResult
     {
-        public IReadOnlyDictionary<string, object> Data { get; init; }
+        public IReadOnlyDictionary<string, object?>? Data { get; init; }
 
         public IReadOnlyList<FieldError>? Errors { get; init; }
     }

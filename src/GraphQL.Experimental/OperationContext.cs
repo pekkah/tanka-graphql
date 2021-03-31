@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Tanka.GraphQL.Experimental.Definitions;
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Experimental

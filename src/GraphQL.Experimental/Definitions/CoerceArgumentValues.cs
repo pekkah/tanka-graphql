@@ -1,0 +1,16 @@
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
+namespace Tanka.GraphQL.Experimental.Definitions
+{
+    public delegate ValueTask<IReadOnlyDictionary<string, object?>> CoerceArgumentValues(
+        ExecutableSchema schema,
+        ObjectDefinition objectDefinition,
+        FieldSelection field,
+        IReadOnlyDictionary<string, object?> variableValues,
+        CancellationToken cancellationToken
+    );
+}
