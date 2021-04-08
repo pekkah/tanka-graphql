@@ -6,6 +6,6 @@ namespace Tanka.GraphQL.Experimental
     {
         public IReadOnlyDictionary<string, object?>? Data { get; init; }
 
-        public IReadOnlyList<FieldError>? Errors { get; init; }
+        public IReadOnlyList<FieldException>? Errors { get; init; }
     }
 }

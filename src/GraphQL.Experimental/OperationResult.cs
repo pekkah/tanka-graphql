@@ -5,11 +5,11 @@ namespace Tanka.GraphQL.Experimental
 {
     public record OperationResult
     {
-        private IReadOnlyDictionary<string, object>? _data;
+        private IReadOnlyDictionary<string, object?>? _data;
         private IReadOnlyList<FieldError>? _errors;
-        private IReadOnlyDictionary<string, object>? _extensions;
+        private IReadOnlyDictionary<string, object?>? _extensions;
 
-        public IReadOnlyDictionary<string, object>? Data
+        public IReadOnlyDictionary<string, object?>? Data
         {
             get => _data;
             set
@@ -24,7 +24,7 @@ namespace Tanka.GraphQL.Experimental
             }
         }
 
-        public IReadOnlyDictionary<string, object>? Extensions
+        public IReadOnlyDictionary<string, object?>? Extensions
         {
             get => _extensions;
             set

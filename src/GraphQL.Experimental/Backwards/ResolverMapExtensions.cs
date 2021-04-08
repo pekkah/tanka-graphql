@@ -1,7 +1,7 @@
 ﻿using System;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Experimental
+namespace Tanka.GraphQL.Experimental.Backwards
 {
     public static class ResolverMapExtensions
     {

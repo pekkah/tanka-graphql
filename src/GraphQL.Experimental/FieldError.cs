@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using Tanka.GraphQL.Language.Nodes;
+﻿using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Experimental
 {
-    public class FieldError : Exception
+    public record FieldError
     {
-        public string Message { get; set; }
-
-        public List<Location>? Locations { get; set; }
-
-        public List<object> Path { get; set; }
-
-        public Dictionary<string, object>? Extensions { get; set; }
-
-        public void Extend(string key, object value)
+        public FieldError(string message, object[] path, Location[] locations)
         {
-            if (Extensions == null)
-                Extensions = new Dictionary<string, object>();
-
-            Extensions[key] = value;
+            Message = message;
+            Path = path;
+            Locations = locations;
         }
+
+        public Location[] Locations { get; init; }
+
+        public object[] Path { get; init; }
+
+        public string Message { get; init; }
     }
 }

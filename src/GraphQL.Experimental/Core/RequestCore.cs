@@ -25,7 +25,10 @@ namespace Tanka.GraphQL.Experimental.Core
             {
                 yield return new OperationResult
                 {
-                    Errors = operationContext?.ValidationResult.Errors.ToList()
+                    Errors = operationContext?
+                        .ValidationResult.Errors
+                        .Select(ex => new FieldError(ex.Message, ex.Path, ex.Locations))
+                        .ToList()
                 };
             }
             else

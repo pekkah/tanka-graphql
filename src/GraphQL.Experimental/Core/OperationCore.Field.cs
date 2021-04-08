@@ -27,33 +27,59 @@ namespace Tanka.GraphQL.Experimental.Core
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var field = fields.First();
-            var fieldName = field.Name;
+            object? completedValue = null;
 
-            var argumentValues = await coerceArgumentValues(
-                context.Schema,
-                objectDefinition,
-                field,
-                context.CoercedVariableValues,
-                cancellationToken);
+            try
+            {
+                var field = fields.First();
+                var fieldName = field.Name;
 
-            var (resolvedValue, resolveAbstractType) = await resolveFieldValue(
-                context,
-                objectDefinition,
-                objectValue,
-                fieldName,
-                argumentValues,
-                path,
-                cancellationToken);
+                var argumentValues = await coerceArgumentValues(
+                    context.Schema,
+                    objectDefinition,
+                    field,
+                    context.CoercedVariableValues,
+                    cancellationToken);
 
-            return await completeValue(
-                context,
-                fieldType,
-                fields,
-                resolvedValue,
-                resolveAbstractType,
-                path,
-                cancellationToken);
+                var (resolvedValue, resolveAbstractType) = await resolveFieldValue(
+                    context,
+                    objectDefinition,
+                    objectValue,
+                    fieldName,
+                    argumentValues,
+                    path,
+                    cancellationToken);
+
+                completedValue = await completeValue(
+                    context,
+                    fieldType,
+                    fields,
+                    resolvedValue,
+                    resolveAbstractType,
+                    path,
+                    cancellationToken);
+
+                return completedValue;
+            }
+            catch (Exception error)
+            {
+                var fieldError = error as FieldException ?? new FieldException(
+                    error.Message,
+                    path,
+                    fields
+                        .Where(f => f.Location.HasValue)
+                        .Select(f => f.Location!.Value)
+                        .ToArray(),
+                    error);
+
+                // bubble to field above
+                if (fieldType.Kind == NodeKind.NonNullType)
+                    // ReSharper disable once PossibleIntendedRethrow
+                    throw fieldError;
+
+                context.AddError(fieldError);
+                return completedValue;
+            }
         }
 
         public static async Task<object?> CompleteValue(
@@ -83,7 +109,7 @@ namespace Tanka.GraphQL.Experimental.Core
 
                 if (completedResult is null)
                     //todo: throw field error
-                    throw new Exception($"Field value cannot be null. Field is non-null type.");
+                    throw new Exception("Field value cannot be null. Field is non-null type.");
 
                 return completedResult;
             }
@@ -100,11 +126,12 @@ namespace Tanka.GraphQL.Experimental.Core
                     IEnumerable enumerableValue => await CompleteEnumerableValue(innerType, enumerableValue),
                     //todo: async enumerable support?
                     //todo: throw field error
-                    _ => throw new Exception($"Cannot complete list value. Resolved value is not known enumerable type. Value type is '{result.GetType().Name}'")
+                    _ => throw new Exception(
+                        $"Cannot complete list value. Resolved value is not known enumerable type. Value type is '{result.GetType().Name}'")
                 };
             }
 
-            var namedType = (NamedType)fieldType;
+            var namedType = (NamedType) fieldType;
 
             var typeDefinition = context.Schema.GetNamedType<TypeDefinition>(namedType.Name);
 
@@ -117,12 +144,12 @@ namespace Tanka.GraphQL.Experimental.Core
             var objectDefinition = typeDefinition switch
             {
                 InterfaceDefinition interfaceDefinition => resolveAbstractType?.Invoke(
-                    context.Schema, 
+                    context.Schema,
                     interfaceDefinition,
                     result),
                 UnionDefinition unionDefinition => resolveAbstractType?.Invoke(
-                    context.Schema, 
-                    unionDefinition, 
+                    context.Schema,
+                    unionDefinition,
                     result),
                 _ => typeDefinition as ObjectDefinition
             };
@@ -131,7 +158,7 @@ namespace Tanka.GraphQL.Experimental.Core
                 throw new Exception($"Cannot complete field value. FieldType '{fieldType.Kind}' cannot be completed.");
 
             var subSelectionSet = fields.Merge();
-            var subSelectionSetResult = await context.ExecuteSelectionSet(
+            return await context.ExecuteSelectionSet(
                 context,
                 objectDefinition,
                 result,
@@ -140,13 +167,11 @@ namespace Tanka.GraphQL.Experimental.Core
                 cancellationToken
             );
 
-            return subSelectionSetResult.Data;
-
             async Task<IReadOnlyCollection<object?>> CompleteEnumerableValue(TypeBase innerType, IEnumerable value)
             {
-                List<object?> completeValues = new ();
+                List<object?> completeValues = new();
                 var enumerator = value.GetEnumerator();
-                int count = 0;
+                var count = 0;
                 while (enumerator.MoveNext())
                 {
                     var itemPath = path.Fork().Append(count);

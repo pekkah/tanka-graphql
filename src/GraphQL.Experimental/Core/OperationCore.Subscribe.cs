@@ -108,18 +108,30 @@ namespace Tanka.GraphQL.Experimental.Core
                     "Schema does not support subscriptions. No subscription root provided.");
 
             var selectionSet = context.Operation.SelectionSet;
-            var result = await context.ExecuteSelectionSet(
-                context,
-                subscriptionType,
-                @event,
-                selectionSet,
-                new NodePath(),
-                cancellationToken);
+
+            var result = Null;
+
+            try
+            {
+                result = await context.ExecuteSelectionSet(
+                    context,
+                    subscriptionType,
+                    @event,
+                    selectionSet,
+                    new NodePath(),
+                    cancellationToken);
+            }
+            catch (FieldException e)
+            {
+                context.AddError(e);
+            }
 
             return new OperationResult
             {
-                Data = result.Data,
-                Errors = result.Errors
+                Data = result,
+                Errors = context.Errors
+                    .Select(ex => new FieldError(ex.Message, ex.Path, ex.Locations))
+                    .ToList()
             };
         }
     }

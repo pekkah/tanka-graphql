@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace Tanka.GraphQL.Experimental.Core
 {
     public partial class OperationCore
     {
-        public static Task<SelectionSetResult> ExecuteSelectionSet(
+        public static Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
             OperationContext context,
             ObjectDefinition objectDefinition,
             object? objectValue,
@@ -57,7 +58,7 @@ namespace Tanka.GraphQL.Experimental.Core
             };
         }
 
-        public static async Task<SelectionSetResult> ExecuteSelectionSetParallel(
+        public static async Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSetParallel(
             OperationContext context,
             ObjectDefinition objectDefinition,
             object? objectValue,
@@ -98,13 +99,16 @@ namespace Tanka.GraphQL.Experimental.Core
 
             await Task.WhenAll(tasks.Values);
 
-            return new SelectionSetResult
-            {
-                Data = tasks.ToDictionary(kv => kv.Key, kv => kv.Value.Result)
-            };
+            var data = tasks
+                .ToDictionary(
+                    kv => kv.Key, 
+                    kv => kv.Value.Result
+                    );
+
+            return data;
         }
 
-        public static async Task<SelectionSetResult> ExecuteSelectionSetSerial(
+        public static async Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSetSerial(
             OperationContext context,
             ObjectDefinition objectDefinition,
             object? objectValue,
@@ -143,10 +147,7 @@ namespace Tanka.GraphQL.Experimental.Core
                         cancellationToken));
             }
 
-            return new SelectionSetResult
-            {
-                Data = data
-            };
+            return data;
         }
 
         public static Dictionary<string, List<FieldSelection>> CollectFields(

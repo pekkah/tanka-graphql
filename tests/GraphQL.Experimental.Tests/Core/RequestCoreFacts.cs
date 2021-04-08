@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Experimental.Definitions;
 using Tanka.GraphQL.Experimental.TypeSystem;
+using Tanka.GraphQL.Experimental.ValueSerialization;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
@@ -32,6 +33,11 @@ type Query {
                 {"Query.world", ResolveWorld},
                 {"World.hello", ResolveHello}
             };
+
+            CoerceValue = BuildCoerceValue(new Dictionary<string, CoerceValue>()
+            {
+                ["String"] = (schema, value, type) => new StringConverter().ParseValue(value)
+            });
         }
 
         private ValueTask<(object? Value, ResolveAbstractType? ResolveAbstractType)> ResolveWorld(
@@ -50,6 +56,8 @@ type Query {
         public ResolverRoutes Data { get; }
 
         public ExecutableSchema Schema { get; }
+
+        public CoerceValue CoerceValue { get; }
 
         private ValueTask<(object? Value, ResolveAbstractType? ResolveAbstractType)> ResolveHello(
             OperationContext context,
@@ -71,14 +79,17 @@ type Query {
             object? initialValue = "initial";
 
 
-            var collectFields = BuildCollectFields(Coerce.CoerceValue);
-            var coerceArgumentValues = BuildCoerceArgumentValues(Coerce.CoerceValue);
             SerializeValue serializeValue = (schema, definition, value) => new ValueTask<object?>(value);
 
             ResolveFieldValue resolveFieldValue =
                 (context, objectDefinition, objectValue, fieldName, variableValues, path, token) =>
                     Data.Resolver($"{objectDefinition.Name}.{fieldName}")(context, objectDefinition, objectValue,
                         fieldName, variableValues, path, token);
+
+            ResolveFieldEventStream resolveFieldEventStream = default;
+
+            var collectFields = BuildCollectFields(CoerceValue);
+            var coerceArgumentValues = BuildCoerceArgumentValues(CoerceValue);
 
             var completeValue = BuildCompleteValue(
                 serializeValue
@@ -95,7 +106,7 @@ type Query {
 
             var executeQuery = BuildExecuteOperation();
 
-            ResolveFieldEventStream resolveFieldEventStream = default;
+            
             var executeSubscription = BuildExecuteSubscription(
                 BuildCreateSourceEventStream(
                     collectFields,
@@ -114,7 +125,7 @@ type Query {
                         context.Operation = Ast.GetOperation(options.Document, options.OperationName);
                         return Task.CompletedTask;
                     },
-                    BuildCoerceVariableValues(Coerce.CoerceValue),
+                    BuildCoerceVariableValues(CoerceValue),
                     (context, options, _) => Task.CompletedTask,
                     (context, options, cancellationToken) =>
                     {
@@ -130,7 +141,7 @@ type Query {
                         context.ExecuteSelectionSet = executeSelectionSet;
                         return Task.CompletedTask;
                     },
-                    Coerce.CoerceValue
+                    CoerceValue
                 ));
 
             var executeRequestSingle = BuildExecuteSingle(executeRequest);

@@ -6,7 +6,7 @@ namespace Tanka.GraphQL.Execution
 {
     public static class FieldErrors
     {
-        public static object Handle(
+        public static object? Handle(
             IExecutorContext context,
             ObjectType objectType,
             string fieldName,
@@ -16,7 +16,7 @@ namespace Tanka.GraphQL.Execution
             Exception error,
             NodePath path)
         {
-            if (!(error is QueryExecutionException))
+            if (error is not QueryExecutionException)
             {
                 error = new QueryExecutionException(
                     "",

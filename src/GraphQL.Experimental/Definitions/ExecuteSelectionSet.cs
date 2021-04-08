@@ -1,11 +1,12 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Experimental.Definitions
 {
-    public delegate Task<SelectionSetResult> ExecuteSelectionSet(
+    public delegate Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
         OperationContext context,
         ObjectDefinition objectDefinition,
         object? objectValue,

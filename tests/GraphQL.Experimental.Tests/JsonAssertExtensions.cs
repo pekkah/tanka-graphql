@@ -21,7 +21,7 @@ namespace Tanka.GraphQL.Experimental.Tests
                 }));
 
             var expectedJsonObject = JObject.FromObject(
-                JsonConvert.DeserializeObject<ExecutionResult>(expectedJson),
+                JsonConvert.DeserializeObject<T>(expectedJson) ?? throw new InvalidOperationException(),
                 JsonSerializer.Create(new JsonSerializerSettings()
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver(),

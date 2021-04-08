@@ -1,4 +1,5 @@
-﻿using Tanka.GraphQL.Experimental.Definitions;
+﻿using System.Collections.Generic;
+using Tanka.GraphQL.Experimental.Definitions;
 
 namespace Tanka.GraphQL.Experimental.Core
 {
@@ -7,7 +8,7 @@ namespace Tanka.GraphQL.Experimental.Core
         public static OperationExecutor BuildExecuteOperation()
         {
             return (context, _, initialValue, cancellationToken) =>
-                Core.OperationCore.ExecuteOperation(
+                OperationCore.ExecuteOperation(
                     context,
                     initialValue,
                     cancellationToken);
@@ -19,7 +20,7 @@ namespace Tanka.GraphQL.Experimental.Core
         )
         {
             return (context, options, initialValue, cancellationToken) =>
-                Core.OperationCore.ExecuteSubscription(
+                OperationCore.ExecuteSubscription(
                     context,
                     createSourceEventStream,
                     mapSourceToResponseEvent,
@@ -33,7 +34,7 @@ namespace Tanka.GraphQL.Experimental.Core
         )
         {
             return (context, objectDefinition, objectValue, selectionSet, path, cancellationToken) =>
-                Core.OperationCore.ExecuteSelectionSet(
+                OperationCore.ExecuteSelectionSet(
                     context,
                     objectDefinition,
                     objectValue,
@@ -49,7 +50,7 @@ namespace Tanka.GraphQL.Experimental.Core
         )
         {
             return (context, objectDefinition, selectionSet, visitedFragments, cancellationToken) =>
-                Core.OperationCore.CollectFields(
+                OperationCore.CollectFields(
                     context,
                     objectDefinition,
                     selectionSet,
@@ -64,7 +65,7 @@ namespace Tanka.GraphQL.Experimental.Core
             CompleteValue completeValue)
         {
             return (context, objectDefinition, objectValue, fieldType, fields, path, cancellationToken) =>
-                Core.OperationCore.ExecuteField(
+                OperationCore.ExecuteField(
                     context,
                     objectDefinition,
                     objectValue,
@@ -107,7 +108,7 @@ namespace Tanka.GraphQL.Experimental.Core
             ResolveFieldEventStream resolveFieldEventStream)
         {
             return (context, initialValue, cancellationToken) =>
-                Core.OperationCore.CreateSourceEventStream(
+                OperationCore.CreateSourceEventStream(
                     context,
                     initialValue,
                     collectFields,
@@ -120,7 +121,7 @@ namespace Tanka.GraphQL.Experimental.Core
             ExecuteSubscriptionEvent executeSubscriptionEvent)
         {
             return (context, sourceStream, cancellationToken) =>
-                Core.OperationCore.MapSourceToResponseEvent(
+                OperationCore.MapSourceToResponseEvent(
                     context,
                     sourceStream,
                     executeSubscriptionEvent,
@@ -129,14 +130,14 @@ namespace Tanka.GraphQL.Experimental.Core
 
         public static ExecuteSubscriptionEvent BuildExecuteSubscriptionEvent()
         {
-            return Core.OperationCore.ExecuteSubscriptionEvent;
+            return OperationCore.ExecuteSubscriptionEvent;
         }
 
         public static CompleteValue BuildCompleteValue(
             SerializeValue serializeValue)
         {
             return (context, fieldType, fields, resolvedValue, resolveAbstractType, path, cancellationToken) =>
-                Core.OperationCore.CompleteValue(
+                OperationCore.CompleteValue(
                     context,
                     fieldType,
                     fields,
@@ -145,6 +146,13 @@ namespace Tanka.GraphQL.Experimental.Core
                     serializeValue,
                     resolveAbstractType,
                     cancellationToken);
+        }
+
+        public static CoerceValue BuildCoerceValue(
+            IReadOnlyDictionary<string, CoerceValue> valueConverter)
+        {
+            return (schema, value, type) =>
+                Coerce.CoerceValue(schema, value, type, valueConverter);
         }
     }
 }

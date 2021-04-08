@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Experimental.Definitions;
 using Tanka.GraphQL.Experimental.TypeSystem;
+using Tanka.GraphQL.Experimental.ValueSerialization;
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -133,7 +135,7 @@ namespace Tanka.GraphQL.Experimental
                         try
                         {
                             var coercedValue = coerceValue(
-                                schema,
+                            schema,
                                 value,
                                 argumentType);
 
@@ -152,9 +154,36 @@ namespace Tanka.GraphQL.Experimental
             return new ValueTask<IReadOnlyDictionary<string, object?>>(coercedValues);
         }
 
-        public static object? CoerceValue(ExecutableSchema schema, object? value, TypeBase valueType)
+        public static object? CoerceValue(
+            ExecutableSchema schema,
+            object? value,
+            TypeBase valueType,
+            IReadOnlyDictionary<string, CoerceValue> valueConverters)
         {
-            return null;
+            var typeDefinition = Ast.TypeFromAst(schema, valueType);
+
+            if (typeDefinition == null)
+                throw new InvalidOperationException(
+                    $"Cannot coerce value. Given schema does not know value type '{valueType.ToGraphQL()}'.");
+
+            if (!valueConverters.TryGetValue(typeDefinition.Name, out var converter))
+                throw new InvalidOperationException(
+                    $"Cannot coerce value. No value converter given for type '{typeDefinition.Name}'.");
+
+            try
+            {
+                return converter(schema, value, valueType);
+            }
+            catch (Exception x)
+            {
+                // wrap exceptions in FormatException if needed
+                if (x is not FormatException)
+                    throw new FormatException(
+                        $"Could not coerce value '{valueType.ToGraphQL()}' of type '{typeDefinition.Name}'. " +
+                        "Coercing value resulted in error.", x);
+
+                throw;
+            }
         }
     }
 }

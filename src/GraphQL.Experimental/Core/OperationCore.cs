@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -6,6 +7,8 @@ namespace Tanka.GraphQL.Experimental.Core
 {
     public partial class OperationCore
     {
+        private const IReadOnlyDictionary<string, object?>? Null = default(Dictionary<string, object?>); 
+
         public static async IAsyncEnumerable<OperationResult> ExecuteOperation(
             OperationContext context,
             object? initialValue = null,
@@ -18,18 +21,28 @@ namespace Tanka.GraphQL.Experimental.Core
             var query = context.Schema.Query;
             var selectionSet = context.Operation.SelectionSet;
 
-            var result = await context.ExecuteSelectionSet(
-                context,
-                query,
-                initialValue,
-                selectionSet,
-                path,
-                cancellationToken);
+            var result = Null;
+            try
+            {
+                result = await context.ExecuteSelectionSet(
+                    context,
+                    query,
+                    initialValue,
+                    selectionSet,
+                    path,
+                    cancellationToken);
+            }
+            catch (FieldException e)
+            {
+                context.AddError(e);
+            }
 
             yield return new OperationResult
             {
-                Data = result.Data,
-                Errors = result.Errors
+                Data = result,
+                Errors = context.Errors
+                    .Select(ex => new FieldError(ex.Message, ex.Path, ex.Locations))
+                    .ToList()
             };
         }
     }

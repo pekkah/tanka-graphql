@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Tanka.GraphQL.Experimental.Definitions;
 using Tanka.GraphQL.Language.Nodes;
 
@@ -6,12 +7,14 @@ namespace Tanka.GraphQL.Experimental
 {
     public class OperationContext
     {
+        private ConcurrentBag<FieldException> _fieldErrors = new();
+
         public OperationContext(ExecutableSchema schema,
             ExecutableDocument document,
             OperationDefinition operation,
             IReadOnlyDictionary<string, object?> coercedVariableValues,
             OperationValidationResult validationResult,
-            OperationExecutor operationExecutor, 
+            OperationExecutor operationExecutor,
             ExecuteSelectionSet executeSelectionSet)
         {
             Schema = schema;
@@ -21,7 +24,6 @@ namespace Tanka.GraphQL.Experimental
             ValidationResult = validationResult;
             OperationExecutor = operationExecutor;
             ExecuteSelectionSet = executeSelectionSet;
-
         }
 
         public OperationDefinition Operation { get; }
@@ -37,5 +39,12 @@ namespace Tanka.GraphQL.Experimental
         public ExecutableDocument Document { get; }
 
         public ExecuteSelectionSet ExecuteSelectionSet { get; }
+
+        public IReadOnlyList<FieldException> Errors => _fieldErrors.ToArray();
+
+        public void AddError(FieldException fieldException)
+        {
+            _fieldErrors.Add(fieldException);
+        }
     }
 }
