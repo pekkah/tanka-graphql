@@ -5,7 +5,6 @@ using Tanka.GraphQL.Experimental.Definitions;
 using Tanka.GraphQL.Experimental.ValueSerialization;
 using Tanka.GraphQL.Language.Nodes;
 using Xunit;
-using static Tanka.GraphQL.Experimental.Core.OperationCoreBuilder;
 using static Tanka.GraphQL.Experimental.Request;
 
 namespace Tanka.GraphQL.Experimental.Tests
@@ -39,36 +38,45 @@ namespace Tanka.GraphQL.Experimental.Tests
                     }";
 
             Query = new Query();
-            Resolvers = new ResolverRoutes()
+            Resolvers = new ResolverRoutes
             {
                 {"Container.nonNullWithNull", Resolve<Container>.As(c => c.NonNull_WithNull)},
                 {"Container.nonNullListAsNull", Resolve<Container>.As(c => c.NonNullList_AsNull)},
                 {"Container.nonNullListWithNonNullItem", Resolve<Container>.As(c => c.NonNullList_WithNullSecondItem)},
                 {"Container.nonNullListWithNullItem", Resolve<Container>.As(c => c.NonNullList_WithNullSecondItem)},
 
-                {"CustomErrorContainer.nonNullWithCustomError", Resolve.As(c => throw new InvalidOperationException("error"))},
-                {"CustomErrorContainer.nullableWithCustomError", Resolve.As(c => throw new InvalidOperationException("error"))},
-                {"CustomErrorContainer.nonNullListWithCustomError", Resolve.As(c => throw new InvalidOperationException("error"))},
-                {"CustomErrorContainer.nonNullListItemWithCustomError", Resolve.As(c => throw new InvalidOperationException("error"))},
+                {
+                    "CustomErrorContainer.nonNullWithCustomError",
+                    Resolve.As(c => throw new InvalidOperationException("error"))
+                },
+                {
+                    "CustomErrorContainer.nullableWithCustomError",
+                    Resolve.As(c => throw new InvalidOperationException("error"))
+                },
+                {
+                    "CustomErrorContainer.nonNullListWithCustomError",
+                    Resolve.As(c => throw new InvalidOperationException("error"))
+                },
+                {
+                    "CustomErrorContainer.nonNullListItemWithCustomError",
+                    Resolve.As(c => throw new InvalidOperationException("error"))
+                },
 
-                {"Query.container" , Resolve.As(_ => Query.Container)},
+                {"Query.container", Resolve.As(_ => Query.Container)},
                 {"Query.custom", Resolve.As(_ => Query.Custom)}
             };
 
-
-            var coerceValue = BuildCoerceValue(new Dictionary<string, CoerceValue>()
-            {
-                ["String"] = (schema, value, type) => new StringConverter().ParseValue(value)
-
-            });
             ExecuteRequest = UseExecuteRequestSingle(
                 Schema,
-                (context, options, token) => Task.CompletedTask,
                 Resolvers.Resolve,
                 default,
-                coerceValue,
-                (schema, definition, value) => new ValueTask<object?>(value)
-            );
+                new Dictionary<string, CoerceValue>
+                {
+                    ["String"] = (schema, value, type) => new StringConverter().ParseValue(value)
+                }, new Dictionary<string, SerializeValue>
+                {
+                    ["String"] = (schema, type, value) => new ValueTask<object?>(new StringConverter().Serialize(value))
+                });
         }
 
         public ExecuteRequestSingle ExecuteRequest { get; }
@@ -94,7 +102,7 @@ namespace Tanka.GraphQL.Experimental.Tests
 
 
             /* When */
-            var result = await ExecuteRequest(new RequestOptions()
+            var result = await ExecuteRequest(new RequestOptions
             {
                 Document = query
             });
@@ -138,7 +146,7 @@ namespace Tanka.GraphQL.Experimental.Tests
 
 
             /* When */
-            var result = await ExecuteRequest(new RequestOptions()
+            var result = await ExecuteRequest(new RequestOptions
             {
                 Document = query
             });
@@ -182,7 +190,7 @@ namespace Tanka.GraphQL.Experimental.Tests
 
 
             /* When */
-            var result = await ExecuteRequest(new RequestOptions()
+            var result = await ExecuteRequest(new RequestOptions
             {
                 Document = query
             });
@@ -217,7 +225,7 @@ namespace Tanka.GraphQL.Experimental.Tests
 
 
             /* When */
-            var result = await ExecuteRequest(new RequestOptions()
+            var result = await ExecuteRequest(new RequestOptions
             {
                 Document = query
             });
@@ -261,7 +269,7 @@ namespace Tanka.GraphQL.Experimental.Tests
 
 
             /* When */
-            var result = await ExecuteRequest(new RequestOptions()
+            var result = await ExecuteRequest(new RequestOptions
             {
                 Document = query
             });
@@ -307,7 +315,7 @@ namespace Tanka.GraphQL.Experimental.Tests
 
 
             /* When */
-            var result = await ExecuteRequest(new RequestOptions()
+            var result = await ExecuteRequest(new RequestOptions
             {
                 Document = query
             });
@@ -355,7 +363,7 @@ namespace Tanka.GraphQL.Experimental.Tests
 
 
             /* When */
-            var result = await ExecuteRequest(new RequestOptions()
+            var result = await ExecuteRequest(new RequestOptions
             {
                 Document = query
             });

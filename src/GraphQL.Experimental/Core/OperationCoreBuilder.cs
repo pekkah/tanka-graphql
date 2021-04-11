@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Tanka.GraphQL.Experimental.Definitions;
 
 namespace Tanka.GraphQL.Experimental.Core
@@ -153,6 +154,17 @@ namespace Tanka.GraphQL.Experimental.Core
         {
             return (schema, value, type) =>
                 Coerce.CoerceValue(schema, value, type, valueConverter);
+        }
+
+        public static ValidateOperation BuildValidator()
+        {
+            return (context, options, cancellationToken) => Task.CompletedTask;
+        }
+
+        public static SerializeValue BuildSerializeValue(IReadOnlyDictionary<string, SerializeValue> valueSerializers)
+        {
+            return (schema, definition, value) =>
+                Serialize.SerializeValue(schema, value, definition, valueSerializers);
         }
     }
 }
