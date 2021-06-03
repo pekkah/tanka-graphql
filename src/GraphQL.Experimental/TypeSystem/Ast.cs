@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Tanka.GraphQL.Experimental.Definitions;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -107,6 +109,54 @@ namespace Tanka.GraphQL.Experimental.TypeSystem
                 NodeKind.EnumDefinition => true,
                 _ => false
             };
+        }
+
+        public static bool GetIfArgumentValue(
+            ExecutableSchema schema,
+            Directive directive,
+            IReadOnlyDictionary<string, object?> coercedVariableValues,
+            Argument argument,
+            CoerceValue coerceValue)
+        {
+            if (directive == null) throw new ArgumentNullException(nameof(directive));
+            if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
+
+            switch (argument.Value.Kind)
+            {
+                case NodeKind.BooleanValue:
+                    return (bool) (coerceValue(schema, argument.Value, "Boolean!") ?? false);
+                case NodeKind.Variable:
+                    var variable = (Variable) argument.Value;
+                    var variableValue = coercedVariableValues[variable.Name];
+
+                    if (variableValue == null)
+                        throw new Exception(
+                            $"If argument of {directive} is null. Variable value should not be null");
+
+                    return (bool) variableValue;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool DoesFragmentTypeApply(
+            ObjectDefinition objectType,
+            TypeDefinition fragmentType)
+        {
+            if (objectType.Name == fragmentType.Name)
+                return true;
+
+            if (fragmentType is InterfaceDefinition interfaceType)
+                return objectType
+                    .Interfaces
+                    ?.Any(implementedInterface => implementedInterface.Name == interfaceType.Name) == true;
+
+            if (fragmentType is UnionDefinition unionType)
+                return unionType
+                    .Members
+                    ?.Any(member => member.Name == objectType.Name) == true;
+
+            return false;
         }
     }
 }

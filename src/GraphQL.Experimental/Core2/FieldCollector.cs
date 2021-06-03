@@ -1,159 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Tanka.GraphQL.Experimental.Definitions;
 using Tanka.GraphQL.Experimental.TypeSystem;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL.Experimental.Core
+namespace Tanka.GraphQL.Experimental.Core2
 {
-    public partial class OperationCore
+    public class FieldCollector
     {
-        public static Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
-            OperationContext context,
-            ObjectDefinition objectDefinition,
-            object? objectValue,
-            SelectionSet selectionSet,
-            NodePath path,
-            CollectFields collectFields,
-            ExecuteField executeField,
-            CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
+        private readonly CoerceValue _coerceValue;
 
-            return context.Operation.Operation switch
-            {
-                OperationType.Query => ExecuteSelectionSetParallel(
-                    context,
-                    objectDefinition,
-                    objectValue,
-                    selectionSet,
-                    path,
-                    collectFields,
-                    executeField,
-                    cancellationToken),
-                OperationType.Mutation => ExecuteSelectionSetSerial(
-                    context,
-                    objectDefinition,
-                    objectValue,
-                    selectionSet,
-                    path,
-                    collectFields,
-                    executeField,
-                    cancellationToken),
-                OperationType.Subscription => ExecuteSelectionSetParallel(
-                    context,
-                    objectDefinition,
-                    objectValue,
-                    selectionSet,
-                    path,
-                    collectFields,
-                    executeField,
-                    cancellationToken),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+        public FieldCollector(
+            CoerceValue coerceValue)
+        {
+            _coerceValue = coerceValue;
         }
 
-        public static async Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSetParallel(
-            OperationContext context,
-            ObjectDefinition objectDefinition,
-            object? objectValue,
-            SelectionSet selectionSet,
-            NodePath path,
-            CollectFields collectFields,
-            ExecuteField executeField,
-            CancellationToken cancellationToken)
-        {
-            var groupedFieldSet = collectFields(
-                context,
-                objectDefinition,
-                selectionSet,
-                cancellationToken: cancellationToken);
-
-            var tasks = new Dictionary<string, Task<object?>>();
-
-            foreach (var (responseKey, fields) in groupedFieldSet)
-            {
-                var fieldPath = path.Fork();
-                var fieldName = fields.First().Name;
-                var fieldType = context.Schema
-                    .GetField(objectDefinition, fieldName)
-                    ?.Type;
-
-                fieldPath.Append(fieldName);
-
-                if (fieldType != null)
-                    tasks.Add(responseKey, executeField(
-                        context,
-                        objectDefinition,
-                        objectValue,
-                        fieldType,
-                        fields,
-                        fieldPath,
-                        cancellationToken));
-            }
-
-            await Task.WhenAll(tasks.Values);
-
-            var data = tasks
-                .ToDictionary(
-                    kv => kv.Key,
-                    kv => kv.Value.Result
-                );
-
-            return data;
-        }
-
-        public static async Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSetSerial(
-            OperationContext context,
-            ObjectDefinition objectDefinition,
-            object? objectValue,
-            SelectionSet selectionSet,
-            NodePath path,
-            CollectFields collectFields,
-            ExecuteField executeField,
-            CancellationToken cancellationToken)
-        {
-            var groupedFieldSet = collectFields(
-                context,
-                objectDefinition,
-                selectionSet,
-                cancellationToken: cancellationToken);
-
-            var data = new Dictionary<string, object?>();
-
-            foreach (var (responseKey, fields) in groupedFieldSet)
-            {
-                var fieldPath = path.Fork();
-                var fieldName = fields.First().Name;
-                var fieldType = context.Schema
-                    .GetField(objectDefinition, fieldName)
-                    ?.Type;
-
-                fieldPath.Append(fieldName);
-
-                if (fieldType != null)
-                    data.Add(responseKey, await executeField(
-                        context,
-                        objectDefinition,
-                        objectValue,
-                        fieldType,
-                        fields,
-                        fieldPath,
-                        cancellationToken));
-            }
-
-            return data;
-        }
-
-        public static Dictionary<string, List<FieldSelection>> CollectFields(
+        public Dictionary<string, List<FieldSelection>> CollectFields(
             OperationContext context,
             ObjectDefinition objectDefinition,
             SelectionSet selectionSet,
-            CoerceValue coerceValue,
             List<string>? visitedFragments = null,
             CancellationToken cancellationToken = default)
         {
@@ -170,12 +38,12 @@ namespace Tanka.GraphQL.Experimental.Core
                 var directives = selection.Directives ?? Language.Nodes.Directives.None;
 
                 var skipDirective = directives.FirstOrDefault(d => d.Name == "skip");
-                if (skipDirective != null && SkipSelection(skipDirective, coercedVariableValues, schema, coerceValue))
+                if (skipDirective != null && SkipSelection(skipDirective, coercedVariableValues, schema, _coerceValue))
                     continue;
 
                 var includeDirective = directives.FirstOrDefault(d => d.Name == "include");
                 if (includeDirective != null &&
-                    !IncludeSelection(includeDirective, coercedVariableValues, schema, coerceValue))
+                    !IncludeSelection(includeDirective, coercedVariableValues, schema, _coerceValue))
                     continue;
 
                 if (selection is FieldSelection fieldSelection)
@@ -212,7 +80,6 @@ namespace Tanka.GraphQL.Experimental.Core
                         context,
                         objectDefinition,
                         fragmentSelectionSet,
-                        coerceValue,
                         visitedFragments,
                         cancellationToken); //todo: nested defer?
 
@@ -241,7 +108,6 @@ namespace Tanka.GraphQL.Experimental.Core
                         context,
                         objectDefinition,
                         fragmentSelectionSet,
-                        coerceValue,
                         visitedFragments,
                         cancellationToken); //todo: nested defer?
 
@@ -260,7 +126,7 @@ namespace Tanka.GraphQL.Experimental.Core
             return groupedFields;
         }
 
-        private static bool IncludeSelection(
+        private bool IncludeSelection(
             Directive includeDirective,
             IReadOnlyDictionary<string, object?> coercedVariableValues,
             ExecutableSchema schema,
@@ -281,7 +147,7 @@ namespace Tanka.GraphQL.Experimental.Core
                 coerceValue);
         }
 
-        private static bool SkipSelection(
+        private bool SkipSelection(
             Directive skipDirective,
             IReadOnlyDictionary<string, object?> coercedVariableValues,
             ExecutableSchema schema,
