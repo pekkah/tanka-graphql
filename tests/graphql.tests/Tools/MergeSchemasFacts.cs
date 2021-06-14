@@ -3,6 +3,7 @@ using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.Tools
@@ -162,6 +163,43 @@ type Query {
 
             var field = schema.GetField("Query", "color");
             Assert.Equal(newUnionType, field.Type);
+        }
+
+        [Fact]
+        public void Merge_schema_with_new_CustomScalar()
+        {
+            /* Given */
+            var newTypes = new SchemaBuilder()
+                .Sdl(@"
+                    scalar Date
+
+                    input InputTest {
+                        timestamp: Date
+                    }   
+
+                    type Query {
+                        useRaw(date: Date!): Int
+                        useWithInput(inputWithDate: InputTest!): Int
+                    }
+                    ")
+                .Include("Date", new StringConverter())
+                .Build();
+
+            var builder = new SchemaBuilder()
+                .Sdl(@"
+                    schema {
+                        query: Query
+                    }
+                    ");
+
+
+            /* When */
+            var schema = builder.Merge(newTypes)
+                .Build();
+
+            /* Then */
+            var newScalarType = schema.GetNamedType<ScalarType>("Date");
+            Assert.NotNull(newScalarType);
         }
     }
 }

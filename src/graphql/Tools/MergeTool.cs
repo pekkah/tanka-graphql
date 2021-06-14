@@ -15,15 +15,14 @@ namespace Tanka.GraphQL.Tools
 
         public static void Schema(SchemaBuilder target, ISchema right)
         {
+            foreach (var rightType in right.QueryTypes<ScalarType>())
+                MergeScalarType(right, target, rightType);
+
             foreach (var rightType in right.QueryTypes<EnumType>())
                 MergeEnumType(right, target, rightType);
 
             foreach (var rightType in right.QueryTypes<InputObjectType>()) 
                 MergeInputType(right, target, rightType);
-
-            foreach (var rightType in right.QueryTypes<ScalarType>())
-                MergeScalarType(right, target, rightType);
-
 
             foreach (var directiveType in right.QueryDirectiveTypes())
             {
