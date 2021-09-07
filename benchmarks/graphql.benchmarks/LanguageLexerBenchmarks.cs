@@ -30,10 +30,9 @@ namespace Tanka.GraphQL.Benchmarks
         [Benchmark(Baseline = true)]
         public void GraphQL_dotnet_Lexer_IntrospectionQuery()
         {
-            var lexer = new Lexer();
-            var source = new Source(IntrospectionQuery);
-            var token = lexer.Lex(source);
-            while (token.Kind != TokenKind.EOF) token = lexer.Lex(source, token.End);
+            var token = Lexer.Lex(IntrospectionQuery);
+            while (token.Kind != TokenKind.EOF)
+                token = Lexer.Lex(IntrospectionQuery, token.End);
         }
 
         [Benchmark]

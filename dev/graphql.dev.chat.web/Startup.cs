@@ -17,18 +17,19 @@ using Tanka.GraphQL.Samples.Chat.Web.GraphQL;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.Server.Links.DTOs;
 using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Samples.Chat.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            Env = env;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Env { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -49,15 +50,18 @@ namespace Tanka.GraphQL.Samples.Chat.Web
             services.AddSingleton(provider => provider.GetRequiredService<ChatSchemas>().Chat);
 
             // configure execution options
-            services.AddTankaGraphQL()
+            var tanka = services.AddTankaGraphQL()
                 .ConfigureRules(rules => rules.Concat(new[]
                 {
                     CostAnalyzer.MaxCost(100, 1, true)
                 }).ToArray())
                 .ConfigureSchema<ISchema>(schema => new ValueTask<ISchema>(schema))
-                .AddExtension<TraceExtension>()
                 .ConfigureWebSockets();
-                
+
+            if (Env.IsDevelopment())
+            {
+                tanka.AddExtension<TraceExtension>();
+            }
 
             // signalr server
             services.AddSignalR(options => options.EnableDetailedErrors = true)
