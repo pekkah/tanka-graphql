@@ -42,8 +42,8 @@ namespace Tanka.GraphQL.Language.Visitors
         public List<IVisit<DefaultValue>> DefaultValue { get; set; }
             = new List<IVisit<DefaultValue>>();
 
-        public List<IVisit<Value>> Value { get; set; }
-            = new List<IVisit<Value>>();
+        public List<IVisit<ValueBase>> Value { get; set; }
+            = new List<IVisit<ValueBase>>();
 
         public List<IVisit<Directive>> Directive { get; set; }
             = new List<IVisit<Directive>>();
@@ -90,7 +90,7 @@ namespace Tanka.GraphQL.Language.Visitors
             if (visitor is IVisit<DefaultValue> dv)
                 DefaultValue.Add(dv);
 
-            if (visitor is IVisit<Value> v)
+            if (visitor is IVisit<ValueBase> v)
                 Value.Add(v);
 
             if (visitor is IVisit<Directive> d)

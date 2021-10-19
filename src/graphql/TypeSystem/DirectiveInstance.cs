@@ -17,6 +17,8 @@ namespace Tanka.GraphQL.TypeSystem
 
         public string Name => Type.Name;
 
+        public IReadOnlyDictionary<string, object?> Arguments => _arguments;
+
         public T GetArgument<T>(string name)
         {
             object rawValue;

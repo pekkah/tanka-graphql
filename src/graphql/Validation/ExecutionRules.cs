@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Net;
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
@@ -45,7 +45,7 @@ namespace Tanka.GraphQL.Validation
             R572DirectivesAreInValidLocations(),
 
             R581And582Variables(),
-            //todo: 5.8.3 All Variable Uses Defined
+            R583AllVariableUsesDefined(),
             R584AllVariablesUsed(),
             R585AllVariableUsagesAreAllowed(),
             
@@ -143,7 +143,7 @@ namespace Tanka.GraphQL.Validation
                                 "GraphQL allows a short‐hand form for defining " +
                                 "query operations when only that one operation exists in " +
                                 "the document.",
-                                operations);
+                                (INode) operations);
                 };
             };
         }
@@ -868,7 +868,7 @@ namespace Tanka.GraphQL.Validation
                                     type.ToString(),
                                     fieldDef.Key,
                                     nonNull.ToString()),
-                                node);
+                                (INode) node);
                     }
                 };
                 rule.EnterObjectField += node =>
@@ -940,7 +940,7 @@ namespace Tanka.GraphQL.Validation
 
             void IsValidScalar(
                 IRuleVisitorContext context,
-                Value node)
+                ValueBase node)
             {
                 var locationType = context.Tracker.GetInputType();
 
@@ -1064,7 +1064,7 @@ namespace Tanka.GraphQL.Validation
                                     "does not have a default value. Otherwise, the input object field " +
                                     "is optional. " +
                                     $"Field '{nonNull}.{fieldName}' is required.",
-                                    node);
+                                    (INode) node);
 
                                 return;
                             }
@@ -1284,6 +1284,42 @@ namespace Tanka.GraphQL.Validation
                                 "and interfaces cannot be used as inputs.. " +
                                 $"Given type of '{variableName}' is '{variableType}'",
                                 node);
+                    }
+                };
+            };
+        }
+
+        public static CombineRule R583AllVariableUsesDefined()
+        {
+            return (context, rule) =>
+            {
+                var variableDefinitions = new List<string>();
+                rule.EnterOperationDefinition += node =>
+                {
+                    variableDefinitions.Clear();
+                    if (node.VariableDefinitions != null)
+                        variableDefinitions.AddRange(node.VariableDefinitions.Select(v => v.Variable.Name.Value));
+                };
+
+                rule.LeaveOperationDefinition += node =>
+                {
+                    var usages = context.GetRecursiveVariables(node)
+                        .Select(usage => usage.Node.Name.Value)
+                        .ToList();
+
+                    foreach (var usage in usages)
+                    {
+                        if (!variableDefinitions.Contains(usage))
+                        {
+                            context.Error(
+                                ValidationErrorCodes.R583AllVariableUsesDefined,
+                                $"Variables are scoped on a per‐operation basis. " +
+                                $"That means that any variable used within the context of " +
+                                $"an operation must be defined at the top level of that operation. " +
+                                $"Variable use '{usage}' is not defined.",
+                                node
+                            );
+                        }
                     }
                 };
             };

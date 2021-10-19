@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.SDL
 
         public static SchemaBuilder Sdl(this SchemaBuilder builder, TypeSystemDocument document)
         {
-            var reader = new SdlReader(document, builder);
+            var reader = new SchemaReader(document, builder);
             reader.Read();
             return builder;
         }

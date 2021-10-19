@@ -100,7 +100,7 @@ namespace Tanka.GraphQL
                 return error;
 
             error.Locations = graphQLError.Nodes?
-                .Where(n => n.Location != null)
+                .Where(n => !n.Location.Equals(default(Location)))
                 .Select(n => n.Location.Value)
                 .ToList();
             

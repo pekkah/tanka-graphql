@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net5.0</TargetFrameworks>
+    <RootNamespace>Tanka.GraphQL.Extensions.Tracing</RootNamespace>
+    <AssemblyName>Tanka.GraphQL.Extensions.Tracing</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\graphql\graphql.csproj" />
+  </ItemGroup>
+
+</Project>

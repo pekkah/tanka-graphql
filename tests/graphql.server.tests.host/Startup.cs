@@ -120,10 +120,13 @@ namespace Tanka.GraphQL.Server.Tests.Host
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseWebSockets();
-            app.UseTankaGraphQLWebSockets("/api/graphql");
 
             app.UseRouting();
-            app.UseEndpoints(routes => { routes.MapTankaGraphQLSignalR("/graphql"); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapTankaGraphQLSignalR("/graphql");
+                endpoints.MapTankaGraphQLWebSockets("/api/graphql");
+            });
         }
     }
 

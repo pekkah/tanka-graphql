@@ -659,14 +659,14 @@ namespace Tanka.GraphQL.Validation
 
                 var arg2 = arguments2[arg1.Key];
 
-                var value1 = Arguments.CoerceArgumentValue(
+                var value1 = ArgumentCoercion.CoerceArgumentValue(
                     _context.Schema,
                     _context.VariableValues,
                     arg1.Key,
                     fieldDefPair1.FieldDef.GetArgument(arg1.Key),
                     arg1.Value);
 
-                var value2 = Arguments.CoerceArgumentValue(
+                var value2 = ArgumentCoercion.CoerceArgumentValue(
                     _context.Schema,
                     _context.VariableValues,
                     arg1.Key,

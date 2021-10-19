@@ -15,14 +15,14 @@ namespace Tanka.GraphQL.Tools
 
         public static void Schema(SchemaBuilder target, ISchema right)
         {
+            foreach (var rightType in right.QueryTypes<ScalarType>())
+                MergeScalarType(right, target, rightType);
+
             foreach (var rightType in right.QueryTypes<EnumType>())
                 MergeEnumType(right, target, rightType);
 
             foreach (var rightType in right.QueryTypes<InputObjectType>()) 
                 MergeInputType(right, target, rightType);
-
-            foreach (var rightType in right.QueryTypes<ScalarType>())
-                MergeScalarType(target, rightType);
 
             foreach (var directiveType in right.QueryDirectiveTypes())
             {
@@ -92,9 +92,18 @@ namespace Tanka.GraphQL.Tools
             }
         }
 
-        private static void MergeScalarType(SchemaBuilder builder, ScalarType rightType)
+        private static void MergeScalarType(ISchema right, SchemaBuilder builder, ScalarType rightType)
         {
-            if (!builder.TryGetType<ScalarType>(rightType.Name, out _)) builder.Include(rightType);
+            if (!builder.TryGetType<ScalarType>(rightType.Name, out _)) 
+                builder.Include(rightType);
+
+            if (!builder.TryGetValueConverter(rightType.Name, out _))
+            {
+                var converter = right.GetValueConverter(rightType.Name);
+
+                if (converter != null)
+                    builder.Include(rightType.Name, converter);
+            }
         }
 
         private static void MergeInputType(ISchema right, SchemaBuilder builder, InputObjectType rightType)

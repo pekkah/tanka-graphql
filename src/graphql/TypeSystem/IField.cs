@@ -8,6 +8,6 @@ namespace Tanka.GraphQL.TypeSystem
 
         IEnumerable<KeyValuePair<string, Argument>>? Arguments { get; set; }
 
-        Argument GetArgument(string name);
+        Argument? GetArgument(string name);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class FloatValue : Value, INode
+    public sealed class FloatValue : ValueBase, INode
     {
         public override NodeKind Kind => NodeKind.FloatValue;
         public readonly bool IsExponent;

@@ -31,19 +31,19 @@ namespace Tanka.GraphQL.Language
         }
 
         public static DirectiveDefinition WithArguments(this DirectiveDefinition definition,
-            IReadOnlyCollection<InputValueDefinition> arguments)
+            IReadOnlyList<InputValueDefinition> arguments)
         {
             return new DirectiveDefinition(
                 definition.Description,
                 definition.Name,
-                arguments,
+                new ArgumentsDefinition(arguments), 
                 definition.IsRepeatable,
                 definition.DirectiveLocations,
                 definition.Location);
         }
 
         public static DirectiveDefinition WithDirectiveLocations(this DirectiveDefinition definition,
-            IReadOnlyCollection<string> directiveLocations)
+            IReadOnlyList<string> directiveLocations)
         {
             return new DirectiveDefinition(
                 definition.Description,

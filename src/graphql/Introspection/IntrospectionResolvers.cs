@@ -152,27 +152,18 @@ namespace Tanka.GraphQL.Introspection
 
         public static __TypeKind KindOf(IType type)
         {
-            switch (type)
+            return type switch
             {
-                case ObjectType _:
-                    return __TypeKind.OBJECT;
-                case ScalarType _:
-                    return __TypeKind.SCALAR;
-                case EnumType _:
-                    return __TypeKind.ENUM;
-                case InputObjectType _:
-                    return __TypeKind.INPUT_OBJECT;
-                case InterfaceType _:
-                    return __TypeKind.INTERFACE;
-                case List _:
-                    return __TypeKind.LIST;
-                case NonNull _:
-                    return __TypeKind.NON_NULL;
-                case UnionType _:
-                    return __TypeKind.UNION;
-                default:
-                    throw new InvalidOperationException($"Cannot get kind form {type}");
-            }
+                ObjectType _ => __TypeKind.OBJECT,
+                ScalarType _ => __TypeKind.SCALAR,
+                EnumType _ => __TypeKind.ENUM,
+                InputObjectType _ => __TypeKind.INPUT_OBJECT,
+                InterfaceType _ => __TypeKind.INTERFACE,
+                List _ => __TypeKind.LIST,
+                NonNull _ => __TypeKind.NON_NULL,
+                UnionType _ => __TypeKind.UNION,
+                _ => throw new InvalidOperationException($"Cannot get kind form {type}")
+            };
         }
 
         private IEnumerable<__DirectiveLocation> LocationsOf(IEnumerable<DirectiveLocation> locations)

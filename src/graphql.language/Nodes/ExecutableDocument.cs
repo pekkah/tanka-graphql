@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
@@ -8,12 +7,12 @@ namespace Tanka.GraphQL.Language.Nodes
     {
         public NodeKind Kind => NodeKind.ExecutableDocument;
         public Location? Location => null;
-        public readonly IReadOnlyCollection<FragmentDefinition>? FragmentDefinitions;
-        public readonly IReadOnlyCollection<OperationDefinition>? OperationDefinitions;
+        public readonly FragmentDefinitions? FragmentDefinitions;
+        public readonly OperationDefinitions? OperationDefinitions;
 
         public ExecutableDocument(
-            IReadOnlyCollection<OperationDefinition>? operationDefinitions,
-            IReadOnlyCollection<FragmentDefinition>? fragmentDefinitions)
+            OperationDefinitions? operationDefinitions,
+            FragmentDefinitions? fragmentDefinitions)
         {
             OperationDefinitions = operationDefinitions;
             FragmentDefinitions = fragmentDefinitions;

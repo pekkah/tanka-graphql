@@ -209,7 +209,7 @@ namespace Tanka.GraphQL.Execution
 
         private static IEnumerable<Directive> GetDirectives(ISelection selection)
         {
-            return selection.Directives ?? Array.Empty<Directive>();
+            return selection.Directives ?? Language.Nodes.Directives.None;
         }
 
         private static bool DoesFragmentTypeApply(ObjectType objectType, IType fragmentType)

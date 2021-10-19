@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
@@ -10,8 +9,8 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public InputObjectDefinition(
             StringValue? description,
             in Name name,
-            IReadOnlyCollection<Directive>? directives,
-            IReadOnlyCollection<InputValueDefinition>? fields,
+            Directives? directives,
+            InputFieldsDefinition? fields,
             in Location? location = default)
         {
             Description = description;
@@ -23,8 +22,8 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue? Description { get; }
         public override Name Name { get; }
-        public IReadOnlyCollection<Directive>? Directives { get; }
-        public IReadOnlyCollection<InputValueDefinition>? Fields { get; }
+        public Directives? Directives { get; }
+        public InputFieldsDefinition? Fields { get; }
         public override Location? Location { get; }
 
         public static implicit operator InputObjectDefinition(string value)

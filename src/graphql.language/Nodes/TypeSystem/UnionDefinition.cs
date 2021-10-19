@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
@@ -10,8 +9,8 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public UnionDefinition(
             StringValue? description,
             in Name name,
-            IReadOnlyCollection<Directive>? directives,
-            IReadOnlyCollection<NamedType>? members,
+            Directives? directives,
+            UnionMemberTypes? members,
             in Location? location = default)
         {
             Description = description;
@@ -25,9 +24,9 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public override Name Name { get; }
 
-        public IReadOnlyCollection<Directive>? Directives { get; }
+        public Directives? Directives { get; }
 
-        public IReadOnlyCollection<NamedType>? Members { get; }
+        public UnionMemberTypes? Members { get; }
 
         public override Location? Location { get; }
 

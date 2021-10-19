@@ -16,7 +16,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public const string INPUT_OBJECT = nameof(INPUT_OBJECT);
         public const string INPUT_FIELD_DEFINITION = nameof(INPUT_FIELD_DEFINITION);
 
-        public static IReadOnlyCollection<string> All = new List<string>
+        public static IReadOnlyList<string> All = new List<string>
         {
             SCHEMA,
             SCALAR,

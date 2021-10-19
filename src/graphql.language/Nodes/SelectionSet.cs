@@ -2,18 +2,18 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class SelectionSet: INode
+    public sealed class SelectionSet : CollectionNodeBase<ISelection>
     {
-        public NodeKind Kind => NodeKind.SelectionSet;
-        public Location? Location {get;}
-        public readonly IReadOnlyCollection<ISelection> Selections;
+        //todo: remove
+        public readonly IReadOnlyList<ISelection> Selections;
 
         public SelectionSet(
-            IReadOnlyCollection<ISelection> selections,
-            in Location? location = default)
+            IReadOnlyList<ISelection> selections,
+            in Location? location = default) : base(selections, in location)
         {
             Selections = selections;
-            Location = location;
         }
+
+        public override NodeKind Kind => NodeKind.SelectionSet;
     }
 }

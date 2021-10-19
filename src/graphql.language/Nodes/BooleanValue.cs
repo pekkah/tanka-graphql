@@ -1,6 +1,6 @@
 ﻿namespace Tanka.GraphQL.Language.Nodes
 {
-    public sealed class BooleanValue : Value, INode
+    public sealed class BooleanValue : ValueBase, INode
     {
         public override NodeKind Kind => NodeKind.BooleanValue;
         public override Location? Location {get;}

@@ -41,14 +41,14 @@ namespace Tanka.GraphQL.Language
         }
 
         public static InputValueDefinition WithDirectives(this InputValueDefinition definition,
-            IReadOnlyCollection<Directive>? directives)
+            IReadOnlyList<Directive>? directives)
         {
             return new InputValueDefinition(
                 definition.Description,
                 definition.Name,
                 definition.Type,
                 definition.DefaultValue,
-                directives,
+                Directives.From(directives),
                 definition.Location);
         }
     }

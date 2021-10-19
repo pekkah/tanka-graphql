@@ -1,4 +1,6 @@
-﻿using BenchmarkDotNet.Running;
+﻿using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Running;
 
 namespace Tanka.GraphQL.Benchmarks
 {
@@ -10,12 +12,18 @@ namespace Tanka.GraphQL.Benchmarks
                 .FromAssembly(typeof(Program).Assembly);
 
             if (args.Length == 0)
-                runner.RunAll();
+                runner.RunAll(GetGlobalConfig());
             else
             {
-                runner.Run(args);
+                runner.Run(args, GetGlobalConfig());
             }
 
         }
+
+        static IConfig GetGlobalConfig()
+            => DefaultConfig.Instance
+                .WithArtifactsPath("artifacts/benchmarks")
+                .AddJob(Job.Default
+                    .AsDefault());
     }
 }

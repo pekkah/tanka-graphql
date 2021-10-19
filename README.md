@@ -47,26 +47,20 @@ Start the client by following instructions below:
 
 ```bash
 # Install dependencies
-src\graphql.server.link> yarn install
-
-# Link the server-link
-src\graphql.server.link> yarn link
+src\graphql.server.link> npm i
 
 # Watch for source changes and recompile the link
-src\graphql.server.link> yarn watch
+src\graphql.server.link> npm run watch
 
 # Install dependencies
-dev\graphql.dev.chat.ui> yarn install
-
-# Use the linked server-link
-dev\graphql.dev.chat.ui> yarn link @tanka/tanka-graphql-server-link
+dev\graphql.dev.chat.ui> npm i
 
 # Watch for source changes and recompile the sample
-dev\graphql.dev.chat.ui> yarn start
+dev\graphql.dev.chat.ui> npm start
 ```
 
 ### Run benchmarks
 
 ```bash
-src\graphql.benchmarks> dotnet run --configuration release --framework netcoreapp22
+src\graphql.benchmarks> dotnet run --configuration release --framework net5.0
 ```

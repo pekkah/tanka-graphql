@@ -30,11 +30,9 @@ namespace Tanka.GraphQL.Benchmarks
         [Benchmark(Baseline = true)]
         public void GraphQL_dotnet_Parser_IntrospectionQuery()
         {
-            var parser = new GraphQLParser.Parser(new Lexer());
-            var source = new Source(IntrospectionQuery);
-            var document = parser.Parse(source);
-
-            if (!document.Definitions.Any())
+            var document = GraphQLParser.Parser.Parse(IntrospectionQuery);
+            
+            if (document.Definitions?.Any() == false)
                 throw new InvalidOperationException("Failed");
         }
 

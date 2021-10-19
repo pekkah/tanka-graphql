@@ -45,6 +45,21 @@
         EnumValueDefinition,
         FieldDefinition,
         InputValueDefinition,
-        TypeExtension
+        TypeExtension,
+        TankaImport,
+
+        Directives,
+        Arguments,
+        FragmentDefinitions,
+        OperationDefinitions,
+        VariableDefinitions,
+        ArgumentsDefinition,
+        EnumValuesDefinition,
+        ImplementsInterfaces,
+        FieldsDefinition,
+        RootOperationTypeDefinition,
+        UnionMemberTypes,
+        InputFieldsDefinition,
+        RootOperationTypeDefinitions
     }
 }

@@ -674,6 +674,7 @@ namespace Tanka.GraphQL.Language.Tests
         [Theory]
         [InlineData("123", 123)]
         [InlineData("-123", -123)]
+        [InlineData("0", 0)]
         public void Value_Int(string source, int expected)
         {
             /* Given */

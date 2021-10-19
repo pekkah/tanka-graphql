@@ -1,0 +1,5 @@
+﻿id: extensions
+title: "Extensions"
+index_page: xref://extensions:tracing.md
+nav:
+  - xref://nav.md

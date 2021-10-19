@@ -27,7 +27,7 @@ namespace Tanka.GraphQL.Execution
             var field = schema.GetField(objectType.Name, fieldName);
             object? completedValue = null;
 
-            var argumentValues = Arguments.CoerceArgumentValues(
+            var argumentValues = ArgumentCoercion.CoerceArgumentValues(
                 schema,
                 objectType,
                 fieldSelection,

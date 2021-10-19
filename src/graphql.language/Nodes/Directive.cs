@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
@@ -7,13 +6,13 @@ namespace Tanka.GraphQL.Language.Nodes
     public sealed class Directive: INode
     {
         public NodeKind Kind => NodeKind.Directive;
-        public readonly IReadOnlyCollection<Argument>? Arguments;
+        public readonly Arguments? Arguments;
         public Location? Location {get;}
         public readonly Name Name;
 
         public Directive(
             in Name name,
-            IReadOnlyCollection<Argument>? arguments,
+            Arguments? arguments,
             in Location? location = default)
         {
             Name = name;

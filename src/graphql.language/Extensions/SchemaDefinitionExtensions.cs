@@ -16,7 +16,7 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
         public static SchemaDefinition WithDirectives(this SchemaDefinition definition,
-            IReadOnlyCollection<Directive>? directives)
+            Directives? directives)
         {
             return new SchemaDefinition(
                 definition.Description,
@@ -26,7 +26,7 @@ namespace Tanka.GraphQL.Language
         }
 
         public static SchemaDefinition WithOperations(this SchemaDefinition definition,
-            IReadOnlyCollection<(OperationType Operation, NamedType NamedType)> operations)
+            RootOperationTypeDefinitions operations)
         {
             return new SchemaDefinition(
                 definition.Description,

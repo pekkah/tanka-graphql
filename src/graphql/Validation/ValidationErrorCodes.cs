@@ -1,5 +1,8 @@
 ﻿namespace Tanka.GraphQL.Validation
 {
+    /// <summary>
+    ///     References to sections of https://spec.graphql.org/June2018
+    /// </summary>
     public static class ValidationErrorCodes
     {
         public const string R511ExecutableDefinitions = "5.1.1 Executable Definitions";
@@ -54,8 +57,8 @@
        
         public const string R582VariablesAreInputTypes = "5.8.2 Variables Are Input Types";
 
-        public const string R583AllVariablesUsed = "5.8.3 All Variable Uses Defined";
-
+        public const string R583AllVariableUsesDefined = "5.8.3 All Variable Uses Defined";
+        
         public const string R584AllVariablesUsed = "5.8.4 All Variables Used";
 
         public const string R585AllVariableUsagesAreAllowed = "5.8.5 All Variable Usages Are Allowed";

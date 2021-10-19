@@ -39,7 +39,7 @@ namespace Tanka.GraphQL.Language
         }
 
         public static TypeSystemDocument WithDirectiveDefinitions(
-            this TypeSystemDocument document, IReadOnlyCollection<DirectiveDefinition>? definitions)
+            this TypeSystemDocument document, IReadOnlyList<DirectiveDefinition>? definitions)
         {
             return new TypeSystemDocument(
                 document.SchemaDefinitions,
@@ -50,7 +50,7 @@ namespace Tanka.GraphQL.Language
         }
 
         public static TypeSystemDocument WithSchemaDefinitions(
-            this TypeSystemDocument document, IReadOnlyCollection<SchemaDefinition>? definitions)
+            this TypeSystemDocument document, IReadOnlyList<SchemaDefinition>? definitions)
         {
             return new TypeSystemDocument(
                 definitions,
@@ -61,7 +61,7 @@ namespace Tanka.GraphQL.Language
         }
 
         public static TypeSystemDocument WithSchemaExtensions(
-            this TypeSystemDocument document, IReadOnlyCollection<SchemaExtension>? definitions)
+            this TypeSystemDocument document, IReadOnlyList<SchemaExtension>? definitions)
         {
             return new TypeSystemDocument(
                 document.SchemaDefinitions,
@@ -72,7 +72,7 @@ namespace Tanka.GraphQL.Language
         }
 
         public static TypeSystemDocument WithTypeDefinitions(
-            this TypeSystemDocument document, IReadOnlyCollection<TypeDefinition>? definitions)
+            this TypeSystemDocument document, IReadOnlyList<TypeDefinition>? definitions)
         {
             return new TypeSystemDocument(
                 document.SchemaDefinitions,
@@ -83,7 +83,7 @@ namespace Tanka.GraphQL.Language
         }
 
         public static TypeSystemDocument WithTypeExtensions(
-            this TypeSystemDocument document, IReadOnlyCollection<TypeExtension>? definitions)
+            this TypeSystemDocument document, IReadOnlyList<TypeExtension>? definitions)
         {
             return new TypeSystemDocument(
                 document.SchemaDefinitions,

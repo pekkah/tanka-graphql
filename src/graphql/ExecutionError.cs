@@ -12,7 +12,7 @@ namespace Tanka.GraphQL
 
         public string Message { get; set; }
 
-        public List<Location> Locations { get; set; }
+        public List<Location>? Locations { get; set; }
 
         public List<object> Path { get; set; }
 
