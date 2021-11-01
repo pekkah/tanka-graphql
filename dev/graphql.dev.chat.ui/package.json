@@ -8,7 +8,7 @@
     "apollo-link-retry": "^2.2.16",
     "chokidar": "^3.5.2",
     "graphiql": "1.4.2",
-    "graphql": "^15.5.0",
+    "graphql": "^16.0.0",
     "react": "^16.14",
     "react-dom": "^16.14",
     "react-scripts": "4.0.3"
