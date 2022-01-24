@@ -30,5 +30,19 @@ namespace Tanka.GraphQL.Language.Tests.Nodes
             Assert.NotNull(original.OperationDefinitions);
             Assert.Single(original.OperationDefinitions);
         }
+
+        [Fact]
+        public void OverrideToString()
+        {
+            /* Given */
+            string expected = "{ field1 field2 }";
+            ExecutableDocument original = expected;
+
+            /* When */
+            var actual = original.ToString();
+
+            /* Then */
+            Assert.Equal(expected, actual);
+        }
     }
 }

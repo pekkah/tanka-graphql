@@ -9,5 +9,10 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         }
 
         public override NodeKind Kind => NodeKind.RootOperationTypeDefinitions;
+
+        public static RootOperationTypeDefinitions From(IReadOnlyList<RootOperationTypeDefinition> operations)
+        {
+            return new RootOperationTypeDefinitions(operations);
+        }
     }
 }

@@ -29,5 +29,10 @@ namespace Tanka.GraphQL.Language.Nodes
             var parser = Parser.Create(value);
             return parser.ParseExecutableDocument();
         }
+
+        public override string ToString()
+        {
+            return Printer.Print(this);
+        }
     }
 }

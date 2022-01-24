@@ -1,4 +1,6 @@
-﻿namespace Tanka.GraphQL.Language.Nodes
+﻿using System.Runtime.CompilerServices;
+
+namespace Tanka.GraphQL.Language.Nodes
 {
     public interface INode
     {

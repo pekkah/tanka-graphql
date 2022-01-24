@@ -1,4 +1,0 @@
-﻿id: artifacts
-type: artifacts
-includes:
-  - "**/*.md"

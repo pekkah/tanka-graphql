@@ -33,10 +33,15 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             return parser.ParseSchemaDefinition();
         }
 
-        public static implicit operator SchemaDefinition(in ReadOnlySpan<byte> value)
+        public static implicit operator SchemaDefinition(ReadOnlySpan<byte> value)
         {
             var parser = Parser.Create(value);
             return parser.ParseSchemaDefinition();
+        }
+
+        public override string ToString()
+        {
+            return Printer.Print(this);
         }
     }
 }
