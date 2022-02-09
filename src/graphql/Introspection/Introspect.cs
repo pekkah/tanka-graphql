@@ -1,4 +1,4 @@
-﻿using Tanka.GraphQL.Tools;
+﻿using System.Threading.Tasks;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Introspection
@@ -100,14 +100,15 @@ namespace Tanka.GraphQL.Introspection
         /// </summary>
         /// <param name="schema"></param>
         /// <returns></returns>
-        public static ISchema Schema(ISchema schema)
+        public static Task<ISchema> Schema(ISchema schema)
         {
-            var introspectionSchema = IntrospectionSchema.Create();
+            var builder = IntrospectionSchema.Create();
             var introspectionResolvers = new IntrospectionResolvers(schema);
 
-            return SchemaTools.MakeExecutableSchema(
-                introspectionSchema,
-                introspectionResolvers);
+            return builder.Build(new SchemaBuildOptions()
+            {
+                Resolvers = introspectionResolvers
+            });
         }
     }
 }

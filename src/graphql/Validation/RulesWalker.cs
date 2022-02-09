@@ -71,8 +71,8 @@ namespace Tanka.GraphQL.Validation
                             usages.Add(new VariableUsage
                             {
                                 Node = node,
-                                Type = context.Tracker.GetInputType(),
-                                DefaultValue = context.Tracker.GetDefaultValue()
+                                Type = null,//context.Tracker.GetInputType(),
+                                DefaultValue = null,//context.Tracker.GetDefaultValue()
                             });
                         };
                     }

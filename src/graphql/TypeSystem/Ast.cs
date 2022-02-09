@@ -1,36 +1,63 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.TypeSystem
 {
     public static class Ast
     {
-        public static IType TypeFromAst(ISchema schema, TypeBase type)
+        public static bool GetIfArgumentValue(
+            Directive directive,
+            IReadOnlyDictionary<string, object?>? coercedVariableValues,
+            Argument argument)
         {
-            if (type == null)
-                return null;
+            if (directive == null) throw new ArgumentNullException(nameof(directive));
+            if (argument == null) throw new ArgumentNullException(nameof(argument));
 
-            if (type.Kind == NodeKind.NonNullType)
+            switch (argument.Value)
             {
-                var innerType = TypeFromAst(schema, ((NonNullType)type).OfType);
-                return new NonNull(innerType);
-            }
+                case { Kind: NodeKind.BooleanValue }:
+                    return ((BooleanValue)argument.Value).Value;
+                case { Kind: NodeKind.Variable }:
+                    var variable = (Variable)argument.Value;
+                    var variableValue = coercedVariableValues?[variable.Name];
 
-            if (type.Kind == NodeKind.ListType)
+                    if (variableValue == null)
+                        throw new Exception(
+                            $"If argument of {directive} is null. Variable value should not be null");
+
+                    return (bool)variableValue;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool DoesFragmentTypeApply(
+            ObjectDefinition objectType,
+            TypeDefinition fragmentType)
+        {
+            if (objectType.Name == fragmentType.Name)
+                return true;
+
+            return fragmentType switch
             {
-                var innerType = TypeFromAst(schema, ((ListType)type).OfType);
-                return new List(innerType);
-            }
+                InterfaceDefinition interfaceType => objectType.HasInterface(interfaceType.Name),
+                UnionDefinition unionType => unionType.HasMember(objectType.Name),
+                _ => false
+            };
+        }
 
-            if (type.Kind == NodeKind.NamedType)
+        public static TypeDefinition UnwrapAndResolveType(ISchema schema, TypeBase type)
+        {
+            return type switch
             {
-                var namedType = (NamedType) type;
-                return schema.GetNamedType(namedType.Name);
-            }
-
-            throw new DocumentException(
-                $"Unexpected type kind: {type.Kind}");
+                NonNullType NonNullType => UnwrapAndResolveType(schema, NonNullType.OfType),
+                ListType list => UnwrapAndResolveType(schema, list.OfType),
+                NamedType namedType => schema.GetRequiredNamedType<TypeDefinition>(namedType.Name),
+                _ => throw new InvalidOperationException($"Unsupported type '{type}'")
+            };
         }
     }
 }

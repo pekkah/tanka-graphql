@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Execution
 {
     public static class FieldGroups
     {
-        public static async Task<object> ExecuteFieldAsync(
+        public static async Task<object?> ExecuteFieldAsync(
             IExecutorContext context,
-            ObjectType objectType,
-            object objectValue,
+            ObjectDefinition objectDefinition,
+            object? objectValue,
             IReadOnlyCollection<FieldSelection> fields,
-            IType fieldType,
+            TypeBase fieldType,
             NodePath path)
         {
             if (fields == null) throw new ArgumentNullException(nameof(fields));
@@ -24,27 +24,30 @@ namespace Tanka.GraphQL.Execution
             var schema = context.Schema;
             var fieldSelection = fields.First();
             var fieldName = fieldSelection.Name;
-            var field = schema.GetField(objectType.Name, fieldName);
+            var field = schema.GetField(objectDefinition.Name, fieldName);
             object? completedValue = null;
+
+            if (field is null)
+                return completedValue;
 
             var argumentValues = ArgumentCoercion.CoerceArgumentValues(
                 schema,
-                objectType,
+                objectDefinition,
                 fieldSelection,
                 context.CoercedVariableValues);
 
             try
             {
-                var resolver = schema.GetResolver(objectType.Name, fieldName);
+                var resolver = schema.GetResolver(objectDefinition.Name, fieldName);
 
                 if (resolver == null)
                     throw new QueryExecutionException(
-                        $"Could not get resolver for {objectType.Name}.{fieldName}",
+                        $"Could not get resolver for {objectDefinition.Name}.{fieldName}",
                         path);
 
                 var resolverContext =
                     new ResolverContext(
-                        objectType,
+                        objectDefinition,
                         objectValue,
                         field,
                         fieldSelection,
@@ -80,7 +83,7 @@ namespace Tanka.GraphQL.Execution
             {
                 return FieldErrors.Handle(
                     context,
-                    objectType,
+                    objectDefinition,
                     fieldName,
                     fieldType,
                     fieldSelection,
@@ -90,10 +93,10 @@ namespace Tanka.GraphQL.Execution
             }
         }
 
-        public static async Task<object> ExecuteFieldGroupAsync(
+        public static async Task<object?> ExecuteFieldGroupAsync(
             IExecutorContext context,
-            ObjectType objectType,
-            object objectValue,
+            ObjectDefinition objectDefinition,
+            object? objectValue,
             KeyValuePair<string, IReadOnlyCollection<FieldSelection>> fieldGroup,
             NodePath path)
         {
@@ -103,20 +106,20 @@ namespace Tanka.GraphQL.Execution
             path.Append(fieldName);
 
             // __typename hack
-            if (fieldName == "__typename") return objectType.Name;
+            if (fieldName == "__typename") return objectDefinition.Name.Value;
 
             var fieldType = schema
-                .GetField(objectType.Name, fieldName)?
+                .GetField(objectDefinition.Name, fieldName)?
                 .Type;
 
             if (fieldType == null)
                 throw new QueryExecutionException(
-                    $"Object '{objectType.Name}' does not have field '{fieldName}'",
+                    $"Object '{objectDefinition.Name}' does not have field '{fieldName}'",
                     path);
 
             var responseValue = await ExecuteFieldAsync(
                 context,
-                objectType,
+                objectDefinition,
                 objectValue,
                 fields,
                 fieldType,

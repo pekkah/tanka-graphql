@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Tanka.GraphQL.ValueResolution
 {
     public class ResolverBuilder
     {
-        private readonly List<ResolverMiddleware> _middlewares
-            = new List<ResolverMiddleware>();
+        private readonly List<ResolverMiddleware> _middlewares = new();
 
-        private Resolver _root;
+        private Resolver? _root;
 
         public ResolverBuilder(Resolver root)
         {
@@ -42,7 +42,10 @@ namespace Tanka.GraphQL.ValueResolution
 
         public Resolver Build()
         {
-            Resolver resolver = _root;
+            if (_root is null)
+                throw new InvalidOperationException($"Resolver chain is missing ending. Use {nameof(Run)} to end the chain.");
+
+            var resolver = _root;
             foreach (var middleware in _middlewares)
             {
                 var resolver1 = resolver;

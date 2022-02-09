@@ -1,18 +1,18 @@
 ﻿using System;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL
 {
     public class ValueCoercionException : Exception
     {
-        public IType Type { get; }
-
-        public ValueCoercionException(string message, object? value, IType type)
-            :base(message)
+        public ValueCoercionException(string message, object? value, INode type)
+            : base(message)
         {
             Type = type;
             Value = value;
         }
+
+        public INode Type { get; }
 
         public object? Value { get; set; }
     }

@@ -13,7 +13,7 @@ namespace Tanka.GraphQL.Language.ImportProviders
     {
         private static readonly Regex _match = new Regex(@"embedded:\/\/(?<assembly>\w.+)\/(?<resourceName>\w.+)");
 
-        public bool CanImport(string path, string[] types)
+        public bool CanImport(string path, string[]? types)
         {
             return _match.IsMatch(path);
         }
@@ -25,21 +25,23 @@ namespace Tanka.GraphQL.Language.ImportProviders
             var resourceName = matches.Groups["resourceName"].Value;
 
             var source = GetSource(assembly, resourceName);
-            var document = await GraphQL.Parser.ParseTypeSystemDocumentAsync(source, options);
+            var document = (TypeSystemDocument)source;
 
-            // if no type filter provided import all
-            if (types == null || types.Length == 0)
+            /* resource imports are fully qualified */
+
+            if (types is {Length: > 0})
             {
-                return document;
+
+                document = document
+                    .WithDirectiveDefinitions(document.DirectiveDefinitions
+                        ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
+                    .WithTypeDefinitions(document.TypeDefinitions
+                        ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
+                    .WithTypeExtensions(document.TypeExtensions
+                        ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList());
             }
 
-            return document
-                .WithDirectiveDefinitions(document.DirectiveDefinitions
-                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
-                .WithTypeDefinitions(document.TypeDefinitions
-                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
-                .WithTypeExtensions(document.TypeExtensions
-                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList());
+            return document;
         }
 
         private string GetSource(string assemblyName, string resourceName)
@@ -53,8 +55,12 @@ namespace Tanka.GraphQL.Language.ImportProviders
 
             using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream == null)
-                throw new InvalidOperationException($"Could not load manifest stream from '{assemblyName}' with name '{resourceName}'.");
-            
+            {
+                var resourceNames = string.Join(",", assembly.GetManifestResourceNames());
+                throw new InvalidOperationException(
+                    $"Could not load manifest stream from '{assemblyName}' with name '{resourceName}'. Found resources: {resourceNames}");
+            }
+
             using var reader = new StreamReader(stream);
             return reader.ReadToEnd();
         }

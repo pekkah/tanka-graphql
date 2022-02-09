@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
-using Argument = Tanka.GraphQL.TypeSystem.Argument;
 
 namespace Tanka.GraphQL.Validation
 {
@@ -16,7 +15,7 @@ namespace Tanka.GraphQL.Validation
             /* R511ExecutableDefinitions(),*/
             
             R5211OperationNameUniqueness(),
-            R5221LoneAnonymousOperation(),
+            /*R5221LoneAnonymousOperation(),
             R5231SingleRootField(),
             
             R531FieldSelections(),
@@ -47,7 +46,7 @@ namespace Tanka.GraphQL.Validation
             R581And582Variables(),
             R583AllVariableUsesDefined(),
             R584AllVariablesUsed(),
-            R585AllVariableUsagesAreAllowed(),
+            R585AllVariableUsagesAreAllowed(),*/
             
         };
 
@@ -122,7 +121,7 @@ namespace Tanka.GraphQL.Validation
         ///     If operations is a set of more than 1:
         ///     anonymous must be empty.
         /// </summary>
-        public static CombineRule R5221LoneAnonymousOperation()
+        /*public static CombineRule R5221LoneAnonymousOperation()
         {
             return (context, rule) =>
             {
@@ -270,10 +269,10 @@ namespace Tanka.GraphQL.Validation
 
                     if (field != null)
                     {
-                        var selectionType = field.Value.Field.Type.Unwrap();
-                        var hasSubSelection = selection.SelectionSet?.Selections?.Any();
+                        var selectionType = Ast.UnwrapAndResolveType(context.Schema, field.Type);
+                        var hasSubSelection = selection.SelectionSet?.Any();
 
-                        if (selectionType is ScalarType && hasSubSelection == true)
+                        if (selectionType is ScalarDefinition && hasSubSelection == true)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Field selections on scalars or enums are never " +
@@ -281,7 +280,7 @@ namespace Tanka.GraphQL.Validation
                                 $"Field: '{fieldName}'",
                                 selection);
 
-                        if (selectionType is EnumType && hasSubSelection == true)
+                        if (selectionType is EnumDefinition && hasSubSelection == true)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Field selections on scalars or enums are never " +
@@ -289,7 +288,7 @@ namespace Tanka.GraphQL.Validation
                                 $"Field: '{fieldName}'",
                                 selection);
 
-                        if (selectionType is ObjectType && hasSubSelection == null)
+                        if (selectionType is ObjectDefinition && hasSubSelection == null)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Leaf selections on objects, interfaces, and unions " +
@@ -297,7 +296,7 @@ namespace Tanka.GraphQL.Validation
                                 $"Field: '{fieldName}'",
                                 selection);
 
-                        if (selectionType is InterfaceType && hasSubSelection == null)
+                        if (selectionType is InterfaceDefinition && hasSubSelection == null)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Leaf selections on objects, interfaces, and unions " +
@@ -305,7 +304,7 @@ namespace Tanka.GraphQL.Validation
                                 $"Field: '{fieldName}'",
                                 selection);
 
-                        if (selectionType is UnionType && hasSubSelection == null)
+                        if (selectionType is UnionDefinition && hasSubSelection == null)
                             context.Error(
                                 ValidationErrorCodes.R533LeafFieldSelections,
                                 "Leaf selections on objects, interfaces, and unions " +
@@ -359,11 +358,10 @@ namespace Tanka.GraphQL.Validation
         {
             IEnumerable<KeyValuePair<string, Argument>> GetFieldArgumentDefinitions(IRuleVisitorContext context)
             {
-                IEnumerable<KeyValuePair<string, Argument>>? definitions = context
+                var definitions = context
                     .Tracker
                     .GetFieldDef()
-                    ?.Field
-                    .Arguments;
+                    ?.Arguments;
 
                 if (definitions == null)
                     return Enumerable.Empty<KeyValuePair<string, Argument>>();
@@ -394,7 +392,7 @@ namespace Tanka.GraphQL.Validation
                     var type = argumentDefinition.Value.Type;
                     var defaultValue = argumentDefinition.Value.DefaultValue;
 
-                    if (!(type is NonNull nonNull) || defaultValue != null)
+                    if (!(type is NonNullType NonNullType) || defaultValue != null)
                         continue;
 
                     var argumentName = argumentDefinition.Key;
@@ -560,7 +558,7 @@ namespace Tanka.GraphQL.Validation
                 {
                     var type = context.Tracker.GetCurrentType();
 
-                    if (type is UnionType)
+                    if (type is UnionDefinition)
                         return;
 
                     if (type is ComplexType)
@@ -576,7 +574,7 @@ namespace Tanka.GraphQL.Validation
                 {
                     var type = context.Tracker.GetCurrentType();
 
-                    if (type is UnionType)
+                    if (type is UnionDefinition)
                         return;
 
                     if (type is ComplexType)
@@ -813,17 +811,17 @@ namespace Tanka.GraphQL.Validation
                 };
             };
 
-            ObjectType[] GetPossibleTypes(IType type, ISchema schema)
+            ObjectDefinition[] GetPossibleTypes(IType type, ISchema schema)
             {
                 switch (type)
                 {
-                    case ObjectType objectType:
-                        return new[] {objectType};
-                    case InterfaceType interfaceType:
+                    case ObjectDefinition ObjectDefinition:
+                        return new[] {ObjectDefinition};
+                    case InterfaceDefinition interfaceType:
                         return schema.GetPossibleTypes(interfaceType).ToArray();
-                    case UnionType unionType:
-                        return schema.GetPossibleTypes(unionType).ToArray();
-                    default: return new ObjectType[] { };
+                    case UnionDefinition UnionDefinition:
+                        return schema.GetPossibleTypes(UnionDefinition).ToArray();
+                    default: return new ObjectDefinition[] { };
                 }
             }
         }
@@ -840,14 +838,14 @@ namespace Tanka.GraphQL.Validation
                     var type = context.Tracker.GetNullableType(
                         context.Tracker.GetParentInputType());
 
-                    if (!(type is List)) IsValidScalar(context, node);
+                    if (!(type is ListType)) IsValidScalar(context, node);
                 };
                 rule.EnterObjectValue += node =>
                 {
                     var type = context.Tracker.GetNamedType(
                         context.Tracker.GetInputType());
 
-                    if (!(type is InputObjectType inputType))
+                    if (!(type is InputObjectDefinition inputType))
                     {
                         IsValidScalar(context, node);
                         // return false;
@@ -861,13 +859,13 @@ namespace Tanka.GraphQL.Validation
                         inputType.Name))
                     {
                         var fieldNode = fieldNodeMap.ContainsKey(fieldDef.Key);
-                        if (!fieldNode && fieldDef.Value.Type is NonNull nonNull)
+                        if (!fieldNode && fieldDef.Value.Type is NonNullType NonNullType)
                             context.Error(
                                 ValidationErrorCodes.R561ValuesOfCorrectType,
                                 RequiredFieldMessage(
                                     type.ToString(),
                                     fieldDef.Key,
-                                    nonNull.ToString()),
+                                    NonNullType.ToString()),
                                 (INode) node);
                     }
                 };
@@ -877,7 +875,7 @@ namespace Tanka.GraphQL.Validation
                         .GetNamedType(context.Tracker.GetParentInputType());
 
                     var fieldType = context.Tracker.GetInputType();
-                    if (fieldType == null && parentType is InputObjectType)
+                    if (fieldType == null && parentType is InputObjectDefinition)
                         context.Error(
                             ValidationErrorCodes.R561ValuesOfCorrectType,
                             UnknownFieldMessage(
@@ -891,7 +889,7 @@ namespace Tanka.GraphQL.Validation
                     var maybeEnumType = context.Tracker.GetNamedType(
                         context.Tracker.GetInputType());
 
-                    if (!(maybeEnumType is EnumType type))
+                    if (!(maybeEnumType is EnumDefinition type))
                         IsValidScalar(context, node);
                     
                     else if (type.ParseValue(node) == null)
@@ -990,7 +988,7 @@ namespace Tanka.GraphQL.Validation
                     var inputFieldName = inputField.Name;
 
                     if (!(context.Tracker
-                        .GetParentInputType() is InputObjectType parentType))
+                        .GetParentInputType() is InputObjectDefinition parentType))
                         return;
 
                     var inputFieldDefinition = context.Schema
@@ -1038,7 +1036,7 @@ namespace Tanka.GraphQL.Validation
             {
                 rule.EnterObjectValue += node =>
                 {
-                    var inputObject = context.Tracker.GetInputType() as InputObjectType;
+                    var inputObject = context.Tracker.GetInputType() as InputObjectDefinition;
 
                     if (inputObject == null)
                         return;
@@ -1051,7 +1049,7 @@ namespace Tanka.GraphQL.Validation
                         var type = fieldDefinition.Value.Type;
                         var defaultValue = fieldDefinition.Value.DefaultValue;
 
-                        if (type is NonNull nonNull && defaultValue == null)
+                        if (type is NonNullType NonNullType && defaultValue == null)
                         {
                             var fieldName = fieldDefinition.Key;
                             if (!fields.TryGetValue(fieldName, out var field))
@@ -1063,7 +1061,7 @@ namespace Tanka.GraphQL.Validation
                                     "fields. An input field is required if it has a non‐null type and " +
                                     "does not have a default value. Otherwise, the input object field " +
                                     "is optional. " +
-                                    $"Field '{nonNull}.{fieldName}' is required.",
+                                    $"Field '{NonNullType}.{fieldName}' is required.",
                                     (INode) node);
 
                                 return;
@@ -1077,7 +1075,7 @@ namespace Tanka.GraphQL.Validation
                                     "fields. An input field is required if it has a non‐null type and " +
                                     "does not have a default value. Otherwise, the input object field " +
                                     "is optional. " +
-                                    $"Field '{nonNull}.{field}' value cannot be null.",
+                                    $"Field '{NonNullType}.{field}' value cannot be null.",
                                     node, field);
                         }
                     }
@@ -1414,16 +1412,16 @@ namespace Tanka.GraphQL.Validation
                 object locationDefaultValue
                 )
             {
-                if (locationType is NonNull nonNullLocationType && !(varType is NonNull)) 
+                if (locationType is NonNullType NonNullTypeTypeLocationType && !(varType is NonNullType)) 
                 {
-                    bool hasNonNullVariableDefaultValue = varDefaultValue != null;
+                    bool hasNonNullTypeTypeVariableDefaultValue = varDefaultValue != null;
                     bool hasLocationDefaultValue = locationDefaultValue != null;
 
-                    if (!hasNonNullVariableDefaultValue && !hasLocationDefaultValue) {
+                    if (!hasNonNullTypeTypeVariableDefaultValue && !hasLocationDefaultValue) {
                         return false;
                     }
 
-                    var nullableLocationType = nonNullLocationType.OfType;
+                    var nullableLocationType = NonNullTypeTypeLocationType.OfType;
                     return IsTypeSubTypeOf(schema, varType, nullableLocationType);
                 }
 
@@ -1443,24 +1441,24 @@ namespace Tanka.GraphQL.Validation
                 }
 
                 // If superType is non-null, maybeSubType must also be non-null.
-                if (superType is NonNull nonNullSuperType) {
-                    if (maybeSubType is NonNull nonNullMaybeSubType) {
+                if (superType is NonNullType NonNullTypeTypeSuperType) {
+                    if (maybeSubType is NonNullType NonNullTypeTypeMaybeSubType) {
                         return IsTypeSubTypeOf(
                             schema, 
-                            nonNullMaybeSubType.OfType, 
-                            nonNullSuperType.OfType);
+                            NonNullTypeTypeMaybeSubType.OfType, 
+                            NonNullTypeTypeSuperType.OfType);
                     }
                     return false;
                 }
 
-                if (maybeSubType is NonNull nonNullMaybeSubType2) {
+                if (maybeSubType is NonNullType NonNullTypeTypeMaybeSubType2) {
                     // If superType is nullable, maybeSubType may be non-null or nullable.
-                    return IsTypeSubTypeOf(schema, nonNullMaybeSubType2.OfType, superType);
+                    return IsTypeSubTypeOf(schema, NonNullTypeTypeMaybeSubType2.OfType, superType);
                 }
 
                 // If superType type is a list, maybeSubType type must also be a list.
-                if (superType is List listSuperType) {
-                    if (maybeSubType is List listMaybeSubType) {
+                if (superType is ListType listSuperType) {
+                    if (maybeSubType is ListType listMaybeSubType) {
                         return IsTypeSubTypeOf(
                             schema, 
                             listMaybeSubType.OfType, 
@@ -1477,7 +1475,7 @@ namespace Tanka.GraphQL.Validation
                 // If superType type is an abstract type, maybeSubType type may be a currently
                 // possible object type.
                 if (superType is IAbstractType abstractSuperType &&
-                    maybeSubType is ObjectType objectMaybeSubType &&
+                    maybeSubType is ObjectDefinition objectMaybeSubType &&
                     abstractSuperType.IsPossible(objectMaybeSubType)) 
                 {
                     return true;
@@ -1487,5 +1485,7 @@ namespace Tanka.GraphQL.Validation
                 return false;
             }
         }
+
+        */
     }
 }

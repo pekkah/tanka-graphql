@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
+    [DebuggerDisplay("{Value}")]
     public sealed class EnumValueDefinition : INode
     {
         public EnumValueDefinition(

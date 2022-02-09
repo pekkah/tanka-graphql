@@ -2,6 +2,6 @@
 {
     public class DirectiveVisitor
     {
-        public DirectiveNodeVisitor<DirectiveFieldVisitorContext> FieldDefinition { get; set; }
+        public DirectiveNodeVisitor<DirectiveFieldVisitorContext>? FieldDefinition { get; set; }
     }
 }

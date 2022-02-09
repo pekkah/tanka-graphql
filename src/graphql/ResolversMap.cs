@@ -3,9 +3,9 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL
 {
-    public class ObjectTypeMap : Dictionary<string, FieldResolversMap>, IResolverMap, ISubscriberMap
+    public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap, ISubscriberMap
     {
-        public Resolver GetResolver(string typeName, string fieldName)
+        public Resolver? GetResolver(string typeName, string fieldName)
         {
             if (!TryGetValue(typeName, out var objectNode))
                 return null;
@@ -14,7 +14,7 @@ namespace Tanka.GraphQL
             return resolver;
         }
 
-        public Subscriber GetSubscriber(string typeName, string fieldName)
+        public Subscriber? GetSubscriber(string typeName, string fieldName)
         {
             if (!TryGetValue(typeName, out var objectNode))
                 return null;
@@ -23,16 +23,16 @@ namespace Tanka.GraphQL
             return resolver;
         }
 
-        public ObjectTypeMap Clone()
+        public ResolversMap Clone()
         {
-            var result = new ObjectTypeMap();
+            var result = new ResolversMap();
 
             foreach (var objectMap in this) result.Add(objectMap.Key, objectMap.Value.Clone());
 
             return result;
         }
 
-        public static ObjectTypeMap operator +(ObjectTypeMap a, ObjectTypeMap b)
+        public static ResolversMap operator +(ResolversMap a, ResolversMap b)
         {
             var result = a.Clone();
 
@@ -42,19 +42,19 @@ namespace Tanka.GraphQL
             return result;
         }
 
-        public static ObjectTypeMap operator +(ObjectTypeMap a, (string Name, FieldResolversMap Fields) objectType)
+        public static ResolversMap operator +(ResolversMap a, (string Name, FieldResolversMap Fields) ObjectDefinition)
         {
             var result = a.Clone();
 
-            if (result.ContainsKey(objectType.Name))
-                result[objectType.Name] += objectType.Fields;
+            if (result.ContainsKey(ObjectDefinition.Name))
+                result[ObjectDefinition.Name] += ObjectDefinition.Fields;
             else
-                result[objectType.Name] = objectType.Fields;
+                result[ObjectDefinition.Name] = ObjectDefinition.Fields;
 
             return result;
         }
 
-        public static ObjectTypeMap operator -(ObjectTypeMap a, string name)
+        public static ResolversMap operator -(ResolversMap a, string name)
         {
             var result = a.Clone();
 
@@ -64,7 +64,7 @@ namespace Tanka.GraphQL
             return result;
         }
 
-        public static ObjectTypeMap operator -(ObjectTypeMap a, ObjectTypeMap b)
+        public static ResolversMap operator -(ResolversMap a, ResolversMap b)
         {
             var result = a.Clone();
 

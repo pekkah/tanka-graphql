@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
-using static Tanka.GraphQL.TypeSystem.Ast;
-using Argument = Tanka.GraphQL.TypeSystem.Argument;
 
 namespace Tanka.GraphQL.Execution
 {
     public static class SelectionSets
     {
-        public static async Task<IDictionary<string, object>> ExecuteSelectionSetAsync(
+        public static async Task<IDictionary<string, object>?> ExecuteSelectionSetAsync(
             IExecutorContext executorContext,
             SelectionSet selectionSet,
-            ObjectType objectType,
+            ObjectDefinition objectDefinition,
             object objectValue,
             NodePath path)
         {
@@ -25,14 +24,14 @@ namespace Tanka.GraphQL.Execution
             var groupedFieldSet = CollectFields(
                 executorContext.Schema,
                 executorContext.Document,
-                objectType,
+                objectDefinition,
                 selectionSet,
                 executorContext.CoercedVariableValues);
 
             var resultMap = await executorContext.Strategy.ExecuteGroupedFieldSetAsync(
                 executorContext,
                 groupedFieldSet,
-                objectType,
+                objectDefinition,
                 objectValue,
                 path).ConfigureAwait(false);
 
@@ -46,9 +45,9 @@ namespace Tanka.GraphQL.Execution
             foreach (var field in fields)
             {
                 var fieldSelectionSet = field.SelectionSet;
-                if (fieldSelectionSet?.Selections == null || !fieldSelectionSet.Selections.Any()) continue;
+                if (fieldSelectionSet is null || fieldSelectionSet.Count == 0) continue;
 
-                selectionSet.AddRange(fieldSelectionSet.Selections);
+                selectionSet.AddRange(fieldSelectionSet);
             }
 
             return new SelectionSet(selectionSet);
@@ -57,7 +56,7 @@ namespace Tanka.GraphQL.Execution
         public static IReadOnlyDictionary<string, List<FieldSelection>> CollectFields(
             ISchema schema,
             ExecutableDocument document,
-            ObjectType objectType,
+            ObjectDefinition objectDefinition,
             SelectionSet selectionSet,
             IReadOnlyDictionary<string, object?> coercedVariableValues,
             List<string>? visitedFragments = null)
@@ -67,16 +66,16 @@ namespace Tanka.GraphQL.Execution
             var fragments = document.FragmentDefinitions;
 
             var groupedFields = new Dictionary<string, List<FieldSelection>>();
-            foreach (var selection in selectionSet.Selections)
+            foreach (var selection in selectionSet)
             {
                 var directives = GetDirectives(selection).ToList();
 
                 var skipDirective = directives.FirstOrDefault(d => d.Name == "skip"); //todo: skip to constant
-                if (SkipSelection(skipDirective, coercedVariableValues, schema, objectType, selection))
+                if (SkipSelection(skipDirective, coercedVariableValues, schema, objectDefinition, selection))
                     continue;
 
                 var includeDirective = directives.FirstOrDefault(d => d.Name == "include"); //todo: include to constant
-                if (!IncludeSelection(includeDirective, coercedVariableValues, schema, objectType, selection))
+                if (!IncludeSelection(includeDirective, coercedVariableValues, schema, objectDefinition, selection))
                     continue;
 
                 if (selection is FieldSelection fieldSelection)
@@ -102,16 +101,16 @@ namespace Tanka.GraphQL.Execution
                         continue;
 
                     var fragmentTypeAst = fragment.TypeCondition;
-                    var fragmentType = TypeFromAst(schema, fragmentTypeAst);
+                    var fragmentType = Ast.UnwrapAndResolveType(schema, fragmentTypeAst);
 
-                    if (!DoesFragmentTypeApply(objectType, fragmentType))
+                    if (!DoesFragmentTypeApply(objectDefinition, fragmentType))
                         continue;
 
                     var fragmentSelectionSet = fragment.SelectionSet;
                     var fragmentGroupedFieldSet = CollectFields(
                         schema,
                         document,
-                        objectType,
+                        objectDefinition,
                         fragmentSelectionSet,
                         coercedVariableValues,
                         visitedFragments);
@@ -130,16 +129,16 @@ namespace Tanka.GraphQL.Execution
                 if (selection is InlineFragment inlineFragment)
                 {
                     var fragmentTypeAst = inlineFragment.TypeCondition;
-                    var fragmentType = TypeFromAst(schema, fragmentTypeAst);
+                    var fragmentType = Ast.UnwrapAndResolveType(schema, fragmentTypeAst);
 
-                    if (fragmentType != null && !DoesFragmentTypeApply(objectType, fragmentType))
+                    if (fragmentType != null && !DoesFragmentTypeApply(objectDefinition, fragmentType))
                         continue;
 
                     var fragmentSelectionSet = inlineFragment.SelectionSet;
                     var fragmentGroupedFieldSet = CollectFields(
                         schema,
                         document,
-                        objectType,
+                        objectDefinition,
                         fragmentSelectionSet,
                         coercedVariableValues,
                         visitedFragments);
@@ -159,8 +158,12 @@ namespace Tanka.GraphQL.Execution
             return groupedFields;
         }
 
-        private static bool IncludeSelection(Directive includeDirective,
-            IReadOnlyDictionary<string, object?> coercedVariableValues, ISchema schema, ObjectType objectType, object selection)
+        private static bool IncludeSelection(
+            Directive? includeDirective,
+            IReadOnlyDictionary<string, object?> coercedVariableValues, 
+            ISchema schema,
+            ObjectDefinition objectDefinition, 
+            object selection)
         {
             if (includeDirective?.Arguments == null)
                 return true;
@@ -169,8 +172,12 @@ namespace Tanka.GraphQL.Execution
             return GetIfArgumentValue(schema, includeDirective, coercedVariableValues, ifArgument);
         }
 
-        private static bool SkipSelection(Directive skipDirective,
-            IReadOnlyDictionary<string, object?> coercedVariableValues, ISchema schema, ObjectType objectType, object selection)
+        private static bool SkipSelection(
+            Directive? skipDirective,
+            IReadOnlyDictionary<string, object?> coercedVariableValues, 
+            ISchema schema,
+            ObjectDefinition objectDefinition, 
+            object selection)
         {
             if (skipDirective?.Arguments == null)
                 return false;
@@ -183,28 +190,12 @@ namespace Tanka.GraphQL.Execution
             ISchema schema,
             Directive directive,
             IReadOnlyDictionary<string, object?> coercedVariableValues,
-            Language.Nodes.Argument argument)
+            Argument? argument)
         {
-            if (directive == null) throw new ArgumentNullException(nameof(directive));
-            if (coercedVariableValues == null) throw new ArgumentNullException(nameof(coercedVariableValues));
+            if (argument is null)
+                return false;
 
-            switch (argument.Value.Kind)
-            {
-                case NodeKind.BooleanValue:
-                    return (bool) Values.CoerceValue(schema.GetInputFields, schema.GetValueConverter, (BooleanValue)argument.Value, ScalarType.NonNullBoolean);
-                case NodeKind.Variable:
-                    var variable = (Variable) argument.Value;
-                    var variableValue = coercedVariableValues[variable.Name];
-                    
-                    if (variableValue == null)
-                        throw new QueryExecutionException(
-                            $"If argument of {directive} is null. Variable value should not be null",
-                            new NodePath(), argument);
-                    
-                    return (bool) variableValue;
-                default:
-                    return false;
-            }
+            return Ast.GetIfArgumentValue(directive, coercedVariableValues, argument);
         }
 
         private static IEnumerable<Directive> GetDirectives(ISelection selection)
@@ -212,16 +203,9 @@ namespace Tanka.GraphQL.Execution
             return selection.Directives ?? Language.Nodes.Directives.None;
         }
 
-        private static bool DoesFragmentTypeApply(ObjectType objectType, IType fragmentType)
+        private static bool DoesFragmentTypeApply(ObjectDefinition objectDefinition, TypeDefinition fragmentType)
         {
-            if (fragmentType is ObjectType obj)
-                return string.Equals(obj.Name, objectType.Name, StringComparison.Ordinal);
-
-            if (fragmentType is InterfaceType interfaceType) return objectType.Implements(interfaceType);
-
-            if (fragmentType is UnionType unionType) return unionType.IsPossible(objectType);
-
-            return false;
+            return Ast.DoesFragmentTypeApply(objectDefinition, fragmentType);
         }
     }
 }

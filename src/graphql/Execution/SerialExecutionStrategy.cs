@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Execution
 {
     public class SerialExecutionStrategy : IExecutionStrategy
     {
-        public async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
+        public async Task<IDictionary<string, object?>> ExecuteGroupedFieldSetAsync(
             IExecutorContext context,
             IReadOnlyDictionary<string, List<FieldSelection>> groupedFieldSet,
-            ObjectType objectType, object objectValue,
+            ObjectDefinition objectDefinition,
+            object? objectValue,
             NodePath path)
         {
-            var responseMap = new Dictionary<string, object>();
+            var responseMap = new Dictionary<string, object?>();
 
             foreach (var fieldGroup in groupedFieldSet)
             {
@@ -24,9 +24,9 @@ namespace Tanka.GraphQL.Execution
                 {
                     var result = await FieldGroups.ExecuteFieldGroupAsync(
                         context,
-                        objectType,
+                        objectDefinition,
                         objectValue,
-                        new KeyValuePair<string, IReadOnlyCollection<FieldSelection>>(fieldGroup.Key, fieldGroup.Value), 
+                        new KeyValuePair<string, IReadOnlyCollection<FieldSelection>>(fieldGroup.Key, fieldGroup.Value),
                         path.Fork()).ConfigureAwait(false);
 
                     responseMap[responseKey] = result;

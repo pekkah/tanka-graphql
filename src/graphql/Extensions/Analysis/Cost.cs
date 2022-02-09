@@ -4,24 +4,18 @@ using System.Linq;
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Extensions.Analysis
 {
     public static class CostAnalyzer
     {
-        public static DirectiveType CostDirective = new DirectiveType(
-            "cost",
-            new[]
-            {
-                DirectiveLocation.FIELD_DEFINITION
-            },
-            new Args
-            {
-                {"complexity", ScalarType.NonNullInt},
-                {"multipliers", new List(ScalarType.NonNullString)}
-            });
+        public static DirectiveDefinition CostDirective = 
+            @"directive @cost(
+                    complexity: Int!
+                    multipliers: [String!]
+               ) on FIELD_DEFINITION 
+            ";
 
         internal static TypeSystemDocument CostDirectiveAst = 
             @"directive @cost(

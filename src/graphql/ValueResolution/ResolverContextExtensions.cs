@@ -5,13 +5,13 @@ namespace Tanka.GraphQL.ValueResolution
 {
     public static class ResolverContextExtensions
     {
-        public static T GetArgument<T>(this IResolverContext context, string name)
+        public static T? GetArgument<T>(this IResolverContext context, string name)
         {
             if (!context.Arguments.TryGetValue(name, out var arg))
                 throw new ArgumentOutOfRangeException(nameof(name), name,
                     $"Field '{context.FieldName}' does not contain argument with name '{name}''");
 
-            return (T) arg;
+            return (T?) arg;
         }
 
         
@@ -24,10 +24,13 @@ namespace Tanka.GraphQL.ValueResolution
         /// <typeparam name="T"></typeparam>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static T GetObjectArgument<T>(this IResolverContext context, string name)
+        public static T? GetObjectArgument<T>(this IResolverContext context, string name)
             where T : IReadFromObjectDictionary, new()
         {
             var arg = context.GetArgument<IReadOnlyDictionary<string, object>>(name);
+
+            if (arg is null)
+                return default;
 
             var value = new T();
             value.Read(arg);
@@ -43,7 +46,7 @@ namespace Tanka.GraphQL.ValueResolution
         /// <typeparam name="T"></typeparam>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static IEnumerable<T> GetObjectArgumentList<T>(this IResolverContext context, string name)
+        public static IEnumerable<T?> GetObjectArgumentList<T>(this IResolverContext context, string name)
             where T : IReadFromObjectDictionary, new()
         {
             var arg = context.GetArgument<IEnumerable<IReadOnlyDictionary<string, object>>>(name);

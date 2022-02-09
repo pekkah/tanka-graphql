@@ -1,31 +1,29 @@
 ﻿using System;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Execution
 {
     public static class FieldErrors
     {
-        public static object Handle(
+        public static object? Handle(
             IExecutorContext context,
-            ObjectType objectType,
+            ObjectDefinition objectDefinition,
             string fieldName,
-            IType fieldType,
+            TypeBase fieldType,
             FieldSelection fieldSelection,
             object? completedValue,
             Exception error,
             NodePath path)
         {
-            if (!(error is QueryExecutionException))
-            {
+            if (error is not QueryExecutionException)
                 error = new QueryExecutionException(
                     "",
                     error,
                     path,
                     fieldSelection);
-            }
 
-            if (fieldType is NonNull)
+            if (fieldType is NonNullType)
                 throw error;
 
             context.AddError(error);

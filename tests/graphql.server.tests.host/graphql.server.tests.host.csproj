@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <RootNamespace>Tanka.GraphQL.Server.Tests.Host</RootNamespace>
     <AssemblyName>tanka.graphql.server.tests.host</AssemblyName>
     <IsPackable>false</IsPackable>

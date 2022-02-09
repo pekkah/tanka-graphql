@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.TypeSystem
 {
     public interface IHasDirectives
     {
-        IEnumerable<DirectiveInstance> Directives { get; }
+        IEnumerable<Directive> Directives { get; }
 
-        DirectiveInstance? GetDirective(string name);
+        Directive? GetDirective(string name);
 
         bool HasDirective(string name);
     }

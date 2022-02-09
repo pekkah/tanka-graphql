@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -6,7 +8,42 @@ namespace Tanka.GraphQL.Language
 {
     public static class InterfaceDefinitionExtensions
     {
-        public static InterfaceDefinition WithDescription(this InterfaceDefinition definition, 
+        public static bool TryGetDirective(
+            this InterfaceDefinition definition,
+            Name directiveName,
+            [NotNullWhen(true)]out Directive? directive)
+        {
+            if (definition.Directives is null)
+            {
+                directive = null;
+                return false;
+            }
+
+            return definition.Directives.TryGet(directiveName, out directive);
+        }
+
+        public static bool TryImplements(
+            this InterfaceDefinition definition,
+            Name interfaceName,
+            [NotNullWhen(true)] out NamedType? namedType)
+        {
+            if (definition.Interfaces is null)
+            {
+                namedType = null;
+                return false;
+            }
+
+            return definition.Interfaces.TryGet(interfaceName, out namedType);
+        }
+
+        public static bool Implements(
+            this InterfaceDefinition definition,
+            Name interfaceName)
+        {
+            return definition.Interfaces?.Any(i => i.Name == interfaceName) == true;
+        }
+
+        public static InterfaceDefinition WithDescription(this InterfaceDefinition definition,
             in StringValue? description)
         {
             return new InterfaceDefinition(
@@ -18,7 +55,7 @@ namespace Tanka.GraphQL.Language
                 definition.Location);
         }
 
-        public static InterfaceDefinition WithName(this InterfaceDefinition definition, 
+        public static InterfaceDefinition WithName(this InterfaceDefinition definition,
             in Name name)
         {
             return new InterfaceDefinition(
@@ -49,7 +86,7 @@ namespace Tanka.GraphQL.Language
                 definition.Description,
                 definition.Name,
                 definition.Interfaces,
-                Directives.From(directives), 
+                Directives.From(directives),
                 definition.Fields,
                 definition.Location);
         }

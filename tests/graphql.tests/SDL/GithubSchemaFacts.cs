@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
+using System.Threading.Tasks;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.SDL
@@ -22,15 +22,15 @@ namespace Tanka.GraphQL.Tests.SDL
         }
 
         [Fact]
-        public void LoadSchema()
+        public async Task LoadSchema()
         {
             /* Given */
             var sdl = GetGitHubSchema();
 
             /* When */
-            var schema = new SchemaBuilder()
-                .Sdl(sdl)
-                .Build(false);
+            var schema = await new SchemaBuilder()
+                .Add(sdl)
+                .Build(new SchemaBuildOptions());
 
             /* Then */
             Assert.NotNull(schema);

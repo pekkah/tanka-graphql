@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public sealed class InputValueDefinition: INode
+    public sealed class InputValueDefinition : INode
     {
-        public NodeKind Kind => NodeKind.InputValueDefinition;
-        
         public InputValueDefinition(
             StringValue? description,
             in Name name,
@@ -24,15 +21,16 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             Location = location;
         }
 
+        public DefaultValue? DefaultValue { get; }
+
         public StringValue? Description { get; }
+
+        public Directives? Directives { get; }
 
         public Name Name { get; }
 
         public TypeBase Type { get; }
-
-        public DefaultValue? DefaultValue { get; }
-
-        public Directives? Directives { get; }
+        public NodeKind Kind => NodeKind.InputValueDefinition;
 
         public Location? Location { get; }
 

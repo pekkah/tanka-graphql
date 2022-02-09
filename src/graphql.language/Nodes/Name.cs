@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Language.Nodes
 {
-    public readonly struct Name : IEquatable<Name>
+    public readonly struct Name : IEquatable<Name>, IEquatable<string>
     {
         public Location? Location { get; }
 
@@ -37,7 +37,7 @@ namespace Tanka.GraphQL.Language.Nodes
             return Value == other.Value;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Name other && Equals(other);
         }
@@ -55,6 +55,14 @@ namespace Tanka.GraphQL.Language.Nodes
         public static bool operator !=(in Name left, in Name right)
         {
             return !left.Equals(right);
+        }
+
+        public bool Equals(string? other)
+        {
+            if (other is null)
+                return false;
+
+            return Value == other;
         }
     }
 }

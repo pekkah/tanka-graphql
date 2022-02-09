@@ -1,20 +1,17 @@
 ﻿using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
-using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Benchmarks
 {
     public static class Utils
     {
-        public static ISchema InitializeSchema()
+        public static Task<ISchema> InitializeSchema()
         {
             var events = new SingleValueEventChannel();
             var builder = new SchemaBuilder()
-                .Sdl(Parser.ParseTypeSystemDocument(
+                .Add(Parser.ParseTypeSystemDocument(
                 @"
                     type Query {
                         simple: String
@@ -35,7 +32,7 @@ namespace Tanka.GraphQL.Benchmarks
                     }
                     "));
 
-            var resolvers = new ObjectTypeMap
+            var resolvers = new ResolversMap()
             {
                 {
                     "Query", new FieldResolversMap
@@ -60,12 +57,7 @@ namespace Tanka.GraphQL.Benchmarks
                 }
             };
 
-            var schema = SchemaTools.MakeExecutableSchema(
-                builder, 
-                resolvers,
-                resolvers);
-
-            return schema;
+            return builder.Build(resolvers, resolvers);
         }
 
         public static ExecutableDocument InitializeQuery()

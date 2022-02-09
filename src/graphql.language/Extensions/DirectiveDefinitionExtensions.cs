@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -6,6 +7,20 @@ namespace Tanka.GraphQL.Language
 {
     public static class DirectiveDefinitionExtensions
     {
+        public static bool TryGetArgument(
+            this DirectiveDefinition definition,
+            Name argumentName,
+            [NotNullWhen(true)]out InputValueDefinition? argument)
+        {
+            if (definition.Arguments is null)
+            {
+                argument = null;
+                return false;
+            }
+
+            return definition.Arguments.TryGet(argumentName, out argument);
+        }
+
         public static DirectiveDefinition WithDescription(this DirectiveDefinition definition,
             in StringValue? description)
         {

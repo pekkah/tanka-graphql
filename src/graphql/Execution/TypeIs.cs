@@ -1,68 +1,54 @@
-﻿using System.Collections.Generic;
+﻿using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 
-namespace Tanka.GraphQL.Execution
+namespace Tanka.GraphQL.Execution;
+
+public static class TypeIs
 {
-    public static class TypeIs
+    public static bool IsInputType(ISchema schema, TypeBase type)
     {
-        public static bool IsInputType(IType type)
+        return type switch
         {
-            if (type is IWrappingType wrappingType)
-            {
-                return IsInputType(wrappingType.OfType);
-            }
+            NonNullType NonNullType => IsInputType(schema, NonNullType.OfType),
+            ListType list => IsInputType(schema, list.OfType),
+            NamedType namedType => IsInputType(schema.GetRequiredNamedType<TypeDefinition>(namedType.Name)),
+            _ => false
+        };
+    }
 
-            if (type is ScalarType)
-            {
-                return true;
-            }
-
-            if (type is EnumType)
-            {
-                return true;
-            }
-
-            if (type is InputObjectType)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        public static bool IsOutputType(IType type)
+    public static bool IsInputType(TypeDefinition type)
+    {
+        return type switch
         {
-            if (type is IWrappingType wrappingType)
-            {
-                return IsOutputType(wrappingType.OfType);
-            }
+            ScalarDefinition => true,
+            EnumDefinition => true,
+            InputObjectDefinition => true,
+            _ => false
+        };
+    }
 
-            if (type is ScalarType)
-            {
-                return true;
-            }
+    public static bool IsOutputType(ISchema schema, TypeBase type)
+    {
+        return type switch
+        {
+            NonNullType NonNullType => IsOutputType(schema, NonNullType.OfType),
+            ListType list => IsOutputType(schema, list.OfType),
+            NamedType namedType => IsOutputType(schema.GetRequiredNamedType<TypeDefinition>(namedType.Name)),
+            _ => false
+        };
+    }
 
-            if (type is ObjectType)
-            {
-                return true;
-            }
-
-            if (type is InterfaceType)
-            {
-                return true;
-            }
-
-            if (type is UnionType)
-            {
-                return true;
-            }
-
-            if (type is EnumType)
-            {
-                return true;
-            }
-
-            return false;
-        }
+    public static bool IsOutputType(TypeDefinition type)
+    {
+        return type switch
+        {
+            ScalarDefinition => true,
+            ObjectDefinition => true,
+            InterfaceDefinition => true,
+            UnionDefinition => true,
+            EnumDefinition => true,
+            _ => false
+        };
     }
 }

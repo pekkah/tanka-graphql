@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Validation
@@ -22,7 +25,7 @@ namespace Tanka.GraphQL.Validation
             var conflicts = FindConflictsWithinSelectionSet(
                 cachedFieldsAndFragmentNames,
                 comparedFragmentPairs,
-                _context.Tracker.GetParentType(),
+                _context.Tracker.ParentType ?? throw new InvalidOperationException("todo: ParentType is null"),
                 selectionSet);
 
             foreach (var conflict in conflicts)
@@ -236,24 +239,22 @@ namespace Tanka.GraphQL.Validation
 
 
         private void CollectFieldsAndFragmentNames(
-            IType parentType,
+            NamedType? parentType,
             SelectionSet selectionSet,
             Dictionary<string, List<FieldDefPair>> nodeAndDefs,
             Dictionary<string, bool> fragments)
         {
-            var selections = selectionSet.Selections.ToArray();
-            for (var i = 0; i < selections.Length; i++)
+            var selections = selectionSet.ToList();
+            for (var i = 0; i < selections.Count; i++)
             {
                 var selection = selections[i];
 
                 if (selection is FieldSelection field)
                 {
                     var fieldName = field.Name;
-                    IField fieldDef = null;
-                    if (isObjectType(parentType) || isInterfaceType(parentType))
-                        fieldDef = _context.Schema.GetField(
-                            ((INamedType) parentType).Name,
-                            fieldName);
+                    FieldDefinition? fieldDef = null;
+                    if (parentType is not null && (IsObjectDefinition(parentType) || IsInterfaceType(parentType)))
+                        fieldDef = _context.Schema.GetField( parentType.Name, fieldName);
 
                     var responseName = field.AliasOrName;
 
@@ -274,9 +275,7 @@ namespace Tanka.GraphQL.Validation
                 {
                     var typeCondition = inlineFragment.TypeCondition;
                     var inlineFragmentType =
-                        typeCondition != null
-                            ? Ast.TypeFromAst(_context.Schema, typeCondition)
-                            : parentType;
+                        typeCondition ?? parentType;
 
                     CollectFieldsAndFragmentNames(
                         inlineFragmentType,
@@ -287,22 +286,25 @@ namespace Tanka.GraphQL.Validation
             }
         }
 
-        private bool DoTypesConflict(IType type1, IType type2)
+        private bool DoTypesConflict(TypeBase type1, TypeBase type2)
         {
-            if (type1 is List type1List)
-                return !(type2 is List type2List) || DoTypesConflict(type1List.OfType, type2List.OfType);
+            if (type1 is ListType type1List)
+                return type2 is not ListType type2List || DoTypesConflict(type1List.OfType, type2List.OfType);
 
-            if (type2 is List) return true;
+            if (type2 is ListType) return true;
 
-            if (type1 is NonNull type1NonNull)
-                return !(type2 is NonNull type2NonNull) ||
-                       DoTypesConflict(type1NonNull.OfType, type2NonNull.OfType);
+            if (type1 is NonNullType type1NonNullType)
+                return !(type2 is NonNullType type2NonNullType) ||
+                       DoTypesConflict(type1NonNullType.OfType, type2NonNullType.OfType);
 
-            if (type2 is NonNull) return true;
+            if (type2 is NonNullType) return true;
 
-            if (type1 is ScalarType || type2 is ScalarType) return !Equals(type1, type2);
+            var typeDefinition1 = Ast.UnwrapAndResolveType(_context.Schema, type1);
+            var typeDefinition2 = Ast.UnwrapAndResolveType(_context.Schema, type2);
 
-            if (type1 is EnumType || type2 is EnumType) return !Equals(type1, type2);
+            if (typeDefinition1 is ScalarDefinition || typeDefinition2 is ScalarDefinition) return !Equals(typeDefinition1, typeDefinition2);
+
+            if (typeDefinition1 is EnumDefinition || typeDefinition2 is EnumDefinition) return !Equals(typeDefinition1, typeDefinition2);
 
             return false;
         }
@@ -313,7 +315,7 @@ namespace Tanka.GraphQL.Validation
                    "Use different aliases on the fields to fetch both if this was intentional.";
         }
 
-        private Conflict FindConflict(
+        private Conflict? FindConflict(
             Dictionary<SelectionSet, CachedField> cachedFieldsAndFragmentNames,
             PairSet comparedFragmentPairs,
             bool parentFieldsAreMutuallyExclusive,
@@ -340,7 +342,7 @@ namespace Tanka.GraphQL.Validation
 
             var areMutuallyExclusive =
                 parentFieldsAreMutuallyExclusive ||
-                parentType1 != parentType2 && isObjectType(parentType1) && isObjectType(parentType2);
+                parentType1 != parentType2 && IsObjectDefinition(parentType1) && IsObjectDefinition(parentType2);
 
             // return type for each field.
             var type1 = def1?.Type;
@@ -402,19 +404,19 @@ namespace Tanka.GraphQL.Validation
             // Collect and compare sub-fields. Use the same "visited fragment names" list
             // for both collections so fields in a fragment reference are never
             // compared to themselves.
-            var SelectionSet1 = node1.SelectionSet;
-            var SelectionSet2 = node2.SelectionSet;
+            var selectionSet1 = node1.SelectionSet;
+            var selectionSet2 = node2.SelectionSet;
 
-            if (SelectionSet1 != null && SelectionSet2 != null)
+            if (selectionSet1 != null && selectionSet2 != null)
             {
                 var conflicts = FindConflictsBetweenSubSelectionSets(
                     cachedFieldsAndFragmentNames,
                     comparedFragmentPairs,
                     areMutuallyExclusive,
-                    type1.Unwrap(),
-                    SelectionSet1,
-                    type2.Unwrap(),
-                    SelectionSet2);
+                    type1?.Unwrap(),
+                    selectionSet1,
+                    type2?.Unwrap(),
+                    selectionSet2);
 
                 return SubfieldConflicts(conflicts, responseName, node1, node2);
             }
@@ -426,9 +428,9 @@ namespace Tanka.GraphQL.Validation
             Dictionary<SelectionSet, CachedField> cachedFieldsAndFragmentNames,
             PairSet comparedFragmentPairs,
             bool areMutuallyExclusive,
-            IType parentType1,
+            NamedType? parentType1,
             SelectionSet selectionSet1,
-            IType parentType2,
+            NamedType? parentType2,
             SelectionSet selectionSet2)
         {
             var conflicts = new List<Conflict>();
@@ -511,7 +513,7 @@ namespace Tanka.GraphQL.Validation
         private List<Conflict> FindConflictsWithinSelectionSet(
             Dictionary<SelectionSet, CachedField> cachedFieldsAndFragmentNames,
             PairSet comparedFragmentPairs,
-            INamedType parentType,
+            NamedType? parentType,
             SelectionSet selectionSet)
         {
             var conflicts = new List<Conflict>();
@@ -566,7 +568,7 @@ namespace Tanka.GraphQL.Validation
 
         private CachedField GetFieldsAndFragmentNames(
             Dictionary<SelectionSet, CachedField> cachedFieldsAndFragmentNames,
-            IType parentType,
+            NamedType? parentType,
             SelectionSet selectionSet)
         {
             cachedFieldsAndFragmentNames.TryGetValue(selectionSet,
@@ -600,21 +602,21 @@ namespace Tanka.GraphQL.Validation
             if (cachedFieldsAndFragmentNames.ContainsKey(fragment.SelectionSet))
                 return cachedFieldsAndFragmentNames[fragment.SelectionSet];
 
-            var fragmentType = Ast.TypeFromAst(_context.Schema, fragment.TypeCondition);
+            var fragmentType = fragment.TypeCondition;
             return GetFieldsAndFragmentNames(
                 cachedFieldsAndFragmentNames,
                 fragmentType,
                 fragment.SelectionSet);
         }
 
-        private bool isInterfaceType(IType parentType)
+        private bool IsInterfaceType(NamedType parentType)
         {
-            return parentType is InterfaceType;
+            return _context.Schema.GetNamedType(parentType.Name) is InterfaceDefinition;
         }
 
-        private bool isObjectType(IType parentType)
+        private bool IsObjectDefinition(NamedType? parentType)
         {
-            return parentType is ObjectType;
+            return _context.Schema.GetNamedType(parentType.Name) is ObjectDefinition;
         }
 
         private static string ReasonMessage(Message reasonMessage)
@@ -659,22 +661,27 @@ namespace Tanka.GraphQL.Validation
 
                 var arg2 = arguments2[arg1.Key];
 
-                var value1 = ArgumentCoercion.CoerceArgumentValue(
-                    _context.Schema,
-                    _context.VariableValues,
-                    arg1.Key,
-                    fieldDefPair1.FieldDef.GetArgument(arg1.Key),
-                    arg1.Value);
+                if (fieldDefPair1.FieldDef?.TryGetArgument(arg1.Key, out var argDef1) == true && fieldDefPair2.FieldDef?.TryGetArgument(arg1.Key, out var argDef2) == true)
+                {
+                    var value1 = ArgumentCoercion.CoerceArgumentValue(
+                        _context.Schema,
+                        _context.VariableValues,
+                        arg1.Key,
+                        argDef1,
+                        arg1.Value);
 
-                var value2 = ArgumentCoercion.CoerceArgumentValue(
-                    _context.Schema,
-                    _context.VariableValues,
-                    arg1.Key,
-                    fieldDefPair2.FieldDef.GetArgument(arg1.Key),
-                    arg2);
+                    var value2 = ArgumentCoercion.CoerceArgumentValue(
+                        _context.Schema,
+                        _context.VariableValues,
+                        arg1.Key,
+                        argDef2,
+                        arg2);
 
-                return SameValue(value1, value2);
-            });
+                    return SameValue(value1, value2);
+                }
+
+                return false;
+                });
         }
 
         private bool SameValue(object arg1, object arg2)
@@ -743,8 +750,8 @@ namespace Tanka.GraphQL.Validation
         {
             public FieldSelection Field { get; set; }
 
-            public IField FieldDef { get; set; }
-            public IType ParentType { get; set; }
+            public FieldDefinition? FieldDef { get; set; }
+            public NamedType? ParentType { get; set; }
         }
 
         private class Message

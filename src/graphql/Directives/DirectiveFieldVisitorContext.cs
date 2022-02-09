@@ -1,23 +1,22 @@
 ﻿using System;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Directives
 {
     public class DirectiveFieldVisitorContext: IEquatable<DirectiveFieldVisitorContext>
     {
-        public DirectiveFieldVisitorContext(string name, IField value, Resolver resolver,
+        public DirectiveFieldVisitorContext(
+            FieldDefinition value, 
+            Resolver resolver,
             Subscriber subscriber)
         {
-            Name = name;
             Field = value;
             Resolver = resolver;
             Subscriber = subscriber;
         }
 
-        public string Name { get; }
-
-        public IField Field { get; }
+        public FieldDefinition Field { get; }
 
         public Resolver Resolver { get; }
 
@@ -30,7 +29,7 @@ namespace Tanka.GraphQL.Directives
             var builder = new ResolverBuilder();
             build(builder);
 
-            return new DirectiveFieldVisitorContext(Name,Field, builder.Build(), Subscriber);
+            return new DirectiveFieldVisitorContext(Field, builder.Build(), Subscriber);
         }
 
         public DirectiveFieldVisitorContext WithSubscriber(Action<ResolverBuilder> buildResolver, Action<SubscriberBuilder> buildSubscriber)
@@ -44,42 +43,35 @@ namespace Tanka.GraphQL.Directives
             var subscriberBuilder = new SubscriberBuilder();
             buildSubscriber(subscriberBuilder);
 
-            return new DirectiveFieldVisitorContext(Name,Field, resolverBuilder.Build(), subscriberBuilder.Build());
+            return new DirectiveFieldVisitorContext(Field, resolverBuilder.Build(), subscriberBuilder.Build());
         }
 
-        public bool Equals(DirectiveFieldVisitorContext other)
+        public bool Equals(DirectiveFieldVisitorContext? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Name, other.Name) && Equals(Field, other.Field) && Equals(Resolver, other.Resolver) && Equals(Subscriber, other.Subscriber);
+            return Field.Equals(other.Field) && Resolver.Equals(other.Resolver) && Subscriber.Equals(other.Subscriber);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((DirectiveFieldVisitorContext) obj);
+            return Equals((DirectiveFieldVisitorContext)obj);
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = (Name != null ? Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Field != null ? Field.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Resolver != null ? Resolver.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Subscriber != null ? Subscriber.GetHashCode() : 0);
-                return hashCode;
-            }
+            return HashCode.Combine(Field, Resolver, Subscriber);
         }
 
-        public static bool operator ==(DirectiveFieldVisitorContext left, DirectiveFieldVisitorContext right)
+        public static bool operator ==(DirectiveFieldVisitorContext? left, DirectiveFieldVisitorContext? right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(DirectiveFieldVisitorContext left, DirectiveFieldVisitorContext right)
+        public static bool operator !=(DirectiveFieldVisitorContext? left, DirectiveFieldVisitorContext? right)
         {
             return !Equals(left, right);
         }

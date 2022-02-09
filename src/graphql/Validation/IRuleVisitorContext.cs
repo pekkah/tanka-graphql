@@ -10,7 +10,7 @@ namespace Tanka.GraphQL.Validation
 
         ExecutableDocument Document { get; }
 
-        IReadOnlyDictionary<string, object> VariableValues { get; }
+        IReadOnlyDictionary<string, object?> VariableValues { get; }
 
         TypeTracker Tracker { get; }
 

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
@@ -15,24 +14,25 @@ namespace Tanka.GraphQL.Tests
             // schema
             var builder = new SchemaBuilder();
 
-            builder.Object("Node", out var node)
-                .Connections(connect => connect
-                    .Field(node, "child", node)
-                    .Field(node, "path", new List(ScalarType.String))
-                    .Field(node, "value", ScalarType.String)
-                    .Field(node, "children", new List(node)));
+            builder.Add((TypeSystemDocument)@"
+type Node {
+    child: Node
+    path: [String]
+    value: String
+    children: [Node]
+}
 
-            builder.Query(out var query)
-                .Connections(connect => connect
-                    .Field(query, "root", node));
+type Query {
+    root: Node
+}
 
-            builder.Mutation(out var mutation)
-                .Connections(connect => connect
-                    .Field(mutation, "root", node));
+type Mutation {
+    root: Node
+}
 
-            var schema = builder.Build();
-
-            var resolvers = new ObjectTypeMap
+");
+            
+            var resolvers = new ResolversMap()
             {
                 {
                     "Query", new FieldResolversMap
@@ -63,7 +63,7 @@ namespace Tanka.GraphQL.Tests
                 }
             };
 
-            _schema = SchemaTools.MakeExecutableSchema(schema, resolvers);
+            _schema = builder.Build(resolvers).Result;
         }
 
         private readonly ISchema _schema;
@@ -93,7 +93,7 @@ mutation Root {
             var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
                 Schema = _schema,
-                Document = Parser.ParseDocument(query)
+                Document = query
             });
 
             /* Then */
@@ -146,7 +146,7 @@ mutation Root {
             var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
                 Schema = _schema,
-                Document = Parser.ParseDocument(query)
+                Document = query
             });
 
             /* Then */

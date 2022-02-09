@@ -2,25 +2,25 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Execution
 {
     public class ParallelExecutionStrategy : IExecutionStrategy
     {
-        public async Task<IDictionary<string, object>> ExecuteGroupedFieldSetAsync(
+        public async Task<IDictionary<string, object?>> ExecuteGroupedFieldSetAsync(
             IExecutorContext context,
             IReadOnlyDictionary<string, List<FieldSelection>> groupedFieldSet,
-            ObjectType objectType,
-            object objectValue,
+            ObjectDefinition objectDefinition,
+            object? objectValue,
             NodePath path)
         {
-            var tasks = new Dictionary<string, Task<object>>();
+            var tasks = new Dictionary<string, Task<object?>>();
             foreach (var fieldGroup in groupedFieldSet)
             {
                 var executionTask = FieldGroups.ExecuteFieldGroupAsync(
                     context,
-                    objectType,
+                    objectDefinition,
                     objectValue,
                     //todo: following is dirty
                     new KeyValuePair<string, IReadOnlyCollection<FieldSelection>>(fieldGroup.Key,

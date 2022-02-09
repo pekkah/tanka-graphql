@@ -5,14 +5,13 @@ using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
-using Type = System.Type;
 
 namespace Tanka.GraphQL
 {
     public class ExtensionsRunner
     {
-        private readonly List<IExtensionScope> _scopes = new List<IExtensionScope>();
-        private readonly Dictionary<Type, IExtensionScope> _scopesDictionary = new Dictionary<Type, IExtensionScope>();
+        private readonly List<IExtensionScope> _scopes = new();
+        private readonly Dictionary<Type, IExtensionScope> _scopesDictionary = new();
 
         public ExtensionsRunner(IReadOnlyList<IExtensionScope> extensions)
         {
@@ -24,7 +23,7 @@ namespace Tanka.GraphQL
         public T Extension<T>() where T : IExtensionScope
         {
             var extensionScope = Extension(typeof(T));
-            return (T) extensionScope;
+            return (T)extensionScope;
         }
 
         public IExtensionScope Extension(Type extensionScopeType)

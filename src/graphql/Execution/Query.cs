@@ -21,7 +21,7 @@ namespace Tanka.GraphQL.Execution
             var selectionSet = operation.SelectionSet;
             var executionContext = context.BuildExecutorContext(new ParallelExecutionStrategy());
 
-            IDictionary<string, object> data;
+            IDictionary<string, object?>? data;
 
             try
             {

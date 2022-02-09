@@ -3,33 +3,33 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
 {
     public static class Resolve
     {
-        public static IResolverResult As(object result)
+        public static IResolverResult As(object? result)
         {
-            return new CompleteValueResult(result, null);
+            return new CompleteValueResult(result);
         }
 
-        public static IResolverResult As(ObjectType type, object result)
+        public static IResolverResult As(ObjectDefinition type, object? result)
         {
             return new CompleteValueResult(result, type);
         }
 
-        public static IResolverResult As(IEnumerable result)
+        public static IResolverResult As(IEnumerable? result)
         {
-            return new CompleteValueResult(result, null);
+            return new CompleteValueResult(result);
         }
 
-        public static IResolverResult As(IEnumerable result, Func<object, IType> isTypeOf)
+        public static IResolverResult As(IEnumerable? result, Func<IResolverContext, object?, TypeDefinition> isTypeOf)
         {
             return new CompleteValueResult(result, isTypeOf);
         }
 
-        public static Resolver PropertyOf<T>(Func<T, object> getValue)
+        public static Resolver PropertyOf<T>(Func<T, object?> getValue)
         {
             return context =>
             {
@@ -42,7 +42,7 @@ namespace Tanka.GraphQL.ValueResolution
             };
         }
 
-        public static Resolver PropertyOf<T>(Func<T, IEnumerable<object>> getValue)
+        public static Resolver PropertyOf<T>(Func<T, IEnumerable<object?>?> getValue)
         {
             return context =>
             {

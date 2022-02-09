@@ -33,8 +33,7 @@ namespace Tanka.GraphQL
         /// <summary>
         ///     Query validator function
         /// </summary>
-        public Func<ISchema, ExecutableDocument, IReadOnlyDictionary<string, object>, ValueTask<ValidationResult>>
-            Validate { get; set; }
+        public Func<ISchema, ExecutableDocument, IReadOnlyDictionary<string, object>, ValueTask<ValidationResult>>? Validate { get; set; }
 
         /// <summary>
         ///     Schema to execute against
@@ -71,7 +70,7 @@ namespace Tanka.GraphQL
             IEnumerable<CombineRule> rules,
             ISchema schema,
             ExecutableDocument document,
-            IReadOnlyDictionary<string, object> variableValues = null)
+            IReadOnlyDictionary<string, object?>? variableValues = null)
         {
             var result = Validator.Validate(
                 rules,

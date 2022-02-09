@@ -26,7 +26,7 @@ namespace Tanka.GraphQL.Benchmarks
         [GlobalSetup]
         public void Setup()
         {
-            _schema = Utils.InitializeSchema();
+            _schema = Utils.InitializeSchema().Result;
             _query = Utils.InitializeQuery();
             _defaultRulesMap = ExecutionRules.All.ToList();
             _comparisonRules = new List<CombineRule>

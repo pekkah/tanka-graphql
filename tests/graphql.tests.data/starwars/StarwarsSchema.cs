@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.TypeSystem;
 
@@ -18,13 +20,13 @@ namespace Tanka.GraphQL.Tests.Data.Starwars
 
             builder.Include(Episode);
 
-            var EpisodeList = new List(Episode);
+            var EpisodeList = new ListType(Episode);
 
             builder.Interface("Character", out var Character,
                 "Character in the movie");
 
             // use NamedTypeReference as proxy to bypass circular dependencies
-            var CharacterList = new List(Character);
+            var CharacterList = new List<>(Character);
 
             builder.Connections(connect => connect
                 .Field(Character, "id", ScalarType.NonNullString)

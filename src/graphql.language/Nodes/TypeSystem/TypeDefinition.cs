@@ -1,12 +1,15 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
-    public abstract class TypeDefinition: INode
+    public abstract class TypeDefinition : INode, IEquatable<TypeDefinition>
     {
+        public abstract Name Name { get; }
+
+        public abstract NodeKind Kind { get; }
+        public abstract Location? Location { get; }
+
         public static implicit operator TypeDefinition(string value)
         {
             var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
@@ -18,9 +21,32 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             var parser = Parser.Create(value);
             return parser.ParseTypeDefinition();
         }
-        
-        public abstract NodeKind Kind { get; }
-        public abstract Location? Location { get; }
-        public abstract Name Name { get; }
+
+        public bool Equals(TypeDefinition? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Name.Equals(other.Name) && Kind == other.Kind;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return ReferenceEquals(this, obj) || obj is TypeDefinition other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, (int)Kind);
+        }
+
+        public static bool operator ==(TypeDefinition? left, TypeDefinition? right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(TypeDefinition? left, TypeDefinition? right)
+        {
+            return !Equals(left, right);
+        }
     }
 }

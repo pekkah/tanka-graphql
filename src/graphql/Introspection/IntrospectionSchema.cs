@@ -1,116 +1,117 @@
-﻿using System;
-using System.Linq;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.TypeSystem;
+﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL.Introspection
+namespace Tanka.GraphQL.Introspection;
+
+public class IntrospectionSchema
 {
-    public class IntrospectionSchema
+    public const string EnumValueName = "__EnumValue";
+    public const string FieldName = "__Field";
+    public const string InputValueName = "__InputValue";
+    public const string SchemaName = "__Schema";
+    public const string TypeKindName = "__TypeKind";
+    public const string TypeName = "__Type";
+
+    public static SchemaBuilder Create()
     {
-        public const string EnumValueName = "__EnumValue";
-        public const string FieldName = "__Field";
-        public const string InputValueName = "__InputValue";
-        public const string SchemaName = "__Schema";
-        public const string TypeKindName = "__TypeKind";
-        public const string TypeName = "__Type";
+        var builder = new SchemaBuilder();
 
-        public static SchemaBuilder Create()
-        {
-            var builder = new SchemaBuilder();
+        builder.Add(
+            (TypeSystemDocument)
+@"
+type __Schema {
+  description: String
+  types: [__Type!]!
+  queryType: __Type!
+  mutationType: __Type
+  subscriptionType: __Type
+  directives: [__Directive!]!
+}
 
-            // define type here so that it can be referenced early
-            builder.Object(TypeName, out var type);
-            var typeList = new List(new NonNull(type));
+type __Type {
+  kind: __TypeKind!
+  name: String
+  description: String
+  # must be non-null for OBJECT and INTERFACE, otherwise null.
+  fields(includeDeprecated: Boolean = false): [__Field!]
+  # must be non-null for OBJECT and INTERFACE, otherwise null.
+  interfaces: [__Type!]
+  # must be non-null for INTERFACE and UNION, otherwise null.
+  possibleTypes: [__Type!]
+  # must be non-null for ENUM, otherwise null.
+  enumValues(includeDeprecated: Boolean = false): [__EnumValue!]
+  # must be non-null for INPUT_OBJECT, otherwise null.
+  inputFields: [__InputValue!]
+  # must be non-null for NON_NULL and LIST, otherwise null.
+  ofType: __Type
+  # may be non-null for custom SCALAR, otherwise null.
+  specifiedByURL: String
+}
 
-            builder.Enum(TypeKindName, out var typeKind,
-                null,
-                values => 
-                values.Value(__TypeKind.SCALAR.ToString(), default, null, null)
-                .Value(__TypeKind.OBJECT.ToString(), default, null, null)
-                .Value(__TypeKind.ENUM.ToString(), default, null, null)
-                .Value(__TypeKind.INPUT_OBJECT.ToString(), default, null, null)
-                .Value(__TypeKind.INTERFACE.ToString(), default, null, null)
-                .Value(__TypeKind.LIST.ToString(), default, null, null)
-                .Value(__TypeKind.NON_NULL.ToString(), default, null, null)
-                .Value(__TypeKind.UNION.ToString(), default, null, null));
+enum __TypeKind {
+  SCALAR
+  OBJECT
+  INTERFACE
+  UNION
+  ENUM
+  INPUT_OBJECT
+  LIST
+  NON_NULL
+}
 
-            builder.Object(InputValueName, out var inputValue)
-                .Connections(connect => connect
-                    .Field(inputValue, "name", ScalarType.NonNullString)
-                    .Field(inputValue, "description", ScalarType.String)
-                    .Field(inputValue, "defaultValue", ScalarType.String)
-                    .Field(inputValue, "type", new NonNull(type)));
+type __Field {
+  name: String!
+  description: String
+  args: [__InputValue!]!
+  type: __Type!
+  isDeprecated: Boolean!
+  deprecationReason: String
+}
 
-            var inputValueList = new List(new NonNull(inputValue));
-            var argsList = new List(new NonNull(inputValue));
+type __InputValue {
+  name: String!
+  description: String
+  type: __Type!
+  defaultValue: String
+}
 
-            builder.Object(FieldName, out var field)
-                .Connections(connect => connect
-                    .Field(field, "name", ScalarType.NonNullString)
-                    .Field(field, "description", ScalarType.String)
-                    .Field(field, "args", argsList)
-                    .Field(field, "type", new NonNull(type))
-                    .Field(field, "isDeprecated", ScalarType.NonNullBoolean)
-                    .Field(field, "deprecationReason", ScalarType.String));
+type __EnumValue {
+  name: String!
+  description: String
+  isDeprecated: Boolean!
+  deprecationReason: String
+}
 
-            var fieldList = new List(new NonNull(field));
+type __Directive {
+  name: String!
+  description: String
+  locations: [__DirectiveLocation!]!
+  args: [__InputValue!]!
+  isRepeatable: Boolean!
+}
 
-            builder.Object(EnumValueName, out var enumValue)
-                .Connections(connect => connect
-                    .Field(enumValue, "name", ScalarType.NonNullString)
-                    .Field(enumValue, "description", ScalarType.String)
-                    .Field(enumValue, "isDeprecated", ScalarType.NonNullBoolean)
-                    .Field(enumValue, "deprecationReason", ScalarType.String));
+enum __DirectiveLocation {
+  QUERY
+  MUTATION
+  SUBSCRIPTION
+  FIELD
+  FRAGMENT_DEFINITION
+  FRAGMENT_SPREAD
+  INLINE_FRAGMENT
+  VARIABLE_DEFINITION
+  SCHEMA
+  SCALAR
+  OBJECT
+  FIELD_DEFINITION
+  ARGUMENT_DEFINITION
+  INTERFACE
+  UNION
+  ENUM
+  ENUM_VALUE
+  INPUT_OBJECT
+  INPUT_FIELD_DEFINITION
+}
+");
 
-            var enumValueList = new List(new NonNull(enumValue));
-
-            builder
-                .Connections(connect => connect
-                    .Field(type, "kind", new NonNull(typeKind))
-                    .Field(type, "name", ScalarType.String)
-                    .Field(type, "description", ScalarType.String)
-                    .Field(type, "fields", fieldList,
-                        args: args => args.Arg("includeDeprecated", ScalarType.Boolean, false, default))
-                    .Field(type, "interfaces", typeList)
-                    .Field(type, "possibleTypes", typeList)
-                    .Field(type, "enumValues", enumValueList,
-                        args: args => args.Arg("includeDeprecated", ScalarType.Boolean, false, default))
-                    .Field(type, "inputFields", inputValueList)
-                    .Field(type, "ofType", type));
-
-            builder.Enum("__DirectiveLocation", out var directiveLocation,
-                directives: null,
-                values: values => Enum.GetNames(typeof(__DirectiveLocation))
-                    .ToList()
-                    .ForEach(v => values
-                        .Value(
-                            v, 
-                            string.Empty, 
-                            Enumerable.Empty<DirectiveInstance>(), 
-                            null)));
-
-            builder.Object("__Directive", out var directive)
-                .Connections(connect => connect
-                    .Field(directive, "name", ScalarType.String)
-                    .Field(directive, "description", ScalarType.String)
-                    .Field(directive, "locations", new List(directiveLocation))
-                    .Field(directive, "args", argsList));
-
-            builder.Object(SchemaName, out var schema)
-                .Connections(connect => connect
-                    .Field(schema, "types", typeList)
-                    .Field(schema, "queryType", type)
-                    .Field(schema, "mutationType", type)
-                    .Field(schema, "subscriptionType", type)
-                    .Field(schema, "directives", new List(directive)));
-
-            builder.Query(out var query)
-                .Connections(connect => connect
-                    .Field(query, "__schema", schema)
-                    .Field(query, "__type", type,
-                        args: args => args.Arg("name", ScalarType.NonNullString, default, default)));
-
-            return builder;
-        }
+        return builder;
     }
 }

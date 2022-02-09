@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyName>Tanka.GraphQL.Extensions.ApolloFederation.Tests</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Extensions.ApolloFederation.Tests</RootNamespace>

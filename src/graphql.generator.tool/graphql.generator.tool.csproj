@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Tanka.GraphQL.Generator.Tool</RootNamespace>
     <AssemblyName>tanka.graphql.generator.tool</AssemblyName>
     <PackAsTool>true</PackAsTool>

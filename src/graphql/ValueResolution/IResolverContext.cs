@@ -2,21 +2,21 @@
 
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
 {
     public interface IResolverContext
     {
-        ObjectType ObjectType { get; }
+        ObjectDefinition ObjectDefinition { get; }
 
-        object ObjectValue { get; }
+        object? ObjectValue { get; }
 
-        IField Field { get; }
+        FieldDefinition Field { get; }
 
         FieldSelection Selection { get; }
 
-        IReadOnlyDictionary<string, object> Arguments { get; }
+        IReadOnlyDictionary<string, object?> Arguments { get; }
 
         NodePath Path { get; }
 

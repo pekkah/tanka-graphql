@@ -4,9 +4,9 @@ using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.ValueResolution
 {
-    public class NullValueForNonNullException : CompleteValueException
+    public class NullValueForNonNullTypeException : CompleteValueException
     {
-        public NullValueForNonNullException(
+        public NullValueForNonNullTypeException(
             string type,
             string field,
             NodePath path,

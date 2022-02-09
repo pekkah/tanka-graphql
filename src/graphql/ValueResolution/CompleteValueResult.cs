@@ -3,7 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.ValueResolution
 {
@@ -11,31 +15,38 @@ namespace Tanka.GraphQL.ValueResolution
     {
         private readonly object? _value;
 
-        public CompleteValueResult(object? value, IType actualType)
+        public CompleteValueResult(object? value, TypeDefinition actualType)
         {
             _value = value;
-            IsTypeOf = _ => actualType;
+            IsTypeOf = (_,_) => actualType;
         }
 
-        public CompleteValueResult(IEnumerable value, Func<object, IType> isTypeOf)
+        public CompleteValueResult(IEnumerable? value, Func<IResolverContext, object?, TypeDefinition> isTypeOf)
         {
             _value = value;
             IsTypeOf = isTypeOf;
         }
 
-        public Func<object, IType> IsTypeOf { get; }
+        public CompleteValueResult(object? value)
+        {
+            _value = value;
+            IsTypeOf = (_, _) =>
+                throw new InvalidOperationException("Abstract type value was resolved without actual type or isTypeOf being provided.");
+        }
+
+        public Func<IResolverContext, object?, TypeDefinition> IsTypeOf { get; }
 
         public object? Value => _value;
 
-        public ValueTask<object> CompleteValueAsync(
+        public ValueTask<object?> CompleteValueAsync(
             IResolverContext context)
         {
             return CompleteValueAsync(_value, context.Field.Type, context.Path, context);
         }
 
-        private ValueTask<object> CompleteValueAsync(
+        private ValueTask<object?> CompleteValueAsync(
             object? value,
-            IType fieldType,
+            TypeBase fieldType,
             NodePath path,
             IResolverContext context)
         {
@@ -46,24 +57,27 @@ namespace Tanka.GraphQL.ValueResolution
                     context.Selection);
             }
 
-
-            if (fieldType is NonNull nonNull)
-                return CompleteNonNullValueAsync(value, nonNull, path, context);
+            if (fieldType is NonNullType NonNullType)
+                return CompleteNonNullTypeValueAsync(value, NonNullType, path, context);
 
             if (value == null)
                 return default;
 
-            if (fieldType is List list)
+            if (fieldType is ListType list)
                 return CompleteListValueAsync(value, list, path, context);
 
-            return fieldType switch
-            {
-                ScalarType scalarType => CompleteScalarType(value, scalarType, context),
-                EnumType enumType => CompleteEnumType(value, enumType, context),
-                ObjectType objectType => CompleteObjectValueAsync(value, objectType, path, context),
+            if (fieldType is not NamedType namedType)
+                throw new InvalidOperationException("FieldType is not NamedType");
 
-                InterfaceType interfaceType => CompleteInterfaceValueAsync(value, interfaceType, path, context),
-                UnionType unionType => CompleteUnionValueAsync(value, unionType, path, context),
+            var typeDefinition = context.ExecutionContext.Schema.GetRequiredNamedType<TypeDefinition>(namedType.Name);
+            return  typeDefinition switch
+            {
+                ScalarDefinition scalarType => CompleteScalarType(value, scalarType, context),
+                EnumDefinition enumType => CompleteEnumType(value, enumType, context),
+                ObjectDefinition objectDefinition => CompleteObjectValueAsync(value, objectDefinition, path, context),
+
+                InterfaceDefinition interfaceType => CompleteInterfaceValueAsync(value, interfaceType, path, context),
+                UnionDefinition unionDefinition => CompleteUnionValueAsync(value, unionDefinition, path, context),
                 _ => throw new CompleteValueException(
                     $"Cannot complete value for field {context.FieldName}. Cannot complete value of type {fieldType}.",
                     path,
@@ -71,37 +85,37 @@ namespace Tanka.GraphQL.ValueResolution
             };
         }
 
-        private ValueTask<object> CompleteEnumType(object value, EnumType enumType, IResolverContext context)
+        private ValueTask<object?> CompleteEnumType(object? value, EnumDefinition enumType, IResolverContext context)
         {
             //todo: use similar pattern to scalars
-            return new ValueTask<object>(enumType.Serialize(value));
+            return new ValueTask<object?>(new EnumConverter(enumType).Serialize(value));
         }
 
-        private ValueTask<object> CompleteScalarType(object value, ScalarType scalarType, IResolverContext context)
+        private ValueTask<object?> CompleteScalarType(object? value, ScalarDefinition scalarType, IResolverContext context)
         {
-            var converter = context.ExecutionContext.Schema.GetValueConverter(scalarType.Name);
-            return new ValueTask<object>(converter.Serialize(value));
+            var converter = context.ExecutionContext.Schema.GetRequiredValueConverter(scalarType.Name);
+            return new ValueTask<object?>(converter.Serialize(value));
         }
 
-        private async ValueTask<object> CompleteUnionValueAsync(
+        private async ValueTask<object?> CompleteUnionValueAsync(
             object value,
-            UnionType unionType,
+            UnionDefinition unionDefinition,
             NodePath path,
             IResolverContext context)
         {
-            var actualType = IsTypeOf(value) as ObjectType;
+            var actualType = IsTypeOf(context, value) as ObjectDefinition;
 
             if (actualType == null)
                 throw new CompleteValueException(
-                    $"Cannot complete value for field '{context.FieldName}':'{unionType}'. " +
+                    $"Cannot complete value for field '{context.FieldName}':'{unionDefinition}'. " +
                     "ActualType is required for union values.",
                     path,
                     context.Selection);
 
-            if (!unionType.IsPossible(actualType))
+            if (!unionDefinition.HasMember(actualType.Name))
                 throw new CompleteValueException(
-                    $"Cannot complete value for field '{context.FieldName}':'{unionType}'. " +
-                    $"ActualType '{actualType}' is not possible for '{unionType}'",
+                    $"Cannot complete value for field '{context.FieldName}':'{unionDefinition}'. " +
+                    $"ActualType '{actualType}' is not possible for '{unionDefinition}'",
                     path,
                     context.Selection);
 
@@ -116,13 +130,13 @@ namespace Tanka.GraphQL.ValueResolution
             return data;
         }
 
-        private async ValueTask<object> CompleteInterfaceValueAsync(
+        private async ValueTask<object?> CompleteInterfaceValueAsync(
             object value,
-            InterfaceType interfaceType,
+            InterfaceDefinition interfaceType,
             NodePath path,
             IResolverContext context)
         {
-            var actualType = IsTypeOf(value) as ObjectType;
+            var actualType = IsTypeOf(context, value) as ObjectDefinition;
 
             if (actualType == null)
                 throw new CompleteValueException(
@@ -131,7 +145,7 @@ namespace Tanka.GraphQL.ValueResolution
                     path,
                     context.Selection);
 
-            if (!actualType.Implements(interfaceType))
+            if (!actualType.HasInterface(interfaceType.Name))
                 throw new CompleteValueException(
                     $"Cannot complete value for field '{context.FieldName}':'{interfaceType}'. " +
                     $"ActualType '{actualType}' does not implement interface '{interfaceType}'",
@@ -149,9 +163,9 @@ namespace Tanka.GraphQL.ValueResolution
             return data;
         }
 
-        private static async ValueTask<object> CompleteObjectValueAsync(
+        private static async ValueTask<object?> CompleteObjectValueAsync(
             object value,
-            ObjectType objectType,
+            ObjectDefinition objectDefinition,
             NodePath path,
             IResolverContext context)
         {
@@ -159,25 +173,25 @@ namespace Tanka.GraphQL.ValueResolution
             var data = await SelectionSets.ExecuteSelectionSetAsync(
                 context.ExecutionContext,
                 subSelectionSet,
-                objectType,
+                objectDefinition,
                 value,
                 path);
 
             return data;
         }
 
-        private async ValueTask<object> CompleteNonNullValueAsync(
-            object value,
-            NonNull nonNull,
+        private async ValueTask<object?> CompleteNonNullTypeValueAsync(
+            object? value,
+            NonNullType NonNullType,
             NodePath path,
             IResolverContext context)
         {
-            var innerType = nonNull.OfType;
+            var innerType = NonNullType.OfType;
             var completedResult = await CompleteValueAsync(value, innerType, path, context);
 
             if (completedResult == null)
-                throw new NullValueForNonNullException(
-                    context.ObjectType.Name,
+                throw new NullValueForNonNullTypeException(
+                    context.ObjectDefinition.Name,
                     context.FieldName,
                     path,
                     context.Selection);
@@ -185,13 +199,13 @@ namespace Tanka.GraphQL.ValueResolution
             return completedResult;
         }
 
-        private async ValueTask<object> CompleteListValueAsync(
+        private async ValueTask<object?> CompleteListValueAsync(
             object value,
-            List list,
+            ListType list,
             NodePath path,
             IResolverContext context)
         {
-            if (!(value is IEnumerable values))
+            if (value is not IEnumerable values)
                 throw new CompleteValueException(
                     $"Cannot complete value for list field '{context.FieldName}':'{list}'. " +
                     "Resolved value is not a collection",
@@ -199,7 +213,7 @@ namespace Tanka.GraphQL.ValueResolution
                     context.Selection);
 
             var innerType = list.OfType;
-            var result = new List<object>();
+            var result = new List<object?>();
             var i = 0;
             foreach (var resultItem in values)
             {
@@ -214,7 +228,7 @@ namespace Tanka.GraphQL.ValueResolution
                 }
                 catch (Exception e)
                 {
-                    if (innerType is NonNull) throw;
+                    if (innerType is NonNullType) throw;
 
                     context.ExecutionContext.AddError(e);
                     result.Add(null);

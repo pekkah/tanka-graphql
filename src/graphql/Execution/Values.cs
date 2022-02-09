@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
@@ -11,47 +12,49 @@ namespace Tanka.GraphQL.Execution
     public static class Values
     {
         public static object? CoerceValue(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter,
+            ISchema schema,
             object? value,
-            IType valueType)
+            TypeBase valueType)
         {
-            if (valueType is NonNull nonNull)
-                return CoerceNonNullValue(
-                    getInputObjectFields,
-                    getValueConverter,
+            switch (valueType)
+            {
+                case NonNullType NonNullType:
+                    return CoerceNonNullTypeValue(
+                        schema,
+                        value,
+                        NonNullType);
+                case ListType list:
+                    return CoerceListValues(
+                        schema,
+                        list.OfType,
+                        value);
+            }
+
+
+            if (valueType is not NamedType namedValueType)
+                throw new ValueCoercionException(
+                    $"Unexpected valueType {valueType}. Cannot coerce value.",
                     value,
-                    nonNull);
+                    valueType);
+            
+            var valueTypeDefinition = schema.GetRequiredNamedType<TypeDefinition>(namedValueType.Name);
 
-            if (valueType is List list)
-                return CoerceListValues(
-                    getInputObjectFields,
-                    getValueConverter,
-                    list.OfType,
-                    value);
-
-            if (valueType is ScalarType scalar) return CoerceScalarValue(getValueConverter, value, scalar);
-
-            if (valueType is EnumType enumType) return CoerceEnumValue(value, enumType);
-
-            if (valueType is InputObjectType input)
-                return CoerceInputValue(
-                    getInputObjectFields,
-                    getValueConverter,
+            return valueTypeDefinition switch
+            {
+                ScalarDefinition scalar => CoerceScalarValue(schema, value, scalar),
+                EnumDefinition enumDefinition => CoerceEnumValue(value, enumDefinition),
+                InputObjectDefinition input => CoerceInputValue(
+                    schema,
                     value,
-                    input);
-
-            throw new ValueCoercionException(
-                $"Unexpected valueType {valueType}. Cannot coerce value.",
-                value,
-                valueType);
+                    input),
+                _ => throw new ArgumentOutOfRangeException($"Type of the '{valueType} is not supported by value coercion")
+            };
         }
 
         private static IDictionary<string, object?>? CoerceInputValue(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter, 
+            ISchema schema,
             object? value,
-            InputObjectType input)
+            InputObjectDefinition input)
         {
             if (value == null)
                 return null;
@@ -59,11 +62,11 @@ namespace Tanka.GraphQL.Execution
             var result = new Dictionary<string, object?>();
 
             if (value is ObjectValue objectValue)
-                return CoerceInputValueAst(getInputObjectFields, getValueConverter, input, objectValue, result);
+                return CoerceInputValueAst(schema, input, objectValue, result);
 
             if (value is IDictionary<string, object> dictionaryValues)
             {
-                var fields = getInputObjectFields(input.Name);
+                var fields = schema.GetInputFields(input.Name);
                 foreach (var inputField in fields)
                 {
                     var fieldName = inputField.Key;
@@ -74,7 +77,7 @@ namespace Tanka.GraphQL.Execution
 
                     if (dictionaryValues.ContainsKey(fieldName)) astValue = dictionaryValues[fieldName];
 
-                    var coercedFieldValue = CoerceValue(getInputObjectFields, getValueConverter, astValue, fieldType);
+                    var coercedFieldValue = CoerceValue(schema, astValue, fieldType);
 
                     result[fieldName] = coercedFieldValue;
                 }
@@ -84,13 +87,12 @@ namespace Tanka.GraphQL.Execution
         }
 
         private static IDictionary<string, object?> CoerceInputValueAst(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter,
-            InputObjectType input,
+            ISchema schema,
+            InputObjectDefinition input,
             ObjectValue objectValue,
             Dictionary<string, object?> result)
         {
-            var fields = getInputObjectFields(input.Name);
+            var fields = schema.GetInputFields(input.Name);
             foreach (var inputField in fields)
             {
                 var fieldName = inputField.Key;
@@ -98,8 +100,7 @@ namespace Tanka.GraphQL.Execution
                 var fieldType = field.Type;
 
                 var astValue = objectValue.Fields.SingleOrDefault(v => v.Name == fieldName);
-                var coercedFieldValue =
-                    CoerceValue(getInputObjectFields, getValueConverter, astValue?.Value, fieldType);
+                var coercedFieldValue = CoerceValue(schema, astValue?.Value, fieldType);
 
                 result[fieldName] = coercedFieldValue;
             }
@@ -107,35 +108,34 @@ namespace Tanka.GraphQL.Execution
             return result;
         }
 
-        private static object CoerceNonNullValue(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter,
-            object value,
-            NonNull nonNull)
+        private static object CoerceNonNullTypeValue(
+            ISchema schema,
+            object? value,
+            NonNullType NonNullType)
         {
-            var coercedValue = CoerceValue(getInputObjectFields, getValueConverter, value, nonNull.OfType);
+            var coercedValue = CoerceValue(schema, value, NonNullType.OfType);
             if (coercedValue == null)
                 throw new ValueCoercionException("Coerced value is null",
                     value,
-                    nonNull);
+                    NonNullType);
 
             return coercedValue;
         }
 
-        private static object? CoerceEnumValue(object value, EnumType enumType1)
+        private static object? CoerceEnumValue(object? value, EnumDefinition enumType)
         {
             if (value is ValueBase astValue)
-                return enumType1.ParseLiteral(astValue);
+                return new EnumConverter(enumType).ParseLiteral(astValue);
 
-            return enumType1.ParseValue(value);
+            return new EnumConverter(enumType).ParseValue(value);
         }
 
         private static object? CoerceScalarValue(
-            Func<string, IValueConverter> getValueConverter,
-            object value,
-            ScalarType scalarType)
+            ISchema schema,
+            object? value,
+            ScalarDefinition scalarType)
         {
-            var serializer = getValueConverter(scalarType.Name);
+            var serializer = schema.GetRequiredValueConverter(scalarType.Name);
 
             if (value is ValueBase astValue)
                 return serializer.ParseLiteral(astValue);
@@ -144,10 +144,9 @@ namespace Tanka.GraphQL.Execution
         }
 
         private static object? CoerceListValues(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter,
-            IType listWrappedType,
-            object value)
+            ISchema schema,
+            TypeBase listWrappedType,
+            object? value)
         {
             if (value == null)
                 return null;
@@ -157,7 +156,7 @@ namespace Tanka.GraphQL.Execution
             {
                 foreach (var listValueValue in listValue.Values)
                 {
-                    var coercedValue = CoerceValue(getInputObjectFields, getValueConverter, listValueValue,
+                    var coercedValue = CoerceValue(schema, listValueValue,
                         listWrappedType);
                     coercedListValues.Add(coercedValue);
                 }
@@ -169,14 +168,14 @@ namespace Tanka.GraphQL.Execution
             {
                 foreach (var v in values)
                 {
-                    var coercedValue = CoerceValue(getInputObjectFields, getValueConverter, v, listWrappedType);
+                    var coercedValue = CoerceValue(schema, v, listWrappedType);
                     coercedListValues.Add(coercedValue);
                 }
 
                 return coercedListValues;
             }
 
-            coercedListValues.Add(CoerceValue(getInputObjectFields, getValueConverter, value, listWrappedType));
+            coercedListValues.Add(CoerceValue(schema, value, listWrappedType));
             return coercedListValues.ToArray();
         }
     }

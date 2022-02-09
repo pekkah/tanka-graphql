@@ -1,12 +1,9 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes
 {
     public sealed class NamedType : TypeBase
     {
-        public override NodeKind Kind => NodeKind.NamedType;
-        public override Location? Location {get;}
         public readonly Name Name;
 
         public NamedType(
@@ -16,6 +13,9 @@ namespace Tanka.GraphQL.Language.Nodes
             Name = name;
             Location = location;
         }
+
+        public override NodeKind Kind => NodeKind.NamedType;
+        public override Location? Location { get; }
 
         public static implicit operator NamedType(string value)
         {

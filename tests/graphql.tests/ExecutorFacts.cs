@@ -3,20 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Tests.Data;
-using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Tanka.GraphQL.Tests
+namespace Tanka.GraphQL.Tests;
+
+public class ExecutorFacts
 {
-    public class ExecutorFacts
-    {
-        public const string Sdl = @"
+    public const string Sdl = @"
                 enum EventType {
                     INSERT
                     UPDATE
@@ -64,116 +62,101 @@ namespace Tanka.GraphQL.Tests
                 }
                 ";
 
-        public ExecutorFacts(ITestOutputHelper atr)
+    public ExecutorFacts(ITestOutputHelper atr)
+    {
+        Model = new EventsModel();
+        Resolvers = new ResolversMap
         {
-            Model = new EventsModel();
-            Resolvers = new ObjectTypeMap
             {
+                "Success", new FieldResolversMap
                 {
-                    "Success", new FieldResolversMap
-                    {
-                        {"id", Resolve.PropertyOf<EventsModel.Success>(m => m.Id)},
-                        {"event", Resolve.PropertyOf<EventsModel.Success>(m => m.Event)}
-                    }
-                },
+                    { "id", Resolve.PropertyOf<EventsModel.Success>(m => m.Id) },
+                    { "event", Resolve.PropertyOf<EventsModel.Success>(m => m.Event) }
+                }
+            },
+            {
+                "Failure", new FieldResolversMap
                 {
-                    "Failure", new FieldResolversMap
-                    {
-                        {"message", Resolve.PropertyOf<EventsModel.Failure>(m => m.Message)}
-                    }
-                },
+                    { "message", Resolve.PropertyOf<EventsModel.Failure>(m => m.Message) }
+                }
+            },
+            {
+                "Event", new FieldResolversMap
                 {
-                    "Event", new FieldResolversMap
-                    {
-                        {"id", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Id)},
-                        {"type", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Type)},
-                        {"payload", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Payload)}
-                    }
-                },
+                    { "id", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Id) },
+                    { "type", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Type) },
+                    { "payload", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Payload) }
+                }
+            },
+            {
+                "NewEvent", new FieldResolversMap
                 {
-                    "NewEvent", new FieldResolversMap
-                    {
-                        {"type", Resolve.PropertyOf<EventsModel.NewEvent>(type => type.Type)},
-                        {"payload", Resolve.PropertyOf<EventsModel.NewEvent>(type => type.Payload)}
-                    }
-                },
+                    { "type", Resolve.PropertyOf<EventsModel.NewEvent>(type => type.Type) },
+                    { "payload", Resolve.PropertyOf<EventsModel.NewEvent>(type => type.Payload) }
+                }
+            },
+            {
+                "Query", new FieldResolversMap
                 {
-                    "Query", new FieldResolversMap
-                    {
-                        {"events", context => new ValueTask<IResolverResult>(Resolve.As(Model.Events))}
-                    }
-                },
+                    { "events", context => new ValueTask<IResolverResult>(Resolve.As(Model.Events)) }
+                }
+            },
+            {
+                "Mutation", new FieldResolversMap
                 {
-                    "Mutation", new FieldResolversMap
                     {
+                        "create", async context =>
                         {
-                            "create", async context =>
-                            {
-                                var newEvent = context.GetObjectArgument<EventsModel.NewEvent>("event");
+                            var newEvent = context.GetObjectArgument<EventsModel.NewEvent>("event");
 
-                                if (newEvent.Payload == null)
-                                    return Resolve.As(
-                                        context.ExecutionContext.Schema.GetNamedType<ObjectType>("Failure"),
-                                        new EventsModel.Failure("Payload should be given"));
-
-                                var id = await Model.AddAsync(newEvent);
-                                var ev = Model.Events.Single(e => e.Id == id);
-
+                            if (newEvent.Payload == null)
                                 return Resolve.As(
-                                    context.ExecutionContext.Schema.GetNamedType<ObjectType>("Success"),
-                                    new EventsModel.Success(id, ev));
-                            }
-                        }
-                    }
-                },
-                {
-                    "Subscription", new FieldResolversMap
-                    {
-                        {
-                            "events", async (context, unsubscribe) =>
-                            {
-                                await Task.Delay(0);
-                                var source = Model.Subscribe(unsubscribe);
-                                return source;
-                            },
-                            context => new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue))
+                                    context.ExecutionContext.Schema.GetRequiredNamedType<ObjectDefinition>("Failure"),
+                                    new EventsModel.Failure("Payload should be given"));
+
+                            var id = await Model.AddAsync(newEvent);
+                            var ev = Model.Events.Single(e => e.Id == id);
+
+                            return Resolve.As(
+                                context.ExecutionContext.Schema.GetRequiredNamedType<ObjectDefinition>("Success"),
+                                new EventsModel.Success(id, ev));
                         }
                     }
                 }
-            };
-
-            Schema = SchemaTools.MakeExecutableSchema(
-                new SchemaBuilder().Sdl(Sdl),
-                Resolvers,
-                Resolvers);
-        }
-
-        public ObjectTypeMap Resolvers { get; set; }
-
-        public EventsModel Model { get; set; }
-
-        public ISchema Schema { get; set; }
-
-        private static Dictionary<string, object> NewEvent(EventsModel.EventType type, string payload)
-        {
-            return new Dictionary<string, object>
+            },
             {
+                "Subscription", new FieldResolversMap
                 {
-                    "event", new Dictionary<string, object>
                     {
-                        {"type", type},
-                        {"payload", payload}
+                        "events", async (context, unsubscribe) =>
+                        {
+                            await Task.Delay(0);
+                            var source = Model.Subscribe(unsubscribe);
+                            return source;
+                        },
+                        context => new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue))
                     }
                 }
-            };
-        }
+            }
+        };
 
-        [Fact]
-        public async Task Mutation1()
-        {
-            /* Given */
-            var mutation = Parser.ParseDocument(
-                @"mutation AddEvent($event: NewEvent!) {
+        Schema = new SchemaBuilder()
+            .Add((TypeSystemDocument)Sdl)
+            .Build(Resolvers, Resolvers).Result;
+    }
+
+    public EventsModel Model { get; set; }
+
+    public ResolversMap Resolvers { get; set; }
+
+    public ISchema Schema { get; set; }
+
+    [Fact]
+    public async Task Mutation1()
+    {
+        /* Given */
+        var mutation = 
+            @"mutation AddEvent($event: NewEvent!) {
                     create(event: $event) {
                         __typename
                         ...on Success {
@@ -187,21 +170,21 @@ namespace Tanka.GraphQL.Tests
                             message
                         }
                     }
-                }");
+                }";
 
-            var variables = NewEvent(EventsModel.EventType.INSERT, "payload");
+        var variables = NewEvent(EventsModel.EventType.INSERT, "payload");
 
-            /* When */
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Schema = Schema,
-                Document = mutation,
-                VariableValues = variables
-            });
+        /* When */
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = Schema,
+            Document = mutation,
+            VariableValues = variables
+        });
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""create"": {
                       ""__typename"": ""Success"",
@@ -212,14 +195,14 @@ namespace Tanka.GraphQL.Tests
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Mutation2()
-        {
-            /* Given */
-            var mutation = Parser.ParseDocument(
-                @"mutation AddEvent($event: NewEvent!) {
+    [Fact]
+    public async Task Mutation2()
+    {
+        /* Given */
+        var mutation = 
+            @"mutation AddEvent($event: NewEvent!) {
                     create(event: $event) {
                         __typename
                         ...on Success {
@@ -230,21 +213,21 @@ namespace Tanka.GraphQL.Tests
                             message
                         }
                     }
-                }");
+                }";
 
-            var variables = NewEvent(EventsModel.EventType.INSERT, null);
+        var variables = NewEvent(EventsModel.EventType.INSERT, null);
 
-            /* When */
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Schema = Schema,
-                Document = mutation,
-                VariableValues = variables
-            });
+        /* When */
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = Schema,
+            Document = mutation,
+            VariableValues = variables
+        });
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""create"": {
                       ""__typename"": ""Failure"",
@@ -252,44 +235,44 @@ namespace Tanka.GraphQL.Tests
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Query()
+    [Fact]
+    public async Task Query()
+    {
+        /* Given */
+        await Model.AddAsync(new EventsModel.NewEvent
         {
-            /* Given */
-            await Model.AddAsync(new EventsModel.NewEvent()
-            {
-                Type = EventsModel.EventType.DELETE,
-                Payload = "payload1"
-            });
+            Type = EventsModel.EventType.DELETE,
+            Payload = "payload1"
+        });
 
-            await Model.AddAsync(new EventsModel.NewEvent()
-            {
-                Type = EventsModel.EventType.UPDATE,
-                Payload = "payload2"
-            });
+        await Model.AddAsync(new EventsModel.NewEvent
+        {
+            Type = EventsModel.EventType.UPDATE,
+            Payload = "payload2"
+        });
 
-            var query = Parser.ParseDocument(
-                @"{
+        var query =
+            @"{
                     events {
                         __typename
                         id
                         type
                         payload
                     }
-                }");
+                }";
 
-            /* When */
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Schema = Schema,
-                Document = query
-            });
+        /* When */
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = Schema,
+            Document = query
+        });
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""events"": [
                       {
@@ -307,45 +290,45 @@ namespace Tanka.GraphQL.Tests
                     ]
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Subscription()
-        {
-            /* Given */
-            var subscription = Parser.ParseDocument(
-                @"subscription {
+    [Fact]
+    public async Task Subscription()
+    {
+        /* Given */
+        var subscription =
+            @"subscription {
                     events {
                         __typename
                         id
                         type
                         payload
                     }
-                }");
+                }";
 
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-            /* When */
-            var result = await Executor.SubscribeAsync(new ExecutionOptions()
-            {
-                Schema = Schema,
-                Document = subscription
-            }, cts.Token);
+        /* When */
+        var result = await Executor.SubscribeAsync(new ExecutionOptions
+        {
+            Schema = Schema,
+            Document = subscription
+        }, cts.Token);
 
-            await Model.AddAsync(new EventsModel.NewEvent()
-            {
-                Type = EventsModel.EventType.DELETE,
-                Payload = "payload1"
-            });
+        await Model.AddAsync(new EventsModel.NewEvent
+        {
+            Type = EventsModel.EventType.DELETE,
+            Payload = "payload1"
+        });
 
-            var ev = await result.Source.Reader.ReadAsync(cts.Token);
+        var ev = await result.Source.Reader.ReadAsync(cts.Token);
 
-            // unsubscribe
-            cts.Cancel();
+        // unsubscribe
+        cts.Cancel();
 
-            /* Then */
-            ev.ShouldMatchJson(
-                @"{
+        /* Then */
+        ev.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""events"": {
                       ""type"": ""DELETE"",
@@ -355,6 +338,19 @@ namespace Tanka.GraphQL.Tests
                     }
                   }
                 }");
-        }
+    }
+
+    private static Dictionary<string, object> NewEvent(EventsModel.EventType type, string payload)
+    {
+        return new Dictionary<string, object>
+        {
+            {
+                "event", new Dictionary<string, object>
+                {
+                    { "type", type },
+                    { "payload", payload }
+                }
+            }
+        };
     }
 }

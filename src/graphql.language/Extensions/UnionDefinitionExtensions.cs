@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -6,10 +7,17 @@ namespace Tanka.GraphQL.Language
 {
     public static class UnionDefinitionExtensions
     {
+        public static bool HasMember(
+            this UnionDefinition definition,
+            Name name)
+        {
+            return definition.Members?.Any(m => m.Name == name) == true;
+        }
+
         public static UnionDefinition WithDescription(this UnionDefinition definition,
             in StringValue? description)
         {
-            return new(
+            return new UnionDefinition(
                 description,
                 definition.Name,
                 definition.Directives,
@@ -20,7 +28,7 @@ namespace Tanka.GraphQL.Language
         public static UnionDefinition WithName(this UnionDefinition definition,
             in Name name)
         {
-            return new(
+            return new UnionDefinition(
                 definition.Description,
                 name,
                 definition.Directives,
@@ -31,7 +39,7 @@ namespace Tanka.GraphQL.Language
         public static UnionDefinition WithDirectives(this UnionDefinition definition,
             IReadOnlyList<Directive>? directives)
         {
-            return new(
+            return new UnionDefinition(
                 definition.Description,
                 definition.Name,
                 Directives.From(directives),
@@ -42,7 +50,7 @@ namespace Tanka.GraphQL.Language
         public static UnionDefinition WithMembers(this UnionDefinition definition,
             IReadOnlyList<NamedType>? members)
         {
-            return new(
+            return new UnionDefinition(
                 definition.Description,
                 definition.Name,
                 definition.Directives,

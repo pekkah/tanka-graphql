@@ -20,10 +20,10 @@ namespace Tanka.GraphQL.Execution
             foreach (var variableDefinition in variableDefinitions)
             {
                 var variableName = variableDefinition.Variable.Name;
-                var variableType = Ast.TypeFromAst(schema, variableDefinition.Type);
+                var variableType = variableDefinition.Type;
 
                 //  should be assert?
-                if (!TypeIs.IsInputType(variableType))
+                if (!TypeIs.IsInputType(schema, variableType))
                     throw new VariableException($"Variable is not of input type", variableName, variableType);
 
                 var defaultValue = variableDefinition.DefaultValue;
@@ -33,7 +33,7 @@ namespace Tanka.GraphQL.Execution
                 if (!hasValue && defaultValue != null) 
                     coercedValues[variableName] = defaultValue;
 
-                if (variableType is NonNull
+                if (variableType is NonNullType
                     && (!hasValue || value == null))
                     throw new ValueCoercionException(
                         $"Variable {variableName} type is non-nullable but value is null or not set",
@@ -46,8 +46,7 @@ namespace Tanka.GraphQL.Execution
                         coercedValues[variableName] = null;
                     else
                         coercedValues[variableName] = Values.CoerceValue(
-                            schema.GetInputFields,
-                            schema.GetValueConverter,
+                            schema,
                             value,
                             variableType);
                 }
