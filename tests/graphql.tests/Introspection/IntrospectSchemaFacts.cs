@@ -1,10 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Tanka.GraphQL.Introspection;
-using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.TypeSystem;
 using Xunit;
-using static Tanka.GraphQL.Parser;
 
 // ReSharper disable InconsistentNaming
 
@@ -15,64 +13,64 @@ namespace Tanka.GraphQL.Tests.Introspection
         public IntrospectSchemaFacts()
         {
             var builder = new SchemaBuilder();
+            builder.Add(@"
 
-            builder.Interface("Interface", out var interface1,
-                    "Description")
-                .Connections(connect => connect
-                    .Field(interface1, ScalarFieldName, ScalarType.Int));
+""""""Description""""""
+interface Interface 
+{
+    int: Int    
+}
 
-            builder.Object(ObjectTypeName, out var type1,
-                    "Description",
-                    new[] {interface1})
-                .Connections(connect => connect
-                    .Field(type1, ScalarFieldName, ScalarType.NonNullInt,
-                        "Description",
-                        args: args => args.Arg("arg1", ScalarType.Float, 1d, "Description")));
+""""""Description""""""
+type Object implements Interface
+{
+    int: Int
+    """"""Description""""""
+    nonNullInt(arg1: Float = 1): Int!
+}
 
-            builder.Object($"{ObjectTypeName}2", out var type2,
-                    "Description")
-                .Connections(connect => connect
-                    .Field(type2, ScalarFieldName, new List(ScalarType.Int)));
+type Object2 
+{
+    int: [Int]
+}
+
+""""""Description""""""
+union Union = Object | Object2
+
+""""""Description""""""
+enum Enum {
+    """"""Description""""""
+    VALUE1
+    
+    """"""Description""""""
+    VALUE2 @deprecated(reason: ""reason"")
+}
+
+""""""Description""""""
+input InputObject 
+{
+    """"""Description""""""
+    field1: Boolean = true
+}
+
+type Query {
+    object: Object
+    union: Union
+    enum: Enum
+    listOfObjects: [Object2]
+    nonNullObject: Object1!
+
+    """"""Description""""""
+    inputObjectArg(arg1: InputObject): Boolean!
+}
+
+type Mutation {}
+type Subscription {}
+");
 
 
-            var union = new UnionType(
-                "Union",
-                new[] {type1, type2},
-                "Description");
-
-            builder.Include(union);
-
-            var enum1 = new EnumType(
-                "Enum",
-                new EnumValues
-                {
-                    {"value1", "Description"},
-                    {"value2", "Description", null, "Deprecated"}
-                },
-                "Description");
-
-            builder.Include(enum1);
-
-            builder.InputObject("InputObject", out var inputObject,
-                    "Description")
-                .Connections(connect => connect
-                    .InputField(inputObject, "field1", ScalarType.Boolean, true, "Description"));
-
-            builder.Query(out var query)
-                .Connections(connect => connect
-                    .Field(query, "object", type1)
-                    .Field(query, "union", union)
-                    .Field(query, "enum", enum1)
-                    .Field(query, "listOfObjects", new List(type2))
-                    .Field(query, "nonNullObject", new NonNull(type1))
-                    .Field(query, "inputObjectArg", ScalarType.NonNullBoolean,
-                        args: args => args.Arg("arg1", inputObject, default, "With inputObject arg")));
-
-            builder.Mutation(out var mutation);
-            builder.Subscription(out var subscription);
-
-            var sourceSchema = builder.Build();
-            _introspectionSchema = Introspect.Schema(sourceSchema);
+            var sourceSchema = builder.Build(new SchemaBuildOptions()).Result;
+            _introspectionSchema = Introspect.Schema(sourceSchema).Result;
         }
 
         private readonly ISchema _introspectionSchema;
@@ -85,7 +83,8 @@ namespace Tanka.GraphQL.Tests.Introspection
             return await Executor.ExecuteAsync(new ExecutionOptions
             {
                 Schema = _introspectionSchema,
-                Document = ParseDocument(query)
+                Document = query,
+                IncludeExceptionDetails = true
             });
         }
 
@@ -105,22 +104,27 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__schema"": {
-                      ""directives"": [
-                        {
-                          ""name"": ""include""
-                        },
-                        {
-                          ""name"": ""skip""
-                        },
-                        {
-                          ""name"": ""deprecated""
-                        }
-                      ]
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__schema"": {
+      ""directives"": [
+        {
+          ""name"": ""deprecated""
+        },
+        {
+          ""name"": ""include""
+        },
+        {
+          ""name"": ""skip""
+        },
+        {
+          ""name"": ""specifiedBy""
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
 
         [Fact]
@@ -173,55 +177,57 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__schema"": {
-                      ""types"": [
-                        {
-                          ""name"": ""String""
-                        },
-                        {
-                          ""name"": ""Int""
-                        },
-                        {
-                          ""name"": ""Float""
-                        },
-                        {
-                          ""name"": ""Boolean""
-                        },
-                        {
-                          ""name"": ""ID""
-                        },
-                        {
-                          ""name"": ""Interface""
-                        },
-                        {
-                          ""name"": ""Object""
-                        },
-                        {
-                          ""name"": ""Object2""
-                        },
-                        {
-                          ""name"": ""Union""
-                        },
-                        {
-                          ""name"": ""Enum""
-                        },
-                        {
-                          ""name"": ""InputObject""
-                        },
-                        {
-                          ""name"": ""Query""
-                        },
-                        {
-                          ""name"": ""Mutation""
-                        },
-                        {
-                          ""name"": ""Subscription""
-                        }
-                      ]
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__schema"": {
+      ""types"": [
+        {
+          ""name"": ""Boolean""
+        },
+        {
+          ""name"": ""Enum""
+        },
+        {
+          ""name"": ""Float""
+        },
+        {
+          ""name"": ""ID""
+        },
+        {
+          ""name"": ""InputObject""
+        },
+        {
+          ""name"": ""Int""
+        },
+        {
+          ""name"": ""Interface""
+        },
+        {
+          ""name"": ""Mutation""
+        },
+        {
+          ""name"": ""Object""
+        },
+        {
+          ""name"": ""Object2""
+        },
+        {
+          ""name"": ""Query""
+        },
+        {
+          ""name"": ""String""
+        },
+        {
+          ""name"": ""Subscription""
+        },
+        {
+          ""name"": ""Union""
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
 
         [Fact]
@@ -245,54 +251,68 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__schema"": {
-                      ""directives"": [
-                        {
-                          ""locations"": [
-                            ""FIELD"",
-                            ""FRAGMENT_SPREAD"",
-                            ""INLINE_FRAGMENT""
-                          ],
-                          ""description"": """",
-                          ""name"": ""include"",
-                          ""args"": [
-                            {
-                              ""name"": ""if""
-                            }
-                          ]
-                        },
-                        {
-                          ""locations"": [
-                            ""FIELD"",
-                            ""FRAGMENT_SPREAD"",
-                            ""INLINE_FRAGMENT""
-                          ],
-                          ""description"": """",
-                          ""name"": ""skip"",
-                          ""args"": [
-                            {
-                              ""name"": ""if""
-                            }
-                          ]
-                        },
-                        {
-                          ""name"": ""deprecated"",
-                          ""description"": """",
-                          ""locations"": [
-                            ""FIELD_DEFINITION"",
-                            ""ENUM_VALUE""
-                          ],
-                          ""args"": [
-                            {
-                              ""name"": ""reason""
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__schema"": {
+      ""directives"": [
+        {
+          ""name"": ""deprecated"",
+          ""description"": null,
+          ""locations"": [
+            ""FIELD_DEFINITION"",
+            ""ENUM_VALUE""
+          ],
+          ""args"": [
+            {
+              ""name"": ""reason""
+            }
+          ]
+        },
+        {
+          ""name"": ""include"",
+          ""description"": null,
+          ""locations"": [
+            ""FIELD"",
+            ""FRAGMENT_SPREAD"",
+            ""INLINE_FRAGMENT""
+          ],
+          ""args"": [
+            {
+              ""name"": ""if""
+            }
+          ]
+        },
+        {
+          ""name"": ""skip"",
+          ""description"": null,
+          ""locations"": [
+            ""FIELD"",
+            ""FRAGMENT_SPREAD"",
+            ""INLINE_FRAGMENT""
+          ],
+          ""args"": [
+            {
+              ""name"": ""if""
+            }
+          ]
+        },
+        {
+          ""name"": ""specifiedBy"",
+          ""description"": null,
+          ""locations"": [
+            ""SCALAR""
+          ],
+          ""args"": [
+            {
+              ""name"": ""url""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
 
         [Fact]
@@ -320,22 +340,24 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""description"": ""Description"",
-                      ""name"": ""Enum"",
-                      ""enumValues"": [
-                        {
-                          ""description"": ""Description"",
-                          ""name"": ""VALUE1"",
-                          ""isDeprecated"": false,
-                          ""deprecationReason"": null
-                        }
-                      ],
-                      ""kind"": ""ENUM""
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""ENUM"",
+      ""name"": ""Enum"",
+      ""description"": ""Description"",
+      ""enumValues"": [
+        {
+          ""name"": ""VALUE1"",
+          ""description"": ""Description"",
+          ""isDeprecated"": false,
+          ""deprecationReason"": null
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
 
         [Fact]
@@ -362,28 +384,30 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""name"": ""Enum"",
-                      ""enumValues"": [
-                        {
-                          ""isDeprecated"": false,
-                          ""name"": ""VALUE1"",
-                          ""description"": ""Description"",
-                          ""deprecationReason"": null
-                        },
-                        {
-                          ""isDeprecated"": true,
-                          ""name"": ""VALUE2"",
-                          ""description"": ""Description"",
-                          ""deprecationReason"": ""Deprecated""
-                        }
-                      ],
-                      ""description"": ""Description"",
-                      ""kind"": ""ENUM""
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""ENUM"",
+      ""name"": ""Enum"",
+      ""description"": ""Description"",
+      ""enumValues"": [
+        {
+          ""name"": ""VALUE1"",
+          ""description"": ""Description"",
+          ""isDeprecated"": false,
+          ""deprecationReason"": null
+        },
+        {
+          ""name"": ""VALUE2"",
+          ""description"": ""Description"",
+          ""isDeprecated"": true,
+          ""deprecationReason"": ""reason""
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
 
         [Fact]
@@ -404,14 +428,16 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""name"": ""InputObject"",
-                      ""description"": ""Description"",
-                      ""kind"": ""INPUT_OBJECT""
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""INPUT_OBJECT"",
+      ""name"": ""InputObject"",
+      ""description"": ""Description""
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
 
         [Fact]
@@ -513,24 +539,29 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""interfaces"": [
-                        {
-                          ""name"": ""Interface""
-                        }
-                      ],
-                      ""fields"": [
-                        {
-                          ""name"": ""int""
-                        }
-                      ],
-                      ""kind"": ""OBJECT"",
-                      ""description"": ""Description"",
-                      ""name"": ""Object""
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""OBJECT"",
+      ""name"": ""Object"",
+      ""description"": ""Description"",
+      ""fields"": [
+        {
+          ""name"": ""int""
+        },
+        {
+          ""name"": ""nonNullInt""
+        }
+      ],
+      ""interfaces"": [
+        {
+          ""name"": ""Interface""
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
 
         [Fact]
@@ -556,31 +587,45 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""fields"": [
-                        {
-                          ""description"": ""Description"",
-                          ""name"": ""int"",
-                          ""isDeprecated"": false,
-                          ""args"": [
-                            {
-                              ""name"": ""arg1""
-                            }
-                          ],
-                          ""deprecationReason"": null,
-                          ""type"": {
-                            ""name"": null,
-                            ""kind"": ""NON_NULL"",
-                            ""ofType"": {
-                              ""name"": ""Int""
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__type"": {
+      ""fields"": [
+        {
+          ""name"": ""int"",
+          ""description"": null,
+          ""isDeprecated"": false,
+          ""deprecationReason"": null,
+          ""type"": {
+            ""name"": ""Int"",
+            ""kind"": ""SCALAR"",
+            ""ofType"": null
+          },
+          ""args"": []
+        },
+        {
+          ""name"": ""nonNullInt"",
+          ""description"": ""Description"",
+          ""isDeprecated"": false,
+          ""deprecationReason"": null,
+          ""type"": {
+            ""name"": null,
+            ""kind"": ""NON_NULL"",
+            ""ofType"": {
+              ""name"": ""Int""
+            }
+          },
+          ""args"": [
+            {
+              ""name"": ""arg1""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
 
         [Fact]
@@ -606,25 +651,30 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""fields"": [
-                        {
-                          ""args"": [
-                            {
-                              ""name"": ""arg1"",
-                              ""defaultValue"": ""1"",
-                              ""type"": {
-                                ""name"": ""Float""
-                              },
-                              ""description"": ""Description""
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__type"": {
+      ""fields"": [
+        {
+          ""args"": []
+        },
+        {
+          ""args"": [
+            {
+              ""name"": ""arg1"",
+              ""description"": null,
+              ""type"": {
+                ""name"": ""Float""
+              },
+              ""defaultValue"": ""1""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
 
         [Fact]
@@ -674,22 +724,24 @@ namespace Tanka.GraphQL.Tests.Introspection
             /* Then */
             result.ShouldMatchJson(
                 @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""kind"": ""UNION"",
-                      ""description"": ""Description"",
-                      ""possibleTypes"": [
-                        {
-                          ""name"": ""Object""
-                        },
-                        {
-                          ""name"": ""Object2""
-                        }
-                      ],
-                      ""name"": ""Union""
-                    }
-                  }
-                }");
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""UNION"",
+      ""name"": ""Union"",
+      ""description"": ""Description"",
+      ""possibleTypes"": [
+        {
+          ""name"": ""Object""
+        },
+        {
+          ""name"": ""Object2""
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
         }
     }
 }

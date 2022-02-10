@@ -16,7 +16,7 @@ namespace Tanka.GraphQL.Execution
             Argument? argument)
         {
             var argumentType = argumentDefinition.Type;
-            var defaultValue = argumentDefinition.DefaultValue;
+            var defaultValue = argumentDefinition.DefaultValue?.Value;
             var argumentValue = argument?.Value;
 
             var hasValue = argumentValue != null;
@@ -61,7 +61,10 @@ namespace Tanka.GraphQL.Execution
                 return coercedValue;
             }
 
-            return defaultValue;
+            return Values.CoerceValue(
+                schema,
+                defaultValue,
+                argumentType);
         }
 
         public static IReadOnlyDictionary<string, object?> CoerceArgumentValues(

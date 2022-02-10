@@ -1,121 +1,119 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.ValueResolution
+namespace Tanka.GraphQL.Tests.ValueResolution;
+
+public class ResolverBuilderFacts
 {
-    public class ResolverBuilderFacts
+    [Fact]
+    public async Task Should_chain_in_order1()
     {
-        [Fact]
-        public async Task Should_chain_in_order1()
+        /* Given */
+        var values = new List<int>();
+        var builder = new ResolverBuilder();
+        builder.Use((context, next) =>
         {
-            /* Given */
-            var values = new List<int>();
-            var builder = new ResolverBuilder();
-            builder.Use((context, next) =>
-            {
-                values.Add(0);
-                return next(context);
-            });
+            values.Add(0);
+            return next(context);
+        });
 
-            builder.Use((context, next) =>
-            {
-                values.Add(1);
-                return next(context);
-            });
-
-            builder.Use((context, next) =>
-            {
-                values.Add(2);
-                return next(context);
-            });
-
-            builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
-
-            /* When */
-            var resolver = builder.Build();
-            await resolver(null);
-
-            /* Then */
-            Assert.Equal(new[] {0, 1, 2}, values.ToArray());
-        }
-
-        [Fact]
-        public async Task Should_chain_in_order2()
+        builder.Use((context, next) =>
         {
-            /* Given */
-            var values = new List<int>();
-            var builder = new ResolverBuilder();
-            builder.Use((context, next) =>
-            {
-                values.Add(0);
-                return next(context);
-            });
+            values.Add(1);
+            return next(context);
+        });
 
-            builder.Use((context, next) =>
-            {
-                var result = next(context);
-                values.Add(1);
-                return result;
-            });
-
-            builder.Use((context, next) =>
-            {
-                values.Add(2);
-                return next(context);
-            });
-
-            builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
-
-            /* When */
-            var resolver = builder.Build();
-            await resolver(null);
-
-            /* Then */
-            Assert.Equal(new[] {0, 2, 1}, values.ToArray());
-        }
-
-        [Fact]
-        public async Task Should_propagate_resolved_value()
+        builder.Use((context, next) =>
         {
-            /* Given */
-            var builder = new ResolverBuilder();
-            builder
-                .Use((context, next) => next(context))
-                .Use((context, next) => next(context))
-                .Use((context, next) => next(context));
+            values.Add(2);
+            return next(context);
+        });
 
-            builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
+        builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
 
-            /* When */
-            var resolver = builder.Build();
-            var result = await resolver(null);
+        /* When */
+        var resolver = builder.Build();
+        await resolver(null);
 
-            /* Then */
-            Assert.Equal(42, result.Value);
-        }
+        /* Then */
+        Assert.Equal(new[] { 0, 1, 2 }, values.ToArray());
+    }
 
-        [Fact]
-        public void Should_not_call_chain_until_resolver_executed()
+    [Fact]
+    public async Task Should_chain_in_order2()
+    {
+        /* Given */
+        var values = new List<int>();
+        var builder = new ResolverBuilder();
+        builder.Use((context, next) =>
         {
-            /* Given */
-            var values = new List<int>();
-            var builder = new ResolverBuilder();
-            builder.Use((context, next) =>
-            {
-                values.Add(0);
-                return next(context);
-            });
+            values.Add(0);
+            return next(context);
+        });
 
-            builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
+        builder.Use((context, next) =>
+        {
+            var result = next(context);
+            values.Add(1);
+            return result;
+        });
 
-            /* When */
-            builder.Build();
+        builder.Use((context, next) =>
+        {
+            values.Add(2);
+            return next(context);
+        });
 
-            /* Then */
-            Assert.Equal(new int[] {}, values.ToArray());
-        }
+        builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
+
+        /* When */
+        var resolver = builder.Build();
+        await resolver(null);
+
+        /* Then */
+        Assert.Equal(new[] { 0, 2, 1 }, values.ToArray());
+    }
+
+    [Fact]
+    public async Task Should_propagate_resolved_value()
+    {
+        /* Given */
+        var builder = new ResolverBuilder();
+        builder
+            .Use((context, next) => next(context))
+            .Use((context, next) => next(context))
+            .Use((context, next) => next(context));
+
+        builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
+
+        /* When */
+        var resolver = builder.Build();
+        var result = await resolver(null);
+
+        /* Then */
+        Assert.Equal(42, result.Value);
+    }
+
+    [Fact]
+    public void Should_not_call_chain_until_resolver_executed()
+    {
+        /* Given */
+        var values = new List<int>();
+        var builder = new ResolverBuilder();
+        builder.Use((context, next) =>
+        {
+            values.Add(0);
+            return next(context);
+        });
+
+        builder.Run(context => new ValueTask<IResolverResult>(Resolve.As(42)));
+
+        /* When */
+        builder.Build();
+
+        /* Then */
+        Assert.Equal(new int[] { }, values.ToArray());
     }
 }

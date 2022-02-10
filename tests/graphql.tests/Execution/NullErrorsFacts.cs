@@ -1,113 +1,117 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.Tests.Data;
-using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.Execution
+namespace Tanka.GraphQL.Tests.Execution;
+
+public class NullErrorsFacts
 {
-    public class NullErrorsFacts
+    private readonly ISchema _schema;
+
+    public NullErrorsFacts()
     {
-        public NullErrorsFacts()
+        var builder = new SchemaBuilder()
+            .Add(@"
+    type Nest 
+    {
+        nestedNonNull: String!
+    }
+
+    type Query 
+    {
+        nonNull: String!
+        nonNullNested: Nest!
+        nonNullListItem: [String!]
+        nonNullList: [String]!
+        nullableNested: Nest
+        nullable: String
+    }
+    ");
+
+
+        var nestedNonNullData = new Dictionary<string, string>
         {
-            var builder = new SchemaBuilder();
-            builder.Object("Nest", out var nested)
-                .Connections(connect => connect
-                .Field(nested, "nestedNonNull", ScalarType.NonNullString));
+            ["nestedNonNull"] = null
+        };
 
-            builder.Query(out var query)
-                .Connections(connect => connect
-                .Field(query, "nonNull", ScalarType.NonNullString)
-                .Field(query, "nonNullNested", new NonNull(nested))
-                .Field(query, "nonNullListItem", new List(ScalarType.NonNullString))
-                .Field(query, "nonNullList", new NonNull(new List(ScalarType.String)))
-                .Field(query, "nullableNested", nested)
-                .Field(query, "nullable", ScalarType.String));
-
-
-            var nestedNonNullData = new Dictionary<string, string>
+        IResolverMap resolvers = new ResolversMap
+        {
+            ["Query"] = new()
             {
-                ["nestedNonNull"] = null
-            };
-
-            IResolverMap resolvers = new ObjectTypeMap
-            {
-                ["Query"] = new FieldResolversMap
+                { "nonNull", context => new ValueTask<IResolverResult>(Resolve.As(null)) },
+                { "nonNullNested", context => new ValueTask<IResolverResult>(Resolve.As(nestedNonNullData)) },
                 {
-                    {"nonNull", context => new ValueTask<IResolverResult>(Resolve.As(null))},
-                    {"nonNullNested", context => new ValueTask<IResolverResult>(Resolve.As(nestedNonNullData))},
-                    {"nonNullListItem", context => new ValueTask<IResolverResult>(Resolve.As(new[] {"str", null, "str"}))},
-                    {"nonNullList", context => new ValueTask<IResolverResult>(Resolve.As(null))},
-                    {"nullableNested", context => new ValueTask<IResolverResult>(Resolve.As(nestedNonNullData))},
-                    {"nullable", context => new ValueTask<IResolverResult>(Resolve.As("hello"))}
+                    "nonNullListItem",
+                    context => new ValueTask<IResolverResult>(Resolve.As(new[] { "str", null, "str" }))
                 },
+                { "nonNullList", context => new ValueTask<IResolverResult>(Resolve.As(null)) },
+                { "nullableNested", context => new ValueTask<IResolverResult>(Resolve.As(nestedNonNullData)) },
+                { "nullable", context => new ValueTask<IResolverResult>(Resolve.As("hello")) }
+            },
 
-                ["Nest"] = new FieldResolversMap
-                {
-                    {"nestedNonNull", Resolve.PropertyOf<Dictionary<string, string>>(d => d["nestedNonNull"])}
-                }
-            };
+            ["Nest"] = new()
+            {
+                { "nestedNonNull", Resolve.PropertyOf<Dictionary<string, string>>(d => d["nestedNonNull"]) }
+            }
+        };
 
-            _schema = SchemaTools.MakeExecutableSchema(
-                builder,
-                resolvers);
-        }
-
-        private readonly ISchema _schema;
+        _schema = builder.Build(resolvers).Result;
+    }
 
 
-        [Fact]
-        public async Task Nested_NonNull_should_produce_error_and_set_graph_to_null()
-        {
-            /* Given */
-            var query = @"
+    [Fact]
+    public async Task Nested_NonNull_should_produce_error_and_set_graph_to_null()
+    {
+        /* Given */
+        var query = @"
 {
     nonNullNested {
        nestedNonNull 
     }
 }";
 
-            /* When */
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Schema = _schema,
-                Document =  Parser.ParseDocument(query)
-            }).ConfigureAwait(false);
-
-
-            /* Then */
-            result.ShouldMatchJson(@"
-                {
-                  ""data"": null,
-                  ""errors"": [
-                    {
-                      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
-                      ""locations"": [
-                        {
-                          ""line"": 4,
-                          ""column"": 9
-                        }
-                      ],
-                      ""path"": [
-                        ""nonNullNested"",
-                        ""nestedNonNull""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""NULLVALUEFORNONNULL""
-                      }
-                    }
-                  ]
-                }");
-        }
-
-        [Fact]
-        public async Task Nested_Nullable_NonNull_and_nullable_should_produce_error()
+        /* When */
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
         {
-            /* Given */
-            var query = @"
+            Schema = _schema,
+            Document = query
+        }).ConfigureAwait(false);
+
+
+        /* Then */
+        result.ShouldMatchJson(@"
+                {
+  ""data"": null,
+  ""extensions"": null,
+  ""errors"": [
+    {
+      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
+      ""locations"": [
+        {
+          ""line"": 4,
+          ""column"": 9
+        }
+      ],
+      ""path"": [
+        ""nonNullNested"",
+        ""nestedNonNull""
+      ],
+      ""extensions"": {
+        ""code"": ""NULLVALUEFORNONNULLTYPE""
+      }
+    }
+  ]
+}");
+    }
+
+    [Fact]
+    public async Task Nested_Nullable_NonNull_and_nullable_should_produce_error()
+    {
+        /* Given */
+        var query = @"
 {
     nullable
     nullableNested {
@@ -115,127 +119,129 @@ namespace Tanka.GraphQL.Tests.Execution
     }
 }";
 
-            /* When */
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Schema = _schema,
-                Document =  Parser.ParseDocument(query)
-            }).ConfigureAwait(false);
-
-
-            /* Then */
-            result.ShouldMatchJson(@"
-                {
-                  ""data"": {
-                    ""nullableNested"": null,
-                    ""nullable"": ""hello""
-                  },
-                  ""errors"": [
-                    {
-                      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
-                      ""locations"": [
-                        {
-                          ""line"": 5,
-                          ""column"": 10
-                        }
-                      ],
-                      ""path"": [
-                        ""nullableNested"",
-                        ""nestedNonNull""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""NULLVALUEFORNONNULL""
-                      }
-                    }
-                  ]
-                }");
-        }
-
-        [Fact]
-        public async Task Nested_Nullable_NonNull_should_produce_error()
+        /* When */
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
         {
-            /* Given */
-            var query = @"
+            Schema = _schema,
+            Document = query
+        }).ConfigureAwait(false);
+
+
+        /* Then */
+        result.ShouldMatchJson(@"
+                {
+  ""data"": {
+    ""nullable"": ""hello"",
+    ""nullableNested"": null
+  },
+  ""extensions"": null,
+  ""errors"": [
+    {
+      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
+      ""locations"": [
+        {
+          ""line"": 5,
+          ""column"": 10
+        }
+      ],
+      ""path"": [
+        ""nullableNested"",
+        ""nestedNonNull""
+      ],
+      ""extensions"": {
+        ""code"": ""NULLVALUEFORNONNULLTYPE""
+      }
+    }
+  ]
+}");
+    }
+
+    [Fact]
+    public async Task Nested_Nullable_NonNull_should_produce_error()
+    {
+        /* Given */
+        var query = @"
 {
     nullableNested {
        nestedNonNull 
     }
 }";
 
-            /* When */
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Schema = _schema,
-                Document =  Parser.ParseDocument(query)
-            }).ConfigureAwait(false);
-
-
-            /* Then */
-            result.ShouldMatchJson(@"
-                {
-                  ""data"": {
-                    ""nullableNested"": null
-                  },
-                  ""errors"": [
-                    {
-                      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
-                      ""locations"": [
-                        {
-                          ""line"": 4,
-                          ""column"": 9
-                        }
-                      ],
-                      ""path"": [
-                        ""nullableNested"",
-                        ""nestedNonNull""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""NULLVALUEFORNONNULL""
-                      }
-                    }
-                  ]
-                }");
-        }
-
-        [Fact]
-        public async Task NonNull_should_produce_error()
+        /* When */
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
         {
-            /* Given */
-            var query = @"
+            Schema = _schema,
+            Document = query
+        }).ConfigureAwait(false);
+
+
+        /* Then */
+        result.ShouldMatchJson(@"
+                {
+  ""data"": {
+    ""nullableNested"": null
+  },
+  ""extensions"": null,
+  ""errors"": [
+    {
+      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
+      ""locations"": [
+        {
+          ""line"": 4,
+          ""column"": 9
+        }
+      ],
+      ""path"": [
+        ""nullableNested"",
+        ""nestedNonNull""
+      ],
+      ""extensions"": {
+        ""code"": ""NULLVALUEFORNONNULLTYPE""
+      }
+    }
+  ]
+}");
+    }
+
+    [Fact]
+    public async Task NonNull_should_produce_error()
+    {
+        /* Given */
+        var query = @"
 {
     nonNull
 }";
 
-            /* When */
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Schema = _schema,
-                Document =  Parser.ParseDocument(query)
-            }).ConfigureAwait(false);
+        /* When */
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = _schema,
+            Document = query
+        }).ConfigureAwait(false);
 
 
-            /* Then */
-            result.ShouldMatchJson(@"
+        /* Then */
+        result.ShouldMatchJson(@"
                 {
-                  ""data"": null,
-                  ""errors"": [
-                    {
-                      ""message"": ""Cannot return null for non-nullable field 'Query.nonNull'."",
-                      ""locations"": [
-                        {
-                          ""line"": 3,
-                          ""column"": 6
-                        }
-                      ],
-                      ""path"": [
-                        ""nonNull""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""NULLVALUEFORNONNULL""
-                      }
-                    }
-                  ]
-                }");
+  ""data"": null,
+  ""extensions"": null,
+  ""errors"": [
+    {
+      ""message"": ""Cannot return null for non-nullable field 'Query.nonNull'."",
+      ""locations"": [
+        {
+          ""line"": 3,
+          ""column"": 6
         }
+      ],
+      ""path"": [
+        ""nonNull""
+      ],
+      ""extensions"": {
+        ""code"": ""NULLVALUEFORNONNULLTYPE""
+      }
+    }
+  ]
+}");
     }
 }

@@ -110,6 +110,11 @@ enum __DirectiveLocation {
   INPUT_OBJECT
   INPUT_FIELD_DEFINITION
 }
+
+type Query {
+    __type(name: String!): __Type
+    __schema: __Schema
+}
 ");
 
         return builder;

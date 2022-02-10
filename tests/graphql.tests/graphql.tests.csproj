@@ -11,39 +11,34 @@
     <Compile Remove="Analysis\**" />
     <Compile Remove="Bug\**" />
     <Compile Remove="Descriptions\**" />
-    <Compile Remove="Execution\**" />
     <Compile Remove="Extensions\**" />
-    <Compile Remove="Introspection\**" />
     <Compile Remove="Tools\**" />
     <Compile Remove="TypeSystem\**" />
     <Compile Remove="Validation\**" />
-    <Compile Remove="ValueResolution\**" />
     <EmbeddedResource Remove="Analysis\**" />
     <EmbeddedResource Remove="Bug\**" />
     <EmbeddedResource Remove="Descriptions\**" />
-    <EmbeddedResource Remove="Execution\**" />
     <EmbeddedResource Remove="Extensions\**" />
-    <EmbeddedResource Remove="Introspection\**" />
     <EmbeddedResource Remove="Tools\**" />
     <EmbeddedResource Remove="TypeSystem\**" />
     <EmbeddedResource Remove="Validation\**" />
-    <EmbeddedResource Remove="ValueResolution\**" />
     <None Remove="Analysis\**" />
     <None Remove="Bug\**" />
     <None Remove="Descriptions\**" />
-    <None Remove="Execution\**" />
     <None Remove="Extensions\**" />
-    <None Remove="Introspection\**" />
     <None Remove="Tools\**" />
     <None Remove="TypeSystem\**" />
     <None Remove="Validation\**" />
-    <None Remove="ValueResolution\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="ExtensionsRunnerFacts.cs" />
     <Compile Remove="StarwarsFacts.cs" />
     <Compile Remove="SubscriptionsFacts.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Bug\Bug_339.cs" />
   </ItemGroup>
 
   <ItemGroup>

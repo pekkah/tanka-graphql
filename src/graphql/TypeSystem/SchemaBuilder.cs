@@ -216,13 +216,26 @@ directive @specifiedBy(url: String!) on SCALAR
             options.OverrideSubscriptionRootName
         );
 
-        var fields = namedTypeDefinitions
+        var allFields = namedTypeDefinitions
             .Where(kv => kv.Value is ObjectDefinition)
             .ToDictionary(
                 kv => kv.Key,
                 kv => ((ObjectDefinition)kv.Value).Fields?.ToDictionary(field => field.Name.Value, field => field) ??
                       NoFields
             );
+
+        var interfaceFields = namedTypeDefinitions
+            .Where(kv => kv.Value is InterfaceDefinition)
+            .ToDictionary(
+                kv => kv.Key,
+                kv => ((InterfaceDefinition)kv.Value).Fields?.ToDictionary(field => field.Name.Value, field => field) ??
+                      NoFields
+            );
+
+        foreach (var (type,fields) in interfaceFields)
+        {
+            allFields.Add(type, fields);
+        }
 
         var inputFields = namedTypeDefinitions
             .Where(kv => kv.Value is InputObjectDefinition)
@@ -240,7 +253,7 @@ directive @specifiedBy(url: String!) on SCALAR
 
         ISchema schema = new ExecutableSchema(
             namedTypeDefinitions,
-            fields,
+            allFields,
             inputFields,
             _directiveDefinitions.ToDictionary(kv => kv.Key, kv => kv.Value),
             queryRoot,

@@ -26,12 +26,17 @@ namespace Tanka.GraphQL.Execution
                 if (!TypeIs.IsInputType(schema, variableType))
                     throw new VariableException($"Variable is not of input type", variableName, variableType);
 
-                var defaultValue = variableDefinition.DefaultValue;
+                var defaultValue = variableDefinition.DefaultValue?.Value;
                 var hasValue = variableValues.ContainsKey(variableName);
                 var value = hasValue ? variableValues[variableName]: null;
 
-                if (!hasValue && defaultValue != null) 
-                    coercedValues[variableName] = defaultValue;
+                if (!hasValue && defaultValue != null)
+                {
+                    coercedValues[variableName] = Values.CoerceValue(
+                        schema,
+                        defaultValue,
+                        variableType);;
+                }
 
                 if (variableType is NonNullType
                     && (!hasValue || value == null))
