@@ -239,7 +239,7 @@ namespace Tanka.GraphQL.Validation
 
 
         private void CollectFieldsAndFragmentNames(
-            NamedType? parentType,
+            TypeDefinition parentType,
             SelectionSet selectionSet,
             Dictionary<string, List<FieldDefPair>> nodeAndDefs,
             Dictionary<string, bool> fragments)
@@ -274,14 +274,18 @@ namespace Tanka.GraphQL.Validation
                 else if (selection is InlineFragment inlineFragment)
                 {
                     var typeCondition = inlineFragment.TypeCondition;
-                    var inlineFragmentType =
-                        typeCondition ?? parentType;
 
-                    CollectFieldsAndFragmentNames(
-                        inlineFragmentType,
-                        inlineFragment.SelectionSet,
-                        nodeAndDefs,
-                        fragments);
+                    if (typeCondition is not null)
+                    {
+                        var inlineFragmentType =
+                            _context.Schema.GetNamedType(typeCondition.Name) ?? parentType;
+
+                        CollectFieldsAndFragmentNames(
+                            inlineFragmentType,
+                            inlineFragment.SelectionSet,
+                            nodeAndDefs,
+                            fragments);
+                    }
                 }
             }
         }
@@ -323,11 +327,11 @@ namespace Tanka.GraphQL.Validation
             FieldDefPair fieldDefPair1,
             FieldDefPair fieldDefPair2)
         {
-            var parentType1 = fieldDefPair1.ParentType;
+            var parentType1 = _context.Schema.GetNamedType(fieldDefPair1.ParentType.Name);
             var node1 = fieldDefPair1.Field;
             var def1 = fieldDefPair1.FieldDef;
 
-            var parentType2 = fieldDefPair2.ParentType;
+            var parentType2 = _context.Schema.GetNamedType(fieldDefPair2.ParentType.Name);
             var node2 = fieldDefPair2.Field;
             var def2 = fieldDefPair2.FieldDef;
 
@@ -413,9 +417,9 @@ namespace Tanka.GraphQL.Validation
                     cachedFieldsAndFragmentNames,
                     comparedFragmentPairs,
                     areMutuallyExclusive,
-                    type1?.Unwrap(),
+                    Ast.UnwrapAndResolveType(_context.Schema, type1),
                     selectionSet1,
-                    type2?.Unwrap(),
+                    Ast.UnwrapAndResolveType(_context.Schema, type2),
                     selectionSet2);
 
                 return SubfieldConflicts(conflicts, responseName, node1, node2);
@@ -428,9 +432,9 @@ namespace Tanka.GraphQL.Validation
             Dictionary<SelectionSet, CachedField> cachedFieldsAndFragmentNames,
             PairSet comparedFragmentPairs,
             bool areMutuallyExclusive,
-            NamedType? parentType1,
+            TypeDefinition parentType1,
             SelectionSet selectionSet1,
-            NamedType? parentType2,
+            TypeDefinition parentType2,
             SelectionSet selectionSet2)
         {
             var conflicts = new List<Conflict>();
@@ -513,7 +517,7 @@ namespace Tanka.GraphQL.Validation
         private List<Conflict> FindConflictsWithinSelectionSet(
             Dictionary<SelectionSet, CachedField> cachedFieldsAndFragmentNames,
             PairSet comparedFragmentPairs,
-            NamedType? parentType,
+            TypeDefinition parentType,
             SelectionSet selectionSet)
         {
             var conflicts = new List<Conflict>();
@@ -568,7 +572,7 @@ namespace Tanka.GraphQL.Validation
 
         private CachedField GetFieldsAndFragmentNames(
             Dictionary<SelectionSet, CachedField> cachedFieldsAndFragmentNames,
-            NamedType? parentType,
+            TypeDefinition parentType,
             SelectionSet selectionSet)
         {
             cachedFieldsAndFragmentNames.TryGetValue(selectionSet,
@@ -605,18 +609,18 @@ namespace Tanka.GraphQL.Validation
             var fragmentType = fragment.TypeCondition;
             return GetFieldsAndFragmentNames(
                 cachedFieldsAndFragmentNames,
-                fragmentType,
+                _context.Schema.GetNamedType(fragmentType.Name) ?? throw  new InvalidOperationException($"Could not find type '{fragmentType.Name}' from schema."),
                 fragment.SelectionSet);
         }
 
-        private bool IsInterfaceType(NamedType parentType)
+        private bool IsInterfaceType(TypeDefinition? parentType)
         {
-            return _context.Schema.GetNamedType(parentType.Name) is InterfaceDefinition;
+            return parentType is InterfaceDefinition;
         }
 
-        private bool IsObjectDefinition(NamedType? parentType)
+        private bool IsObjectDefinition(TypeDefinition? parentType)
         {
-            return _context.Schema.GetNamedType(parentType.Name) is ObjectDefinition;
+            return parentType is ObjectDefinition;
         }
 
         private static string ReasonMessage(Message reasonMessage)
@@ -751,7 +755,7 @@ namespace Tanka.GraphQL.Validation
             public FieldSelection Field { get; set; }
 
             public FieldDefinition? FieldDef { get; set; }
-            public NamedType? ParentType { get; set; }
+            public TypeDefinition? ParentType { get; set; }
         }
 
         private class Message
