@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Tanka.GraphQL.Language.Nodes;
+﻿using System.Linq;
 using Tanka.GraphQL.Validation;
 using Xunit;
 
@@ -9,319 +7,10 @@ namespace Tanka.GraphQL.Tests.Validation;
 public partial class ValidatorFacts
 {
     [Fact]
-    public void Rule_561_ValuesOfCorrectType_valid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"fragment goodBooleanArg on Arguments {
-                      booleanArgField(booleanArg: true)
-                    }
-
-                    fragment coercedIntIntoFloatArg on Arguments {
-                      # Note: The input coercion rules for Float allow Int literals.
-                      floatArgField(floatArg: 123)
-                    }
-
-                    query goodComplexDefaultValue($search: ComplexInput = { name: ""Fido"" }) {
-                      findDog(complex: $search)
-                    }
-                  ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R561ValuesOfCorrectType());
-
-        /* Then */
-        Assert.True(result.IsValid);
-    }
-
-    [Fact]
-    public void Rule_561_ValuesOfCorrectType_invalid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"fragment stringIntoInt on Arguments {
-                      intArgField(intArg: ""123"")
-                    }"
-        );
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R561ValuesOfCorrectType());
-
-        /* Then */
-        Assert.False(result.IsValid);
-        Assert.Single(
-            result.Errors,
-            error => error.Code == ValidationErrorCodes.R561ValuesOfCorrectType);
-    }
-
-    [Fact]
-    public void Rule_561_ValuesOfCorrectType_invalid2()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"query badComplexValue {
-                      findDog(complex: { name: 123 })
-                    }"
-        );
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R561ValuesOfCorrectType());
-
-        /* Then */
-        Assert.False(result.IsValid);
-        Assert.Single(
-            result.Errors,
-            error => error.Code == ValidationErrorCodes.R561ValuesOfCorrectType);
-    }
-
-    [Fact]
-    public void Rule_562_InputObjectFieldNames_valid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"{
-                      findDog(complex: { name: ""Fido"" })
-                    }
-                  ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R562InputObjectFieldNames());
-
-        /* Then */
-        Assert.True(result.IsValid);
-    }
-
-    [Fact]
-    public void Rule_562_InputObjectFieldNames_invalid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"{
-                      findDog(complex: { favoriteCookieFlavor: ""Bacon"" })
-                    }
-                    ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R562InputObjectFieldNames());
-
-        /* Then */
-        Assert.False(result.IsValid);
-        Assert.Single(
-            result.Errors,
-            error => error.Code == ValidationErrorCodes.R562InputObjectFieldNames);
-    }
-
-    [Fact]
-    public void Rule_563_InputObjectFieldUniqueness_invalid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"{
-                      field(arg: { field: true, field: false })
-                    }
-                 ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R563InputObjectFieldUniqueness());
-
-        /* Then */
-        Assert.False(result.IsValid);
-        Assert.Contains(
-            result.Errors,
-            error => error.Code == ValidationErrorCodes.R563InputObjectFieldUniqueness);
-    }
-
-    [Fact]
-    public void Rule_564_InputObjectRequiredFields_invalid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"{
-                       findDog(complex: { owner: ""Fido"" })
-                  }
-                 ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R564InputObjectRequiredFields());
-
-        /* Then */
-        Assert.False(result.IsValid);
-        Assert.Single(
-            result.Errors,
-            error => error.Code == ValidationErrorCodes.R564InputObjectRequiredFields);
-    }
-
-    [Fact]
-    public void Rule_564_InputObjectRequiredFields_invalid2()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"{
-                       findDog(complex: { name: null })
-                  }
-                 ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R564InputObjectRequiredFields());
-
-        /* Then */
-        Assert.False(result.IsValid);
-        Assert.Single(
-            result.Errors,
-            error => error.Code == ValidationErrorCodes.R564InputObjectRequiredFields);
-    }
-
-    [Fact]
-    public void Rule_57_DirectivesAreDefined_valid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"{
-                       findDog(complex: { name: ""Fido"" }) @skip(if: false)
-                  }
-                 ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R571And573Directives());
-
-        /* Then */
-        Assert.True(result.IsValid);
-    }
-
-    [Fact]
-    public void Rule_571_DirectivesAreDefined_invalid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"{
-                       findDog(complex: { name: ""Fido"" }) @doesNotExists
-                  }
-                 ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R571And573Directives());
-
-        /* Then */
-        Assert.False(result.IsValid);
-        Assert.Single(
-            result.Errors,
-            error => error.Code == ValidationErrorCodes.R571DirectivesAreDefined);
-    }
-
-    [Fact]
-    public void Rule_572_DirectivesAreInValidLocations_valid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"
-                query {
-                  field @skip(if: $foo)
-                }
-                 ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R572DirectivesAreInValidLocations());
-
-        /* Then */
-        Assert.True(result.IsValid);
-    }
-
-    [Fact]
-    public void Rule_572_DirectivesAreInValidLocations_invalid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"
-                query @skip(if: $foo) {
-                  field
-                }
-                 ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R572DirectivesAreInValidLocations());
-
-        /* Then */
-        Assert.False(result.IsValid);
-        Assert.Single(
-            result.Errors,
-            error => error.Code == ValidationErrorCodes.R572DirectivesAreInValidLocations);
-    }
-
-    [Fact]
-    public void Rule_573_DirectivesAreUniquePerLocation_valid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"query ($foo: Boolean = true, $bar: Boolean = false) {
-                      field @skip(if: $foo) {
-                        subfieldA
-                      }
-                      field @skip(if: $bar) {
-                        subfieldB
-                      }
-                    }
-                 ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R571And573Directives());
-
-        /* Then */
-        Assert.True(result.IsValid);
-    }
-
-    [Fact]
-    public void Rule_573_DirectivesAreUniquePerLocation_invalid1()
-    {
-        /* Given */
-        var document = Parser.ParseDocument(
-            @"query ($foo: Boolean = true, $bar: Boolean = false) {
-                      field @skip(if: $foo) @skip(if: $bar)
-                    }
-                 ");
-
-        /* When */
-        var result = Validate(
-            document,
-            ExecutionRules.R571And573Directives());
-
-        /* Then */
-        Assert.False(result.IsValid);
-        Assert.Single(
-            result.Errors,
-            error => error.Code == ValidationErrorCodes.R573DirectivesAreUniquePerLocation);
-    }
-
-    [Fact]
     public void Rule_58_Variables_valid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"query A($atOtherHomes: Boolean) {
                       ...HouseTrainedFragment
                     }
@@ -335,7 +24,7 @@ public partial class ValidatorFacts
                         isHousetrained(atOtherHomes: $atOtherHomes)
                       }
                     }
-                 ");
+                 ";
 
         /* When */
         var result = Validate(
@@ -350,13 +39,13 @@ public partial class ValidatorFacts
     public void Rule_58_Variables_invalid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"query houseTrainedQuery($atOtherHomes: Boolean, $atOtherHomes: Boolean) {
                       dog {
                         isHousetrained(atOtherHomes: $atOtherHomes)
                       }
                     }
-                 ");
+                 ";
 
         /* When */
         var result = Validate(
@@ -374,7 +63,7 @@ public partial class ValidatorFacts
     public void Rule_582_VariablesAreInputTypes_valid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"query takesBoolean($atOtherHomes: Boolean) {
                       dog {
                         isHousetrained(atOtherHomes: $atOtherHomes)
@@ -390,7 +79,7 @@ public partial class ValidatorFacts
                     query TakesListOfBooleanBang($booleans: [Boolean!]) {
                       booleanList(booleanListArg: $booleans)
                     }
-                 ");
+                 ";
 
         /* When */
         var result = Validate(
@@ -405,7 +94,7 @@ public partial class ValidatorFacts
     public void Rule_582_VariablesAreInputTypes_invalid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"query takesCat($cat: Cat) {
                       __typename
                     }
@@ -421,7 +110,7 @@ public partial class ValidatorFacts
                     query takesCatOrDog($catOrDog: CatOrDog) {
                       __typename
                     }
-                 ");
+                 ";
 
         /* When */
         var result = Validate(
@@ -441,12 +130,12 @@ public partial class ValidatorFacts
     public void Rule_583_AllVariableUsesDefined_valid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"query variableIsDefined($atOtherHomes: Boolean) {
                       dog {
                         isHousetrained(atOtherHomes: $atOtherHomes)
                       }
-                    }");
+                    }";
 
         /* When */
         var result = Validate(
@@ -461,7 +150,7 @@ public partial class ValidatorFacts
     public void Rule_583_AllVariableUsesDefined_valid2()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"query variableIsDefinedUsedInSingleFragment($atOtherHomes: Boolean) {
                       dog {
                         ...isHousetrainedFragment
@@ -470,7 +159,7 @@ public partial class ValidatorFacts
 
                     fragment isHousetrainedFragment on Dog {
                       isHousetrained(atOtherHomes: $atOtherHomes)
-                    }");
+                    }";
 
         /* When */
         var result = Validate(
@@ -485,7 +174,7 @@ public partial class ValidatorFacts
     public void Rule_583_AllVariableUsesDefined_valid3()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"query housetrainedQueryOne($atOtherHomes: Boolean) {
                       dog {
                         ...isHousetrainedFragment
@@ -500,7 +189,7 @@ public partial class ValidatorFacts
 
                 fragment isHousetrainedFragment on Dog {
                   isHousetrained(atOtherHomes: $atOtherHomes)
-                }");
+                }";
 
         /* When */
         var result = Validate(
@@ -515,14 +204,14 @@ public partial class ValidatorFacts
     public void Rule_583_AllVariableUsesDefined_invalid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
             query variableIsNotDefined {
               dog {
                 isHousetrained(atOtherHomes: $atOtherHomes)
               }
             }
-             ");
+             ";
 
         /* When */
         var result = Validate(
@@ -540,7 +229,7 @@ public partial class ValidatorFacts
     public void Rule_583_AllVariableUsesDefined_invalid2()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
             query variableIsNotDefinedUsedInSingleFragment {
               dog {
@@ -551,7 +240,7 @@ public partial class ValidatorFacts
             fragment isHousetrainedFragment on Dog {
               isHousetrained(atOtherHomes: $atOtherHomes)
             }
-             ");
+             ";
 
         /* When */
         var result = Validate(
@@ -569,7 +258,7 @@ public partial class ValidatorFacts
     public void Rule_583_AllVariableUsesDefined_invalid3()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
             query variableIsNotDefinedUsedInNestedFragment {
               dog {
@@ -584,7 +273,7 @@ public partial class ValidatorFacts
             fragment isHousetrainedFragment on Dog {
               isHousetrained(atOtherHomes: $atOtherHomes)
             }
-             ");
+             ";
 
         /* When */
         var result = Validate(
@@ -602,7 +291,7 @@ public partial class ValidatorFacts
     public void Rule_583_AllVariableUsesDefined_invalid4()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
             query housetrainedQueryOne($atOtherHomes: Boolean) {
               dog {
@@ -619,7 +308,7 @@ public partial class ValidatorFacts
             fragment isHousetrainedFragment on Dog {
               isHousetrained(atOtherHomes: $atOtherHomes)
             }
-             ");
+             ";
 
         /* When */
         var result = Validate(
@@ -637,14 +326,14 @@ public partial class ValidatorFacts
     public void Rule_584_AllVariablesUsed_invalid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query variableUnused($atOtherHomes: Boolean) {
                   dog {
                     isHousetrained
                   }
                 }
-                 ");
+                 ";
 
         /* When */
         var result = Validate(
@@ -663,7 +352,7 @@ public partial class ValidatorFacts
     public void Rule_584_AllVariablesUsed_invalid2()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query variableNotUsedWithinFragment($atOtherHomes: Boolean) {
                   dog {
@@ -674,7 +363,7 @@ public partial class ValidatorFacts
                 fragment isHousetrainedWithoutVariableFragment on Dog {
                   isHousetrained
                 }
-                 ");
+                 ";
 
         /* When */
         var result = Validate(
@@ -693,7 +382,7 @@ public partial class ValidatorFacts
     public void Rule_584_AllVariablesUsed_invalid3()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query queryWithUsedVar($atOtherHomes: Boolean) {
                   dog {
@@ -710,7 +399,7 @@ public partial class ValidatorFacts
                 fragment isHousetrainedFragment on Dog {
                   isHousetrained(atOtherHomes: $atOtherHomes)
                 }
-                 ");
+                 ";
 
         /* When */
         var result = Validate(
@@ -729,7 +418,7 @@ public partial class ValidatorFacts
     public void Rule_584_AllVariablesUsed_valid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query variableUsedInFragment($atOtherHomes: Boolean) {
                   dog {
@@ -740,7 +429,7 @@ public partial class ValidatorFacts
                 fragment isHousetrainedFragment on Dog {
                   isHousetrained(atOtherHomes: $atOtherHomes)
                 }
-                 ");
+                 ";
 
         /* When */
         var result = Validate(
@@ -755,14 +444,14 @@ public partial class ValidatorFacts
     public void Rule_585_AllVariableUsagesAreAllowed_invalid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query intCannotGoIntoBoolean($intArg: Int) {
                   arguments {
                     booleanArgField(booleanArg: $intArg)
                   }
                 }
-                ");
+                ";
 
         /* When */
         var result = Validate(
@@ -780,14 +469,14 @@ public partial class ValidatorFacts
     public void Rule_585_AllVariableUsagesAreAllowed_invalid2()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query booleanListCannotGoIntoBoolean($booleanListArg: [Boolean]) {
                   arguments {
                     booleanArgField(booleanArg: $booleanListArg)
                   }
                 }
-                ");
+                ";
 
         /* When */
         var result = Validate(
@@ -805,14 +494,14 @@ public partial class ValidatorFacts
     public void Rule_585_AllVariableUsagesAreAllowed_invalid3()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query booleanArgQuery($booleanArg: Boolean) {
                   arguments {
                     nonNullBooleanArgField(nonNullBooleanArg: $booleanArg)
                   }
                 }
-                ");
+                ";
 
         /* When */
         var result = Validate(
@@ -830,14 +519,14 @@ public partial class ValidatorFacts
     public void Rule_585_AllVariableUsagesAreAllowed_valid1()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query nonNullListToList($nonNullBooleanList: [Boolean]!) {
                   arguments {
                     booleanListArgField(booleanListArg: $nonNullBooleanList)
                   }
                 }
-                ");
+                ";
 
         /* When */
         var result = Validate(
@@ -852,14 +541,14 @@ public partial class ValidatorFacts
     public void Rule_585_AllVariableUsagesAreAllowed_invalid4()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query listToNonNullList($booleanList: [Boolean]) {
                   arguments {
                     nonNullBooleanListField(nonNullBooleanListArg: $booleanList)
                   }
                 }
-                ");
+                ";
 
         /* When */
         var result = Validate(
@@ -877,14 +566,14 @@ public partial class ValidatorFacts
     public void Rule_585_AllVariableUsagesAreAllowed_valid2()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query booleanArgQueryWithDefault($booleanArg: Boolean) {
                   arguments {
                     optionalNonNullBooleanArgField(optionalBooleanArg: $booleanArg)
                   }
                 }
-                ");
+                ";
 
         /* When */
         var result = Validate(
@@ -899,14 +588,14 @@ public partial class ValidatorFacts
     public void Rule_585_AllVariableUsagesAreAllowed_valid3()
     {
         /* Given */
-        var document = Parser.ParseDocument(
+        var document =
             @"
                 query booleanArgQueryWithDefault($booleanArg: Boolean = true) {
                   arguments {
                     nonNullBooleanArgField(nonNullBooleanArg: $booleanArg)
                   }
                 }
-                ");
+                ";
 
         /* When */
         var result = Validate(

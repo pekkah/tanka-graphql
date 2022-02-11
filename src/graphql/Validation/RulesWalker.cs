@@ -71,8 +71,8 @@ namespace Tanka.GraphQL.Validation
                             usages.Add(new VariableUsage
                             {
                                 Node = node,
-                                Type = null,//context.Tracker.GetInputType(),
-                                DefaultValue = null,//context.Tracker.GetDefaultValue()
+                                Type = context.Tracker.InputType,
+                                DefaultValue = context.Tracker.DefaultValue
                             });
                         };
                     }
@@ -90,7 +90,8 @@ namespace Tanka.GraphQL.Validation
         public IEnumerable<VariableUsage> GetRecursiveVariables(
             OperationDefinition operation)
         {
-            if (_variables.TryGetValue(operation, out var results)) return results;
+            if (_variables.TryGetValue(operation, out var results)) 
+                return results;
 
             var usages = GetVariables(operation);
 
@@ -118,7 +119,7 @@ namespace Tanka.GraphQL.Validation
             {
                 var set = setsToVisit.Pop();
 
-                foreach (var selection in set.Selections)
+                foreach (var selection in set)
                     switch (selection)
                     {
                         case FragmentSpread spread:
@@ -126,18 +127,9 @@ namespace Tanka.GraphQL.Validation
                             break;
                         case InlineFragment inlineFragment:
                         {
-                            if (inlineFragment.SelectionSet != null)
-                                setsToVisit.Push(inlineFragment.SelectionSet);
+                            setsToVisit.Push(inlineFragment.SelectionSet);
                             break;
                         }
-                        /*
-                        case OperationDefinition operationDefinition:
-                        {
-                            if (operationDefinition.SelectionSet != null)
-                                setsToVisit.Push(operationDefinition.SelectionSet);
-                            break;
-                        }
-                        */
                         case FieldSelection fieldSelection:
                         {
                             if (fieldSelection.SelectionSet != null) setsToVisit.Push(fieldSelection.SelectionSet);

@@ -38,7 +38,10 @@
     <Compile Include="Bug\Bug_339.cs" />
     <Compile Include="Validation\ValidatorFacts.Arguments.cs" />
     <Compile Include="Validation\ValidatorFacts.cs" />
+    <Compile Include="Validation\ValidatorFacts.Directives.cs" />
+    <Compile Include="Validation\ValidatorFacts.Fields.cs" />
     <Compile Include="Validation\ValidatorFacts.Fragments.cs" />
+    <Compile Include="Validation\ValidatorFacts.Variables.cs" />
     <Compile Include="Validation\ValidatorFacts.ValidatorFacts.Selections.cs" />
   </ItemGroup>
 

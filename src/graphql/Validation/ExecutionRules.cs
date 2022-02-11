@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.Validation;
 
@@ -34,7 +38,7 @@ public static class ExecutionRules
         R5522FragmentSpreadsMustNotFormCycles(),
         R5523FragmentSpreadIsPossible(),
 
-        /*R561ValuesOfCorrectType(),
+        R561ValuesOfCorrectType(),
         R562InputObjectFieldNames(),
         R563InputObjectFieldUniqueness(),
         R564InputObjectRequiredFields(),
@@ -42,10 +46,11 @@ public static class ExecutionRules
         R571And573Directives(),
         R572DirectivesAreInValidLocations(),
 
+        
         R581And582Variables(),
         R583AllVariableUsesDefined(),
         R584AllVariablesUsed(),
-        R585AllVariableUsagesAreAllowed(),*/
+        R585AllVariableUsagesAreAllowed(),
     };
 
 
@@ -856,7 +861,7 @@ public static class ExecutionRules
             }
         }
     }
-    /*
+    
     public static CombineRule R561ValuesOfCorrectType()
     {
         return (context, rule) =>
@@ -866,20 +871,15 @@ public static class ExecutionRules
 
             rule.EnterListValue += node =>
             {
-                var type = context.Tracker.GetNullableType(
-                    context.Tracker.GetParentInputType());
-
-                if (!(type is ListType)) IsValidScalar(context, node);
+                IsValidScalar(context, node);
             };
             rule.EnterObjectValue += node =>
             {
-                var type = context.Tracker.GetNamedType(
-                    context.Tracker.GetInputType());
+                var type = context.Tracker.InputType;
 
-                if (!(type is InputObjectDefinition inputType))
+                if (type is not InputObjectDefinition inputType)
                 {
                     IsValidScalar(context, node);
-                    // return false;
                     return;
                 }
 
@@ -902,34 +902,46 @@ public static class ExecutionRules
             };
             rule.EnterObjectField += node =>
             {
-                var parentType = context.Tracker
-                    .GetNamedType(context.Tracker.GetParentInputType());
+                var parentType = context.Tracker.ParentInputType;
 
-                var fieldType = context.Tracker.GetInputType();
+                var fieldType = context.Tracker.InputType;
                 if (fieldType == null && parentType is InputObjectDefinition)
                     context.Error(
                         ValidationErrorCodes.R561ValuesOfCorrectType,
                         UnknownFieldMessage(
-                            parentType.ToString(),
+                            parentType.Name,
                             node.Name,
                             string.Empty),
                         node);
             };
             rule.EnterEnumValue += node =>
             {
-                var maybeEnumType = context.Tracker.GetNamedType(
-                    context.Tracker.GetInputType());
+                var maybeEnumType = context.Tracker.InputType;
 
-                if (!(maybeEnumType is EnumDefinition type))
+                if (maybeEnumType is not EnumDefinition type)
                     IsValidScalar(context, node);
-                
-                else if (type.ParseValue(node) == null)
-                    context.Error(
-                        ValidationErrorCodes.R561ValuesOfCorrectType,
-                        BadValueMessage(
-                            type.Name,
-                            node.ToString(),
-                            string.Empty));
+
+                else
+                {
+                    try
+                    {
+                        var value = new EnumConverter(type).ParseLiteral(node);
+
+                        if (value is null)
+                            throw new ValueCoercionException(
+                                $"{Printer.Print(type)} does not contain a value of '{Printer.Print(node)}'", node,
+                                node);
+                    }
+                    catch (Exception x)
+                    {
+                        context.Error(
+                            ValidationErrorCodes.R561ValuesOfCorrectType,
+                            BadValueMessage(
+                                type.Name,
+                                Printer.Print(node),
+                                string.Empty));
+                    }
+                }
             };
             rule.EnterIntValue += node => IsValidScalar(context, node);
             rule.EnterFloatValue += node => IsValidScalar(context, node);
@@ -971,22 +983,19 @@ public static class ExecutionRules
             IRuleVisitorContext context,
             ValueBase node)
         {
-            var locationType = context.Tracker.GetInputType();
+            var locationType = context.Tracker.InputType;
 
             if (locationType == null)
                 return;
 
-            var maybeScalarType = context
-                .Tracker
-                .GetNamedType(locationType);
 
-            if (!(maybeScalarType is ScalarType type))
+            if (locationType is not ScalarDefinition type)
             {
                 context.Error(
                     ValidationErrorCodes.R561ValuesOfCorrectType,
                     BadValueMessage(
-                        maybeScalarType?.ToString(),
-                        node.ToString(),
+                        locationType.Name,
+                        Printer.Print(node),
                         string.Empty),
                     node);
 
@@ -995,15 +1004,19 @@ public static class ExecutionRules
 
             try
             {
-                var converter = context.Schema.GetValueConverter(type.Name);
+                var converter = context.Schema.GetValueConverter(type.Name) ?? throw new ValueCoercionException(
+                    $"Value converter for '{Printer.Print(type)}' not found from schema.", 
+                    type, 
+                    type);
+
                 converter.ParseLiteral(node);
             }
             catch (Exception e)
             {
                 context.Error(
                     ValidationErrorCodes.R561ValuesOfCorrectType,
-                    BadValueMessage(locationType?.ToString(),
-                        node.ToString(),
+                    BadValueMessage(locationType.Name,
+                        Printer.Print(node),
                         e.ToString()),
                     node);
             }
@@ -1018,8 +1031,7 @@ public static class ExecutionRules
             {
                 var inputFieldName = inputField.Name;
 
-                if (!(context.Tracker
-                    .GetParentInputType() is InputObjectDefinition parentType))
+                if (context.Tracker.ParentInputType is not InputObjectDefinition parentType)
                     return;
 
                 var inputFieldDefinition = context.Schema
@@ -1067,7 +1079,7 @@ public static class ExecutionRules
         {
             rule.EnterObjectValue += node =>
             {
-                var inputObject = context.Tracker.GetInputType() as InputObjectDefinition;
+                var inputObject = context.Tracker.InputType as InputObjectDefinition;
 
                 if (inputObject == null)
                     return;
@@ -1080,7 +1092,7 @@ public static class ExecutionRules
                     var type = fieldDefinition.Value.Type;
                     var defaultValue = fieldDefinition.Value.DefaultValue;
 
-                    if (type is NonNullType NonNullType && defaultValue == null)
+                    if (type is NonNullType nonNullType && defaultValue == null)
                     {
                         var fieldName = fieldDefinition.Key;
                         if (!fields.TryGetValue(fieldName, out var field))
@@ -1092,7 +1104,7 @@ public static class ExecutionRules
                                 "fields. An input field is required if it has a non‐null type and " +
                                 "does not have a default value. Otherwise, the input object field " +
                                 "is optional. " +
-                                $"Field '{NonNullType}.{fieldName}' is required.",
+                                $"Field '{nonNullType}.{fieldName}' is required.",
                                 (INode) node);
 
                             return;
@@ -1106,7 +1118,7 @@ public static class ExecutionRules
                                 "fields. An input field is required if it has a non‐null type and " +
                                 "does not have a default value. Otherwise, the input object field " +
                                 "is optional. " +
-                                $"Field '{NonNullType}.{field}' value cannot be null.",
+                                $"Field '{nonNullType}.{field}' value cannot be null.",
                                 node, field);
                     }
                 }
@@ -1114,6 +1126,7 @@ public static class ExecutionRules
         };
     }
 
+    
     /// <summary>
     ///     5.7.1, 5.7.3
     /// </summary>
@@ -1145,9 +1158,9 @@ public static class ExecutionRules
         };
 
         // 5.7.3
-        void CheckDirectives(IRuleVisitorContext context, IEnumerable<Directive> directives)
+        void CheckDirectives(IRuleVisitorContext context, Language.Nodes.Directives? directives)
         {
-            if (directives == null)
+            if (directives is null || directives.Count == 0)
                 return;
 
             var knownDirectives = new List<string>();
@@ -1182,19 +1195,20 @@ public static class ExecutionRules
         void CheckDirectives(
             IRuleVisitorContext context,
             INode node,
-            IEnumerable<Directive> directives)
+            Language.Nodes.Directives? directives)
         {
-            if (directives == null)
+            if (directives == null || directives.Count == 0)
                 return;
 
             var currentLocation = GetLocation(node);
             foreach (var directive in directives)
             {
-                var directiveType = context.Schema.GetDirectiveType(
-                    directive.Name);
+                var directiveType = context.Schema.GetDirectiveType(directive.Name);
 
-                var validLocations = directiveType.Locations
-                    .ToArray();
+                if (directiveType is null)
+                    continue;
+
+                var validLocations = directiveType.DirectiveLocations;
 
                 if (!validLocations.Contains(currentLocation))
                 {
@@ -1211,7 +1225,7 @@ public static class ExecutionRules
             }
         }
 
-        DirectiveLocation GetLocation(INode appliedTo)
+        string GetLocation(INode appliedTo)
         {
             switch (appliedTo.Kind)
             {
@@ -1219,59 +1233,60 @@ public static class ExecutionRules
                     switch (((OperationDefinition) appliedTo).Operation)
                     {
                         case OperationType.Query:
-                            return DirectiveLocation.QUERY;
+                            return ExecutableDirectiveLocations.QUERY;
                         case OperationType.Mutation:
-                            return DirectiveLocation.MUTATION;
+                            return ExecutableDirectiveLocations.MUTATION;
                         case OperationType.Subscription:
-                            return DirectiveLocation.SUBSCRIPTION;
+                            return ExecutableDirectiveLocations.SUBSCRIPTION;
                     }
 
                     break;
                 case NodeKind.FieldSelection:
-                    return DirectiveLocation.FIELD;
+                    return ExecutableDirectiveLocations.FIELD;
                 case NodeKind.FragmentSpread:
-                    return DirectiveLocation.FRAGMENT_SPREAD;
+                    return ExecutableDirectiveLocations.FRAGMENT_SPREAD;
                 case NodeKind.InlineFragment:
-                    return DirectiveLocation.INLINE_FRAGMENT;
+                    return ExecutableDirectiveLocations.INLINE_FRAGMENT;
                 case NodeKind.FragmentDefinition:
-                    return DirectiveLocation.FRAGMENT_DEFINITION;
+                    return ExecutableDirectiveLocations.FRAGMENT_DEFINITION;
                 case NodeKind.VariableDefinition:
                     throw new InvalidOperationException($"Not supported");
                 case NodeKind.SchemaDefinition:
-                    //case NodeKind.SCHEMA_EXTENSION:
-                    return DirectiveLocation.SCHEMA;
+                case NodeKind.SchemaExtension:
+                    return TypeSystemDirectiveLocations.SCHEMA;
                 case NodeKind.ScalarDefinition:
-                    //case NodeKind.SCALAR_TYPE_EXTENSION:
-                    return DirectiveLocation.SCALAR;
+                    //case NodeKind.TypeExtension:
+                    return TypeSystemDirectiveLocations.SCALAR;
                 case NodeKind.ObjectDefinition:
                     //case NodeKind.OBJECT_TYPE_EXTENSION:
-                    return DirectiveLocation.OBJECT;
+                    return TypeSystemDirectiveLocations.OBJECT;
                 case NodeKind.FieldDefinition:
-                    return DirectiveLocation.FIELD_DEFINITION;
+                    return TypeSystemDirectiveLocations.FIELD_DEFINITION;
                 case NodeKind.InterfaceDefinition:
                     //case NodeKind.INTERFACE_TYPE_EXTENSION:
-                    return DirectiveLocation.INTERFACE;
+                    return TypeSystemDirectiveLocations.INTERFACE;
                 case NodeKind.UnionDefinition:
                     //case NodeKind.UNION_TYPE_EXTENSION:
-                    return DirectiveLocation.UNION;
+                    return TypeSystemDirectiveLocations.UNION;
                 case NodeKind.EnumDefinition:
                     //case NodeKind.ENUM_TYPE_EXTENSION:
-                    return DirectiveLocation.ENUM;
+                    return TypeSystemDirectiveLocations.ENUM;
                 case NodeKind.EnumValueDefinition:
-                    return DirectiveLocation.ENUM_VALUE;
+                    return TypeSystemDirectiveLocations.ENUM_VALUE;
                 case NodeKind.InputObjectDefinition:
                     //case NodeKind.INPUT_OBJECT_TYPE_EXTENSION:
-                    return DirectiveLocation.INPUT_OBJECT;
+                    return TypeSystemDirectiveLocations.INPUT_OBJECT;
                 case NodeKind.Argument:
-                    return DirectiveLocation.ARGUMENT_DEFINITION; //todo: is this correct?
+                    return TypeSystemDirectiveLocations.ARGUMENT_DEFINITION;
                 case NodeKind.InputValueDefinition:
-                    return DirectiveLocation.INPUT_FIELD_DEFINITION;
+                    return TypeSystemDirectiveLocations.INPUT_FIELD_DEFINITION;
             }
 
             throw new InvalidOperationException($"Not supported location: {appliedTo.Kind}");
         }
     }
 
+    
     /// <summary>
     ///     5.8.1, 5.8.2
     /// </summary>
@@ -1305,8 +1320,8 @@ public static class ExecutionRules
                     knownVariables.Add(variableName);
 
                     // 5.8.2
-                    var variableType = Ast.TypeFromAst(context.Schema, variableUsage.Type);
-                    if (!TypeIs.IsInputType(variableType))
+                    var variableType = Ast.UnwrapAndResolveType(context.Schema, variableUsage.Type);
+                    if (variableType is null ||!TypeIs.IsInputType(variableType))
                         context.Error(
                             ValidationErrorCodes.R582VariablesAreInputTypes,
                             "Variables can only be input types. Objects, unions, " +
@@ -1397,38 +1412,43 @@ public static class ExecutionRules
         return (context, rule) =>
         {
             var variableDefinitions = new Dictionary<string, VariableDefinition>();
+            var usages = new List<(Variable Variable, TypeBase? Type, ValueBase? DefaultValue)>();
 
-            rule.EnterVariableDefinition += node => 
+            rule.EnterVariableDefinition += node =>
                 variableDefinitions[node.Variable.Name] = node;
-            rule.EnterOperationDefinition += node =>
+            rule.EnterOperationDefinition += node => { variableDefinitions.Clear(); };
+
+            rule.EnterVariable += node =>
             {
-                variableDefinitions.Clear();
+                var type = context.Tracker.ArgumentDefinition?.Type;
+                var defaultValue = context.Tracker.DefaultValue;
+                usages.Add((node, type, defaultValue));
             };
+
             rule.LeaveOperationDefinition += node =>
             {
-                var usages = context.GetRecursiveVariables(node);
+                //var usages = context.GetRecursiveVariables(node);
 
                 foreach (var usage in usages)
                 {
-                    var variableName = usage.Node.Name;
+                    var variableName = usage.Variable.Name;
 
                     if (!variableDefinitions.TryGetValue(variableName, out var variableDefinition))
                     {
                         return;
                     }
 
-                    var variableType = Ast.TypeFromAst(context.Schema, variableDefinition.Type);
-                    if (variableType != null && !AllowedVariableUsage(
+                    if (!AllowedVariableUsage(
                             context.Schema,
-                            variableType,
-                            variableDefinition.DefaultValue,
+                            variableDefinition.Type,
+                            variableDefinition?.DefaultValue,
                             usage.Type,
                             usage.DefaultValue))
                     {
                         context.Error(
                             ValidationErrorCodes.R585AllVariableUsagesAreAllowed,
                             $"Variable usages must be compatible with the arguments they are passed to. " +
-                            $"Variable '{variableName}' of type '{variableType}' used in " +
+                            $"Variable '{variableName}' of type '{variableDefinition?.Type}' used in " +
                             $"position expecting type '{usage.Type}'");
                     }
                 }
@@ -1437,22 +1457,23 @@ public static class ExecutionRules
 
         bool AllowedVariableUsage(
             ISchema schema,
-            IType varType,
-            object varDefaultValue,
-            IType locationType,
-            object locationDefaultValue
-            )
+            TypeBase varType,
+            object? varDefaultValue,
+            TypeBase? locationType,
+            object? locationDefaultValue
+        )
         {
-            if (locationType is NonNullType NonNullTypeTypeLocationType && !(varType is NonNullType)) 
+            if (locationType is NonNullType nonNullTypeTypeLocationType && varType is not NonNullType)
             {
                 bool hasNonNullTypeTypeVariableDefaultValue = varDefaultValue != null;
                 bool hasLocationDefaultValue = locationDefaultValue != null;
 
-                if (!hasNonNullTypeTypeVariableDefaultValue && !hasLocationDefaultValue) {
+                if (!hasNonNullTypeTypeVariableDefaultValue && !hasLocationDefaultValue)
+                {
                     return false;
                 }
 
-                var nullableLocationType = NonNullTypeTypeLocationType.OfType;
+                var nullableLocationType = nonNullTypeTypeLocationType.OfType;
                 return IsTypeSubTypeOf(schema, varType, nullableLocationType);
             }
 
@@ -1462,60 +1483,71 @@ public static class ExecutionRules
         //todo: Move to TypeIs
         bool IsTypeSubTypeOf(
             ISchema schema,
-            IType maybeSubType,
-            IType superType
+            TypeBase maybeSubType,
+            TypeBase superType
         )
         {
             // Equivalent type is a valid subtype
-            if (Equals(maybeSubType, superType)) {
-                return true;
+            if (maybeSubType is NamedType namedSubType && superType is NamedType namedSuperType)
+            {
+                if (namedSubType.Name.Equals(namedSuperType.Name))
+                    return true;
             }
 
             // If superType is non-null, maybeSubType must also be non-null.
-            if (superType is NonNullType NonNullTypeTypeSuperType) {
-                if (maybeSubType is NonNullType NonNullTypeTypeMaybeSubType) {
+            if (superType is NonNullType nonNullTypeTypeSuperType)
+            {
+                if (maybeSubType is NonNullType nonNullTypeTypeMaybeSubType)
+                {
                     return IsTypeSubTypeOf(
-                        schema, 
-                        NonNullTypeTypeMaybeSubType.OfType, 
-                        NonNullTypeTypeSuperType.OfType);
+                        schema,
+                        nonNullTypeTypeMaybeSubType.OfType,
+                        nonNullTypeTypeSuperType.OfType);
                 }
+
                 return false;
             }
 
-            if (maybeSubType is NonNullType NonNullTypeTypeMaybeSubType2) {
+            if (maybeSubType is NonNullType nonNullTypeTypeMaybeSubType2)
+            {
                 // If superType is nullable, maybeSubType may be non-null or nullable.
-                return IsTypeSubTypeOf(schema, NonNullTypeTypeMaybeSubType2.OfType, superType);
+                return IsTypeSubTypeOf(schema, nonNullTypeTypeMaybeSubType2.OfType, superType);
             }
 
             // If superType type is a list, maybeSubType type must also be a list.
-            if (superType is ListType listSuperType) {
-                if (maybeSubType is ListType listMaybeSubType) {
+            if (superType is ListType listSuperType)
+            {
+                if (maybeSubType is ListType listMaybeSubType)
+                {
                     return IsTypeSubTypeOf(
-                        schema, 
-                        listMaybeSubType.OfType, 
+                        schema,
+                        listMaybeSubType.OfType,
                         listSuperType.OfType);
                 }
+
                 return false;
             }
 
-            if (maybeSubType is List) {
+            if (maybeSubType is ListType)
+            {
                 // If superType is not a list, maybeSubType must also be not a list.
                 return false;
             }
 
             // If superType type is an abstract type, maybeSubType type may be a currently
             // possible object type.
-            if (superType is IAbstractType abstractSuperType &&
-                maybeSubType is ObjectDefinition objectMaybeSubType &&
-                abstractSuperType.IsPossible(objectMaybeSubType)) 
-            {
-                return true;
-            }
+            var superTypeDefinition = schema.GetNamedType(superType.Unwrap().Name);
+            var maybeSubTypeDefinition = schema.GetNamedType(maybeSubType.Unwrap().Name);
 
-            // Otherwise, the child type is not a valid subtype of the parent type.
-            return false;
+            var possibleTypes  = superTypeDefinition switch
+            {
+                null => Enumerable.Empty<TypeDefinition>(),
+                InterfaceDefinition interfaceDefinition => schema.GetPossibleTypes(interfaceDefinition),
+                UnionDefinition unionDefinition => schema.GetPossibleTypes(unionDefinition),
+                _ => Enumerable.Empty<TypeDefinition>()
+            };
+
+            return possibleTypes.Contains(maybeSubTypeDefinition);
         }
     }
-
-    */
 }

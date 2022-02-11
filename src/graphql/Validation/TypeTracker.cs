@@ -165,7 +165,7 @@ public class TypeTracker : RuleVisitor
             DefaultValues.TryPop(out _);
             InputTypes.TryPop(out _);
         };
-
+        
         EnterListValue = node =>
         {
             /*if (InputType is not null)
@@ -175,6 +175,7 @@ public class TypeTracker : RuleVisitor
             */
 
             // List positions never have a default value
+            
             DefaultValues.Push(null);
         };
         LeaveListValue = node =>
@@ -230,6 +231,20 @@ public class TypeTracker : RuleVisitor
     public FieldDefinition? FieldDefinition => FieldDefinitions.Count > 0 ? FieldDefinitions.Peek() : null;
 
     public TypeDefinition? InputType => InputTypes.Count > 0 ? InputTypes.Peek() : null;
+
+    public TypeDefinition? ParentInputType
+    {
+        get
+        {
+            if (InputTypes.Count <= 1)
+                return null;
+
+            var currentType = InputTypes.Pop();
+            var parentInputType = InputTypes.Peek();
+            InputTypes.Push(currentType);
+            return parentInputType;
+        }
+    }
 
     public TypeDefinition? ParentType => ParentTypes.Count > 0 ? ParentTypes.Peek() : null;
 

@@ -28,7 +28,7 @@ namespace Tanka.GraphQL.Validation
         IEnumerable<VariableUsage> GetRecursiveVariables(
             OperationDefinition operation);
 
-        FragmentDefinition GetFragment(string name);
+        FragmentDefinition? GetFragment(string name);
         List<FragmentSpread> GetFragmentSpreads(SelectionSet node);
 
         IEnumerable<FragmentDefinition> GetRecursivelyReferencedFragments(
