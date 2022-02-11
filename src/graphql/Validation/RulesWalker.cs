@@ -269,13 +269,17 @@ namespace Tanka.GraphQL.Validation
         }
 
         public override FragmentSpread BeginVisitFragmentSpread(
-            FragmentSpread fragmentSpread)
+            FragmentSpread node)
         {
             {
-                Tracker.EnterFragmentSpread?.Invoke(fragmentSpread);
+                Tracker.EnterFragmentSpread?.Invoke(node);
             }
 
-            return base.BeginVisitFragmentSpread(fragmentSpread);
+            var result = base.BeginVisitFragmentSpread(node);
+
+            Tracker.LeaveFragmentSpread?.Invoke(node);
+
+            return result;
         }
 
         public override InlineFragment BeginVisitInlineFragment(

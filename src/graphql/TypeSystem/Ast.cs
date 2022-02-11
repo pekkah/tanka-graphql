@@ -49,13 +49,14 @@ namespace Tanka.GraphQL.TypeSystem
             };
         }
 
-        public static TypeDefinition UnwrapAndResolveType(ISchema schema, TypeBase type)
+        public static TypeDefinition? UnwrapAndResolveType(ISchema schema, TypeBase? type)
         {
             return type switch
             {
-                NonNullType NonNullType => UnwrapAndResolveType(schema, NonNullType.OfType),
+                null => null,
+                NonNullType nonNullType => UnwrapAndResolveType(schema, nonNullType.OfType),
                 ListType list => UnwrapAndResolveType(schema, list.OfType),
-                NamedType namedType => schema.GetRequiredNamedType<TypeDefinition>(namedType.Name),
+                NamedType namedType => schema.GetNamedType(namedType.Name),
                 _ => throw new InvalidOperationException($"Unsupported type '{type}'")
             };
         }

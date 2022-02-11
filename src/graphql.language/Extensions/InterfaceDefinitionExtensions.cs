@@ -8,6 +8,13 @@ namespace Tanka.GraphQL.Language
 {
     public static class InterfaceDefinitionExtensions
     {
+        public static bool HasInterface(
+            this InterfaceDefinition definition,
+            Name interfaceName)
+        {
+            return definition.Interfaces?.Any(i => i.Name == interfaceName) == true;
+        }
+
         public static bool TryGetDirective(
             this InterfaceDefinition definition,
             Name directiveName,
@@ -20,27 +27,6 @@ namespace Tanka.GraphQL.Language
             }
 
             return definition.Directives.TryGet(directiveName, out directive);
-        }
-
-        public static bool TryImplements(
-            this InterfaceDefinition definition,
-            Name interfaceName,
-            [NotNullWhen(true)] out NamedType? namedType)
-        {
-            if (definition.Interfaces is null)
-            {
-                namedType = null;
-                return false;
-            }
-
-            return definition.Interfaces.TryGet(interfaceName, out namedType);
-        }
-
-        public static bool Implements(
-            this InterfaceDefinition definition,
-            Name interfaceName)
-        {
-            return definition.Interfaces?.Any(i => i.Name == interfaceName) == true;
         }
 
         public static InterfaceDefinition WithDescription(this InterfaceDefinition definition,

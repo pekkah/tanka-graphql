@@ -31,7 +31,7 @@ namespace Tanka.GraphQL.TypeSystem
 
         InputValueDefinition? GetInputField(string type, string name);
 
-        IEnumerable<ObjectDefinition> GetPossibleTypes(InterfaceDefinition abstractType);
+        IEnumerable<TypeDefinition> GetPossibleTypes(InterfaceDefinition abstractType);
 
         IEnumerable<ObjectDefinition> GetPossibleTypes(UnionDefinition abstractType);
 

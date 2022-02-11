@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 {
+    [DebuggerDisplay("{Kind}", Name = "{Name}")]
     public abstract class TypeDefinition : INode, IEquatable<TypeDefinition>
     {
         public abstract Name Name { get; }

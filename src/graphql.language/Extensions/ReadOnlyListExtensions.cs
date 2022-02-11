@@ -52,14 +52,43 @@ namespace Tanka.GraphQL.Language
 
             if (right is not null)
             {
-                return result.Join(
+                return Joiner(
+                    result,
                     right,
-                    keySelector,
                     keySelector,
                     resultSelector).ToList();
             }
 
             return result;
+
+            IEnumerable<T> Joiner<T>(
+                IEnumerable<T> left,
+                IEnumerable<T> right,
+                Func<T, TKey> keySelector,
+                Func<T, T, T> conflictResolver)
+            {
+                var leftKeyed = left.ToDictionary(keySelector, item => item);
+                var rightKeyed = right.ToDictionary(keySelector, item => item);
+
+                foreach (var (leftKey, leftItem) in leftKeyed)
+                {
+                    if (rightKeyed.TryGetValue(leftKey, out var rightItem))
+                    {
+                        var resolvedItem = conflictResolver(leftItem, rightItem);
+                        yield return resolvedItem;
+                        rightKeyed.Remove(leftKey);
+                        continue;
+                    }
+
+                    yield return leftItem;
+                }
+
+                // non conflicting right items
+                foreach (var (_, rightItem) in rightKeyed)
+                {
+                    yield return rightItem;
+                }
+            }
         }
 
         public static IReadOnlyList<NamedType>? Join(
@@ -86,8 +115,14 @@ namespace Tanka.GraphQL.Language
             var fields = Join(
                 left,
                 right,
-                field => field.Name.Value,
-                (leftField, _) => leftField);
+                field =>
+                {
+                    return field.Name.Value;
+                },
+                (leftField, _) =>
+                {
+                    return leftField;
+                });
 
             if (fields is null)
                 return null;

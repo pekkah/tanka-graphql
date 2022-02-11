@@ -26,6 +26,8 @@ namespace Tanka.GraphQL.Validation
 
         public NodeVisitor<FragmentSpread> EnterFragmentSpread { get; set; }
 
+        public NodeVisitor<FragmentSpread> LeaveFragmentSpread { get; set; }
+
         public NodeVisitor<InlineFragment> EnterInlineFragment { get; set; }
 
         public NodeVisitor<IntValue> EnterIntValue { get; set; }

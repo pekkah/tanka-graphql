@@ -123,9 +123,17 @@ namespace Tanka.GraphQL.TypeSystem
             return null;
         }
 
-        public IEnumerable<ObjectDefinition> GetPossibleTypes(InterfaceDefinition abstractType)
+        public IEnumerable<TypeDefinition> GetPossibleTypes(InterfaceDefinition abstractType)
         {
-            return QueryTypes<ObjectDefinition>(ob => ob.HasInterface(abstractType.Name));
+            foreach (var objectDefinition in QueryTypes<ObjectDefinition>(ob => ob.HasInterface(abstractType.Name)))
+            {
+                yield return objectDefinition;
+            }
+
+            foreach (var interfaceDefinition in QueryTypes<InterfaceDefinition>(ob => ob.HasInterface(abstractType.Name)))
+            {
+                yield return interfaceDefinition;
+            }
         }
 
         public IEnumerable<ObjectDefinition> GetPossibleTypes(UnionDefinition abstractType)
