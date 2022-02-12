@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Tanka.GraphQL.Directives;
+using Tanka.GraphQL.Extensions;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.ImportProviders;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
@@ -36,6 +37,7 @@ public class SchemaBuildOptions
     public IReadOnlyList<IImportProvider> ImportProviders { get; set; } = new List<IImportProvider>()
     {
         new EmbeddedResourceImportProvider(),
-        new FileSystemImportProvider(AppContext.BaseDirectory)
+        new FileSystemImportProvider(AppContext.BaseDirectory),
+        new ExtensionsImportProvider()
     };
 }

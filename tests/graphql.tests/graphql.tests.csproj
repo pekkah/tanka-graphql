@@ -10,19 +10,16 @@
   <ItemGroup>
     <Compile Remove="Bug\**" />
     <Compile Remove="Descriptions\**" />
-    <Compile Remove="Extensions\**" />
     <Compile Remove="Tools\**" />
     <Compile Remove="TypeSystem\**" />
     <Compile Remove="Validation\**" />
     <EmbeddedResource Remove="Bug\**" />
     <EmbeddedResource Remove="Descriptions\**" />
-    <EmbeddedResource Remove="Extensions\**" />
     <EmbeddedResource Remove="Tools\**" />
     <EmbeddedResource Remove="TypeSystem\**" />
     <EmbeddedResource Remove="Validation\**" />
     <None Remove="Bug\**" />
     <None Remove="Descriptions\**" />
-    <None Remove="Extensions\**" />
     <None Remove="Tools\**" />
     <None Remove="TypeSystem\**" />
     <None Remove="Validation\**" />
