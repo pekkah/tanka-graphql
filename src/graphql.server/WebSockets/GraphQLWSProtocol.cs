@@ -132,7 +132,7 @@ namespace Tanka.GraphQL.Server.WebSockets
 
             using var logScope = _logger.BeginScope("Query: '{operationName}'", payload.OperationName);
 
-            var document = Parser.ParseDocument(payload.Query);
+            ExecutableDocument document = payload.Query;
             var unsubscribeSource = new CancellationTokenSource();
             var queryStream = await _queryStreamService.QueryAsync(new Query
             {

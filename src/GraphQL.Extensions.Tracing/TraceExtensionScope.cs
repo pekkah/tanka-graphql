@@ -101,7 +101,7 @@ namespace Tanka.GraphQL.Extensions.Tracing
             var record = new TraceExtensionRecord.ResolverTrace()
             {
                 StartOffset = start.TotalNanoSeconds(),
-                ParentType = context.ObjectType.Name,
+                ParentType = context.ObjectDefinition.Name,
                 FieldName = context.FieldName,
                 Path = context.Path.Segments.ToList(),
                 ReturnType = context.Field.Type.ToString()

@@ -9,8 +9,8 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             StringValue? description,
             in Name name,
             TypeBase type,
-            DefaultValue? defaultValue,
-            Directives? directives,
+            DefaultValue? defaultValue = default,
+            Directives? directives = default,
             in Location? location = default)
         {
             Description = description;

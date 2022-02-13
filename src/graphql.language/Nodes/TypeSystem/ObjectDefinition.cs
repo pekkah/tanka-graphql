@@ -8,9 +8,9 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public ObjectDefinition(
             StringValue? description,
             in Name name,
-            ImplementsInterfaces? interfaces,
-            Directives? directives,
-            FieldsDefinition? fields,
+            ImplementsInterfaces? interfaces = default,
+            Directives? directives = default,
+            FieldsDefinition? fields = default,
             in Location? location = default)
         {
             Description = description;

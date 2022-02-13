@@ -26,7 +26,7 @@ namespace Tanka.GraphQL.Server
             {
                 var result = await _queryStreamService.QueryAsync(new Query()
                 {
-                    Document = Parser.ParseDocument(query.Query),
+                    Document = query.Query,
                     OperationName = query.OperationName,
                     Extensions = query.Extensions,
                     Variables = query.Variables

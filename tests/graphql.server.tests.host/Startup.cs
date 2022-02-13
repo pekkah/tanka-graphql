@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
-using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
@@ -51,9 +48,9 @@ namespace Tanka.GraphQL.Server.Tests.Host
                 ";
 
             var builder = new SchemaBuilder()
-                .Sdl(Parser.ParseTypeSystemDocument(sdl));
+                .Add(sdl);
 
-            var resolvers = new ObjectTypeMap
+            var resolvers = new ResolversMap()
             {
                 {
                     "Event", new FieldResolversMap
@@ -97,10 +94,7 @@ namespace Tanka.GraphQL.Server.Tests.Host
                 }
             };
 
-            var executable = SchemaTools.MakeExecutableSchemaWithIntrospection(
-                builder,
-                resolvers,
-                resolvers);
+            var executable = builder.Build(resolvers, resolvers);
 
             services.AddSingleton(provider => eventManager);
 

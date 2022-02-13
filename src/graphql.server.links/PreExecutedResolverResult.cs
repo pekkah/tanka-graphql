@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Server.Links
@@ -49,7 +51,7 @@ namespace Tanka.GraphQL.Server.Links
                     context.Path,
                     context.Selection);
 
-            var resolveResult = new CompleteValueResult(value, context.Field.Type);
+            var resolveResult = new CompleteValueResult(value, context.Schema.GetRequiredNamedType<ObjectDefinition>(context.Field.Type.Unwrap().Name));
             return resolveResult.CompleteValueAsync(context);
         }
     }

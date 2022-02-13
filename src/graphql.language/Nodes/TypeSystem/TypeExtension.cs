@@ -4,7 +4,7 @@
     {
         public TypeExtension(
             TypeDefinition definition,
-            in Location? location)
+            in Location? location = default)
         {
             Definition = definition;
             Location = location;
