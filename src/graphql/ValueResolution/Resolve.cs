@@ -42,6 +42,19 @@ namespace Tanka.GraphQL.ValueResolution
             };
         }
 
+        public static Resolver PropertyOf<T>(Func<T, IResolverContext, object?> getValue)
+        {
+            return context =>
+            {
+                var source = context.ObjectValue is T objectValue ? objectValue : default;
+
+                if (source == null) return ResolveSync.As(null);
+
+                var value = getValue(source, context);
+                return ResolveSync.As(value);
+            };
+        }
+
         public static Resolver PropertyOf<T>(Func<T, IEnumerable<object?>?> getValue)
         {
             return context =>

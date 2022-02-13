@@ -28,9 +28,29 @@ namespace Tanka.GraphQL
             return _subscribers.Values.GetEnumerator();
         }
 
+        public IEnumerable<string> GetFields()
+        {
+            foreach (var (field, _) in _resolvers)
+            {
+                yield return field;
+            }
+
+            foreach (var (field, _) in _subscribers)
+            {   if (_resolvers.ContainsKey(field))
+                    continue;
+
+                yield return field;
+            }
+        }
+
         public void Add(string key, Resolver resolver)
         {
             _resolvers.Add(key, resolver);
+        }
+
+        public void Add(string key, Subscriber subscriber)
+        {
+            _subscribers.Add(key, subscriber);
         }
 
         public void Add(string key, Subscriber subscriber, Resolver resolver)
@@ -43,7 +63,7 @@ namespace Tanka.GraphQL
             _resolvers.Add(key, resolver);
         }
 
-        public Resolver GetResolver(string key)
+        public Resolver? GetResolver(string key)
         {
             if (!_resolvers.ContainsKey(key))
                 return null;
@@ -51,7 +71,7 @@ namespace Tanka.GraphQL
             return _resolvers[key];
         }
 
-        public Subscriber GetSubscriber(string key)
+        public Subscriber? GetSubscriber(string key)
         {
             if (!_subscribers.ContainsKey(key))
                 return null;

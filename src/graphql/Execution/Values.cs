@@ -111,13 +111,13 @@ namespace Tanka.GraphQL.Execution
         private static object CoerceNonNullTypeValue(
             ISchema schema,
             object? value,
-            NonNullType NonNullType)
+            NonNullType nonNullType)
         {
-            var coercedValue = CoerceValue(schema, value, NonNullType.OfType);
+            var coercedValue = CoerceValue(schema, value, nonNullType.OfType);
             if (coercedValue == null)
                 throw new ValueCoercionException("Coerced value is null",
                     value,
-                    NonNullType);
+                    nonNullType);
 
             return coercedValue;
         }

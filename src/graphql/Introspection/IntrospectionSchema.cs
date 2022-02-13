@@ -11,13 +11,9 @@ public class IntrospectionSchema
     public const string TypeKindName = "__TypeKind";
     public const string TypeName = "__Type";
 
-    public static SchemaBuilder Create()
+    public static TypeSystemDocument GetTypeSystem()
     {
-        var builder = new SchemaBuilder();
-
-        builder.Add(
-            (TypeSystemDocument)
-@"
+        return @"
 type __Schema {
   description: String
   types: [__Type!]!
@@ -111,11 +107,18 @@ enum __DirectiveLocation {
   INPUT_FIELD_DEFINITION
 }
 
-type Query {
+extend type Query {
     __type(name: String!): __Type
     __schema: __Schema
 }
-");
+";
+    }
+
+    public static SchemaBuilder Create()
+    {
+        var builder = new SchemaBuilder();
+
+        builder.Add(GetTypeSystem());
 
         return builder;
     }

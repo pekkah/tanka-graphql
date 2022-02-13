@@ -3,6 +3,7 @@
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.ValueResolution
 {
@@ -27,5 +28,7 @@ namespace Tanka.GraphQL.ValueResolution
         IDictionary<object, object> Items { get; }
 
         IReadOnlyCollection<FieldSelection> Fields { get; }
+
+        ISchema Schema => ExecutionContext.Schema;
     }
 }

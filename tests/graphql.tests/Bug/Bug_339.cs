@@ -33,12 +33,11 @@ public class Bug_339
                 ")
             .Build(new SchemaBuildOptions());
 
-        var introspectionSchema = await Introspect.Schema(schema);
 
         /* When */
         var result = await Executor.ExecuteAsync(new ExecutionOptions
         {
-            Schema = introspectionSchema,
+            Schema = schema,
             Document = Introspect.DefaultQuery
         });
 

@@ -69,8 +69,7 @@ type Subscription {}
 ");
 
 
-            var sourceSchema = builder.Build(new SchemaBuildOptions()).Result;
-            _introspectionSchema = Introspect.Schema(sourceSchema).Result;
+            _introspectionSchema = builder.Build(new SchemaBuildOptions()).Result;
         }
 
         private readonly ISchema _introspectionSchema;
@@ -181,22 +180,10 @@ type Subscription {}
     ""__schema"": {
       ""types"": [
         {
-          ""name"": ""Boolean""
-        },
-        {
           ""name"": ""Enum""
         },
         {
-          ""name"": ""Float""
-        },
-        {
-          ""name"": ""ID""
-        },
-        {
           ""name"": ""InputObject""
-        },
-        {
-          ""name"": ""Int""
         },
         {
           ""name"": ""Interface""
@@ -212,9 +199,6 @@ type Subscription {}
         },
         {
           ""name"": ""Query""
-        },
-        {
-          ""name"": ""String""
         },
         {
           ""name"": ""Subscription""

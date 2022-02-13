@@ -10,9 +10,9 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
             IReadOnlyList<SchemaDefinition>? schemaDefinitions,
             IReadOnlyList<TypeDefinition>? typeDefinitions,
             IReadOnlyList<DirectiveDefinition>? directiveDefinitions,
-            IReadOnlyList<SchemaExtension>? schemaExtensions,
-            IReadOnlyList<TypeExtension>? typeExtensions,
-            IReadOnlyList<Import>? imports = null)
+            IReadOnlyList<SchemaExtension>? schemaExtensions = default,
+            IReadOnlyList<TypeExtension>? typeExtensions = default,
+            IReadOnlyList<Import>? imports = default)
         {
             SchemaDefinitions = schemaDefinitions;
             TypeDefinitions = typeDefinitions;

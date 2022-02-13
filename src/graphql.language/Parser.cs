@@ -637,6 +637,7 @@ namespace Tanka.GraphQL.Language
             return ParseName();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Name ParseName()
         {
             var location = Ensure(TokenKind.Name);
@@ -647,7 +648,7 @@ namespace Tanka.GraphQL.Language
             return new Name(value, location);
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Location Ensure(TokenKind kind)
         {
             SkipComment();
@@ -660,7 +661,7 @@ namespace Tanka.GraphQL.Language
             return GetLocation();
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Location GetLocation()
         {
             return new Location(_lexer.Line, _lexer.Column);

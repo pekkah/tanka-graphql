@@ -20,6 +20,9 @@ namespace Tanka.GraphQL.Validation
 
         public void Validate(SelectionSet selectionSet)
         {
+            if (_context.Tracker.ParentType is null)
+                return;
+
             var comparedFragmentPairs = new PairSet();
             var cachedFieldsAndFragmentNames = new Dictionary<SelectionSet, CachedField>();
             var conflicts = FindConflictsWithinSelectionSet(

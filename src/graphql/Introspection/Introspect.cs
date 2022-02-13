@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Introspection
@@ -95,20 +97,12 @@ namespace Tanka.GraphQL.Introspection
               }
             }";
 
-        /// <summary>
-        ///     Return introspection schema for given schema
-        /// </summary>
-        /// <param name="schema"></param>
-        /// <returns></returns>
-        public static Task<ISchema> Schema(ISchema schema)
+        public static (TypeSystemDocument TypeSystemDocument, ResolversMap Resolvers) Create()
         {
-            var builder = IntrospectionSchema.Create();
-            var introspectionResolvers = new IntrospectionResolvers(schema);
+            var typeSystem = IntrospectionSchema.GetTypeSystem();
+            var introspectionResolvers = new IntrospectionResolvers();
 
-            return builder.Build(new SchemaBuildOptions()
-            {
-                Resolvers = introspectionResolvers
-            });
+            return (typeSystem, introspectionResolvers);
         }
     }
 }

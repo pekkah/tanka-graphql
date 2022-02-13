@@ -7,42 +7,7 @@
     <RootNamespace>Tanka.GraphQL.Tests</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Bug\**" />
-    <Compile Remove="Descriptions\**" />
-    <Compile Remove="Tools\**" />
-    <Compile Remove="TypeSystem\**" />
-    <Compile Remove="Validation\**" />
-    <EmbeddedResource Remove="Bug\**" />
-    <EmbeddedResource Remove="Descriptions\**" />
-    <EmbeddedResource Remove="Tools\**" />
-    <EmbeddedResource Remove="TypeSystem\**" />
-    <EmbeddedResource Remove="Validation\**" />
-    <None Remove="Bug\**" />
-    <None Remove="Descriptions\**" />
-    <None Remove="Tools\**" />
-    <None Remove="TypeSystem\**" />
-    <None Remove="Validation\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="ExtensionsRunnerFacts.cs" />
-    <Compile Remove="StarwarsFacts.cs" />
-    <Compile Remove="SubscriptionsFacts.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Bug\Bug_339.cs" />
-    <Compile Include="Validation\ValidatorFacts.Arguments.cs" />
-    <Compile Include="Validation\ValidatorFacts.cs" />
-    <Compile Include="Validation\ValidatorFacts.Directives.cs" />
-    <Compile Include="Validation\ValidatorFacts.Fields.cs" />
-    <Compile Include="Validation\ValidatorFacts.Fragments.cs" />
-    <Compile Include="Validation\ValidatorFacts.Variables.cs" />
-    <Compile Include="Validation\ValidatorFacts.ValidatorFacts.Selections.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+ <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NSubstitute" Version="4.3.0" />

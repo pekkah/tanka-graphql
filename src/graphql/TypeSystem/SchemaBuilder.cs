@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Directives;
+using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.Language;
-using Tanka.GraphQL.Language.ImportProviders;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
@@ -21,13 +20,13 @@ public class SchemaBuilder
     private static readonly List<Directive> NoDirectives = new(0);
     private readonly ConcurrentDictionary<string, DirectiveDefinition> _directiveDefinitions = new();
 
+    private readonly ConcurrentBag<Import> _imports = new();
+
     private readonly ConcurrentBag<SchemaDefinition> _schemaDefinitions = new();
     private readonly ConcurrentBag<SchemaExtension> _schemaExtensions = new();
 
     private readonly ConcurrentDictionary<string, TypeDefinition> _typeDefinitions = new();
     private readonly ConcurrentDictionary<string, ConcurrentBag<TypeExtension>> _typeExtensions = new();
-
-    private readonly ConcurrentBag<Import> _imports = new();
 
     public SchemaBuilder()
     {
@@ -86,9 +85,7 @@ directive @specifiedBy(url: String!) on SCALAR
     {
         if (typeSystem.Imports is not null)
             foreach (var import in typeSystem.Imports)
-            {
                 Add(import);
-            }
 
         if (typeSystem.SchemaDefinitions is not null)
             foreach (var schemaDefinition in typeSystem.SchemaDefinitions)
@@ -113,13 +110,10 @@ directive @specifiedBy(url: String!) on SCALAR
         return this;
     }
 
-    private SchemaBuilder Add(Import importDefinition)
+    public SchemaBuilder Add(string typeSystemSdl)
     {
-        _imports.Add(importDefinition);
-        return this;
+        return Add((TypeSystemDocument)typeSystemSdl);
     }
-
-    public SchemaBuilder Add(string typeSystemSdl) => Add((TypeSystemDocument)typeSystemSdl);
 
     public SchemaBuilder Add(SchemaDefinition schemaDefinition)
     {
@@ -174,24 +168,38 @@ directive @specifiedBy(url: String!) on SCALAR
         return this;
     }
 
-    public Task<ISchema> Build(IResolverMap resolvers, ISubscriberMap? subscribers = null) => Build(
-        new SchemaBuildOptions()
-        {
-            Resolvers = resolvers,
-            Subscribers = subscribers
-        });
-    
+    public Task<ISchema> Build(IResolverMap resolvers, ISubscriberMap? subscribers = null)
+    {
+        return Build(
+            new SchemaBuildOptions
+            {
+                Resolvers = resolvers,
+                Subscribers = subscribers
+            });
+    }
+
     public async Task<ISchema> Build(SchemaBuildOptions options)
     {
+        var resolvers = new ResolversMap(options.Resolvers ?? ResolversMap.None, options.Subscribers);
+
+        if (options.IncludeIntrospection)
+        {
+            var introspection = Introspect.Create();
+            Add(introspection.TypeSystemDocument);
+
+            resolvers += introspection.Resolvers;
+        }
+
         await AddImports(options.ImportProviders);
-        
+
         var typeDefinitions = BuildTypeDefinitions(
             options.BuildTypesFromOrphanedExtensions
         );
 
         typeDefinitions = RunDirectiveVisitors(typeDefinitions, options).ToList();
 
-        var namedTypeDefinitions = typeDefinitions.ToDictionary(type => type.Name.Value, type => type);
+        var namedTypeDefinitions = typeDefinitions
+            .ToDictionary(type => type.Name.Value, type => type);
 
         var schemas = BuildSchemas().ToList();
         var operationDefinitions = schemas
@@ -232,10 +240,7 @@ directive @specifiedBy(url: String!) on SCALAR
                       NoFields
             );
 
-        foreach (var (type,fields) in interfaceFields)
-        {
-            allFields.Add(type, fields);
-        }
+        foreach (var (type, fields) in interfaceFields) allFields.Add(type, fields);
 
         var inputFields = namedTypeDefinitions
             .Where(kv => kv.Value is InputObjectDefinition)
@@ -250,22 +255,27 @@ directive @specifiedBy(url: String!) on SCALAR
             ?.SelectMany(schema => schema.Directives?.ToList() ?? NoDirectives)
             .ToList();
 
-
         ISchema schema = new ExecutableSchema(
             namedTypeDefinitions,
             allFields,
             inputFields,
             _directiveDefinitions.ToDictionary(kv => kv.Key, kv => kv.Value),
             queryRoot,
-            options.Resolvers ?? new ResolversMap(),
+            resolvers,
             options.ValueConverters ?? new Dictionary<string, IValueConverter>(0),
             mutationRoot,
             subscriptionRoot,
-            options.Subscribers,
+            resolvers,
             schemaDirectives
         );
 
         return schema;
+    }
+
+    private SchemaBuilder Add(Import importDefinition)
+    {
+        _imports.Add(importDefinition);
+        return this;
     }
 
     private async Task AddImports(IReadOnlyList<IImportProvider> providers)
@@ -273,7 +283,7 @@ directive @specifiedBy(url: String!) on SCALAR
         if (providers.Count == 0)
             return;
 
-        var parentOptions = new ParserOptions()
+        var parentOptions = new ParserOptions
         {
             ImportProviders = providers.ToList()
         };
@@ -286,28 +296,28 @@ directive @specifiedBy(url: String!) on SCALAR
             var provider = providers.FirstOrDefault(p => p.CanImport(path, types));
 
             if (provider is null)
-                throw new InvalidOperationException($"No import provider capable of handling import '{import}' given. " +
-                                                    $"Use {nameof(SchemaBuildOptions)}.{nameof(SchemaBuildOptions.ImportProviders)} to set the providers.");
+                throw new InvalidOperationException(
+                    $"No import provider capable of handling import '{import}' given. " +
+                    $"Use {nameof(SchemaBuildOptions)}.{nameof(SchemaBuildOptions.ImportProviders)} to set the providers.");
 
             var typeSystemDocument = await provider.ImportAsync(path, types, parentOptions);
 
             if (typeSystemDocument.Imports != null)
                 foreach (var subImport in typeSystemDocument.Imports)
-                {
                     imports.Enqueue(subImport);
-                }
 
             Add(typeSystemDocument);
         }
     }
 
-    private IEnumerable<TypeDefinition> RunDirectiveVisitors(IEnumerable<TypeDefinition> typeDefinitions, SchemaBuildOptions options)
+    private IEnumerable<TypeDefinition> RunDirectiveVisitors(IEnumerable<TypeDefinition> typeDefinitions,
+        SchemaBuildOptions options)
     {
         if (options.DirectiveVisitorFactories is null)
             return typeDefinitions;
 
         var visitors = options.DirectiveVisitorFactories
-            .Select(factory => new KeyValuePair<string,DirectiveVisitor>(
+            .Select(factory => new KeyValuePair<string, DirectiveVisitor>(
                 factory.Key,
                 factory.Value(this) //todo: use options instead of this
             ));
@@ -318,61 +328,59 @@ directive @specifiedBy(url: String!) on SCALAR
 
     private IEnumerable<TypeDefinition> RunDirectiveVisitors(
         IEnumerable<TypeDefinition> typeDefinitions,
-        SchemaBuildOptions options, 
+        SchemaBuildOptions options,
         IEnumerable<KeyValuePair<string, DirectiveVisitor>> visitors)
     {
         var typeDefinitionList = typeDefinitions.ToList();
 
         foreach (var (directiveName, visitor) in visitors)
+        foreach (var typeDefinition in typeDefinitionList)
         {
-            foreach (var typeDefinition in typeDefinitionList)
+            if (typeDefinition is not ObjectDefinition objectDefinition)
             {
-                if (typeDefinition is not ObjectDefinition objectDefinition)
-                {
-                    yield return typeDefinition;
-                    continue;
-                }
+                yield return typeDefinition;
+                continue;
+            }
 
-                if (visitor.FieldDefinition != null && objectDefinition.Fields is {Count: > 0})
+            if (visitor.FieldDefinition != null && objectDefinition.Fields is { Count: > 0 })
+            {
+                var fieldsChanged = false;
+                var fields = new List<FieldDefinition>(objectDefinition.Fields.Count);
+                foreach (var fieldDefinition in objectDefinition.Fields)
                 {
-                    bool fieldsChanged = false;
-                    var fields = new List<FieldDefinition>(objectDefinition.Fields.Count);
-                    foreach (var fieldDefinition in objectDefinition.Fields)
+                    if (!fieldDefinition.TryGetDirective(directiveName, out var directive))
+                        continue;
+
+                    var resolver = options.Resolvers?.GetResolver(typeDefinition.Name, fieldDefinition.Name);
+                    var subscriber = options.Subscribers?.GetSubscriber(typeDefinition.Name, fieldDefinition.Name);
+                    var context = new DirectiveFieldVisitorContext(
+                        fieldDefinition,
+                        resolver,
+                        subscriber
+                    );
+
+                    var maybeSameContext = visitor.FieldDefinition(directive, context);
+
+                    // field not modified
+                    if (maybeSameContext == context)
                     {
-                        if (!fieldDefinition.TryGetDirective(directiveName, out var directive))
-                            continue;
-
-                        var resolver = options.Resolvers?.GetResolver(typeDefinition.Name, fieldDefinition.Name);
-                        var subscriber = options.Subscribers?.GetSubscriber(typeDefinition.Name, fieldDefinition.Name);
-                        var context = new DirectiveFieldVisitorContext(
-                            fieldDefinition,
-                            resolver,
-                            subscriber
-                            );
-
-                        DirectiveFieldVisitorContext? maybeSameContext = visitor.FieldDefinition(directive, context);
-
-                        // field not modified
-                        if (maybeSameContext == context)
-                        {
-                            fields.Add(fieldDefinition);
-                            continue;
-                        }
-
-                        fieldsChanged = true;
-
-                        // field removed
-                        if (maybeSameContext is null)
-                            continue;
-                        
-                        fields.Add(maybeSameContext.Field);
+                        fields.Add(fieldDefinition);
+                        continue;
                     }
 
-                    if (fieldsChanged)
-                        yield return objectDefinition.WithFields(fields);
-                    else 
-                        yield return objectDefinition;
+                    fieldsChanged = true;
+
+                    // field removed
+                    if (maybeSameContext is null)
+                        continue;
+
+                    fields.Add(maybeSameContext.Field);
                 }
+
+                if (fieldsChanged)
+                    yield return objectDefinition.WithFields(fields);
+                else
+                    yield return objectDefinition;
             }
         }
     }

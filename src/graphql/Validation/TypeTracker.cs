@@ -24,9 +24,16 @@ public class TypeTracker : RuleVisitor
 
             Types.Push(root);
         };
-        LeaveOperationDefinition = node => { Types.TryPop(out _); };
+        LeaveOperationDefinition = node =>
+        {
+            Types.TryPop(out _);
+        };
 
-        EnterSelectionSet = node => { ParentTypes.Push(CurrentType); };
+        EnterSelectionSet = node =>
+        {
+            ParentTypes.Push(CurrentType);
+        };
+
 
         LeaveSelectionSet = node => { ParentTypes.TryPop(out _); };
 

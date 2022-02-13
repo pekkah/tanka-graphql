@@ -40,4 +40,6 @@ public class SchemaBuildOptions
         new FileSystemImportProvider(AppContext.BaseDirectory),
         new ExtensionsImportProvider()
     };
+
+    public bool IncludeIntrospection { get; set; } = true;
 }

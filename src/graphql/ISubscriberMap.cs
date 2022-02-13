@@ -1,4 +1,5 @@
-﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
+﻿using System.Collections.Generic;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL
@@ -6,6 +7,8 @@ namespace Tanka.GraphQL
     public interface ISubscriberMap
     {
         Subscriber? GetSubscriber(string typeName, string fieldName);
+
+        IEnumerable<(string TypeName, IEnumerable<string> Fields)> GetTypes();
     }
 
     public static class SubscriberMapExtensions
