@@ -28,9 +28,7 @@ public class SchemaBuilder
     private readonly ConcurrentDictionary<string, TypeDefinition> _typeDefinitions = new();
     private readonly ConcurrentDictionary<string, ConcurrentBag<TypeExtension>> _typeExtensions = new();
 
-    public SchemaBuilder()
-    {
-        Add((TypeSystemDocument)@"
+    public static TypeSystemDocument BuiltInTypes => @"
 """"""
 The `Boolean` scalar type represents `true` or `false`
 """"""
@@ -78,8 +76,7 @@ directive @skip(if: Boolean!) on
     | INLINE_FRAGMENT
 
 directive @specifiedBy(url: String!) on SCALAR
-            ");
-    }
+";
 
     public SchemaBuilder Add(TypeSystemDocument typeSystem)
     {
@@ -178,8 +175,19 @@ directive @specifiedBy(url: String!) on SCALAR
             });
     }
 
+    public IEnumerable<TypeDefinition> QueryTypeDefinitions(Func<TypeDefinition, bool> filter, SchemaBuildOptions options)
+    {
+        var typeDefinitions = BuildTypeDefinitions(options.BuildTypesFromOrphanedExtensions);
+        return typeDefinitions.Where(filter);
+    }
+
     public async Task<ISchema> Build(SchemaBuildOptions options)
     {
+        if (options.IncludeBuiltInTypes)
+        {
+            Add(BuiltInTypes);
+        }
+
         var resolvers = new ResolversMap(options.Resolvers ?? ResolversMap.None, options.Subscribers);
 
         if (options.IncludeIntrospection)
@@ -310,7 +318,8 @@ directive @specifiedBy(url: String!) on SCALAR
         }
     }
 
-    private IEnumerable<TypeDefinition> RunDirectiveVisitors(IEnumerable<TypeDefinition> typeDefinitions,
+    private IEnumerable<TypeDefinition> RunDirectiveVisitors(
+        IEnumerable<TypeDefinition> typeDefinitions,
         SchemaBuildOptions options)
     {
         if (options.DirectiveVisitorFactories is null)
@@ -332,56 +341,73 @@ directive @specifiedBy(url: String!) on SCALAR
         IEnumerable<KeyValuePair<string, DirectiveVisitor>> visitors)
     {
         var typeDefinitionList = typeDefinitions.ToList();
-
-        foreach (var (directiveName, visitor) in visitors)
-        foreach (var typeDefinition in typeDefinitionList)
+        var visitorList = visitors.ToList();
+        for (var typeIndex = 0; typeIndex < typeDefinitionList.Count; typeIndex++)
         {
-            if (typeDefinition is not ObjectDefinition objectDefinition)
+            TypeDefinition typeDefinition = typeDefinitionList[typeIndex];
+            foreach (var (directiveName, visitor) in visitorList)
             {
-                yield return typeDefinition;
-                continue;
-            }
-
-            if (visitor.FieldDefinition != null && objectDefinition.Fields is { Count: > 0 })
-            {
-                var fieldsChanged = false;
-                var fields = new List<FieldDefinition>(objectDefinition.Fields.Count);
-                foreach (var fieldDefinition in objectDefinition.Fields)
+                if (visitor.TypeDefinition is not null)
                 {
-                    if (!fieldDefinition.TryGetDirective(directiveName, out var directive))
+                    if (!typeDefinition.TryGetDirective(directiveName, out var directive))
                         continue;
 
-                    var resolver = options.Resolvers?.GetResolver(typeDefinition.Name, fieldDefinition.Name);
-                    var subscriber = options.Subscribers?.GetSubscriber(typeDefinition.Name, fieldDefinition.Name);
-                    var context = new DirectiveFieldVisitorContext(
-                        fieldDefinition,
-                        resolver,
-                        subscriber
-                    );
+                    var context = new DirectiveTypeVisitorContext(typeDefinition);
 
-                    var maybeSameContext = visitor.FieldDefinition(directive, context);
+                    var maybeSameContext = visitor.TypeDefinition(directive, context);
 
-                    // field not modified
-                    if (maybeSameContext == context)
+                    // type removed
+                    if (maybeSameContext is null)
                     {
-                        fields.Add(fieldDefinition);
                         continue;
                     }
 
-                    fieldsChanged = true;
-
-                    // field removed
-                    if (maybeSameContext is null)
-                        continue;
-
-                    fields.Add(maybeSameContext.Field);
+                    typeDefinition = maybeSameContext.TypeDefinition;
                 }
 
-                if (fieldsChanged)
-                    yield return objectDefinition.WithFields(fields);
-                else
-                    yield return objectDefinition;
+                if (typeDefinition is ObjectDefinition objectDefinition)
+                    if (visitor.FieldDefinition != null && objectDefinition.Fields is { Count: > 0 })
+                    {
+                        var fieldsChanged = false;
+                        var fields = new List<FieldDefinition>(objectDefinition.Fields.Count);
+                        foreach (var fieldDefinition in objectDefinition.Fields)
+                        {
+                            if (!fieldDefinition.TryGetDirective(directiveName, out var directive))
+                                continue;
+
+                            var resolver = options.Resolvers?.GetResolver(typeDefinition.Name, fieldDefinition.Name);
+                            var subscriber =
+                                options.Subscribers?.GetSubscriber(typeDefinition.Name, fieldDefinition.Name);
+                            var context = new DirectiveFieldVisitorContext(
+                                fieldDefinition,
+                                resolver,
+                                subscriber
+                            );
+
+                            var maybeSameContext = visitor.FieldDefinition(directive, context);
+
+                            // field not modified
+                            if (maybeSameContext == context)
+                            {
+                                fields.Add(fieldDefinition);
+                                continue;
+                            }
+
+                            fieldsChanged = true;
+
+                            // field removed
+                            if (maybeSameContext is null)
+                                continue;
+
+                            fields.Add(maybeSameContext.Field);
+                        }
+
+                        if (fieldsChanged)
+                            typeDefinition = objectDefinition.WithFields(fields);
+                    }
             }
+
+            yield return typeDefinition;
         }
     }
 
@@ -429,7 +455,7 @@ directive @specifiedBy(url: String!) on SCALAR
             ?.NamedType;
 
         // by convention
-        if (queryNamedType == null && _typeDefinitions.TryGetValue("Query", out var queryDefinition))
+        if (queryNamedType == null && typeDefinitions.TryGetValue("Query", out var queryDefinition))
             return (ObjectDefinition)queryDefinition;
 
         if (queryNamedType is null)
@@ -451,7 +477,7 @@ directive @specifiedBy(url: String!) on SCALAR
             ?.NamedType;
 
         // by convention
-        if (mutationNamedType == null && _typeDefinitions.TryGetValue("Mutation", out var mutationDefinition))
+        if (mutationNamedType == null && typeDefinitions.TryGetValue("Mutation", out var mutationDefinition))
             return (ObjectDefinition)mutationDefinition;
 
         if (mutationNamedType is null)
@@ -474,7 +500,7 @@ directive @specifiedBy(url: String!) on SCALAR
 
         // by convention
         if (subscriptionNamedType == null &&
-            _typeDefinitions.TryGetValue("Subscription", out var subscriptionDefinition))
+            typeDefinitions.TryGetValue("Subscription", out var subscriptionDefinition))
             return (ObjectDefinition)subscriptionDefinition;
 
         if (subscriptionNamedType is null)

@@ -8,11 +8,32 @@ using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.TypeSystem;
 
-public class SchemaBuildOptions
+public record SchemaBuildOptions
 {
+    public SchemaBuildOptions()
+    {
+    }
+
+    public SchemaBuildOptions(IResolverMap resolvers, ISubscriberMap? subscribers = null)
+    {
+        Resolvers = resolvers;
+        Subscribers = subscribers;
+    }
+
     public bool BuildTypesFromOrphanedExtensions { get; set; } = false;
 
     public IReadOnlyDictionary<string, CreateDirectiveVisitor>? DirectiveVisitorFactories { get; set; }
+
+    public IReadOnlyList<IImportProvider> ImportProviders { get; set; } = new List<IImportProvider>
+    {
+        new EmbeddedResourceImportProvider(),
+        new FileSystemImportProvider(AppContext.BaseDirectory),
+        new ExtensionsImportProvider()
+    };
+
+    public bool IncludeBuiltInTypes { get; set; } = true;
+
+    public bool IncludeIntrospection { get; set; } = true;
 
     public string? OverrideMutationRootName { get; set; }
 
@@ -33,13 +54,4 @@ public class SchemaBuildOptions
             [Scalars.Boolean.Name] = new BooleanConverter(),
             [Scalars.ID.Name] = new IdConverter()
         };
-
-    public IReadOnlyList<IImportProvider> ImportProviders { get; set; } = new List<IImportProvider>()
-    {
-        new EmbeddedResourceImportProvider(),
-        new FileSystemImportProvider(AppContext.BaseDirectory),
-        new ExtensionsImportProvider()
-    };
-
-    public bool IncludeIntrospection { get; set; } = true;
 }

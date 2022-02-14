@@ -1,10 +1,38 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Language
 {
     public static class TypeDefinitionExtensions
     {
+        public static bool HasDirective(
+            this TypeDefinition definition,
+            Name directiveName)
+        {
+            if (definition.Directives is null)
+            {
+                return false;
+            }
+
+            return definition.Directives.TryGet(directiveName, out _);
+        }
+
+        public static bool TryGetDirective(
+            this TypeDefinition definition,
+            Name directiveName,
+            [NotNullWhen(true)] out Directive? directive)
+        {
+            if (definition.Directives is null)
+            {
+                directive = null;
+                return false;
+            }
+
+            return definition.Directives.TryGet(directiveName, out directive);
+        }
+
         public static TypeDefinition Extend(
             this TypeDefinition typeDefinition,
             params TypeExtension[] typeExtensions)

@@ -18,7 +18,7 @@ public sealed class ScalarDefinition : TypeDefinition
     }
 
     public StringValue? Description { get; }
-    public Directives? Directives { get; }
+    public override Directives? Directives { get; }
     public override NodeKind Kind => NodeKind.ScalarDefinition;
     public override Location? Location { get; }
     public override Name Name { get; }

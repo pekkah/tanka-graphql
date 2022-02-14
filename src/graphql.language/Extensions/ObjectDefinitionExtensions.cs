@@ -43,6 +43,18 @@ namespace Tanka.GraphQL.Language
             return definition.Directives.TryGet(directiveName, out directive);
         }
 
+        public static bool HasDirective(
+            this ObjectDefinition definition,
+            Name directiveName)
+        {
+            if (definition.Directives is null)
+            {
+                return false;
+            }
+
+            return definition.Directives.TryGet(directiveName, out _);
+        }
+
         public static ObjectDefinition WithDescription(this ObjectDefinition definition, 
             in StringValue? description)
         {

@@ -24,7 +24,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public override Name Name { get; }
 
-        public Directives? Directives { get; }
+        public override Directives? Directives { get; }
 
         public UnionMemberTypes? Members { get; }
 

@@ -22,7 +22,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
 
         public StringValue? Description { get; }
         public override Name Name { get; }
-        public Directives? Directives { get; }
+        public override Directives? Directives { get; }
         public InputFieldsDefinition? Fields { get; }
         public override Location? Location { get; }
 

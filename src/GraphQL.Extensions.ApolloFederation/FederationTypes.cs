@@ -1,46 +1,31 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Tanka.GraphQL.TypeSystem;
+﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL.Extensions.ApolloFederation
+namespace Tanka.GraphQL.Extensions.ApolloFederation;
+
+public static class FederationTypes
 {
-    public static class FederationTypes
-    {
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        public static readonly ScalarType _Any = new ScalarType("_Any");
+    public static TypeSystemDocument TypeSystem =>
+        @"
+scalar _Any
+scalar _FieldSet
 
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        public static readonly ScalarType _FieldSet = new ScalarType("_FieldSet");
+# a union of all types that use the @key directive
+union _Entity
 
-        public static readonly DirectiveType External = new DirectiveType(
-            "external",
-            new[] {DirectiveLocation.FIELD_DEFINITION});
+type _Service {
+  sdl: String
+}
 
-        public static readonly DirectiveType Requires = new DirectiveType(
-            "requires",
-            new[] {DirectiveLocation.FIELD_DEFINITION},
-            new Args
-            {
-                {"fields", _FieldSet, null, "Fields"}
-            });
+extend type Query {
+  # we add this dynamically _entities(representations: [_Any!]!): [_Entity]!
+  # see above _service: _Service!
+}
 
-        public static readonly DirectiveType Provides = new DirectiveType(
-            "provides",
-            new[] {DirectiveLocation.FIELD_DEFINITION},
-            new Args
-            {
-                {"fields", _FieldSet, null, "Fields"}
-            });
+directive @external on FIELD_DEFINITION
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
 
-        public static readonly DirectiveType Key = new DirectiveType(
-            "key",
-            new[] {DirectiveLocation.FIELD_DEFINITION},
-            new Args
-            {
-                {"fields", _FieldSet, null, "fields"}
-            });
-
-        public static readonly DirectiveType Extends = new DirectiveType(
-            "extends",
-            new[] {DirectiveLocation.OBJECT, DirectiveLocation.INTERFACE});
-    }
+directive @extends on OBJECT | INTERFACE
+";
 }

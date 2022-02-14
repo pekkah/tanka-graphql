@@ -20,7 +20,7 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         }
 
         public StringValue? Description { get; }
-        public Directives? Directives { get; }
+        public override Directives? Directives { get; }
         public override Name Name { get; }
         public EnumValuesDefinition? Values { get; }
         public override NodeKind Kind => NodeKind.EnumDefinition;

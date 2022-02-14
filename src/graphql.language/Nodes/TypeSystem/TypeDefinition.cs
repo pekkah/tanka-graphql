@@ -12,6 +12,9 @@ namespace Tanka.GraphQL.Language.Nodes.TypeSystem
         public abstract NodeKind Kind { get; }
         public abstract Location? Location { get; }
 
+        public abstract Directives? Directives { get; }
+        
+
         public static implicit operator TypeDefinition(string value)
         {
             var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
