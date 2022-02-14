@@ -1,20 +1,18 @@
 ﻿using System.Collections.Generic;
 
-namespace Tanka.GraphQL.Introspection
+namespace Tanka.GraphQL.Introspection;
+
+// ReSharper disable once InconsistentNaming
+public class __Field
 {
-    // ReSharper disable once InconsistentNaming
-    public class __Field
-    {
-        public string Name { get; set; }
+    public List<__InputValue> Args { get; set; }
 
-        public string Description { get; set; }
+    public string DeprecationReason { get; set; }
 
-        public List<__InputValue> Args { get; set; }
+    public string Description { get; set; }
 
-        public __Type Type { get; set; }
+    public bool IsDeprecated { get; set; }
+    public string Name { get; set; }
 
-        public bool IsDeprecated { get; set; }
-
-        public string DeprecationReason { get; set; }
-    }
+    public __Type Type { get; set; }
 }

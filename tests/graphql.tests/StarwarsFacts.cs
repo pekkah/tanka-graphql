@@ -34,7 +34,7 @@ public class StarwarsFacts : IClassFixture<StarwarsFixture>
         /* Then */
         Assert.NotNull(result.Data);
         Assert.NotEmpty(result?.Data);
-        
+
         Assert.Null(result.Errors);
     }
 

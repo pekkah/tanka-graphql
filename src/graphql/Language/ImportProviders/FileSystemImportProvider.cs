@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Unicode;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
@@ -46,8 +45,6 @@ public class FileSystemImportProvider : IImportProvider
 
         // if no type filter provided import all
         if (types is { Length: > 0 })
-        {
-
             document = document
                 .WithDirectiveDefinitions(document.DirectiveDefinitions
                     ?.Where(type => types.Contains(type.Name.ToString())).ToList())
@@ -55,7 +52,6 @@ public class FileSystemImportProvider : IImportProvider
                     ?.Where(type => types.Contains(type.Name.ToString())).ToList())
                 .WithTypeExtensions(document.TypeExtensions
                     ?.Where(type => types.Contains(type.Name.ToString())).ToList());
-        }
 
         return document;
     }
@@ -64,7 +60,7 @@ public class FileSystemImportProvider : IImportProvider
     {
         var from = import.From.ToString();
 
-        if (!Path.IsPathRooted(from)) 
+        if (!Path.IsPathRooted(from))
             from = Path.Combine(rootPath, from);
 
         return new Import(import.Types, new StringValue(Encoding.UTF8.GetBytes(from)));

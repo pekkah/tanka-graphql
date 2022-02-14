@@ -1,19 +1,23 @@
 ﻿using System.Threading.Tasks;
-using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
 // ReSharper disable InconsistentNaming
 
-namespace Tanka.GraphQL.Tests.Introspection
+namespace Tanka.GraphQL.Tests.Introspection;
+
+public class IntrospectSchemaFacts
 {
-    public class IntrospectSchemaFacts
+    public const string ObjectTypeName = "Object";
+    public const string ScalarFieldName = "int";
+
+    private readonly ISchema _introspectionSchema;
+
+    public IntrospectSchemaFacts()
     {
-        public IntrospectSchemaFacts()
-        {
-            var builder = new SchemaBuilder();
-            builder.Add(@"
+        var builder = new SchemaBuilder();
+        builder.Add(@"
 
 """"""Description""""""
 interface Interface 
@@ -69,40 +73,25 @@ type Subscription {}
 ");
 
 
-            _introspectionSchema = builder.Build(new SchemaBuildOptions()).Result;
-        }
+        _introspectionSchema = builder.Build(new SchemaBuildOptions()).Result;
+    }
 
-        private readonly ISchema _introspectionSchema;
-
-        public const string ObjectTypeName = "Object";
-        public const string ScalarFieldName = "int";
-
-        private async Task<ExecutionResult> QueryAsync(string query)
-        {
-            return await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Schema = _introspectionSchema,
-                Document = query,
-                IncludeExceptionDetails = true
-            });
-        }
-
-        [Fact]
-        public async Task Schema_directives()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Schema_directives()
+    {
+        /* Given */
+        var query = @"{ 
                             __schema {
                                 directives { name }
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__schema"": {
       ""directives"": [
@@ -124,13 +113,13 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
 
-        [Fact]
-        public async Task Schema_root_types()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Schema_root_types()
+    {
+        /* Given */
+        var query = @"{ 
                             __schema {
                                 queryType { name }
                                 mutationType { name }
@@ -138,12 +127,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""__schema"": {
                       ""queryType"": {
@@ -158,24 +147,24 @@ type Subscription {}
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Schema_types()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Schema_types()
+    {
+        /* Given */
+        var query = @"{ 
                             __schema {
                                 types { name }
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__schema"": {
       ""types"": [
@@ -212,13 +201,13 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_DirectiveType()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_DirectiveType()
+    {
+        /* Given */
+        var query = @"{ 
                             __schema {
                                 directives {
                                     name
@@ -229,12 +218,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__schema"": {
       ""directives"": [
@@ -297,14 +286,14 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_EnumType()
-        {
-            /* Given */
-            //todo(pekka): separate enumValues testing to own test
-            var query = @"{ 
+    [Fact]
+    public async Task Type_EnumType()
+    {
+        /* Given */
+        //todo(pekka): separate enumValues testing to own test
+        var query = @"{ 
                             __type(name: ""Enum"") {
                                 kind
                                 name
@@ -318,12 +307,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__type"": {
       ""kind"": ""ENUM"",
@@ -342,13 +331,13 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_EnumType_include_deprecated()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_EnumType_include_deprecated()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Enum"") {
                                 kind
                                 name
@@ -362,12 +351,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__type"": {
       ""kind"": ""ENUM"",
@@ -392,13 +381,13 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_InputObjectType()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_InputObjectType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""InputObject"") {
                                 kind
                                 name
@@ -406,12 +395,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__type"": {
       ""kind"": ""INPUT_OBJECT"",
@@ -422,13 +411,13 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_InputObjectType_fields()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_InputObjectType_fields()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""InputObject"") {
                                 inputFields {
                                     name
@@ -439,12 +428,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""__type"": {
                       ""inputFields"": [
@@ -461,13 +450,13 @@ type Subscription {}
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_InterfaceType()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_InterfaceType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Interface"") {
                                 kind
                                 name
@@ -477,12 +466,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""__type"": {
                       ""possibleTypes"": [
@@ -501,13 +490,13 @@ type Subscription {}
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_ObjectType()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_ObjectType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Object"") {
                                 kind
                                 name
@@ -517,12 +506,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__type"": {
       ""kind"": ""OBJECT"",
@@ -546,13 +535,13 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_ObjectType_fields()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_ObjectType_fields()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Object"") {
                                 fields { 
                                     name 
@@ -565,12 +554,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__type"": {
       ""fields"": [
@@ -610,13 +599,13 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_ObjectType_fields_args()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_ObjectType_fields_args()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Object"") {
                                 fields { 
                                     args { 
@@ -629,12 +618,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__type"": {
       ""fields"": [
@@ -659,13 +648,13 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_ScalarType()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_ScalarType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Int"") {
                                 kind
                                 name
@@ -673,12 +662,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""__type"": {
                       ""name"": ""Int"",
@@ -687,13 +676,13 @@ type Subscription {}
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_UnionType()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_UnionType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Union"") {
                                 kind
                                 name
@@ -702,12 +691,12 @@ type Subscription {}
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
   ""data"": {
     ""__type"": {
       ""kind"": ""UNION"",
@@ -726,6 +715,15 @@ type Subscription {}
   ""extensions"": null,
   ""errors"": null
 }");
-        }
+    }
+
+    private async Task<ExecutionResult> QueryAsync(string query)
+    {
+        return await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = _introspectionSchema,
+            Document = query,
+            IncludeExceptionDetails = true
+        });
     }
 }

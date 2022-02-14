@@ -210,7 +210,7 @@ public partial class ValidatorFacts
         var result = Validate(
             document,
             ExecutionRules.R532FieldSelectionMerging(),
-            new Dictionary<string, object>()
+            new Dictionary<string, object>
             {
                 ["dogCommand"] = "SIT"
             });
@@ -310,7 +310,7 @@ public partial class ValidatorFacts
         var result = Validate(
             document,
             ExecutionRules.R532FieldSelectionMerging(),
-            new Dictionary<string, object>()
+            new Dictionary<string, object>
             {
                 ["dogCommand"] = "HEEL",
                 ["varOne"] = "SIT",

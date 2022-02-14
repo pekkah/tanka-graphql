@@ -45,8 +45,8 @@ public class CostFacts
         var result = Validate(
             document,
             CostAnalyzer.MaxCost(
-                maxCost: 0,
-                defaultFieldComplexity: 0)
+                0,
+                0)
         );
 
         /* Then */
@@ -69,8 +69,8 @@ public class CostFacts
         var result = Validate(
             document,
             CostAnalyzer.MaxCost(
-                maxCost: 5,
-                defaultFieldComplexity: 0)
+                5,
+                0)
         );
 
         /* Then */
@@ -93,8 +93,8 @@ public class CostFacts
         var result = Validate(
             document,
             CostAnalyzer.MaxCost(
-                maxCost: 0,
-                defaultFieldComplexity: 1)
+                0,
+                1)
         );
 
         /* Then */
@@ -117,8 +117,8 @@ public class CostFacts
         var result = Validate(
             document,
             CostAnalyzer.MaxCost(
-                maxCost: 1,
-                defaultFieldComplexity: 1)
+                1,
+                1)
         );
 
         /* Then */
@@ -138,8 +138,8 @@ public class CostFacts
         var result = Validate(
             document,
             CostAnalyzer.MaxCost(
-                maxCost: 1,
-                defaultFieldComplexity: 0)
+                1,
+                0)
         );
 
         /* Then */
@@ -159,8 +159,8 @@ public class CostFacts
         var result = Validate(
             document,
             CostAnalyzer.MaxCost(
-                maxCost: 3,
-                defaultFieldComplexity: 0)
+                3,
+                0)
         );
 
         /* Then */

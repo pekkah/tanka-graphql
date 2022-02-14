@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 
-namespace Tanka.GraphQL
+namespace Tanka.GraphQL;
+
+public interface IExecutorExtension
 {
-    public interface IExecutorExtension
-    {
-        //todo: change to ValueTask ?
-        Task<IExtensionScope> BeginExecuteAsync(ExecutionOptions options);
-    }
+    //todo: change to ValueTask ?
+    Task<IExtensionScope> BeginExecuteAsync(ExecutionOptions options);
 }

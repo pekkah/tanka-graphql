@@ -1,18 +1,18 @@
 ﻿using System.Collections.Generic;
 
-namespace Tanka.GraphQL.Language.Nodes.TypeSystem
+namespace Tanka.GraphQL.Language.Nodes.TypeSystem;
+
+public sealed class RootOperationTypeDefinitions : CollectionNodeBase<RootOperationTypeDefinition>
 {
-    public sealed class RootOperationTypeDefinitions: CollectionNodeBase<RootOperationTypeDefinition>
+    public RootOperationTypeDefinitions(IReadOnlyList<RootOperationTypeDefinition> items,
+        in Location? location = default) : base(items, in location)
     {
-        public RootOperationTypeDefinitions(IReadOnlyList<RootOperationTypeDefinition> items, in Location? location = default) : base(items, in location)
-        {
-        }
+    }
 
-        public override NodeKind Kind => NodeKind.RootOperationTypeDefinitions;
+    public override NodeKind Kind => NodeKind.RootOperationTypeDefinitions;
 
-        public static RootOperationTypeDefinitions From(IReadOnlyList<RootOperationTypeDefinition> operations)
-        {
-            return new RootOperationTypeDefinitions(operations);
-        }
+    public static RootOperationTypeDefinitions From(IReadOnlyList<RootOperationTypeDefinition> operations)
+    {
+        return new RootOperationTypeDefinitions(operations);
     }
 }

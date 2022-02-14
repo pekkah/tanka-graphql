@@ -5,54 +5,54 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Server.Links
+namespace Tanka.GraphQL.Server.Links;
+
+public class PreExecutedResolverResult : IResolverResult
 {
-    public class PreExecutedResolverResult : IResolverResult
+    private readonly IDictionary<string, object> _data;
+    private readonly IEnumerable<ExecutionError> _errors;
+    private readonly Dictionary<string, object> _extensions;
+
+    public PreExecutedResolverResult(ExecutionResult executionResult)
     {
-        private readonly IDictionary<string, object> _data;
-        private readonly IEnumerable<ExecutionError> _errors;
-        private readonly Dictionary<string, object> _extensions;
+        _data = executionResult.Data;
+        _errors = executionResult.Errors;
+        _extensions = executionResult.Extensions;
+    }
 
-        public PreExecutedResolverResult(ExecutionResult executionResult)
+    public object Value => _data;
+
+    public ValueTask<object> CompleteValueAsync(IResolverContext context)
+    {
+        if (_errors != null && _errors.Any())
         {
-            _data = executionResult.Data;
-            _errors = executionResult.Errors;
-            _extensions = executionResult.Extensions;
-        }
-
-        public object Value => _data;
-
-        public ValueTask<object> CompleteValueAsync(IResolverContext context)
-        {
-            if (_errors != null && _errors.Any())
-            {
-                var first = _errors.First();
-                throw new CompleteValueException(
-                    $"{first.Message}",
-                    null,
-                    context.Path,
-                    new Dictionary<string, object>
+            var first = _errors.First();
+            throw new CompleteValueException(
+                $"{first.Message}",
+                null,
+                context.Path,
+                new Dictionary<string, object>
+                {
+                    ["remoteError"] = new
                     {
-                        ["remoteError"] = new
-                        {
-                            error = first,
-                            data = _data,
-                            errors = _errors,
-                            extensions = _extensions
-                        }
-                    },
-                    context.Selection);
-            }
-
-            if (!_data.TryGetValue(context.FieldName, out var value))
-                throw new CompleteValueException(
-                    $"Could not complete value for field '{context.FieldName}:{context.Field.Type}'. " +
-                    $"Could not find field value from execution result. Fields found '{string.Join(",", _data.Keys)}'",
-                    context.Path,
-                    context.Selection);
-
-            var resolveResult = new CompleteValueResult(value, context.Schema.GetRequiredNamedType<ObjectDefinition>(context.Field.Type.Unwrap().Name));
-            return resolveResult.CompleteValueAsync(context);
+                        error = first,
+                        data = _data,
+                        errors = _errors,
+                        extensions = _extensions
+                    }
+                },
+                context.Selection);
         }
+
+        if (!_data.TryGetValue(context.FieldName, out var value))
+            throw new CompleteValueException(
+                $"Could not complete value for field '{context.FieldName}:{context.Field.Type}'. " +
+                $"Could not find field value from execution result. Fields found '{string.Join(",", _data.Keys)}'",
+                context.Path,
+                context.Selection);
+
+        var resolveResult = new CompleteValueResult(value,
+            context.Schema.GetRequiredNamedType<ObjectDefinition>(context.Field.Type.Unwrap().Name));
+        return resolveResult.CompleteValueAsync(context);
     }
 }

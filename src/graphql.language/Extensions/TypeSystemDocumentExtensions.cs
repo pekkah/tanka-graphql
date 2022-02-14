@@ -39,7 +39,7 @@ public static class TypeSystemDocumentExtensions
     }
 
     public static TypeSystemDocument WithImports(
-        this TypeSystemDocument document, 
+        this TypeSystemDocument document,
         IReadOnlyList<Import>? definitions)
     {
         return new TypeSystemDocument(

@@ -1,8 +1,7 @@
-namespace Tanka.GraphQL.Tests.Data
+namespace Tanka.GraphQL.Tests.Data;
+
+public enum DiffStyle
 {
-    public enum DiffStyle
-    {
-        Full, 
-        Minimal
-    }
+    Full,
+    Minimal
 }

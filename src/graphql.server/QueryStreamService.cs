@@ -1,153 +1,143 @@
-﻿
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 
-namespace Tanka.GraphQL.Server
+namespace Tanka.GraphQL.Server;
+
+public class QueryStreamService : IQueryStreamService
 {
-    public class QueryStreamService : IQueryStreamService
+    private readonly List<IExecutorExtension> _extensions;
+    private readonly ILogger<QueryStreamService> _logger;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly ServerOptions _options;
+
+    public QueryStreamService(
+        IOptionsMonitor<ServerOptions> optionsMonitor,
+        ILoggerFactory loggerFactory,
+        IEnumerable<IExecutorExtension> extensions)
     {
-        private readonly List<IExecutorExtension> _extensions;
-        private readonly ILogger<QueryStreamService> _logger;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ServerOptions _options;
+        _options = optionsMonitor.CurrentValue;
+        _loggerFactory = loggerFactory;
+        _extensions = extensions.ToList();
+        _logger = loggerFactory.CreateLogger<QueryStreamService>();
+    }
 
-        public QueryStreamService(
-            IOptionsMonitor<ServerOptions> optionsMonitor,
-            ILoggerFactory loggerFactory,
-            IEnumerable<IExecutorExtension> extensions)
+    public async Task<QueryStream> QueryAsync(
+        Query query,
+        CancellationToken cancellationToken)
+    {
+        try
         {
-            _options = optionsMonitor.CurrentValue;
-            _loggerFactory = loggerFactory;
-            _extensions = extensions.ToList();
-            _logger = loggerFactory.CreateLogger<QueryStreamService>();
-        }
-
-        public async Task<QueryStream> QueryAsync(
-            Query query,
-            CancellationToken cancellationToken)
-        {
-            try
+            _logger.Query(query);
+            var schemaOptions = _options;
+            var document = query.Document;
+            var schema = await schemaOptions.GetSchema(query);
+            var executionOptions = new ExecutionOptions
             {
-                _logger.Query(query);
-                var schemaOptions = _options;
-                var document = query.Document;
-                var schema = await schemaOptions.GetSchema(query);
-                var executionOptions = new ExecutionOptions
-                {
-                    Schema = schema,
-                    Document = document,
-                    OperationName = query.OperationName,
-                    VariableValues = query.Variables,
-                    InitialValue = null,
-                    LoggerFactory = _loggerFactory,
-                    Extensions = _extensions,
-                    Validate = (s, d, v) => ExecutionOptions.DefaultValidate(
-                        schemaOptions.ValidationRules,
-                        s,
-                        d,
-                        v)
-                };
+                Schema = schema,
+                Document = document,
+                OperationName = query.OperationName,
+                VariableValues = query.Variables,
+                InitialValue = null,
+                LoggerFactory = _loggerFactory,
+                Extensions = _extensions,
+                Validate = (s, d, v) => ExecutionOptions.DefaultValidate(
+                    schemaOptions.ValidationRules,
+                    s,
+                    d,
+                    v)
+            };
 
-                // is subscription
-                if (document.OperationDefinitions
+            // is subscription
+            if (document.OperationDefinitions
                     ?.Any(op => op.Operation == OperationType.Subscription) ?? false)
-                    return await SubscribeAsync(
-                        executionOptions,
-                        cancellationToken);
-
-
-                // is query or mutation
-                return await ExecuteAsync(
+                return await SubscribeAsync(
                     executionOptions,
                     cancellationToken);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError($"Failed to execute query '{query.Document.ToGraphQL()}'. Error. '{e}'");
-                var channel = Channel.CreateBounded<ExecutionResult>(1);
-                channel.Writer.TryComplete(e);
-                return new QueryStream(channel);
-            }
+
+
+            // is query or mutation
+            return await ExecuteAsync(
+                executionOptions,
+                cancellationToken);
         }
-
-        private async Task<QueryStream> ExecuteAsync(
-            ExecutionOptions options,
-            CancellationToken cancellationToken)
+        catch (Exception e)
         {
-            var result = await Executor.ExecuteAsync(options, cancellationToken);
-
-            if (_logger.IsEnabled(LogLevel.Debug) && result.Errors != null)
-            {
-                foreach (var error in result.Errors)
-                {
-                    _logger.LogError($"GraphQL ERROR: '{error.Message}', Path: '{error.Path}'");
-                }
-            }
-
+            _logger.LogError($"Failed to execute query '{query.Document.ToGraphQL()}'. Error. '{e}'");
             var channel = Channel.CreateBounded<ExecutionResult>(1);
-
-            await channel.Writer.WriteAsync(result, cancellationToken);
-            channel.Writer.TryComplete();
-
-            _logger.Executed(options.OperationName, options.VariableValues, null);
+            channel.Writer.TryComplete(e);
             return new QueryStream(channel);
         }
+    }
 
-        private async Task<QueryStream> SubscribeAsync(
-            ExecutionOptions options,
-            CancellationToken cancellationToken)
+    private async Task<QueryStream> ExecuteAsync(
+        ExecutionOptions options,
+        CancellationToken cancellationToken)
+    {
+        var result = await Executor.ExecuteAsync(options, cancellationToken);
+
+        if (_logger.IsEnabled(LogLevel.Debug) && result.Errors != null)
+            foreach (var error in result.Errors)
+                _logger.LogError($"GraphQL ERROR: '{error.Message}', Path: '{error.Path}'");
+
+        var channel = Channel.CreateBounded<ExecutionResult>(1);
+
+        await channel.Writer.WriteAsync(result, cancellationToken);
+        channel.Writer.TryComplete();
+
+        _logger.Executed(options.OperationName, options.VariableValues, null);
+        return new QueryStream(channel);
+    }
+
+    private async Task<QueryStream> SubscribeAsync(
+        ExecutionOptions options,
+        CancellationToken cancellationToken)
+    {
+        if (!cancellationToken.CanBeCanceled)
+            throw new InvalidOperationException(
+                "Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
+
+        var unsubscribeSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var result = await Executor.SubscribeAsync(options, unsubscribeSource.Token);
+        _logger.Subscribed(options.OperationName, options.VariableValues, null);
+
+        unsubscribeSource.Token.Register(() =>
         {
-            if (!cancellationToken.CanBeCanceled)
-                throw new InvalidOperationException(
-                    "Invalid cancellation token. To unsubscribe the provided cancellation token must be cancellable.");
+            _logger?.Unsubscribed(
+                options.OperationName,
+                options.VariableValues,
+                null);
+        });
 
-            var unsubscribeSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var result = await Executor.SubscribeAsync(options, unsubscribeSource.Token);
-            _logger.Subscribed(options.OperationName, options.VariableValues, null);
+        if (result.Errors != null && result.Errors.Any())
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+                foreach (var error in result.Errors)
+                    _logger.LogError($"GraphQL ERROR: '{error.Message}', Path: '{error.Path}'");
 
-            unsubscribeSource.Token.Register(() =>
+            var channel = Channel.CreateBounded<ExecutionResult>(1);
+            await channel.Writer.WriteAsync(new ExecutionResult
             {
-                _logger?.Unsubscribed(
-                    options.OperationName,
-                    options.VariableValues,
-                    null);
-            });
+                Errors = result.Errors.ToList(),
+                Extensions = result.Extensions.ToDictionary(kv => kv.Key, kv => kv.Value)
+            }, CancellationToken.None);
 
-            if (result.Errors != null && result.Errors.Any())
-            {
-                if (_logger.IsEnabled(LogLevel.Debug))
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        _logger.LogError($"GraphQL ERROR: '{error.Message}', Path: '{error.Path}'");
-                    }
-                }
+            channel.Writer.TryComplete();
 
-                var channel = Channel.CreateBounded<ExecutionResult>(1);
-                await channel.Writer.WriteAsync(new ExecutionResult
-                {
-                    Errors = result.Errors.ToList(),
-                    Extensions = result.Extensions.ToDictionary(kv => kv.Key, kv => kv.Value)
-                }, CancellationToken.None);
+            // unsubscribe
+            unsubscribeSource.Cancel();
 
-                channel.Writer.TryComplete();
-
-                // unsubscribe
-                unsubscribeSource.Cancel();
-
-                return new QueryStream(channel.Reader);
-            }
-
-            var stream = new QueryStream(result.Source);
-            return stream;
+            return new QueryStream(channel.Reader);
         }
+
+        var stream = new QueryStream(result.Source);
+        return stream;
     }
 }

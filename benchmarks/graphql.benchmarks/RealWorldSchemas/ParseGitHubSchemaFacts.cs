@@ -3,33 +3,31 @@ using System.IO;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+using Tanka.GraphQL.Language;
 
-namespace Tanka.GraphQL.Benchmarks.RealWorldSchemas
+namespace Tanka.GraphQL.Benchmarks.RealWorldSchemas;
+
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
+[MarkdownExporterAttribute.GitHub]
+public class ParseGitHubSchemaBenchmark
 {
-    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-    [RankColumn]
-    [MemoryDiagnoser]
-    [MarkdownExporterAttribute.GitHub]
-    public class ParseGitHubSchemaBenchmark
+    public byte[] GitHubBytes { get; private set; }
+
+    [GlobalSetup]
+    public void Setup()
     {
-        public byte[] GitHubBytes { get; private set; }
+        GitHubBytes = File.ReadAllBytes("RealWorldSchemas/github.graphql");
+    }
 
-        [GlobalSetup]
-        public void Setup()
-        {
-            GitHubBytes = File.ReadAllBytes("RealWorldSchemas/github.graphql");
-        }
+    [Benchmark]
+    public void GitHub()
+    {
+        var parser = Parser.Create(GitHubBytes);
+        var typeSystem = parser.ParseTypeSystemDocument();
 
-        [Benchmark]
-        public void GitHub()
-        {
-            var parser = Language.Parser.Create(GitHubBytes);
-            var typeSystem = parser.ParseTypeSystemDocument();
-
-            if (typeSystem.TypeDefinitions == null || !typeSystem.TypeDefinitions.Any())
-            {
-                throw new Exception("It has types");
-            }
-        }
+        if (typeSystem.TypeDefinitions == null || !typeSystem.TypeDefinitions.Any())
+            throw new Exception("It has types");
     }
 }

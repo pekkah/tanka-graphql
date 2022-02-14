@@ -60,15 +60,15 @@ type Query {
             }
         };
 
-        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions()
+        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions
+        {
+            SchemaBuildOptions = new SchemaBuildOptions(resolvers),
+            ReferenceResolvers = new DictionaryReferenceResolversMap
             {
-                SchemaBuildOptions = new SchemaBuildOptions(resolvers),
-                ReferenceResolvers = new DictionaryReferenceResolversMap
-                {
-                    ["User"] = UserReference,
-                    ["Product"] = ProductReference
-                }
-            });
+                ["User"] = UserReference,
+                ["Product"] = ProductReference
+            }
+        });
 
         return schema;
     }

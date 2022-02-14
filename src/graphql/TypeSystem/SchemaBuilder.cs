@@ -175,18 +175,17 @@ directive @specifiedBy(url: String!) on SCALAR
             });
     }
 
-    public IEnumerable<TypeDefinition> QueryTypeDefinitions(Func<TypeDefinition, bool> filter, SchemaBuildOptions options)
+    public IEnumerable<TypeDefinition> QueryTypeDefinitions(Func<TypeDefinition, bool> filter,
+        SchemaBuildOptions? options = null)
     {
+        options ??= new SchemaBuildOptions();
         var typeDefinitions = BuildTypeDefinitions(options.BuildTypesFromOrphanedExtensions);
         return typeDefinitions.Where(filter);
     }
 
     public async Task<ISchema> Build(SchemaBuildOptions options)
     {
-        if (options.IncludeBuiltInTypes)
-        {
-            Add(BuiltInTypes);
-        }
+        if (options.IncludeBuiltInTypes) Add(BuiltInTypes);
 
         var resolvers = new ResolversMap(options.Resolvers ?? ResolversMap.None, options.Subscribers);
 
@@ -344,7 +343,7 @@ directive @specifiedBy(url: String!) on SCALAR
         var visitorList = visitors.ToList();
         for (var typeIndex = 0; typeIndex < typeDefinitionList.Count; typeIndex++)
         {
-            TypeDefinition typeDefinition = typeDefinitionList[typeIndex];
+            var typeDefinition = typeDefinitionList[typeIndex];
             foreach (var (directiveName, visitor) in visitorList)
             {
                 if (visitor.TypeDefinition is not null)
@@ -357,10 +356,7 @@ directive @specifiedBy(url: String!) on SCALAR
                     var maybeSameContext = visitor.TypeDefinition(directive, context);
 
                     // type removed
-                    if (maybeSameContext is null)
-                    {
-                        continue;
-                    }
+                    if (maybeSameContext is null) continue;
 
                     typeDefinition = maybeSameContext.TypeDefinition;
                 }

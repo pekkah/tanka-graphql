@@ -10,7 +10,7 @@ public static class FieldDefinitionExtension
     public static bool TryGetArgument(
         this FieldDefinition definition,
         Name argumentName,
-        [NotNullWhen(true)]out InputValueDefinition? argument)
+        [NotNullWhen(true)] out InputValueDefinition? argument)
     {
         if (definition.Arguments is null)
         {
@@ -33,14 +33,11 @@ public static class FieldDefinitionExtension
 
         if (definition.TryGetDirective("deprecated", out var directive))
         {
-            if (directive.Arguments?.TryGet("reason", out var reasonArg) == true && reasonArg.Value is StringValue stringValue)
-            {
+            if (directive.Arguments?.TryGet("reason", out var reasonArg) == true &&
+                reasonArg.Value is StringValue stringValue)
                 reason = stringValue;
-            }
             else
-            {
                 reason = null;
-            }
 
             return true;
         }

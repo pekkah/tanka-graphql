@@ -12,9 +12,8 @@ namespace Tanka.GraphQL.Extensions.ApolloFederation;
 
 public record FederatedSchemaBuildOptions
 {
-    public SchemaBuildOptions? SchemaBuildOptions { get; init; }
-
     public IReferenceResolversMap? ReferenceResolvers { get; init; }
+    public SchemaBuildOptions? SchemaBuildOptions { get; init; }
 }
 
 public static class Federation
@@ -35,7 +34,7 @@ public static class Federation
     private static IReadOnlyDictionary<string, IValueConverter> NoConverters { get; } =
         new Dictionary<string, IValueConverter>(0);
 
-    private static object Service { get; } = new ();
+    private static object Service { get; } = new();
 
     public static Task<ISchema> BuildSubgraph(this SchemaBuilder builder, FederatedSchemaBuildOptions options)
     {
@@ -76,19 +75,23 @@ public static class Federation
                             "_service: _Service!"
                         }))));
 
-            resolvers += new ResolversMap()
+            resolvers += new ResolversMap
             {
-                {"Query", "_service", _ =>  ResolveSync.As(Service)},
-                {"Query", "_entities", CreateEntitiesResolver(options.ReferenceResolvers ?? new DictionaryReferenceResolversMap())},
+                { "Query", "_service", _ => ResolveSync.As(Service) },
+                {
+                    "Query", "_entities",
+                    CreateEntitiesResolver(options.ReferenceResolvers ?? new DictionaryReferenceResolversMap())
+                },
 
-                {"_Service", "sdl", CreateSdlResolver()}
+                { "_Service", "sdl", CreateSdlResolver() }
             };
         }
 
 
         schemaBuildOptions = schemaBuildOptions with
         {
-            ValueConverters = new Dictionary<string, IValueConverter>(schemaBuildOptions.ValueConverters ?? NoConverters)
+            ValueConverters =
+            new Dictionary<string, IValueConverter>(schemaBuildOptions.ValueConverters ?? NoConverters)
             {
                 { "_Any", new AnyScalarConverter() },
                 { "_FieldSet", new FieldSetScalarConverter() }
@@ -96,7 +99,7 @@ public static class Federation
             Resolvers = resolvers,
             Subscribers = resolvers,
             BuildTypesFromOrphanedExtensions = true
-        };      
+        };
 
         return builder.Build(schemaBuildOptions);
     }

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Tanka.GraphQL.ValueResolution
+namespace Tanka.GraphQL.ValueResolution;
+
+public interface IReadFromObjectDictionary
 {
-    public interface IReadFromObjectDictionary
-    {
-        void Read(IReadOnlyDictionary<string, object> source);
-    }
+    void Read(IReadOnlyDictionary<string, object> source);
 }

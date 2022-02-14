@@ -181,7 +181,7 @@ public partial class ValidatorFacts
     public void Rule_5421_Required_Arguments_invalid2()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment missingRequiredArg on Arguments {
                       nonNullBooleanArgField(nonNullBooleanArg: null)
                     }";

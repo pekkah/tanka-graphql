@@ -3,29 +3,29 @@ using System.Threading.Tasks;
 using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
+namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;
+
+public class FederationFacts
 {
-    public class FederationFacts
+    public FederationFacts()
     {
-        public FederationFacts()
-        {
-            Sut = SchemaFactory.Create().Result;
-        }
+        Sut = SchemaFactory.Create().Result;
+    }
 
-        public ISchema Sut { get; }
+    public ISchema Sut { get; }
 
-        [Fact]
-        public async Task Query_representation()
-        {
-            /* Given */
+    [Fact]
+    public async Task Query_representation()
+    {
+        /* Given */
 
-            /* When */
-            var result = await Executor
-                .ExecuteAsync(new ExecutionOptions
-                {
-                    IncludeExceptionDetails = true,
-                    Schema = Sut,
-                    Document = @"
+        /* When */
+        var result = await Executor
+            .ExecuteAsync(new ExecutionOptions
+            {
+                IncludeExceptionDetails = true,
+                Schema = Sut,
+                Document = @"
 query($representations:[_Any!]!) {
     _entities(representations:$representations) {
         ...on User {
@@ -42,21 +42,21 @@ query($representations:[_Any!]!) {
         }
     }
 }",
-                    VariableValues = new Dictionary<string, object>
+                VariableValues = new Dictionary<string, object>
+                {
+                    ["representations"] = new[]
                     {
-                        ["representations"] = new[]
+                        new Dictionary<string, object>
                         {
-                            new Dictionary<string, object>
-                            {
-                                ["__typename"] = "User",
-                                ["id"] = 1
-                            }
+                            ["__typename"] = "User",
+                            ["id"] = 1
                         }
                     }
-                });
+                }
+            });
 
-            /* Then */
-            result.ShouldMatchJson(@"
+        /* Then */
+        result.ShouldMatchJson(@"
 {
   ""data"": {
     ""_entities"": [
@@ -89,35 +89,34 @@ query($representations:[_Any!]!) {
   ""extensions"": null,
   ""errors"": null
 }");
-        }
-
-        [Fact]
-        public async Task Query_sdl()
-        {
-            /* Given */
-
-            /* When */
-            var result = await Executor
-                .ExecuteAsync(new ExecutionOptions
-                {
-                    IncludeExceptionDetails = true,
-                    Schema = Sut,
-                    Document = @"query { _service { sdl } }"
-                });
-
-            /* Then */
-            Assert.Null(result.Errors);
-            //todo: fix test when builtin type ignored when printing
-            /*result.ShouldMatchJson(@"
-{
-  ""data"": {
-    ""_service"": {
-      ""sdl"": ""type Review  @key(fields: \""id\"") { id: ID! body: String author: User @provides(fields: \""username\"") product: Product }  type User  @key(fields: \""id\"") @extends { id: ID! @external username: String @external reviews: [Review] }  type Product  @key(fields: \""upc\"") @extends { upc: String! @external reviews: [Review] }""
     }
-  },
-  ""extensions"": null,
-  ""errors"": null
+
+    [Fact]
+    public async Task Query_sdl()
+    {
+        /* Given */
+
+        /* When */
+        var result = await Executor
+            .ExecuteAsync(new ExecutionOptions
+            {
+                IncludeExceptionDetails = true,
+                Schema = Sut,
+                Document = @"query { _service { sdl } }"
+            });
+
+        /* Then */
+        Assert.Null(result.Errors);
+        //todo: fix test when builtin type ignored when printing
+        /*result.ShouldMatchJson(@"
+{
+""data"": {
+""_service"": {
+  ""sdl"": ""type Review  @key(fields: \""id\"") { id: ID! body: String author: User @provides(fields: \""username\"") product: Product }  type User  @key(fields: \""id\"") @extends { id: ID! @external username: String @external reviews: [Review] }  type Product  @key(fields: \""upc\"") @extends { upc: String! @external reviews: [Review] }""
+}
+},
+""extensions"": null,
+""errors"": null
 }");*/
-        }
     }
 }

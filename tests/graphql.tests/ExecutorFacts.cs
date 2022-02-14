@@ -155,7 +155,7 @@ public class ExecutorFacts
     public async Task Mutation1()
     {
         /* Given */
-        var mutation = 
+        var mutation =
             @"mutation AddEvent($event: NewEvent!) {
                     create(event: $event) {
                         __typename
@@ -201,7 +201,7 @@ public class ExecutorFacts
     public async Task Mutation2()
     {
         /* Given */
-        var mutation = 
+        var mutation =
             @"mutation AddEvent($event: NewEvent!) {
                     create(event: $event) {
                         __typename

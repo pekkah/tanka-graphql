@@ -1,163 +1,137 @@
 ﻿using System.Collections.Generic;
-using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL
+namespace Tanka.GraphQL;
+
+public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap, ISubscriberMap
 {
-    public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap, ISubscriberMap
+    public ResolversMap(IResolverMap resolvers, ISubscriberMap? subscribers = null)
     {
-        public ResolversMap(IResolverMap resolvers, ISubscriberMap? subscribers = null)
+        Add(resolvers, subscribers);
+    }
+
+    public ResolversMap()
+    {
+    }
+
+    public static IResolverMap None { get; } = new ResolversMap();
+
+    public Resolver? GetResolver(string typeName, string fieldName)
+    {
+        if (!TryGetValue(typeName, out var objectNode))
+            return null;
+
+        var resolver = objectNode.GetResolver(fieldName);
+        return resolver;
+    }
+
+    public IEnumerable<(string TypeName, IEnumerable<string> Fields)> GetTypes()
+    {
+        foreach (var (typeName, fields) in this) yield return (typeName, fields.GetFields());
+    }
+
+    public Subscriber? GetSubscriber(string typeName, string fieldName)
+    {
+        if (!TryGetValue(typeName, out var objectNode))
+            return null;
+
+        var resolver = objectNode.GetSubscriber(fieldName);
+        return resolver;
+    }
+
+    public void Add(IResolverMap resolvers, ISubscriberMap? subscribers)
+    {
+        foreach (var (typeName, fields) in resolvers.GetTypes())
+        foreach (var field in fields)
         {
-            Add(resolvers, subscribers);
+            var resolver = resolvers?.GetResolver(typeName, field);
+            var subscriber = subscribers?.GetSubscriber(typeName, field);
+
+            if (resolver is not null) Add(typeName, field, resolver, subscriber);
         }
 
-        public void Add(IResolverMap resolvers, ISubscriberMap? subscribers)
-        {
-            foreach (var (typeName, fields) in resolvers.GetTypes())
+        if (subscribers is not null)
+            foreach (var (typeName, fields) in subscribers.GetTypes())
+            foreach (var field in fields)
             {
-                foreach (var field in fields)
-                {
-                    var resolver = resolvers?.GetResolver(typeName, field);
-                    var subscriber = subscribers?.GetSubscriber(typeName, field);
+                var resolver = resolvers?.GetResolver(typeName, field);
+                var subscriber = subscribers?.GetSubscriber(typeName, field);
 
-                    if (resolver is not null)
-                    {
-                        Add(typeName, field, resolver, subscriber);
-                    }
-                }
+                if (subscriber is not null) Add(typeName, field, subscriber);
             }
+    }
 
-            if (subscribers is not null)
-            {
-                foreach (var (typeName, fields) in subscribers.GetTypes())
-                {
-                    foreach (var field in fields)
-                    {
-                        var resolver = resolvers?.GetResolver(typeName, field);
-                        var subscriber = subscribers?.GetSubscriber(typeName, field);
+    public void Add(string typeName, string fieldName, Resolver resolver, Subscriber? subscriber = null)
+    {
+        if (!TryGetValue(typeName, out var fieldsResolvers)) fieldsResolvers = this[typeName] = new FieldResolversMap();
 
-                        if (subscriber is not null)
-                        {
-                            Add(typeName, field, subscriber);
-                        }
-                    }
-                }
-            }
-        }
+        if (subscriber is null)
+            fieldsResolvers.Add(fieldName, resolver);
+        else
+            fieldsResolvers.Add(fieldName, subscriber, resolver);
+    }
 
-        public ResolversMap()
-        {
+    public bool Add(string typeName, string fieldName, Subscriber subscriber)
+    {
+        if (!TryGetValue(typeName, out var fieldsResolvers)) fieldsResolvers = this[typeName] = new FieldResolversMap();
 
-        }
+        if (fieldsResolvers.GetSubscriber(fieldName) is not null)
+            return false;
 
-        public static IResolverMap None { get; } = new ResolversMap();
+        fieldsResolvers.Add(fieldName, subscriber);
+        return true;
+    }
 
-        public Resolver? GetResolver(string typeName, string fieldName)
-        {
-            if (!TryGetValue(typeName, out var objectNode))
-                return null;
+    public ResolversMap Clone()
+    {
+        var result = new ResolversMap();
 
-            var resolver = objectNode.GetResolver(fieldName);
-            return resolver;
-        }
+        foreach (var objectMap in this)
+            result.Add(objectMap.Key, objectMap.Value.Clone());
 
-        public IEnumerable<(string TypeName, IEnumerable<string> Fields)> GetTypes()
-        {
-            foreach (var (typeName, fields) in this)
-            {
-                yield return (typeName, fields.GetFields());
-            }
-        }
+        return result;
+    }
 
-        public Subscriber? GetSubscriber(string typeName, string fieldName)
-        {
-            if (!TryGetValue(typeName, out var objectNode))
-                return null;
+    public static ResolversMap operator +(ResolversMap a, ResolversMap b)
+    {
+        var result = a.Clone();
 
-            var resolver = objectNode.GetSubscriber(fieldName);
-            return resolver;
-        }
+        result.Add(b, b);
 
-        public void Add(string typeName, string fieldName, Resolver resolver, Subscriber? subscriber = null)
-        {
-            if (!TryGetValue(typeName, out var fieldsResolvers))
-            {
-                fieldsResolvers = this[typeName] = new FieldResolversMap();
-            }
+        return result;
+    }
 
-            if (subscriber is null)
-                fieldsResolvers.Add(fieldName, resolver);
-            else
-            {
-                fieldsResolvers.Add(fieldName, subscriber, resolver);
-            }
-        }
+    public static ResolversMap operator +(ResolversMap a, (string Name, FieldResolversMap Fields) objectDefinition)
+    {
+        var result = a.Clone();
 
-        public bool Add(string typeName, string fieldName, Subscriber subscriber)
-        {
-            if (!TryGetValue(typeName, out var fieldsResolvers))
-            {
-                fieldsResolvers = this[typeName] = new FieldResolversMap();
-            }
+        if (result.ContainsKey(objectDefinition.Name))
+            result[objectDefinition.Name] += objectDefinition.Fields;
+        else
+            result[objectDefinition.Name] = objectDefinition.Fields;
 
-            if (fieldsResolvers.GetSubscriber(fieldName) is not null)
-                return false;
+        return result;
+    }
 
-            fieldsResolvers.Add(fieldName, subscriber);
-            return true;
-        }
+    public static ResolversMap operator -(ResolversMap a, string name)
+    {
+        var result = a.Clone();
 
-        public ResolversMap Clone()
-        {
-            var result = new ResolversMap();
+        if (result.ContainsKey(name))
+            result.Remove(name);
 
-            foreach (var objectMap in this) 
-                result.Add(objectMap.Key, objectMap.Value.Clone());
+        return result;
+    }
 
-            return result;
-        }
+    public static ResolversMap operator -(ResolversMap a, ResolversMap b)
+    {
+        var result = a.Clone();
 
-        public static ResolversMap operator +(ResolversMap a, ResolversMap b)
-        {
-            var result = a.Clone();
+        // remove b by key
+        foreach (var objectMap in b)
+            if (result.ContainsKey(objectMap.Key))
+                result.Remove(objectMap.Key);
 
-            result.Add(b, b);
-
-            return result;
-        }
-
-        public static ResolversMap operator +(ResolversMap a, (string Name, FieldResolversMap Fields) objectDefinition)
-        {
-            var result = a.Clone();
-
-            if (result.ContainsKey(objectDefinition.Name))
-                result[objectDefinition.Name] += objectDefinition.Fields;
-            else
-                result[objectDefinition.Name] = objectDefinition.Fields;
-
-            return result;
-        }
-
-        public static ResolversMap operator -(ResolversMap a, string name)
-        {
-            var result = a.Clone();
-
-            if (result.ContainsKey(name))
-                result.Remove(name);
-
-            return result;
-        }
-
-        public static ResolversMap operator -(ResolversMap a, ResolversMap b)
-        {
-            var result = a.Clone();
-
-            // remove b by key
-            foreach (var objectMap in b)
-                if (result.ContainsKey(objectMap.Key))
-                    result.Remove(objectMap.Key);
-
-            return result;
-        }
+        return result;
     }
 }

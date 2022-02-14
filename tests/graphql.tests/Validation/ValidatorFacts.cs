@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.Validation
+namespace Tanka.GraphQL.Tests.Validation;
+
+public partial class ValidatorFacts
 {
-    public partial class ValidatorFacts
+    public ValidatorFacts()
     {
-        public ValidatorFacts()
-        {
-            var sdl =
-                @"
+        var sdl =
+            @"
                 schema {
                     query: Query
                     subscription: Subscription
@@ -107,62 +106,47 @@ namespace Tanka.GraphQL.Tests.Validation
             }
                 ";
 
-            Schema = new SchemaBuilder()
-                .Add(sdl)
-                .Build(new SchemaBuildOptions()).Result;
-        }
+        Schema = new SchemaBuilder()
+            .Add(sdl)
+            .Build(new SchemaBuildOptions()).Result;
+    }
 
-        public ISchema Schema { get; }
+    public ISchema Schema { get; }
 
-        private ValidationResult Validate(
-            ExecutableDocument document,
-            CombineRule rule,
-            Dictionary<string, object> variables = null)
-        {
-            if (document == null) throw new ArgumentNullException(nameof(document));
-            if (rule == null) throw new ArgumentNullException(nameof(rule));
+    [Fact(Skip = "Not required by new language module")]
+    public void Rule_511_Executable_Definitions()
+    {
+        /* Given */
+        /*var document = Parser.ParseDocument(
+            @"query getDogName {
+              dog {
+                name
+                color
+              }
+            }
 
-            return Validator.Validate(           
-                new[] {rule},
-                Schema,
-                document,
-                variables);
-        }
+            extend type Dog {
+              color: String
+            }");*/
 
-        [Fact(Skip = "Not required by new language module")]
-        public void Rule_511_Executable_Definitions()
-        {
-            /* Given */
-            /*var document = Parser.ParseDocument(
-                @"query getDogName {
-                  dog {
-                    name
-                    color
-                  }
-                }
+        /* When */
+        /*var result = Validate(
+            document,
+            ExecutionRules.R511ExecutableDefinitions());*/
 
-                extend type Dog {
-                  color: String
-                }");*/
+        /* Then */
+        /*Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R511ExecutableDefinitions);*/
+    }
 
-            /* When */
-            /*var result = Validate(
-                document,
-                ExecutionRules.R511ExecutableDefinitions());*/
-
-            /* Then */
-            /*Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error => error.Code == ValidationErrorCodes.R511ExecutableDefinitions);*/
-        }
-
-        [Fact]
-        public void Rule_5211_Operation_Name_Uniqueness_valid()
-        {
-            /* Given */
-            var document = 
-                @"query getDogName {
+    [Fact]
+    public void Rule_5211_Operation_Name_Uniqueness_valid()
+    {
+        /* Given */
+        var document =
+            @"query getDogName {
                       dog {
                         name
                       }
@@ -176,21 +160,21 @@ namespace Tanka.GraphQL.Tests.Validation
                       }
                     }";
 
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R5211OperationNameUniqueness());
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R5211OperationNameUniqueness());
 
-            /* Then */
-            Assert.True(result.IsValid);
-        }
+        /* Then */
+        Assert.True(result.IsValid);
+    }
 
-        [Fact]
-        public void Rule_5211_Operation_Name_Uniqueness_invalid()
-        {
-            /* Given */
-            var document = 
-                @"query getName {
+    [Fact]
+    public void Rule_5211_Operation_Name_Uniqueness_invalid()
+    {
+        /* Given */
+        var document =
+            @"query getName {
                       dog {
                         name
                       }
@@ -204,44 +188,44 @@ namespace Tanka.GraphQL.Tests.Validation
                       }
                     }";
 
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R5211OperationNameUniqueness());
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R5211OperationNameUniqueness());
 
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error => error.Code == ValidationErrorCodes.R5211OperationNameUniqueness);
-        }
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R5211OperationNameUniqueness);
+    }
 
-        [Fact]
-        public void Rule_5221_Lone_Anonymous_Operation_valid()
-        {
-            /* Given */
-            var document = 
-                @"{
+    [Fact]
+    public void Rule_5221_Lone_Anonymous_Operation_valid()
+    {
+        /* Given */
+        var document =
+            @"{
                   dog {
                     name
                   }
                 }";
 
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R5221LoneAnonymousOperation());
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R5221LoneAnonymousOperation());
 
-            /* Then */
-            Assert.True(result.IsValid);
-        }
+        /* Then */
+        Assert.True(result.IsValid);
+    }
 
-        [Fact]
-        public void Rule_5221_Lone_Anonymous_Operation_invalid()
-        {
-            /* Given */
-            var document = 
-                @"{
+    [Fact]
+    public void Rule_5221_Lone_Anonymous_Operation_invalid()
+    {
+        /* Given */
+        var document =
+            @"{
                   dog {
                     name
                   }
@@ -255,45 +239,45 @@ namespace Tanka.GraphQL.Tests.Validation
                   }
                 }";
 
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R5221LoneAnonymousOperation());
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R5221LoneAnonymousOperation());
 
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error => error.Code == ValidationErrorCodes.R5221LoneAnonymousOperation);
-        }
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R5221LoneAnonymousOperation);
+    }
 
-        [Fact]
-        public void Rule_5231_Single_root_field_valid()
-        {
-            /* Given */
-            var document = 
-                @"subscription sub {
+    [Fact]
+    public void Rule_5231_Single_root_field_valid()
+    {
+        /* Given */
+        var document =
+            @"subscription sub {
                       newMessage {
                         body
                         sender
                       }
                     }";
 
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R5221LoneAnonymousOperation());
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R5221LoneAnonymousOperation());
 
-            /* Then */
-            Assert.True(result.IsValid);
-        }
+        /* Then */
+        Assert.True(result.IsValid);
+    }
 
-        [Fact]
-        public void Rule_5231_Single_root_field_valid_with_fragment()
-        {
-            /* Given */
-            var document = 
-                @"subscription sub {
+    [Fact]
+    public void Rule_5231_Single_root_field_valid_with_fragment()
+    {
+        /* Given */
+        var document =
+            @"subscription sub {
                       ...newMessageFields
                     }
 
@@ -304,21 +288,21 @@ namespace Tanka.GraphQL.Tests.Validation
                       }
                     }";
 
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R5231SingleRootField());
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R5231SingleRootField());
 
-            /* Then */
-            Assert.True(result.IsValid);
-        }
+        /* Then */
+        Assert.True(result.IsValid);
+    }
 
-        [Fact]
-        public void Rule_5231_Single_root_field_invalid()
-        {
-            /* Given */
-            var document = 
-                @"subscription sub {
+    [Fact]
+    public void Rule_5231_Single_root_field_invalid()
+    {
+        /* Given */
+        var document =
+            @"subscription sub {
                       newMessage {
                         body
                         sender
@@ -326,24 +310,24 @@ namespace Tanka.GraphQL.Tests.Validation
                       disallowedSecondRootField
                     }";
 
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R5231SingleRootField());
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R5231SingleRootField());
 
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error => error.Code == ValidationErrorCodes.R5231SingleRootField);
-        }
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R5231SingleRootField);
+    }
 
-        [Fact]
-        public void Rule_5231_Single_root_field_invalid_with_fragment()
-        {
-            /* Given */
-            var document = 
-                @"subscription sub {
+    [Fact]
+    public void Rule_5231_Single_root_field_invalid_with_fragment()
+    {
+        /* Given */
+        var document =
+            @"subscription sub {
                       ...multipleSubscriptions
                     }
 
@@ -355,24 +339,24 @@ namespace Tanka.GraphQL.Tests.Validation
                       disallowedSecondRootField
                     }";
 
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R5231SingleRootField());
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R5231SingleRootField());
 
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error => error.Code == ValidationErrorCodes.R5231SingleRootField);
-        }
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R5231SingleRootField);
+    }
 
-        [Fact]
-        public void Rule_5231_Single_root_field_invalid_with_typename()
-        {
-            /* Given */
-            var document = 
-                @"subscription sub {
+    [Fact]
+    public void Rule_5231_Single_root_field_invalid_with_typename()
+    {
+        /* Given */
+        var document =
+            @"subscription sub {
                       newMessage {
                         body
                         sender
@@ -380,16 +364,30 @@ namespace Tanka.GraphQL.Tests.Validation
                       __typename
                     }";
 
-            /* When */
-            var result = Validate(
-                document,
-                ExecutionRules.R5231SingleRootField());
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R5231SingleRootField());
 
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error => error.Code == ValidationErrorCodes.R5231SingleRootField);
-        }
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R5231SingleRootField);
+    }
+
+    private ValidationResult Validate(
+        ExecutableDocument document,
+        CombineRule rule,
+        Dictionary<string, object> variables = null)
+    {
+        if (document == null) throw new ArgumentNullException(nameof(document));
+        if (rule == null) throw new ArgumentNullException(nameof(rule));
+
+        return Validator.Validate(
+            new[] { rule },
+            Schema,
+            document,
+            variables);
     }
 }

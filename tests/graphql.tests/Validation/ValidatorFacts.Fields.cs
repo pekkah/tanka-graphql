@@ -9,7 +9,7 @@ public partial class ValidatorFacts
     public void Rule_561_ValuesOfCorrectType_valid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment goodBooleanArg on Arguments {
                       booleanArgField(booleanArg: true)
                     }
@@ -37,7 +37,7 @@ public partial class ValidatorFacts
     public void Rule_561_ValuesOfCorrectType_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment stringIntoInt on Arguments {
                       intArgField(intArg: ""123"")
                     }";
@@ -58,7 +58,7 @@ public partial class ValidatorFacts
     public void Rule_561_ValuesOfCorrectType_invalid2()
     {
         /* Given */
-        var document = 
+        var document =
             @"query badComplexValue {
                       findDog(complex: { name: 123 })
                     }";
@@ -79,7 +79,7 @@ public partial class ValidatorFacts
     public void Rule_562_InputObjectFieldNames_valid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"{
                       findDog(complex: { name: ""Fido"" })
                     }
@@ -120,7 +120,7 @@ public partial class ValidatorFacts
     public void Rule_563_InputObjectFieldUniqueness_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"{
                       field(arg: { field: true, field: false })
                     }
@@ -142,7 +142,7 @@ public partial class ValidatorFacts
     public void Rule_564_InputObjectRequiredFields_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"{
                        findDog(complex: { owner: ""Fido"" })
                   }

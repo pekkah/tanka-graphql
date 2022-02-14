@@ -2,28 +2,26 @@
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
-namespace Tanka.GraphQL.Benchmarks
+namespace Tanka.GraphQL.Benchmarks;
+
+public class Program
 {
-    public class Program
+    private static void Main(string[] args)
     {
-        private static void Main(string[] args)
-        {
-            var runner = BenchmarkSwitcher
-                .FromAssembly(typeof(Program).Assembly);
+        var runner = BenchmarkSwitcher
+            .FromAssembly(typeof(Program).Assembly);
 
-            if (args.Length == 0)
-                runner.RunAll(GetGlobalConfig());
-            else
-            {
-                runner.Run(args, GetGlobalConfig());
-            }
+        if (args.Length == 0)
+            runner.RunAll(GetGlobalConfig());
+        else
+            runner.Run(args, GetGlobalConfig());
+    }
 
-        }
-
-        static IConfig GetGlobalConfig()
-            => DefaultConfig.Instance
-                .WithArtifactsPath("artifacts/benchmarks")
-                .AddJob(Job.Default
-                    .AsDefault());
+    private static IConfig GetGlobalConfig()
+    {
+        return DefaultConfig.Instance
+            .WithArtifactsPath("artifacts/benchmarks")
+            .AddJob(Job.Default
+                .AsDefault());
     }
 }

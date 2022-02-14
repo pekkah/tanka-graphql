@@ -1,9 +1,8 @@
-﻿namespace Tanka.GraphQL.Language.Nodes
+﻿namespace Tanka.GraphQL.Language.Nodes;
+
+public enum SelectionType
 {
-    public enum SelectionType
-    {
-        Field,
-        FragmentSpread,
-        InlineFragment
-    }
+    Field,
+    FragmentSpread,
+    InlineFragment
 }

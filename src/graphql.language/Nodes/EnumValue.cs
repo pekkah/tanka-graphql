@@ -1,72 +1,72 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Tanka.GraphQL.Language.Nodes
+namespace Tanka.GraphQL.Language.Nodes;
+
+[DebuggerDisplay("{Name}")]
+public sealed class EnumValue : ValueBase, INode, IEquatable<EnumValue>, IEquatable<string>
 {
-    [DebuggerDisplay("{Name}")]
-    public sealed class EnumValue : ValueBase, INode, IEquatable<EnumValue>, IEquatable<string>
+    public readonly Name Name;
+
+    public EnumValue(
+        in Name name,
+        in Location? location = default)
     {
-        public override NodeKind Kind => NodeKind.EnumValue;
-        public override Location? Location {get;}
-        public readonly Name Name;
+        Name = name;
+        Location = location;
+    }
 
-        public EnumValue(
-            in Name name,
-            in Location? location = default)
-        {
-            Name = name;
-            Location = location;
-        }
+    public bool Equals(EnumValue? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Name.Equals(other.Name);
+    }
 
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
+    public bool Equals(string? other)
+    {
+        return Name.Equals(other);
+    }
 
-        public static bool operator ==(EnumValue? left, EnumValue? right)
-        {
-            return Equals(left, right);
-        }
+    public override NodeKind Kind => NodeKind.EnumValue;
+    public override Location? Location { get; }
 
-        public static bool operator !=(EnumValue? left, EnumValue? right)
-        {
-            return !Equals(left, right);
-        }
+    public override int GetHashCode()
+    {
+        return Name.GetHashCode();
+    }
 
-        public bool Equals(EnumValue? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Name.Equals(other.Name);
-        }
+    public static bool operator ==(EnumValue? left, EnumValue? right)
+    {
+        return Equals(left, right);
+    }
 
-        public bool Equals(string? other)
-        {
-            return Name.Equals(other);
-        }
+    public static bool operator !=(EnumValue? left, EnumValue? right)
+    {
+        return !Equals(left, right);
+    }
 
-        public bool Equals(Enum systemEnum)
-        {
-            var enumName = Enum.GetName(systemEnum.GetType(), systemEnum);
+    public bool Equals(Enum systemEnum)
+    {
+        var enumName = Enum.GetName(systemEnum.GetType(), systemEnum);
 
-            return Equals(enumName);
-        }
+        return Equals(enumName);
+    }
 
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(this, obj))
-                return true;
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(this, obj))
+            return true;
 
-            if (obj is EnumValue otherValue && Equals(otherValue))
-                return true;
+        if (obj is EnumValue otherValue && Equals(otherValue))
+            return true;
 
-            if (obj is string otherStr && Equals(otherStr))
-                return true;
+        if (obj is string otherStr && Equals(otherStr))
+            return true;
 
-            if (obj is Enum otherEnum && Equals(otherEnum))
-                return true;
+        if (obj is Enum otherEnum && Equals(otherEnum))
+            return true;
 
-            return false;
-        }
+        return false;
     }
 }

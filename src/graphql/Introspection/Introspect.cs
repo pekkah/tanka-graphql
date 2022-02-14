@@ -1,13 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem;
+﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL.Introspection
+namespace Tanka.GraphQL.Introspection;
+
+public class Introspect
 {
-    public class Introspect
-    {
-        public static string DefaultQuery = @"
+    public static string DefaultQuery = @"
             query IntrospectionQuery {
               __schema {
                 queryType { name }
@@ -97,12 +94,11 @@ namespace Tanka.GraphQL.Introspection
               }
             }";
 
-        public static (TypeSystemDocument TypeSystemDocument, ResolversMap Resolvers) Create()
-        {
-            var typeSystem = IntrospectionSchema.GetTypeSystem();
-            var introspectionResolvers = new IntrospectionResolvers();
+    public static (TypeSystemDocument TypeSystemDocument, ResolversMap Resolvers) Create()
+    {
+        var typeSystem = IntrospectionSchema.GetTypeSystem();
+        var introspectionResolvers = new IntrospectionResolvers();
 
-            return (typeSystem, introspectionResolvers);
-        }
+        return (typeSystem, introspectionResolvers);
     }
 }

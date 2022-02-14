@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Xunit;
 
 namespace Tanka.GraphQL.Server.Links.Tests.Introspection;

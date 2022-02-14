@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace Tanka.GraphQL
+namespace Tanka.GraphQL;
+
+public interface IExtensionsRunnerFactory
 {
-    public interface IExtensionsRunnerFactory
-    {
-        Task<ExtensionsRunner> BeginScope(ExecutionOptions options);
-    }
+    Task<ExtensionsRunner> BeginScope(ExecutionOptions options);
 }

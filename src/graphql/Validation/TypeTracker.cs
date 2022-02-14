@@ -24,15 +24,9 @@ public class TypeTracker : RuleVisitor
 
             Types.Push(root);
         };
-        LeaveOperationDefinition = node =>
-        {
-            Types.TryPop(out _);
-        };
+        LeaveOperationDefinition = node => { Types.TryPop(out _); };
 
-        EnterSelectionSet = node =>
-        {
-            ParentTypes.Push(CurrentType);
-        };
+        EnterSelectionSet = node => { ParentTypes.Push(CurrentType); };
 
 
         LeaveSelectionSet = node => { ParentTypes.TryPop(out _); };
@@ -172,7 +166,7 @@ public class TypeTracker : RuleVisitor
             DefaultValues.TryPop(out _);
             InputTypes.TryPop(out _);
         };
-        
+
         EnterListValue = node =>
         {
             /*if (InputType is not null)
@@ -182,7 +176,7 @@ public class TypeTracker : RuleVisitor
             */
 
             // List positions never have a default value
-            
+
             DefaultValues.Push(null);
         };
         LeaveListValue = node =>

@@ -28,7 +28,7 @@ public partial class ValidatorFacts
     public void Rule_571_DirectivesAreDefined_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"{
                        findDog(complex: { name: ""Fido"" }) @doesNotExists
                   }
@@ -50,7 +50,7 @@ public partial class ValidatorFacts
     public void Rule_572_DirectivesAreInValidLocations_valid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"
                 query {
                   field @skip(if: $foo)
@@ -70,7 +70,7 @@ public partial class ValidatorFacts
     public void Rule_572_DirectivesAreInValidLocations_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"
                 query @skip(if: $foo) {
                   field
@@ -117,7 +117,7 @@ public partial class ValidatorFacts
     public void Rule_573_DirectivesAreUniquePerLocation_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"query ($foo: Boolean = true, $bar: Boolean = false) {
                       field @skip(if: $foo) @skip(if: $bar)
                     }

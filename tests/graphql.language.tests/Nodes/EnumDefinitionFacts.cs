@@ -4,99 +4,98 @@ using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
 
-namespace Tanka.GraphQL.Language.Tests.Nodes
+namespace Tanka.GraphQL.Language.Tests.Nodes;
+
+public class EnumDefinitionFacts
 {
-    public class EnumDefinitionFacts
+    [Fact]
+    public void FromBytes()
     {
-        [Fact]
-        public void FromBytes()
-        {
-            /* Given */
-            /* When */
-            EnumDefinition original = Encoding.UTF8.GetBytes("enum ENUM { V1, V2 }")
-                .AsReadOnlySpan();
+        /* Given */
+        /* When */
+        EnumDefinition original = Encoding.UTF8.GetBytes("enum ENUM { V1, V2 }")
+            .AsReadOnlySpan();
 
-            /* Then */
-            Assert.Equal("ENUM", original.Name);
-        }
-        
-        [Fact]
-        public void FromString()
-        {
-            /* Given */
-            /* When */
-            EnumDefinition original = "enum ENUM { V1, V2 }";
+        /* Then */
+        Assert.Equal("ENUM", original.Name);
+    }
 
-            /* Then */
-            Assert.Equal("ENUM", original.Name);
-        }
+    [Fact]
+    public void FromString()
+    {
+        /* Given */
+        /* When */
+        EnumDefinition original = "enum ENUM { V1, V2 }";
 
-        [Fact]
-        public void WithDescription()
-        {
-            /* Given */
-            EnumDefinition original = @"enum ENUM { V1, V2 }";
+        /* Then */
+        Assert.Equal("ENUM", original.Name);
+    }
 
-            /* When */
-            var modified = original
-                .WithDescription("Description");
+    [Fact]
+    public void WithDescription()
+    {
+        /* Given */
+        EnumDefinition original = @"enum ENUM { V1, V2 }";
 
-            /* Then */
-            Assert.Null(original.Description);
-            Assert.Equal("Description", modified.Description);
-        }
+        /* When */
+        var modified = original
+            .WithDescription("Description");
 
-        [Fact]
-        public void WithName()
-        {
-            /* Given */
-            EnumDefinition original = @"enum ENUM { V1, V2 }";
+        /* Then */
+        Assert.Null(original.Description);
+        Assert.Equal("Description", modified.Description);
+    }
 
-            /* When */
-            var modified = original
-                .WithName("Renamed");
+    [Fact]
+    public void WithName()
+    {
+        /* Given */
+        EnumDefinition original = @"enum ENUM { V1, V2 }";
 
-            /* Then */
-            Assert.Equal("ENUM", original.Name);
-            Assert.Equal("Renamed", modified.Name);
-        }
+        /* When */
+        var modified = original
+            .WithName("Renamed");
 
-        [Fact]
-        public void WithValues()
-        {
-            /* Given */
-            EnumDefinition original = @"enum ENUM { V1, V2 }";
+        /* Then */
+        Assert.Equal("ENUM", original.Name);
+        Assert.Equal("Renamed", modified.Name);
+    }
 
-            /* When */
-            var modified = original
-                .WithValues(new List<EnumValueDefinition>
-                {
-                    "V3 @new"
-                });
+    [Fact]
+    public void WithValues()
+    {
+        /* Given */
+        EnumDefinition original = @"enum ENUM { V1, V2 }";
 
-            /* Then */
-            Assert.Equal(2, original.Values?.Count);
-            Assert.Equal(1, modified.Values?.Count);
-        }
+        /* When */
+        var modified = original
+            .WithValues(new List<EnumValueDefinition>
+            {
+                "V3 @new"
+            });
 
-        [Fact]
-        public void WithDirectives()
-        {
-            /* Given */
-            EnumDefinition original = @"enum ENUM { V1, V2 }";
+        /* Then */
+        Assert.Equal(2, original.Values?.Count);
+        Assert.Equal(1, modified.Values?.Count);
+    }
 
-            /* When */
-            var modified = original
-                .WithDirectives(new List<Directive>
-                {
-                    "@a"
-                });
+    [Fact]
+    public void WithDirectives()
+    {
+        /* Given */
+        EnumDefinition original = @"enum ENUM { V1, V2 }";
 
-            /* Then */
-            Assert.Null(original.Directives);
-            Assert.NotNull(modified.Directives);
-            var a = Assert.Single(modified.Directives);
-            Assert.Equal("a", a?.Name);
-        }
+        /* When */
+        var modified = original
+            .WithDirectives(new List<Directive>
+            {
+                "@a"
+            });
+
+        /* Then */
+        Assert.Null(original.Directives);
+        Assert.NotNull(modified.Directives);
+        var a = Assert.Single(modified.Directives);
+        Assert.Equal("a", a?.Name);
     }
 }

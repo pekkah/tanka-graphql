@@ -6,206 +6,205 @@ using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 
-namespace Tanka.GraphQL.Execution
+namespace Tanka.GraphQL.Execution;
+
+public static class SelectionSets
 {
-    public static class SelectionSets
+    public static async Task<IDictionary<string, object>?> ExecuteSelectionSetAsync(
+        IExecutorContext executorContext,
+        SelectionSet selectionSet,
+        ObjectDefinition objectDefinition,
+        object objectValue,
+        NodePath path)
     {
-        public static async Task<IDictionary<string, object>?> ExecuteSelectionSetAsync(
-            IExecutorContext executorContext,
-            SelectionSet selectionSet,
-            ObjectDefinition objectDefinition,
-            object objectValue,
-            NodePath path)
+        if (executorContext == null) throw new ArgumentNullException(nameof(executorContext));
+        if (selectionSet == null) throw new ArgumentNullException(nameof(selectionSet));
+        if (path == null) throw new ArgumentNullException(nameof(path));
+
+        var groupedFieldSet = CollectFields(
+            executorContext.Schema,
+            executorContext.Document,
+            objectDefinition,
+            selectionSet,
+            executorContext.CoercedVariableValues);
+
+        var resultMap = await executorContext.Strategy.ExecuteGroupedFieldSetAsync(
+            executorContext,
+            groupedFieldSet,
+            objectDefinition,
+            objectValue,
+            path).ConfigureAwait(false);
+
+        return resultMap;
+    }
+
+
+    public static SelectionSet MergeSelectionSets(IReadOnlyCollection<FieldSelection> fields)
+    {
+        var selectionSet = new List<ISelection>();
+        foreach (var field in fields)
         {
-            if (executorContext == null) throw new ArgumentNullException(nameof(executorContext));
-            if (selectionSet == null) throw new ArgumentNullException(nameof(selectionSet));
-            if (path == null) throw new ArgumentNullException(nameof(path));
+            var fieldSelectionSet = field.SelectionSet;
+            if (fieldSelectionSet is null || fieldSelectionSet.Count == 0) continue;
 
-            var groupedFieldSet = CollectFields(
-                executorContext.Schema,
-                executorContext.Document,
-                objectDefinition,
-                selectionSet,
-                executorContext.CoercedVariableValues);
-
-            var resultMap = await executorContext.Strategy.ExecuteGroupedFieldSetAsync(
-                executorContext,
-                groupedFieldSet,
-                objectDefinition,
-                objectValue,
-                path).ConfigureAwait(false);
-
-            return resultMap;
+            selectionSet.AddRange(fieldSelectionSet);
         }
 
+        return new SelectionSet(selectionSet);
+    }
 
-        public static SelectionSet MergeSelectionSets(IReadOnlyCollection<FieldSelection> fields)
+    public static IReadOnlyDictionary<string, List<FieldSelection>> CollectFields(
+        ISchema schema,
+        ExecutableDocument document,
+        ObjectDefinition objectDefinition,
+        SelectionSet selectionSet,
+        IReadOnlyDictionary<string, object?> coercedVariableValues,
+        List<string>? visitedFragments = null)
+    {
+        visitedFragments ??= new List<string>();
+
+        var fragments = document.FragmentDefinitions;
+
+        var groupedFields = new Dictionary<string, List<FieldSelection>>();
+        foreach (var selection in selectionSet)
         {
-            var selectionSet = new List<ISelection>();
-            foreach (var field in fields)
-            {
-                var fieldSelectionSet = field.SelectionSet;
-                if (fieldSelectionSet is null || fieldSelectionSet.Count == 0) continue;
+            var directives = GetDirectives(selection).ToList();
 
-                selectionSet.AddRange(fieldSelectionSet);
+            var skipDirective = directives.FirstOrDefault(d => d.Name == "skip"); //todo: skip to constant
+            if (SkipSelection(skipDirective, coercedVariableValues, schema, objectDefinition, selection))
+                continue;
+
+            var includeDirective = directives.FirstOrDefault(d => d.Name == "include"); //todo: include to constant
+            if (!IncludeSelection(includeDirective, coercedVariableValues, schema, objectDefinition, selection))
+                continue;
+
+            if (selection is FieldSelection fieldSelection)
+            {
+                var name = fieldSelection.AliasOrName;
+                if (!groupedFields.ContainsKey(name))
+                    groupedFields[name] = new List<FieldSelection>();
+
+                groupedFields[name].Add(fieldSelection);
             }
 
-            return new SelectionSet(selectionSet);
-        }
-
-        public static IReadOnlyDictionary<string, List<FieldSelection>> CollectFields(
-            ISchema schema,
-            ExecutableDocument document,
-            ObjectDefinition objectDefinition,
-            SelectionSet selectionSet,
-            IReadOnlyDictionary<string, object?> coercedVariableValues,
-            List<string>? visitedFragments = null)
-        {
-            visitedFragments ??= new List<string>();
-
-            var fragments = document.FragmentDefinitions;
-
-            var groupedFields = new Dictionary<string, List<FieldSelection>>();
-            foreach (var selection in selectionSet)
+            if (selection is FragmentSpread fragmentSpread)
             {
-                var directives = GetDirectives(selection).ToList();
+                var fragmentSpreadName = fragmentSpread.FragmentName;
 
-                var skipDirective = directives.FirstOrDefault(d => d.Name == "skip"); //todo: skip to constant
-                if (SkipSelection(skipDirective, coercedVariableValues, schema, objectDefinition, selection))
+                if (visitedFragments.Contains(fragmentSpreadName)) continue;
+
+                visitedFragments.Add(fragmentSpreadName);
+
+                var fragment = fragments.SingleOrDefault(f => f.FragmentName == fragmentSpreadName);
+
+                if (fragment == null)
                     continue;
 
-                var includeDirective = directives.FirstOrDefault(d => d.Name == "include"); //todo: include to constant
-                if (!IncludeSelection(includeDirective, coercedVariableValues, schema, objectDefinition, selection))
+                var fragmentTypeAst = fragment.TypeCondition;
+                var fragmentType = Ast.UnwrapAndResolveType(schema, fragmentTypeAst);
+
+                if (!DoesFragmentTypeApply(objectDefinition, fragmentType))
                     continue;
 
-                if (selection is FieldSelection fieldSelection)
+                var fragmentSelectionSet = fragment.SelectionSet;
+                var fragmentGroupedFieldSet = CollectFields(
+                    schema,
+                    document,
+                    objectDefinition,
+                    fragmentSelectionSet,
+                    coercedVariableValues,
+                    visitedFragments);
+
+                foreach (var fragmentGroup in fragmentGroupedFieldSet)
                 {
-                    var name = fieldSelection.AliasOrName;
-                    if (!groupedFields.ContainsKey(name))
-                        groupedFields[name] = new List<FieldSelection>();
+                    var responseKey = fragmentGroup.Key;
 
-                    groupedFields[name].Add(fieldSelection);
-                }
+                    if (!groupedFields.ContainsKey(responseKey))
+                        groupedFields[responseKey] = new List<FieldSelection>();
 
-                if (selection is FragmentSpread fragmentSpread)
-                {
-                    var fragmentSpreadName = fragmentSpread.FragmentName;
-
-                    if (visitedFragments.Contains(fragmentSpreadName)) continue;
-
-                    visitedFragments.Add(fragmentSpreadName);
-
-                    var fragment = fragments.SingleOrDefault(f => f.FragmentName == fragmentSpreadName);
-
-                    if (fragment == null)
-                        continue;
-
-                    var fragmentTypeAst = fragment.TypeCondition;
-                    var fragmentType = Ast.UnwrapAndResolveType(schema, fragmentTypeAst);
-
-                    if (!DoesFragmentTypeApply(objectDefinition, fragmentType))
-                        continue;
-
-                    var fragmentSelectionSet = fragment.SelectionSet;
-                    var fragmentGroupedFieldSet = CollectFields(
-                        schema,
-                        document,
-                        objectDefinition,
-                        fragmentSelectionSet,
-                        coercedVariableValues,
-                        visitedFragments);
-
-                    foreach (var fragmentGroup in fragmentGroupedFieldSet)
-                    {
-                        var responseKey = fragmentGroup.Key;
-
-                        if (!groupedFields.ContainsKey(responseKey))
-                            groupedFields[responseKey] = new List<FieldSelection>();
-
-                        groupedFields[responseKey].AddRange(fragmentGroup.Value);
-                    }
-                }
-
-                if (selection is InlineFragment inlineFragment)
-                {
-                    var fragmentTypeAst = inlineFragment.TypeCondition;
-                    var fragmentType = Ast.UnwrapAndResolveType(schema, fragmentTypeAst);
-
-                    if (fragmentType != null && !DoesFragmentTypeApply(objectDefinition, fragmentType))
-                        continue;
-
-                    var fragmentSelectionSet = inlineFragment.SelectionSet;
-                    var fragmentGroupedFieldSet = CollectFields(
-                        schema,
-                        document,
-                        objectDefinition,
-                        fragmentSelectionSet,
-                        coercedVariableValues,
-                        visitedFragments);
-
-                    foreach (var fragmentGroup in fragmentGroupedFieldSet)
-                    {
-                        var responseKey = fragmentGroup.Key;
-
-                        if (!groupedFields.ContainsKey(responseKey))
-                            groupedFields[responseKey] = new List<FieldSelection>();
-
-                        groupedFields[responseKey].AddRange(fragmentGroup.Value);
-                    }
+                    groupedFields[responseKey].AddRange(fragmentGroup.Value);
                 }
             }
 
-            return groupedFields;
+            if (selection is InlineFragment inlineFragment)
+            {
+                var fragmentTypeAst = inlineFragment.TypeCondition;
+                var fragmentType = Ast.UnwrapAndResolveType(schema, fragmentTypeAst);
+
+                if (fragmentType != null && !DoesFragmentTypeApply(objectDefinition, fragmentType))
+                    continue;
+
+                var fragmentSelectionSet = inlineFragment.SelectionSet;
+                var fragmentGroupedFieldSet = CollectFields(
+                    schema,
+                    document,
+                    objectDefinition,
+                    fragmentSelectionSet,
+                    coercedVariableValues,
+                    visitedFragments);
+
+                foreach (var fragmentGroup in fragmentGroupedFieldSet)
+                {
+                    var responseKey = fragmentGroup.Key;
+
+                    if (!groupedFields.ContainsKey(responseKey))
+                        groupedFields[responseKey] = new List<FieldSelection>();
+
+                    groupedFields[responseKey].AddRange(fragmentGroup.Value);
+                }
+            }
         }
 
-        private static bool IncludeSelection(
-            Directive? includeDirective,
-            IReadOnlyDictionary<string, object?> coercedVariableValues, 
-            ISchema schema,
-            ObjectDefinition objectDefinition, 
-            object selection)
-        {
-            if (includeDirective?.Arguments == null)
-                return true;
+        return groupedFields;
+    }
 
-            var ifArgument = includeDirective.Arguments.SingleOrDefault(a => a.Name == "if"); //todo: if to constants
-            return GetIfArgumentValue(schema, includeDirective, coercedVariableValues, ifArgument);
-        }
+    private static bool IncludeSelection(
+        Directive? includeDirective,
+        IReadOnlyDictionary<string, object?> coercedVariableValues,
+        ISchema schema,
+        ObjectDefinition objectDefinition,
+        object selection)
+    {
+        if (includeDirective?.Arguments == null)
+            return true;
 
-        private static bool SkipSelection(
-            Directive? skipDirective,
-            IReadOnlyDictionary<string, object?> coercedVariableValues, 
-            ISchema schema,
-            ObjectDefinition objectDefinition, 
-            object selection)
-        {
-            if (skipDirective?.Arguments == null)
-                return false;
+        var ifArgument = includeDirective.Arguments.SingleOrDefault(a => a.Name == "if"); //todo: if to constants
+        return GetIfArgumentValue(schema, includeDirective, coercedVariableValues, ifArgument);
+    }
 
-            var ifArgument = skipDirective.Arguments.SingleOrDefault(a => a.Name == "if"); //todo: if to constants
-            return GetIfArgumentValue(schema, skipDirective, coercedVariableValues, ifArgument);
-        }
+    private static bool SkipSelection(
+        Directive? skipDirective,
+        IReadOnlyDictionary<string, object?> coercedVariableValues,
+        ISchema schema,
+        ObjectDefinition objectDefinition,
+        object selection)
+    {
+        if (skipDirective?.Arguments == null)
+            return false;
 
-        private static bool GetIfArgumentValue(
-            ISchema schema,
-            Directive directive,
-            IReadOnlyDictionary<string, object?> coercedVariableValues,
-            Argument? argument)
-        {
-            if (argument is null)
-                return false;
+        var ifArgument = skipDirective.Arguments.SingleOrDefault(a => a.Name == "if"); //todo: if to constants
+        return GetIfArgumentValue(schema, skipDirective, coercedVariableValues, ifArgument);
+    }
 
-            return Ast.GetIfArgumentValue(directive, coercedVariableValues, argument);
-        }
+    private static bool GetIfArgumentValue(
+        ISchema schema,
+        Directive directive,
+        IReadOnlyDictionary<string, object?> coercedVariableValues,
+        Argument? argument)
+    {
+        if (argument is null)
+            return false;
 
-        private static IEnumerable<Directive> GetDirectives(ISelection selection)
-        {
-            return selection.Directives ?? Language.Nodes.Directives.None;
-        }
+        return Ast.GetIfArgumentValue(directive, coercedVariableValues, argument);
+    }
 
-        private static bool DoesFragmentTypeApply(ObjectDefinition objectDefinition, TypeDefinition fragmentType)
-        {
-            return Ast.DoesFragmentTypeApply(objectDefinition, fragmentType);
-        }
+    private static IEnumerable<Directive> GetDirectives(ISelection selection)
+    {
+        return selection.Directives ?? Language.Nodes.Directives.None;
+    }
+
+    private static bool DoesFragmentTypeApply(ObjectDefinition objectDefinition, TypeDefinition fragmentType)
+    {
+        return Ast.DoesFragmentTypeApply(objectDefinition, fragmentType);
     }
 }

@@ -6,56 +6,55 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Tanka.GraphQL.Server.WebSockets
+namespace Tanka.GraphQL.Server.WebSockets;
+
+public class WebSocketServer
 {
-    public class WebSocketServer
+    private readonly ILogger<WebSocketServer> _logger;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly IOptions<WebSocketServerOptions> _options;
+
+    public WebSocketServer(
+        ILoggerFactory loggerFactory,
+        IOptions<WebSocketServerOptions> options)
     {
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ILogger<WebSocketServer> _logger;
-        private readonly IOptions<WebSocketServerOptions> _options;
+        _loggerFactory = loggerFactory;
+        _logger = loggerFactory.CreateLogger<WebSocketServer>();
+        _options = options;
+    }
 
-        public WebSocketServer(
-            ILoggerFactory loggerFactory,
-            IOptions<WebSocketServerOptions> options)
+    public ConcurrentDictionary<string, MessageServer> Clients { get; } = new();
+
+    public async Task ProcessRequestAsync(HttpContext context)
+    {
+        try
         {
-            _loggerFactory = loggerFactory;
-            _logger = loggerFactory.CreateLogger<WebSocketServer>();
-            _options = options;
+            _logger.LogInformation($"Processing WebSocket: {context.TraceIdentifier}");
+            var connection = new WebSocketPipe(_loggerFactory);
+            var protocol = context.RequestServices
+                .GetRequiredService<IProtocolHandler>();
+
+            var messageServer = new SubscriptionServer(protocol, _options);
+
+            Clients.TryAdd(context.TraceIdentifier, messageServer);
+            var run = messageServer.RunAsync(connection, context.RequestAborted);
+            await connection.ProcessRequestAsync(context);
+            await run;
         }
-
-        public ConcurrentDictionary<string, MessageServer> Clients { get; } =
-            new ConcurrentDictionary<string, MessageServer>();
-
-        public async Task ProcessRequestAsync(HttpContext context)
+        catch (Exception e)
         {
-            try
+            _logger.LogError(e, $"Processing websocket failed: {context.TraceIdentifier}");
+            throw;
+        }
+        finally
+        {
+            if (Clients.TryRemove(context.TraceIdentifier, out var s))
             {
-                _logger.LogInformation($"Processing WebSocket: {context.TraceIdentifier}");
-                var connection = new WebSocketPipe(_loggerFactory);
-                var protocol = context.RequestServices
-                    .GetRequiredService<IProtocolHandler>();
-                
-                var messageServer = new SubscriptionServer(protocol, _options);
+                s.Complete();
+                await s.Completion;
+            }
 
-                Clients.TryAdd(context.TraceIdentifier, messageServer);
-                var run = messageServer.RunAsync(connection, context.RequestAborted);
-                await connection.ProcessRequestAsync(context);
-                await run;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, $"Processing websocket failed: {context.TraceIdentifier}");
-                throw;
-            }
-            finally
-            {
-                if (Clients.TryRemove(context.TraceIdentifier, out var s))
-                {
-                    s.Complete();
-                    await s.Completion;
-                }
-                _logger.LogInformation($"Processing websocket finished: {context.TraceIdentifier}");
-            }
+            _logger.LogInformation($"Processing websocket finished: {context.TraceIdentifier}");
         }
     }
 }

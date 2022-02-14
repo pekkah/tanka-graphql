@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language;
@@ -42,15 +41,15 @@ public static class ExecutionRules
         R562InputObjectFieldNames(),
         R563InputObjectFieldUniqueness(),
         R564InputObjectRequiredFields(),
-        
+
         R571And573Directives(),
         R572DirectivesAreInValidLocations(),
 
-        
+
         R581And582Variables(),
         R583AllVariableUsesDefined(),
         R584AllVariablesUsed(),
-        R585AllVariableUsagesAreAllowed(),
+        R585AllVariableUsagesAreAllowed()
     };
 
 
@@ -200,7 +199,7 @@ public static class ExecutionRules
             };
         };
     }
-    
+
     /// <summary>
     ///     For each selection in the document.
     ///     Let fieldName be the target field of selection
@@ -242,10 +241,7 @@ public static class ExecutionRules
         return (context, rule) =>
         {
             var validator = new FieldSelectionMergingValidator(context);
-            rule.EnterSelectionSet += selectionSet =>
-            {
-                validator.Validate(selectionSet);
-            };
+            rule.EnterSelectionSet += selectionSet => { validator.Validate(selectionSet); };
         };
     }
 
@@ -318,7 +314,7 @@ public static class ExecutionRules
             };
         };
     }
-    
+
     /// <summary>
     ///     For each argument in the document
     ///     Let argumentName be the Name of argument.
@@ -375,9 +371,9 @@ public static class ExecutionRules
         ArgumentsDefinition GetDirectiveArgumentDefinitions(IRuleVisitorContext context)
         {
             var definitions = context
-                                  .Tracker
-                                  .DirectiveDefinition
-                                  ?.Arguments;
+                .Tracker
+                .DirectiveDefinition
+                ?.Arguments;
 
             if (definitions == null)
                 return ArgumentsDefinition.None;
@@ -387,7 +383,7 @@ public static class ExecutionRules
 
         void ValidateArguments(
             ArgumentsDefinition argumentDefinitions,
-            IReadOnlyList<Argument> arguments, 
+            IReadOnlyList<Argument> arguments,
             IRuleVisitorContext ruleVisitorContext)
         {
             foreach (var argumentDefinition in argumentDefinitions)
@@ -433,7 +429,7 @@ public static class ExecutionRules
             rule.EnterFieldSelection += field =>
             {
                 var args = field.Arguments;
-                var argumentDefinitions = 
+                var argumentDefinitions =
                     GetFieldArgumentDefinitions(context);
 
                 ValidateArguments(argumentDefinitions, args ?? Arguments.None, context);
@@ -441,7 +437,7 @@ public static class ExecutionRules
             rule.EnterDirective += directive =>
             {
                 var args = directive.Arguments;
-                var argumentDefinitions = 
+                var argumentDefinitions =
                     GetDirectiveArgumentDefinitions(context);
 
                 ValidateArguments(argumentDefinitions, args ?? Arguments.None, context);
@@ -477,7 +473,7 @@ public static class ExecutionRules
             };
         };
     }
-    
+
     /// <summary>
     ///     For each fragment definition fragment in the document
     ///     Let fragmentName be the name of fragment.
@@ -619,13 +615,11 @@ public static class ExecutionRules
                 var fragment = context.GetFragment(node.FragmentName);
 
                 if (fragment == null)
-                {
                     context.Error(
                         ValidationErrorCodes.R5521FragmentSpreadTargetDefined,
-                        $"Named fragment spreads must refer to fragments " +
-                        $"defined within the document. " +
+                        "Named fragment spreads must refer to fragments " +
+                        "defined within the document. " +
                         $"Fragment '{node.FragmentName}' not found");
-                }
             };
         };
     }
@@ -640,7 +634,7 @@ public static class ExecutionRules
             // Position in the spread path
             var spreadPathIndexByName = new Dictionary<string, int?>();
             var fragments = context.Document.FragmentDefinitions;
-            
+
             rule.EnterFragmentDefinition += node =>
             {
                 DetectCycleRecursive(
@@ -666,7 +660,7 @@ public static class ExecutionRules
         {
             var spreads = new List<FragmentSpread>();
 
-            var setsToVisit = new Stack<SelectionSet>(new[] {node});
+            var setsToVisit = new Stack<SelectionSet>(new[] { node });
 
             while (setsToVisit.Any())
             {
@@ -693,7 +687,7 @@ public static class ExecutionRules
         {
             if (fragments == null)
                 return;
-            
+
             var fragmentName = fragment.FragmentName;
             if (visitedFrags.Contains(fragmentName))
                 return;
@@ -763,8 +757,8 @@ public static class ExecutionRules
         return (context, rule) =>
         {
             var fragments = context.Document.FragmentDefinitions
-                ?.ToDictionary(f => f.FragmentName)
-                ?? new Dictionary<Name, FragmentDefinition>(0);
+                                ?.ToDictionary(f => f.FragmentName)
+                            ?? new Dictionary<Name, FragmentDefinition>(0);
 
             rule.EnterFragmentSpread += node =>
             {
@@ -773,19 +767,15 @@ public static class ExecutionRules
                 var parentType = context.Tracker.ParentType;
                 if (fragmentType is not null && parentType is not null)
                 {
-                    bool applicableTypes = false;
+                    var applicableTypes = false;
                     var parentTypePossibleTypes = GetPossibleTypes(parentType, context.Schema);
                     var fragmentTypePossibleTypes = GetPossibleTypes(fragmentType, context.Schema);
 
                     if (fragmentType is InterfaceDefinition && parentType is InterfaceDefinition)
-                    {
                         applicableTypes = parentTypePossibleTypes.Contains(fragmentType);
-                    }
                     else
-                    {
                         applicableTypes =
                             fragmentTypePossibleTypes.Intersect(parentTypePossibleTypes).Any();
-                    }
 
                     if (!applicableTypes)
                         context.Error(
@@ -845,23 +835,23 @@ public static class ExecutionRules
                 }
             };
         };
-        
+
         IEnumerable<TypeDefinition> GetPossibleTypes(TypeDefinition type, ISchema schema)
         {
             switch (type)
             {
                 case ObjectDefinition objectDefinition:
-                    return new[] {objectDefinition};
+                    return new[] { objectDefinition };
                 case InterfaceDefinition interfaceType:
                     return schema.GetPossibleTypes(interfaceType);
                 case UnionDefinition unionDefinition:
                     return schema.GetPossibleTypes(unionDefinition);
-                default: 
+                default:
                     return Enumerable.Empty<TypeDefinition>();
             }
         }
     }
-    
+
     public static CombineRule R561ValuesOfCorrectType()
     {
         return (context, rule) =>
@@ -869,10 +859,7 @@ public static class ExecutionRules
             //todo: there's an objectkind for nullvalue but no type
             //rule.EnterNullValue += node => { };
 
-            rule.EnterListValue += node =>
-            {
-                IsValidScalar(context, node);
-            };
+            rule.EnterListValue += node => { IsValidScalar(context, node); };
             rule.EnterObjectValue += node =>
             {
                 var type = context.Tracker.InputType;
@@ -887,7 +874,7 @@ public static class ExecutionRules
                     f => f.Name);
 
                 foreach (var fieldDef in context.Schema.GetInputFields(
-                    inputType.Name))
+                             inputType.Name))
                 {
                     var fieldNode = fieldNodeMap.ContainsKey(fieldDef.Key);
                     if (!fieldNode && fieldDef.Value.Type is NonNullType NonNullType)
@@ -897,7 +884,7 @@ public static class ExecutionRules
                                 type.ToString(),
                                 fieldDef.Key,
                                 NonNullType.ToString()),
-                            (INode) node);
+                            (INode)node);
                 }
             };
             rule.EnterObjectField += node =>
@@ -922,7 +909,6 @@ public static class ExecutionRules
                     IsValidScalar(context, node);
 
                 else
-                {
                     try
                     {
                         var value = new EnumConverter(type).ParseLiteral(node);
@@ -941,7 +927,6 @@ public static class ExecutionRules
                                 Printer.Print(node),
                                 string.Empty));
                     }
-                }
             };
             rule.EnterIntValue += node => IsValidScalar(context, node);
             rule.EnterFloatValue += node => IsValidScalar(context, node);
@@ -1005,8 +990,8 @@ public static class ExecutionRules
             try
             {
                 var converter = context.Schema.GetValueConverter(type.Name) ?? throw new ValueCoercionException(
-                    $"Value converter for '{Printer.Print(type)}' not found from schema.", 
-                    type, 
+                    $"Value converter for '{Printer.Print(type)}' not found from schema.",
+                    type,
                     type);
 
                 converter.ParseLiteral(node);
@@ -1105,7 +1090,7 @@ public static class ExecutionRules
                                 "does not have a default value. Otherwise, the input object field " +
                                 "is optional. " +
                                 $"Field '{nonNullType}.{fieldName}' is required.",
-                                (INode) node);
+                                (INode)node);
 
                             return;
                         }
@@ -1126,7 +1111,7 @@ public static class ExecutionRules
         };
     }
 
-    
+
     /// <summary>
     ///     5.7.1, 5.7.3
     /// </summary>
@@ -1211,17 +1196,15 @@ public static class ExecutionRules
                 var validLocations = directiveType.DirectiveLocations;
 
                 if (!validLocations.Contains(currentLocation))
-                {
                     context.Error(
                         ValidationErrorCodes.R572DirectivesAreInValidLocations,
-                        $"GraphQL servers define what directives they support " +
-                        $"and where they support them. For each usage of a directive, " +
-                        $"the directive must be used in a location that the server has " +
-                        $"declared support for. " +
+                        "GraphQL servers define what directives they support " +
+                        "and where they support them. For each usage of a directive, " +
+                        "the directive must be used in a location that the server has " +
+                        "declared support for. " +
                         $"Directive '{directive.Name.Value}' is in invalid location " +
                         $"'{currentLocation}'. Valid locations: '{string.Join(",", validLocations)}'",
                         directive);
-                }
             }
         }
 
@@ -1230,7 +1213,7 @@ public static class ExecutionRules
             switch (appliedTo.Kind)
             {
                 case NodeKind.OperationDefinition:
-                    switch (((OperationDefinition) appliedTo).Operation)
+                    switch (((OperationDefinition)appliedTo).Operation)
                     {
                         case OperationType.Query:
                             return ExecutableDirectiveLocations.QUERY;
@@ -1250,7 +1233,7 @@ public static class ExecutionRules
                 case NodeKind.FragmentDefinition:
                     return ExecutableDirectiveLocations.FRAGMENT_DEFINITION;
                 case NodeKind.VariableDefinition:
-                    throw new InvalidOperationException($"Not supported");
+                    throw new InvalidOperationException("Not supported");
                 case NodeKind.SchemaDefinition:
                 case NodeKind.SchemaExtension:
                     return TypeSystemDirectiveLocations.SCHEMA;
@@ -1286,7 +1269,7 @@ public static class ExecutionRules
         }
     }
 
-    
+
     /// <summary>
     ///     5.8.1, 5.8.2
     /// </summary>
@@ -1321,7 +1304,7 @@ public static class ExecutionRules
 
                     // 5.8.2
                     var variableType = Ast.UnwrapAndResolveType(context.Schema, variableUsage.Type);
-                    if (variableType is null ||!TypeIs.IsInputType(variableType))
+                    if (variableType is null || !TypeIs.IsInputType(variableType))
                         context.Error(
                             ValidationErrorCodes.R582VariablesAreInputTypes,
                             "Variables can only be input types. Objects, unions, " +
@@ -1352,19 +1335,15 @@ public static class ExecutionRules
                     .ToList();
 
                 foreach (var usage in usages)
-                {
                     if (!variableDefinitions.Contains(usage))
-                    {
                         context.Error(
                             ValidationErrorCodes.R583AllVariableUsesDefined,
-                            $"Variables are scoped on a per‐operation basis. " +
-                            $"That means that any variable used within the context of " +
-                            $"an operation must be defined at the top level of that operation. " +
+                            "Variables are scoped on a per‐operation basis. " +
+                            "That means that any variable used within the context of " +
+                            "an operation must be defined at the top level of that operation. " +
                             $"Variable use '{usage}' is not defined.",
                             node
                         );
-                    }
-                }
             };
         };
     }
@@ -1376,10 +1355,7 @@ public static class ExecutionRules
             var variableDefinitions = new List<VariableDefinition>();
 
             rule.EnterVariableDefinition += node => variableDefinitions.Add(node);
-            rule.EnterOperationDefinition += node =>
-            {
-                variableDefinitions.Clear();
-            };
+            rule.EnterOperationDefinition += node => { variableDefinitions.Clear(); };
             rule.LeaveOperationDefinition += node =>
             {
                 var usages = context.GetRecursiveVariables(node)
@@ -1391,17 +1367,15 @@ public static class ExecutionRules
                     var variableName = variableDefinition.Variable.Name.Value;
 
                     if (!usages.Contains(variableName))
-                    {
                         context.Error(
                             ValidationErrorCodes.R584AllVariablesUsed,
-                            $"All variables defined by an operation " +
-                            $"must be used in that operation or a fragment " +
-                            $"transitively included by that operation. Unused " +
-                            $"variables cause a validation error. " +
+                            "All variables defined by an operation " +
+                            "must be used in that operation or a fragment " +
+                            "transitively included by that operation. Unused " +
+                            "variables cause a validation error. " +
                             $"Variable: '{variableName}' is not used.",
                             variableDefinition
-                            );
-                    }
+                        );
                 }
             };
         };
@@ -1433,10 +1407,7 @@ public static class ExecutionRules
                 {
                     var variableName = usage.Variable.Name;
 
-                    if (!variableDefinitions.TryGetValue(variableName, out var variableDefinition))
-                    {
-                        return;
-                    }
+                    if (!variableDefinitions.TryGetValue(variableName, out var variableDefinition)) return;
 
                     if (!AllowedVariableUsage(
                             context.Schema,
@@ -1444,13 +1415,11 @@ public static class ExecutionRules
                             variableDefinition?.DefaultValue,
                             usage.Type,
                             usage.DefaultValue))
-                    {
                         context.Error(
                             ValidationErrorCodes.R585AllVariableUsagesAreAllowed,
-                            $"Variable usages must be compatible with the arguments they are passed to. " +
+                            "Variable usages must be compatible with the arguments they are passed to. " +
                             $"Variable '{variableName}' of type '{variableDefinition?.Type}' used in " +
                             $"position expecting type '{usage.Type}'");
-                    }
                 }
             };
         };
@@ -1465,13 +1434,10 @@ public static class ExecutionRules
         {
             if (locationType is NonNullType nonNullTypeTypeLocationType && varType is not NonNullType)
             {
-                bool hasNonNullTypeTypeVariableDefaultValue = varDefaultValue != null;
-                bool hasLocationDefaultValue = locationDefaultValue != null;
+                var hasNonNullTypeTypeVariableDefaultValue = varDefaultValue != null;
+                var hasLocationDefaultValue = locationDefaultValue != null;
 
-                if (!hasNonNullTypeTypeVariableDefaultValue && !hasLocationDefaultValue)
-                {
-                    return false;
-                }
+                if (!hasNonNullTypeTypeVariableDefaultValue && !hasLocationDefaultValue) return false;
 
                 var nullableLocationType = nonNullTypeTypeLocationType.OfType;
                 return IsTypeSubTypeOf(schema, varType, nullableLocationType);
@@ -1489,57 +1455,47 @@ public static class ExecutionRules
         {
             // Equivalent type is a valid subtype
             if (maybeSubType is NamedType namedSubType && superType is NamedType namedSuperType)
-            {
                 if (namedSubType.Name.Equals(namedSuperType.Name))
                     return true;
-            }
 
             // If superType is non-null, maybeSubType must also be non-null.
             if (superType is NonNullType nonNullTypeTypeSuperType)
             {
                 if (maybeSubType is NonNullType nonNullTypeTypeMaybeSubType)
-                {
                     return IsTypeSubTypeOf(
                         schema,
                         nonNullTypeTypeMaybeSubType.OfType,
                         nonNullTypeTypeSuperType.OfType);
-                }
 
                 return false;
             }
 
             if (maybeSubType is NonNullType nonNullTypeTypeMaybeSubType2)
-            {
                 // If superType is nullable, maybeSubType may be non-null or nullable.
                 return IsTypeSubTypeOf(schema, nonNullTypeTypeMaybeSubType2.OfType, superType);
-            }
 
             // If superType type is a list, maybeSubType type must also be a list.
             if (superType is ListType listSuperType)
             {
                 if (maybeSubType is ListType listMaybeSubType)
-                {
                     return IsTypeSubTypeOf(
                         schema,
                         listMaybeSubType.OfType,
                         listSuperType.OfType);
-                }
 
                 return false;
             }
 
             if (maybeSubType is ListType)
-            {
                 // If superType is not a list, maybeSubType must also be not a list.
                 return false;
-            }
 
             // If superType type is an abstract type, maybeSubType type may be a currently
             // possible object type.
             var superTypeDefinition = schema.GetNamedType(superType.Unwrap().Name);
             var maybeSubTypeDefinition = schema.GetNamedType(maybeSubType.Unwrap().Name);
 
-            var possibleTypes  = superTypeDefinition switch
+            var possibleTypes = superTypeDefinition switch
             {
                 null => Enumerable.Empty<TypeDefinition>(),
                 InterfaceDefinition interfaceDefinition => schema.GetPossibleTypes(interfaceDefinition),

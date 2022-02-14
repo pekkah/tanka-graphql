@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
-namespace Tanka.GraphQL.Server.Links.Tests
+namespace Tanka.GraphQL.Server.Links.Tests;
+
+public class MakeRemoteExecutableFacts
 {
-    public class MakeRemoteExecutableFacts
+    [Fact]
+    public async Task Execute_with_StaticLink()
     {
-        [Fact]
-        public async Task Execute_with_StaticLink()
-        {
-            /* Given */
-            var schemaOneBuilder = new SchemaBuilder()
-                .Add(
-                    @"
+        /* Given */
+        var schemaOneBuilder = new SchemaBuilder()
+            .Add(
+                @"
                     type User {
                         id: ID!
                         name: String!
@@ -31,9 +29,9 @@ namespace Tanka.GraphQL.Server.Links.Tests
                     }
                     ");
 
-            var schemaTwoBuilder = new SchemaBuilder()
-                .Add(
-                    @"
+        var schemaTwoBuilder = new SchemaBuilder()
+            .Add(
+                @"
                     type Address {
                         city: String!
                     }
@@ -46,44 +44,44 @@ namespace Tanka.GraphQL.Server.Links.Tests
 
                     }
                     "
-                );
+            );
 
-            var schemaOne = RemoteSchemaTools.MakeRemoteExecutable(
-                schemaOneBuilder,
-                RemoteLinks.Static(new ExecutionResult
-                {
-                    Data = new Dictionary<string, object>
-                    {
-                        ["userById"] = new Dictionary<string, object>
-                        {
-                            ["id"] = "1",
-                            ["name"] = "name"
-                        }
-                    }
-                }));
-
-            var schemaTwo = await schemaTwoBuilder.Build(
-                new ResolversMap()
-                {
-                    ["Address"] = new FieldResolversMap
-                    {
-                        {"city", context => ResolveSync.As(context.ObjectValue)}
-                    },
-                    ["User"] = new FieldResolversMap
-                    {
-                        {"address", context => ResolveSync.As("Vantaa")}
-                    }
-                });
-
-            var schema = await new SchemaBuilder()
-                //.Merge(schemaOne, schemaTwo)
-                .Build(new SchemaBuildOptions());
-
-            /* When */
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
+        var schemaOne = RemoteSchemaTools.MakeRemoteExecutable(
+            schemaOneBuilder,
+            RemoteLinks.Static(new ExecutionResult
             {
-                Schema = schema,
-                Document = @"
+                Data = new Dictionary<string, object>
+                {
+                    ["userById"] = new Dictionary<string, object>
+                    {
+                        ["id"] = "1",
+                        ["name"] = "name"
+                    }
+                }
+            }));
+
+        var schemaTwo = await schemaTwoBuilder.Build(
+            new ResolversMap
+            {
+                ["Address"] = new()
+                {
+                    { "city", context => ResolveSync.As(context.ObjectValue) }
+                },
+                ["User"] = new()
+                {
+                    { "address", context => ResolveSync.As("Vantaa") }
+                }
+            });
+
+        var schema = await new SchemaBuilder()
+            //.Merge(schemaOne, schemaTwo)
+            .Build(new SchemaBuildOptions());
+
+        /* When */
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = schema,
+            Document = @"
                 {
                     userById(id: ""1"") {
                         id
@@ -93,11 +91,11 @@ namespace Tanka.GraphQL.Server.Links.Tests
                         }
                     }
                 }"
-            });
+        });
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"
+        /* Then */
+        result.ShouldMatchJson(
+            @"
                 {
                   ""data"": {
                     ""userById"": {
@@ -110,6 +108,5 @@ namespace Tanka.GraphQL.Server.Links.Tests
                   }
                 }
                 ");
-        }
     }
 }

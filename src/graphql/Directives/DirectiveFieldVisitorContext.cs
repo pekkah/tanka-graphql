@@ -2,78 +2,78 @@
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Directives
+namespace Tanka.GraphQL.Directives;
+
+public class DirectiveFieldVisitorContext : IEquatable<DirectiveFieldVisitorContext>
 {
-    public class DirectiveFieldVisitorContext: IEquatable<DirectiveFieldVisitorContext>
+    public DirectiveFieldVisitorContext(
+        FieldDefinition value,
+        Resolver resolver,
+        Subscriber subscriber)
     {
-        public DirectiveFieldVisitorContext(
-            FieldDefinition value, 
-            Resolver resolver,
-            Subscriber subscriber)
-        {
-            Field = value;
-            Resolver = resolver;
-            Subscriber = subscriber;
-        }
+        Field = value;
+        Resolver = resolver;
+        Subscriber = subscriber;
+    }
 
-        public FieldDefinition Field { get; }
+    public FieldDefinition Field { get; }
 
-        public Resolver Resolver { get; }
+    public Resolver Resolver { get; }
 
-        public Subscriber Subscriber { get; }
+    public Subscriber Subscriber { get; }
 
-        public DirectiveFieldVisitorContext WithResolver(Action<ResolverBuilder> build)
-        {
-            if (build == null) throw new ArgumentNullException(nameof(build));
+    public bool Equals(DirectiveFieldVisitorContext? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Field.Equals(other.Field) && Resolver.Equals(other.Resolver) && Subscriber.Equals(other.Subscriber);
+    }
 
-            var builder = new ResolverBuilder();
-            build(builder);
+    public DirectiveFieldVisitorContext WithResolver(Action<ResolverBuilder> build)
+    {
+        if (build == null) throw new ArgumentNullException(nameof(build));
 
-            return new DirectiveFieldVisitorContext(Field, builder.Build(), Subscriber);
-        }
+        var builder = new ResolverBuilder();
+        build(builder);
 
-        public DirectiveFieldVisitorContext WithSubscriber(Action<ResolverBuilder> buildResolver, Action<SubscriberBuilder> buildSubscriber)
-        {
-            if (buildResolver == null) throw new ArgumentNullException(nameof(buildResolver));
-            if (buildSubscriber == null) throw new ArgumentNullException(nameof(buildSubscriber));
+        return new DirectiveFieldVisitorContext(Field, builder.Build(), Subscriber);
+    }
 
-            var resolverBuilder = new ResolverBuilder();
-            buildResolver(resolverBuilder);
+    public DirectiveFieldVisitorContext WithSubscriber(Action<ResolverBuilder> buildResolver,
+        Action<SubscriberBuilder> buildSubscriber)
+    {
+        if (buildResolver == null) throw new ArgumentNullException(nameof(buildResolver));
+        if (buildSubscriber == null) throw new ArgumentNullException(nameof(buildSubscriber));
 
-            var subscriberBuilder = new SubscriberBuilder();
-            buildSubscriber(subscriberBuilder);
+        var resolverBuilder = new ResolverBuilder();
+        buildResolver(resolverBuilder);
 
-            return new DirectiveFieldVisitorContext(Field, resolverBuilder.Build(), subscriberBuilder.Build());
-        }
+        var subscriberBuilder = new SubscriberBuilder();
+        buildSubscriber(subscriberBuilder);
 
-        public bool Equals(DirectiveFieldVisitorContext? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Field.Equals(other.Field) && Resolver.Equals(other.Resolver) && Subscriber.Equals(other.Subscriber);
-        }
+        return new DirectiveFieldVisitorContext(Field, resolverBuilder.Build(), subscriberBuilder.Build());
+    }
 
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((DirectiveFieldVisitorContext)obj);
-        }
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((DirectiveFieldVisitorContext)obj);
+    }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Field, Resolver, Subscriber);
-        }
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Field, Resolver, Subscriber);
+    }
 
-        public static bool operator ==(DirectiveFieldVisitorContext? left, DirectiveFieldVisitorContext? right)
-        {
-            return Equals(left, right);
-        }
+    public static bool operator ==(DirectiveFieldVisitorContext? left, DirectiveFieldVisitorContext? right)
+    {
+        return Equals(left, right);
+    }
 
-        public static bool operator !=(DirectiveFieldVisitorContext? left, DirectiveFieldVisitorContext? right)
-        {
-            return !Equals(left, right);
-        }
+    public static bool operator !=(DirectiveFieldVisitorContext? left, DirectiveFieldVisitorContext? right)
+    {
+        return !Equals(left, right);
     }
 }

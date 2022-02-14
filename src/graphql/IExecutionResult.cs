@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace Tanka.GraphQL
-{
-    public interface IExecutionResult
-    {
-        List<ExecutionError>? Errors { get; set; }
+namespace Tanka.GraphQL;
 
-        Dictionary<string, object>? Extensions { get; set; }
-    }
+public interface IExecutionResult
+{
+    List<ExecutionError>? Errors { get; set; }
+
+    Dictionary<string, object>? Extensions { get; set; }
 }

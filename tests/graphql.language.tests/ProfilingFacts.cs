@@ -1,41 +1,11 @@
 using System.Text;
-using Tanka.GraphQL.Language.Internal;
 using Xunit;
 
-namespace Tanka.GraphQL.Language.Tests
+namespace Tanka.GraphQL.Language.Tests;
+
+public class ProfilingFacts
 {
-    public class ProfilingFacts
-    {
-        public ProfilingFacts()
-        {
-            _queryBytes = Encoding.UTF8.GetBytes(DefaultQuery);
-        }
-
-        [Fact]
-        public void Lex_IntrospectionQuery()
-        {
-            var lexer = Lexer.Create(_queryBytes);
-
-            while (lexer.Advance())
-            {
-                if (lexer.Kind == TokenKind.LeftBrace)
-                {
-
-                }
-            }
-        }
-
-        [Fact]
-        public void Parse_IntrospectionQuery()
-        {
-            var parser = Parser.Create(_queryBytes);
-            var document = parser.ParseExecutableDocument();
-
-            Assert.NotNull(document.OperationDefinitions);
-            Assert.NotEmpty(document.OperationDefinitions);
-        }
-
-        public static string DefaultQuery = @"
+    public static string DefaultQuery = @"
             query IntrospectionQuery {
               __schema {
                 queryType { name }
@@ -125,6 +95,31 @@ namespace Tanka.GraphQL.Language.Tests
               }
             }";
 
-        private byte[] _queryBytes;
+    private readonly byte[] _queryBytes;
+
+    public ProfilingFacts()
+    {
+        _queryBytes = Encoding.UTF8.GetBytes(DefaultQuery);
+    }
+
+    [Fact]
+    public void Lex_IntrospectionQuery()
+    {
+        var lexer = Lexer.Create(_queryBytes);
+
+        while (lexer.Advance())
+            if (lexer.Kind == TokenKind.LeftBrace)
+            {
+            }
+    }
+
+    [Fact]
+    public void Parse_IntrospectionQuery()
+    {
+        var parser = Parser.Create(_queryBytes);
+        var document = parser.ParseExecutableDocument();
+
+        Assert.NotNull(document.OperationDefinitions);
+        Assert.NotEmpty(document.OperationDefinitions);
     }
 }

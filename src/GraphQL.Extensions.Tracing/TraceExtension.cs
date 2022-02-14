@@ -1,13 +1,12 @@
 ﻿using System.Threading.Tasks;
 
-namespace Tanka.GraphQL.Extensions.Tracing
+namespace Tanka.GraphQL.Extensions.Tracing;
+
+public class TraceExtension : IExecutorExtension
 {
-    public class TraceExtension : IExecutorExtension
+    public Task<IExtensionScope> BeginExecuteAsync(ExecutionOptions options)
     {
-        public Task<IExtensionScope> BeginExecuteAsync(ExecutionOptions options)
-        {
-            IExtensionScope scope = new TraceExtensionScope(options);
-            return Task.FromResult(scope);
-        }
+        IExtensionScope scope = new TraceExtensionScope(options);
+        return Task.FromResult(scope);
     }
 }

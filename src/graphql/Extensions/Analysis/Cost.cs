@@ -44,19 +44,16 @@ public static class CostAnalyzer
 
                 if (field is not null)
                 {
-                    int complexity = (int)defaultFieldComplexity;
+                    var complexity = (int)defaultFieldComplexity;
 
                     if (field.TryGetDirective("cost", out var costDirective))
                     {
                         if (costDirective.TryGetArgument("complexity", out var complexityArg))
-                        {
                             complexity = (int?)Values.CoerceValue(context.Schema, complexityArg?.Value, "Int!") ?? 0;
-                        }
 
                         costDirective.TryGetArgument("multipliers", out var multipliersArg);
                         if (Values.CoerceValue(context.Schema, multipliersArg?.Value, "[String!]") is
                             IEnumerable<object> multipliers)
-                        {
                             foreach (var multiplier in multipliers.Select(o => o.ToString()))
                             {
                                 var multiplierName = multiplier;
@@ -80,7 +77,6 @@ public static class CostAnalyzer
 
                                 complexity *= multiplierValue;
                             }
-                        }
                     }
 
                     cost += (uint)complexity;

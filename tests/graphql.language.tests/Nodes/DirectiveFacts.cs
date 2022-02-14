@@ -4,71 +4,70 @@ using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Xunit;
 
-namespace Tanka.GraphQL.Language.Tests.Nodes
+namespace Tanka.GraphQL.Language.Tests.Nodes;
+
+public class DirectiveFacts
 {
-    public class DirectiveFacts
+    [Fact]
+    public void FromBytes()
     {
-        [Fact]
-        public void FromBytes()
-        {
-            /* Given */
-            /* When */
-            Directive original = Encoding.UTF8.GetBytes("@a(x: 100, y: 100)")
-                .AsReadOnlySpan();
+        /* Given */
+        /* When */
+        Directive original = Encoding.UTF8.GetBytes("@a(x: 100, y: 100)")
+            .AsReadOnlySpan();
 
-            /* Then */
-            Assert.Equal("a", original.Name);
-            Assert.NotNull(original.Arguments);
-            Assert.Equal(2, original.Arguments?.Count);
-        }
-        
-        [Fact]
-        public void FromString()
-        {
-            /* Given */
-            /* When */
-            Directive original = "@a(x: 100, y: 100)";
+        /* Then */
+        Assert.Equal("a", original.Name);
+        Assert.NotNull(original.Arguments);
+        Assert.Equal(2, original.Arguments?.Count);
+    }
 
-            /* Then */
-            Assert.Equal("a", original.Name);
-            Assert.NotNull(original.Arguments);
-            Assert.Equal(2, original.Arguments?.Count);
-        }
+    [Fact]
+    public void FromString()
+    {
+        /* Given */
+        /* When */
+        Directive original = "@a(x: 100, y: 100)";
 
-        [Fact]
-        public void WithArguments()
-        {
-            /* Given */
-            Directive original = "@a(x: 100, y: 100)";
+        /* Then */
+        Assert.Equal("a", original.Name);
+        Assert.NotNull(original.Arguments);
+        Assert.Equal(2, original.Arguments?.Count);
+    }
 
-            /* When */
-            var modified = original
-                .WithArguments(
-                    new List<Argument>(original.Arguments ?? Enumerable.Empty<Argument>())
-                        .Concat(new []
-                        {
-                            new Argument("x", new IntValue(100, default), default), 
-                        }).ToList()
-                    );
+    [Fact]
+    public void WithArguments()
+    {
+        /* Given */
+        Directive original = "@a(x: 100, y: 100)";
 
-            /* Then */
-            Assert.Equal(2, original.Arguments?.Count);
-            Assert.Equal(3, modified.Arguments?.Count);
-        }
+        /* When */
+        var modified = original
+            .WithArguments(
+                new List<Argument>(original.Arguments ?? Enumerable.Empty<Argument>())
+                    .Concat(new[]
+                    {
+                        new Argument("x", new IntValue(100))
+                    }).ToList()
+            );
 
-        [Fact]
-        public void WithName()
-        {
-            /* Given */
-            Directive original = "@a(x: 100, y: 100)";
+        /* Then */
+        Assert.Equal(2, original.Arguments?.Count);
+        Assert.Equal(3, modified.Arguments?.Count);
+    }
 
-            /* When */
-            var modified = original
-                .WithName("b");
+    [Fact]
+    public void WithName()
+    {
+        /* Given */
+        Directive original = "@a(x: 100, y: 100)";
 
-            /* Then */
-            Assert.Equal("a", original.Name);
-            Assert.Equal("b", modified.Name);
-        }
+        /* When */
+        var modified = original
+            .WithName("b");
+
+        /* Then */
+        Assert.Equal("a", original.Name);
+        Assert.Equal("b", modified.Name);
     }
 }

@@ -40,7 +40,7 @@ public partial class ValidatorFacts
     public void Rule_5511_Fragment_Name_Uniqueness_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"{
                       dog {
                         ...fragmentOne
@@ -73,7 +73,7 @@ public partial class ValidatorFacts
     public void Rule_5512_Fragment_Spread_Type_Existence_valid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment correctType on Dog {
                         name
                     }
@@ -104,7 +104,7 @@ public partial class ValidatorFacts
     public void Rule_5512_Fragment_Spread_Type_Existence_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment notOnExistingType on NotInSchema {
                       name
                     }";
@@ -125,7 +125,7 @@ public partial class ValidatorFacts
     public void Rule_5512_Fragment_Spread_Type_Existence_invalid2()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment inlineNotExistingType on Dog {
                       ... on NotInSchema {
                         name
@@ -148,7 +148,7 @@ public partial class ValidatorFacts
     public void Rule_5513_FragmentsOnCompositeTypes_valid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment fragOnObject on Dog {
                       name
                     }
@@ -177,7 +177,7 @@ public partial class ValidatorFacts
     public void Rule_5513_FragmentsOnCompositeTypes_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment fragOnScalar on Int {
                       something
                     }";
@@ -198,7 +198,7 @@ public partial class ValidatorFacts
     public void Rule_5513_FragmentsOnCompositeTypes_invalid2()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment inlineFragOnScalar on Dog {
                       ... on Boolean {
                         somethingElse
@@ -221,7 +221,7 @@ public partial class ValidatorFacts
     public void Rule_5514_FragmentsMustBeUsed_valid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment nameFragment on Dog {
                       name
                     }
@@ -245,7 +245,7 @@ public partial class ValidatorFacts
     public void Rule_5514_FragmentsMustBeUsed_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment nameFragment on Dog {
                       name
                     }
@@ -272,7 +272,7 @@ public partial class ValidatorFacts
     public void Rule_5521_FragmentSpreadTargetDefined_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"
                 {
                   dog {
@@ -297,7 +297,7 @@ public partial class ValidatorFacts
     public void Rule_5521_FragmentSpreadTargetDefined_valid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"
                 {
                     dog   {
@@ -323,7 +323,7 @@ public partial class ValidatorFacts
     public void Rule_5522_FragmentSpreadsMustNotFormCycles_invalid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"{
                       dog {
                         ...nameFragment
@@ -356,7 +356,7 @@ public partial class ValidatorFacts
     public void Rule_5522_FragmentSpreadsMustNotFormCycles_invalid2()
     {
         /* Given */
-        var document = 
+        var document =
             @"{
                       dog {
                         ...dogFragment
@@ -393,7 +393,7 @@ public partial class ValidatorFacts
     public void Rule_5523_FragmentSpreadIsPossible_in_scope_valid()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment dogFragment on Dog {
                       ... on Dog {
                         barkVolume
@@ -436,7 +436,7 @@ public partial class ValidatorFacts
     public void Rule_5523_FragmentSpreadIsPossible_in_abstract_scope_valid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment petNameFragment on Pet {
                       name
                     }
@@ -459,7 +459,7 @@ public partial class ValidatorFacts
     public void Rule_5523_FragmentSpreadIsPossible_in_abstract_scope_valid2()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment catOrDogNameFragment on CatOrDog {
                       ... on Cat {
                         meowVolume
@@ -484,7 +484,7 @@ public partial class ValidatorFacts
     public void Rule_5523_FragmentSpreadIsPossible_abstract_in_abstract_scope_valid1()
     {
         /* Given */
-        var document = 
+        var document =
             @"fragment unionWithInterface on Pet {
                       ...dogOrHumanFragment
                     }
@@ -509,7 +509,7 @@ public partial class ValidatorFacts
     public void Rule_5523_FragmentSpreadIsPossible_abstract_in_abstract_scope_invalid()
     {
         /* Given */
-        var document = 
+        var document =
             @"
             fragment nonIntersectingInterfaces on Pet {
                 ...sentientFragment
@@ -535,7 +535,7 @@ public partial class ValidatorFacts
     public void Rule_5523_FragmentSpreadIsPossible_Interface_in_interface_scope_valid()
     {
         /* Given */
-        var document = 
+        var document =
             @"
             fragment interfaceWithInterface on Node {
               ...resourceFragment

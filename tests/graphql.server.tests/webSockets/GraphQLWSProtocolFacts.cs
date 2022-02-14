@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
@@ -13,180 +11,179 @@ using Xunit;
 
 // ReSharper disable InconsistentNaming
 
-namespace Tanka.GraphQL.Server.Tests.WebSockets
+namespace Tanka.GraphQL.Server.Tests.WebSockets;
+
+public class GraphQLWSProtocolFacts
 {
-    public class GraphQLWSProtocolFacts
+    private readonly MessageContextAccessor _accessor;
+    private readonly NullLogger<GraphQLWSProtocol> _logger;
+    private readonly IOptions<WebSocketServerOptions> _options;
+
+    public GraphQLWSProtocolFacts()
     {
-        private IOptions<Server.WebSockets.WebSocketServerOptions> _options;
-        private NullLogger<GraphQLWSProtocol> _logger;
-        private MessageContextAccessor _accessor;
+        _options = Options.Create(new WebSocketServerOptions());
+        _logger = new NullLogger<GraphQLWSProtocol>();
+        _accessor = new MessageContextAccessor();
+    }
 
-        public GraphQLWSProtocolFacts()
+    public GraphQLWSProtocol CreateSut(IQueryStreamService queryStreamService)
+    {
+        return new GraphQLWSProtocol(queryStreamService, _options, _accessor, _logger);
+    }
+
+    [Fact]
+    public async Task Unknown()
+    {
+        /* Given */
+        var channel = Channel.CreateUnbounded<OperationMessage>();
+        var queryStreamService = Substitute.For<IQueryStreamService>();
+        var sut = CreateSut(queryStreamService);
+
+        var message = new OperationMessage
         {
-            _options = Options.Create(new Server.WebSockets.WebSocketServerOptions());
-            _logger = new NullLogger<GraphQLWSProtocol>();
-            _accessor = new MessageContextAccessor();
-        }
+            Type = "ARGHH"
+        };
 
-        protected ValueTask<OperationMessage> ReadWithTimeout(
-            Channel<OperationMessage> channel,
-            int timeoutSeconds = 10)
+        var context = new MessageContext(message, channel);
+
+        /* When */
+        await sut.Handle(context);
+
+        /* Then */
+        var response = await ReadWithTimeout(channel);
+        Assert.Equal(new OperationMessage
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+            Type = MessageType.GQL_CONNECTION_ERROR
+        }, response);
+    }
 
-            return channel.Reader.ReadAsync(cts.Token);
-        }
+    [Fact]
+    public async Task Init()
+    {
+        /* Given */
+        var channel = Channel.CreateUnbounded<OperationMessage>();
+        var queryStreamService = Substitute.For<IQueryStreamService>();
+        var sut = CreateSut(queryStreamService);
 
-        public GraphQLWSProtocol CreateSut(IQueryStreamService queryStreamService)
+        var message = new OperationMessage
         {
-            return new GraphQLWSProtocol(queryStreamService, _options, _accessor, _logger);
-        }
+            Type = MessageType.GQL_CONNECTION_INIT
+        };
 
-        [Fact]
-        public async Task Unknown()
+        var context = new MessageContext(message, channel);
+
+        /* When */
+        await sut.Handle(context);
+
+        /* Then */
+        var response = await ReadWithTimeout(channel);
+        Assert.Equal(new OperationMessage
         {
-            /* Given */
-            var channel = Channel.CreateUnbounded<OperationMessage>();
-            var queryStreamService = Substitute.For<IQueryStreamService>();
-            var sut = CreateSut(queryStreamService);
+            Type = MessageType.GQL_CONNECTION_ACK
+        }, response);
+    }
 
-            var message = new OperationMessage
-            {
-                Type = "ARGHH"
-            };
+    [Fact]
+    public async Task Terminate()
+    {
+        /* Given */
+        var channel = Channel.CreateUnbounded<OperationMessage>();
+        var queryStreamService = Substitute.For<IQueryStreamService>();
+        var sut = CreateSut(queryStreamService);
 
-            var context = new MessageContext(message, channel);
-
-            /* When */
-            await sut.Handle(context);
-
-            /* Then */
-            var response = await ReadWithTimeout(channel);
-            Assert.Equal(new OperationMessage
-            {
-                Type = MessageType.GQL_CONNECTION_ERROR
-            }, response);
-        }
-
-        [Fact]
-        public async Task Init()
+        var message = new OperationMessage
         {
-            /* Given */
-            var channel = Channel.CreateUnbounded<OperationMessage>();
-            var queryStreamService = Substitute.For<IQueryStreamService>();
-            var sut = CreateSut(queryStreamService);
+            Type = MessageType.GQL_CONNECTION_TERMINATE
+        };
 
-            var message = new OperationMessage
-            {
-                Type = MessageType.GQL_CONNECTION_INIT
-            };
+        var context = new MessageContext(message, channel);
 
-            var context = new MessageContext(message, channel);
+        /* When */
+        await sut.Handle(context);
 
-            /* When */
-            await sut.Handle(context);
+        /* Then */
+        Assert.True(channel.Reader.Completion.IsCompleted);
+    }
 
-            /* Then */
-            var response = await ReadWithTimeout(channel);
-            Assert.Equal(new OperationMessage
-            {
-                Type = MessageType.GQL_CONNECTION_ACK
-            }, response);
-        }
+    [Fact]
+    public async Task Start()
+    {
+        /* Given */
+        var output = Channel.CreateUnbounded<OperationMessage>();
+        var queryStreamService = Substitute.For<IQueryStreamService>();
 
-        [Fact]
-        public async Task Terminate()
+        var queryStream = Channel.CreateUnbounded<ExecutionResult>();
+        queryStreamService.QueryAsync(null, default)
+            .ReturnsForAnyArgs(new QueryStream(queryStream));
+
+
+        var sut = CreateSut(queryStreamService);
+
+        var message = new OperationMessage
         {
-            /* Given */
-            var channel = Channel.CreateUnbounded<OperationMessage>();
-            var queryStreamService = Substitute.For<IQueryStreamService>();
-            var sut = CreateSut(queryStreamService);
-
-            var message = new OperationMessage
+            Id = "1",
+            Type = MessageType.GQL_START,
+            Payload = new OperationMessageQueryPayload
             {
-                Type = MessageType.GQL_CONNECTION_TERMINATE
-            };
+                Query = "subscription { hello }"
+            }
+        };
 
-            var context = new MessageContext(message, channel);
+        var context = new MessageContext(message, output);
 
-            /* When */
-            await sut.Handle(context);
+        /* When */
+        await sut.Handle(context);
 
-            /* Then */
-            Assert.True(channel.Reader.Completion.IsCompleted);
-        }
+        /* Then */
+        var subscription = sut.GetSubscription(message.Id);
+        Assert.NotNull(subscription);
+    }
 
-        [Fact]
-        public async Task Start()
+    [Fact]
+    public async Task Stop()
+    {
+        /* Given */
+        var output = Channel.CreateUnbounded<OperationMessage>();
+        var queryStreamService = Substitute.For<IQueryStreamService>();
+
+        var queryStream = Channel.CreateUnbounded<ExecutionResult>();
+        var queryResult = new QueryStream(queryStream);
+        queryStreamService.QueryAsync(null, default)
+            .ReturnsForAnyArgs(ci =>
+            {
+                ci.Arg<CancellationToken>().Register(() => queryStream.Writer.Complete());
+                return queryResult;
+            });
+
+        var sut = CreateSut(queryStreamService);
+        var message = new OperationMessage
         {
-            /* Given */
-            var output = Channel.CreateUnbounded<OperationMessage>();
-            var queryStreamService = Substitute.For<IQueryStreamService>();
+            Id = "1",
+            Type = MessageType.GQL_START,
+            Payload = new OperationMessageQueryPayload()
+        };
 
-            var queryStream = Channel.CreateUnbounded<ExecutionResult>();
-            queryStreamService.QueryAsync(null, default)
-                .ReturnsForAnyArgs(new QueryStream(queryStream));
+        var context = new MessageContext(message, output);
+        await sut.Handle(context);
 
-
-            var sut = CreateSut(queryStreamService);
-
-            var message = new OperationMessage
-            {
-                Id = "1",
-                Type = MessageType.GQL_START,
-                Payload = new OperationMessageQueryPayload()
-                {
-                    Query = "subscription { hello }"
-                }
-            };
-
-            var context = new MessageContext(message, output);
-
-            /* When */
-            await sut.Handle(context);
-
-            /* Then */
-            var subscription = sut.GetSubscription(message.Id);
-            Assert.NotNull(subscription);
-        }
-
-        [Fact]
-        public async Task Stop()
+        /* When */
+        await sut.Handle(new MessageContext(new OperationMessage
         {
-            /* Given */
-            var output = Channel.CreateUnbounded<OperationMessage>();
-            var queryStreamService = Substitute.For<IQueryStreamService>();
+            Id = "1",
+            Type = MessageType.GQL_STOP
+        }, output));
 
-            var queryStream = Channel.CreateUnbounded<ExecutionResult>();
-            var queryResult = new QueryStream(queryStream);
-            queryStreamService.QueryAsync(null, default)
-                .ReturnsForAnyArgs(ci =>
-                {
-                    ci.Arg<CancellationToken>().Register(() => queryStream.Writer.Complete());
-                    return queryResult;
-                });
+        /* Then */
+        var subscription = sut.GetSubscription(message.Id);
+        Assert.Equal(default, subscription);
+    }
 
-            var sut = CreateSut(queryStreamService);
-            var message = new OperationMessage
-            {
-                Id = "1",
-                Type = MessageType.GQL_START,
-                Payload = new OperationMessageQueryPayload()
-            };
+    protected ValueTask<OperationMessage> ReadWithTimeout(
+        Channel<OperationMessage> channel,
+        int timeoutSeconds = 10)
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
 
-            var context = new MessageContext(message, output);
-            await sut.Handle(context);
-
-            /* When */
-            await sut.Handle(new MessageContext(new OperationMessage()
-            {
-                Id = "1",
-                Type = MessageType.GQL_STOP
-            }, output));
-
-            /* Then */
-            var subscription = sut.GetSubscription(message.Id);
-            Assert.Equal(default, subscription);
-        }
+        return channel.Reader.ReadAsync(cts.Token);
     }
 }
