@@ -13,6 +13,12 @@ stages:
       vmImage: 'windows-latest'
     steps:
     - task: UseDotNet@2
+      displayName: SDK 3.0.x for legacy tools
+      inputs:
+        packageType: 'sdk'
+        version: '3.0.x'
+
+    - task: UseDotNet@2
       displayName: Use dotnet core SDK
       inputs:
         packageType: 'sdk'
