@@ -12,7 +12,7 @@ stages:
     pool:
       vmImage: 'windows-latest'
     steps:
-     - task: UseDotNet@2
+    - task: UseDotNet@2
       displayName: Use dotnet core SDK
       inputs:
         packageType: 'sdk'
