@@ -1,0 +1,37 @@
+name: Build and package
+
+on:
+  push:
+    branches:
+      - main
+      - release/**
+    tags:
+    - v**
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+       
+        
+    - name: Build packages
+      # Pack as private build for now
+      run: |
+        ./build.ps1 -Output ./artifacts    
+    
+    - name: Publish packages
+      uses: actions/upload-artifact@v2
+      with:
+        name: Packages
+        path: |
+          ./artifacts/*.nupkg
