@@ -12,22 +12,16 @@ stages:
     pool:
       vmImage: 'windows-latest'
     steps:
-    - task: UseDotNet@2
+     - task: UseDotNet@2
       displayName: Use dotnet core SDK
       inputs:
         packageType: 'sdk'
-        version: '3.1.x'
-
-    - task: UseDotNet@2
-      displayName: Use dotnet core SDK
-      inputs:
-        packageType: 'sdk'
-        version: '5.0.x'
+        version: '6.0.x'
 
     - task: NodeTool@0
       displayName: "Install Node"
       inputs:
-        versionSpec: "12.x"
+        versionSpec: "16.x"
         checkLatest: true
     
     - task: PowerShell@2
