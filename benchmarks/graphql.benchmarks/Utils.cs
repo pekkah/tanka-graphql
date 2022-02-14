@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -11,7 +12,7 @@ public static class Utils
     {
         var events = new SingleValueEventChannel();
         var builder = new SchemaBuilder()
-            .Add(Parser.ParseTypeSystemDocument(
+            .Add(
                 @"
                     type Query {
                         simple: String
@@ -30,7 +31,7 @@ public static class Utils
                         mutation: Mutation
                         subscription: Subscription
                     }
-                    "));
+                    ");
 
         var resolvers = new ResolversMap
         {
@@ -63,25 +64,25 @@ public static class Utils
 
     public static ExecutableDocument InitializeQuery()
     {
-        return Parser.ParseDocument(@"
+        return @"
 {
     simple
-}");
+}";
     }
 
     public static ExecutableDocument InitializeMutation()
     {
-        return Parser.ParseDocument(@"
+        return @"
 mutation {
     simple
-}");
+}";
     }
 
     public static ExecutableDocument InitializeSubscription()
     {
-        return Parser.ParseDocument(@"
+        return @"
 subscription {
     simple
-}");
+}";
     }
 }
