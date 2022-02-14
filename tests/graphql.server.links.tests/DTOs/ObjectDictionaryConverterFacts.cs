@@ -199,8 +199,8 @@ public class ObjectDictionaryConverterFacts
         /* Then */
         Assert.Equal(
             @"{
-  ""value1"": null,
   ""dictionary"": null,
+  ""value1"": null,
   ""value2"": 123
 }".Trim(),
             json);
@@ -227,11 +227,11 @@ public class ObjectDictionaryConverterFacts
         /* Then */
         Assert.Equal(
             @"{
-  ""value1"": ""string"",
   ""dictionary"": {
     ""int"": 123,
     ""string"": ""string""
   },
+  ""value1"": ""string"",
   ""value2"": 123
 }".Trim(),
             json);
@@ -257,10 +257,10 @@ public class ObjectDictionaryConverterFacts
         /* Then */
         Assert.Equal(
             @"{
-  ""value1"": ""string"",
   ""dictionary"": {
     ""string"": null
   },
+  ""value1"": ""string"",
   ""value2"": 123
 }".Trim(),
             json);
@@ -291,7 +291,6 @@ public class ObjectDictionaryConverterFacts
         /* Then */
         Assert.Equal(
             @"{
-  ""value1"": ""string"",
   ""dictionary"": {
     ""int"": 123,
     ""string"": ""string"",
@@ -299,6 +298,7 @@ public class ObjectDictionaryConverterFacts
       ""double"": 1.123
     }
   },
+  ""value1"": ""string"",
   ""value2"": 123
 }".Trim(),
             json);

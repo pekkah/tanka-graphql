@@ -70,7 +70,8 @@ public abstract class WebSocketFactsBase : IClassFixture<WebApplicationFactory<S
         string message;
         var buffer = new byte[1024 * 4];
         var segment = new ArraySegment<byte>(buffer);
-
+        var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromSeconds(5));
         using var memoryStream = new MemoryStream();
         try
         {
@@ -78,7 +79,7 @@ public abstract class WebSocketFactsBase : IClassFixture<WebApplicationFactory<S
 
             do
             {
-                receiveResult = await socket.ReceiveAsync(segment, CancellationToken.None);
+                receiveResult = await socket.ReceiveAsync(segment, cts.Token);
 
                 if (receiveResult.CloseStatus.HasValue)
                     break;

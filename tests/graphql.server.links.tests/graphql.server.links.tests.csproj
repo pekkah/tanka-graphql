@@ -8,16 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="digitransit.introspection" />
-    <None Remove="github.introspection" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="digitransit.introspection" />
-    <EmbeddedResource Include="github.introspection" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="xunit" Version="2.4.1" />

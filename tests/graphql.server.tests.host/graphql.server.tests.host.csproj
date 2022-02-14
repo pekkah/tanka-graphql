@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\graphql.server\graphql.server.csproj" />
     <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
   </ItemGroup>
