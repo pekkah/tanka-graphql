@@ -6,37 +6,37 @@ on:
       - master
       - release/**
     tags:
-    - v**
+      - v**
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 env:
-    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-        
-    - name: Build packages
-      shell: pwsh
-      run: |
-        ./build.ps1 -Output ./artifacts    
-    
-    - name: Publish packages
-      uses: actions/upload-artifact@v2
-      with:
-        name: Packages
-        path: |
-          ./artifacts/*.nupkg
-          ./artifacts/*.tgz
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Build packages
+        shell: pwsh
+        run: |
+          ./build.ps1 -Output ./artifacts
+
+      - name: Publish packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: Packages
+          path: |
+            ./artifacts/*.nupkg
+            ./artifacts/*.tgz
