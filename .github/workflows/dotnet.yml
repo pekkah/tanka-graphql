@@ -31,7 +31,7 @@ jobs:
       - name: Build packages
         shell: pwsh
         run: |
-          ./build.ps1 -Output ./artifacts -CurrentBranch ${GITHUB_REF_NAME}
+          ./build.ps1 -Output ./artifacts -CurrentBranch $GITHUB_REF_NAME
 
       - name: Publish packages
         uses: actions/upload-artifact@v2
