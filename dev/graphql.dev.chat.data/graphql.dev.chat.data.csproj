@@ -6,13 +6,9 @@
     <RootNamespace>Tanka.GraphQL.Samples.Chat.Data</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <None Remove="schema.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="IDL\schema.graphql" />
+    <EmbeddedResource Include="idl\schema.graphql" />
   </ItemGroup>
 
   <ItemGroup>

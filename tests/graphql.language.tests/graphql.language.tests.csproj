@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyName>tanka.graphql.language.tests</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Language.Tests</RootNamespace>

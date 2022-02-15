@@ -10,12 +10,14 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
 jobs:
   build:
-    runs-on: windows-latest
-    env:
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -25,10 +27,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-       
         
     - name: Build packages
-      # Pack as private build for now
+      shell: pwsh
       run: |
         ./build.ps1 -Output ./artifacts    
     
@@ -38,3 +39,4 @@ jobs:
         name: Packages
         path: |
           ./artifacts/*.nupkg
+          ./artifacts/*.tgz

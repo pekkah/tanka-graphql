@@ -22,7 +22,7 @@ public static class IdlSchema
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceStream =
-            assembly.GetManifestResourceStream("Tanka.GraphQL.Samples.Chat.Data.IDL.schema.graphql");
+            assembly.GetManifestResourceStream("Tanka.GraphQL.Samples.Chat.Data.idl.schema.graphql");
 
         using var reader =
             new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8);

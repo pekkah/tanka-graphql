@@ -202,7 +202,7 @@ public class ObjectDictionaryConverterFacts
   ""dictionary"": null,
   ""value1"": null,
   ""value2"": 123
-}".Trim(),
+}".Trim().ReplaceLineEndings(),
             json);
     }
 
@@ -233,7 +233,7 @@ public class ObjectDictionaryConverterFacts
   },
   ""value1"": ""string"",
   ""value2"": 123
-}".Trim(),
+}".Trim().ReplaceLineEndings(),
             json);
     }
 
@@ -262,7 +262,7 @@ public class ObjectDictionaryConverterFacts
   },
   ""value1"": ""string"",
   ""value2"": 123
-}".Trim(),
+}".Trim().ReplaceLineEndings(),
             json);
     }
 
@@ -300,7 +300,7 @@ public class ObjectDictionaryConverterFacts
   },
   ""value1"": ""string"",
   ""value2"": 123
-}".Trim(),
+}".Trim().ReplaceLineEndings(),
             json);
     }
 
