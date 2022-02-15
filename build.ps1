@@ -1,6 +1,6 @@
 param (
     [string]$Output = "./artifacts",
-    [string]$CurrentBranch = $Env:BUILD_SOURCEBRANCH
+    [string]$CurrentBranch =''
  )
 
 # Utils
