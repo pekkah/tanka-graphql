@@ -47,7 +47,7 @@ jobs:
         env:
           NUGET_KEY: ${{ secrets.NUGET_KEY }}
         run: |
-          dotnet nuget push "./artifacts/*.nupkg" -k $Env:NUGET_KEY
+          dotnet nuget push "./artifacts/*.nupkg" -k $Env:NUGET_KEY -s https://api.nuget.org/v3/index.json
 
       - uses: actions/setup-node@v2
         with:
