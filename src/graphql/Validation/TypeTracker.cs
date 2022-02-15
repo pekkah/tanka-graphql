@@ -1,327 +1,261 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-
 using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
-using Argument = Tanka.GraphQL.TypeSystem.Argument;
 
-namespace Tanka.GraphQL.Validation
+namespace Tanka.GraphQL.Validation;
+
+public class TypeTracker : RuleVisitor
 {
-    public class TypeTracker : RuleVisitor
+    public TypeTracker(ISchema schema)
     {
-        private readonly Stack<object> _defaultValueStack = new Stack<object>();
-
-        private readonly Stack<(string Name, IField Field)?> _fieldDefStack = new Stack<(string Name, IField Field)?>();
-
-        private readonly Stack<IType> _inputTypeStack = new Stack<IType>();
-
-        private readonly Stack<INamedType> _parentTypeStack = new Stack<INamedType>();
-
-        private readonly Stack<IType> _typeStack = new Stack<IType>();
-        private Argument _argument;
-
-        private DirectiveType _directive;
-
-        private object _enumValue;
-
-        public TypeTracker(ISchema schema)
+        EnterOperationDefinition = node =>
         {
-            EnterSelectionSet = selectionSet =>
+            var root = node.Operation switch
             {
-                var namedType = GetNamedType(GetCurrentType());
-                var complexType = namedType as INamedType;
-                _parentTypeStack.Push(complexType);
+                OperationType.Query => schema.Query,
+                OperationType.Mutation => schema.Mutation,
+                OperationType.Subscription => schema.Subscription,
+                _ => throw new ArgumentOutOfRangeException()
             };
 
-            EnterFieldSelection = selection =>
-            {
-                var parentType = GetParentType();
-                (string Name, IField Field)? fieldDef = null;
-                IType fieldType = null;
+            Types.Push(root);
+        };
+        LeaveOperationDefinition = node => { Types.TryPop(out _); };
 
-                if (parentType != null)
+        EnterSelectionSet = node => { ParentTypes.Push(CurrentType); };
+
+
+        LeaveSelectionSet = node => { ParentTypes.TryPop(out _); };
+
+        EnterFieldSelection = node =>
+        {
+            if (ParentType is not null)
+            {
+                var fieldDefinition = schema.GetField(ParentType.Name, node.Name);
+                FieldDefinitions.Push(fieldDefinition ?? null);
+
+                if (fieldDefinition?.Type is not null)
                 {
-                    fieldDef = GetFieldDef(schema, parentType, selection);
+                    var fieldTypeDefinition = Ast.UnwrapAndResolveType(schema, fieldDefinition.Type);
 
-                    if (fieldDef != null) fieldType = fieldDef.Value.Field.Type;
+                    if (fieldTypeDefinition is not null && TypeIs.IsOutputType(fieldTypeDefinition))
+                        Types.Push(fieldTypeDefinition);
+                    else
+                        Types.Push(null);
                 }
-
-                _fieldDefStack.Push(fieldDef);
-                _typeStack.Push(TypeIs.IsOutputType(fieldType) ? fieldType : null);
-            };
-
-            EnterDirective = directive =>
-            {
-                _directive = schema.GetDirectiveType(directive.Name);
-            };
-
-            EnterOperationDefinition = definition =>
-            {
-                ObjectType type = null;
-                switch (definition.Operation)
-                {
-                    case OperationType.Query:
-                        type = schema.Query;
-                        break;
-                    case OperationType.Mutation:
-                        type = schema.Mutation;
-                        break;
-                    case OperationType.Subscription:
-                        type = schema.Subscription;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                _typeStack.Push(type);
-            };
-
-            EnterInlineFragment = inlineFragment =>
-            {
-                var typeConditionAst = inlineFragment.TypeCondition;
-
-                IType outputType;
-                if (typeConditionAst != null)
-                    outputType = Ast.TypeFromAst(schema, typeConditionAst);
                 else
-                    outputType = GetNamedType(GetCurrentType());
-
-                _typeStack.Push(TypeIs.IsOutputType(outputType) ? outputType : null);
-            };
-
-            EnterFragmentDefinition = node =>
+                {
+                    Types.Push(null);
+                }
+            }
+            else
             {
-                var typeConditionAst = node.TypeCondition;
+                Types.Push(null);
+            }
+        };
+        LeaveFieldSelection = node =>
+        {
+            Types.TryPop(out _);
+            FieldDefinitions.TryPop(out _);
+        };
 
-                IType outputType;
-                if (typeConditionAst != null)
-                    outputType = Ast.TypeFromAst(schema, typeConditionAst);
+        EnterDirective = directive => { DirectiveDefinition = schema.GetDirectiveType(directive.Name); };
+        LeaveDirective = node => { DirectiveDefinition = null; };
+
+        EnterInlineFragment = node =>
+        {
+            var typeConditionAst = node.TypeCondition;
+            if (typeConditionAst is not null)
+            {
+                var typeConditionDefinition = Ast.UnwrapAndResolveType(schema, typeConditionAst);
+
+                if (typeConditionDefinition is not null)
+                    Types.Push(TypeIs.IsOutputType(typeConditionDefinition) ? typeConditionDefinition : null);
                 else
-                    outputType = GetNamedType(GetCurrentType());
-
-                _typeStack.Push(TypeIs.IsOutputType(outputType) ? outputType : null);
-            };
-
-            EnterVariableDefinition = node =>
-            {
-                var inputType = Ast.TypeFromAst(schema, node.Type);
-                _inputTypeStack.Push(TypeIs.IsInputType(inputType) ? inputType : null);
-            };
-
-            EnterArgument = argument =>
-            {
-                Argument argDef = null;
-                IType argType = null;
-
-                if (GetDirective() != null)
-                {
-                    argDef = GetDirective()?.GetArgument(argument.Name);
-                    argType = argDef?.Type;
-                }
-                else if (GetFieldDef() != null)
-                {
-                    argDef = GetFieldDef()?.Field.GetArgument(argument.Name);
-                    argType = argDef?.Type;
-                }
-
-                _argument = argDef;
-                _defaultValueStack.Push(argDef?.DefaultValue);
-                _inputTypeStack.Push(TypeIs.IsInputType(argType) ? argType : null);
-            };
-
-            EnterListValue = node =>
-            {
-                var listType = GetNullableType(GetInputType());
-                var itemType = listType is List list ? list.OfType : listType;
-
-                // List positions never have a default value
-                _defaultValueStack.Push(null);
-                _inputTypeStack.Push(TypeIs.IsInputType(itemType) ? itemType : null);
-            };
-
-            EnterObjectField = node =>
-            {
-                var objectType = GetNamedType(GetInputType());
-                IType inputFieldType = null;
-                InputObjectField inputField = null;
-
-                if (objectType is InputObjectType inputObjectType)
-                {
-                    inputField = schema.GetInputField(
-                        inputObjectType.Name,
-                        node.Name);
-
-                    if (inputField != null)
-                        inputFieldType = inputField.Type;
-                }
-
-                _defaultValueStack.Push(inputField?.DefaultValue);
-                _inputTypeStack.Push(TypeIs.IsInputType(inputFieldType) ? inputFieldType : null);
-            };
-
-            EnterEnumValue = value =>
-            {
-                var maybeEnumType = GetNamedType(GetInputType());
-                object enumValue = null;
-
-                if (maybeEnumType is EnumType enumType)
-                    enumValue = enumType.ParseLiteral(value);
-
-                _enumValue = enumValue;
-            };
-
-            LeaveSelectionSet = _ => _parentTypeStack.Pop();
-
-            LeaveFieldSelection = _ =>
-            {
-                _fieldDefStack.Pop();
-                _typeStack.Pop();
-            };
-
-            LeaveDirective = _ => _directive = null;
-
-            LeaveOperationDefinition = _ => _typeStack.Pop();
-
-            LeaveInlineFragment = _ => _typeStack.Pop();
-
-            LeaveFragmentDefinition = _ => _typeStack.Pop();
-
-            LeaveVariableDefinition = _ => _inputTypeStack.Pop();
-
-            LeaveArgument = _ =>
-            {
-                _argument = null;
-                _defaultValueStack.Pop();
-                _inputTypeStack.Pop();
-            };
-
-            LeaveListValue = _ =>
-            {
-                _defaultValueStack.Pop();
-                _inputTypeStack.Pop();
-            };
-
-            LeaveObjectField = _ =>
-            {
-                _defaultValueStack.Pop();
-                _inputTypeStack.Pop();
-            };
-
-            LeaveEnumValue = _ => _enumValue = null;
-        }
-
-        public IType GetCurrentType()
-        {
-            if (_typeStack.Count == 0)
-                return null;
-
-            return _typeStack.Peek();
-        }
-
-        public INamedType GetParentType()
-        {
-            if (_parentTypeStack.Count == 0)
-                return null;
-
-            return _parentTypeStack.Peek();
-        }
-
-        //todo: originally returns an input type
-        public IType GetInputType()
-        {
-            if (_inputTypeStack.Count == 0)
-                return null;
-
-            return _inputTypeStack.Peek();
-        }
-
-        public IType GetParentInputType()
-        {
-            //todo: probably a bad idea
-            return _inputTypeStack.ElementAtOrDefault(_inputTypeStack.Count - 1);
-        }
-
-        public (string Name, IField Field)? GetFieldDef()
-        {
-            if (_fieldDefStack.Count == 0)
-                return null;
-
-            return _fieldDefStack.Peek();
-        }
-
-        public object GetDefaultValue()
-        {
-            if (_defaultValueStack.Count == 0)
-                return null;
-
-            return _defaultValueStack.Peek();
-        }
-
-        public DirectiveType GetDirective()
-        {
-            return _directive;
-        }
-
-        public Argument GetArgument()
-        {
-            return _argument;
-        }
-
-        public object GetEnumValue()
-        {
-            return _enumValue;
-        }
-
-        public IType GetNamedType(IType type)
-        {
-            return type?.Unwrap();
-        }
-
-        public IType GetNullableType(IType type)
-        {
-            if (type is NonNull nonNull)
-                return nonNull.OfType;
-
-            return null;
-        }
-
-        public (string Name, IField Field)? GetFieldDef(
-            ISchema schema,
-            IType parentType,
-            FieldSelection fieldNode)
-        {
-            var name = fieldNode.Name;
-            /*if (name == SchemaMetaFieldDef.name 
-                         && schema.getQueryType() == parentType) 
-            {
-                return SchemaMetaFieldDef;
+                    Types.Push(null);
             }
-
-            if (name == TypeMetaFieldDef.name 
-                         && schema.getQueryType() == parentType) 
+            else
             {
-                return TypeMetaFieldDef;
+                Types.Push(CurrentType);
             }
+        };
+        LeaveInlineFragment = node => Types.TryPop(out _);
 
-            if (name == TypeNameMetaFieldDef.name 
-                         && isCompositeType(parentType)) 
+        EnterFragmentDefinition = node =>
+        {
+            var typeConditionAst = node.TypeCondition;
+            var typeConditionDefinition = Ast.UnwrapAndResolveType(schema, typeConditionAst);
+
+            if (typeConditionDefinition is not null)
+                Types.Push(TypeIs.IsOutputType(typeConditionDefinition) ? typeConditionDefinition : null);
+            else
+                Types.Push(CurrentType);
+        };
+        LeaveFragmentDefinition = node => Types.TryPop(out _);
+
+        EnterVariableDefinition = node =>
+        {
+            var inputTypeDefinition = Ast.UnwrapAndResolveType(schema, node.Type);
+
+            if (inputTypeDefinition is not null)
+                InputTypes.Push(TypeIs.IsInputType(inputTypeDefinition) ? inputTypeDefinition : null);
+            else
+                InputTypes.Push(null);
+        };
+        LeaveVariableDefinition = node => InputTypes.TryPop(out _);
+
+        EnterArgument = node =>
+        {
+            // we're in directive
+            if (DirectiveDefinition is not null)
             {
-                return TypeNameMetaFieldDef;
-            }*/
+                if (DirectiveDefinition.TryGetArgument(node.Name, out var inputValueDefinition))
+                {
+                    ArgumentDefinition = inputValueDefinition;
+                    DefaultValues.Push(inputValueDefinition.DefaultValue?.Value);
 
-            if (parentType is ComplexType complexType)
-            {
-                var field = schema.GetField(complexType.Name, name);
+                    var argumentTypeDefinition = Ast.UnwrapAndResolveType(schema, inputValueDefinition.Type);
 
-                if (field == null)
-                    return null;
-
-                return (name, field);
+                    if (argumentTypeDefinition is not null)
+                        InputTypes.Push(TypeIs.IsInputType(argumentTypeDefinition) ? argumentTypeDefinition : null);
+                    else
+                        InputTypes.Push(null);
+                }
+                else
+                {
+                    ArgumentDefinition = null;
+                    DefaultValues.Push(null);
+                    InputTypes.Push(null);
+                }
             }
+            else if (FieldDefinition is not null)
+            {
+                if (FieldDefinition.TryGetArgument(node.Name, out var inputValueDefinition))
+                {
+                    ArgumentDefinition = inputValueDefinition;
+                    DefaultValues.Push(inputValueDefinition.DefaultValue?.Value);
 
-            return null;
+                    var argumentTypeDefinition = Ast.UnwrapAndResolveType(schema, inputValueDefinition.Type);
+
+                    if (argumentTypeDefinition is not null)
+                        InputTypes.Push(TypeIs.IsInputType(argumentTypeDefinition) ? argumentTypeDefinition : null);
+                    else
+                        InputTypes.Push(null);
+                }
+                else
+                {
+                    ArgumentDefinition = null;
+                    DefaultValues.Push(null);
+                    InputTypes.Push(null);
+                }
+            }
+            else
+            {
+                ArgumentDefinition = null;
+                DefaultValues.Push(null);
+                InputTypes.Push(null);
+            }
+        };
+        LeaveArgument = node =>
+        {
+            ArgumentDefinition = null;
+            DefaultValues.TryPop(out _);
+            InputTypes.TryPop(out _);
+        };
+
+        EnterListValue = node =>
+        {
+            /*if (InputType is not null)
+                InputTypes.Push(TypeIs.IsInputType(InputType) ? InputType : null);
+            else
+                InputTypes.Push(null);
+            */
+
+            // List positions never have a default value
+
+            DefaultValues.Push(null);
+        };
+        LeaveListValue = node =>
+        {
+            InputTypes.TryPop(out _);
+            DefaultValues.TryPop(out _);
+        };
+
+        EnterObjectField = node =>
+        {
+            if (InputType is InputObjectDefinition objectType)
+            {
+                var inputField = schema.GetInputField(objectType.Name, node.Name);
+
+                if (inputField is not null)
+                {
+                    DefaultValues.Push(inputField.DefaultValue?.Value);
+
+                    var inputFieldTypeDefinition = Ast.UnwrapAndResolveType(schema, inputField.Type);
+
+                    if (inputFieldTypeDefinition is not null)
+                        InputTypes.Push(TypeIs.IsInputType(inputFieldTypeDefinition) ? inputFieldTypeDefinition : null);
+                    else
+                        InputTypes.Push(null);
+                }
+                else
+                {
+                    DefaultValues.Push(null);
+                    InputTypes.Push(null);
+                }
+            }
+            else
+            {
+                DefaultValues.Push(null);
+                InputTypes.Push(null);
+            }
+        };
+        LeaveObjectField = node =>
+        {
+            DefaultValues.TryPop(out _);
+            InputTypes.TryPop(out _);
+        };
+    }
+
+    public InputValueDefinition? ArgumentDefinition { get; private set; }
+
+    public TypeDefinition? CurrentType => Types.Count > 0 ? Types.Peek() : null;
+
+    public ValueBase? DefaultValue => DefaultValues.Count > 0 ? DefaultValues.Peek() : null;
+
+    public DirectiveDefinition? DirectiveDefinition { get; private set; }
+
+    public FieldDefinition? FieldDefinition => FieldDefinitions.Count > 0 ? FieldDefinitions.Peek() : null;
+
+    public TypeDefinition? InputType => InputTypes.Count > 0 ? InputTypes.Peek() : null;
+
+    public TypeDefinition? ParentInputType
+    {
+        get
+        {
+            if (InputTypes.Count <= 1)
+                return null;
+
+            var currentType = InputTypes.Pop();
+            var parentInputType = InputTypes.Peek();
+            InputTypes.Push(currentType);
+            return parentInputType;
         }
     }
+
+    public TypeDefinition? ParentType => ParentTypes.Count > 0 ? ParentTypes.Peek() : null;
+
+    protected Stack<ValueBase?> DefaultValues { get; } = new();
+
+    protected Stack<FieldDefinition?> FieldDefinitions { get; } = new();
+
+    protected Stack<TypeDefinition?> InputTypes { get; } = new();
+
+    protected Stack<TypeDefinition?> ParentTypes { get; } = new();
+
+    protected Stack<TypeDefinition?> Types { get; } = new();
 }

@@ -1,177 +1,265 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Introspection
+namespace Tanka.GraphQL.Introspection;
+
+public class IntrospectionResolvers : ResolversMap
 {
-    public class IntrospectionResolvers : ObjectTypeMap
+    public IntrospectionResolvers(string queryTypeName = "Query")
     {
-        public IntrospectionResolvers(ISchema source)
+        this[queryTypeName] = new FieldResolversMap
         {
-            this[source.Query.Name] = new FieldResolversMap
+            { "__schema", context => ResolveSync.As(context.Schema) },
             {
-                {"__schema", context => ResolveSync.As(source)},
+                "__type", context => ResolveSync.As(context.Schema.GetNamedType(context.GetArgument<string>("name")))
+            }
+        };
+
+        this[IntrospectionSchema.SchemaName] = new FieldResolversMap
+        {
+            {
+                "types", context => ResolveSync.As(context.Schema
+                    .QueryTypes<TypeDefinition>(IsNotBuiltIn)
+                    .OrderBy(t => t.Name.Value))
+            },
+            { "queryType", context => ResolveSync.As(context.Schema.Query) },
+            { "mutationType", context => ResolveSync.As(context.Schema.Mutation) },
+            { "subscriptionType", context => ResolveSync.As(context.Schema.Subscription) },
+            { "directives", context => ResolveSync.As(context.Schema.QueryDirectiveTypes().OrderBy(t => t.Name.Value)) }
+        };
+
+        this[IntrospectionSchema.TypeName] = new FieldResolversMap
+        {
+            { "kind", Resolve.PropertyOf<INode>((t, context) => KindOf(context.Schema, t)) },
+            { "name", Resolve.PropertyOf<INode>((t, context) => NameOf(context.Schema, t)) },
+            { "description", Resolve.PropertyOf<INode>(Describe) },
+
+            // OBJECT and INTERFACE only
+            {
+                "fields", context =>
                 {
-                    "__type", context => ResolveSync.As(
-                        source.GetNamedType(context.GetArgument<string>("name")))
+                    var fields = context.ObjectValue switch
+                    {
+                        null => null,
+                        ObjectDefinition objectDefinition => context.Schema.GetFields(objectDefinition.Name),
+                        InterfaceDefinition interfaceDefinition => context.Schema.GetFields(interfaceDefinition.Name),
+                        _ => null
+                    };
+
+                    if (fields is null)
+                        return ResolveSync.As(null);
+
+                    var includeDeprecated = context.GetArgument<bool?>("includeDeprecated") ?? false;
+                    if (!includeDeprecated)
+                        fields = fields.Where(f => !f.Value.TryGetDirective("deprecated", out _));
+
+                    return ResolveSync.As(fields.OrderBy(t => t.Key).ToList());
                 }
-            };
+            },
 
-            this[IntrospectionSchema.SchemaName] = new FieldResolversMap
+            // OBJECT only
+            { "interfaces", Resolve.PropertyOf<ObjectDefinition>(t => t.Interfaces?.OrderBy(t => t.Name.Value)) },
+
+
+            // INTERFACE and UNION only
             {
-                {"types", context => ResolveSync.As(source.QueryTypes<INamedType>())},
-                {"queryType", context => ResolveSync.As(source.Query)},
-                {"mutationType", context => ResolveSync.As(source.Mutation)},
-                {"subscriptionType", context => ResolveSync.As(source.Subscription)},
-                {"directives", context => ResolveSync.As(source.QueryDirectiveTypes())}
-            };
-
-            this[IntrospectionSchema.TypeName] = new FieldResolversMap
-            {
-                {"kind", Resolve.PropertyOf<IType>(t => KindOf(t))},
-                {"name", Resolve.PropertyOf<INamedType>(t => t.Name)},
-                {"description", Resolve.PropertyOf<IDescribable>(t => t.Description)},
-
-                // OBJECT and INTERFACE only
+                "possibleTypes", context =>
                 {
-                    "fields", context =>
+                    var possibleTypes = context.ObjectValue switch
                     {
-                        if (!(context.ObjectValue is ComplexType complexType))
-                            return ResolveSync.As(null);
+                        null => null,
+                        InterfaceDefinition interfaceDefinition => context.Schema.GetPossibleTypes(interfaceDefinition),
+                        UnionDefinition unionDefinition => context.Schema.GetPossibleTypes(unionDefinition),
+                        _ => null
+                    };
 
-                        var includeDeprecated = (bool) context.Arguments["includeDeprecated"];
-
-                        var fields = source.GetFields(complexType.Name);
-
-                        if (!includeDeprecated) fields = fields.Where(f => !f.Value.IsDeprecated);
-
-                        return ResolveSync.As(fields.ToList());
-                    }
-                },
-
-                // OBJECT only
-                {"interfaces", Resolve.PropertyOf<ObjectType>(t => t.Interfaces)},
-
-
-                // INTERFACE and UNION only
-                {
-                    "possibleTypes", context =>
-                    {
-                        List<ObjectType> possibleTypes = null;
-
-                        switch (context.ObjectValue)
-                        {
-                            case InterfaceType interfaceType:
-                            {
-                                var objects = source.QueryTypes<ObjectType>()
-                                    .Where(o => o.Implements(interfaceType))
-                                    .ToList();
-
-                                possibleTypes = objects;
-                                break;
-                            }
-                            case UnionType unionType:
-                                possibleTypes = unionType.PossibleTypes.Select(p => p.Value)
-                                    .ToList();
-                                break;
-                        }
-
-                        return ResolveSync.As(possibleTypes);
-                    }
-                },
-
-                // ENUM only
-                {
-                    "enumValues", context =>
-                    {
-                        var en = context.ObjectValue as EnumType;
-
-                        if (en == null)
-                            return ResolveSync.As(null);
-
-                        var includeDeprecated = (bool) context.Arguments["includeDeprecated"];
-
-                        var values = en.Values;
-
-                        if (!includeDeprecated) values = values.Where(v => !v.Value.IsDeprecated);
-                        return ResolveSync.As(values);
-                    }
-                },
-
-                // INPUT_OBJECT only
-                {
-                    "inputFields", Resolve.PropertyOf<InputObjectType>(t => source.GetInputFields(t.Name)
-                        .Select(iof => new KeyValuePair<string, Argument>(
-                            iof.Key,
-                            new Argument(iof.Value.Type, iof.Value.DefaultValue, iof.Value.Description))).ToList())
-                },
-
-                // NON_NULL and LIST only
-                {"ofType", Resolve.PropertyOf<IWrappingType>(t => t.OfType)}
-            };
-
-            this[IntrospectionSchema.FieldName] = new FieldResolversMap
-            {
-                {"name", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Key)},
-                {"description", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.Description)},
-                {"args", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.Arguments)},
-                {"type", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.Type)},
-                {"isDeprecated", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.IsDeprecated)},
-                {"deprecationReason", Resolve.PropertyOf<KeyValuePair<string, IField>>(f => f.Value.DeprecationReason)}
-            };
-
-            this[IntrospectionSchema.InputValueName] = new FieldResolversMap
-            {
-                {"name", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Key)},
-                {"description", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.Description)},
-                {"type", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.Type)},
-                {"defaultValue", Resolve.PropertyOf<KeyValuePair<string, Argument>>(f => f.Value.DefaultValue)}
-            };
-
-            this[IntrospectionSchema.EnumValueName] = new FieldResolversMap
-            {
-                {"name", Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Key)},
-                {"description", Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Value.Description)},
-                {"isDeprecated", Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Value.IsDeprecated)},
-                {
-                    "deprecationReason",
-                    Resolve.PropertyOf<KeyValuePair<string, EnumValue>>(f => f.Value.DeprecationReason)
+                    return ResolveSync.As(possibleTypes?.OrderBy(t => t.Name.Value));
                 }
-            };
+            },
 
-            this["__Directive"] = new FieldResolversMap
+            // ENUM only
             {
-                {"name", Resolve.PropertyOf<DirectiveType>(d => d.Name)},
-                {"description", Resolve.PropertyOf<DirectiveType>(d => d.Description)},
-                {"locations", Resolve.PropertyOf<DirectiveType>(d => LocationsOf(d.Locations))},
-                {"args", Resolve.PropertyOf<DirectiveType>(d => d.Arguments)}
-            };
-        }
+                "enumValues", context =>
+                {
+                    var en = context.ObjectValue as EnumDefinition;
 
-        public static __TypeKind KindOf(IType type)
-        {
-            return type switch
+                    if (en == null)
+                        return ResolveSync.As(null);
+
+                    var includeDeprecated = context.GetArgument<bool?>("includeDeprecated") ?? false;
+
+                    var values = en.Values?.ToList();
+
+                    if (!includeDeprecated)
+                        values = values?.Where(f => !f.TryGetDirective("deprecated", out _)).ToList();
+
+                    return ResolveSync.As(values?.OrderBy(t => t.Value.Name.Value));
+                }
+            },
+
+            // INPUT_OBJECT only
             {
-                ObjectType _ => __TypeKind.OBJECT,
-                ScalarType _ => __TypeKind.SCALAR,
-                EnumType _ => __TypeKind.ENUM,
-                InputObjectType _ => __TypeKind.INPUT_OBJECT,
-                InterfaceType _ => __TypeKind.INTERFACE,
-                List _ => __TypeKind.LIST,
-                NonNull _ => __TypeKind.NON_NULL,
-                UnionType _ => __TypeKind.UNION,
-                _ => throw new InvalidOperationException($"Cannot get kind form {type}")
-            };
-        }
+                "inputFields", Resolve.PropertyOf<InputObjectDefinition>((t, context) => context.Schema
+                    .GetInputFields(t.Name)
+                    .Select(iof => iof.Value).OrderBy(t => t.Name.Value).ToList())
+            },
 
-        private IEnumerable<__DirectiveLocation> LocationsOf(IEnumerable<DirectiveLocation> locations)
+            // NON_NULL and LIST only
+            {
+                "ofType", Resolve.PropertyOf<TypeBase>(t => t switch
+                {
+                    null => null,
+                    NonNullType nonNullType => nonNullType.OfType,
+                    ListType list => list.OfType,
+                    _ => null
+                })
+            }
+        };
+
+        this[IntrospectionSchema.FieldName] = new FieldResolversMap
         {
-            return locations
-                .Select(l => (__DirectiveLocation) Enum.Parse(
-                    typeof(__DirectiveLocation),
-                    l.ToString())).ToList();
-        }
+            { "name", Resolve.PropertyOf<KeyValuePair<string, FieldDefinition>>(f => f.Key) },
+            { "description", Resolve.PropertyOf<KeyValuePair<string, FieldDefinition>>(f => f.Value.Description) },
+            {
+                "args",
+                Resolve.PropertyOf<KeyValuePair<string, FieldDefinition>>(f =>
+                    f.Value.Arguments ?? ArgumentsDefinition.None)
+            },
+            { "type", Resolve.PropertyOf<KeyValuePair<string, FieldDefinition>>(f => f.Value.Type) },
+            {
+                "isDeprecated",
+                Resolve.PropertyOf<KeyValuePair<string, FieldDefinition>>(f => f.Value.IsDeprecated(out _))
+            },
+            {
+                "deprecationReason",
+                Resolve.PropertyOf<KeyValuePair<string, FieldDefinition>>(f =>
+                    f.Value.IsDeprecated(out var reason) ? reason : null)
+            }
+        };
+
+        this[IntrospectionSchema.InputValueName] = new FieldResolversMap
+        {
+            { "name", Resolve.PropertyOf<InputValueDefinition>(f => f.Name.Value) },
+            { "description", Resolve.PropertyOf<InputValueDefinition>(f => f.Description) },
+            { "type", Resolve.PropertyOf<InputValueDefinition>(f => f.Type) },
+            {
+                "defaultValue", Resolve.PropertyOf<InputValueDefinition>((f, context) =>
+                {
+                    try
+                    {
+                        return Execution.Values.CoerceValue(context.Schema, f.DefaultValue?.Value, f.Type);
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                })
+            }
+        };
+
+        this[IntrospectionSchema.EnumValueName] = new FieldResolversMap
+        {
+            { "name", Resolve.PropertyOf<EnumValueDefinition>(f => f.Value.Name) },
+            { "description", Resolve.PropertyOf<EnumValueDefinition>(f => f.Description) },
+            { "isDeprecated", Resolve.PropertyOf<EnumValueDefinition>(f => f.IsDeprecated(out _)) },
+            {
+                "deprecationReason",
+                Resolve.PropertyOf<EnumValueDefinition>(f => f.IsDeprecated(out var reason) ? reason : null)
+            }
+        };
+
+        this["__Directive"] = new FieldResolversMap
+        {
+            { "name", Resolve.PropertyOf<DirectiveDefinition>(d => d.Name) },
+            { "description", Resolve.PropertyOf<DirectiveDefinition>(d => d.Description) },
+            { "locations", Resolve.PropertyOf<DirectiveDefinition>(d => LocationsOf(d.DirectiveLocations)) },
+            {
+                "args",
+                Resolve.PropertyOf<DirectiveDefinition>(d => { return d.Arguments?.OrderBy(t => t.Name.Value); })
+            }
+        };
+    }
+
+    private IReadOnlyList<string> BuiltInTypes => new List<string>
+    {
+        Scalars.Boolean.Name,
+        Scalars.Float.Name,
+        Scalars.ID.Name,
+        Scalars.Int.Name,
+        Scalars.String.Name,
+        "__Directive",
+        "__EnumValue",
+        "__Field",
+        "__InputValue",
+        "__Schema",
+        "__Type",
+        "__TypeKind",
+        "__DirectiveLocation"
+    };
+
+    public static __TypeKind KindOf(ISchema schema, INode type)
+    {
+        return type switch
+        {
+            NamedType namedType => KindOf(schema, schema.GetRequiredNamedType<TypeDefinition>(namedType.Name)),
+            ObjectDefinition _ => __TypeKind.OBJECT,
+            ScalarDefinition _ => __TypeKind.SCALAR,
+            EnumDefinition _ => __TypeKind.ENUM,
+            InputObjectDefinition _ => __TypeKind.INPUT_OBJECT,
+            InterfaceDefinition _ => __TypeKind.INTERFACE,
+            ListType _ => __TypeKind.LIST,
+            NonNullType _ => __TypeKind.NON_NULL,
+            UnionDefinition _ => __TypeKind.UNION,
+            _ => throw new InvalidOperationException($"Cannot get kind from {type}")
+        };
+    }
+
+    private bool IsNotBuiltIn(TypeDefinition maybeBuiltIn)
+    {
+        return !BuiltInTypes.Contains(maybeBuiltIn.Name.Value);
+    }
+
+
+    private string? NameOf(ISchema context, INode? type)
+    {
+        return type switch
+        {
+            null => null,
+            NamedType namedType => namedType.Name.Value,
+            TypeDefinition typeDefinition => typeDefinition.Name.Value,
+            _ => null
+        };
+    }
+
+    private string? Describe(INode node)
+    {
+        return node switch
+        {
+            null => null,
+            ObjectDefinition objectDefinition => objectDefinition.Description,
+            InterfaceDefinition interfaceDefinition => interfaceDefinition.Description,
+            FieldDefinition fieldDefinition => fieldDefinition.Description,
+            DirectiveDefinition directiveDefinition => directiveDefinition.Description,
+            ScalarDefinition scalarDefinition => scalarDefinition.Description,
+            UnionDefinition unionDefinition => unionDefinition.Description,
+            EnumDefinition enumDefinition => enumDefinition.Description,
+            InputObjectDefinition inputObjectDefinition => inputObjectDefinition.Description,
+            InputValueDefinition inputValueDefinition => inputValueDefinition.Description,
+            EnumValueDefinition enumValueDefinition => enumValueDefinition.Description
+        };
+    }
+
+    private IEnumerable<__DirectiveLocation> LocationsOf(IEnumerable<string> locations)
+    {
+        return locations
+            .Select(l => (__DirectiveLocation)Enum.Parse(
+                typeof(__DirectiveLocation),
+                l.ToString())).ToList();
     }
 }

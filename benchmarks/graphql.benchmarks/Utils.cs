@@ -1,20 +1,18 @@
 ﻿using System.Threading.Tasks;
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
-using Tanka.GraphQL.Tools;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Benchmarks
+namespace Tanka.GraphQL.Benchmarks;
+
+public static class Utils
 {
-    public static class Utils
+    public static Task<ISchema> InitializeSchema()
     {
-        public static ISchema InitializeSchema()
-        {
-            var events = new SingleValueEventChannel();
-            var builder = new SchemaBuilder()
-                .Sdl(Parser.ParseTypeSystemDocument(
+        var events = new SingleValueEventChannel();
+        var builder = new SchemaBuilder()
+            .Add(
                 @"
                     type Query {
                         simple: String
@@ -33,63 +31,58 @@ namespace Tanka.GraphQL.Benchmarks
                         mutation: Mutation
                         subscription: Subscription
                     }
-                    "));
+                    ");
 
-            var resolvers = new ObjectTypeMap
+        var resolvers = new ResolversMap
+        {
             {
+                "Query", new FieldResolversMap
                 {
-                    "Query", new FieldResolversMap
-                    {
-                        {"simple", context => new ValueTask<IResolverResult>(Resolve.As("value"))}
-                    }
-                },
+                    { "simple", context => new ValueTask<IResolverResult>(Resolve.As("value")) }
+                }
+            },
+            {
+                "Mutation", new FieldResolversMap
                 {
-                    "Mutation", new FieldResolversMap
-                    {
-                        {"simple", context => new ValueTask<IResolverResult>(Resolve.As("value"))}
-                    }
-                },
+                    { "simple", context => new ValueTask<IResolverResult>(Resolve.As("value")) }
+                }
+            },
+            {
+                "Subscription", new FieldResolversMap
                 {
-                    "Subscription", new FieldResolversMap()
                     {
-                        {
-                            "simple", 
-                            (context, unsubscribe) => ResolveSync.Subscribe(events, unsubscribe), 
-                            context => new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue))}
+                        "simple",
+                        (context, unsubscribe) => ResolveSync.Subscribe(events, unsubscribe),
+                        context => new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue))
                     }
                 }
-            };
+            }
+        };
 
-            var schema = SchemaTools.MakeExecutableSchema(
-                builder, 
-                resolvers,
-                resolvers);
+        return builder.Build(resolvers, resolvers);
+    }
 
-            return schema;
-        }
-
-        public static ExecutableDocument InitializeQuery()
-        {
-            return Parser.ParseDocument(@"
+    public static ExecutableDocument InitializeQuery()
+    {
+        return @"
 {
     simple
-}");
-        }
+}";
+    }
 
-        public static ExecutableDocument InitializeMutation()
-        {
-            return Parser.ParseDocument(@"
+    public static ExecutableDocument InitializeMutation()
+    {
+        return @"
 mutation {
     simple
-}");
-        }
+}";
+    }
 
-        public static ExecutableDocument InitializeSubscription()
-        {
-            return Parser.ParseDocument(@"
+    public static ExecutableDocument InitializeSubscription()
+    {
+        return @"
 subscription {
     simple
-}");
-        }
+}";
     }
 }

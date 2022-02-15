@@ -2,15 +2,14 @@
 using Tanka.GraphQL.Channels;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Benchmarks
+namespace Tanka.GraphQL.Benchmarks;
+
+public class SingleValueEventChannel : EventChannel<string>
 {
-    public class SingleValueEventChannel : EventChannel<string>
+    public override void OnSubscribed(ISubscriberResult subscription)
     {
-        public override void OnSubscribed(ISubscriberResult subscription)
-        {
-            subscription.WriteAsync("value", CancellationToken.None)
-                .AsTask()
-                .Wait();
-        }
+        subscription.WriteAsync("value", CancellationToken.None)
+            .AsTask()
+            .Wait();
     }
 }

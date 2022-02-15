@@ -1,17 +1,17 @@
-﻿namespace Tanka.GraphQL.Language.Nodes
-{
-    public sealed class Variable : ValueBase, INode
-    {
-        public override NodeKind Kind => NodeKind.Variable;
-        public override Location? Location {get;}
-        public readonly Name Name;
+﻿namespace Tanka.GraphQL.Language.Nodes;
 
-        public Variable(
-            in Name name,
-            in Location? location = default)
-        {
-            Name = name;
-            Location = location;
-        }
+public sealed class Variable : ValueBase, INode
+{
+    public readonly Name Name;
+
+    public Variable(
+        in Name name,
+        in Location? location = default)
+    {
+        Name = name;
+        Location = location;
     }
+
+    public override NodeKind Kind => NodeKind.Variable;
+    public override Location? Location { get; }
 }

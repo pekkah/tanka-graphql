@@ -1,31 +1,30 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Extensions.ApolloFederation
+namespace Tanka.GraphQL.Extensions.ApolloFederation;
+
+public delegate ValueTask<ResolveReferenceResult> ResolveReference(
+    IResolverContext context,
+    TypeDefinition type,
+    IReadOnlyDictionary<string, object> representation);
+
+public readonly struct ResolveReferenceResult
 {
-    public delegate ValueTask<ResolveReferenceResult> ResolveReference(
-        IResolverContext context,
-        INamedType type,
-        IReadOnlyDictionary<string, object> representation);
+    public TypeDefinition Type { get; }
 
-    public readonly struct ResolveReferenceResult
+    public object Reference { get; }
+
+    public ResolveReferenceResult(TypeDefinition type, object reference)
     {
-        public INamedType Type { get; }
+        Type = type;
+        Reference = reference;
+    }
 
-        public object Reference { get; }
-
-        public ResolveReferenceResult(INamedType type, object reference)
-        {
-            Type = type;
-            Reference = reference;
-        }
-
-        public void Deconstruct(out INamedType type, out object reference)
-        {
-            type = Type;
-            reference = Reference;
-        }
+    public void Deconstruct(out TypeDefinition type, out object reference)
+    {
+        type = Type;
+        reference = Reference;
     }
 }

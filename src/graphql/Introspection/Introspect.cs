@@ -1,11 +1,10 @@
-﻿using Tanka.GraphQL.Tools;
-using Tanka.GraphQL.TypeSystem;
+﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL.Introspection
+namespace Tanka.GraphQL.Introspection;
+
+public class Introspect
 {
-    public class Introspect
-    {
-        public static string DefaultQuery = @"
+    public static string DefaultQuery = @"
             query IntrospectionQuery {
               __schema {
                 queryType { name }
@@ -95,19 +94,11 @@ namespace Tanka.GraphQL.Introspection
               }
             }";
 
-        /// <summary>
-        ///     Return introspection schema for given schema
-        /// </summary>
-        /// <param name="schema"></param>
-        /// <returns></returns>
-        public static ISchema Schema(ISchema schema)
-        {
-            var introspectionSchema = IntrospectionSchema.Create();
-            var introspectionResolvers = new IntrospectionResolvers(schema);
+    public static (TypeSystemDocument TypeSystemDocument, ResolversMap Resolvers) Create()
+    {
+        var typeSystem = IntrospectionSchema.GetTypeSystem();
+        var introspectionResolvers = new IntrospectionResolvers();
 
-            return SchemaTools.MakeExecutableSchema(
-                introspectionSchema,
-                introspectionResolvers);
-        }
+        return (typeSystem, introspectionResolvers);
     }
 }

@@ -1,105 +1,88 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Tanka.GraphQL.Language.Nodes;
 
-namespace Tanka.GraphQL.Language.Visitors
+namespace Tanka.GraphQL.Language.Visitors;
+
+public sealed class ExecutionDocumentWalkerOptions
 {
-    public sealed class ExecutionDocumentWalkerOptions
+    public List<IVisit<Argument>> Argument { get; set; } = new();
+
+    public List<IVisit<DefaultValue>> DefaultValue { get; set; } = new();
+
+    public List<IVisit<Directive>> Directive { get; set; } = new();
+
+    public List<IVisit<ExecutableDocument>> ExecutableDocument { get; set; } = new();
+
+    public List<IVisit<FieldSelection>> FieldSelection { get; set; } = new();
+
+    public List<IVisit<FragmentDefinition>> FragmentDefinition { get; set; } = new();
+
+    public List<IVisit<FragmentSpread>> FragmentSpread { get; set; } = new();
+
+    public List<IVisit<InlineFragment>> InlineFragment { get; set; } = new();
+
+    public List<IVisit<NamedType>> NamedType { get; set; } = new();
+
+    public List<IVisit<OperationDefinition>> OperationDefinition { get; set; } = new();
+
+    public List<IVisit<ISelection>> Selection { get; set; } = new();
+
+    public List<IVisit<SelectionSet>> SelectionSet { get; set; } = new();
+
+    public List<IVisit<TypeBase>> Type { get; set; } = new();
+
+    public List<IVisit<ValueBase>> Value { get; set; } = new();
+
+    public List<IVisit<VariableDefinition>> VariableDefinition { get; set; } = new();
+
+    public ExecutionDocumentWalkerOptions Add(object visitor)
     {
-        public List<IVisit<ExecutableDocument>> ExecutableDocument { get; set; }
-            = new List<IVisit<ExecutableDocument>>();
+        if (visitor is IVisit<ExecutableDocument> ed)
+            ExecutableDocument.Add(ed);
 
-        public List<IVisit<FragmentDefinition>> FragmentDefinition { get; set; }
-            = new List<IVisit<FragmentDefinition>>();
+        if (visitor is IVisit<FragmentDefinition> fd)
+            FragmentDefinition.Add(fd);
 
-        public List<IVisit<OperationDefinition>> OperationDefinition { get; set; }
-            = new List<IVisit<OperationDefinition>>();
+        if (visitor is IVisit<OperationDefinition> od)
+            OperationDefinition.Add(od);
 
-        public List<IVisit<SelectionSet>> SelectionSet { get; set; }
-            = new List<IVisit<SelectionSet>>();
+        if (visitor is IVisit<SelectionSet> ss)
+            SelectionSet.Add(ss);
 
-        public List<IVisit<ISelection>> Selection { get; set; }
-            = new List<IVisit<ISelection>>();
 
-        public List< IVisit<FieldSelection>> FieldSelection { get; set; }
-            = new List<IVisit<FieldSelection>>();
+        if (visitor is IVisit<ISelection> s)
+            Selection.Add(s);
 
-        public List<IVisit<InlineFragment>> InlineFragment { get; set; }
-            = new List<IVisit<InlineFragment>>();
+        if (visitor is IVisit<FieldSelection> fs)
+            FieldSelection.Add(fs);
 
-        public List<IVisit<FragmentSpread>> FragmentSpread { get; set; }
-            = new List<IVisit<FragmentSpread>>();
+        if (visitor is IVisit<InlineFragment> ift)
+            InlineFragment.Add(ift);
 
-        public List<IVisit<Argument>> Argument { get; set; }
-            = new List<IVisit<Argument>>();
+        if (visitor is IVisit<FragmentSpread> fgs)
+            FragmentSpread.Add(fgs);
 
-        public List<IVisit<NamedType>> NamedType { get; set; }
-            = new List<IVisit<NamedType>>();
+        if (visitor is IVisit<Argument> arg)
+            Argument.Add(arg);
 
-        public List<IVisit<VariableDefinition>> VariableDefinition { get; set; }
-            = new List<IVisit<VariableDefinition>>();
+        if (visitor is IVisit<NamedType> nt)
+            NamedType.Add(nt);
 
-        public List<IVisit<DefaultValue>> DefaultValue { get; set; }
-            = new List<IVisit<DefaultValue>>();
+        if (visitor is IVisit<VariableDefinition> vd)
+            VariableDefinition.Add(vd);
 
-        public List<IVisit<ValueBase>> Value { get; set; }
-            = new List<IVisit<ValueBase>>();
+        if (visitor is IVisit<DefaultValue> dv)
+            DefaultValue.Add(dv);
 
-        public List<IVisit<Directive>> Directive { get; set; }
-            = new List<IVisit<Directive>>();
+        if (visitor is IVisit<ValueBase> v)
+            Value.Add(v);
 
-        public List<IVisit<TypeBase>> Type { get; set; }
-            = new List<IVisit<TypeBase>>();
+        if (visitor is IVisit<Directive> d)
+            Directive.Add(d);
 
-        public ExecutionDocumentWalkerOptions Add(object visitor)
-        {
-            if (visitor is IVisit<ExecutableDocument> ed)
-                ExecutableDocument.Add(ed);
+        if (visitor is IVisit<TypeBase> t)
+            Type.Add(t);
 
-            if (visitor is IVisit<FragmentDefinition> fd)
-                FragmentDefinition.Add(fd);
-
-            if (visitor is IVisit<OperationDefinition> od)
-                OperationDefinition.Add(od);
-
-            if (visitor is IVisit<SelectionSet> ss)
-                SelectionSet.Add(ss);
-
-            
-            if (visitor is IVisit<ISelection> s)
-                Selection.Add(s);
-
-            if (visitor is IVisit<FieldSelection> fs)
-                FieldSelection.Add(fs);
-
-            if (visitor is IVisit<InlineFragment> ift)
-                InlineFragment.Add(ift);
-
-            if (visitor is IVisit<FragmentSpread> fgs)
-                FragmentSpread.Add(fgs);
-
-            if (visitor is IVisit<Argument> arg)
-                Argument.Add(arg);
-
-            if (visitor is IVisit<NamedType> nt)
-                NamedType.Add(nt);
-
-            if (visitor is IVisit<VariableDefinition> vd)
-                VariableDefinition.Add(vd);
-
-            if (visitor is IVisit<DefaultValue> dv)
-                DefaultValue.Add(dv);
-
-            if (visitor is IVisit<ValueBase> v)
-                Value.Add(v);
-
-            if (visitor is IVisit<Directive> d)
-                Directive.Add(d);
-
-            if (visitor is IVisit<TypeBase> t)
-                Type.Add(t);
-
-            return this;
-        }
+        return this;
     }
 }

@@ -1,20 +1,21 @@
 ﻿using System.Collections.Generic;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.TypeSystem;
 
-namespace Tanka.GraphQL
+namespace Tanka.GraphQL;
+
+public interface ISubscriberMap
 {
-    public interface ISubscriberMap
-    {
-        Subscriber GetSubscriber(string typeName, string fieldName);
-    }
+    Subscriber? GetSubscriber(string typeName, string fieldName);
 
-    public static class SubscriberMapExtensions
+    IEnumerable<(string TypeName, IEnumerable<string> Fields)> GetTypes();
+}
+
+public static class SubscriberMapExtensions
+{
+    public static Subscriber? GetSubscriber(this ISubscriberMap map, ObjectDefinition type,
+        FieldDefinition field)
     {
-        public static Subscriber GetSubscriber(this ISubscriberMap map, ComplexType type,
-            KeyValuePair<string, IField> field)
-        {
-            return map.GetSubscriber(type.Name, field.Key);
-        }
+        return map.GetSubscriber(type.Name, field.Name);
     }
 }

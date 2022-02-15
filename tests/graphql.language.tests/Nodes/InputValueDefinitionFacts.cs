@@ -4,97 +4,96 @@ using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
 
-namespace Tanka.GraphQL.Language.Tests.Nodes
+namespace Tanka.GraphQL.Language.Tests.Nodes;
+
+public class InputValueDefinitionFacts
 {
-    public class InputValueDefinitionFacts
+    [Fact]
+    public void FromBytes()
     {
-        [Fact]
-        public void FromBytes()
-        {
-            /* Given */
-            /* When */
-            InputValueDefinition original = Encoding.UTF8.GetBytes("field: ENUM")
-                .AsReadOnlySpan();
+        /* Given */
+        /* When */
+        InputValueDefinition original = Encoding.UTF8.GetBytes("field: ENUM")
+            .AsReadOnlySpan();
 
-            /* Then */
-            Assert.Equal("field", original.Name);
-            Assert.IsType<NamedType>(original.Type);
-        }
-        
-        [Fact]
-        public void FromString()
-        {
-            /* Given */
-            /* When */
-            InputValueDefinition original = "field: ENUM";
+        /* Then */
+        Assert.Equal("field", original.Name);
+        Assert.IsType<NamedType>(original.Type);
+    }
 
-            /* Then */
-            Assert.Equal("field", original.Name);
-            Assert.IsType<NamedType>(original.Type);
-        }
+    [Fact]
+    public void FromString()
+    {
+        /* Given */
+        /* When */
+        InputValueDefinition original = "field: ENUM";
 
-        [Fact]
-        public void WithDescription()
-        {
-            /* Given */
-            InputValueDefinition original = "field: ENUM!";
+        /* Then */
+        Assert.Equal("field", original.Name);
+        Assert.IsType<NamedType>(original.Type);
+    }
 
-            /* When */
-            var modified = original
-                .WithDescription("Description");
+    [Fact]
+    public void WithDescription()
+    {
+        /* Given */
+        InputValueDefinition original = "field: ENUM!";
 
-            /* Then */
-            Assert.Equal("Description", modified.Description);
-        }
+        /* When */
+        var modified = original
+            .WithDescription("Description");
 
-        [Fact]
-        public void WithName()
-        {
-            /* Given */
-            InputValueDefinition original = "field: ENUM!";
+        /* Then */
+        Assert.Equal("Description", modified.Description);
+    }
 
-            /* When */
-            var modified = original
-                .WithName("b");
+    [Fact]
+    public void WithName()
+    {
+        /* Given */
+        InputValueDefinition original = "field: ENUM!";
 
-            /* Then */
-            Assert.Equal("field", original.Name);
-            Assert.Equal("b", modified.Name);
-        }
+        /* When */
+        var modified = original
+            .WithName("b");
 
-        [Fact]
-        public void WithType()
-        {
-            /* Given */
-            InputValueDefinition original = @"field: Int";
+        /* Then */
+        Assert.Equal("field", original.Name);
+        Assert.Equal("b", modified.Name);
+    }
 
-            /* When */
-            var modified = original
-                .WithType("String!");
+    [Fact]
+    public void WithType()
+    {
+        /* Given */
+        InputValueDefinition original = @"field: Int";
 
-            /* Then */
-            var nonNull = Assert.IsType<NonNullType>(modified.Type);
-            var named = Assert.IsType<NamedType>(nonNull.OfType);
-            Assert.Equal("String", named.Name);
-        }
+        /* When */
+        var modified = original
+            .WithType("String!");
 
-        [Fact]
-        public void WithDirectives()
-        {
-            /* Given */
-            InputValueDefinition original = @"field: Int";
+        /* Then */
+        var nonNull = Assert.IsType<NonNullType>(modified.Type);
+        var named = Assert.IsType<NamedType>(nonNull.OfType);
+        Assert.Equal("String", named.Name);
+    }
 
-            /* When */
-            var modified = original
-                .WithDirectives(new List<Directive>
-                {
-                    "@a", 
-                });
+    [Fact]
+    public void WithDirectives()
+    {
+        /* Given */
+        InputValueDefinition original = @"field: Int";
 
-            /* Then */
-            Assert.NotNull(modified.Directives);
-            var a = Assert.Single(modified.Directives);
-            Assert.Equal("a", a?.Name);
-        }
+        /* When */
+        var modified = original
+            .WithDirectives(new List<Directive>
+            {
+                "@a"
+            });
+
+        /* Then */
+        Assert.NotNull(modified.Directives);
+        var a = Assert.Single(modified.Directives);
+        Assert.Equal("a", a?.Name);
     }
 }

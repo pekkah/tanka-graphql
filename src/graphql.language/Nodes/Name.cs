@@ -1,60 +1,67 @@
 ﻿using System;
 
-namespace Tanka.GraphQL.Language.Nodes
+namespace Tanka.GraphQL.Language.Nodes;
+
+public readonly struct Name : IEquatable<Name>, IEquatable<string>
 {
-    public readonly struct Name : IEquatable<Name>
+    public Location? Location { get; }
+
+    public readonly string Value;
+
+    public Name(string value, in Location? location = default)
     {
-        public Location? Location { get; }
+        Value = value ?? throw new ArgumentNullException(nameof(value));
+        Location = location;
+    }
 
-        public readonly string Value;
+    public static implicit operator Name(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return default;
 
-        public Name(string value, in Location? location = default)
-        {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-            Location = location;
-        }
+        return new Name(value);
+    }
 
-        public static implicit operator Name(string value)
-        {
-            if (string.IsNullOrEmpty(value))
-                return default;
+    public static implicit operator string(in Name value)
+    {
+        return value.ToString();
+    }
 
-            return new Name(value);
-        }
+    public override string ToString()
+    {
+        return Value;
+    }
 
-        public static implicit operator string(in Name value)
-        {
-            return value.ToString();
-        }
+    public bool Equals(Name other)
+    {
+        return Value == other.Value;
+    }
 
-        public override string ToString()
-        {
-            return Value;
-        }
+    public override bool Equals(object? obj)
+    {
+        return obj is Name other && Equals(other);
+    }
 
-        public bool Equals(Name other)
-        {
-            return Value == other.Value;
-        }
+    public override int GetHashCode()
+    {
+        return Value != null ? Value.GetHashCode() : 0;
+    }
 
-        public override bool Equals(object obj)
-        {
-            return obj is Name other && Equals(other);
-        }
+    public static bool operator ==(in Name left, in Name right)
+    {
+        return left.Equals(right);
+    }
 
-        public override int GetHashCode()
-        {
-            return Value != null ? Value.GetHashCode() : 0;
-        }
+    public static bool operator !=(in Name left, in Name right)
+    {
+        return !left.Equals(right);
+    }
 
-        public static bool operator ==(in Name left, in Name right)
-        {
-            return left.Equals(right);
-        }
+    public bool Equals(string? other)
+    {
+        if (other is null)
+            return false;
 
-        public static bool operator !=(in Name left, in Name right)
-        {
-            return !left.Equals(right);
-        }
+        return Value == other;
     }
 }

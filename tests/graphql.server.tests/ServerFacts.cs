@@ -3,226 +3,226 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Server.Tests.Host;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.Server.Links.DTOs;
+using Tanka.GraphQL.Server.Tests.Host;
 using Xunit;
 
-namespace Tanka.GraphQL.Server.Tests
+namespace Tanka.GraphQL.Server.Tests;
+
+public class ServerFacts : IClassFixture<WebApplicationFactory<Startup>>
 {
-    public class ServerFacts : IClassFixture<WebApplicationFactory<Startup>>
+    private readonly HttpClient _client;
+    private readonly EventManager _eventManager;
+
+    private readonly TestServer _server;
+
+    public ServerFacts(WebApplicationFactory<Startup> factory)
     {
-        public ServerFacts(WebApplicationFactory<Startup> factory)
+        _client = factory.CreateClient();
+        _server = factory.Server;
+        _eventManager = factory.Server.Host.Services.GetRequiredService<EventManager>();
+    }
+
+    [Fact]
+    public async Task Multiple_Queries()
+    {
+        /* Given */
+        var cts = new CancellationTokenSource();
+        var hubConnection = Connect();
+        await hubConnection.StartAsync();
+
+        /* When */
+        var reader1 = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
         {
-            _client = factory.CreateClient();
-            _server = factory.Server;
-            _eventManager = factory.Server.Host.Services.GetRequiredService<EventManager>();
-        }
+            Query = "{ hello }"
+        }, cts.Token);
 
-        private readonly TestServer _server;
-        private readonly HttpClient _client;
-        private readonly EventManager _eventManager;
-
-        private HubConnection Connect()
+        var reader2 = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
         {
-            var connection = new HubConnectionBuilder()
-                .WithUrl(new Uri(_server.BaseAddress, "graphql"),
-                    o => { o.HttpMessageHandlerFactory = _ => _server.CreateHandler(); })
-                .AddJsonProtocol(options =>
-                {
-                    options.PayloadSerializerOptions.Converters.Add(new ObjectDictionaryConverter());
-                })
-                .Build();
+            Query = "{ hello }"
+        }, cts.Token);
 
-            connection.Closed += exception =>
-            {
-                Assert.Null(exception);
-                return Task.CompletedTask;
-            };
+        /* Then */
+        var result1 = await reader1.ReadAsync();
+        var result2 = await reader2.ReadAsync();
 
-            return connection;
-        }
-
-        [Fact]
-        public async Task Multiple_Queries()
+        Assert.Contains(result1.Data, kv =>
         {
-            /* Given */
-            var cts = new CancellationTokenSource();
-            var hubConnection = Connect();
-            await hubConnection.StartAsync();
+            var (key, value) = kv;
+            return key == "hello" && value.ToString() == "world";
+        });
 
-            /* When */
-            var reader1 = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
-            {
-                Query = "{ hello }"
-            }, cts.Token);
-
-            var reader2 = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
-            {
-                Query = "{ hello }"
-            }, cts.Token);
-
-            /* Then */
-            var result1 = await reader1.ReadAsync();
-            var result2 = await reader2.ReadAsync();
-
-            Assert.Contains(result1.Data, kv =>
-            {
-                var (key, value) = kv;
-                return key == "hello" && value.ToString() == "world";
-            });
-
-            Assert.Contains(result2.Data, kv =>
-            {
-                var (key, value) = kv;
-                return key == "hello" && value.ToString() == "world";
-            });
-
-            await hubConnection.StopAsync();
-        }
-
-        [Fact]
-        public async Task Mutation()
+        Assert.Contains(result2.Data, kv =>
         {
-            /* Given */
-            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-            var hubConnection = Connect();
-            await hubConnection.StartAsync();
+            var (key, value) = kv;
+            return key == "hello" && value.ToString() == "world";
+        });
 
-            /* When */
-            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
-            {
-                Query = @"
+        await hubConnection.StopAsync();
+    }
+
+    [Fact]
+    public async Task Mutation()
+    {
+        /* Given */
+        var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+        var hubConnection = Connect();
+        await hubConnection.StartAsync();
+
+        /* When */
+        var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
+        {
+            Query = @"
                         mutation Add($event: InputEvent!) { 
                             add(event: $event) {
                                     type
                                     message
                                 }
                         }",
-                Variables = new Dictionary<string, object>
+            Variables = new Dictionary<string, object>
+            {
                 {
+                    "event", new Dictionary<string, object>
                     {
-                        "event", new Dictionary<string, object>
-                        {
-                            {"type", "hello"},
-                            {"message", "world"}
-                        }
+                        { "type", "hello" },
+                        { "message", "world" }
                     }
                 }
-            }, cts.Token);
+            }
+        }, cts.Token);
 
 
-            /* Then */
-            var result = await reader.ReadAsync(cts.Token);
+        /* Then */
+        var result = await reader.ReadAsync(cts.Token);
 
-            Assert.Contains(result.Data, kv =>
-            {
-                var (key, value) = kv;
-                return key == "add";
-            });
-
-            cts.Cancel();
-            await hubConnection.StopAsync();
-        }
-
-        [Fact]
-        public async Task Query()
+        Assert.Contains(result.Data, kv =>
         {
-            /* Given */
-            var cts = new CancellationTokenSource();
-            var hubConnection = Connect();
-            await hubConnection.StartAsync();
+            var (key, value) = kv;
+            return key == "add";
+        });
 
-            /* When */
-            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
-            {
-                Query = "{ hello }"
-            }, cts.Token);
+        cts.Cancel();
+        await hubConnection.StopAsync();
+    }
 
-            /* Then */
-            var result = await reader.ReadAsync(cts.Token);
+    [Fact]
+    public async Task Query()
+    {
+        /* Given */
+        var cts = new CancellationTokenSource();
+        var hubConnection = Connect();
+        await hubConnection.StartAsync();
 
-            Assert.Contains(result.Data, kv =>
-            {
-                var (key, value) = kv;
-                return key == "hello" && value.ToString() == "world";
-            });
-
-            await hubConnection.StopAsync();
-        }
-
-        [Fact]
-        public async Task Subscribe()
+        /* When */
+        var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
         {
-            /* Given */
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            var hubConnection = Connect();
-            await hubConnection.StartAsync();
+            Query = "{ hello }"
+        }, cts.Token);
 
-            /* When */
-            // this wont block until the actual hub method execution has finished?
-            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>(
-                "Query",
-                new QueryRequest
-                {
-                    Query = @"
+        /* Then */
+        var result = await reader.ReadAsync(cts.Token);
+
+        Assert.Contains(result.Data, kv =>
+        {
+            var (key, value) = kv;
+            return key == "hello" && value.ToString() == "world";
+        });
+
+        await hubConnection.StopAsync();
+    }
+
+    [Fact]
+    public async Task Subscribe()
+    {
+        /* Given */
+        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        var hubConnection = Connect();
+        await hubConnection.StartAsync();
+
+        /* When */
+        // this wont block until the actual hub method execution has finished?
+        var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>(
+            "Query",
+            new QueryRequest
+            {
+                Query = @"
                         subscription { 
                             events {
                                  type
                                  message
                             }
                         }"
-                }, cts.Token);
+            }, cts.Token);
 
-            /* Then */
-            var result = await reader.ReadAsync(cts.Token);
+        /* Then */
+        var result = await reader.ReadAsync(cts.Token);
 
-            Assert.Contains(result.Data, kv =>
-            {
-                var (key, value) = kv;
-                return key == "events";
-            });
-
-            cts.Cancel();
-            await hubConnection.StopAsync();
-        }
-
-        [Fact]
-        public async Task Subscribe_with_unsubscribe()
+        Assert.Contains(result.Data, kv =>
         {
-            /* Given */
-            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-            var hubConnection = Connect();
-            await hubConnection.StartAsync();
+            var (key, value) = kv;
+            return key == "events";
+        });
 
-            /* When */
-            var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
-            {
-                Query = @"
+        cts.Cancel();
+        await hubConnection.StopAsync();
+    }
+
+    [Fact]
+    public async Task Subscribe_with_unsubscribe()
+    {
+        /* Given */
+        var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+        var hubConnection = Connect();
+        await hubConnection.StartAsync();
+
+        /* When */
+        var reader = await hubConnection.StreamAsChannelAsync<ExecutionResult>("Query", new QueryRequest
+        {
+            Query = @"
                     subscription { 
                         events {
                              type
                              message
                         }
                     }"
-            }, cts.Token);
+        }, cts.Token);
 
 
-            /* Then */
-            var result = await reader.ReadAsync(cts.Token);
+        /* Then */
+        var result = await reader.ReadAsync(cts.Token);
 
-            Assert.Contains(result.Data, kv =>
+        Assert.Contains(result.Data, kv =>
+        {
+            var (key, value) = kv;
+            return key == "events";
+        });
+
+        cts.Cancel();
+
+        await hubConnection.StopAsync();
+    }
+
+    private HubConnection Connect()
+    {
+        var connection = new HubConnectionBuilder()
+            .WithUrl(new Uri(_server.BaseAddress, "graphql"),
+                o => { o.HttpMessageHandlerFactory = _ => _server.CreateHandler(); })
+            .AddJsonProtocol(options =>
             {
-                var (key, value) = kv;
-                return key == "events";
-            });
+                options.PayloadSerializerOptions.Converters.Add(new ObjectDictionaryConverter());
+            })
+            .Build();
 
-            cts.Cancel();
+        connection.Closed += exception =>
+        {
+            Assert.Null(exception);
+            return Task.CompletedTask;
+        };
 
-            await hubConnection.StopAsync();
-        }
+        return connection;
     }
 }

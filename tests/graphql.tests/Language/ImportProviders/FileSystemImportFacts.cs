@@ -1,19 +1,17 @@
 ﻿using System.Threading.Tasks;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
 using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.Language.ImportProviders
+namespace Tanka.GraphQL.Tests.Language.ImportProviders;
+
+public class FileSystemImportFacts
 {
-    public class FileSystemImportFacts
+    [Fact]
+    public async Task Parse_Sdl()
     {
-        [Fact]
-        public async Task Parse_Sdl()
-        {
-            /* Given */
-            var sdl =
-                  @"
+        /* Given */
+        var sdl =
+            @"
                     """"""
                     tanka_import from ""Files/Import""
                     """"""
@@ -23,20 +21,21 @@ namespace Tanka.GraphQL.Tests.Language.ImportProviders
                     }
                  ";
 
-            /* When */
-            var builder = await new SchemaBuilder()
-                // BuiltIn import providers are used
-                .SdlAsync(sdl);
+        /* When */
+        var builder = new SchemaBuilder()
+            // BuiltIn import providers are used
+            .Add(sdl);
 
-            var schema = builder.Build();
+        var schema = await builder.Build(new SchemaBuildOptions());
 
-            /* Then */
-            var importedType = schema.GetNamedType<ObjectType>("ImportedType");
-            Assert.NotNull(importedType);
-            var importedField = schema.GetField(schema.Query.Name, "imported");
-            Assert.Same(importedType, importedField.Type.Unwrap());
-            var nestedType = schema.GetNamedType<ObjectType>("NestedObject");
-            Assert.NotNull(nestedType);
-        }
+        /* Then */
+        var importedType = schema.GetNamedType("ImportedType");
+        Assert.NotNull(importedType);
+
+        var importedField = schema.GetField(schema.Query.Name, "imported");
+        Assert.Equal(importedType.Name, importedField.Type.Unwrap().Name);
+
+        var nestedType = schema.GetNamedType("NestedObject");
+        Assert.NotNull(nestedType);
     }
 }

@@ -5,44 +5,42 @@ using BenchmarkDotNet.Order;
 using GraphQLParser;
 using Tanka.GraphQL.Introspection;
 
-namespace Tanka.GraphQL.Benchmarks
+namespace Tanka.GraphQL.Benchmarks;
+
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
+[MarkdownExporterAttribute.GitHub]
+public class LanguageLexerBenchmarks
 {
-    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-    [RankColumn]
-    [MemoryDiagnoser]
-    [MarkdownExporterAttribute.GitHub]
-    public class LanguageLexerBenchmarks
+    public string IntrospectionQuery { get; set; }
+
+    public Memory<byte> IntrospectionQueryMemory { get; set; }
+    public string SimpleQuery { get; set; }
+
+    [GlobalSetup]
+    public void Setup()
     {
-        public string SimpleQuery { get; set; }
+        IntrospectionQuery = Introspect.DefaultQuery;
+        IntrospectionQueryMemory = new Memory<byte>(Encoding.UTF8.GetBytes(IntrospectionQuery));
+        SimpleQuery = "query { field }";
+    }
 
-        public string IntrospectionQuery { get; set; }
+    [Benchmark(Baseline = true)]
+    public void GraphQL_dotnet_Lexer_IntrospectionQuery()
+    {
+        var token = Lexer.Lex(IntrospectionQuery);
+        while (token.Kind != TokenKind.EOF)
+            token = Lexer.Lex(IntrospectionQuery, token.End);
+    }
 
-        public Memory<byte> IntrospectionQueryMemory { get; set; }
-
-        [GlobalSetup]
-        public void Setup()
+    [Benchmark]
+    public void Tanka_GraphQL_Lexer_IntrospectionQuery()
+    {
+        var lexer = Language.Lexer.Create(IntrospectionQueryMemory.Span);
+        while (lexer.Advance())
         {
-            IntrospectionQuery = Introspect.DefaultQuery;
-            IntrospectionQueryMemory = new Memory<byte>(Encoding.UTF8.GetBytes(IntrospectionQuery));
-            SimpleQuery = "query { field }";
-        }
-
-        [Benchmark(Baseline = true)]
-        public void GraphQL_dotnet_Lexer_IntrospectionQuery()
-        {
-            var token = Lexer.Lex(IntrospectionQuery);
-            while (token.Kind != TokenKind.EOF)
-                token = Lexer.Lex(IntrospectionQuery, token.End);
-        }
-
-        [Benchmark]
-        public void Tanka_GraphQL_Lexer_IntrospectionQuery()
-        {
-            var lexer = Language.Lexer.Create(IntrospectionQueryMemory.Span);
-            while (lexer.Advance())
-            {
-                //noop
-            }
+            //noop
         }
     }
 }

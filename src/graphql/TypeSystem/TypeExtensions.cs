@@ -1,18 +1,16 @@
-﻿namespace Tanka.GraphQL.TypeSystem
-{
-    public static class TypeExtensions 
-    {
-        public static INamedType? Unwrap(this IType type)
-        {
-            switch (type)
-            {
-                case NonNull nonNull:
-                    return Unwrap(nonNull.OfType);
-                case List list:
-                    return Unwrap(list.OfType);
-            }
+﻿using Tanka.GraphQL.Language.Nodes;
 
-            return type as INamedType;
-        }
+namespace Tanka.GraphQL.TypeSystem;
+
+public static class TypeExtensions
+{
+    public static NamedType Unwrap(this TypeBase type)
+    {
+        return type switch
+        {
+            NonNullType NonNullType => Unwrap(NonNullType.OfType),
+            ListType list => Unwrap(list.OfType),
+            _ => (NamedType)type
+        };
     }
 }

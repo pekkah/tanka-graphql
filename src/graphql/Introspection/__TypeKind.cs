@@ -1,15 +1,14 @@
-﻿namespace Tanka.GraphQL.Introspection
+﻿namespace Tanka.GraphQL.Introspection;
+
+// ReSharper disable once InconsistentNaming
+public enum __TypeKind
 {
-    // ReSharper disable once InconsistentNaming
-    public enum __TypeKind
-    {
-        SCALAR,
-        OBJECT,
-        INTERFACE,
-        UNION,
-        ENUM,
-        INPUT_OBJECT,
-        LIST,
-        NON_NULL
-    }
+    SCALAR,
+    OBJECT,
+    INTERFACE,
+    UNION,
+    ENUM,
+    INPUT_OBJECT,
+    LIST,
+    NON_NULL
 }

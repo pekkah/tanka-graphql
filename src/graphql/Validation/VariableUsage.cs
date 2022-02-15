@@ -1,15 +1,13 @@
-﻿
-using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
+﻿using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL.Validation
+namespace Tanka.GraphQL.Validation;
+
+public struct VariableUsage
 {
-    public struct VariableUsage
-    {
-        public Variable Node;
+    public Variable Node;
 
-        public IType Type;
+    public TypeDefinition? Type;
 
-        public object DefaultValue;
-    }
+    public object? DefaultValue;
 }

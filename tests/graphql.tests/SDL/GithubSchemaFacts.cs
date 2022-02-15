@@ -2,39 +2,38 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
+using System.Threading.Tasks;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.SDL
+namespace Tanka.GraphQL.Tests.SDL;
+
+public class GithubSchemaFacts
 {
-    public class GithubSchemaFacts
+    [Fact]
+    public async Task LoadSchema()
     {
-        private static string GetGitHubSchema()
+        /* Given */
+        var sdl = GetGitHubSchema();
+
+        /* When */
+        var schema = await new SchemaBuilder()
+            .Add(sdl)
+            .Build(new SchemaBuildOptions());
+
+        /* Then */
+        Assert.NotNull(schema);
+        Assert.NotNull(schema.Query);
+    }
+
+    private static string GetGitHubSchema()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceStream = assembly.GetManifestResourceStream("Tanka.GraphQL.Tests.github.graphql");
+        using (var reader =
+               new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceStream = assembly.GetManifestResourceStream("Tanka.GraphQL.Tests.github.graphql");
-            using (var reader =
-                new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
-            {
-                return reader.ReadToEnd();
-            }
-        }
-
-        [Fact]
-        public void LoadSchema()
-        {
-            /* Given */
-            var sdl = GetGitHubSchema();
-
-            /* When */
-            var schema = new SchemaBuilder()
-                .Sdl(sdl)
-                .Build(false);
-
-            /* Then */
-            Assert.NotNull(schema);
-            Assert.NotNull(schema.Query);
+            return reader.ReadToEnd();
         }
     }
 }

@@ -1,22 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-namespace Tanka.GraphQL.Language.Nodes.TypeSystem
+namespace Tanka.GraphQL.Language.Nodes.TypeSystem;
+
+public sealed class ArgumentsDefinition : CollectionNodeBase<InputValueDefinition>
 {
-    public sealed class ArgumentsDefinition : CollectionNodeBase<InputValueDefinition>
+    public ArgumentsDefinition(IReadOnlyList<InputValueDefinition> items, in Location? location = default) :
+        base(items, in location)
     {
-        public ArgumentsDefinition(IReadOnlyList<InputValueDefinition> items, in Location? location = default) :
-            base(items, in location)
-        {
-        }
+    }
 
-        public override NodeKind Kind => NodeKind.ArgumentsDefinition;
+    public override NodeKind Kind => NodeKind.ArgumentsDefinition;
 
-        public static ArgumentsDefinition? From(IReadOnlyList<InputValueDefinition>? args)
-        {
-            if (args == null)
-                return null;
+    public static ArgumentsDefinition None { get; } = new(Array.Empty<InputValueDefinition>());
 
-            return new ArgumentsDefinition(args);
-        }
+    public static ArgumentsDefinition? From(IReadOnlyList<InputValueDefinition>? args)
+    {
+        if (args == null)
+            return null;
+
+        return new ArgumentsDefinition(args);
     }
 }

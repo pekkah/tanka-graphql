@@ -1,13 +1,13 @@
 ﻿using System.Linq;
 using Xunit;
 
-namespace Tanka.GraphQL.Server.Links.Tests.Introspection
+namespace Tanka.GraphQL.Server.Links.Tests.Introspection;
+
+public class ParseIntrospectionFacts
 {
-    public class ParseIntrospectionFacts
+    public ParseIntrospectionFacts()
     {
-        public ParseIntrospectionFacts()
-        {
-            IntrospectionJson = @"{
+        IntrospectionJson = @"{
           ""data"": {
             ""__schema"": {
               ""directives"": [
@@ -403,96 +403,95 @@ namespace Tanka.GraphQL.Server.Links.Tests.Introspection
           },
           ""extensions"": {}
         }";
-        }
+    }
 
-        public string IntrospectionJson { get; }
+    public string IntrospectionJson { get; }
 
-        [Fact]
-        public void Parse_Schema()
-        {
-            /* Given */
-            /* When */
-            var result = IntrospectionParser.Deserialize(IntrospectionJson);
+    [Fact]
+    public void Parse_Schema()
+    {
+        /* Given */
+        /* When */
+        var result = IntrospectionParser.Deserialize(IntrospectionJson);
 
-            /* Then */
-            Assert.NotNull(result.Schema);
-        }
+        /* Then */
+        Assert.NotNull(result.Schema);
+    }
 
-        [Fact]
-        public void Parse_QueryType_Name()
-        {
-            /* Given */
-            /* When */
-            var result = IntrospectionParser.Deserialize(IntrospectionJson);
+    [Fact]
+    public void Parse_QueryType_Name()
+    {
+        /* Given */
+        /* When */
+        var result = IntrospectionParser.Deserialize(IntrospectionJson);
 
-            /* Then */
-            Assert.NotNull(result.Schema.QueryType.Name);
-        }
+        /* Then */
+        Assert.NotNull(result.Schema.QueryType.Name);
+    }
 
-        [Fact]
-        public void Parse_MutationType_Name()
-        {
-            /* Given */
-            /* When */
-            var result = IntrospectionParser.Deserialize(IntrospectionJson);
+    [Fact]
+    public void Parse_MutationType_Name()
+    {
+        /* Given */
+        /* When */
+        var result = IntrospectionParser.Deserialize(IntrospectionJson);
 
-            /* Then */
-            Assert.NotNull(result.Schema.MutationType.Name);
-        }
+        /* Then */
+        Assert.NotNull(result.Schema.MutationType.Name);
+    }
 
-        [Fact]
-        public void Parse_SubscriptionType_Name()
-        {
-            /* Given */
-            /* When */
-            var result = IntrospectionParser.Deserialize(IntrospectionJson);
+    [Fact]
+    public void Parse_SubscriptionType_Name()
+    {
+        /* Given */
+        /* When */
+        var result = IntrospectionParser.Deserialize(IntrospectionJson);
 
-            /* Then */
-            Assert.NotNull(result.Schema.SubscriptionType.Name);
-        }
+        /* Then */
+        Assert.NotNull(result.Schema.SubscriptionType.Name);
+    }
 
-        [Fact]
-        public void Parsed_Types_Includes_QueryType()
-        {
-            /* Given */
-            /* When */
-            var result = IntrospectionParser.Deserialize(IntrospectionJson);
+    [Fact]
+    public void Parsed_Types_Includes_QueryType()
+    {
+        /* Given */
+        /* When */
+        var result = IntrospectionParser.Deserialize(IntrospectionJson);
 
-            /* Then */
-            Assert.NotNull(result.Schema.Types.SingleOrDefault(t => t.Name == result.Schema.QueryType.Name));
-        }
+        /* Then */
+        Assert.NotNull(result.Schema.Types.SingleOrDefault(t => t.Name == result.Schema.QueryType.Name));
+    }
 
-        [Fact]
-        public void Parsed_Types_Includes_MutationType()
-        {
-            /* Given */
-            /* When */
-            var result = IntrospectionParser.Deserialize(IntrospectionJson);
+    [Fact]
+    public void Parsed_Types_Includes_MutationType()
+    {
+        /* Given */
+        /* When */
+        var result = IntrospectionParser.Deserialize(IntrospectionJson);
 
-            /* Then */
-            Assert.NotNull(result.Schema.Types.SingleOrDefault(t => t.Name == result.Schema.MutationType.Name));
-        }
+        /* Then */
+        Assert.NotNull(result.Schema.Types.SingleOrDefault(t => t.Name == result.Schema.MutationType.Name));
+    }
 
-        [Fact]
-        public void Parsed_Types_Includes_SubscriptionType()
-        {
-            /* Given */
-            /* When */
-            var result = IntrospectionParser.Deserialize(IntrospectionJson);
+    [Fact]
+    public void Parsed_Types_Includes_SubscriptionType()
+    {
+        /* Given */
+        /* When */
+        var result = IntrospectionParser.Deserialize(IntrospectionJson);
 
-            /* Then */
-            Assert.NotNull(result.Schema.Types.SingleOrDefault(t => t.Name == result.Schema.SubscriptionType.Name));
-        }
+        /* Then */
+        Assert.NotNull(result.Schema.Types.SingleOrDefault(t => t.Name == result.Schema.SubscriptionType.Name));
+    }
 
-        [Fact]
-        public void Parsed_Types_have_kind()
-        {
-            /* Given */
-            /* When */
-            var result = IntrospectionParser.Deserialize(IntrospectionJson);
+    [Fact]
+    public void Parsed_Types_have_kind()
+    {
+        /* Given */
+        /* When */
+        var result = IntrospectionParser.Deserialize(IntrospectionJson);
 
-            /* Then */
-            Assert.All(result.Schema.Types, type => Assert.NotNull(type.Kind));
-        }
+        /* Then */
+        Assert.All(result.Schema.Types, type => Assert.NotNull(type.Kind));
     }
 }

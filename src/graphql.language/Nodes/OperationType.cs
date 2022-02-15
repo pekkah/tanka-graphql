@@ -1,9 +1,8 @@
-﻿namespace Tanka.GraphQL.Language.Nodes
+﻿namespace Tanka.GraphQL.Language.Nodes;
+
+public enum OperationType
 {
-    public enum OperationType
-    {
-        Query,
-        Mutation,
-        Subscription
-    }
+    Query,
+    Mutation,
+    Subscription
 }

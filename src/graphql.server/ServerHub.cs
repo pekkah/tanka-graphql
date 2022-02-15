@@ -5,35 +5,34 @@ using Microsoft.AspNetCore.SignalR;
 using Tanka.GraphQL.Channels;
 using Tanka.GraphQL.Server.Links.DTOs;
 
-namespace Tanka.GraphQL.Server
+namespace Tanka.GraphQL.Server;
+
+public class ServerHub : Hub
 {
-    public class ServerHub : Hub
+    private readonly IQueryStreamService _queryStreamService;
+
+    public ServerHub(IQueryStreamService queryStreamService)
     {
-        private readonly IQueryStreamService _queryStreamService;
+        _queryStreamService = queryStreamService;
+    }
 
-        public ServerHub(IQueryStreamService queryStreamService)
+    [HubMethodName("query")]
+    public ChannelReader<ExecutionResult> QueryAsync(
+        QueryRequest query,
+        CancellationToken cancellationToken)
+    {
+        var channel = Channel.CreateUnbounded<ExecutionResult>();
+        var _ = Task.Run(async () =>
         {
-            _queryStreamService = queryStreamService;
-        }
-
-        [HubMethodName("query")]
-        public ChannelReader<ExecutionResult> QueryAsync(
-            QueryRequest query,
-            CancellationToken cancellationToken)
-        {
-            var channel = Channel.CreateUnbounded<ExecutionResult>();
-            var _ = Task.Run(async ()=>
+            var result = await _queryStreamService.QueryAsync(new Query
             {
-                var result = await _queryStreamService.QueryAsync(new Query()
-                {
-                    Document = Parser.ParseDocument(query.Query),
-                    OperationName = query.OperationName,
-                    Extensions = query.Extensions,
-                    Variables = query.Variables
-                }, cancellationToken);
-                var __ = result.Reader.WriteTo(channel.Writer);
-            }, CancellationToken.None);
-            return channel.Reader;
-        }
+                Document = query.Query,
+                OperationName = query.OperationName,
+                Extensions = query.Extensions,
+                Variables = query.Variables
+            }, cancellationToken);
+            var __ = result.Reader.WriteTo(channel.Writer);
+        }, CancellationToken.None);
+        return channel.Reader;
     }
 }

@@ -1,12 +1,11 @@
 using System;
 
-namespace Tanka.GraphQL.Language.Tests
+namespace Tanka.GraphQL.Language.Tests;
+
+public static class SpanExtensions
 {
-    public static class SpanExtensions 
+    public static ReadOnlySpan<byte> AsReadOnlySpan(this byte[] bytes)
     {
-        public static ReadOnlySpan<byte> AsReadOnlySpan(this byte[] bytes)
-        {
-            return bytes.AsSpan();
-        }
+        return bytes.AsSpan();
     }
 }

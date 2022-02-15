@@ -1,19 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Tanka.GraphQL
+namespace Tanka.GraphQL;
+
+public class ExtensionsRunnerFactory : IExtensionsRunnerFactory
 {
-    public class ExtensionsRunnerFactory : IExtensionsRunnerFactory
+    public async Task<ExtensionsRunner> BeginScope(ExecutionOptions options)
     {
-        public async Task<ExtensionsRunner> BeginScope(ExecutionOptions options)
-        {
-            var extensions = options.Extensions;
-            var scopes = new List<IExtensionScope>();
+        var extensions = options.Extensions;
+        var scopes = new List<IExtensionScope>();
 
-            foreach (var extension in extensions) 
-                scopes.Add(await extension.BeginExecuteAsync(options));
+        foreach (var extension in extensions)
+            scopes.Add(await extension.BeginExecuteAsync(options));
 
-            return new ExtensionsRunner(scopes);
-        }
+        return new ExtensionsRunner(scopes);
     }
 }

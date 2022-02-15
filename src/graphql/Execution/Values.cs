@@ -3,181 +3,179 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
-namespace Tanka.GraphQL.Execution
-{
-    public static class Values
-    {
-        public static object? CoerceValue(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter,
-            object? value,
-            IType valueType)
-        {
-            if (valueType is NonNull nonNull)
-                return CoerceNonNullValue(
-                    getInputObjectFields,
-                    getValueConverter,
-                    value,
-                    nonNull);
+namespace Tanka.GraphQL.Execution;
 
-            if (valueType is List list)
+public static class Values
+{
+    public static object? CoerceValue(
+        ISchema schema,
+        object? value,
+        TypeBase valueType)
+    {
+        switch (valueType)
+        {
+            case NonNullType NonNullType:
+                return CoerceNonNullTypeValue(
+                    schema,
+                    value,
+                    NonNullType);
+            case ListType list:
                 return CoerceListValues(
-                    getInputObjectFields,
-                    getValueConverter,
+                    schema,
                     list.OfType,
                     value);
+        }
 
-            if (valueType is ScalarType scalar) return CoerceScalarValue(getValueConverter, value, scalar);
 
-            if (valueType is EnumType enumType) return CoerceEnumValue(value, enumType);
-
-            if (valueType is InputObjectType input)
-                return CoerceInputValue(
-                    getInputObjectFields,
-                    getValueConverter,
-                    value,
-                    input);
-
+        if (valueType is not NamedType namedValueType)
             throw new ValueCoercionException(
                 $"Unexpected valueType {valueType}. Cannot coerce value.",
                 value,
                 valueType);
-        }
 
-        private static IDictionary<string, object?>? CoerceInputValue(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter, 
-            object? value,
-            InputObjectType input)
+        var valueTypeDefinition = schema.GetRequiredNamedType<TypeDefinition>(namedValueType.Name);
+
+        return valueTypeDefinition switch
         {
-            if (value == null)
-                return null;
+            ScalarDefinition scalar => CoerceScalarValue(schema, value, scalar),
+            EnumDefinition enumDefinition => CoerceEnumValue(value, enumDefinition),
+            InputObjectDefinition input => CoerceInputValue(
+                schema,
+                value,
+                input),
+            _ => throw new ArgumentOutOfRangeException($"Type of the '{valueType} is not supported by value coercion")
+        };
+    }
 
-            var result = new Dictionary<string, object?>();
+    private static IDictionary<string, object?>? CoerceInputValue(
+        ISchema schema,
+        object? value,
+        InputObjectDefinition input)
+    {
+        if (value == null)
+            return null;
 
-            if (value is ObjectValue objectValue)
-                return CoerceInputValueAst(getInputObjectFields, getValueConverter, input, objectValue, result);
+        var result = new Dictionary<string, object?>();
 
-            if (value is IDictionary<string, object> dictionaryValues)
-            {
-                var fields = getInputObjectFields(input.Name);
-                foreach (var inputField in fields)
-                {
-                    var fieldName = inputField.Key;
-                    var field = inputField.Value;
-                    var fieldType = field.Type;
+        if (value is ObjectValue objectValue)
+            return CoerceInputValueAst(schema, input, objectValue, result);
 
-                    object astValue = null;
-
-                    if (dictionaryValues.ContainsKey(fieldName)) astValue = dictionaryValues[fieldName];
-
-                    var coercedFieldValue = CoerceValue(getInputObjectFields, getValueConverter, astValue, fieldType);
-
-                    result[fieldName] = coercedFieldValue;
-                }
-            }
-
-            return result;
-        }
-
-        private static IDictionary<string, object?> CoerceInputValueAst(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter,
-            InputObjectType input,
-            ObjectValue objectValue,
-            Dictionary<string, object?> result)
+        if (value is IDictionary<string, object> dictionaryValues)
         {
-            var fields = getInputObjectFields(input.Name);
+            var fields = schema.GetInputFields(input.Name);
             foreach (var inputField in fields)
             {
                 var fieldName = inputField.Key;
                 var field = inputField.Value;
                 var fieldType = field.Type;
 
-                var astValue = objectValue.Fields.SingleOrDefault(v => v.Name == fieldName);
-                var coercedFieldValue =
-                    CoerceValue(getInputObjectFields, getValueConverter, astValue?.Value, fieldType);
+                object astValue = null;
+
+                if (dictionaryValues.ContainsKey(fieldName)) astValue = dictionaryValues[fieldName];
+
+                var coercedFieldValue = CoerceValue(schema, astValue, fieldType);
 
                 result[fieldName] = coercedFieldValue;
             }
-
-            return result;
         }
 
-        private static object CoerceNonNullValue(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter,
-            object value,
-            NonNull nonNull)
-        {
-            var coercedValue = CoerceValue(getInputObjectFields, getValueConverter, value, nonNull.OfType);
-            if (coercedValue == null)
-                throw new ValueCoercionException("Coerced value is null",
-                    value,
-                    nonNull);
+        return result;
+    }
 
-            return coercedValue;
+    private static IDictionary<string, object?> CoerceInputValueAst(
+        ISchema schema,
+        InputObjectDefinition input,
+        ObjectValue objectValue,
+        Dictionary<string, object?> result)
+    {
+        var fields = schema.GetInputFields(input.Name);
+        foreach (var inputField in fields)
+        {
+            var fieldName = inputField.Key;
+            var field = inputField.Value;
+            var fieldType = field.Type;
+
+            var astValue = objectValue.Fields.SingleOrDefault(v => v.Name == fieldName);
+            var coercedFieldValue = CoerceValue(schema, astValue?.Value, fieldType);
+
+            result[fieldName] = coercedFieldValue;
         }
 
-        private static object? CoerceEnumValue(object value, EnumType enumType1)
+        return result;
+    }
+
+    private static object CoerceNonNullTypeValue(
+        ISchema schema,
+        object? value,
+        NonNullType nonNullType)
+    {
+        var coercedValue = CoerceValue(schema, value, nonNullType.OfType);
+        if (coercedValue == null)
+            throw new ValueCoercionException("Coerced value is null",
+                value,
+                nonNullType);
+
+        return coercedValue;
+    }
+
+    private static object? CoerceEnumValue(object? value, EnumDefinition enumType)
+    {
+        if (value is ValueBase astValue)
+            return new EnumConverter(enumType).ParseLiteral(astValue);
+
+        return new EnumConverter(enumType).ParseValue(value);
+    }
+
+    private static object? CoerceScalarValue(
+        ISchema schema,
+        object? value,
+        ScalarDefinition scalarType)
+    {
+        var serializer = schema.GetRequiredValueConverter(scalarType.Name);
+
+        if (value is ValueBase astValue)
+            return serializer.ParseLiteral(astValue);
+
+        return serializer.ParseValue(value);
+    }
+
+    private static object? CoerceListValues(
+        ISchema schema,
+        TypeBase listWrappedType,
+        object? value)
+    {
+        if (value == null)
+            return null;
+
+        var coercedListValues = new List<object?>();
+        if (value is ListValue listValue)
         {
-            if (value is ValueBase astValue)
-                return enumType1.ParseLiteral(astValue);
-
-            return enumType1.ParseValue(value);
-        }
-
-        private static object? CoerceScalarValue(
-            Func<string, IValueConverter> getValueConverter,
-            object value,
-            ScalarType scalarType)
-        {
-            var serializer = getValueConverter(scalarType.Name);
-
-            if (value is ValueBase astValue)
-                return serializer.ParseLiteral(astValue);
-
-            return serializer.ParseValue(value);
-        }
-
-        private static object? CoerceListValues(
-            Func<string, IEnumerable<KeyValuePair<string, InputObjectField>>> getInputObjectFields,
-            Func<string, IValueConverter> getValueConverter,
-            IType listWrappedType,
-            object value)
-        {
-            if (value == null)
-                return null;
-
-            var coercedListValues = new List<object?>();
-            if (value is ListValue listValue)
+            foreach (var listValueValue in listValue.Values)
             {
-                foreach (var listValueValue in listValue.Values)
-                {
-                    var coercedValue = CoerceValue(getInputObjectFields, getValueConverter, listValueValue,
-                        listWrappedType);
-                    coercedListValues.Add(coercedValue);
-                }
-
-                return coercedListValues;
+                var coercedValue = CoerceValue(schema, listValueValue,
+                    listWrappedType);
+                coercedListValues.Add(coercedValue);
             }
 
-            if (value is IEnumerable values)
-            {
-                foreach (var v in values)
-                {
-                    var coercedValue = CoerceValue(getInputObjectFields, getValueConverter, v, listWrappedType);
-                    coercedListValues.Add(coercedValue);
-                }
+            return coercedListValues;
+        }
 
-                return coercedListValues;
+        if (value is IEnumerable values)
+        {
+            foreach (var v in values)
+            {
+                var coercedValue = CoerceValue(schema, v, listWrappedType);
+                coercedListValues.Add(coercedValue);
             }
 
-            coercedListValues.Add(CoerceValue(getInputObjectFields, getValueConverter, value, listWrappedType));
-            return coercedListValues.ToArray();
+            return coercedListValues;
         }
+
+        coercedListValues.Add(CoerceValue(schema, value, listWrappedType));
+        return coercedListValues.ToArray();
     }
 }

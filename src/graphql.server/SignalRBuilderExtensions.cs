@@ -3,21 +3,20 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.Server.Links.DTOs;
 
-namespace Tanka.GraphQL.Server
-{
-    public static class SignalRBuilderExtensions
-    {
-        public static ISignalRBuilder AddTankaGraphQL(this ISignalRBuilder builder)
-        {
-            builder.AddJsonProtocol(options =>
-            {
-                if (!options.PayloadSerializerOptions.Converters.Any(converter =>
-                    converter is ObjectDictionaryConverter))
-                    options.PayloadSerializerOptions.Converters
-                        .Add(new ObjectDictionaryConverter());
-            });
+namespace Tanka.GraphQL.Server;
 
-            return builder;
-        }
+public static class SignalRBuilderExtensions
+{
+    public static ISignalRBuilder AddTankaGraphQL(this ISignalRBuilder builder)
+    {
+        builder.AddJsonProtocol(options =>
+        {
+            if (!options.PayloadSerializerOptions.Converters.Any(converter =>
+                    converter is ObjectDictionaryConverter))
+                options.PayloadSerializerOptions.Converters
+                    .Add(new ObjectDictionaryConverter());
+        });
+
+        return builder;
     }
 }

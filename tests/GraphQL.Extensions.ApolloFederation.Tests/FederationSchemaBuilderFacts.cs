@@ -1,139 +1,136 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
-namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests
+namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;
+
+public class FederationSchemaBuilderFacts
 {
-    public class FederationSchemaBuilderFacts
+    [Fact]
+    public async Task EntityUnion_does_not_contain_object_without_key_directive()
     {
-        [Fact]
-        public void EntityUnion_does_not_contain_object_without_key_directive()
-        {
-            /* Given */
-            var builder = new SchemaBuilder()
-                .AddFederationDirectives()
-                .Sdl(@"
+        /* Given */
+        var builder = new SchemaBuilder()
+            .Add(@"
                     type Person @key(fields: ""id"") {
                         id: ID!
                     }
                     type Address {
                         street: String
-                    }")
-                .Query(out var query);
+                    }");
 
-            /* When */
-            var schema = Federation.ServiceFrom(
-                    builder.Build(),
-                    new DictionaryReferenceResolversMap())
-                .Build();
+        /* When */
+        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions());
 
-            var entityUnion = schema.GetNamedType<UnionType>("_Entity");
-            var entities = schema.GetPossibleTypes(entityUnion)
-                .ToList();
+        var entityUnion = schema.GetRequiredNamedType<UnionDefinition>("_Entity");
+        var entities = schema.GetPossibleTypes(entityUnion)
+            .ToList();
 
-            /* Then */
-            Assert.Single(entities);
-        }
+        /* Then */
+        Assert.Single(entities);
+    }
 
-        [Fact]
-        public void EntityUnion_has_possible_type_with_key_directive()
-        {
-            /* Given */
-            var builder = new SchemaBuilder()
-                .AddFederationDirectives()
-                .Sdl(@"
+    [Fact]
+    public async Task EntityUnion_has_possible_type_with_key_directive()
+    {
+        /* Given */
+        var builder = new SchemaBuilder()
+            .Add(@"
                     type Person @key(fields: ""id"") {
                         id: ID!
-                    }")
-                .Query(out var query);
+                    }");
 
-            /* When */
-            var schema = Federation.ServiceFrom(
-                    builder.Build(),
-                    new DictionaryReferenceResolversMap())
-                .Build();
+        /* When */
+        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions());
 
-            var entityUnion = schema.GetNamedType<UnionType>("_Entity");
-            var entities = schema.GetPossibleTypes(entityUnion);
+        var entityUnion = schema.GetRequiredNamedType<UnionDefinition>("_Entity");
+        var entities = schema.GetPossibleTypes(entityUnion);
 
-            /* Then */
-            Assert.Single(entities, obj => obj.Name == "Person");
-        }
+        /* Then */
+        Assert.Single(entities, obj => obj.Name == "Person");
+    }
 
-        [Fact]
-        public async Task Query_entities()
-        {
-            /* Given */
-            var builder = new SchemaBuilder()
-                .AddFederationDirectives()
-                .Sdl(@"
+    [Fact]
+    public async Task Query_entities()
+    {
+        /* Given */
+        var builder = new SchemaBuilder()
+            .Add(@"
                     type Person @key(fields: ""id"") {
                         id: ID!
                         name: String!
                     }
                     type Address @key(fields: ""street"") {
                         street: String
-                    }")
-                .UseResolversAndSubscribers(new ObjectTypeMap
-                {
-                    ["Person"] = new FieldResolversMap
-                    {
-                        {"id", context => ResolveSync.As("ID123")},
-                        {"name", context => ResolveSync.As("Name 123")}
-                    }
-                })
-                .Query(out _);
-            ;
+                    }");
 
-            /* When */
-            var schema = Federation.ServiceFrom(
-                    builder.Build(),
-                    new DictionaryReferenceResolversMap
-                    {
-                        ["Person"] = (context, type, representation) => new ValueTask<ResolveReferenceResult>(
-                            new ResolveReferenceResult(type, representation))
-                    })
-                .Build();
-
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
+        var resolvers = new ResolversMap
+        {
+            ["Person"] = new()
             {
-                Schema = schema,
-                Document = @"query Entities($reps: [_Any!]!) { 
+                { "id", context => ResolveSync.As("ID123") },
+                { "name", context => ResolveSync.As("Name 123") }
+            }
+        };
+
+        /* When */
+        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions
+        {
+            SchemaBuildOptions = new SchemaBuildOptions(resolvers),
+            ReferenceResolvers = new DictionaryReferenceResolversMap
+            {
+                ["Person"] = (context, type, representation) => new ValueTask<ResolveReferenceResult>(
+                    new ResolveReferenceResult(type, representation))
+            }
+        });
+
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = schema,
+            Document = @"query Entities($reps: [_Any!]!) { 
 _entities(representations: $reps) { 
     ... on Person { 
         id 
         } 
     } 
 }",
-                VariableValues = new Dictionary<string, object>
+            VariableValues = new Dictionary<string, object>
+            {
+                ["reps"] = new List<object>
                 {
-                    ["reps"] = new List<object>
+                    new Dictionary<string, object>
                     {
-                        new Dictionary<string, object>
-                        {
-                            ["id"] = 101,
-                            ["__typename"] = "Person"
-                        }
+                        ["id"] = 101,
+                        ["__typename"] = "Person"
                     }
                 }
-            });
+            }
+        });
 
-            /* Then */
-            Assert.Null(result.Errors);
-        }
+        /* Then */
+        result.ShouldMatchJson(@"{
+  ""data"": {
+    ""_entities"": [
+      {
+        ""id"": ""ID123""
+      }
+    ]
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
 
-        [Fact]
-        public async Task Query_sdl()
-        {
-            /* Given */
-            var builder = new SchemaBuilder()
-                .AddFederationDirectives()
-                .Sdl(@"
+    [Fact]
+    public async Task Query_sdl()
+    {
+        /* Given */
+        var builder = new SchemaBuilder()
+            .Add(@"
 type Review  @key(fields: ""id"") {
   id: ID!
   product: Product
@@ -142,29 +139,32 @@ type Review  @key(fields: ""id"") {
 
 type Product @key(fields: ""upc"") @extends {
   upc: String! @external
-}")
-                .UseResolversAndSubscribers(new ObjectTypeMap())
-                .Query(out _);
-
-            /* When */
-            var schema = Federation.ServiceFrom(
-                    builder.Build(),
-                    new DictionaryReferenceResolversMap())
-                .Build();
-
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
+}");
+        /* When */
+        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions
+        {
+            SchemaBuildOptions = new SchemaBuildOptions
             {
-                Schema = schema,
-                Document = @"
+                BuildTypesFromOrphanedExtensions = true
+            },
+            ReferenceResolvers = new DictionaryReferenceResolversMap()
+        });
+
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = schema,
+            Document = @"
 {
     _service {
         sdl
     }
 }"
-            });
+        });
 
-            /* Then */
-            Assert.Null(result.Errors);
-        }
+        /* Then */
+        //todo: when buit in types are ignored fix this to validated the actual result
+        Assert.Null(result.Errors);
+        Assert.NotNull(result.Data);
+        Assert.NotEmpty(result.Data);
     }
 }

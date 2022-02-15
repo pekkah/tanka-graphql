@@ -1,24 +1,21 @@
 using System;
-using Tanka.GraphQL.Tools;
+using System.Threading.Tasks;
 using Tanka.GraphQL.TypeSystem;
 
-namespace Tanka.GraphQL.Tests.Data.Starwars
+namespace Tanka.GraphQL.Tests.Data.Starwars;
+
+public class StarwarsFixture : IDisposable
 {
-    public class StarwarsFixture : IDisposable
+    public void Dispose()
     {
-        public void Dispose()
-        {
-        }
+    }
 
-        public ISchema CreateSchema(Starwars starwars)
-        {
-            var schema = StarwarsSchema.Create();
-            var resolvers = StarwarsResolvers.BuildResolvers(starwars);
-            var executable = SchemaTools.MakeExecutableSchemaWithIntrospection(
-                schema,
-                resolvers);
+    public Task<ISchema> CreateSchema(Starwars starwars)
+    {
+        var builder = StarwarsSchema.Create();
+        var resolvers = StarwarsResolvers.BuildResolvers(starwars);
+        var executable = builder.Build(resolvers);
 
-            return executable;
-        }
+        return executable;
     }
 }

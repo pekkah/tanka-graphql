@@ -4,19 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Tanka.GraphQL;
 using Tanka.GraphQL.Extensions.ApolloFederation;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
-using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
-namespace GraphQL.Dev.Reviews
+namespace GraphQL.Dev.Reviews;
+
+public static class SchemaFactory
 {
-    public static class SchemaFactory
+    public static async ValueTask<ISchema> Create()
     {
-        public static async ValueTask<ISchema> Create()
-        {
-            var typeDefs = @"
+        var typeDefs = @"
 type Review @key(fields: ""id"") {
     id: ID!
     body: String
@@ -38,187 +36,181 @@ type Product @key(fields: ""upc"") @extends {
 type Query {
 }
 ";
-            var builder = new SchemaBuilder()
-                .AddFederationDirectives();
+        var builder = new SchemaBuilder()
+            .Add(typeDefs);
 
-            await builder.SdlAsync(typeDefs);
-
-            builder.UseResolversAndSubscribers(
-                new ObjectTypeMap
+        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions
+        {
+            SchemaBuildOptions = new SchemaBuildOptions
+            {
+                Resolvers = new ResolversMap
                 {
-                    ["User"] = new FieldResolversMap
+                    ["User"] = new()
                     {
-                        {"id", Resolve.PropertyOf<User>(u => u.ID)},
-                        {"username", UserUsername},
-                        {"reviews", UserReviews}
+                        { "id", Resolve.PropertyOf<User>(u => u.ID) },
+                        { "username", UserUsername },
+                        { "reviews", UserReviews }
                     },
-                    ["Review"] = new FieldResolversMap
+                    ["Review"] = new()
                     {
-                        {"id", Resolve.PropertyOf<Review>(r => r.ID)},
-                        {"body", Resolve.PropertyOf<Review>(r => r.Body)},
-                        {"author", ReviewAuthor},
-                        {"product", Resolve.PropertyOf<Review>(r => r.Product)}
+                        { "id", Resolve.PropertyOf<Review>(r => r.ID) },
+                        { "body", Resolve.PropertyOf<Review>(r => r.Body) },
+                        { "author", ReviewAuthor },
+                        { "product", Resolve.PropertyOf<Review>(r => r.Product) }
                     },
-                    ["Product"] = new FieldResolversMap
+                    ["Product"] = new()
                     {
-                        {"upc", Resolve.PropertyOf<Product>(p => p.Upc)},
-                        {"reviews", ProductReviews}
+                        { "upc", Resolve.PropertyOf<Product>(p => p.Upc) },
+                        { "reviews", ProductReviews }
                     }
-                });
-
-            var federationBuilder = Federation
-                .ServiceFrom(builder.Build(),
-                    new DictionaryReferenceResolversMap()
-                    {
-                        ["User"] = UserReference,
-                        ["Product"] = ProductReference
-                    });
-
-            return SchemaTools.MakeExecutableSchemaWithIntrospection(federationBuilder);
-        }
-
-        private static ValueTask<IResolverResult> UserUsername(IResolverContext context)
-        {
-            var user = (User) context.ObjectValue;
-
-            return ResolveSync.As(user.Username);
-        }
-
-        private static async ValueTask<ResolveReferenceResult> ProductReference(
-            IResolverContext context, INamedType type, IReadOnlyDictionary<string, object> representation)
-        {
-            await Task.Delay(0);
-
-            var upc = representation["upc"].ToString();
-            var product = new Product
+                }
+            },
+            ReferenceResolvers = new DictionaryReferenceResolversMap
             {
-                Upc = upc
-            };
-
-            return new ResolveReferenceResult(type, product);
-        }
-
-        private static ValueTask<IResolverResult> ProductReviews(IResolverContext context)
-        {
-            var product = (Product) context.ObjectValue;
-            var reviews = Db.Reviews
-                .Where(r => r.Value.Product.Upc == product.Upc)
-                .Select(p => p.Value);
-
-            return ResolveSync.As(reviews);
-        }
-
-        private static ValueTask<IResolverResult> ReviewAuthor(IResolverContext context)
-        {
-            var review = (Review) context.ObjectValue;
-
-            return ResolveSync.As(new User
-            {
-                ID = review.AuthorID,
-                Username = Db.Usernames[review.AuthorID]
-            });
-        }
-
-        private static ValueTask<IResolverResult> UserReviews(IResolverContext context)
-        {
-            var user = (User) context.ObjectValue;
-            var reviews = Db.Reviews
-                .Where(r => r.Value.AuthorID == user.ID)
-                .Select(r => r.Value);
-
-            return ResolveSync.As(reviews);
-        }
-
-        private static async ValueTask<ResolveReferenceResult> UserReference(
-            IResolverContext context, 
-            INamedType type, 
-            IReadOnlyDictionary<string, object> representation)
-        {
-            await Task.Delay(0);
-
-            if (!representation.TryGetValue("id", out var idObj))
-            {
-                throw new ArgumentOutOfRangeException("id", "Representation is missing the required 'id' value");
+                ["User"] = UserReference,
+                ["Product"] = ProductReference
             }
+        });
 
-            var userId = idObj.ToString();
-
-            if (!Db.Usernames.TryGetValue(userId, out var username))
-            {
-                throw new ArgumentOutOfRangeException("id", $"User '{userId} not found");
-            }
-
-            var user = new User
-            {
-                ID = userId,
-                Username = username
-            };
-
-            return new ResolveReferenceResult(type, user);
-        }
+        return schema;
     }
 
-    public static class Db
+    private static ValueTask<IResolverResult> UserUsername(IResolverContext context)
     {
-        public static Dictionary<string, Review> Reviews { get; } = new Dictionary<string, Review>
+        var user = (User)context.ObjectValue;
+
+        return ResolveSync.As(user.Username);
+    }
+
+    private static async ValueTask<ResolveReferenceResult> ProductReference(
+        IResolverContext context, TypeDefinition type, IReadOnlyDictionary<string, object> representation)
+    {
+        await Task.Delay(0);
+
+        var upc = representation["upc"].ToString();
+        var product = new Product
         {
-            ["1"] = new Review
-            {
-                ID = "1",
-                AuthorID = "1",
-                Product = new Product {Upc = "1"},
-                Body = "Love it!"
-            },
-            ["2"] = new Review
-            {
-                ID = "2",
-                AuthorID = "1",
-                Product = new Product {Upc = "2"},
-                Body = "Too expensive!"
-            },
-            ["3"] = new Review
-            {
-                ID = "3",
-                AuthorID = "2",
-                Product = new Product {Upc = "3"},
-                Body = "Could be better"
-            },
-            ["4"] = new Review
-            {
-                ID = "4",
-                AuthorID = "2",
-                Product = new Product {Upc = "1"},
-                Body = "Prefer something else"
-            }
+            Upc = upc
         };
 
-        public static Dictionary<string, string> Usernames { get; } = new Dictionary<string, string>
+        return new ResolveReferenceResult(type, product);
+    }
+
+    private static ValueTask<IResolverResult> ProductReviews(IResolverContext context)
+    {
+        var product = (Product)context.ObjectValue;
+        var reviews = Db.Reviews
+            .Where(r => r.Value.Product.Upc == product.Upc)
+            .Select(p => p.Value);
+
+        return ResolveSync.As(reviews);
+    }
+
+    private static ValueTask<IResolverResult> ReviewAuthor(IResolverContext context)
+    {
+        var review = (Review)context.ObjectValue;
+
+        return ResolveSync.As(new User
         {
-            ["1"] = "@ada",
-            ["2"] = "@complete"
+            ID = review.AuthorID,
+            Username = Db.Usernames[review.AuthorID]
+        });
+    }
+
+    private static ValueTask<IResolverResult> UserReviews(IResolverContext context)
+    {
+        var user = (User)context.ObjectValue;
+        var reviews = Db.Reviews
+            .Where(r => r.Value.AuthorID == user.ID)
+            .Select(r => r.Value);
+
+        return ResolveSync.As(reviews);
+    }
+
+    private static async ValueTask<ResolveReferenceResult> UserReference(
+        IResolverContext context,
+        TypeDefinition type,
+        IReadOnlyDictionary<string, object> representation)
+    {
+        await Task.Delay(0);
+
+        if (!representation.TryGetValue("id", out var idObj))
+            throw new ArgumentOutOfRangeException("id", "Representation is missing the required 'id' value");
+
+        var userId = idObj.ToString();
+
+        if (!Db.Usernames.TryGetValue(userId, out var username))
+            throw new ArgumentOutOfRangeException("id", $"User '{userId} not found");
+
+        var user = new User
+        {
+            ID = userId,
+            Username = username
         };
-    }
 
-    public class Review
+        return new ResolveReferenceResult(type, user);
+    }
+}
+
+public static class Db
+{
+    public static Dictionary<string, Review> Reviews { get; } = new()
     {
-        public string ID { get; set; }
+        ["1"] = new Review
+        {
+            ID = "1",
+            AuthorID = "1",
+            Product = new Product { Upc = "1" },
+            Body = "Love it!"
+        },
+        ["2"] = new Review
+        {
+            ID = "2",
+            AuthorID = "1",
+            Product = new Product { Upc = "2" },
+            Body = "Too expensive!"
+        },
+        ["3"] = new Review
+        {
+            ID = "3",
+            AuthorID = "2",
+            Product = new Product { Upc = "3" },
+            Body = "Could be better"
+        },
+        ["4"] = new Review
+        {
+            ID = "4",
+            AuthorID = "2",
+            Product = new Product { Upc = "1" },
+            Body = "Prefer something else"
+        }
+    };
 
-        public string Body { get; set; }
-
-        public string AuthorID { get; set; }
-
-        public Product Product { get; set; }
-    }
-
-    public class User
+    public static Dictionary<string, string> Usernames { get; } = new()
     {
-        public string ID { get; set; }
+        ["1"] = "@ada",
+        ["2"] = "@complete"
+    };
+}
 
-        public string Username { get; set; }
-    }
+public class Review
+{
+    public string AuthorID { get; set; }
 
-    public class Product
-    {
-        public string Upc { get; set; }
-    }
+    public string Body { get; set; }
+    public string ID { get; set; }
+
+    public Product Product { get; set; }
+}
+
+public class User
+{
+    public string ID { get; set; }
+
+    public string Username { get; set; }
+}
+
+public class Product
+{
+    public string Upc { get; set; }
 }

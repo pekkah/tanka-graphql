@@ -1,31 +1,31 @@
 ﻿using System.Collections.Generic;
-
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 
-namespace Tanka.GraphQL.ValueResolution
+namespace Tanka.GraphQL.ValueResolution;
+
+public interface IResolverContext
 {
-    public interface IResolverContext
-    {
-        ObjectType ObjectType { get; }
+    IReadOnlyDictionary<string, object?> Arguments { get; }
 
-        object ObjectValue { get; }
+    IExecutorContext ExecutionContext { get; }
 
-        IField Field { get; }
+    FieldDefinition Field { get; }
 
-        FieldSelection Selection { get; }
+    string FieldName { get; }
 
-        IReadOnlyDictionary<string, object> Arguments { get; }
+    IReadOnlyCollection<FieldSelection> Fields { get; }
 
-        NodePath Path { get; }
+    IDictionary<object, object> Items { get; }
+    ObjectDefinition ObjectDefinition { get; }
 
-        IExecutorContext ExecutionContext { get; }
+    object? ObjectValue { get; }
 
-        string FieldName { get; }
+    NodePath Path { get; }
 
-        IDictionary<object, object> Items { get; }
+    ISchema Schema => ExecutionContext.Schema;
 
-        IReadOnlyCollection<FieldSelection> Fields { get; }
-    }
+    FieldSelection Selection { get; }
 }

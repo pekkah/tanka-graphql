@@ -4,82 +4,76 @@ using System.Linq;
 using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 
+namespace Tanka.GraphQL.Validation;
 
-namespace Tanka.GraphQL.Validation
+public class ValidationError
 {
-    public class ValidationError
+    private readonly List<INode> _nodes = new();
+
+    public ValidationError(string message, params INode[] nodes)
     {
-        private readonly List<INode> _nodes = new List<INode>();
+        Message = message;
+        _nodes.AddRange(nodes);
+    }
 
-        public ValidationError(string message, params INode[] nodes)
+    public ValidationError(string code, string message, IEnumerable<INode> nodes)
+        : this(message, nodes?.ToArray() ?? Array.Empty<INode>())
+    {
+        Code = code;
+    }
+
+    public ValidationError(string code, string message, INode node)
+        : this(code, message, new[] { node })
+    {
+    }
+
+    public string Code { get; set; }
+
+    public string Message { get; set; }
+
+    public IEnumerable<INode> Nodes => _nodes;
+
+    public override string ToString()
+    {
+        var builder = new StringBuilder();
+        builder.Append(Message);
+
+        if (Nodes.Any())
         {
-            Message = message;
-            _nodes.AddRange(nodes);
-        }
+            if (!Message.EndsWith("."))
+                builder.Append(". ");
 
-        public ValidationError(string code, string message, IEnumerable<INode> nodes)
-            : this(message, nodes?.ToArray() ?? Array.Empty<INode>())
-        {
-            Code = code;
-        }
+            builder.Append("At ");
 
-        public ValidationError(string code, string message, INode node)
-            : this(code, message, new[] {node})
-        {
-        }
-
-        public string Message { get; set; }
-
-        public IEnumerable<INode> Nodes => _nodes;
-
-        public string Code { get; set; }
-
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-            builder.Append(Message);
-
-            if (Nodes.Any())
+            foreach (var node in Nodes)
             {
-                if (!Message.EndsWith("."))
-                    builder.Append(". ");
+                if (node.Location != null)
+                    builder.Append($"{node.Kind}@{node.Location}");
+                else
+                    builder.Append($"{node.Kind}");
 
-                builder.Append("At ");
+                builder.Append(", ");
+            }
+        }
 
-                foreach (var node in Nodes)
+        return builder.ToString().Trim().TrimEnd(',');
+    }
+
+    public ExecutionError ToError()
+    {
+        return new ExecutionError
+        {
+            Message = ToString(),
+            Locations = Nodes.Where(n => n.Location != null).Select(n => n.Location.Value).ToList(),
+            Extensions = new Dictionary<string, object>
+            {
                 {
-                    if (node.Location != null)
+                    "doc", new
                     {
-                        builder.Append($"{node.Kind}@{node.Location}");
+                        section = Code
                     }
-                    else
-                    {
-                        builder.Append($"{node.Kind}");
-                    }
-
-                    builder.Append(", ");
                 }
             }
-
-            return builder.ToString().Trim().TrimEnd(',');
-        }
-
-        public ExecutionError ToError()
-        {
-            return new ExecutionError()
-            {
-                Message = ToString(),
-                Locations = Nodes.Where(n => n.Location != null).Select(n => n.Location.Value).ToList(),
-                Extensions = new Dictionary<string, object>
-                {
-                    {
-                        "doc", new
-                        {
-                            section = Code
-                        }
-                    }
-                }
-            };
-        }
+        };
     }
 }

@@ -1,66 +1,49 @@
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.TypeSystem;
+namespace Tanka.GraphQL.Tests.Data.Starwars;
 
-namespace Tanka.GraphQL.Tests.Data.Starwars
+public class StarwarsSchema
 {
-    public class StarwarsSchema
+    public static SchemaBuilder Create()
     {
-        public static SchemaBuilder Create()
-        {
-            var builder = new SchemaBuilder();
+        var builder = new SchemaBuilder()
+            .Add(@"
+enum Episode {
+    NEWHOPE
+    EMPIRE
+    JEDI
+}
 
-            var Episode = new EnumType("Episode", new EnumValues
-            {
-                ["NEWHOPE"] = null,
-                ["EMPIRE"] = null,
-                ["JEDI"] = null
-            });
+""""""Character in the movie""""""
+interface Character {
+    id: String!
+    name: String!
+    friends: [Character!]!
+    appearsIn: [Episode!]!
+}
 
-            builder.Include(Episode);
+""""""Human character""""""
+type Human implements Character {
+    id: String!
+    name: String!
+    friends: [Character!]!
+    appearsIn: [Episode!]! 
+    homePlanet: String
+}
 
-            var EpisodeList = new List(Episode);
+input HumanInput {
+    name: String!
+}
 
-            builder.Interface("Character", out var Character,
-                "Character in the movie");
+type Query {
+    human(id: String!): Human
+    character(id: String!): Character
+    characters: [Character!]!
+}
 
-            // use NamedTypeReference as proxy to bypass circular dependencies
-            var CharacterList = new List(Character);
+type Mutation {
+    addHuman(human: HumanInput!): Human
+}
+");
 
-            builder.Connections(connect => connect
-                .Field(Character, "id", ScalarType.NonNullString)
-                .Field(Character, "name", ScalarType.NonNullString)
-                .Field(Character, "friends", CharacterList)
-                .Field(Character, "appearsIn", EpisodeList));
-
-            builder.Object("Human", out var Human,
-                    "Human character",
-                    new[] {Character})
-                .Connections(connect => connect
-                    .Field(Human, "id", ScalarType.NonNullString)
-                    .Field(Human, "name", ScalarType.NonNullString)
-                    .Field(Human, "friends", CharacterList)
-                    .Field(Human, "appearsIn", EpisodeList)
-                    .Field(Human, "homePlanet", ScalarType.String));
-
-            builder.Query(out var Query)
-                .Connections(connect => connect
-                    .Field(Query, "human", Human,
-                        args: args => args.Arg("id", ScalarType.NonNullString, default, default))
-                    .Field(Query, "character", Character,
-                        args: args => args.Arg("id", ScalarType.NonNullString, default, default))
-                    .Field(Query, "characters", CharacterList));
-
-
-            builder.InputObject("HumanInput", out var HumanInput)
-                .Connections(connect => connect
-                    .InputField(HumanInput, "name", ScalarType.NonNullString));
-
-            builder.Mutation(out var Mutation)
-                .Connections(connect => connect
-                    .Field(Mutation, "addHuman", Human,
-                        args: args => args.Arg("human", HumanInput, default, default)));
-
-            return builder;
-        }
+        return builder;
     }
 }

@@ -3,55 +3,54 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Tanka.GraphQL.Language;
 
-namespace Tanka.GraphQL.Server
+namespace Tanka.GraphQL.Server;
+
+internal static class LogMessages
 {
-    internal static class LogMessages
+    private static readonly Action<ILogger, string, string, Exception> QueryAction =
+        LoggerMessage.Define<string, string>(
+            LogLevel.Information,
+            default,
+            "Querying '{OperationName}' with '{Query}'");
+
+    private static readonly Action<ILogger, string, Exception> ExecutedAction =
+        LoggerMessage.Define<string>(
+            LogLevel.Information,
+            default,
+            "Executed '{OperationName}'");
+
+    private static readonly Action<ILogger, string, Exception> SubscribedAction =
+        LoggerMessage.Define<string>(
+            LogLevel.Information,
+            default,
+            "Subscribed '{OperationName}'");
+
+    private static readonly Action<ILogger, string, Exception> UnsubscribedAction =
+        LoggerMessage.Define<string>(
+            LogLevel.Information,
+            default,
+            "Unsubscribed '{OperationName}'");
+
+    internal static void Query(this ILogger logger, Query query)
     {
-        private static readonly Action<ILogger, string, string, Exception> QueryAction =
-            LoggerMessage.Define<string, string>(
-                LogLevel.Information,
-                default(EventId),
-                "Querying '{OperationName}' with '{Query}'");
+        QueryAction(logger, query.OperationName, query.Document.ToGraphQL(), null);
+    }
 
-        private static readonly Action<ILogger, string, Exception> ExecutedAction =
-            LoggerMessage.Define<string>(
-                LogLevel.Information,
-                default(EventId),
-                "Executed '{OperationName}'");
+    internal static void Executed(this ILogger logger, string operationName, Dictionary<string, object> variables,
+        Dictionary<string, object> extensions)
+    {
+        ExecutedAction(logger, operationName, null);
+    }
 
-        private static readonly Action<ILogger, string, Exception> SubscribedAction =
-            LoggerMessage.Define<string>(
-                LogLevel.Information,
-                default(EventId),
-                "Subscribed '{OperationName}'");
+    internal static void Subscribed(this ILogger logger, string operationName, Dictionary<string, object> variables,
+        Dictionary<string, object> extensions)
+    {
+        SubscribedAction(logger, operationName, null);
+    }
 
-        private static readonly Action<ILogger, string, Exception> UnsubscribedAction =
-            LoggerMessage.Define<string>(
-                LogLevel.Information,
-                default(EventId),
-                "Unsubscribed '{OperationName}'");
-
-        internal static void Query(this ILogger logger, Query query)
-        {
-            QueryAction(logger, query.OperationName, query.Document.ToGraphQL(), null);
-        }
-
-        internal static void Executed(this ILogger logger, string operationName, Dictionary<string, object> variables,
-            Dictionary<string, object> extensions)
-        {
-            ExecutedAction(logger, operationName, null);
-        }
-
-        internal static void Subscribed(this ILogger logger, string operationName, Dictionary<string, object> variables,
-            Dictionary<string, object> extensions)
-        {
-            SubscribedAction(logger, operationName, null);
-        }
-
-        internal static void Unsubscribed(this ILogger logger, string operationName, Dictionary<string, object> variables,
-            Dictionary<string, object> extensions)
-        {
-            UnsubscribedAction(logger, operationName, null);
-        }
+    internal static void Unsubscribed(this ILogger logger, string operationName, Dictionary<string, object> variables,
+        Dictionary<string, object> extensions)
+    {
+        UnsubscribedAction(logger, operationName, null);
     }
 }

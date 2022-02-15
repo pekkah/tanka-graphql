@@ -6,105 +6,97 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Server.Tests.Host;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Tanka.GraphQL.Server.Links.DTOs;
+using Tanka.GraphQL.Server.Tests.Host;
 using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Tanka.GraphQL.Server.WebSockets.DTOs.Serialization.Converters;
 using Xunit;
 
-namespace Tanka.GraphQL.Server.Tests.WebSockets
+namespace Tanka.GraphQL.Server.Tests.WebSockets;
+
+public abstract class WebSocketFactsBase : IClassFixture<WebApplicationFactory<Startup>>
 {
-    public abstract class WebSocketFactsBase : IClassFixture<WebApplicationFactory<Startup>>
+    private static readonly JsonSerializerOptions _jsonOptions = new()
     {
-        private HttpClient Client;
-
-        protected WebApplicationFactory<Startup> Factory;
-
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters =
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters =
-            {
-                new OperationMessageConverter(),
-                new ObjectDictionaryConverter()
-            }
-        };
-
-        protected WebSocketFactsBase(WebApplicationFactory<Startup> factory)
-        {
-            Sink = new MessageSinkProtocol();
-            Factory = factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services => { services.TryAddSingleton<IProtocolHandler>(Sink); });
-            });
-            Client = Factory.CreateClient();
-            Application = Factory.Server.Host.Services.GetRequiredService<WebSocketServer>();
+            new OperationMessageConverter(),
+            new ObjectDictionaryConverter()
         }
+    };
 
-        public MessageSinkProtocol Sink { get; set; }
+    protected WebApplicationFactory<Startup> Factory;
+    private HttpClient Client;
 
-        public WebSocketServer Application { get; set; }
-
-        protected async Task<WebSocket> ConnectAsync()
+    protected WebSocketFactsBase(WebApplicationFactory<Startup> factory)
+    {
+        Sink = new MessageSinkProtocol();
+        Factory = factory.WithWebHostBuilder(builder =>
         {
-            var webSocketClient = Factory.Server.CreateWebSocketClient();
-            webSocketClient.ConfigureRequest = request =>
+            builder.ConfigureServices(services => { services.TryAddSingleton<IProtocolHandler>(Sink); });
+        });
+        Client = Factory.CreateClient();
+        Application = Factory.Server.Host.Services.GetRequiredService<WebSocketServer>();
+    }
+
+    public WebSocketServer Application { get; set; }
+
+    public MessageSinkProtocol Sink { get; set; }
+
+    protected async Task<WebSocket> ConnectAsync()
+    {
+        var webSocketClient = Factory.Server.CreateWebSocketClient();
+        webSocketClient.ConfigureRequest = request => { request.Headers.Add("Sec-WebSocket-Protocol", "graphql-ws"); };
+        return await webSocketClient.ConnectAsync(new Uri("http://localhost/api/graphql"), CancellationToken.None);
+    }
+
+    protected OperationMessage DeserializeMessage(string json)
+    {
+        return JsonSerializer.Deserialize<OperationMessage>(json, _jsonOptions);
+    }
+
+    protected byte[] SerializeMessage(OperationMessage message)
+    {
+        return JsonSerializer.SerializeToUtf8Bytes(message, _jsonOptions);
+    }
+
+    protected async Task<string> ReadMessage(WebSocket socket)
+    {
+        string message;
+        var buffer = new byte[1024 * 4];
+        var segment = new ArraySegment<byte>(buffer);
+        var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromSeconds(5));
+        using var memoryStream = new MemoryStream();
+        try
+        {
+            WebSocketReceiveResult receiveResult;
+
+            do
             {
-                request.Headers.Add("Sec-WebSocket-Protocol", "graphql-ws");
-            };
-            return await webSocketClient.ConnectAsync(new Uri("http://localhost/api/graphql"), CancellationToken.None);
+                receiveResult = await socket.ReceiveAsync(segment, cts.Token);
+
+                if (receiveResult.CloseStatus.HasValue)
+                    break;
+
+                if (receiveResult.Count == 0)
+                    continue;
+
+                await memoryStream.WriteAsync(segment.Array, segment.Offset, receiveResult.Count);
+            } while (!receiveResult.EndOfMessage || memoryStream.Length == 0);
+
+            message = Encoding.UTF8.GetString(memoryStream.ToArray());
+
+            return message;
         }
-
-        protected OperationMessage DeserializeMessage(string json)
+        catch (WebSocketException)
         {
-            return JsonSerializer.Deserialize<OperationMessage>(json, _jsonOptions);
-        }
-
-        protected byte[] SerializeMessage(OperationMessage message)
-        {
-            return JsonSerializer.SerializeToUtf8Bytes(message, _jsonOptions);
-        }
-
-        protected async Task<string> ReadMessage(WebSocket socket)
-        {
-            string message;
-            var buffer = new byte[1024 * 4];
-            var segment = new ArraySegment<byte>(buffer);
-
-            using var memoryStream = new MemoryStream();
-            try
-            {
-                WebSocketReceiveResult receiveResult;
-
-                do
-                {
-                    receiveResult = await socket.ReceiveAsync(segment, CancellationToken.None);
-
-                    if (receiveResult.CloseStatus.HasValue)
-                        break;
-
-                    if (receiveResult.Count == 0)
-                        continue;
-
-                    await memoryStream.WriteAsync(segment.Array, segment.Offset, receiveResult.Count);
-                } while (!receiveResult.EndOfMessage || memoryStream.Length == 0);
-
-                message = Encoding.UTF8.GetString(memoryStream.ToArray());
-
-                return message;
-            }
-            catch (WebSocketException)
-            {
-                throw;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            throw;
         }
     }
 }

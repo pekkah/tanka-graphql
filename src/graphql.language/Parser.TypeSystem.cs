@@ -5,804 +5,796 @@ using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL.Language
+namespace Tanka.GraphQL.Language;
+
+public ref partial struct Parser
 {
-    public ref partial struct Parser
+    public TypeSystemDocument ParseTypeSystemDocument()
     {
-        public TypeSystemDocument ParseTypeSystemDocument()
+        var schemaDefinitions = new List<SchemaDefinition>();
+        var typeDefinitions = new List<TypeDefinition>();
+        var directiveDefinitions = new List<DirectiveDefinition>();
+        var schemaExtensions = new List<SchemaExtension>();
+        var typeExtensions = new List<TypeExtension>();
+        var imports = new List<Import>();
+
+        // check for tanka imports
+        if (_lexer.Kind == TokenKind.BlockStringValue)
+            if (TryParseTankaImports(out var foundImports))
+                imports.AddRange(foundImports ?? Enumerable.Empty<Import>());
+
+        while (_lexer.Kind != TokenKind.End)
         {
-            var schemaDefinitions = new List<SchemaDefinition>();
-            var typeDefinitions = new List<TypeDefinition>();
-            var directiveDefinitions = new List<DirectiveDefinition>();
-            var schemaExtensions = new List<SchemaExtension>();
-            var typeExtensions = new List<TypeExtension>();
-            var imports = new List<Import>();
-
-            // check for tanka imports
-            if (_lexer.Kind == TokenKind.BlockStringValue)
+            switch (_lexer.Kind)
             {
-                if (TryParseTankaImports(out var foundImports))
-                {
-                    imports.AddRange(foundImports ?? Enumerable.Empty<Import>());
-                }
-            }
-
-            while (_lexer.Kind != TokenKind.End)
-            {
-                switch (_lexer.Kind)
-                {
-                    case TokenKind.StringValue:
-                    case TokenKind.BlockStringValue:
-                        // this will reserve the description
-                        PreParseOptionalDescription();
+                case TokenKind.StringValue:
+                case TokenKind.BlockStringValue:
+                    // this will reserve the description
+                    PreParseOptionalDescription();
+                    continue;
+                case TokenKind.Name:
+                    // type, scalar etc.
+                    if (Keywords.IsTypeDefinition(_lexer.Value))
+                    {
+                        typeDefinitions.Add(ParseTypeDefinition());
                         continue;
-                    case TokenKind.Name:
-                        // type, scalar etc.
+                    }
+                    // schema
+                    else if (Keywords.Schema.Match(_lexer.Value))
+                    {
+                        schemaDefinitions.Add(ParseSchemaDefinition());
+                        continue;
+                    }
+                    // directive
+                    else if (Keywords.Directive.Match(_lexer.Value))
+                    {
+                        directiveDefinitions.Add(ParseDirectiveDefinition());
+                        continue;
+                    }
+                    // extend
+                    else if (Keywords.Extend.Match(_lexer.Value))
+                    {
+                        _lexer.Advance();
+
+                        // types
                         if (Keywords.IsTypeDefinition(_lexer.Value))
                         {
-                            typeDefinitions.Add(ParseTypeDefinition());
+                            typeExtensions.Add(ParseTypeExtension(false));
                             continue;
                         }
-                        // schema
-                        else if (Keywords.Schema.Match(_lexer.Value))
-                        {
-                            schemaDefinitions.Add(ParseSchemaDefinition());
-                            continue;
-                        }
-                        // directive
-                        else if (Keywords.Directive.Match(_lexer.Value))
-                        {
-                            directiveDefinitions.Add(ParseDirectiveDefinition());
-                            continue;
-                        }
-                        // extend
-                        else if (Keywords.Extend.Match(_lexer.Value))
-                        {
-                            _lexer.Advance();
 
-                            // types
-                            if (Keywords.IsTypeDefinition(_lexer.Value))
-                            {
-                                typeExtensions.Add(ParseTypeExtension(hasExtend: false));
-                                continue;
-                            }
-                            else if (Keywords.Schema.Match(_lexer.Value))
-                            {
-                                schemaExtensions.Add(ParseSchemaExtension(hasExtend: false));
-                                continue;
-                            }
-                        }
-                        else if (Keywords.Import.Match(_lexer.Value))
+                        if (Keywords.Schema.Match(_lexer.Value))
                         {
-                            imports.Add(ParseTankaImport());
+                            schemaExtensions.Add(ParseSchemaExtension(false));
                             continue;
                         }
-                        break;
-                        
-                }
+                    }
+                    else if (Keywords.Import.Match(_lexer.Value))
+                    {
+                        imports.Add(ParseTankaImport());
+                        continue;
+                    }
 
-                throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
+                    break;
             }
 
-            return new TypeSystemDocument(
-                schemaDefinitions,
-                typeDefinitions,
-                directiveDefinitions,
-                schemaExtensions,
-                typeExtensions,
-                imports);
+            throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
         }
 
-        public Import ParseTankaImport()
+        return new TypeSystemDocument(
+            schemaDefinitions,
+            typeDefinitions,
+            directiveDefinitions,
+            schemaExtensions,
+            typeExtensions,
+            imports);
+    }
+
+    public Import ParseTankaImport()
+    {
+        /* """
+         * tanka_import Types[]? from From
+         * """
+         */
+
+        /* From: StringValue */
+
+        /* ex. tanka_import from "./types/person" */
+        /* ex. tanka_import Person from "./types/person" */
+
+        Ensure(TokenKind.BlockStringValue);
+        var blockStringValue = _lexer.Value;
+
+        var importParser = Create(blockStringValue);
+        var import = importParser.ParseTankaImportInternal();
+        Skip(TokenKind.BlockStringValue);
+
+        return import;
+    }
+
+    public bool TryParseTankaImports(out IReadOnlyList<Import>? imports)
+    {
+        if (_lexer.Kind != TokenKind.BlockStringValue)
         {
-            /* """
-             * tanka_import Types[]? from From
-             * """
-             */
+            imports = null;
+            return false;
+        }
 
-            /* From: StringValue */
+        var blockStringValue = _lexer.Value;
 
-            /* ex. tanka_import from "./types/person" */
-            /* ex. tanka_import Person from "./types/person" */
+        var importParser = Create(blockStringValue);
 
-            Ensure(TokenKind.BlockStringValue);
-            var blockStringValue = _lexer.Value;
+        if (!Keywords.Import.Match(importParser._lexer.Value))
+        {
+            imports = null;
+            return false;
+        }
 
-            var importParser = Parser.Create(blockStringValue);
+        var _imports = new List<Import>();
+        while (Keywords.Import.Match(importParser._lexer.Value))
+        {
             var import = importParser.ParseTankaImportInternal();
-            Skip(TokenKind.BlockStringValue);
-            
-            return import;
+            _imports.Add(import);
         }
 
-        public bool TryParseTankaImports(out IReadOnlyList<Import>? imports)
+        Skip(TokenKind.BlockStringValue);
+        imports = _imports;
+        return true;
+    }
+
+    private Import ParseTankaImportInternal()
+    {
+        var location = SkipKeyword(Keywords.Import.Span);
+
+        var types = new List<Name>();
+        if (!Keywords.From.Match(_lexer.Value))
+            // types
+            while (!Keywords.From.Match(_lexer.Value) && _lexer.Kind == TokenKind.Name)
+                types.Add(ParseName());
+
+        // from
+        SkipKeyword(Keywords.From.Span);
+
+        // from
+        var from = ParseStringValue();
+
+        return new Import(
+            types.Any() ? types : null,
+            from,
+            location);
+    }
+
+    public TypeDefinition ParseTypeDefinition()
+    {
+        if (Keywords.Scalar.Match(_lexer.Value))
+            return ParseScalarDefinition();
+
+        if (Keywords.Type.Match(_lexer.Value))
+            return ParseObjectDefinition();
+
+        if (Keywords.Interface.Match(_lexer.Value))
+            return ParseInterfaceDefinition();
+
+        if (Keywords.Union.Match(_lexer.Value))
+            return ParseUnionDefinition();
+
+        if (Keywords.Enum.Match(_lexer.Value))
+            return ParseEnumDefinition();
+
+        if (Keywords.Input.Match(_lexer.Value))
+            return ParseInputObjectDefinition();
+
+        throw new Exception(
+            $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
+    }
+
+    public TypeExtension ParseTypeExtension(bool hasExtend = true)
+    {
+        if (Keywords.Scalar.Match(_lexer.Value))
+            return ParseScalarExtension(hasExtend);
+
+        if (Keywords.Type.Match(_lexer.Value))
+            return ParseObjectExtension(hasExtend);
+
+        if (Keywords.Interface.Match(_lexer.Value))
+            return ParseInterfaceExtension(hasExtend);
+
+        if (Keywords.Union.Match(_lexer.Value))
+            return ParseUnionExtension(hasExtend);
+
+        if (Keywords.Enum.Match(_lexer.Value))
+            return ParseEnumExtension(hasExtend);
+
+        if (Keywords.Input.Match(_lexer.Value))
+            return ParseInputObjectExtension(hasExtend);
+
+        throw new Exception(
+            $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
+    }
+
+    public SchemaDefinition ParseSchemaDefinition()
+    {
+        /* Description? schema Directives? { RootOperationTypeDefinition[] } */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Schema.Span);
+        var directives = ParseOptionalDirectives(true);
+        var operations = ParseRootOperationDefinitions();
+
+        return new SchemaDefinition(
+            description,
+            directives,
+            operations,
+            location);
+    }
+
+    public SchemaExtension ParseSchemaExtension(bool hasExtend)
+    {
+        /* Description? extend schema Directives? { RootOperationTypeDefinition[] } */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Extend.Span, !hasExtend);
+        SkipKeyword(Keywords.Schema.Span);
+        var directives = ParseOptionalDirectives(true);
+        var operations = ParseOptionalRootOperationDefinitions();
+
+        return new SchemaExtension(
+            description,
+            directives,
+            operations,
+            location);
+    }
+
+    public RootOperationTypeDefinitions? ParseOptionalRootOperationDefinitions()
+    {
+        if (_lexer.Kind != TokenKind.LeftBrace)
+            return null;
+
+        return ParseRootOperationDefinitions();
+    }
+
+    public RootOperationTypeDefinitions ParseRootOperationDefinitions()
+    {
+        var location = Skip(TokenKind.LeftBrace);
+
+        var operations = new List<RootOperationTypeDefinition>();
+        while (_lexer.Kind != TokenKind.RightBrace)
         {
-            if (_lexer.Kind != TokenKind.BlockStringValue)
-            {
-                imports = null;
-                return false;
-            }
+            /* OperationType: NamedType */
+            if (!Keywords.IsOperation(_lexer.Value, out var operation))
+                throw new Exception(
+                    $"Unexpected operation type: '{Encoding.UTF8.GetString(_lexer.Value)}'.");
 
-            var blockStringValue = _lexer.Value;
-
-            var importParser = Parser.Create(blockStringValue);
-
-            if (!Keywords.Import.Match(importParser._lexer.Value))
-            {
-                imports = null;
-                return false;
-            }
-
-            var _imports = new List<Import>();
-            while (Keywords.Import.Match(importParser._lexer.Value))
-            {
-                var import = importParser.ParseTankaImportInternal();
-                _imports.Add(import);
-            }
-
-            Skip(TokenKind.BlockStringValue);
-            imports = _imports;
-            return true;
+            Skip(TokenKind.Name);
+            Skip(TokenKind.Colon);
+            var namedType = ParseNamedType();
+            operations.Add(new RootOperationTypeDefinition(operation, namedType));
         }
 
-        private Import ParseTankaImportInternal()
+        Skip(TokenKind.RightBrace);
+        return new RootOperationTypeDefinitions(operations, location);
+    }
+
+    public DirectiveDefinition ParseDirectiveDefinition()
+    {
+        /* Description? directive @Name ArgumentsDefinition[]? repeatable? on DirectiveLocations*/
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+
+        // skip: directive
+        SkipKeyword(Keywords.Directive.Span);
+
+        // skip: @
+        Skip(TokenKind.At);
+
+        // name
+        var name = ParseName();
+        var argumentDefinitions = ParseOptionalArgumentDefinitions();
+
+        // repeatable?
+        var isRepeatable = false;
+        if (Keywords.IsRepeatable(_lexer.Value))
         {
-            var location = SkipKeyword(Keywords.Import.Span);
-
-            var types = new List<Name>();
-            if (!Keywords.From.Match(_lexer.Value))
-            {
-                // types
-                while (!Keywords.From.Match(_lexer.Value) && _lexer.Kind == TokenKind.Name)
-                {
-                    types.Add(ParseName());
-                }
-            }
-
-            // from
-            SkipKeyword(Keywords.From.Span);
-
-            // from
-            var from = ParseStringValue();
-
-            return new Import(
-                types.Any() ? types : null,
-                from,
-                location);
+            isRepeatable = true;
+            Skip(TokenKind.Name);
         }
 
-        public TypeDefinition ParseTypeDefinition()
+        // locations
+        var directiveLocations = ParseDirectiveLocations();
+
+        return new DirectiveDefinition(
+            description,
+            name,
+            argumentDefinitions,
+            isRepeatable,
+            directiveLocations,
+            location);
+    }
+
+    public IReadOnlyList<string> ParseDirectiveLocations()
+    {
+        /*
+        on DirectiveLocations | DirectiveLocation
+        on |? DirectiveLocation 
+        */
+
+        SkipKeyword(Keywords.On.Span);
+
+        if (_lexer.Kind == TokenKind.Pipe)
+            _lexer.Advance();
+
+        var locations = new List<string>(1);
+        while (_lexer.Kind == TokenKind.Name)
         {
-            if (Keywords.Scalar.Match(_lexer.Value))
-                return ParseScalarDefinition();
+            var location = Encoding.UTF8.GetString(_lexer.Value);
 
-            if (Keywords.Type.Match(_lexer.Value))
-                return ParseObjectDefinition();
+            var isValid = ExecutableDirectiveLocations.All.Contains(location)
+                          || TypeSystemDirectiveLocations.All.Contains(location);
 
-            if (Keywords.Interface.Match(_lexer.Value))
-                return ParseInterfaceDefinition();
+            if (!isValid)
+                break;
 
-            if (Keywords.Union.Match(_lexer.Value))
-                return ParseUnionDefinition();
+            _lexer.Advance();
+            locations.Add(location);
 
-            if (Keywords.Enum.Match(_lexer.Value))
-                return ParseEnumDefinition();
-
-            if (Keywords.Input.Match(_lexer.Value))
-                return ParseInputObjectDefinition();
-
-            throw new Exception(
-                $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
-        }
-
-        public TypeExtension ParseTypeExtension(bool hasExtend = true)
-        {
-            if (Keywords.Scalar.Match(_lexer.Value))
-                return ParseScalarExtension(hasExtend);
-
-            if (Keywords.Type.Match(_lexer.Value))
-                return ParseObjectExtension(hasExtend);
-
-            if (Keywords.Interface.Match(_lexer.Value))
-                return ParseInterfaceExtension(hasExtend);
-
-            if (Keywords.Union.Match(_lexer.Value))
-                return ParseUnionExtension(hasExtend);
-
-            if (Keywords.Enum.Match(_lexer.Value))
-                return ParseEnumExtension(hasExtend);
-
-            if (Keywords.Input.Match(_lexer.Value))
-                return ParseInputObjectExtension(hasExtend);
-
-            throw new Exception(
-                $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
-        }
-
-        public SchemaDefinition ParseSchemaDefinition()
-        {
-            /* Description? schema Directives? { RootOperationTypeDefinition[] } */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Schema.Span);
-            var directives = ParseOptionalDirectives(true);
-            var operations = ParseRootOperationDefinitions();
-
-            return new SchemaDefinition(
-                description,
-                directives,
-                operations,
-                location);
-        }
-
-        public SchemaExtension ParseSchemaExtension(bool hasExtend)
-        {
-            /* Description? extend schema Directives? { RootOperationTypeDefinition[] } */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
-            SkipKeyword(Keywords.Schema.Span);
-            var directives = ParseOptionalDirectives(true);
-            var operations = ParseOptionalRootOperationDefinitions();
-
-            return new SchemaExtension(
-                description,
-                directives,
-                operations,
-                location);
-        }
-
-        public RootOperationTypeDefinitions? ParseOptionalRootOperationDefinitions()
-        {
-            if (_lexer.Kind != TokenKind.LeftBrace)
-                return null;
-
-            return ParseRootOperationDefinitions();
-        }
-
-        public RootOperationTypeDefinitions ParseRootOperationDefinitions()
-        {
-            var location = Skip(TokenKind.LeftBrace);
-
-            var operations = new List<RootOperationTypeDefinition>();
-            while (_lexer.Kind != TokenKind.RightBrace)
-            {
-                /* OperationType: NamedType */
-                if (!Keywords.IsOperation(_lexer.Value, out var operation))
-                    throw new Exception(
-                        $"Unexpected operation type: '{Encoding.UTF8.GetString(_lexer.Value)}'.");
-
-                Skip(TokenKind.Name);
-                Skip(TokenKind.Colon);
-                var namedType = ParseNamedType();
-                operations.Add(new RootOperationTypeDefinition(operation, namedType));
-            }
-
-            Skip(TokenKind.RightBrace);
-            return new RootOperationTypeDefinitions(operations, location);
-        }
-
-        public DirectiveDefinition ParseDirectiveDefinition()
-        {
-            /* Description? directive @Name ArgumentsDefinition[]? repeatable? on DirectiveLocations*/
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-
-            // skip: directive
-            SkipKeyword(Keywords.Directive.Span);
-
-            // skip: @
-            Skip(TokenKind.At);
-
-            // name
-            var name = ParseName();
-            var argumentDefinitions = ParseOptionalArgumentDefinitions();
-
-            // repeatable?
-            var isRepeatable = false;
-            if (Keywords.IsRepeatable(_lexer.Value))
-            {
-                isRepeatable = true;
-                Skip(TokenKind.Name);
-            }
-
-            // locations
-            var directiveLocations = ParseDirectiveLocations();
-
-            return new DirectiveDefinition(
-                description,
-                name,
-                argumentDefinitions,
-                isRepeatable,
-                directiveLocations,
-                location);
-        }
-
-        public IReadOnlyList<string> ParseDirectiveLocations()
-        {
-            /*
-            on DirectiveLocations | DirectiveLocation
-            on |? DirectiveLocation 
-            */
-
-            SkipKeyword(Keywords.On.Span);
-
+            // skip pipe
             if (_lexer.Kind == TokenKind.Pipe)
                 _lexer.Advance();
-
-            var locations = new List<string>(1);
-            while (_lexer.Kind == TokenKind.Name)
-            {
-                var location = Encoding.UTF8.GetString(_lexer.Value);
-
-                var isValid = ExecutableDirectiveLocations.All.Contains(location)
-                              || TypeSystemDirectiveLocations.All.Contains(location);
-
-                if (!isValid)
-                    break;
-
-                _lexer.Advance();
-                locations.Add(location);
-
-                // skip pipe
-                if (_lexer.Kind == TokenKind.Pipe)
-                    _lexer.Advance();
-                else
-                    break;
-            }
-
-            return locations;
+            else
+                break;
         }
 
-        public ArgumentsDefinition? ParseOptionalArgumentDefinitions()
+        return locations;
+    }
+
+    public ArgumentsDefinition? ParseOptionalArgumentDefinitions()
+    {
+        if (_lexer.Kind != TokenKind.LeftParenthesis)
+            return null;
+
+        /* (InputValueDefinition[]) */
+        Skip(TokenKind.LeftParenthesis);
+        var definitions = new List<InputValueDefinition>();
+        while (_lexer.Kind != TokenKind.RightParenthesis)
         {
-            if (_lexer.Kind != TokenKind.LeftParenthesis)
-                return null;
-
-            /* (InputValueDefinition[]) */
-            Skip(TokenKind.LeftParenthesis);
-            var definitions = new List<InputValueDefinition>();
-            while (_lexer.Kind != TokenKind.RightParenthesis)
-            {
-                var definition = ParseInputValueDefinition();
-                definitions.Add(definition);
-            }
-
-            Skip(TokenKind.RightParenthesis);
-            return new ArgumentsDefinition(definitions);
+            var definition = ParseInputValueDefinition();
+            definitions.Add(definition);
         }
 
-        public InputValueDefinition ParseInputValueDefinition()
-        {
-            /* Description? Name: Type DefaultValue? Directives? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            var name = ParseName();
-            Skip(TokenKind.Colon);
-            var type = ParseType();
-            var defaultValue = ParseOptionalDefaultValue();
-            var directives = ParseOptionalDirectives(true);
+        Skip(TokenKind.RightParenthesis);
+        return new ArgumentsDefinition(definitions);
+    }
 
-            return new InputValueDefinition(
-                description,
-                name,
-                type,
-                defaultValue,
-                directives,
-                location);
-        }
+    public InputValueDefinition ParseInputValueDefinition()
+    {
+        /* Description? Name: Type DefaultValue? Directives? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        var name = ParseName();
+        Skip(TokenKind.Colon);
+        var type = ParseType();
+        var defaultValue = ParseOptionalDefaultValue();
+        var directives = ParseOptionalDirectives(true);
 
-        public ScalarDefinition ParseScalarDefinition()
-        {
-            /* Description? scalar Name Directives? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Scalar.Span);
-            var name = ParseName();
-            var directives = ParseOptionalDirectives(true);
+        return new InputValueDefinition(
+            description,
+            name,
+            type,
+            defaultValue,
+            directives,
+            location);
+    }
 
-            return new ScalarDefinition(
-                description,
-                name,
-                directives,
-                location);
-        }
+    public ScalarDefinition ParseScalarDefinition()
+    {
+        /* Description? scalar Name Directives? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Scalar.Span);
+        var name = ParseName();
+        var directives = ParseOptionalDirectives(true);
 
-        public TypeExtension ParseScalarExtension(bool hasExtend = true)
-        {
-            /* Description? extend scalar Name Directives? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
-            SkipKeyword(Keywords.Scalar.Span);
-            var name = ParseName();
-            var directives = ParseOptionalDirectives(true);
+        return new ScalarDefinition(
+            description,
+            name,
+            directives,
+            location);
+    }
 
-            return new TypeExtension(new ScalarDefinition(
+    public TypeExtension ParseScalarExtension(bool hasExtend = true)
+    {
+        /* Description? extend scalar Name Directives? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Extend.Span, !hasExtend);
+        SkipKeyword(Keywords.Scalar.Span);
+        var name = ParseName();
+        var directives = ParseOptionalDirectives(true);
+
+        return new TypeExtension(new ScalarDefinition(
                 description,
                 name,
                 directives,
                 location),
-                location);
-        }
+            location);
+    }
 
-        public ObjectDefinition ParseObjectDefinition()
-        {
-            /* Description? type Name ImplementsInterfaces? Directives? FieldsDefinition? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Type.Span);
-            var name = ParseName();
-            var interfaces = ParseOptionalImplementsInterfaces();
-            var directives = ParseOptionalDirectives(true);
-            var fields = ParseOptionalFieldDefinitions();
+    public ObjectDefinition ParseObjectDefinition()
+    {
+        /* Description? type Name ImplementsInterfaces? Directives? FieldsDefinition? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Type.Span);
+        var name = ParseName();
+        var interfaces = ParseOptionalImplementsInterfaces();
+        var directives = ParseOptionalDirectives(true);
+        var fields = ParseOptionalFieldDefinitions();
 
-            return new ObjectDefinition(
-                description,
-                name,
-                interfaces,
-                directives,
-                fields,
-                location);
-        }
+        return new ObjectDefinition(
+            description,
+            name,
+            interfaces,
+            directives,
+            fields,
+            location);
+    }
 
-        public TypeExtension ParseObjectExtension(bool hasExtend = true)
-        {
-            /* Description? extend type Name ImplementsInterfaces? Directives? FieldsDefinition? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
-            SkipKeyword(Keywords.Type.Span);
-            var name = ParseName();
-            var interfaces = ParseOptionalImplementsInterfaces();
-            var directives = ParseOptionalDirectives(true);
-            var fields = ParseOptionalFieldDefinitions();
+    public TypeExtension ParseObjectExtension(bool hasExtend = true)
+    {
+        /* Description? extend type Name ImplementsInterfaces? Directives? FieldsDefinition? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Extend.Span, !hasExtend);
+        SkipKeyword(Keywords.Type.Span);
+        var name = ParseName();
+        var interfaces = ParseOptionalImplementsInterfaces();
+        var directives = ParseOptionalDirectives(true);
+        var fields = ParseOptionalFieldDefinitions();
 
-            return new TypeExtension(new ObjectDefinition(
+        return new TypeExtension(new ObjectDefinition(
                 description,
                 name,
                 interfaces,
                 directives,
                 fields,
                 location),
-                location);
-        }
+            location);
+    }
 
-        public InterfaceDefinition ParseInterfaceDefinition()
-        {
-            /* Description interface Name ImplementsInterfaces? Directives? FieldsDefinition? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Interface.Span);
-            var name = ParseName();
-            var interfaces = ParseOptionalImplementsInterfaces();
-            var directives = ParseOptionalDirectives(true);
-            var fields = ParseOptionalFieldDefinitions();
+    public InterfaceDefinition ParseInterfaceDefinition()
+    {
+        /* Description interface Name ImplementsInterfaces? Directives? FieldsDefinition? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Interface.Span);
+        var name = ParseName();
+        var interfaces = ParseOptionalImplementsInterfaces();
+        var directives = ParseOptionalDirectives(true);
+        var fields = ParseOptionalFieldDefinitions();
 
-            return new InterfaceDefinition(
-                description,
-                name,
-                interfaces,
-                directives,
-                fields,
-                location);
-        }
+        return new InterfaceDefinition(
+            description,
+            name,
+            interfaces,
+            directives,
+            fields,
+            location);
+    }
 
-        public TypeExtension ParseInterfaceExtension(bool hasExtend = true)
-        {
-            /* Description extend interface Name ImplementsInterfaces? Directives? FieldsDefinition? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
-            SkipKeyword(Keywords.Interface.Span);
-            var name = ParseName();
-            var interfaces = ParseOptionalImplementsInterfaces();
-            var directives = ParseOptionalDirectives(true);
-            var fields = ParseOptionalFieldDefinitions();
+    public TypeExtension ParseInterfaceExtension(bool hasExtend = true)
+    {
+        /* Description extend interface Name ImplementsInterfaces? Directives? FieldsDefinition? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Extend.Span, !hasExtend);
+        SkipKeyword(Keywords.Interface.Span);
+        var name = ParseName();
+        var interfaces = ParseOptionalImplementsInterfaces();
+        var directives = ParseOptionalDirectives(true);
+        var fields = ParseOptionalFieldDefinitions();
 
-            return new TypeExtension(new InterfaceDefinition(
+        return new TypeExtension(new InterfaceDefinition(
                 description,
                 name,
                 interfaces,
                 directives,
                 fields,
                 location),
-                location);
-        }
+            location);
+    }
 
-        public UnionDefinition ParseUnionDefinition()
-        {
-            /* Description? union Name Directives? UnionMemberTypes? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Union.Span);
-            var name = ParseName();
-            var directives = ParseOptionalDirectives(true);
-            var members = ParseOptionalUnionMembers();
+    public UnionDefinition ParseUnionDefinition()
+    {
+        /* Description? union Name Directives? UnionMemberTypes? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Union.Span);
+        var name = ParseName();
+        var directives = ParseOptionalDirectives(true);
+        var members = ParseOptionalUnionMembers();
 
-            return new UnionDefinition(
-                description,
-                name,
-                directives,
-                members,
-                location);
-        }
+        return new UnionDefinition(
+            description,
+            name,
+            directives,
+            members,
+            location);
+    }
 
-        public TypeExtension ParseUnionExtension(bool hasExtend = true)
-        {
-            /* Description? extend union Name Directives? UnionMemberTypes? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
-            SkipKeyword(Keywords.Union.Span);
-            var name = ParseName();
-            var directives = ParseOptionalDirectives(true);
-            var members = ParseOptionalUnionMembers();
+    public TypeExtension ParseUnionExtension(bool hasExtend = true)
+    {
+        /* Description? extend union Name Directives? UnionMemberTypes? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Extend.Span, !hasExtend);
+        SkipKeyword(Keywords.Union.Span);
+        var name = ParseName();
+        var directives = ParseOptionalDirectives(true);
+        var members = ParseOptionalUnionMembers();
 
-            return new TypeExtension(new UnionDefinition(
+        return new TypeExtension(new UnionDefinition(
                 description,
                 name,
                 directives,
                 members,
                 location),
-                location);
-        }
+            location);
+    }
 
-        public EnumDefinition ParseEnumDefinition()
-        {
-            /* Description? enum Name Directives? EnumValuesDefinition? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Enum.Span);
-            var name = ParseName();
-            var directives = ParseOptionalDirectives(true);
-            var values = ParseOptionalEnumValueDefinitions();
+    public EnumDefinition ParseEnumDefinition()
+    {
+        /* Description? enum Name Directives? EnumValuesDefinition? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Enum.Span);
+        var name = ParseName();
+        var directives = ParseOptionalDirectives(true);
+        var values = ParseOptionalEnumValueDefinitions();
 
-            return new EnumDefinition(
-                description,
-                name,
-                directives,
-                values,
-                location);
-        }
+        return new EnumDefinition(
+            description,
+            name,
+            directives,
+            values,
+            location);
+    }
 
-        public TypeExtension ParseEnumExtension(bool hasExtend = true)
-        {
-            /* Description? extend enum Name Directives? EnumValuesDefinition? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
-            SkipKeyword(Keywords.Enum.Span);
-            var name = ParseName();
-            var directives = ParseOptionalDirectives(true);
-            var values = ParseOptionalEnumValueDefinitions();
+    public TypeExtension ParseEnumExtension(bool hasExtend = true)
+    {
+        /* Description? extend enum Name Directives? EnumValuesDefinition? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Extend.Span, !hasExtend);
+        SkipKeyword(Keywords.Enum.Span);
+        var name = ParseName();
+        var directives = ParseOptionalDirectives(true);
+        var values = ParseOptionalEnumValueDefinitions();
 
-            return new TypeExtension(new EnumDefinition(
+        return new TypeExtension(new EnumDefinition(
                 description,
                 name,
                 directives,
                 values,
                 location),
-                location);
+            location);
+    }
+
+    public EnumValuesDefinition? ParseOptionalEnumValueDefinitions()
+    {
+        /* { EnumValueDefinition[] } */
+        if (_lexer.Kind != TokenKind.LeftBrace)
+            return null;
+
+        Skip(TokenKind.LeftBrace);
+
+        var values = new List<EnumValueDefinition>();
+        while (_lexer.Kind != TokenKind.RightBrace)
+        {
+            var value = ParseEnumValueDefinition();
+            values.Add(value);
         }
 
-        public EnumValuesDefinition? ParseOptionalEnumValueDefinitions()
-        {
-            /* { EnumValueDefinition[] } */
-            if (_lexer.Kind != TokenKind.LeftBrace)
-                return null;
+        Skip(TokenKind.RightBrace);
+        return new EnumValuesDefinition(values);
+    }
 
-            Skip(TokenKind.LeftBrace);
+    public EnumValueDefinition ParseEnumValueDefinition()
+    {
+        /* Description? EnumValue Directives? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        var value = ParseEnumValue();
+        var directives = ParseOptionalDirectives(true);
 
-            var values = new List<EnumValueDefinition>();
-            while (_lexer.Kind != TokenKind.RightBrace)
-            {
-                var value = ParseEnumValueDefinition();
-                values.Add(value);
-            }
+        return new EnumValueDefinition(
+            description,
+            value,
+            directives,
+            location);
+    }
 
-            Skip(TokenKind.RightBrace);
-            return new EnumValuesDefinition(values);
-        }
+    public InputObjectDefinition ParseInputObjectDefinition()
+    {
+        /* Description? input Name Directives? InputFieldsDefinition? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Input.Span);
+        var name = ParseName();
+        var directives = ParseOptionalDirectives(true);
+        var fields = ParseOptionalInputObjectFields();
 
-        public EnumValueDefinition ParseEnumValueDefinition()
-        {
-            /* Description? EnumValue Directives? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            var value = ParseEnumValue();
-            var directives = ParseOptionalDirectives(true);
+        return new InputObjectDefinition(
+            description,
+            name,
+            directives,
+            fields,
+            location);
+    }
 
-            return new EnumValueDefinition(
-                description,
-                value,
-                directives,
-                location);
-        }
+    public TypeExtension ParseInputObjectExtension(bool hasExtend = true)
+    {
+        /* Description? extend input Name Directives? InputFieldsDefinition? */
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        SkipKeyword(Keywords.Extend.Span, !hasExtend);
+        SkipKeyword(Keywords.Input.Span);
+        var name = ParseName();
+        var directives = ParseOptionalDirectives(true);
+        var fields = ParseOptionalInputObjectFields();
 
-        public InputObjectDefinition ParseInputObjectDefinition()
-        {
-            /* Description? input Name Directives? InputFieldsDefinition? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Input.Span);
-            var name = ParseName();
-            var directives = ParseOptionalDirectives(true);
-            var fields = ParseOptionalInputObjectFields();
-
-            return new InputObjectDefinition(
-                description,
-                name,
-                directives,
-                fields,
-                location);
-        }
-
-        public TypeExtension ParseInputObjectExtension(bool hasExtend = true)
-        {
-            /* Description? extend input Name Directives? InputFieldsDefinition? */
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            SkipKeyword(Keywords.Extend.Span, optional: !hasExtend);
-            SkipKeyword(Keywords.Input.Span);
-            var name = ParseName();
-            var directives = ParseOptionalDirectives(true);
-            var fields = ParseOptionalInputObjectFields();
-
-            return new TypeExtension(new InputObjectDefinition(
+        return new TypeExtension(new InputObjectDefinition(
                 description,
                 name,
                 directives,
                 fields,
                 location),
-                location);
+            location);
+    }
+
+    public FieldDefinition ParseFieldDefinition()
+    {
+        /* Description? Name ArgumentsDefinition?:Type Directives? */
+
+        var location = GetLocation();
+        var description = ParseOptionalDescription();
+        var name = ParseName();
+        var argumentDefinitions = ParseOptionalArgumentDefinitions();
+        Skip(TokenKind.Colon);
+        var type = ParseType();
+        var directives = ParseOptionalDirectives(true);
+
+
+        return new FieldDefinition(
+            description,
+            name,
+            argumentDefinitions,
+            type,
+            directives,
+            location);
+    }
+
+    internal InputFieldsDefinition? ParseOptionalInputObjectFields()
+    {
+        if (_lexer.Kind != TokenKind.LeftBrace)
+            return null;
+
+        Skip(TokenKind.LeftBrace);
+
+        var values = new List<InputValueDefinition>(5);
+        while (_lexer.Kind != TokenKind.RightBrace)
+        {
+            var value = ParseInputValueDefinition();
+            values.Add(value);
         }
 
-        public FieldDefinition ParseFieldDefinition()
+        Skip(TokenKind.RightBrace);
+        return new InputFieldsDefinition(values);
+    }
+
+    internal UnionMemberTypes? ParseOptionalUnionMembers()
+    {
+        /*  UnionMemberTypes | NamedType
+            = |? NamedType 
+        */
+
+        if (_lexer.Kind != TokenKind.Equal)
+            return null;
+
+        Skip(TokenKind.Equal);
+
+        if (_lexer.Kind == TokenKind.Pipe)
+            _lexer.Advance();
+
+        var namedTypes = new List<NamedType>(2);
+        while (_lexer.Kind == TokenKind.Name)
         {
-            /* Description? Name ArgumentsDefinition?:Type Directives? */
-
-            var location = GetLocation();
-            var description = ParseOptionalDescription();
-            var name = ParseName();
-            var argumentDefinitions = ParseOptionalArgumentDefinitions();
-            Skip(TokenKind.Colon);
-            var type = ParseType();
-            var directives = ParseOptionalDirectives(true);
-
-
-            return new FieldDefinition(
-                description,
-                name,
-                argumentDefinitions,
-                type,
-                directives,
-                location);
-        }
-
-        internal InputFieldsDefinition? ParseOptionalInputObjectFields()
-        {
-            if (_lexer.Kind != TokenKind.LeftBrace)
-                return null;
-
-            Skip(TokenKind.LeftBrace);
-
-            var values = new List<InputValueDefinition>(5);
-            while (_lexer.Kind != TokenKind.RightBrace)
-            {
-                var value = ParseInputValueDefinition();
-                values.Add(value);
-            }
-
-            Skip(TokenKind.RightBrace);
-            return new InputFieldsDefinition(values);
-        }
-
-        internal UnionMemberTypes? ParseOptionalUnionMembers()
-        {
-            /*  UnionMemberTypes | NamedType
-                = |? NamedType 
-            */
-
-            if (_lexer.Kind != TokenKind.Equal)
-                return null;
-
-            Skip(TokenKind.Equal);
+            var nameType = ParseNamedType();
+            namedTypes.Add(nameType);
 
             if (_lexer.Kind == TokenKind.Pipe)
                 _lexer.Advance();
-
-            var namedTypes = new List<NamedType>(2);
-            while (_lexer.Kind == TokenKind.Name)
-            {
-                var nameType = ParseNamedType();
-                namedTypes.Add(nameType);
-
-                if (_lexer.Kind == TokenKind.Pipe)
-                    _lexer.Advance();
-                else
-                    break;
-            }
-
-            return new UnionMemberTypes(namedTypes);
+            else
+                break;
         }
 
-        internal FieldsDefinition? ParseOptionalFieldDefinitions()
+        return new UnionMemberTypes(namedTypes);
+    }
+
+    internal FieldsDefinition? ParseOptionalFieldDefinitions()
+    {
+        /* { FieldDefinition } */
+
+        if (_lexer.Kind != TokenKind.LeftBrace)
+            return null;
+
+        Skip(TokenKind.LeftBrace);
+
+        var fields = new List<FieldDefinition>(5);
+        while (_lexer.Kind != TokenKind.RightBrace)
         {
-            /* { FieldDefinition } */
-
-            if (_lexer.Kind != TokenKind.LeftBrace)
-                return null;
-
-            Skip(TokenKind.LeftBrace);
-
-            var fields = new List<FieldDefinition>(5);
-            while (_lexer.Kind != TokenKind.RightBrace)
-            {
-                var field = ParseFieldDefinition();
-                fields.Add(field);
-            }
-
-            Skip(TokenKind.RightBrace);
-
-            return new FieldsDefinition(fields);
+            var field = ParseFieldDefinition();
+            fields.Add(field);
         }
 
-        internal ImplementsInterfaces? ParseOptionalImplementsInterfaces()
+        Skip(TokenKind.RightBrace);
+
+        return new FieldsDefinition(fields);
+    }
+
+    internal ImplementsInterfaces? ParseOptionalImplementsInterfaces()
+    {
+        /*  ImplementsInterfaces & NamedType
+            implements &? NamedType
+        */
+
+        if (!Keywords.IsImplements(_lexer.Value))
+            return null;
+
+        SkipKeyword(Keywords.Implements.Span);
+
+        // skip &
+        if (_lexer.Kind == TokenKind.Ampersand)
+            _lexer.Advance();
+
+        var namedTypes = new List<NamedType>();
+        while (_lexer.Kind == TokenKind.Name)
         {
-            /*  ImplementsInterfaces & NamedType
-                implements &? NamedType
-            */
-
-            if (!Keywords.IsImplements(_lexer.Value))
-                return null;
-
-            SkipKeyword(Keywords.Implements.Span);
+            var namedType = ParseNamedType();
+            namedTypes.Add(namedType);
 
             // skip &
             if (_lexer.Kind == TokenKind.Ampersand)
                 _lexer.Advance();
-
-            var namedTypes = new List<NamedType>();
-            while (_lexer.Kind == TokenKind.Name)
-            {
-                var namedType = ParseNamedType();
-                namedTypes.Add(namedType);
-
-                // skip &
-                if (_lexer.Kind == TokenKind.Ampersand)
-                    _lexer.Advance();
-                else
-                    break;
-            }
-
-            return new ImplementsInterfaces(namedTypes);
+            else
+                break;
         }
 
-        public StringValue? ParseOptionalDescription()
+        return new ImplementsInterfaces(namedTypes);
+    }
+
+    public StringValue? ParseOptionalDescription()
+    {
+        // use preparsed description if it has
+        // been cached
+        if (_description != null)
         {
-            // use preparsed description if it has
-            // been cached
-            if (_description != null)
-            {
-                var value = _description;
-                _description = null;
-                return value;
-            }
-
-            if (_lexer.Kind != TokenKind.StringValue
-                && _lexer.Kind != TokenKind.BlockStringValue)
-                return null;
-
-            if (_lexer.Kind == TokenKind.BlockStringValue)
-                return ParseBlockStringValue();
-
-            return ParseStringValue();
+            var value = _description;
+            _description = null;
+            return value;
         }
 
-        private void PreParseOptionalDescription()
-        {
-            _description = ParseOptionalDescription();
-        }
+        if (_lexer.Kind != TokenKind.StringValue
+            && _lexer.Kind != TokenKind.BlockStringValue)
+            return null;
+
+        if (_lexer.Kind == TokenKind.BlockStringValue)
+            return ParseBlockStringValue();
+
+        return ParseStringValue();
+    }
+
+    private void PreParseOptionalDescription()
+    {
+        _description = ParseOptionalDescription();
     }
 }

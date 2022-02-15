@@ -4,88 +4,87 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.Samples.Chat.Data.Domain;
+using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Samples.Chat.Data
+namespace Tanka.GraphQL.Samples.Chat.Data;
+
+public interface IChat
 {
-    public interface IChat
+    Task<IEnumerable<Message>> GetMessagesAsync(
+        int latest);
+
+    Task<Message> AddMessageAsync(
+        string fromId,
+        string content);
+
+    Task<Message> EditMessageAsync(
+        string id,
+        string content);
+
+    ValueTask<ISubscriberResult> JoinAsync(CancellationToken unsubscribe);
+}
+
+public class Chat : IChat
+{
+    private readonly Queue<Message> _messages = new();
+    private readonly EventChannel<Message> _messageStream;
+
+    private int _lastId;
+
+    public Chat()
     {
-        Task<IEnumerable<Message>> GetMessagesAsync(
-            int latest);
-
-        Task<Message> AddMessageAsync(
-            string fromId,
-            string content);
-
-        Task<Message> EditMessageAsync(
-            string id,
-            string content);
-
-        ValueTask<ISubscriberResult> JoinAsync(CancellationToken unsubscribe);
+        _messageStream = new EventChannel<Message>();
     }
 
-    public class Chat : IChat
+    public async Task<IEnumerable<Message>> GetMessagesAsync(int latest)
     {
-        private readonly Queue<Message> _messages = new Queue<Message>();
-        private readonly EventChannel<Message> _messageStream;
+        await Task.Delay(0);
+        return _messages.Take(latest);
+    }
 
-        private int _lastId;
-
-        public Chat()
+    public async Task<Message> AddMessageAsync(
+        string fromId,
+        string content)
+    {
+        var from = await GetFromAsync(fromId);
+        var message = new Message
         {
-            _messageStream = new EventChannel<Message>();
-        }
+            Id = $"{++_lastId}",
+            Content = content,
+            Timestamp = DateTimeOffset.UtcNow,
+            From = from
+        };
 
-        public async Task<IEnumerable<Message>> GetMessagesAsync(int latest)
+        _messages.Enqueue(message);
+        await _messageStream.WriteAsync(message);
+        return message;
+    }
+
+    public async Task<Message> EditMessageAsync(string id, string content)
+    {
+        await Task.Delay(0);
+        var originalMessage = _messages.SingleOrDefault(m => m.Id == id);
+
+        if (originalMessage == null)
+            return null;
+
+        originalMessage.Content = content;
+        return originalMessage;
+    }
+
+    public ValueTask<ISubscriberResult> JoinAsync(CancellationToken unsubscribe)
+    {
+        return new ValueTask<ISubscriberResult>(_messageStream.Subscribe(unsubscribe));
+    }
+
+    private async Task<From> GetFromAsync(string fromId)
+    {
+        await Task.Delay(0);
+        return new From
         {
-            await Task.Delay(0);
-            return _messages.Take(latest);
-        }
-
-        public async Task<Message> AddMessageAsync(
-            string fromId,
-            string content)
-        {
-            var from = await GetFromAsync(fromId);
-            var message = new Message
-            {
-                Id = $"{++_lastId}",
-                Content = content,
-                Timestamp = DateTimeOffset.UtcNow,
-                From = from
-            };
-
-            _messages.Enqueue(message);
-            await _messageStream.WriteAsync(message);
-            return message;
-        }
-
-        public async Task<Message> EditMessageAsync(string id, string content)
-        {
-            await Task.Delay(0);
-            var originalMessage = _messages.SingleOrDefault(m => m.Id == id);
-
-            if (originalMessage == null)
-                return null;
-
-            originalMessage.Content = content;
-            return originalMessage;
-        }
-
-        public ValueTask<ISubscriberResult> JoinAsync(CancellationToken unsubscribe)
-        {
-            return new ValueTask<ISubscriberResult>(_messageStream.Subscribe(unsubscribe));
-        }
-
-        private async Task<From> GetFromAsync(string fromId)
-        {
-            await Task.Delay(0);
-            return new From
-            {
-                UserId = fromId,
-                Name = "From"
-            };
-        }
+            UserId = fromId,
+            Name = "From"
+        };
     }
 }

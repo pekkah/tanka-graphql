@@ -1,133 +1,125 @@
 ﻿using System.Threading.Tasks;
-using Tanka.GraphQL.Introspection;
-using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.TypeSystem;
 using Xunit;
-using static Tanka.GraphQL.Parser;
 
 // ReSharper disable InconsistentNaming
 
-namespace Tanka.GraphQL.Tests.Introspection
+namespace Tanka.GraphQL.Tests.Introspection;
+
+public class IntrospectSchemaFacts
 {
-    public class IntrospectSchemaFacts
+    public const string ObjectTypeName = "Object";
+    public const string ScalarFieldName = "int";
+
+    private readonly ISchema _introspectionSchema;
+
+    public IntrospectSchemaFacts()
     {
-        public IntrospectSchemaFacts()
-        {
-            var builder = new SchemaBuilder();
+        var builder = new SchemaBuilder();
+        builder.Add(@"
 
-            builder.Interface("Interface", out var interface1,
-                    "Description")
-                .Connections(connect => connect
-                    .Field(interface1, ScalarFieldName, ScalarType.Int));
+""""""Description""""""
+interface Interface 
+{
+    int: Int    
+}
 
-            builder.Object(ObjectTypeName, out var type1,
-                    "Description",
-                    new[] {interface1})
-                .Connections(connect => connect
-                    .Field(type1, ScalarFieldName, ScalarType.NonNullInt,
-                        "Description",
-                        args: args => args.Arg("arg1", ScalarType.Float, 1d, "Description")));
+""""""Description""""""
+type Object implements Interface
+{
+    int: Int
+    """"""Description""""""
+    nonNullInt(arg1: Float = 1): Int!
+}
 
-            builder.Object($"{ObjectTypeName}2", out var type2,
-                    "Description")
-                .Connections(connect => connect
-                    .Field(type2, ScalarFieldName, new List(ScalarType.Int)));
+type Object2 
+{
+    int: [Int]
+}
+
+""""""Description""""""
+union Union = Object | Object2
+
+""""""Description""""""
+enum Enum {
+    """"""Description""""""
+    VALUE1
+    
+    """"""Description""""""
+    VALUE2 @deprecated(reason: ""reason"")
+}
+
+""""""Description""""""
+input InputObject 
+{
+    """"""Description""""""
+    field1: Boolean = true
+}
+
+type Query {
+    object: Object
+    union: Union
+    enum: Enum
+    listOfObjects: [Object2]
+    nonNullObject: Object1!
+
+    """"""Description""""""
+    inputObjectArg(arg1: InputObject): Boolean!
+}
+
+type Mutation {}
+type Subscription {}
+");
 
 
-            var union = new UnionType(
-                "Union",
-                new[] {type1, type2},
-                "Description");
+        _introspectionSchema = builder.Build(new SchemaBuildOptions()).Result;
+    }
 
-            builder.Include(union);
-
-            var enum1 = new EnumType(
-                "Enum",
-                new EnumValues
-                {
-                    {"value1", "Description"},
-                    {"value2", "Description", null, "Deprecated"}
-                },
-                "Description");
-
-            builder.Include(enum1);
-
-            builder.InputObject("InputObject", out var inputObject,
-                    "Description")
-                .Connections(connect => connect
-                    .InputField(inputObject, "field1", ScalarType.Boolean, true, "Description"));
-
-            builder.Query(out var query)
-                .Connections(connect => connect
-                    .Field(query, "object", type1)
-                    .Field(query, "union", union)
-                    .Field(query, "enum", enum1)
-                    .Field(query, "listOfObjects", new List(type2))
-                    .Field(query, "nonNullObject", new NonNull(type1))
-                    .Field(query, "inputObjectArg", ScalarType.NonNullBoolean,
-                        args: args => args.Arg("arg1", inputObject, default, "With inputObject arg")));
-
-            builder.Mutation(out var mutation);
-            builder.Subscription(out var subscription);
-
-            var sourceSchema = builder.Build();
-            _introspectionSchema = Introspect.Schema(sourceSchema);
-        }
-
-        private readonly ISchema _introspectionSchema;
-
-        public const string ObjectTypeName = "Object";
-        public const string ScalarFieldName = "int";
-
-        private async Task<ExecutionResult> QueryAsync(string query)
-        {
-            return await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Schema = _introspectionSchema,
-                Document = ParseDocument(query)
-            });
-        }
-
-        [Fact]
-        public async Task Schema_directives()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Schema_directives()
+    {
+        /* Given */
+        var query = @"{ 
                             __schema {
                                 directives { name }
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__schema"": {
-                      ""directives"": [
-                        {
-                          ""name"": ""include""
-                        },
-                        {
-                          ""name"": ""skip""
-                        },
-                        {
-                          ""name"": ""deprecated""
-                        }
-                      ]
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Schema_root_types()
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__schema"": {
+      ""directives"": [
         {
-            /* Given */
-            var query = @"{ 
+          ""name"": ""deprecated""
+        },
+        {
+          ""name"": ""include""
+        },
+        {
+          ""name"": ""skip""
+        },
+        {
+          ""name"": ""specifiedBy""
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
+
+    [Fact]
+    public async Task Schema_root_types()
+    {
+        /* Given */
+        var query = @"{ 
                             __schema {
                                 queryType { name }
                                 mutationType { name }
@@ -135,12 +127,12 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""__schema"": {
                       ""queryType"": {
@@ -155,80 +147,67 @@ namespace Tanka.GraphQL.Tests.Introspection
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Schema_types()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Schema_types()
+    {
+        /* Given */
+        var query = @"{ 
                             __schema {
                                 types { name }
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__schema"": {
-                      ""types"": [
-                        {
-                          ""name"": ""String""
-                        },
-                        {
-                          ""name"": ""Int""
-                        },
-                        {
-                          ""name"": ""Float""
-                        },
-                        {
-                          ""name"": ""Boolean""
-                        },
-                        {
-                          ""name"": ""ID""
-                        },
-                        {
-                          ""name"": ""Interface""
-                        },
-                        {
-                          ""name"": ""Object""
-                        },
-                        {
-                          ""name"": ""Object2""
-                        },
-                        {
-                          ""name"": ""Union""
-                        },
-                        {
-                          ""name"": ""Enum""
-                        },
-                        {
-                          ""name"": ""InputObject""
-                        },
-                        {
-                          ""name"": ""Query""
-                        },
-                        {
-                          ""name"": ""Mutation""
-                        },
-                        {
-                          ""name"": ""Subscription""
-                        }
-                      ]
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Type_DirectiveType()
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__schema"": {
+      ""types"": [
         {
-            /* Given */
-            var query = @"{ 
+          ""name"": ""Enum""
+        },
+        {
+          ""name"": ""InputObject""
+        },
+        {
+          ""name"": ""Interface""
+        },
+        {
+          ""name"": ""Mutation""
+        },
+        {
+          ""name"": ""Object""
+        },
+        {
+          ""name"": ""Object2""
+        },
+        {
+          ""name"": ""Query""
+        },
+        {
+          ""name"": ""Subscription""
+        },
+        {
+          ""name"": ""Union""
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
+
+    [Fact]
+    public async Task Type_DirectiveType()
+    {
+        /* Given */
+        var query = @"{ 
                             __schema {
                                 directives {
                                     name
@@ -239,68 +218,82 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__schema"": {
-                      ""directives"": [
-                        {
-                          ""locations"": [
-                            ""FIELD"",
-                            ""FRAGMENT_SPREAD"",
-                            ""INLINE_FRAGMENT""
-                          ],
-                          ""description"": """",
-                          ""name"": ""include"",
-                          ""args"": [
-                            {
-                              ""name"": ""if""
-                            }
-                          ]
-                        },
-                        {
-                          ""locations"": [
-                            ""FIELD"",
-                            ""FRAGMENT_SPREAD"",
-                            ""INLINE_FRAGMENT""
-                          ],
-                          ""description"": """",
-                          ""name"": ""skip"",
-                          ""args"": [
-                            {
-                              ""name"": ""if""
-                            }
-                          ]
-                        },
-                        {
-                          ""name"": ""deprecated"",
-                          ""description"": """",
-                          ""locations"": [
-                            ""FIELD_DEFINITION"",
-                            ""ENUM_VALUE""
-                          ],
-                          ""args"": [
-                            {
-                              ""name"": ""reason""
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Type_EnumType()
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__schema"": {
+      ""directives"": [
         {
-            /* Given */
-            //todo(pekka): separate enumValues testing to own test
-            var query = @"{ 
+          ""name"": ""deprecated"",
+          ""description"": null,
+          ""locations"": [
+            ""FIELD_DEFINITION"",
+            ""ENUM_VALUE""
+          ],
+          ""args"": [
+            {
+              ""name"": ""reason""
+            }
+          ]
+        },
+        {
+          ""name"": ""include"",
+          ""description"": null,
+          ""locations"": [
+            ""FIELD"",
+            ""FRAGMENT_SPREAD"",
+            ""INLINE_FRAGMENT""
+          ],
+          ""args"": [
+            {
+              ""name"": ""if""
+            }
+          ]
+        },
+        {
+          ""name"": ""skip"",
+          ""description"": null,
+          ""locations"": [
+            ""FIELD"",
+            ""FRAGMENT_SPREAD"",
+            ""INLINE_FRAGMENT""
+          ],
+          ""args"": [
+            {
+              ""name"": ""if""
+            }
+          ]
+        },
+        {
+          ""name"": ""specifiedBy"",
+          ""description"": null,
+          ""locations"": [
+            ""SCALAR""
+          ],
+          ""args"": [
+            {
+              ""name"": ""url""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
+
+    [Fact]
+    public async Task Type_EnumType()
+    {
+        /* Given */
+        //todo(pekka): separate enumValues testing to own test
+        var query = @"{ 
                             __type(name: ""Enum"") {
                                 kind
                                 name
@@ -314,35 +307,37 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""description"": ""Description"",
-                      ""name"": ""Enum"",
-                      ""enumValues"": [
-                        {
-                          ""description"": ""Description"",
-                          ""name"": ""VALUE1"",
-                          ""isDeprecated"": false,
-                          ""deprecationReason"": null
-                        }
-                      ],
-                      ""kind"": ""ENUM""
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Type_EnumType_include_deprecated()
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""ENUM"",
+      ""name"": ""Enum"",
+      ""description"": ""Description"",
+      ""enumValues"": [
         {
-            /* Given */
-            var query = @"{ 
+          ""name"": ""VALUE1"",
+          ""description"": ""Description"",
+          ""isDeprecated"": false,
+          ""deprecationReason"": null
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
+
+    [Fact]
+    public async Task Type_EnumType_include_deprecated()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Enum"") {
                                 kind
                                 name
@@ -356,41 +351,43 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""name"": ""Enum"",
-                      ""enumValues"": [
-                        {
-                          ""isDeprecated"": false,
-                          ""name"": ""VALUE1"",
-                          ""description"": ""Description"",
-                          ""deprecationReason"": null
-                        },
-                        {
-                          ""isDeprecated"": true,
-                          ""name"": ""VALUE2"",
-                          ""description"": ""Description"",
-                          ""deprecationReason"": ""Deprecated""
-                        }
-                      ],
-                      ""description"": ""Description"",
-                      ""kind"": ""ENUM""
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Type_InputObjectType()
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""ENUM"",
+      ""name"": ""Enum"",
+      ""description"": ""Description"",
+      ""enumValues"": [
         {
-            /* Given */
-            var query = @"{ 
+          ""name"": ""VALUE1"",
+          ""description"": ""Description"",
+          ""isDeprecated"": false,
+          ""deprecationReason"": null
+        },
+        {
+          ""name"": ""VALUE2"",
+          ""description"": ""Description"",
+          ""isDeprecated"": true,
+          ""deprecationReason"": ""reason""
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
+
+    [Fact]
+    public async Task Type_InputObjectType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""InputObject"") {
                                 kind
                                 name
@@ -398,27 +395,29 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""name"": ""InputObject"",
-                      ""description"": ""Description"",
-                      ""kind"": ""INPUT_OBJECT""
-                    }
-                  }
-                }");
-        }
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""INPUT_OBJECT"",
+      ""name"": ""InputObject"",
+      ""description"": ""Description""
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
 
-        [Fact]
-        public async Task Type_InputObjectType_fields()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_InputObjectType_fields()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""InputObject"") {
                                 inputFields {
                                     name
@@ -429,12 +428,12 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""__type"": {
                       ""inputFields"": [
@@ -451,13 +450,13 @@ namespace Tanka.GraphQL.Tests.Introspection
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_InterfaceType()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_InterfaceType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Interface"") {
                                 kind
                                 name
@@ -467,12 +466,12 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""__type"": {
                       ""possibleTypes"": [
@@ -491,13 +490,13 @@ namespace Tanka.GraphQL.Tests.Introspection
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_ObjectType()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_ObjectType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Object"") {
                                 kind
                                 name
@@ -507,37 +506,42 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""interfaces"": [
-                        {
-                          ""name"": ""Interface""
-                        }
-                      ],
-                      ""fields"": [
-                        {
-                          ""name"": ""int""
-                        }
-                      ],
-                      ""kind"": ""OBJECT"",
-                      ""description"": ""Description"",
-                      ""name"": ""Object""
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Type_ObjectType_fields()
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""OBJECT"",
+      ""name"": ""Object"",
+      ""description"": ""Description"",
+      ""fields"": [
         {
-            /* Given */
-            var query = @"{ 
+          ""name"": ""int""
+        },
+        {
+          ""name"": ""nonNullInt""
+        }
+      ],
+      ""interfaces"": [
+        {
+          ""name"": ""Interface""
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
+
+    [Fact]
+    public async Task Type_ObjectType_fields()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Object"") {
                                 fields { 
                                     name 
@@ -550,44 +554,58 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""fields"": [
-                        {
-                          ""description"": ""Description"",
-                          ""name"": ""int"",
-                          ""isDeprecated"": false,
-                          ""args"": [
-                            {
-                              ""name"": ""arg1""
-                            }
-                          ],
-                          ""deprecationReason"": null,
-                          ""type"": {
-                            ""name"": null,
-                            ""kind"": ""NON_NULL"",
-                            ""ofType"": {
-                              ""name"": ""Int""
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Type_ObjectType_fields_args()
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__type"": {
+      ""fields"": [
         {
-            /* Given */
-            var query = @"{ 
+          ""name"": ""int"",
+          ""description"": null,
+          ""isDeprecated"": false,
+          ""deprecationReason"": null,
+          ""type"": {
+            ""name"": ""Int"",
+            ""kind"": ""SCALAR"",
+            ""ofType"": null
+          },
+          ""args"": []
+        },
+        {
+          ""name"": ""nonNullInt"",
+          ""description"": ""Description"",
+          ""isDeprecated"": false,
+          ""deprecationReason"": null,
+          ""type"": {
+            ""name"": null,
+            ""kind"": ""NON_NULL"",
+            ""ofType"": {
+              ""name"": ""Int""
+            }
+          },
+          ""args"": [
+            {
+              ""name"": ""arg1""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
+
+    [Fact]
+    public async Task Type_ObjectType_fields_args()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Object"") {
                                 fields { 
                                     args { 
@@ -600,38 +618,43 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""fields"": [
-                        {
-                          ""args"": [
-                            {
-                              ""name"": ""arg1"",
-                              ""defaultValue"": ""1"",
-                              ""type"": {
-                                ""name"": ""Float""
-                              },
-                              ""description"": ""Description""
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  }
-                }");
-        }
-
-        [Fact]
-        public async Task Type_ScalarType()
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__type"": {
+      ""fields"": [
         {
-            /* Given */
-            var query = @"{ 
+          ""args"": []
+        },
+        {
+          ""args"": [
+            {
+              ""name"": ""arg1"",
+              ""description"": null,
+              ""type"": {
+                ""name"": ""Float""
+              },
+              ""defaultValue"": ""1""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
+
+    [Fact]
+    public async Task Type_ScalarType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Int"") {
                                 kind
                                 name
@@ -639,12 +662,12 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
                   ""data"": {
                     ""__type"": {
                       ""name"": ""Int"",
@@ -653,13 +676,13 @@ namespace Tanka.GraphQL.Tests.Introspection
                     }
                   }
                 }");
-        }
+    }
 
-        [Fact]
-        public async Task Type_UnionType()
-        {
-            /* Given */
-            var query = @"{ 
+    [Fact]
+    public async Task Type_UnionType()
+    {
+        /* Given */
+        var query = @"{ 
                             __type(name: ""Union"") {
                                 kind
                                 name
@@ -668,28 +691,39 @@ namespace Tanka.GraphQL.Tests.Introspection
                             }
                         }";
 
-            /* When */
-            var result = await QueryAsync(query);
+        /* When */
+        var result = await QueryAsync(query);
 
-            /* Then */
-            result.ShouldMatchJson(
-                @"{
-                  ""data"": {
-                    ""__type"": {
-                      ""kind"": ""UNION"",
-                      ""description"": ""Description"",
-                      ""possibleTypes"": [
-                        {
-                          ""name"": ""Object""
-                        },
-                        {
-                          ""name"": ""Object2""
-                        }
-                      ],
-                      ""name"": ""Union""
-                    }
-                  }
-                }");
+        /* Then */
+        result.ShouldMatchJson(
+            @"{
+  ""data"": {
+    ""__type"": {
+      ""kind"": ""UNION"",
+      ""name"": ""Union"",
+      ""description"": ""Description"",
+      ""possibleTypes"": [
+        {
+          ""name"": ""Object""
+        },
+        {
+          ""name"": ""Object2""
         }
+      ]
+    }
+  },
+  ""extensions"": null,
+  ""errors"": null
+}");
+    }
+
+    private async Task<ExecutionResult> QueryAsync(string query)
+    {
+        return await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = _introspectionSchema,
+            Document = query,
+            IncludeExceptionDetails = true
+        });
     }
 }

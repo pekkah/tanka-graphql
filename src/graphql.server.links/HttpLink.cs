@@ -7,99 +7,98 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Server.Links.DTOs;
 
-namespace Tanka.GraphQL.Server.Links
+namespace Tanka.GraphQL.Server.Links;
+
+public class HttpLink
 {
-    public class HttpLink
+    private static readonly JsonSerializerOptions _jsonOptions = new()
     {
-        private readonly HttpClient _client;
-        private readonly Func<HttpResponseMessage, ValueTask<ExecutionResult>> _transformResponse;
-
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters =
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters =
-            {
-                new ObjectDictionaryConverter()
-            }
+            new ObjectDictionaryConverter()
+        }
+    };
+
+    private readonly HttpClient _client;
+
+    private readonly
+        Func<(ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
+            HttpRequestMessage> _transformRequest;
+
+    private readonly Func<HttpResponseMessage, ValueTask<ExecutionResult>> _transformResponse;
+    private readonly string _url;
+
+    public HttpLink(
+        string url,
+        Func<HttpClient> createClient = null,
+        Func<(ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
+            HttpRequestMessage> transformRequest = null,
+        Func<HttpResponseMessage, ValueTask<ExecutionResult>> transformResponse = null)
+    {
+        if (createClient == null)
+            createClient = () => new HttpClient();
+
+        if (transformRequest == null)
+            transformRequest = DefaultTransformRequest;
+
+        if (transformResponse == null)
+            transformResponse = DefaultTransformResponse;
+
+        _url = url;
+        _client = createClient();
+        _transformRequest = transformRequest;
+        _transformResponse = transformResponse;
+    }
+
+    public static HttpRequestMessage DefaultTransformRequest(
+        (ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url) operation)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, operation.Url);
+        var query = new QueryRequest
+        {
+            Query = operation.Document.ToGraphQL(),
+            Variables = operation.Variables?.ToDictionary(kv => kv.Key, kv => kv.Value)
         };
-        private readonly string _url;
+        var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(query, _jsonOptions);
+        var json = Encoding.UTF8.GetString(jsonBytes);
+        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        private readonly
-            Func<(ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
-                HttpRequestMessage> _transformRequest;
+        return request;
+    }
 
-        public HttpLink(
-            string url,
-            Func<HttpClient> createClient = null,
-            Func<(ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url),
-                HttpRequestMessage> transformRequest = null,
-            Func<HttpResponseMessage, ValueTask<ExecutionResult>> transformResponse = null)
-        {
-            if (createClient == null)
-                createClient = () => new HttpClient();
+    public static async ValueTask<ExecutionResult> DefaultTransformResponse(HttpResponseMessage response)
+    {
+        response.EnsureSuccessStatusCode();
 
-            if (transformRequest == null)
-                transformRequest = DefaultTransformRequest;
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        return JsonSerializer.Deserialize<ExecutionResult>(bytes, _jsonOptions);
+    }
 
-            if (transformResponse == null)
-                transformResponse = DefaultTransformResponse;
+    public async ValueTask<ChannelReader<ExecutionResult>> Execute(ExecutableDocument document,
+        IReadOnlyDictionary<string, object> variables, CancellationToken cancellationToken)
+    {
+        var request = _transformRequest((document, variables, _url));
 
-            _url = url;
-            _client = createClient();
-            _transformRequest = transformRequest;
-            _transformResponse = transformResponse;
-        }
+        if (request == null)
+            throw new InvalidOperationException(
+                "Executing HttpLink failed. Transform request resulted in null request.");
 
-        public static HttpRequestMessage DefaultTransformRequest(
-            (ExecutableDocument Document, IReadOnlyDictionary<string, object> Variables, string Url) operation)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Post, operation.Url);
-            var query = new QueryRequest
-            {
-                Query = operation.Document.ToGraphQL(),
-                Variables = operation.Variables?.ToDictionary(kv => kv.Key, kv => kv.Value)
-            };
-            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(query, _jsonOptions);
-            var json = Encoding.UTF8.GetString(jsonBytes);
-            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await _client.SendAsync(request, cancellationToken);
+        var result = await _transformResponse(response);
+        var channel = Channel.CreateBounded<ExecutionResult>(1);
 
-            return request;
-        }
+        if (result == null)
+            throw new InvalidOperationException(
+                "Executing HttpLink failed. Transform response resulted in null result.");
 
-        public static async ValueTask<ExecutionResult> DefaultTransformResponse(HttpResponseMessage response)
-        {
-            response.EnsureSuccessStatusCode();
+        await channel.Writer.WriteAsync(result, cancellationToken);
+        channel.Writer.TryComplete();
 
-            var bytes = await response.Content.ReadAsByteArrayAsync();
-            return JsonSerializer.Deserialize<ExecutionResult>(bytes, _jsonOptions);
-        }
-
-        public async ValueTask<ChannelReader<ExecutionResult>> Execute(ExecutableDocument document,
-            IReadOnlyDictionary<string, object> variables, CancellationToken cancellationToken)
-        {
-            var request = _transformRequest((document, variables, _url));
-
-            if (request == null)
-                throw new InvalidOperationException(
-                    "Executing HttpLink failed. Transform request resulted in null request.");
-
-            var response = await _client.SendAsync(request, cancellationToken);
-            var result = await _transformResponse(response);
-            var channel = Channel.CreateBounded<ExecutionResult>(1);
-
-            if (result == null)
-                throw new InvalidOperationException(
-                    "Executing HttpLink failed. Transform response resulted in null result.");
-
-            await channel.Writer.WriteAsync(result, cancellationToken);
-            channel.Writer.TryComplete();
-
-            return channel;
-        }
+        return channel;
     }
 }

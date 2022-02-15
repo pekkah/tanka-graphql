@@ -1,7 +1,8 @@
-﻿namespace Tanka.GraphQL.Directives
+﻿namespace Tanka.GraphQL.Directives;
+
+public class DirectiveVisitor
 {
-    public class DirectiveVisitor
-    {
-        public DirectiveNodeVisitor<DirectiveFieldVisitorContext> FieldDefinition { get; set; }
-    }
+    public DirectiveNodeVisitor<DirectiveFieldVisitorContext>? FieldDefinition { get; set; }
+
+    public DirectiveNodeVisitor<DirectiveTypeVisitorContext>? TypeDefinition { get; set; }
 }

@@ -1,114 +1,113 @@
 ﻿using System;
 
-namespace Tanka.GraphQL.Language.Internal
+namespace Tanka.GraphQL.Language.Internal;
+
+internal readonly ref struct BlockStringValueReader
 {
-    internal readonly ref struct BlockStringValueReader
+    private readonly ReadOnlySpan<byte> _rawValue;
+
+    public BlockStringValueReader(in ReadOnlySpan<byte> value)
     {
-        private readonly ReadOnlySpan<byte> _rawValue;
+        _rawValue = value;
+    }
 
-        public BlockStringValueReader(in ReadOnlySpan<byte> value)
-        {
-            _rawValue = value;
-        }
+    public ReadOnlySpan<byte> Read()
+    {
+        var commonIndent = CommonIndent(in _rawValue);
+        using var trimWriter = new BufferWriter(_rawValue.Length);
+        var lineReader = new LineReader(_rawValue);
 
-        public ReadOnlySpan<byte> Read()
-        {
-            var commonIndent = CommonIndent(in _rawValue);
-            using var trimWriter = new BufferWriter(_rawValue.Length);
-            var lineReader = new LineReader(_rawValue);
+        if (!lineReader.TryReadLine(out var firstLine))
+            return ReadOnlySpan<byte>.Empty;
 
-            if (!lineReader.TryReadLine(out var firstLine))
-                return ReadOnlySpan<byte>.Empty;
-
-            // trim
-            trimWriter.Write(firstLine);
-            if (commonIndent != null)
-                while (lineReader.TryReadLine(out var line))
-                {
-                    trimWriter.Write(Constants.NewLineMemory.Span);
-                    if (!line.IsEmpty && line.Length >= commonIndent.Value)
-                    {
-                        var trimmedLine = line.Slice(commonIndent.Value);
-                        trimWriter.Write(trimmedLine);
-                    }
-                }
-
-            var trimmedValue = trimWriter.WrittenSpan;
-
-            //todo: check if Trim is better
-            var leadingWhiteSpace = LeadingWhiteSpace(trimmedValue);
-            var trailingWhiteSpace = TrailingWhitespace(trimmedValue);
-            var finalValue = trimmedValue
-                .Slice(0, trimmedValue.Length - trailingWhiteSpace)
-                .Slice(leadingWhiteSpace);
-
-            return finalValue;
-        }
-
-        private int? CommonIndent(in ReadOnlySpan<byte> span)
-        {
-            int? commonIndent = null;
-            var lineReader = new LineReader(in span);
-
-            if (!lineReader.TryReadLine(out _)) throw new Exception("Could not read line starting");
-
+        // trim
+        trimWriter.Write(firstLine);
+        if (commonIndent != null)
             while (lineReader.TryReadLine(out var line))
             {
-                var length = line.Length;
-                var indent = LeadingWhiteSpace(line);
-
-                if (indent < length)
-                    if (commonIndent == null || indent < commonIndent)
-                        commonIndent = indent;
+                trimWriter.Write(Constants.NewLineMemory.Span);
+                if (!line.IsEmpty && line.Length >= commonIndent.Value)
+                {
+                    var trimmedLine = line.Slice(commonIndent.Value);
+                    trimWriter.Write(trimmedLine);
+                }
             }
 
-            return commonIndent;
-        }
+        var trimmedValue = trimWriter.WrittenSpan;
 
-        private int LeadingWhiteSpace(in ReadOnlySpan<byte> line)
+        //todo: check if Trim is better
+        var leadingWhiteSpace = LeadingWhiteSpace(trimmedValue);
+        var trailingWhiteSpace = TrailingWhitespace(trimmedValue);
+        var finalValue = trimmedValue
+            .Slice(0, trimmedValue.Length - trailingWhiteSpace)
+            .Slice(leadingWhiteSpace);
+
+        return finalValue;
+    }
+
+    private int? CommonIndent(in ReadOnlySpan<byte> span)
+    {
+        int? commonIndent = null;
+        var lineReader = new LineReader(in span);
+
+        if (!lineReader.TryReadLine(out _)) throw new Exception("Could not read line starting");
+
+        while (lineReader.TryReadLine(out var line))
         {
-            if (line.IsEmpty)
-                return 0;
+            var length = line.Length;
+            var indent = LeadingWhiteSpace(line);
 
-            var position = 0;
-            while (position < line.Length)
-            {
-                if (!IsWhiteSpace(line[position])) break;
-                position++;
-            }
-
-            return position;
+            if (indent < length)
+                if (commonIndent == null || indent < commonIndent)
+                    commonIndent = indent;
         }
 
-        private int TrailingWhitespace(in ReadOnlySpan<byte> line)
+        return commonIndent;
+    }
+
+    private int LeadingWhiteSpace(in ReadOnlySpan<byte> line)
+    {
+        if (line.IsEmpty)
+            return 0;
+
+        var position = 0;
+        while (position < line.Length)
         {
-            if (line.IsEmpty)
-                return 0;
-
-            var position = line.Length - 1;
-            var count = 0;
-            while (position > 0)
-            {
-                if (!IsWhiteSpace(line[position]))
-                    break;
-
-                position--;
-                count++;
-            }
-
-            return count;
+            if (!IsWhiteSpace(line[position])) break;
+            position++;
         }
 
-        private bool IsWhiteSpace(in byte code)
+        return position;
+    }
+
+    private int TrailingWhitespace(in ReadOnlySpan<byte> line)
+    {
+        if (line.IsEmpty)
+            return 0;
+
+        var position = line.Length - 1;
+        var count = 0;
+        while (position > 0)
         {
-            return code switch
-            {
-                Constants.Tab => true,
-                Constants.Space => true,
-                Constants.Return => true,
-                Constants.NewLine => true,
-                _ => false
-            };
+            if (!IsWhiteSpace(line[position]))
+                break;
+
+            position--;
+            count++;
         }
+
+        return count;
+    }
+
+    private bool IsWhiteSpace(in byte code)
+    {
+        return code switch
+        {
+            Constants.Tab => true,
+            Constants.Space => true,
+            Constants.Return => true,
+            Constants.NewLine => true,
+            _ => false
+        };
     }
 }

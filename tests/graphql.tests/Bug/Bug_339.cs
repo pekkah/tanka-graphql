@@ -1,21 +1,19 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Introspection;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.Bug
+namespace Tanka.GraphQL.Tests.Bug;
+
+public class Bug_339
 {
-    public class Bug_339
+    [Fact]
+    public async Task Introspection_should_pass()
     {
-        [Fact]
-        public async Task Introspection_should_pass()
-        {
-            /* Given */
-            var schema = new SchemaBuilder()
-                .Sdl(@"
+        /* Given */
+        var schema = await new SchemaBuilder()
+            .Add(@"
                         input InputItem {
                           foo: [String]
                         }
@@ -33,37 +31,35 @@ namespace Tanka.GraphQL.Tests.Bug
                             mutation: Mutation
                         }
                 ")
-                .Build();
+            .Build(new SchemaBuildOptions());
 
-            var introspectionSchema = Introspect.Schema(schema);
 
-            /* When */
-            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+        /* When */
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = schema,
+            Document = Introspect.DefaultQuery
+        });
+
+        /* Then */
+        var types = (List<object>)result.Select("__schema", "types");
+
+        foreach (var type in types)
+        {
+            var typeDictionary = (Dictionary<string, object>)type;
+
+            if ((string)typeDictionary["name"] == "InputItem")
             {
-                Schema = introspectionSchema,
-                Document = Parser.ParseDocument(Introspect.DefaultQuery)
-            });
+                var inputFields = (List<object>)typeDictionary["inputFields"];
 
-            /* Then */
-            var types = (List<object>)result.Select("__schema", "types");
-
-            foreach (var type in types)
-            {
-                var typeDictionary = (Dictionary<string, object>) type;
-
-                if ((string) typeDictionary["name"] == "InputItem")
+                foreach (var inputField in inputFields)
                 {
-                    var inputFields = (List<object>)typeDictionary["inputFields"];
+                    var inputFieldDictionary = (Dictionary<string, object>)inputField;
 
-                    foreach (var inputField in inputFields)
+                    if ((string)inputFieldDictionary["name"] == "foo")
                     {
-                        var inputFieldDictionary = (Dictionary<string, object>) inputField;
-
-                        if ((string) inputFieldDictionary["name"] == "foo")
-                        {
-                            var defaultValue = inputFieldDictionary["defaultValue"];
-                            Assert.Null(defaultValue);
-                        }
+                        var defaultValue = inputFieldDictionary["defaultValue"];
+                        Assert.Null(defaultValue);
                     }
                 }
             }

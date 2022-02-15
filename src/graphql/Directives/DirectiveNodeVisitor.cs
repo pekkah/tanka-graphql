@@ -1,6 +1,5 @@
-﻿using Tanka.GraphQL.TypeSystem;
+﻿using Tanka.GraphQL.Language.Nodes;
 
-namespace Tanka.GraphQL.Directives
-{
-    public delegate T DirectiveNodeVisitor<T>(DirectiveInstance directive, T node);
-}
+namespace Tanka.GraphQL.Directives;
+
+public delegate T? DirectiveNodeVisitor<T>(Directive directive, T node);

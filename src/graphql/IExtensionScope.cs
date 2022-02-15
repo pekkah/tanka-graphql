@@ -1,24 +1,23 @@
 ﻿using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.Validation;
+using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL
+namespace Tanka.GraphQL;
+
+public interface IExtensionScope
 {
-    public interface IExtensionScope
-    {
-        ValueTask BeginValidationAsync();
+    ValueTask BeginValidationAsync();
 
-        ValueTask EndValidationAsync(ValidationResult validationResult);
+    ValueTask EndValidationAsync(ValidationResult validationResult);
 
-        ValueTask EndExecuteAsync(IExecutionResult executionResult);
+    ValueTask EndExecuteAsync(IExecutionResult executionResult);
 
-        ValueTask BeginParseDocumentAsync();
+    ValueTask BeginParseDocumentAsync();
 
-        ValueTask EndParseDocumentAsync(ExecutableDocument document);
+    ValueTask EndParseDocumentAsync(ExecutableDocument document);
 
-        ValueTask BeginResolveAsync(IResolverContext context);
+    ValueTask BeginResolveAsync(IResolverContext context);
 
-        ValueTask EndResolveAsync(IResolverContext context, IResolverResult result);
-    }
+    ValueTask EndResolveAsync(IResolverContext context, IResolverResult result);
 }

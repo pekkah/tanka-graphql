@@ -1,19 +1,18 @@
 ﻿using System.Threading.Tasks;
-using Tanka.GraphQL.SchemaBuilding;
-using Tanka.GraphQL.SDL;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
-namespace Tanka.GraphQL.Tests.Extensions
+namespace Tanka.GraphQL.Tests.Extensions;
+
+public class CostAnalysisImportFacts
 {
-    public class CostAnalysisImportFacts
+    [Fact]
+    public async Task Parse_Sdl()
     {
-        [Fact]
-        public async Task Parse_Sdl()
-        {
-            /* Given */
-            var sdl =
-                  @"
+        /* Given */
+        var sdl =
+            @"
                     """"""
                     tanka_import from ""tanka://cost-analysis""
                     """"""
@@ -27,17 +26,16 @@ namespace Tanka.GraphQL.Tests.Extensions
                     }
                  ";
 
-            /* When */
-            var builder = await new SchemaBuilder()
-                // BuiltIn import providers are used
-                .SdlAsync(sdl);
+        /* When */
+        var schema = await new SchemaBuilder()
+            .Add(sdl)
+            // BuiltIn import providers are used
+            .Build(new SchemaBuildOptions());
 
-            var schema = builder.Build();
 
-            /* Then */
-            var objectType = schema.GetNamedType<ObjectType>("ObjectType");
-            var property = schema.GetField(objectType.Name, "property");
-            Assert.Single(property.Directives, directive => directive.Name == "cost");
-        }
+        /* Then */
+        var objectType = schema.GetRequiredNamedType<ObjectDefinition>("ObjectType");
+        var property = schema.GetField(objectType.Name, "property");
+        Assert.Single(property.Directives, directive => directive.Name == "cost");
     }
 }

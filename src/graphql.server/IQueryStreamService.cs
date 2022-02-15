@@ -1,12 +1,11 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Tanka.GraphQL.Server
+namespace Tanka.GraphQL.Server;
+
+public interface IQueryStreamService
 {
-    public interface IQueryStreamService
-    {
-        Task<QueryStream> QueryAsync(
-            Query query,
-            CancellationToken cancellationToken);
-    }
+    Task<QueryStream> QueryAsync(
+        Query query,
+        CancellationToken cancellationToken);
 }

@@ -1,14 +1,13 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Tanka.GraphQL.Server
+namespace Tanka.GraphQL.Server;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static ServerBuilder AddTankaGraphQL(
+        this IServiceCollection services, Action<ServerOptions> configure = null)
     {
-        public static ServerBuilder AddTankaGraphQL(
-            this IServiceCollection services, Action<ServerOptions> configure = null)
-        {
-            return new ServerBuilder(services, configure);
-        }
+        return new ServerBuilder(services, configure);
     }
 }

@@ -2,36 +2,34 @@ using System.Collections.Generic;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 
-namespace Tanka.GraphQL.Validation
+namespace Tanka.GraphQL.Validation;
+
+public interface IRuleVisitorContext
 {
-    public interface IRuleVisitorContext 
-    {
-        ISchema Schema { get; }
+    ExecutableDocument Document { get; }
 
-        ExecutableDocument Document { get; }
+    ExtensionData Extensions { get; }
+    ISchema Schema { get; }
 
-        IReadOnlyDictionary<string, object> VariableValues { get; }
+    TypeTracker Tracker { get; }
 
-        TypeTracker Tracker { get; }
+    IReadOnlyDictionary<string, object?> VariableValues { get; }
 
-        ExtensionData Extensions { get; }
+    void Error(string code, string message, params INode[] nodes);
 
-        void Error(string code, string message, params INode[] nodes);
+    void Error(string code, string message, INode node);
 
-        void Error(string code, string message, INode node);
+    void Error(string code, string message, IEnumerable<INode> nodes);
 
-        void Error(string code, string message, IEnumerable<INode> nodes);
+    List<VariableUsage> GetVariables(
+        INode rootNode);
 
-        List<VariableUsage> GetVariables(
-            INode rootNode);
+    IEnumerable<VariableUsage> GetRecursiveVariables(
+        OperationDefinition operation);
 
-        IEnumerable<VariableUsage> GetRecursiveVariables(
-            OperationDefinition operation);
+    FragmentDefinition? GetFragment(string name);
+    List<FragmentSpread> GetFragmentSpreads(SelectionSet node);
 
-        FragmentDefinition GetFragment(string name);
-        List<FragmentSpread> GetFragmentSpreads(SelectionSet node);
-
-        IEnumerable<FragmentDefinition> GetRecursivelyReferencedFragments(
-            OperationDefinition operation);
-    }
+    IEnumerable<FragmentDefinition> GetRecursivelyReferencedFragments(
+        OperationDefinition operation);
 }

@@ -1,72 +1,78 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
+namespace Tanka.GraphQL.Language.ImportProviders;
 
-namespace Tanka.GraphQL.Language.ImportProviders
+public class FileSystemImportProvider : IImportProvider
 {
-    public class FileSystemImportProvider : IImportProvider
+    public static string FileExtension = ".graphql";
+    private readonly string _rootPath;
+
+    public FileSystemImportProvider() : this(AppContext.BaseDirectory)
     {
-        public static string FileExtension = ".graphql";
-        private readonly string _rootPath;
+    }
 
-        public FileSystemImportProvider() : this(Environment.CurrentDirectory)
+    public FileSystemImportProvider(string rootPath)
+    {
+        _rootPath = rootPath;
+    }
+
+    public bool CanImport(string path, string[]? types)
+    {
+        path = GetFullPath(path);
+        return File.Exists(path);
+    }
+
+    public async ValueTask<TypeSystemDocument> ImportAsync(string path, string[]? types, ParserOptions options)
+    {
+        path = GetFullPath(path);
+        var source = await File.ReadAllTextAsync(path);
+
+        // parse normally
+        var document = (TypeSystemDocument)source;
+
+        if (document.Imports is not null)
         {
-        }
-
-        public FileSystemImportProvider(string rootPath)
-        {
-            _rootPath = rootPath;
-        }
-
-        public bool CanImport(string path, string[] types)
-        {
-            path = GetFullPath(path);
-            return File.Exists(path);
-        }
-
-        public async ValueTask<TypeSystemDocument> ImportAsync(string path, string[]? types, ParserOptions options)
-        {
-            path = GetFullPath(path);
-            var source = File.ReadAllText(path);
-
-            // we need new options with correctly rooted file system import provider
             var rootPath = Path.GetDirectoryName(path);
-            var newOptions = options
-                .ReplaceImportProvider(
-                    this,
-                    new FileSystemImportProvider(rootPath));
+            document = document
+                .WithImports(document.Imports.Select(import => FullyQualify(import, rootPath ?? _rootPath)).ToList());
+        }
 
-            // parse normally
-            var document = await GraphQL.Parser.ParseTypeSystemDocumentAsync(source, newOptions);
-
-            // if no type filter provided import all
-            if (types == null || types.Length == 0)
-            {
-                return document;
-            }
-
-            return document
+        // if no type filter provided import all
+        if (types is { Length: > 0 })
+            document = document
                 .WithDirectiveDefinitions(document.DirectiveDefinitions
-                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
+                    ?.Where(type => types.Contains(type.Name.ToString())).ToList())
                 .WithTypeDefinitions(document.TypeDefinitions
-                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList())
+                    ?.Where(type => types.Contains(type.Name.ToString())).ToList())
                 .WithTypeExtensions(document.TypeExtensions
-                    ?.Where(type => types.Contains<string>(type.Name.ToString())).ToList());
-            
-        }
+                    ?.Where(type => types.Contains(type.Name.ToString())).ToList());
 
-        private string GetFullPath(string path)
-        {
-            if (!Path.HasExtension(path)) path += FileExtension;
-            
-            if (!Path.IsPathRooted(path)) 
-                path = Path.Combine(_rootPath, path);
+        return document;
+    }
 
-            return path;
-        }
+    private Import FullyQualify(Import import, string rootPath)
+    {
+        var from = import.From.ToString();
+
+        if (!Path.IsPathRooted(from))
+            from = Path.Combine(rootPath, from);
+
+        return new Import(import.Types, new StringValue(Encoding.UTF8.GetBytes(from)));
+    }
+
+    private string GetFullPath(string path)
+    {
+        if (!Path.HasExtension(path)) path += FileExtension;
+
+        if (!Path.IsPathRooted(path))
+            path = Path.Combine(_rootPath, path);
+
+        return path;
     }
 }

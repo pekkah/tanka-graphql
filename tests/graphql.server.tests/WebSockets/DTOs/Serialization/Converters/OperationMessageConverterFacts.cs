@@ -5,91 +5,77 @@ using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Tanka.GraphQL.Server.WebSockets.DTOs.Serialization.Converters;
 using Xunit;
 
-namespace Tanka.GraphQL.Server.Tests.WebSockets.DTOs.Serialization.Converters
+namespace Tanka.GraphQL.Server.Tests.WebSockets.DTOs.Serialization.Converters;
+
+public class OperationMessageConverterFacts
 {
-    public class OperationMessageConverterFacts
+    private readonly JsonSerializerOptions _options;
+
+    public OperationMessageConverterFacts()
     {
-        public OperationMessageConverterFacts()
+        _options = new JsonSerializerOptions
         {
-            _options = new JsonSerializerOptions
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters =
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Converters =
-                {
-                    new OperationMessageConverter(),
-                    new ObjectDictionaryConverter()
-                }
-            };
-        }
+                new OperationMessageConverter(),
+                new ObjectDictionaryConverter()
+            }
+        };
+    }
 
-        private readonly JsonSerializerOptions _options;
-
-        private string CreateMessageJson(string id, string type, string payloadJson = null)
-        {
-            return @"
-                {
-                    ""id"": ""{id}"",
-                    ""type"": ""{type}"",
-                    ""payload"": {payloadJson}
-                }
-                "
-                .Replace("{id}", id)
-                .Replace("{type}", type)
-                .Replace("{payloadJson}", payloadJson ?? "null");
-        }
-
-        [Fact]
-        public void Deserialize_Init()
-        {
-            /* Given */
-            var json = CreateMessageJson(
-                "1",
-                MessageType.GQL_CONNECTION_INIT,
-                @"
+    [Fact]
+    public void Deserialize_Init()
+    {
+        /* Given */
+        var json = CreateMessageJson(
+            "1",
+            MessageType.GQL_CONNECTION_INIT,
+            @"
                 {
                     ""token"": ""123""
                 }
                 ");
 
-            /* When */
-            var actual = JsonSerializer.Deserialize<OperationMessage>(json, _options);
+        /* When */
+        var actual = JsonSerializer.Deserialize<OperationMessage>(json, _options);
 
-            /* Then */
-            Assert.Equal("1", actual.Id);
-            Assert.Equal(MessageType.GQL_CONNECTION_INIT, actual.Type);
-            Assert.IsType<Dictionary<string, object>>(actual.Payload);
-        }
+        /* Then */
+        Assert.Equal("1", actual.Id);
+        Assert.Equal(MessageType.GQL_CONNECTION_INIT, actual.Type);
+        Assert.IsType<Dictionary<string, object>>(actual.Payload);
+    }
 
-        [Fact]
-        public void Deserialize_Start()
-        {
-            /* Given */
-            var json = CreateMessageJson(
-                "1",
-                MessageType.GQL_START,
-                @"
+    [Fact]
+    public void Deserialize_Start()
+    {
+        /* Given */
+        var json = CreateMessageJson(
+            "1",
+            MessageType.GQL_START,
+            @"
                 {
                     ""token"": ""123""
                 }
                 ");
 
-            /* When */
-            var actual = JsonSerializer.Deserialize<OperationMessage>(json, _options);
+        /* When */
+        var actual = JsonSerializer.Deserialize<OperationMessage>(json, _options);
 
-            /* Then */
-            Assert.Equal("1", actual.Id);
-            Assert.Equal(MessageType.GQL_START, actual.Type);
-            Assert.IsType<OperationMessageQueryPayload>(actual.Payload);
-        }
+        /* Then */
+        Assert.Equal("1", actual.Id);
+        Assert.Equal(MessageType.GQL_START, actual.Type);
+        Assert.IsType<OperationMessageQueryPayload>(actual.Payload);
+    }
 
-        [Fact]
-        public void Deserialize_Data()
-        {
-            /* Given */
-            var json = CreateMessageJson(
-                "1",
-                MessageType.GQL_DATA,
-                @"
+    [Fact]
+    public void Deserialize_Data()
+    {
+        /* Given */
+        var json = CreateMessageJson(
+            "1",
+            MessageType.GQL_DATA,
+            @"
                 {
                     ""data"": 
                     {
@@ -98,101 +84,114 @@ namespace Tanka.GraphQL.Server.Tests.WebSockets.DTOs.Serialization.Converters
                 }
                 ");
 
-            /* When */
-            var actual = JsonSerializer.Deserialize<OperationMessage>(json, _options);
+        /* When */
+        var actual = JsonSerializer.Deserialize<OperationMessage>(json, _options);
 
-            /* Then */
-            Assert.Equal("1", actual.Id);
-            Assert.Equal(MessageType.GQL_DATA, actual.Type);
-            Assert.IsType<ExecutionResult>(actual.Payload);
-        }
+        /* Then */
+        Assert.Equal("1", actual.Id);
+        Assert.Equal(MessageType.GQL_DATA, actual.Type);
+        Assert.IsType<ExecutionResult>(actual.Payload);
+    }
 
-        [Fact]
-        public void Deserialize_Stop()
+    [Fact]
+    public void Deserialize_Stop()
+    {
+        /* Given */
+        var json = CreateMessageJson(
+            "1",
+            MessageType.GQL_STOP);
+
+        /* When */
+        var actual = JsonSerializer.Deserialize<OperationMessage>(json, _options);
+
+        /* Then */
+        Assert.Equal("1", actual.Id);
+        Assert.Equal(MessageType.GQL_STOP, actual.Type);
+        Assert.Null(actual.Payload);
+    }
+
+    [Fact]
+    public void Serialize_Data()
+    {
+        /* Given */
+        var message = new OperationMessage
         {
-            /* Given */
-            var json = CreateMessageJson(
-                "1",
-                MessageType.GQL_STOP);
-
-            /* When */
-            var actual = JsonSerializer.Deserialize<OperationMessage>(json, _options);
-
-            /* Then */
-            Assert.Equal("1", actual.Id);
-            Assert.Equal(MessageType.GQL_STOP, actual.Type);
-            Assert.Null(actual.Payload);
-        }
-
-        [Fact]
-        public void Serialize_Data()
-        {
-            /* Given */
-            var message = new OperationMessage()
+            Id = "1",
+            Type = MessageType.GQL_DATA,
+            Payload = new ExecutionResult
             {
-                Id = "1",
-                Type = MessageType.GQL_DATA,
-                Payload = new ExecutionResult()
+                Data = new Dictionary<string, object>
                 {
-                    Data = new Dictionary<string, object>()
+                    ["field"] = "123"
+                }
+            }
+        };
+
+        /* When */
+        var actual = JsonSerializer.Serialize(message, _options);
+
+
+        /* Then */
+        message.ShouldMatchJson(actual);
+    }
+
+    [Fact]
+    public void Serialize_Complete()
+    {
+        /* Given */
+        var message = new OperationMessage
+        {
+            Id = "1",
+            Type = MessageType.GQL_COMPLETE
+        };
+
+        /* When */
+        var actual = JsonSerializer.Serialize(message, _options);
+
+
+        /* Then */
+        message.ShouldMatchJson(actual);
+    }
+
+    [Fact]
+    public void Serialize_Error()
+    {
+        /* Given */
+        var message = new OperationMessage
+        {
+            Id = "1",
+            Type = MessageType.GQL_CONNECTION_ERROR,
+            Payload = new ExecutionResult
+            {
+                Errors = new List<ExecutionError>
+                {
+                    new()
                     {
-                        ["field"] = "123"
+                        Message = "error"
                     }
                 }
-            };
+            }
+        };
 
-            /* When */
-            var actual = JsonSerializer.Serialize(message, _options);
-
-
-            /* Then */
-            message.ShouldMatchJson(actual);
-        }
-
-        [Fact]
-        public void Serialize_Complete()
-        {
-            /* Given */
-            var message = new OperationMessage()
-            {
-                Id = "1",
-                Type = MessageType.GQL_COMPLETE
-            };
-
-            /* When */
-            var actual = JsonSerializer.Serialize(message, _options);
+        /* When */
+        var actual = JsonSerializer.Serialize(message, _options);
 
 
-            /* Then */
-            message.ShouldMatchJson(actual);
-        }
+        /* Then */
+        message.ShouldMatchJson(actual);
+    }
 
-        [Fact]
-        public void Serialize_Error()
-        {
-            /* Given */
-            var message = new OperationMessage()
-            {
-                Id = "1",
-                Type = MessageType.GQL_CONNECTION_ERROR,
-                Payload = new ExecutionResult()
+    private string CreateMessageJson(string id, string type, string payloadJson = null)
+    {
+        return @"
                 {
-                    Errors = new List<ExecutionError>()
-                    {
-                        new ExecutionError()
-                        {
-                            Message = "error"
-                        }
-                    }
+                    ""id"": ""{id}"",
+                    ""type"": ""{type}"",
+                    ""payload"": {payloadJson}
                 }
-            };
-
-            /* When */
-            var actual = JsonSerializer.Serialize(message, _options);
-
-
-            /* Then */
-            message.ShouldMatchJson(actual);
-        }
+                "
+            .Replace("{id}", id)
+            .Replace("{type}", type)
+            .Replace("{payloadJson}", payloadJson ?? "null");
     }
 }

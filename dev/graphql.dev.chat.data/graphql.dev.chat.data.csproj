@@ -1,18 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>Tanka.GraphQL.Samples.Chat.Data</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Samples.Chat.Data</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <None Remove="schema.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="IDL\schema.graphql" />
+    <EmbeddedResource Include="idl\schema.graphql" />
   </ItemGroup>
 
   <ItemGroup>
