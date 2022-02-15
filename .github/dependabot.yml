@@ -3,17 +3,17 @@ updates:
 - package-ecosystem: nuget
   directory: "/"
   schedule:
-    interval: weekly
+    interval: daily
   open-pull-requests-limit: 10
 - package-ecosystem: npm
   directory: "/src/graphql.server.link"
   schedule:
-    interval: weekly
+    interval: daily
   open-pull-requests-limit: 10
 - package-ecosystem: npm
   directory: "/dev/graphql.dev.chat.ui"
   schedule:
-    interval: weekly
+    interval: daily
   open-pull-requests-limit: 10
   ignore:
   - dependency-name: react-redux
