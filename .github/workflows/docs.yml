@@ -28,7 +28,7 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
-      - name: Build packages
+      - name: Build docs
         shell: pwsh
         run: |
           ./build-docs.ps1 -Output ./artifacts/gh-pages -CurrentBranch $Env:GITHUB_REF_NAME
