@@ -7,7 +7,7 @@ Input objects are created as instances of `InputObjectType`.
 ### Creating input object
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/InputObjectTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.InputObjectTypeFacts.Define
+// todo: docs
 ```
 
 > When using List or NonNull wrappers make sure that the wrapped type passes `TypeIs.IsInputType`.
@@ -15,5 +15,5 @@ Input objects are created as instances of `InputObjectType`.
 ### Input Coercion
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/InputObjectTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.InputObjectTypeFacts.Input_coercion
+// todo: docs
 ```

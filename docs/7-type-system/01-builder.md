@@ -5,49 +5,49 @@
 ### Creating Root Types
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Query
+//todo: docs
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Mutation
+//todo: docs
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Subscription
+//todo: docs
 ```
 
 ### Creating types
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Object
+//todo: docs
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Interface
+//todo: docs
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Union
+//todo: docs
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Enum
+//todo: docs
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Scalar
+//todo: docs
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Scalar_without_converter
+//todo: docs
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_InputObject
+//todo: docs
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_DirectiveType
+//todo: docs
 ```
 
 ### Build and validate schema
@@ -55,49 +55,29 @@
 Normal (will throw ValidationException if schema is not valid)
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Build
+//todo: docs
 ```
 
 Without throwing validation exception
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Build_and_validate_schema
-```
-
-### Connecting types using fields
-
-```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Object_field
-```
-
-```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Interface_field
-```
-
-```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_InputObject_field
+//todo: docs
 ```
 
 ### Configuring new schema based on existing schema
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Use_existing_schema
+//todo: docs
 ```
 
 ### Merging schemas
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Merge_schemas
+//todo: docs
 ```
 
 ### Making executable schema
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Make_executable_schema
-```
-
-### Special cases
-
-```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Build_with_circular_reference_between_two_objects
+//todo: docs
 ```

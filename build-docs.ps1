@@ -1,6 +1,6 @@
 param (
     [string]$Output = "./artifacts/gh-pages",
-    [string]$CurrentBranch = $Env:BUILD_SOURCEBRANCH
+    [string]$CurrentBranch = $Env:GITHUB_REF_NAME
  )
 
 # Utils

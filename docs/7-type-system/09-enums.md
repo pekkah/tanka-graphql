@@ -9,7 +9,7 @@ Enums are created as instances of `EnumType`.
 Direction enum
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/EnumTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.Define_enum
+// todo: docs
 ```
 
 ### Serialization
@@ -17,17 +17,17 @@ Direction enum
 From input value
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/EnumTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.ParseValue
+// todo: docs
 ```
 
 From AST node value
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/EnumTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.ParseLiteral
+// todo: docs
 ```
 
 Serialize
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/EnumTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.EnumTypeFacts.Serialize
+// todo: docs
 ```
