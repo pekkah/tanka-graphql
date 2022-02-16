@@ -53,11 +53,11 @@ jobs:
       
       - run: ls -la ./docs
 
-      #- name: Deploy 🚀
-      #  uses: JamesIves/github-pages-deploy-action@v4.2.3
-      #  if: github.ref_name == 'master' || startsWith(github.ref, 'refs/tags/')
-      #  with:
-      #    branch: gh-pages
-      #    folder: ./docs
-      #    commit-message: ${github.ref_name}
-      #    clean: true
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.2.3
+        if: github.ref_name == 'master' || startsWith(github.ref, 'refs/tags/')
+        with:
+          branch: gh-pages
+          folder: ./docs
+          commit-message: ${github.ref_name}
+          clean: true
