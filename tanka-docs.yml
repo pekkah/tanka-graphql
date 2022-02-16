@@ -4,7 +4,7 @@ index_page: xref://root@master:index.md
 output_path: "artifacts/gh-pages"
 build_path: "_build"
 branches:
-  master:
+  master-not:
     input_path:
       - ui-bundle
       - docs
