@@ -17,7 +17,6 @@ env:
 jobs:
   build:
     runs-on: windows-latest
-    concurrency: ci-${{ github.ref }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -38,15 +37,27 @@ jobs:
       - name: Publish build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Packages
+          name: Docs
           path: |
             ./artifacts/gh-pages
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.2.3
-        if: github.ref_name == 'master' || startsWith(github.ref, 'refs/tags/')
+build:
+    runs-on: ubuntu-latest
+    depends-on: build
+    concurrency: ci-${{ github.ref }}
+    steps:
+      - uses: actions/download-artifact@v2
         with:
-          branch: gh-pages
-          folder: ./artifacts/gh-pages
-          commit-message: ${github.ref_name}
-          clean: true
+          name: Docs
+          path: docs
+      
+      - run: ls -la ./docs
+
+      #- name: Deploy 🚀
+      #  uses: JamesIves/github-pages-deploy-action@v4.2.3
+      #  if: github.ref_name == 'master' || startsWith(github.ref, 'refs/tags/')
+      #  with:
+      #    branch: gh-pages
+      #    folder: ./docs
+      #    commit-message: ${github.ref_name}
+      #    clean: true
