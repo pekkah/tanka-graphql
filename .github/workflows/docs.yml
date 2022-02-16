@@ -41,7 +41,7 @@ jobs:
           path: |
             ./artifacts/gh-pages
 
-build:
+  deploy:
     runs-on: ubuntu-latest
     depends-on: build
     concurrency: ci-${{ github.ref }}
