@@ -2,18 +2,18 @@ name: on-tag-do-release
 on:
   push:
     tags:
-      - *
+      - "*"
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-    - name: Run
-      run: |
-        dotnet tool install --global GitReleaseManager.Tool
-        tag="${GITHUB_REF:10}"
-        owner="${GITHUB_REPOSITORY%/*}"
-        repo="${GITHUB_REPOSITORY#*/}"
-        dotnet-gitreleasemanager create -m ${tag} --token ${{secrets.GITHUB_TOKEN}} -o ${owner} -r ${repo}
-        dotnet-gitreleasemanager close -m ${tag} --token ${{secrets.GITHUB_TOKEN}} -o ${owner} -r ${repo}
-        dotnet-gitreleasemanager publish -t ${tag} --token ${{secrets.GITHUB_TOKEN}} -o ${owner} -r ${repo}
-      shell: bash
+      - name: Run
+        run: |
+          dotnet tool install --global GitReleaseManager.Tool
+          tag="${GITHUB_REF:10}"
+          owner="${GITHUB_REPOSITORY%/*}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          dotnet-gitreleasemanager create -m ${tag} --token ${{secrets.GITHUB_TOKEN}} -o ${owner} -r ${repo}
+          dotnet-gitreleasemanager close -m ${tag} --token ${{secrets.GITHUB_TOKEN}} -o ${owner} -r ${repo}
+          dotnet-gitreleasemanager publish -t ${tag} --token ${{secrets.GITHUB_TOKEN}} -o ${owner} -r ${repo}
+        shell: bash
