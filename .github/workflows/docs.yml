@@ -43,7 +43,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    depends-on: build
+    needs: build
     concurrency: ci-${{ github.ref }}
     steps:
       - uses: actions/download-artifact@v2
