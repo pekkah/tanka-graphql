@@ -194,49 +194,11 @@
 <p>Interfaces are created as instances of <code>InterfaceType</code>.</p>
 <h3 id="creating-interface">Creating interface</h3>
 <p>Define with non-null scalar field</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void Define_interface()
-        {
-            /* Given */
-            /* When */
-            _builder.Interface(&quot;NamedEntity&quot;, out var namedEntity)
-                .Connections(connect =&gt; connect
-                .Field(namedEntity, &quot;name&quot;, ScalarType.NonNullString));
-
-            var schema = _builder.Build();
-
-            /* Then */
-            var namedEntityFields = schema.GetFields(namedEntity.Name);
-            Assert.Equal(&quot;NamedEntity&quot;, namedEntity.Name);
-            Assert.Single(namedEntityFields, fk =&gt; fk.Key == &quot;name&quot;
-                                                    &amp;&amp; (NonNull) fk.Value.Type == ScalarType.NonNullString);
-        }
-
+<pre><code class="language-csharp">// todo: docs
 </code></pre>
 <h3 id="implementing-interface">Implementing interface</h3>
 <p>Object implements interface</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void Implement_interface()
-        {
-            /* Given */
-            _builder.Interface(&quot;NamedEntity&quot;, out var namedEntity)
-                .Connections(connect =&gt; connect
-                .Field(namedEntity, &quot;name&quot;, ScalarType.NonNullString));
-
-            _builder.Object(&quot;Person&quot;, out var person, interfaces: new []{namedEntity})
-                .Connections(connect =&gt; connect
-                .Field(person, &quot;name&quot;, ScalarType.NonNullString));
-
-            /* When */
-            //todo: interfaces should be behind a connection
-            var implements = person.Implements(namedEntity);
-
-            /* Then */
-            Assert.True(implements);
-        }
-
+<pre><code class="language-csharp">// todo: docs
 </code></pre>
                     
             </main>

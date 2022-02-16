@@ -161,12 +161,12 @@ logic.</p>
 <p>Following example adds custom scalar and converter
 []</p>
 <pre><code class="language-csharp">
-        [Fact]
-        public async Task Part6_Custom_Scalar()
-        {
-            // Create builder and load sdl
-            var builder = new SchemaBuilder()
-                .Sdl(@&quot;
+    [Fact]
+    public async Task Part6_Custom_Scalar()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@&quot;
 
                 # Custom scalar defined in the SDL
                 scalar Uri
@@ -176,58 +176,53 @@ logic.</p>
                 }
                 &quot;);
 
-            // Get query type
-            builder.GetQuery(out var query);
-
-            // Build schema by binding resolvers from ObjectTypeMap
-            var schema = SchemaTools.MakeExecutableSchema(
-                builder,
-                new ObjectTypeMap
+        // Build schema by binding resolvers from ObjectTypeMap
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
                 {
+                    &quot;Query&quot;, new FieldResolversMap
                     {
-                        query.Name, new FieldResolversMap
                         {
-                            {
-                                &quot;url&quot;, context =&gt; ResolveSync.As(new Uri(&quot;https://localhost/&quot;))
-                            }
+                            &quot;url&quot;, context =&gt; ResolveSync.As(new Uri(&quot;https://localhost/&quot;))
                         }
                     }
-                },
-                converters: new Dictionary&lt;string, IValueConverter&gt;()
-                {
-                    // this will add value converter for Uri scalar type
-                    [&quot;Uri&quot;] = new InlineConverter(
-                        serialize: value =&gt;
-                        {
-                            var uri = (Uri) value;
-                            return uri.ToString();
-                        },
-                        parseValue: value =&gt; new Uri(value.ToString()),
-                        parseLiteral: value =&gt;
-                        {
-                            if (value.Kind == NodeKind.StringValue)
-                            {
-                                return new Uri((StringValue)value);
-                            }
-
-                            throw new ArgumentOutOfRangeException(
-                                nameof(value),
-                                $&quot;Cannot coerce Uri from value kind: '{value.Kind}'&quot;);
-                        },
-                        serializeLiteral: value =&gt; new StringValue(Encoding.UTF8.GetBytes(value.ToString())))
-                });
-
-
-            // execute query
-            var result = await Executor.ExecuteAsync(new ExecutionOptions()
+                }
+            },
+            ValueConverters = new Dictionary&lt;string, IValueConverter&gt;
             {
-                Schema = schema,
-                Document = Parser.ParseDocument(@&quot;{ url }&quot;)
-            });
+                // this will add value converter for Uri scalar type
+                [&quot;Uri&quot;] = new InlineConverter(
+                    value =&gt;
+                    {
+                        var uri = (Uri)value;
+                        return uri.ToString();
+                    },
+                    parseValue: value =&gt; new Uri(value.ToString()),
+                    parseLiteral: value =&gt;
+                    {
+                        if (value.Kind == NodeKind.StringValue) return new Uri((StringValue)value);
 
-            var url = result.Data[&quot;url&quot;];
-            Assert.Equal(&quot;https://localhost/&quot;, url.ToString());
-        }
+                        throw new ArgumentOutOfRangeException(
+                            nameof(value),
+                            $&quot;Cannot coerce Uri from value kind: '{value.Kind}'&quot;);
+                    },
+                    serializeLiteral: value =&gt; new StringValue(Encoding.UTF8.GetBytes(value.ToString())))
+            }
+        });
+
+
+        // execute query
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        {
+            Schema = schema,
+            Document = @&quot;{ url }&quot;
+        });
+
+        var url = result.Data[&quot;url&quot;];
+        Assert.Equal(&quot;https://localhost/&quot;, url.ToString());
+    }
 
 </code></pre>
                     

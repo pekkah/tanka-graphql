@@ -161,10 +161,10 @@ setting a maximum allowed cost. Complexity can be set by setting a default field
 which will be used for all fields in a query and/or by using <code>@cost</code> directive on the schema.</p>
 <h2 id="example">Example</h2>
 <p>Example schema has few fields with and without set complexity.</p>
-<pre><code class="language-csharp">        public CostFacts()
-        {
-            var sdl =
-                @&quot;
+<pre><code class="language-csharp">    public CostFacts()
+    {
+        var sdl =
+            @&quot;
                 schema {
                     query: Query
                 }
@@ -176,105 +176,104 @@ which will be used for all fields in a query and/or by using <code>@cost</code> 
                 }
                 &quot;;
 
-            Schema = new SchemaBuilder()
-                .Include(CostAnalyzer.CostDirective)
-                .Sdl(sdl)
-                .Build();
-        }
+        Schema = new SchemaBuilder()
+            .Add(sdl)
+            .Build(new SchemaBuildOptions()).Result;
+    }
 
 </code></pre>
 <h3 id="default-field-complexity">Default field complexity</h3>
 <p>Default field complexity will be used when <code>@cost</code> directive is not present in the field.</p>
 <pre><code class="language-csharp">
-        [Fact]
-        public void Cost_above_max_cost_with_defaultComplexity()
-        {
-            /* Given */
-            var document = Parser.ParseDocument(
-                @&quot;{
+    [Fact]
+    public void Cost_above_max_cost_with_defaultComplexity()
+    {
+        /* Given */
+        var document =
+            @&quot;{
                     default
-                }&quot;);
+                }&quot;;
 
-            /* When */
-            var result = Validate(
-                document,
-                CostAnalyzer.MaxCost(
-                    maxCost: 0,
-                    defaultFieldComplexity: 1)
-                );
+        /* When */
+        var result = Validate(
+            document,
+            CostAnalyzer.MaxCost(
+                0,
+                1)
+        );
 
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error =&gt; error.Code == &quot;MAX_COST&quot;);
-        }
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error =&gt; error.Code == &quot;MAX_COST&quot;);
+    }
 
 </code></pre>
 <h3 id="cost-directive">Cost Directive</h3>
 <p>Complexity of field is set with <code>@cost</code> directive.</p>
 <pre><code class="language-csharp">
-        [Fact]
-        public void Cost_above_max_cost_with_costDirective()
-        {
-            /* Given */
-            var document = Parser.ParseDocument(
-                @&quot;{
+    [Fact]
+    public void Cost_above_max_cost_with_costDirective()
+    {
+        /* Given */
+        var document =
+            @&quot;{
                     withCost
-                }&quot;);
+                }&quot;;
 
-            /* When */
-            var result = Validate(
-                document,
-                CostAnalyzer.MaxCost(
-                    maxCost: 0, 
-                    defaultFieldComplexity: 0)
-                );
+        /* When */
+        var result = Validate(
+            document,
+            CostAnalyzer.MaxCost(
+                0,
+                0)
+        );
 
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error =&gt; error.Code == &quot;MAX_COST&quot;);
-        }
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error =&gt; error.Code == &quot;MAX_COST&quot;);
+    }
 
 </code></pre>
 <p>In some cases the complexity of the field is related to its arguments. In these cases
 value of the argument can be used as mulpliplier for the complexity.</p>
 <pre><code class="language-csharp">
-        [Fact]
-        public void Cost_above_max_cost_with_costDirective_and_multiplier()
-        {
-            /* Given */
-            var document = Parser.ParseDocument(
-                @&quot;{
+    [Fact]
+    public void Cost_above_max_cost_with_costDirective_and_multiplier()
+    {
+        /* Given */
+        var document =
+            @&quot;{
                     withMultiplier(count: 5)
-                }&quot;);
+                }&quot;;
 
-            /* When */
-            var result = Validate(
-                document,
-                CostAnalyzer.MaxCost(
-                    maxCost: 5, 
-                    defaultFieldComplexity: 0)
-                );
+        /* When */
+        var result = Validate(
+            document,
+            CostAnalyzer.MaxCost(
+                5,
+                0)
+        );
 
-            /* Then */
-            Assert.False(result.IsValid);
-            Assert.Single(
-                result.Errors,
-                error =&gt; error.Code == &quot;MAX_COST&quot;);
-        }
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error =&gt; error.Code == &quot;MAX_COST&quot;);
+    }
 
 </code></pre>
 <h2 id="import-directive">Import directive</h2>
 <p>Using SDL import</p>
-<pre><code class="language-csharp">        [Fact]
-        public async Task Parse_Sdl()
-        {
-            /* Given */
-            var sdl =
-                  @&quot;
+<pre><code class="language-csharp">    [Fact]
+    public async Task Parse_Sdl()
+    {
+        /* Given */
+        var sdl =
+            @&quot;
                     &quot;&quot;&quot;&quot;&quot;&quot;
                     tanka_import from &quot;&quot;tanka://cost-analysis&quot;&quot;
                     &quot;&quot;&quot;&quot;&quot;&quot;
@@ -288,18 +287,18 @@ value of the argument can be used as mulpliplier for the complexity.</p>
                     }
                  &quot;;
 
-            /* When */
-            var builder = await new SchemaBuilder()
-                // BuiltIn import providers are used
-                .SdlAsync(sdl);
+        /* When */
+        var schema = await new SchemaBuilder()
+            .Add(sdl)
+            // BuiltIn import providers are used
+            .Build(new SchemaBuildOptions());
 
-            var schema = builder.Build();
 
-            /* Then */
-            var objectType = schema.GetNamedType&lt;ObjectType&gt;(&quot;ObjectType&quot;);
-            var property = schema.GetField(objectType.Name, &quot;property&quot;);
-            Assert.Single(property.Directives, directive =&gt; directive.Name == &quot;cost&quot;);
-        }
+        /* Then */
+        var objectType = schema.GetRequiredNamedType&lt;ObjectDefinition&gt;(&quot;ObjectType&quot;);
+        var property = schema.GetField(objectType.Name, &quot;property&quot;);
+        Assert.Single(property.Directives, directive =&gt; directive.Name == &quot;cost&quot;);
+    }
 
 </code></pre>
 <p>Or you can include it manually using the <code>SchemaBuilder.Include</code></p>

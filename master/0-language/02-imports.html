@@ -201,12 +201,12 @@ tanka_import from &quot;path/to/file&quot;
 <p>If no file extension provided then &quot;.graphql&quot; will be appended to the path.</p>
 <p>Example
 []</p>
-<pre><code class="language-csharp">        [Fact]
-        public async Task Parse_Sdl()
-        {
-            /* Given */
-            var sdl =
-                  @&quot;
+<pre><code class="language-csharp">    [Fact]
+    public async Task Parse_Sdl()
+    {
+        /* Given */
+        var sdl =
+            @&quot;
                     &quot;&quot;&quot;&quot;&quot;&quot;
                     tanka_import from &quot;&quot;Files/Import&quot;&quot;
                     &quot;&quot;&quot;&quot;&quot;&quot;
@@ -216,21 +216,23 @@ tanka_import from &quot;path/to/file&quot;
                     }
                  &quot;;
 
-            /* When */
-            var builder = await new SchemaBuilder()
-                // BuiltIn import providers are used
-                .SdlAsync(sdl);
+        /* When */
+        var builder = new SchemaBuilder()
+            // BuiltIn import providers are used
+            .Add(sdl);
 
-            var schema = builder.Build();
+        var schema = await builder.Build(new SchemaBuildOptions());
 
-            /* Then */
-            var importedType = schema.GetNamedType&lt;ObjectType&gt;(&quot;ImportedType&quot;);
-            Assert.NotNull(importedType);
-            var importedField = schema.GetField(schema.Query.Name, &quot;imported&quot;);
-            Assert.Same(importedType, importedField.Type.Unwrap());
-            var nestedType = schema.GetNamedType&lt;ObjectType&gt;(&quot;NestedObject&quot;);
-            Assert.NotNull(nestedType);
-        }
+        /* Then */
+        var importedType = schema.GetNamedType(&quot;ImportedType&quot;);
+        Assert.NotNull(importedType);
+
+        var importedField = schema.GetField(schema.Query.Name, &quot;imported&quot;);
+        Assert.Equal(importedType.Name, importedField.Type.Unwrap().Name);
+
+        var nestedType = schema.GetNamedType(&quot;NestedObject&quot;);
+        Assert.NotNull(nestedType);
+    }
 
 </code></pre>
 <h4 id="embeddedresourceimportprovider"><code>EmbeddedResourceImportProvider</code></h4>

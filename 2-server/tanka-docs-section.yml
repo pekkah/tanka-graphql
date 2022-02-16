@@ -1,0 +1,8 @@
+﻿id: server
+title: "Server"
+index_page: xref://server:0-common.md
+nav:
+  - xref://nav.md
+  - xref://1-signalR/nav.md
+  - xref://2-graphql-ws/nav.md
+  - xref://5-extensions/nav.md

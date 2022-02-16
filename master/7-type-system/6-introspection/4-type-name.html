@@ -194,37 +194,37 @@
 <p>Any query can include the <code>__typename</code> meta-field. It returns the name of the object type currently being queried.</p>
 <h3 id="query-the-actual-type-name-of-when-querying-on-interface">Query the actual type name of when querying on interface</h3>
 <pre><code class="language-csharp">
-        [Fact]
-        public async Task Query_typename_of_characters()
-        {
-            /* Given */
-            var starwars = new Starwars();
+    [Fact]
+    public async Task Query_typename_of_characters()
+    {
+        /* Given */
+        var starwars = new Starwars();
 
-            var query = $@&quot;{{
-                    characters {{
+        var query = @&quot;{
+                    characters {
                         __typename
                         id
                         name
                         appearsIn
-                    }}
-                }}&quot;;
+                    }
+                }&quot;;
 
-            var executableSchema = _fixture.CreateSchema(starwars);
-            var options = new ExecutionOptions
-            {
-                Schema = executableSchema,
-                Document =  ParseDocument(query),
-                OperationName = null,
-                InitialValue = null,
-                VariableValues = null
-            };
+        var executableSchema = await _fixture.CreateSchema(starwars);
+        var options = new ExecutionOptions
+        {
+            Schema = executableSchema,
+            Document = query,
+            OperationName = null,
+            InitialValue = null,
+            VariableValues = null
+        };
 
-            /* When */
-            var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        /* When */
+        var actual = await ExecuteAsync(options).ConfigureAwait(false);
 
-            /* Then */
-            actual.ShouldMatchJson(
-                @&quot;{
+        /* Then */
+        actual.ShouldMatchJson(
+            @&quot;{
                   &quot;&quot;data&quot;&quot;: {
                     &quot;&quot;characters&quot;&quot;: [
                       {
@@ -250,7 +250,7 @@
                     ]
                   }
                 }&quot;);
-        }
+    }
 
 </code></pre>
                     

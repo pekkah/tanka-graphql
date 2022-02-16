@@ -195,271 +195,99 @@
 <pre><code class="language-csharp">﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.TypeSystem
+namespace Tanka.GraphQL.TypeSystem;
+
+public interface ISchema : IHasDirectives
 {
-    public interface ISchema : IHasDirectives, IType
-    {
-        ObjectType? Subscription { get; }
+    ObjectDefinition? Mutation { get; }
 
-        ObjectType Query { get; }
+    ObjectDefinition Query { get; }
 
-        ObjectType? Mutation { get; }
+    ObjectDefinition? Subscription { get; }
 
-        INamedType GetNamedType(string name);
+    TypeDefinition? GetNamedType(string name);
 
-        IField GetField(string type, string name);
+    FieldDefinition? GetField(string type, string name);
 
-        IEnumerable&lt;KeyValuePair&lt;string, IField&gt;&gt; GetFields(string type);
+    IEnumerable&lt;KeyValuePair&lt;string, FieldDefinition&gt;&gt; GetFields(string type);
 
-        IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt;? filter = null) where T : INamedType;
+    IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt;? filter = null) where T : TypeDefinition;
 
-        DirectiveType GetDirectiveType(string name);
+    DirectiveDefinition? GetDirectiveType(string name);
 
-        IQueryable&lt;DirectiveType&gt; QueryDirectiveTypes(Predicate&lt;DirectiveType&gt; filter = null);
+    IQueryable&lt;DirectiveDefinition&gt; QueryDirectiveTypes(Predicate&lt;DirectiveDefinition&gt;? filter = null);
 
-        IEnumerable&lt;KeyValuePair&lt;string, InputObjectField&gt;&gt; GetInputFields(string type);
+    IEnumerable&lt;KeyValuePair&lt;string, InputValueDefinition&gt;&gt; GetInputFields(string type);
 
-        InputObjectField GetInputField(string type, string name);
+    InputValueDefinition? GetInputField(string type, string name);
 
-        IEnumerable&lt;ObjectType&gt; GetPossibleTypes(IAbstractType abstractType);
+    IEnumerable&lt;TypeDefinition&gt; GetPossibleTypes(InterfaceDefinition abstractType);
 
-        Resolver GetResolver(string type, string fieldName);
+    IEnumerable&lt;ObjectDefinition&gt; GetPossibleTypes(UnionDefinition abstractType);
 
-        Subscriber GetSubscriber(string type, string fieldName);
+    Resolver? GetResolver(string type, string fieldName);
 
-        IValueConverter GetValueConverter(string type);
-    }
+    Subscriber? GetSubscriber(string type, string fieldName);
+
+    IValueConverter? GetValueConverter(string type);
 }
 </code></pre>
-<blockquote class="blockquote">
-<p>Rarely accessing the actual implemention class <code>GraphSchema</code> is required</p>
-</blockquote>
-<p>Schema is immutable and cannot be changed directly once created. To create <code>Schema</code> instance you need to provide <code>query</code> root object at minimum. Optionally <code>mutation</code> and <code>subscription</code> roots can be also provided.</p>
-<h3 id="basics">Basics</h3>
-<p>Built by <code>SchemaBuilder</code></p>
-<pre><code class="language-csharp">        public SchemaFacts()
-        {
-            Schema = new SchemaBuilder()
-                .InputObject(&quot;input&quot;, out var input)
-                .Connections(connect =&gt; connect
-                    .InputField(input, &quot;id&quot;, ScalarType.ID))
-                .Query(out var query)
-                .Connections(connect =&gt; connect
-                    .Field(query, &quot;name&quot;, ScalarType.String))
-                .Build();
-        }
-
-</code></pre>
-<p>Query root is <code>ObjectType</code></p>
+<h3 id="defaults">Defaults</h3>
+<p>By default following type system is included when building a schema using <code>SchemaBuilder</code>.</p>
 <pre><code class="language-csharp">
-        [Fact]
-        public void Roots_Query()
-        {
-            /* Given */
-            /* When */
-            /* Then */
-            Assert.NotNull(Schema.Query);
-            Assert.IsType&lt;ObjectType&gt;(Schema.Query);
-        }
+    public static TypeSystemDocument BuiltInTypes =&gt; @&quot;
+&quot;&quot;&quot;&quot;&quot;&quot;
+The `Boolean` scalar type represents `true` or `false`
+&quot;&quot;&quot;&quot;&quot;&quot;
+scalar Boolean
 
-</code></pre>
-<p>Mutation is optional</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void Roots_Mutation()
-        {
-            /* Given */
-            /* When */
-            /* Then */
-            Assert.Null(Schema.Mutation);
-        }
+&quot;&quot;&quot;&quot;&quot;&quot;
+The `Float` scalar type represents signed double-precision fractional values
+as specified by '[IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)
+&quot;&quot;&quot;&quot;&quot;&quot;
+scalar Float
 
-</code></pre>
-<p>Subscription is optional</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void Roots_Subscription()
-        {
-            /* Given */
-            /* When */
-            /* Then */
-            Assert.Null(Schema.Subscription);
-        }
+&quot;&quot;&quot;&quot;&quot;&quot;
+The ID scalar type represents a unique identifier, often used to refetch an object
+or as the key for a cache. The ID type is serialized in the same way as a String;
+however, it is not intended to be human‐readable. While it is often numeric, it
+should always serialize as a String.
+&quot;&quot;&quot;&quot;&quot;&quot;
+scalar ID
 
-</code></pre>
-<h3 id="querying-types">Querying types</h3>
-<p>Query named types</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetNamedType()
-        {
-            /* Given */
-            var namedTypeName = Schema.Query.Name;
+&quot;&quot;&quot;&quot;&quot;&quot;
+The `Int` scalar type represents non-fractional signed whole numeric values
+&quot;&quot;&quot;&quot;&quot;&quot;
+scalar Int
 
-            /* When */
-            var namedType = Schema.GetNamedType(namedTypeName);
-
-            /* Then */
-            Assert.NotNull(namedType);
-            Assert.IsAssignableFrom&lt;INamedType&gt;(namedType);
-        }
+&quot;&quot;&quot;&quot;&quot;&quot;
+The `String` scalar type represents textual data, represented as UTF-8
+character sequences. The String type is most often used by GraphQL to
+represent free-form human-readable text.
+&quot;&quot;&quot;&quot;&quot;&quot;
+scalar String
 
 
-        [Fact]
-        public void QueryNamedTypes()
-        {
-            /* Given */
-            bool TypesWithoutDescription(ObjectType type)
-            {
-                return string.IsNullOrEmpty(type.Description);
-            }
+directive @deprecated(reason: String) on
+    | FIELD_DEFINITION
+    | ENUM_VALUE
 
-            /* When */
-            var undocumentedTypes = Schema.QueryTypes&lt;ObjectType&gt;(TypesWithoutDescription);
+directive @include(if: Boolean!) on
+    | FIELD
+    | FRAGMENT_SPREAD
+    | INLINE_FRAGMENT
 
-            /* Then */
-            Assert.NotNull(undocumentedTypes);
-            Assert.Single(undocumentedTypes, type =&gt; type.Name == &quot;Query&quot;);
-        }
+directive @skip(if: Boolean!) on
+    | FIELD
+    | FRAGMENT_SPREAD
+    | INLINE_FRAGMENT
 
-</code></pre>
-<p>Query directives</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetDirective()
-        {
-            /* Given */
-            var directiveTypeName = DirectiveType.Include.Name;
-
-            /* When */
-            var directiveType = Schema.GetDirectiveType(directiveTypeName);
-
-            /* Then */
-            Assert.NotNull(directiveType);
-            Assert.IsType&lt;DirectiveType&gt;(directiveType);
-        }
-
-
-        [Fact]
-        public void QueryDirectives()
-        {
-            /* Given */
-            bool AppliesToField(DirectiveType type)
-            {
-                return type.Locations.Contains(DirectiveLocation.FIELD);
-            }
-
-            /* When */
-            var directives = Schema.QueryDirectiveTypes(AppliesToField)
-                .ToList();
-
-            /* Then */
-            foreach (var directiveType in directives) 
-                Assert.Contains(DirectiveLocation.FIELD, directiveType.Locations);
-        }
-
-</code></pre>
-<p>Query fields</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetField()
-        {
-            /* Given */
-            var namedTypeName = Schema.Query.Name;
-
-            /* When */
-            var field = Schema.GetField(namedTypeName, &quot;name&quot;);
-
-            /* Then */
-            Assert.NotNull(field);
-            Assert.Same(ScalarType.String, field.Type);
-        }
-
-
-        [Fact]
-        public void GetFields()
-        {
-            /* Given */
-            var namedTypeName = Schema.Query.Name;
-
-            /* When */
-            var fields = Schema.GetFields(namedTypeName);
-
-            /* Then */
-            Assert.Single(
-                fields,
-                kv =&gt; kv.Key == &quot;name&quot; &amp;&amp; (ScalarType) kv.Value.Type == ScalarType.String);
-        }
-
-</code></pre>
-<p>Query input fields</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void GetInputField()
-        {
-            /* Given */
-            var inputTypeName = &quot;input&quot;;
-
-            /* When */
-            var field = Schema.GetInputField(inputTypeName, &quot;id&quot;);
-
-            /* Then */
-            Assert.NotNull(field);
-            Assert.Same(ScalarType.ID, field.Type);
-        }
-
-
-        [Fact]
-        public void GetInputFields()
-        {
-            /* Given */
-            var inputTypeName = &quot;input&quot;;
-
-            /* When */
-            var fields = Schema.GetInputFields(inputTypeName);
-
-            /* Then */
-            Assert.Single(
-                fields,
-                kv =&gt; kv.Key == &quot;id&quot; &amp;&amp; (ScalarType) kv.Value.Type == ScalarType.ID);
-        }
-
-</code></pre>
-<h4 id="defaults">Defaults</h4>
-<p>By default Skip and Include directives are included</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void Included_directives()
-        {
-            /* Given */ 
-            /* When */
-            var directives = Schema.QueryDirectiveTypes();
-
-            /* Then */
-            Assert.Single(directives, DirectiveType.Include);
-            Assert.Single(directives, DirectiveType.Skip);
-        }
-
-</code></pre>
-<p>By default all standard <code>ScalarType</code>s are included</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void Included_scalars()
-        {
-            /* Given */
-            /* When */
-            var scalars = Schema.QueryTypes&lt;ScalarType&gt;()
-                .ToList();
-
-            /* Then */
-            foreach (var scalar in ScalarType.Standard)
-            {
-                Assert.Contains(scalar.Type, scalars);
-            }
-        }
+directive @specifiedBy(url: String!) on SCALAR
+&quot;;
 
 </code></pre>
                     

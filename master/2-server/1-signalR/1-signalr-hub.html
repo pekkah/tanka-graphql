@@ -160,20 +160,20 @@ used with the provided hub.</p>
 <h3 id="graphql-server">GraphQL Server</h3>
 <p>Configure SignalR server</p>
 <pre><code class="language-csharp">
-        private static void AddSignalRServer(IServiceCollection services)
-        {
-            // Configure Tanka server
-            services.AddSignalR()
-                .AddTankaGraphQL();
-        }
+    private static void AddSignalRServer(IServiceCollection services)
+    {
+        // Configure Tanka server
+        services.AddSignalR()
+            .AddTankaGraphQL();
+    }
 
 </code></pre>
 <pre><code class="language-csharp">
-        private static void UseSignalRServer(IApplicationBuilder app)
-        {
-            // add SignalR
-            app.UseEndpoints(routes =&gt; { routes.MapTankaGraphQLSignalR(&quot;/graphql/hub&quot;); });
-        }
+    private static void UseSignalRServer(IApplicationBuilder app)
+    {
+        // add SignalR
+        app.UseEndpoints(routes =&gt; { routes.MapTankaGraphQLSignalR(&quot;/graphql/hub&quot;); });
+    }
 
 </code></pre>
                     

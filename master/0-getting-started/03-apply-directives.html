@@ -175,44 +175,47 @@
 <h3 id="schema-directives">Schema directives</h3>
 <p>Schema directives can be used to modify field for example by modifying the resolver of the field.</p>
 <pre><code class="language-csharp">
-        [Fact]
-        public async Task Part3_ApplyDirectives_on_Object_fields()
-        {
-            // Create builder, load sdl with our types
-            // and bind the resolvers
-            var builder = new SchemaBuilder()
-                .Sdl(@&quot;
+    [Fact(Skip = &quot;todo: modifying resolvers&quot;)]
+    public async Task Part3_ApplyDirectives_on_Object_fields()
+    {
+        // Create builder, load sdl with our types
+        // and bind the resolvers
+        var builder = new SchemaBuilder()
+            .Add(@&quot;
                     directive @duplicate on FIELD_DEFINITION
 
                     type Query {
                         name: String @duplicate                
                     }
-                    &quot;)
-                .GetQuery(out var query)
-                .UseResolversAndSubscribers(
-                    new ObjectTypeMap
+                    &quot;);
+
+        // todo: This is not currently working and resolvers are being modified but
+        // those modified resolvers are not taken into use by anything
+        // build schema with resolvers and directives
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    &quot;Query&quot;, new FieldResolversMap
                     {
                         {
-                            query.Name, new FieldResolversMap
+                            &quot;name&quot;, context =&gt;
                             {
-                                {
-                                    &quot;name&quot;, context =&gt;
-                                    {
-                                        var result = Resolve.As(&quot;Test&quot;);
-                                        return new ValueTask&lt;IResolverResult&gt;(result);
-                                    }
-                                }
+                                var result = Resolve.As(&quot;Test&quot;);
+                                return new ValueTask&lt;IResolverResult&gt;(result);
                             }
                         }
-                    });
-
-            // Apply directives to schema by providing a visitor which
-            // will transform the fields with the directive into new
-            // fields with the directive logic. Note that the original
-            // field will be replaced.
-            builder.ApplyDirectives(new Dictionary&lt;string, CreateDirectiveVisitor&gt;()
+                    }
+                }
+            },
+            DirectiveVisitorFactories = new Dictionary&lt;string, CreateDirectiveVisitor&gt;
             {
-                [&quot;duplicate&quot;] = _ =&gt; new DirectiveVisitor()
+                // Apply directives to schema by providing a visitor which
+                // will transform the fields with the directive into new
+                // fields with the directive logic. Note that the original
+                // field will be replaced.
+                [&quot;duplicate&quot;] = _ =&gt; new DirectiveVisitor
                 {
                     // Visitor will visit field definitions
                     FieldDefinition = (directive, fieldDefinition) =&gt;
@@ -221,33 +224,31 @@
                         // new resolver. New resolver will execute the 
                         // original resolver, duplicate value and return it
                         return fieldDefinition
-                            .WithResolver(resolver =&gt; 
+                            .WithResolver(resolver =&gt;
                                 resolver.Use(async (context, next) =&gt;
-                        {
-                            // We need to first call the original resolver to 
-                            // get the initial value
-                            var result = await next(context);
+                                {
+                                    // We need to first call the original resolver to 
+                                    // get the initial value
+                                    var result = await next(context);
 
-                            // for simplicity we expect value to be string
-                            var initialValue = result.Value.ToString();
+                                    // for simplicity we expect value to be string
+                                    var initialValue = result.Value.ToString();
 
-                            // return new value
-                            return Resolve.As(initialValue + initialValue);
-                        }).Run(fieldDefinition.Resolver));
+                                    // return new value
+                                    return Resolve.As(initialValue + initialValue);
+                                }).Run(fieldDefinition.Resolver));
                     }
                 }
-            });
+            }
+        });
 
-            // Build schema
-            var schema = builder.Build();
+        // Get resolver for Query.name field
+        var nameResolver = schema.GetResolver(schema.Query.Name, &quot;name&quot;)!;
 
-            // Get resolver for Query.name field
-            var nameResolver = schema.GetResolver(schema.Query.Name, &quot;name&quot;);
-
-            // Execute the resolver. This is normally handled by the executor.
-            var nameValue = await nameResolver(null);
-            Assert.Equal(&quot;TestTest&quot;, nameValue.Value);
-        }
+        // Execute the resolver. This is normally handled by the executor.
+        var nameValue = await nameResolver(null);
+        Assert.Equal(&quot;TestTest&quot;, nameValue.Value);
+    }
 
 </code></pre>
                     

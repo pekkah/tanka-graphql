@@ -143,20 +143,20 @@
 <h3 id="usage">Usage</h3>
 <p>Add Tracing extension</p>
 <pre><code class="language-csharp">
-        [Fact]
-        public void Add_Extension()
-        {
-            /* When */
-            Services.AddTankaGraphQL()
-                .ConfigureSchema(() =&gt; default)
-                // add trace execution extension
-                .AddExtension&lt;TraceExtension&gt;();
+    [Fact]
+    public void Add_Extension()
+    {
+        /* When */
+        Services.AddTankaGraphQL()
+            .ConfigureSchema(() =&gt; default)
+            // add trace execution extension
+            .AddExtension&lt;TraceExtension&gt;();
 
-            /* Then */
-            var provider = Services.BuildServiceProvider();
-            var executorExtensions = provider.GetService&lt;IEnumerable&lt;IExecutorExtension&gt;&gt;();
-            Assert.Contains(executorExtensions, extension =&gt; extension is TraceExtension);
-        }
+        /* Then */
+        var provider = Services.BuildServiceProvider();
+        var executorExtensions = provider.GetService&lt;IEnumerable&lt;IExecutorExtension&gt;&gt;();
+        Assert.Contains(executorExtensions, extension =&gt; extension is TraceExtension);
+    }
 
 </code></pre>
                     

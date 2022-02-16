@@ -182,16 +182,12 @@ or separately.</p>
 <p>First step for either server is to configure your schema options
 for execution. Schema should be built only once and cached as singleton.</p>
 <pre><code class="language-csharp">
-        private async Task&lt;ISchema&gt; Create()
-        {
-            // Do some async work to build the schema. For example
-            // load SDL from file
-            await Task.Delay(0);
-
-            // Build simple schema from SDL string
-            var builder = new SchemaBuilder()
-                .Sdl(
-                    @&quot;
+    private async Task&lt;ISchema&gt; Create()
+    {
+        // Build simple schema from SDL string
+        var builder = new SchemaBuilder()
+            .Add(
+                @&quot;
                     type Query {
                         firstName: String!
                         lastName: String!
@@ -202,19 +198,16 @@ for execution. Schema should be built only once and cached as singleton.</p>
                     }
                     &quot;);
 
-            // Bind resolvers and build
-            return SchemaTools
-                .MakeExecutableSchemaWithIntrospection(
-                    builder,
-                    new ObjectTypeMap
-                    {
-                        [&quot;Query&quot;] = new FieldResolversMap
-                        {
-                            {&quot;firstName&quot;, context =&gt; ResolveSync.As(&quot;Tanka&quot;)},
-                            {&quot;lastName&quot;, UseService()}
-                        }
-                    });
-        }
+        // Bind resolvers and build
+        return await builder.Build(new ResolversMap
+        {
+            [&quot;Query&quot;] = new()
+            {
+                { &quot;firstName&quot;, context =&gt; ResolveSync.As(&quot;Tanka&quot;) },
+                { &quot;lastName&quot;, UseService() }
+            }
+        });
+    }
 
 </code></pre>
 <h3 id="configure">2. Configure</h3>
@@ -223,12 +216,12 @@ the executor where to get the schema and also allows configuring the validation
 rules for the execution. By default all validation rules from the GraphQL
 specification are included.</p>
 <pre><code class="language-csharp">
-        private static void AddTanka(IServiceCollection services)
-        {
-            // Configure schema options
-            services.AddTankaGraphQL()
-                .ConfigureSchema&lt;SchemaCache&gt;(async cache =&gt; await cache.GetOrAdd());
-        }
+    private static void AddTanka(IServiceCollection services)
+    {
+        // Configure schema options
+        services.AddTankaGraphQL()
+            .ConfigureSchema&lt;SchemaCache&gt;(async cache =&gt; await cache.GetOrAdd());
+    }
 
 </code></pre>
 <h3 id="configure-server">3. Configure server</h3>
@@ -237,46 +230,46 @@ services and configure their options. Depending on the server also
 middleware needs to be configured using the paired <code>Use*</code> methods.</p>
 <p>Configure SignalR server</p>
 <pre><code class="language-csharp">
-        private static void AddSignalRServer(IServiceCollection services)
-        {
-            // Configure Tanka server
-            services.AddSignalR()
-                .AddTankaGraphQL();
-        }
+    private static void AddSignalRServer(IServiceCollection services)
+    {
+        // Configure Tanka server
+        services.AddSignalR()
+            .AddTankaGraphQL();
+    }
 
 </code></pre>
 <p>Use SignalR server</p>
 <pre><code class="language-csharp">
-        private static void UseSignalRServer(IApplicationBuilder app)
-        {
-            // add SignalR
-            app.UseEndpoints(routes =&gt; { routes.MapTankaGraphQLSignalR(&quot;/graphql/hub&quot;); });
-        }
+    private static void UseSignalRServer(IApplicationBuilder app)
+    {
+        // add SignalR
+        app.UseEndpoints(routes =&gt; { routes.MapTankaGraphQLSignalR(&quot;/graphql/hub&quot;); });
+    }
 
 </code></pre>
 <p>Configure GraphQL WS server</p>
 <pre><code class="language-csharp">
-        private void AddWebSocketsServer(IServiceCollection services)
-        {
-            // Configure websockets
-            services.AddWebSockets(options =&gt; { options.AllowedOrigins.Add(&quot;https://localhost:5000&quot;); });
+    private void AddWebSocketsServer(IServiceCollection services)
+    {
+        // Configure websockets
+        services.AddWebSockets(options =&gt; { options.AllowedOrigins.Add(&quot;https://localhost:5000&quot;); });
 
-            // Add Tanka GraphQL-WS server
-            services.AddTankaGraphQL()
-                .ConfigureWebSockets();
-        }
+        // Add Tanka GraphQL-WS server
+        services.AddTankaGraphQL()
+            .ConfigureWebSockets();
+    }
 
 </code></pre>
 <p>Use GraphQL WS Server</p>
 <pre><code class="language-csharp">
-        private void UseWebSocketsServer(IApplicationBuilder app)
-        {
-            // Add Websockets middleware
-            app.UseWebSockets();
+    private void UseWebSocketsServer(IApplicationBuilder app)
+    {
+        // Add Websockets middleware
+        app.UseWebSockets();
 
-            // Add Tanka GraphQL-WS middleware
-            app.UseEndpoints(endpoints =&gt; endpoints.MapTankaGraphQLWebSockets(&quot;/graphql/ws&quot;));
-        }
+        // Add Tanka GraphQL-WS middleware
+        app.UseEndpoints(endpoints =&gt; endpoints.MapTankaGraphQLWebSockets(&quot;/graphql/ws&quot;));
+    }
 
 </code></pre>
 <h3 id="http-api">4. HTTP API</h3>
@@ -288,32 +281,32 @@ HTTP/JSON API as that can be easily implemented.</p>
 and is also used by the SignalR and GraphQL-WS based servers to
 execute the queries.</p>
 <p>[]</p>
-<pre><code class="language-csharp">    [Route(&quot;api/graphql&quot;)]
-    public class QueryController : Controller
+<pre><code class="language-csharp">
+[Route(&quot;api/graphql&quot;)]
+public class QueryController : Controller
+{
+    private readonly IQueryStreamService _queryStreamService;
+
+    public QueryController(IQueryStreamService queryStreamService)
     {
-        private readonly IQueryStreamService _queryStreamService;
-
-        public QueryController(IQueryStreamService queryStreamService)
-        {
-            _queryStreamService = queryStreamService;
-        }
-
-        [HttpPost]
-        public async Task&lt;IActionResult&gt; Post([FromBody] OperationRequest request)
-        {
-            var stream = await _queryStreamService.QueryAsync(new Query
-            {
-                Document = ParseDocument(request.Query),
-                Variables = request.Variables,
-                OperationName = request.OperationName
-            }, Request.HttpContext.RequestAborted);
-
-            var result = await stream.Reader.ReadAsync();
-
-            return Ok(result);
-        }
+        _queryStreamService = queryStreamService;
     }
 
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; Post([FromBody] OperationRequest request)
+    {
+        var stream = await _queryStreamService.QueryAsync(new Query
+        {
+            Document = request.Query,
+            Variables = request.Variables,
+            OperationName = request.OperationName
+        }, Request.HttpContext.RequestAborted);
+
+        var result = await stream.Reader.ReadAsync();
+
+        return Ok(result);
+    }
+}
 </code></pre>
                     
             </main>

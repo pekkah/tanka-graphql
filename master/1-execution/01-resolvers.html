@@ -154,19 +154,17 @@
 <p>Resolve fields</p>
 <pre><code class="language-csharp">﻿using System.Threading.Tasks;
 
-namespace Tanka.GraphQL.ValueResolution
-{
-    public delegate ValueTask&lt;IResolverResult&gt; Resolver(IResolverContext context);
-}
+namespace Tanka.GraphQL.ValueResolution;
+
+public delegate ValueTask&lt;IResolverResult&gt; Resolver(IResolverContext context);
 </code></pre>
 <p>Resolve subscription event streams</p>
 <pre><code class="language-csharp">﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Tanka.GraphQL.ValueResolution
-{
-    public delegate ValueTask&lt;ISubscriberResult&gt; Subscriber(IResolverContext context, CancellationToken unsubscribe);
-}
+namespace Tanka.GraphQL.ValueResolution;
+
+public delegate ValueTask&lt;ISubscriberResult&gt; Subscriber(IResolverContext context, CancellationToken unsubscribe);
 </code></pre>
 <h3 id="resolver">Resolver</h3>
 <p>When executing query or mutation <code>Resolver</code> is used to resolve the value of the field. Resolver can use the context to access field arguments, schema, and other details about the context of the execution.</p>
@@ -179,174 +177,108 @@ namespace Tanka.GraphQL.ValueResolution
 <h3 id="building-resolvers-with-fields">Building resolvers with fields</h3>
 <p>Resolvers can be configured when creating fields. This configuration is used to build the actual resolver when <code>Schema</code> is built.</p>
 <pre><code class="language-csharp">
-        [Fact]
-        public async Task Create_Field_Resolver()
+    [Fact]
+    public async Task Part2_BindResolvers_Manual()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@&quot;
+                type Query {
+                    name: String
+                }
+                &quot;);
+
+        // Build schema with the resolver
+        var schema = await builder.Build(new SchemaBuildOptions
         {
-            /* Given */
-            var builder = new SchemaBuilder();
-            builder.Query(out var query)
-                .Connections(connections =&gt;
+            Resolvers = new ResolversMap
+            {
                 {
-                    connections.Field(query, &quot;field1&quot;, ScalarType.String,
-                        &quot;test field&quot;,
-                        resolve =&gt; resolve.Run(context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(42))));
-                });
+                    &quot;Query&quot;, &quot;name&quot;, context =&gt;
+                    {
+                        // Create result using Test as the value
+                        var result = Resolve.As(&quot;Test&quot;);
 
+                        // Resolvers can be sync or async so
+                        // ValueTask result is used to reduce 
+                        // allocations
+                        return new ValueTask&lt;IResolverResult&gt;(result);
+                    }
+                }
+            }
+        });
 
-            /* When */
-            var sut = builder.Build();
+        // Get resolver for Query.name field
+        var nameResolver = schema.GetResolver(schema.Query.Name, &quot;name&quot;)!;
 
-            /* Then */
-            var result = await sut.GetResolver(query.Name, &quot;field1&quot;)(null);
-            Assert.Equal(42, result.Value);
-        }
+        // Execute the resolver. This is normally handled by the executor.
+        var nameValue = await nameResolver(null);
+        Assert.Equal(&quot;Test&quot;, nameValue.Value);
+    }
 
 </code></pre>
-<pre><code class="language-csharp">
-        [Fact]
-        public async Task Create_Field_Subscriber()
-        {
-            /* Given */
-            var builder = new SchemaBuilder();
-            builder.Query(out var query)
-                .Connections(connections =&gt;
-                {
-                    connections.Field(query, &quot;field1&quot;, ScalarType.String,
-                        &quot;test field&quot;,
-                        resolve =&gt; resolve.Run(context =&gt;
-                            ResolveSync.As(42)),
-                        subscribe =&gt; subscribe.Run((context, unsubscribe) =&gt;
-                            ResolveSync.Subscribe(new EventChannel&lt;object&gt;(), unsubscribe)));
-                });
-
-
-            /* When */
-            var sut = builder.Build();
-
-            /* Then */
-            var result = await sut.GetSubscriber(query.Name, &quot;field1&quot;)(null, CancellationToken.None);
-            Assert.NotNull(result.Reader);
-        }
-
+<pre><code class="language-csharp">//todo: Subscriber example
 </code></pre>
 <p>Resolver middlwares can be used to build an execution chain.</p>
 <p>Middlwares are implemented as a delegate method taking in the context and delegate for the next middlware to execute. Last link in the chain is usually the actual resolver but chain can be also interrupted before it by returning a result from the middleware.</p>
 <p>Signature of the value resolver middlware:</p>
 <pre><code class="language-csharp">﻿using System.Threading.Tasks;
 
-namespace Tanka.GraphQL.ValueResolution
-{
-    public delegate ValueTask&lt;IResolverResult&gt; ResolverMiddleware(IResolverContext context, Resolver next);
-}
+namespace Tanka.GraphQL.ValueResolution;
+
+public delegate ValueTask&lt;IResolverResult&gt; ResolverMiddleware(IResolverContext context, Resolver next);
 </code></pre>
 <p>Signature of the subscription middlware:</p>
 <pre><code class="language-csharp">﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Tanka.GraphQL.ValueResolution
-{
-    public delegate ValueTask&lt;ISubscriberResult&gt; SubscriberMiddleware(IResolverContext context, CancellationToken unsubscribe, Subscriber next);
-}
+namespace Tanka.GraphQL.ValueResolution;
+
+public delegate ValueTask&lt;ISubscriberResult&gt; SubscriberMiddleware(IResolverContext context,
+    CancellationToken unsubscribe, Subscriber next);
 </code></pre>
 <h3 id="using-resolver-and-subscriber-maps">Using resolver and subscriber maps</h3>
-<p>In some cases it's useful to be able to build the resolvers separately from the schema building. For that purpose <code>SchemaTools</code> provide a method to bind resolvers to fields by using <code>IResolverMap</code> and <code>ISubscriberMap</code>.</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public async Task Make_executable_schema()
-        {
-            /* Given */
-            var builder = new SchemaBuilder()
-                .Sdl(@&quot;
-                    type Query {
-                        field1: Int!
-                    }
-
-                    schema {
-                        query: Query
-                    }
-                    &quot;
-                );
-
-            var resolvers = new ObjectTypeMap
-            {
-                {
-                    &quot;Query&quot;, new FieldResolversMap
-                    {
-                        {
-                            &quot;field1&quot;, async context =&gt;
-                            {
-                                await Task.Delay(1);
-                                return Resolve.As(1);
-                            }
-                        }
-                    }
-                }
-            };
-
-            /* When */
-            var executableSchema = SchemaTools.MakeExecutableSchema(
-                builder: builder,
-                resolvers: resolvers,
-                subscribers: null,
-                converters: null,
-                directives: null);
-
-            /* Then */
-            var result = await Executor.ExecuteAsync(
-                new ExecutionOptions
-                {
-                    Document = Parser.ParseDocument(@&quot;{ field1 }&quot;),
-                    Schema = executableSchema
-                });
-
-            result.ShouldMatchJson(
-                @&quot;{
-                  &quot;&quot;data&quot;&quot;: {
-                    &quot;&quot;field1&quot;&quot;: 1
-                  }
-                }&quot;);
-        }
-
-</code></pre>
 <p>Dictionary based implementation is provided for setting up both resolvers and subscribers but other implementations can be easily provided.</p>
 <pre><code class="language-csharp">﻿using System.Collections.Generic;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL
-{
-    public interface IResolverMap
-    {
-        Resolver GetResolver(string typeName, string fieldName);
-    }
+namespace Tanka.GraphQL;
 
-    public static class ResolverMapExtensions
+public interface IResolverMap
+{
+    Resolver? GetResolver(string typeName, string fieldName);
+
+    IEnumerable&lt;(string TypeName, IEnumerable&lt;string&gt; Fields)&gt; GetTypes();
+}
+
+public static class ResolverMapExtensions
+{
+    public static Resolver? GetResolver(this IResolverMap map, ObjectDefinition type, FieldDefinition field)
     {
-        public static Resolver GetResolver(this IResolverMap map, ComplexType type, KeyValuePair&lt;string, IField&gt; field)
-        {
-            return map.GetResolver(type.Name, field.Key);
-        }
+        return map.GetResolver(type.Name, field.Name);
     }
 }
 </code></pre>
 <pre><code class="language-csharp">﻿using System.Collections.Generic;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
-using Tanka.GraphQL.TypeSystem;
 
-namespace Tanka.GraphQL
+namespace Tanka.GraphQL;
+
+public interface ISubscriberMap
 {
-    public interface ISubscriberMap
-    {
-        Subscriber GetSubscriber(string typeName, string fieldName);
-    }
+    Subscriber? GetSubscriber(string typeName, string fieldName);
 
-    public static class SubscriberMapExtensions
+    IEnumerable&lt;(string TypeName, IEnumerable&lt;string&gt; Fields)&gt; GetTypes();
+}
+
+public static class SubscriberMapExtensions
+{
+    public static Subscriber? GetSubscriber(this ISubscriberMap map, ObjectDefinition type,
+        FieldDefinition field)
     {
-        public static Subscriber GetSubscriber(this ISubscriberMap map, ComplexType type,
-            KeyValuePair&lt;string, IField&gt; field)
-        {
-            return map.GetSubscriber(type.Name, field.Key);
-        }
+        return map.GetSubscriber(type.Name, field.Name);
     }
 }
 </code></pre>

@@ -122,79 +122,11 @@
     <ul>
     </ul>
 </li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-code-generator/6-usage.html>Usage</a>
-    <ul>
-<li class="nav-item">
-    <a class="nav-link" href=master/3-code-generator/2-object-type.html>Objects</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/3-code-generator/3-input-object-type.html>Input Objects</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/3-code-generator/4-interface-type.html>Interfaces</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/3-code-generator/5-union-type.html>Unions</a>
-    <ul>
-    </ul>
-</li>    </ul>
-</li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h2 id="code-generator">Code Generator</h2>
-<p>Writing code for the resolvers can get tedious when the application
-gets more complicated. Code generator provides features for automatically
-generating some of the the resolvers and providing strongly typed stubs when
-generation is not possible.</p>
-<h3 id="how-it-works">How it works</h3>
-<p>Code generator takes as an input a graphql schema definition language file (SDL)
-and generates resolvers and models from it.</p>
-<p>Code generator includes GraphQL MSBuild item type to connect the generator to SDL
-files in your project. The actual generator is an dotnet tool which gets executed
-by the MSBuild targets or it can be run manually when required.</p>
-<h3 id="install">Install</h3>
-<p>Code generator is distributed as NuGet packages:</p>
-<ul>
-<li><code>tanka.graphql.generator</code> package contains the MSBuild targets and custom tasks,</li>
-<li><code>tanka.graphql.generator.tool</code> package is the dotnet tool which handles the actual code
-generation.</li>
-</ul>
-<p>Steps</p>
-<blockquote class="blockquote">
-<p>Generated code requires that the target project references <code>tanka.graphql</code> and <code>tanka.graphql.server</code> packages.</p>
-</blockquote>
-<h4 id="install-the-tool">1. Install the tool</h4>
-<p>Locally</p>
-<pre><code class="language-bash"># new dotnet tool manifest
-dotnet new tool-manifest
-
-dotnet tool install tanka.graphql.generator.tool
-</code></pre>
-<p>Globally</p>
-<pre><code class="language-bash">dotnet tool install --global tanka.graphql.generator.tool
-</code></pre>
-<h4 id="install-msbuild-tasks-itemtypes-and-targets">2. Install MSBuild tasks, ItemTypes and targets</h4>
-<pre><code class="language-bash">dotnet add package tanka.graphql.generator
-</code></pre>
-<h4 id="add-sdl-file">3. Add SDL file</h4>
-<p>Add SDL file to project and include it as
-and GraphQL SDL file.</p>
-<pre><code class="language-xml">&lt;ItemGroup&gt;
-    &lt;GraphQL Include=&quot;Folder\SDL.graphql&quot; /&gt;
-&lt;/ItemGroup&gt;
-</code></pre>
-<h4 id="generate-code">4. Generate code</h4>
-<p>Code is generated automatically every time the SDL files are changed.
-Rebuilding project will force renegeration to be executed.
-Generated code files are located in IntermediateOutput directory. They're
-automatically included in the compilation of the project and
-Visual Studio IntelliSense will work with them.</p>
+<p>New code generator based on Roslyn Source Generators is in the works. Old source generator has been removed.</p>
                     
             </main>
         </div>

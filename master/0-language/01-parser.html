@@ -137,11 +137,11 @@ is done following the latest <a href="http://spec.graphql.org/draft/">draft</a> 
 <p>Lexer reads stream of tokens from UTF8 byte array (<a href="https://docs.microsoft.com">ReadOnlySpan<byte></a>)
 and parser turns these tokens into syntax tree.</p>
 <h3 id="example-parser-usage">Example: Parser usage</h3>
-<pre><code class="language-csharp">        [Fact]
-        public void ExecutableDocument()
-        {
-            /* Given */
-            var source = @&quot;query {
+<pre><code class="language-csharp">    [Fact]
+    public void ExecutableDocument()
+    {
+        /* Given */
+        var source = @&quot;query {
                                 field
                             }
                             mutation {
@@ -152,32 +152,32 @@ and parser turns these tokens into syntax tree.</p>
                             }
                             &quot;;
 
-            var sut = Parser.Create(source);
-            
-            /* When */
-            var actual = sut.ParseExecutableDocument();
+        var sut = Parser.Create(source);
 
-            /* Then */
-            Assert.Equal(3, actual.OperationDefinitions?.Count);
-        }
+        /* When */
+        var actual = sut.ParseExecutableDocument();
+
+        /* Then */
+        Assert.Equal(3, actual.OperationDefinitions?.Count);
+    }
 
 </code></pre>
 <h3 id="example-parser-usage-simplified">Example: Parser usage simplified</h3>
-<pre><code class="language-csharp">        
-        [Fact]
-        public void FromString()
-        {
-            /* Given */
-            /* When */
-            ObjectDefinition original =
-                @&quot;type Obj {
+<pre><code class="language-csharp">
+    [Fact]
+    public void FromString()
+    {
+        /* Given */
+        /* When */
+        ObjectDefinition original =
+            @&quot;type Obj {
                     field1: String
                 }&quot;;
 
-            /* Then */
-            Assert.Equal(&quot;Obj&quot;, original.Name);
-            Assert.NotNull(original.Fields);
-        }
+        /* Then */
+        Assert.Equal(&quot;Obj&quot;, original.Name);
+        Assert.NotNull(original.Fields);
+    }
 
 </code></pre>
                     

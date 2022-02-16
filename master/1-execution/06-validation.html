@@ -155,63 +155,63 @@
 </blockquote>
 <h3 id="execution">Execution</h3>
 <pre><code class="language-csharp">
-        private ValidationResult Validate(
-            ExecutableDocument document,
-            CombineRule rule,
-            Dictionary&lt;string, object&gt; variables = null)
-        {
-            if (document == null) throw new ArgumentNullException(nameof(document));
-            if (rule == null) throw new ArgumentNullException(nameof(rule));
+    private ValidationResult Validate(
+        ExecutableDocument document,
+        CombineRule rule,
+        Dictionary&lt;string, object&gt; variables = null)
+    {
+        if (document == null) throw new ArgumentNullException(nameof(document));
+        if (rule == null) throw new ArgumentNullException(nameof(rule));
 
-            return Validator.Validate(           
-                new[] {rule},
-                Schema,
-                document,
-                variables);
-        }
+        return Validator.Validate(
+            new[] { rule },
+            Schema,
+            document,
+            variables);
+    }
 
 </code></pre>
 <h3 id="rules">Rules</h3>
 <p>All execution rules</p>
 <pre><code class="language-csharp">All = new[]
-        {
-            /* R511ExecutableDefinitions(),*/
-            
-            R5211OperationNameUniqueness(),
-            R5221LoneAnonymousOperation(),
-            R5231SingleRootField(),
-            
-            R531FieldSelections(),
-            R532FieldSelectionMerging(),
-            R533LeafFieldSelections(),
+    {
+        /* R511ExecutableDefinitions(),*/
 
-            R541ArgumentNames(),
-            R542ArgumentUniqueness(),
-            R5421RequiredArguments(),
+        R5211OperationNameUniqueness(),
+        R5221LoneAnonymousOperation(),
+        R5231SingleRootField(),
 
-            R5511FragmentNameUniqueness(),
-            R5512FragmentSpreadTypeExistence(),
-            R5513FragmentsOnCompositeTypes(),
-            R5514FragmentsMustBeUsed(),
+        R531FieldSelections(),
+        R532FieldSelectionMerging(),
+        R533LeafFieldSelections(),
 
-            R5521FragmentSpreadTargetDefined(),
-            R5522FragmentSpreadsMustNotFormCycles(),
-            R5523FragmentSpreadIsPossible(),
+        R541ArgumentNames(),
+        R542ArgumentUniqueness(),
+        R5421RequiredArguments(),
 
-            R561ValuesOfCorrectType(),
-            R562InputObjectFieldNames(),
-            R563InputObjectFieldUniqueness(),
-            R564InputObjectRequiredFields(),
-            
-            R571And573Directives(),
-            R572DirectivesAreInValidLocations(),
+        R5511FragmentNameUniqueness(),
+        R5512FragmentSpreadTypeExistence(),
+        R5513FragmentsOnCompositeTypes(),
+        R5514FragmentsMustBeUsed(),
 
-            R581And582Variables(),
-            R583AllVariableUsesDefined(),
-            R584AllVariablesUsed(),
-            R585AllVariableUsagesAreAllowed(),
-            
-        }
+        R5521FragmentSpreadTargetDefined(),
+        R5522FragmentSpreadsMustNotFormCycles(),
+        R5523FragmentSpreadIsPossible(),
+
+        R561ValuesOfCorrectType(),
+        R562InputObjectFieldNames(),
+        R563InputObjectFieldUniqueness(),
+        R564InputObjectRequiredFields(),
+
+        R571And573Directives(),
+        R572DirectivesAreInValidLocations(),
+
+
+        R581And582Variables(),
+        R583AllVariableUsesDefined(),
+        R584AllVariablesUsed(),
+        R585AllVariableUsagesAreAllowed()
+    }
 </code></pre>
                     
             </main>

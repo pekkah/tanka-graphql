@@ -193,63 +193,13 @@
 </blockquote>
 <p>Input objects are created as instances of <code>InputObjectType</code>.</p>
 <h3 id="creating-input-object">Creating input object</h3>
-<pre><code class="language-csharp">
-        [Fact]
-        public void Define()
-        {
-            /* Given */
-            /* When */
-            _builder.InputObject(&quot;ExampleInputObject&quot;, out var input)
-                .Connections(connect =&gt; connect
-                    .InputField(input, &quot;a&quot;, ScalarType.Boolean));
-
-            var schema = _builder.Build();
-
-            /* Then */
-            var inputFields = schema.GetInputFields(input.Name);
-            Assert.Single(inputFields,
-                fk =&gt; fk.Key == &quot;a&quot;
-                      &amp;&amp; (ScalarType) fk.Value.Type == ScalarType.Boolean);
-        }
-
+<pre><code class="language-csharp">// todo: docs
 </code></pre>
 <blockquote class="blockquote">
 <p>When using List or NonNull wrappers make sure that the wrapped type passes <code>TypeIs.IsInputType</code>.</p>
 </blockquote>
 <h3 id="input-coercion">Input Coercion</h3>
-<pre><code class="language-csharp">
-        [Fact]
-        public void Input_coercion()
-        {
-            /* Given */
-            _builder.InputObject(&quot;ExampleInputObject&quot;, out var input)
-                .Connections(connect =&gt; connect
-                    .InputField(input, &quot;a&quot;, ScalarType.String)
-                    .InputField(input, &quot;b&quot;, ScalarType.Int));
-
-            var schema = _builder.Build();
-
-            /* When */
-            var literalValue = new Dictionary&lt;string, object&gt;
-            {
-                [&quot;a&quot;] = &quot;abc&quot;,
-                [&quot;b&quot;] = 123
-            };
-
-            var actual = (Dictionary&lt;string, object&gt;) Values.CoerceValue(
-                    schema.GetInputFields, 
-                    schema.GetValueConverter,
-                    literalValue, 
-                    input);
-
-            /* Then */
-            foreach (var expectedKv in literalValue)
-            {
-                Assert.True(actual.ContainsKey(expectedKv.Key));
-                Assert.Equal(expectedKv.Value, actual[expectedKv.Key]);
-            }
-        }
-
+<pre><code class="language-csharp">// todo: docs
 </code></pre>
                     
             </main>

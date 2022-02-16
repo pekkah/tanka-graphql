@@ -156,12 +156,9 @@ method. Use <code>@key</code> directive to mark object or interface as an entity
 <p>Second step is after you have your basic schema with entities specified and it will add the required extension
 points to schema, mainly additional fields to query root type.</p>
 <p>Example</p>
-<pre><code class="language-csharp">        public static ISchema Create()
-        {
-            var builder = new SchemaBuilder()
-                .AddFederationDirectives();
-
-            var typeDefs = @&quot;
+<pre><code class="language-csharp">    public static async Task&lt;ISchema&gt; Create()
+    {
+        var typeDefs = @&quot;
 type Review @key(fields: &quot;&quot;id&quot;&quot;) {
     id: ID!
     body: String
@@ -184,45 +181,43 @@ type Query {
 }
 &quot;;
 
-            builder.Sdl(typeDefs);
+        var builder = new SchemaBuilder();
+        builder.Add(typeDefs);
 
-            builder.UseResolversAndSubscribers(
-                new ObjectTypeMap
-                {
-                    [&quot;User&quot;] = new FieldResolversMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;User&gt;(u =&gt; u.ID)},
-                        {&quot;username&quot;, UserUsername},
-                        {&quot;reviews&quot;, UserReviews}
-                    },
-                    [&quot;Review&quot;] = new FieldResolversMap
-                    {
-                        {&quot;id&quot;, Resolve.PropertyOf&lt;Review&gt;(r =&gt; r.ID)},
-                        {&quot;body&quot;, Resolve.PropertyOf&lt;Review&gt;(r =&gt; r.Body)},
-                        {&quot;author&quot;, ReviewAuthor},
-                        {&quot;product&quot;, Resolve.PropertyOf&lt;Review&gt;(r =&gt; r.Product)}
-                    },
-                    [&quot;Product&quot;] = new FieldResolversMap
-                    {
-                        {&quot;upc&quot;, Resolve.PropertyOf&lt;Product&gt;(p =&gt; p.Upc)},
-                        {&quot;reviews&quot;, ProductReviews}
-                    }
-                });
+        var resolvers = new ResolversMap
+        {
+            [&quot;User&quot;] = new()
+            {
+                { &quot;id&quot;, Resolve.PropertyOf&lt;User&gt;(u =&gt; u.ID) },
+                { &quot;username&quot;, UserUsername },
+                { &quot;reviews&quot;, UserReviews }
+            },
+            [&quot;Review&quot;] = new()
+            {
+                { &quot;id&quot;, Resolve.PropertyOf&lt;Review&gt;(r =&gt; r.ID) },
+                { &quot;body&quot;, Resolve.PropertyOf&lt;Review&gt;(r =&gt; r.Body) },
+                { &quot;author&quot;, ReviewAuthor },
+                { &quot;product&quot;, Resolve.PropertyOf&lt;Review&gt;(r =&gt; r.Product) }
+            },
+            [&quot;Product&quot;] = new()
+            {
+                { &quot;upc&quot;, Resolve.PropertyOf&lt;Product&gt;(p =&gt; p.Upc) },
+                { &quot;reviews&quot;, ProductReviews }
+            }
+        };
 
-            var schema = builder.Build();
+        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions
+        {
+            SchemaBuildOptions = new SchemaBuildOptions(resolvers),
+            ReferenceResolvers = new DictionaryReferenceResolversMap
+            {
+                [&quot;User&quot;] = UserReference,
+                [&quot;Product&quot;] = ProductReference
+            }
+        });
 
-            // create federated service from builder and add 
-            // reference resolvers
-            var federationBuilder = Federation.ServiceFrom(
-                schema,
-                new DictionaryReferenceResolversMap
-                {
-                    [&quot;User&quot;] = UserReference,
-                    [&quot;Product&quot;] = ProductReference
-                });
-
-            return SchemaTools.MakeExecutableSchemaWithIntrospection(federationBuilder);
-        }
+        return schema;
+    }
 
 </code></pre>
 <h3 id="demo">Demo</h3>

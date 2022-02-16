@@ -174,32 +174,32 @@ extensions methods of <code>IResolverContext</code>.</p>
 <h4 id="add-service">1. Add service</h4>
 <p>Define service</p>
 <pre><code class="language-csharp">
-    public class ResolverController
+public class ResolverController
+{
+    public ValueTask&lt;IResolverResult&gt; QueryLastName()
     {
-        public ValueTask&lt;IResolverResult&gt; QueryLastName()
-        {
-            return ResolveSync.As(&quot;GraphQL&quot;);
-        }
+        return ResolveSync.As(&quot;GraphQL&quot;);
     }
+}
 
 </code></pre>
 <p>Add service</p>
 <pre><code class="language-csharp">
-        private void AddExecutionScopedService(IServiceCollection services)
-        {
-            services.AddScoped&lt;ResolverController&gt;();
-        }
+    private void AddExecutionScopedService(IServiceCollection services)
+    {
+        services.AddScoped&lt;ResolverController&gt;();
+    }
 
 </code></pre>
 <h4 id="use-service-in-resolver">3. Use service in resolver</h4>
 <p>See <a href="master/0-getting-started/04-server.html">Server</a> for usage for below method.</p>
 <pre><code class="language-csharp">
-        private Resolver UseService()
-        {
-            return context =&gt; context
-                .Use&lt;ResolverController&gt;()
-                .QueryLastName();
-        }
+    private Resolver UseService()
+    {
+        return context =&gt; context
+            .Use&lt;ResolverController&gt;()
+            .QueryLastName();
+    }
 
 </code></pre>
                     

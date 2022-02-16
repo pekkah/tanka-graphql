@@ -196,58 +196,11 @@
 <p>Objects are created by giving them a unique name and list of fields.</p>
 <h4 id="with-scalar-field">With scalar field</h4>
 <p>Type of field defines the return value of field when resolved during execution.</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void With_scalar_field()
-        {
-            /* Given */
-            _builder.Object(&quot;Person&quot;, out var person)
-                .Connections(connect =&gt; connect
-                    .Field(person, &quot;name&quot;, ScalarType.NonNullString));
-
-            var schema = _builder.Build();
-
-            /* When */
-            var name = schema.GetField(person.Name, &quot;name&quot;);
-
-            /* Then */
-            Assert.Equal(&quot;Person&quot;, person.Name);
-            Assert.NotNull(name);
-            Assert.Equal(ScalarType.NonNullString, name.Type);
-        }
-
+<pre><code class="language-csharp">// todo: docs
 </code></pre>
 <h4 id="with-scalar-field-taking-a-boolean-argument">With scalar field taking a boolean argument</h4>
 <p>Fields can take arguments which have a name and type.</p>
-<pre><code class="language-csharp">
-        [Fact]
-        public void With_scalar_field_with_argument()
-        {
-            /* Given */
-            _builder.Object(&quot;Person&quot;, out var person)
-                .Connections(connect =&gt; connect
-                    .Field(person, &quot;phoneNumber&quot;, ScalarType.NonNullString,
-                        args: args =&gt; args.Arg(
-                            &quot;primary&quot;, 
-                            ScalarType.Boolean, 
-                            default, 
-                            default
-                            )
-                        )
-                );
-
-            var schema = _builder.Build();
-
-            /* When */
-            var phoneNumber = schema.GetField(person.Name, &quot;phoneNumber&quot;);
-
-            /* Then */
-            Assert.NotNull(phoneNumber);
-            Assert.Equal(ScalarType.NonNullString, phoneNumber.Type);
-            Assert.Single(phoneNumber.Arguments,
-                arg =&gt; arg.Key == &quot;primary&quot; &amp;&amp; (ScalarType) arg.Value.Type == ScalarType.Boolean);
-        }
-
+<pre><code class="language-csharp">// todo: docs
 </code></pre>
                     
             </main>

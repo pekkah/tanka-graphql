@@ -194,33 +194,7 @@
 <p>Unions are created as instances of <code>UnionType</code>.</p>
 <h3 id="creating-union">Creating union</h3>
 <p>Union with two possible values</p>
-<pre><code class="language-csharp">        [Fact]
-        public void Define_union()
-        {
-            /* Given */
-            var builder = new SchemaBuilder();
-
-            builder.Object(&quot;Person&quot;, out var person)
-                .Connections(connect =&gt; connect
-                    .Field(person, &quot;name&quot;, ScalarType.NonNullString));
-
-            builder.Object(&quot;Photo&quot;, out var photo)
-                .Connections(connect =&gt; connect
-                    .Field(photo, &quot;height&quot;, ScalarType.NonNullInt)
-                    .Field(photo, &quot;width&quot;, ScalarType.NonNullInt));
-
-            /* When */
-            builder.Union(&quot;SearchResult&quot;, out var searchResult,
-                possibleTypes: new[] {person, photo});
-
-            var personIsPossible = searchResult.IsPossible(person);
-            var photoIsPossible = searchResult.IsPossible(photo);
-
-            /* Then */
-            Assert.True(personIsPossible);
-            Assert.True(photoIsPossible);
-        }
-
+<pre><code class="language-csharp">// todo: docs
 </code></pre>
                     
             </main>

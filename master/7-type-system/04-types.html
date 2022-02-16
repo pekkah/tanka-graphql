@@ -200,127 +200,15 @@
 <li><code>EnumType</code></li>
 <li><code>InputObjectType</code></li>
 </ul>
-<p>These all exists in <code>Tanka.GraphQL.type</code> namespace and implement <code>INamedType</code> interface</p>
-<pre><code class="language-csharp">    public interface INamedType: IType
-    {
-        string Name { get; }
-    }
-
+<p>These all exists in <code>Tanka.GraphQL.Language.Nodes</code> namespace and implement <code>TypeDefinition</code> base class</p>
+<pre><code class="language-csharp">// todo: docs
 </code></pre>
 <h3 id="wrapping-types">Wrapping types</h3>
-<p>Wrapping types implement the <code>IWrappingType</code></p>
-<pre><code class="language-csharp">    public interface IWrappingType: IType
-    {
-        IType OfType { get; }
-    }
-
-</code></pre>
 <p>Two built-in implementations are provided</p>
 <ul>
-<li><code>List</code></li>
-<li><code>NonNull</code></li>
+<li><code>LisType</code></li>
+<li><code>NonNullType</code></li>
 </ul>
-<h3 id="input-and-output-types">Input and output types</h3>
-<p>Is input type?</p>
-<pre><code class="language-csharp">        [Theory]
-        [MemberData(nameof(ValidInputTypes))]
-        public void IsInputType(INamedType type)
-        {
-            /* Given */
-            /* When */
-            var isInput = TypeIs.IsInputType(type);
-            var isInputAsNonNull = TypeIs.IsInputType(
-                new NonNull(type));
-            var isInputAsList = TypeIs.IsInputType(
-                new List(type));
-
-            /* Then */
-            Assert.True(isInput);
-            Assert.True(isInputAsNonNull);
-            Assert.True(isInputAsList);
-        }
-
-</code></pre>
-<pre><code class="language-csharp">
-        public static IEnumerable&lt;object[]&gt; ValidInputTypes
-        {
-            get
-            {
-                foreach (var scalarType in ScalarType.Standard.Select(s =&gt; s.Type))
-                {
-                    yield return new object[] {scalarType};
-                }
-
-                yield return new object[]
-                {
-                    new EnumType(&quot;Enum&quot;,
-                        new EnumValues())
-                };
-
-                yield return new object[]
-                {
-                    new InputObjectType(&quot;Input&quot;)
-                };
-            }
-        }
-
-</code></pre>
-<p>Is output type?</p>
-<pre><code class="language-csharp">
-        [Theory]      
-        [MemberData(nameof(ValidOutputTypes))]
-        public void IsOutputType(INamedType type)
-        {
-            /* Given */
-            /* When */
-            var isOutput = TypeIs.IsOutputType(type);
-            var isOutputAsNonNull = TypeIs.IsOutputType(
-                new NonNull(type));
-            var isOutputAsList = TypeIs.IsOutputType(
-                new List(type));
-
-            /* Then */
-            Assert.True(isOutput);
-            Assert.True(isOutputAsNonNull);
-            Assert.True(isOutputAsList);
-        }
-
-</code></pre>
-<pre><code class="language-csharp">
-        public static IEnumerable&lt;object[]&gt; ValidOutputTypes
-        {
-            get
-            {
-                foreach (var scalarType in ScalarType.Standard.Select(s =&gt; s.Type))
-                {
-                    yield return new object[] {scalarType};
-                }
-
-                yield return new object[]
-                {
-                    new ObjectType(&quot;Object&quot;), 
-                };
-
-                yield return new object[]
-                {
-                    new InterfaceType(&quot;Interface&quot;), 
-                };
-
-                yield return new object[]
-                {
-                    new UnionType(&quot;Union&quot;,
-                        Enumerable.Empty&lt;ObjectType&gt;()), 
-                };
-
-                yield return new object[]
-                {
-                    new EnumType(&quot;Enum&quot;,
-                        new EnumValues())
-                };
-            }
-        }
-
-</code></pre>
                     
             </main>
         </div>
