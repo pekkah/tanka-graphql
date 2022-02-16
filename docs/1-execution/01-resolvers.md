@@ -35,11 +35,11 @@ When executing subscription the `Subscriber` is used to resolve the event stream
 Resolvers can be configured when creating fields. This configuration is used to build the actual resolver when `Schema` is built.
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Field_Resolver
+#include::xref://tutorials:GettingStarted.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.GettingStarted.Part2_BindResolvers_Manual
 ```
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Create_Field_Subscriber
+//todo: Subscriber example
 ```
 
 Resolver middlwares can be used to build an execution chain.
@@ -59,12 +59,6 @@ Signature of the subscription middlware:
 ```
 
 ### Using resolver and subscriber maps
-
-In some cases it's useful to be able to build the resolvers separately from the schema building. For that purpose `SchemaTools` provide a method to bind resolvers to fields by using `IResolverMap` and `ISubscriberMap`.
-
-```csharp
-#include::xref://tests:graphql.tests/TypeSystem/SchemaBuilderFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.SchemaBuilderFacts.Make_executable_schema
-```
 
 Dictionary based implementation is provided for setting up both resolvers and subscribers but other implementations can be easily provided.
 

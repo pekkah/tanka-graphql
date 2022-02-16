@@ -9,7 +9,7 @@ Interfaces are created as instances of `InterfaceType`.
 Define with non-null scalar field
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/InterfaceTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.InterfaceTypeFacts.Define_interface
+// todo: docs
 ```
 
 ### Implementing interface
@@ -17,5 +17,5 @@ Define with non-null scalar field
 Object implements interface
 
 ```csharp
-#include::xref://tests:graphql.tests/TypeSystem/InterfaceTypeFacts.cs?s=Tanka.GraphQL.Tests.TypeSystem.InterfaceTypeFacts.Implement_interface
+// todo: docs
 ```
