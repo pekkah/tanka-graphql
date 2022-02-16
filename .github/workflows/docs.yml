@@ -46,6 +46,10 @@ jobs:
     needs: build
     concurrency: ci-${{ github.ref }}
     steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          
       - uses: actions/download-artifact@v2
         with:
           name: Docs
