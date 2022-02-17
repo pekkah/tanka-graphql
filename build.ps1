@@ -1,6 +1,7 @@
 param (
     [string]$Output = "./artifacts",
-    [string]$CurrentBranch =''
+    [string]$CurrentBranch ='',
+    [bool]$OnlyBuild = $False
  )
 
 # Utils
@@ -15,6 +16,7 @@ function EnsureLastExitCode($message){
 "Output: $Output"
 $Location = Get-Location
 "Location: $Location"
+"OnlyBuild: $OnlyBuild"
 
 if ((Test-Path $output) -eq $True) {
     "Clean: $Output"
@@ -61,34 +63,38 @@ $IsPreRelease = $PreReleaseTag -ne ''
 
 # Build and test
 "----------------------------------------"
-"Build Dotnet"
+"Build"
 dotnet build -c Release
 EnsureLastExitCode("dotnet build failed")
 
-dotnet test -c Release --logger trx -r $Output
-EnsureLastExitCode("dotnet test failed")
+if ($OnlyBuild -eq $False) {
+    "----------------------------------------"
+    "Run tests"
+    dotnet test -c Release --logger trx -r $Output
+    EnsureLastExitCode("dotnet test failed")
 
-"----------------------------------------"
-"Pack NuGet"
-dotnet pack -c Release -o $Output -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
-EnsureLastExitCode("dotnet pack failed")
+    "----------------------------------------"
+    "Pack NuGet"
+    dotnet pack -c Release -o $Output -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+    EnsureLastExitCode("dotnet pack failed")
 
-"----------------------------------------"
-"Pack NPM"
-$Exclude = [string[]]@("node_modules")
-Copy-Item -Recurse -Exclude $Exclude ./src/graphql.server.link/ $Output/graphql.server.link
-Set-Location $Output/graphql.server.link
-npm i
-npm run build
-EnsureLastExitCode("npm run build failed")
-npm --no-git-tag-version --allow-same-version version $Version
-Set-Location $Location
-Set-Location $Output
-npm pack ./graphql.server.link
-EnsureLastExitCode("npm pack failed")
+    "----------------------------------------"
+    "Pack NPM"
+    $Exclude = [string[]]@("node_modules")
+    Copy-Item -Recurse -Exclude $Exclude ./src/graphql.server.link/ $Output/graphql.server.link
+    Set-Location $Output/graphql.server.link
+    npm i
+    npm run build
+    EnsureLastExitCode("npm run build failed")
+    npm --no-git-tag-version --allow-same-version version $Version
+    Set-Location $Location
+    Set-Location $Output
+    npm pack ./graphql.server.link
+    EnsureLastExitCode("npm pack failed")
 
-Set-Location $Location
+    Set-Location $Location
 
+}
 "----------------------------------------"
 "DONE"
 Set-Location $Location
