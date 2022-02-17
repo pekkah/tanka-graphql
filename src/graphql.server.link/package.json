@@ -40,7 +40,7 @@
   "dependencies": {
     "@microsoft/signalr": "^5.0.9",
     "apollo-link": "^1.2.14",
-    "graphql": "^15.5.3",
+    "graphql": "^16.3.0",
     "zen-push": "^0.2.1"
   }
 }
