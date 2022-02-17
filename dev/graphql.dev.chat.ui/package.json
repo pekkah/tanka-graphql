@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@apollo/client": "^3.5.9",
+    "@microsoft/signalr": "^6.0.2",
     "@tanka/tanka-graphql-server-link": "file:../../src/graphql.server.link",
-    "apollo-link": "^1.2.14",
-    "apollo-link-retry": "^2.2.16",
-    "chokidar": "^3.5.2",
-    "graphiql": "1.4.2",
-    "graphql": "^15.5.0",
-    "react": "^16.14",
-    "react-dom": "^16.14",
-    "react-scripts": "4.0.3"
+    "chokidar": "^3.5.3",
+    "graphiql": "1.5.19",
+    "graphql": "^16.3.0",
+    "react": "^17.0",
+    "react-dom": "^17.0",
+    "react-scripts": "5.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

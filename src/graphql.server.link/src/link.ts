@@ -1,10 +1,4 @@
-import {
-  ApolloLink,
-  FetchResult,
-  NextLink,
-  Observable,
-  Operation
-} from "apollo-link";
+import { ApolloLink, FetchResult, Observable, Operation } from "@apollo/client";
 import { TankaClient } from ".";
 
 export class TankaLink extends ApolloLink {
@@ -12,10 +6,7 @@ export class TankaLink extends ApolloLink {
     super();
   }
 
-  public request(
-    operation: Operation,
-    forward?: NextLink
-  ): Observable<FetchResult> | null {
+  public request(operation: Operation): Observable<FetchResult> | null {
     return this.client.request(operation);
   }
 }

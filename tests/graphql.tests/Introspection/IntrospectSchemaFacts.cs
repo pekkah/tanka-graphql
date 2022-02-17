@@ -172,10 +172,22 @@ type Subscription {}
     ""__schema"": {
       ""types"": [
         {
+          ""name"": ""Boolean""
+        },
+        {
           ""name"": ""Enum""
         },
         {
+          ""name"": ""Float""
+        },
+        {
+          ""name"": ""ID""
+        },
+        {
           ""name"": ""InputObject""
+        },
+        {
+          ""name"": ""Int""
         },
         {
           ""name"": ""Interface""
@@ -191,6 +203,9 @@ type Subscription {}
         },
         {
           ""name"": ""Query""
+        },
+        {
+          ""name"": ""String""
         },
         {
           ""name"": ""Subscription""

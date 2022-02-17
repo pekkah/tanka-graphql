@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Tanka.GraphQL.Language.Nodes.TypeSystem;
@@ -11,6 +12,8 @@ public sealed class ImplementsInterfaces : CollectionNodeBase<NamedType>
     }
 
     public override NodeKind Kind => NodeKind.ImplementsInterfaces;
+
+    public static ImplementsInterfaces None { get; } = new(Array.Empty<NamedType>());
 
     public static ImplementsInterfaces? From(IReadOnlyList<NamedType>? interfaces)
     {

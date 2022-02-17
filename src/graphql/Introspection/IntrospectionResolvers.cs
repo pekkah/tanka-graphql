@@ -59,12 +59,35 @@ public class IntrospectionResolvers : ResolversMap
                     if (!includeDeprecated)
                         fields = fields.Where(f => !f.Value.TryGetDirective("deprecated", out _));
 
-                    return ResolveSync.As(fields.OrderBy(t => t.Key).ToList());
+
+                    return ResolveSync.As(fields
+                        .Where(f => !f.Key.StartsWith("__"))
+                        .OrderBy(t => t.Key).ToList());
                 }
             },
 
             // OBJECT only
-            { "interfaces", Resolve.PropertyOf<ObjectDefinition>(t => t.Interfaces?.OrderBy(t => t.Name.Value)) },
+            { "interfaces", Resolve.PropertyOf<INode>((t, context) =>
+            {
+                var interfaces = t switch
+                {
+                    null => null,
+                    InterfaceDefinition interfaceDefinition => interfaceDefinition.Interfaces ?? ImplementsInterfaces.None,
+                    ObjectDefinition objectDefinition => objectDefinition.Interfaces ?? ImplementsInterfaces.None,
+                    _ => null
+                };
+
+                if (interfaces is null)
+                    return null;
+
+                var interfaceNames = interfaces.Select(i => i.Name.Value).ToList();
+
+                // objects and interfaces must return non null value
+                var interfaceTypeDefinitions = context.Schema.QueryTypes<InterfaceDefinition>(i => interfaceNames.Contains(i.Name.Value))
+                    .ToList();
+
+                return interfaceTypeDefinitions;
+            })},
 
 
             // INTERFACE and UNION only
@@ -188,11 +211,6 @@ public class IntrospectionResolvers : ResolversMap
 
     private IReadOnlyList<string> BuiltInTypes => new List<string>
     {
-        Scalars.Boolean.Name,
-        Scalars.Float.Name,
-        Scalars.ID.Name,
-        Scalars.Int.Name,
-        Scalars.String.Name,
         "__Directive",
         "__EnumValue",
         "__Field",
@@ -222,7 +240,8 @@ public class IntrospectionResolvers : ResolversMap
 
     private bool IsNotBuiltIn(TypeDefinition maybeBuiltIn)
     {
-        return !BuiltInTypes.Contains(maybeBuiltIn.Name.Value);
+        var builtInIntrospectionType = BuiltInTypes.Contains(maybeBuiltIn.Name.Value);
+        return !builtInIntrospectionType;
     }
 
 

@@ -1,13 +1,9 @@
-import {
-  FetchResult,
-  Observable,
-  Operation
-} from "apollo-link";
+import { FetchResult, Observable, Operation } from "@apollo/client";
 
 import {
   HubConnection,
   HubConnectionBuilder,
-  IHttpConnectionOptions
+  IHttpConnectionOptions,
 } from "@microsoft/signalr";
 
 import { Request } from "./request";
@@ -15,17 +11,17 @@ import { Subscription } from "./subscription";
 
 export class ClientOptions {
   connection: IHttpConnectionOptions;
-  reconnectAttempts: number = 10;
-  reconnectInitialWaitMs: number = 1000;
-  reconnectAdditionalWaitMs: number = 500;
+  reconnectAttempts = 10;
+  reconnectInitialWaitMs = 1000;
+  reconnectAdditionalWaitMs = 500;
 }
 
 export class TankaClient {
   private BACKGROUND_QUEUE_TIMER_MS = 1000;
   private hub: HubConnection;
-  private connected: boolean = false;
-  private connecting: boolean = false;
-  private buffer: { sub: Subscription, op: Operation }[] = [];
+  private connected = false;
+  private connecting = false;
+  private buffer: { sub: Subscription; op: Operation }[] = [];
   private backgroundQueueTimerId: NodeJS.Timeout;
   private reconnectTimerId: NodeJS.Timeout;
 
@@ -43,18 +39,20 @@ export class TankaClient {
   }
 
   public request(operation: Operation): Observable<FetchResult> {
-    return new Observable<FetchResult>(subscriber => {
+    console.log("request", operation);
+    return new Observable<FetchResult>((subscriber) => {
       const sub = this.query(operation);
       sub.source.observable.subscribe(
-        next => {
+        (next) => {
           subscriber.next({
             data: next.data,
             errors: next.errors,
-            extensions: next.extensions
+            extensions: next.extensions,
           });
         },
-        err => {
+        (err) => {
           subscriber.error(err);
+          console.error("Error", err);
         },
         () => {
           subscriber.complete();
@@ -72,14 +70,13 @@ export class TankaClient {
       try {
         const stream = this.hub.stream("query", new Request(operation));
         sub.subscribe(stream);
-      }
-      catch (e) {
+      } catch (e) {
         this.onClosed(e);
         this.queue(sub, operation);
       }
     } else {
-      this.start(() => { });
       this.queue(sub, operation);
+      this.start(() => {});
     }
 
     return sub;
@@ -91,15 +88,13 @@ export class TankaClient {
 
   private processQueue() {
     while (this.buffer.length > 0) {
-      if (!this.connected)
-        break;
+      if (!this.connected) break;
 
       const { sub, op } = this.buffer.pop();
       try {
         const stream = this.hub.stream("query", new Request(op));
         sub.subscribe(stream);
-      }
-      catch (e) {
+      } catch (e) {
         this.onClosed(e);
         this.queue(sub, op);
       }
@@ -111,7 +106,7 @@ export class TankaClient {
     this.reconnectTimerId = setInterval(() => {
       this.start(() => {
         clearInterval(this.reconnectTimerId);
-        console.log(`Connected`)
+        console.log(`Connected`);
       });
 
       if (this.connected) {
@@ -125,7 +120,7 @@ export class TankaClient {
         clearInterval(this.reconnectTimerId);
         this.onClosed();
       }
-    }, this.options.reconnectInitialWaitMs + (count * this.options.reconnectAdditionalWaitMs));
+    }, this.options.reconnectInitialWaitMs + count * this.options.reconnectAdditionalWaitMs);
   }
 
   private start(callback: () => void) {
@@ -139,16 +134,22 @@ export class TankaClient {
     }
 
     this.connecting = true;
-    return this.hub.start().then(() => {
-      this.connected = true;
-      this.connecting = false;
-      this.backgroundQueueTimerId = setInterval(() => this.processQueue(), this.BACKGROUND_QUEUE_TIMER_MS);
-    })
-      .catch(err => {
+    return this.hub
+      .start()
+      .then(() => {
+        this.connected = true;
+        this.connecting = false;
+        this.backgroundQueueTimerId = setInterval(
+          () => this.processQueue(),
+          this.BACKGROUND_QUEUE_TIMER_MS
+        );
+      })
+      .catch((err) => {
         this.connected = false;
         this.connecting = false;
+        console.error(`Error when connecting to server ${this.url}`, err);
         throw err;
-      })
+      });
   }
 
   private onClosed(error?: Error) {
@@ -161,8 +162,7 @@ export class TankaClient {
     if (error) {
       console.log("Connection closed due to error", error);
       this.reconnect();
-    }
-    else {
+    } else {
       console.log("Connection closed.");
       if (this.reconnectTimerId) {
         clearInterval(this.reconnectTimerId);
