@@ -1,4 +1,4 @@
-import { Operation } from "apollo-link";
+import { Operation } from "@apollo/client";
 import { print } from "graphql";
 
 export class Request {

@@ -54,7 +54,7 @@ public class Startup
             .ConfigureSchema<ISchema>(schema => new ValueTask<ISchema>(schema))
             .ConfigureWebSockets();
 
-        if (Env.IsDevelopment()) tanka.AddExtension<TraceExtension>();
+        //if (Env.IsDevelopment()) tanka.AddExtension<TraceExtension>();
 
         // signalr server
         services.AddSignalR(options => options.EnableDetailedErrors = true)
@@ -64,8 +64,8 @@ public class Startup
         // web socket server
         services.AddWebSockets(options =>
         {
-            options.AllowedOrigins.Add("https://localhost:5000");
-            options.AllowedOrigins.Add("https://localhost:3000");
+            options.AllowedOrigins.Add("http://localhost:5000");
+            options.AllowedOrigins.Add("http://localhost:3000");
         });
 
         // CORS is required for the graphql.samples.chat.ui React App
@@ -103,7 +103,7 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapTankaGraphQLSignalR("/graphql");
-            endpoints.MapTankaGraphQLWebSockets("/api/graphql");
+            //endpoints.MapTankaGraphQLWebSockets("/api/graphql");
 
             endpoints.MapControllers();
         });

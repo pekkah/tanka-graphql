@@ -1,7 +1,7 @@
 import {
   IStreamResult,
   IStreamSubscriber,
-  ISubscription
+  ISubscription,
 } from "@microsoft/signalr";
 
 import PushStream from "zen-push";
@@ -24,7 +24,7 @@ export class Subscription implements IStreamSubscriber<ExecutionResult> {
   public next(value: ExecutionResult): void {
     this.source.next(value);
   }
-  public error(err: any): void {
+  public error(err: never): void {
     this.source.error(err);
   }
   public complete(): void {

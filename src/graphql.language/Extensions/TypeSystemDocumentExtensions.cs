@@ -1,13 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Language;
 
 public static class TypeSystemDocumentExtensions
 {
-    public static TypeSystemDocument WithMerged(this TypeSystemDocument left, TypeSystemDocument right)
+    public static IEnumerable<NamedType> GetNamedTypes(this TypeSystemDocument document)
+    {
+        if (document.DirectiveDefinitions is not null)
+            foreach (var definition in document.DirectiveDefinitions)
+            {
+                yield return new NamedType(definition.Name, definition.Location);
+            }
+
+        if (document.TypeDefinitions is not null)
+            foreach (var definition in document.TypeDefinitions)
+            {
+                yield return new NamedType(definition.Name, definition.Location);
+            }
+    }
+
+
+    public static TypeSystemDocument WithTypeSystem(this TypeSystemDocument left, TypeSystemDocument right)
     {
         var schemaDefinitions = left.SchemaDefinitions ?? Array.Empty<SchemaDefinition>();
         var typeDefinitions = left.TypeDefinitions ?? Array.Empty<TypeDefinition>();

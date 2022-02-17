@@ -78,6 +78,10 @@ directive @skip(if: Boolean!) on
 directive @specifiedBy(url: String!) on SCALAR
 ";
 
+    public static IReadOnlyList<string> BuiltInTypeNames => BuiltInTypes.GetNamedTypes()
+        .Select(n => n.Name.Value)
+        .ToList();
+
     public SchemaBuilder Add(TypeSystemDocument typeSystem)
     {
         if (typeSystem.Imports is not null)

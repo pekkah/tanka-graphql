@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -88,6 +89,8 @@ public class QueryStreamService : IQueryStreamService
                 _logger.LogError($"GraphQL ERROR: '{error.Message}', Path: '{error.Path}'");
 
         var channel = Channel.CreateBounded<ExecutionResult>(1);
+
+        var debug = JsonSerializer.Serialize(result);
 
         await channel.Writer.WriteAsync(result, cancellationToken);
         channel.Writer.TryComplete();
