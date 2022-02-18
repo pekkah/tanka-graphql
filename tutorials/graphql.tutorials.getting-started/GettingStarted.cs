@@ -82,7 +82,7 @@ public class GettingStarted
         Assert.Equal("Test", nameValue.Value);
     }
 
-    [Fact(Skip = "todo: modifying resolvers")]
+    [Fact]
     public async Task Part3_ApplyDirectives_on_Object_fields()
     {
         // Create builder, load sdl with our types

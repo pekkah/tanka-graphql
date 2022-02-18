@@ -154,7 +154,7 @@ public static class Values
         var coercedListValues = new List<object?>();
         if (value is ListValue listValue)
         {
-            foreach (var listValueValue in listValue.Values)
+            foreach (var listValueValue in listValue)
             {
                 var coercedValue = CoerceValue(schema, listValueValue,
                     listWrappedType);

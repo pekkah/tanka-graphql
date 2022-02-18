@@ -10,6 +10,9 @@ namespace Tanka.GraphQL.Execution;
 
 public static class SelectionSets
 {
+    public const string SkipDirectiveName = "skip";
+    public const string IncludeDirectiveName = "include";
+
     public static async Task<IDictionary<string, object>?> ExecuteSelectionSetAsync(
         IExecutorContext executorContext,
         SelectionSet selectionSet,
@@ -70,11 +73,11 @@ public static class SelectionSets
         {
             var directives = GetDirectives(selection).ToList();
 
-            var skipDirective = directives.FirstOrDefault(d => d.Name == "skip"); //todo: skip to constant
+            var skipDirective = directives.FirstOrDefault(d => d.Name == SkipDirectiveName);
             if (SkipSelection(skipDirective, coercedVariableValues, schema, objectDefinition, selection))
                 continue;
 
-            var includeDirective = directives.FirstOrDefault(d => d.Name == "include"); //todo: include to constant
+            var includeDirective = directives.FirstOrDefault(d => d.Name == IncludeDirectiveName);
             if (!IncludeSelection(includeDirective, coercedVariableValues, schema, objectDefinition, selection))
                 continue;
 
@@ -168,7 +171,7 @@ public static class SelectionSets
         if (includeDirective?.Arguments == null)
             return true;
 
-        var ifArgument = includeDirective.Arguments.SingleOrDefault(a => a.Name == "if"); //todo: if to constants
+        var ifArgument = includeDirective.Arguments.SingleOrDefault(a => a.Name == "if");
         return GetIfArgumentValue(schema, includeDirective, coercedVariableValues, ifArgument);
     }
 
@@ -182,7 +185,7 @@ public static class SelectionSets
         if (skipDirective?.Arguments == null)
             return false;
 
-        var ifArgument = skipDirective.Arguments.SingleOrDefault(a => a.Name == "if"); //todo: if to constants
+        var ifArgument = skipDirective.Arguments.SingleOrDefault(a => a.Name == "if");
         return GetIfArgumentValue(schema, skipDirective, coercedVariableValues, ifArgument);
     }
 

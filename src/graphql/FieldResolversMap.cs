@@ -111,4 +111,24 @@ public class FieldResolversMap : IEnumerable<Resolver>, IEnumerable<Subscriber>
 
         return result;
     }
+
+    public void Replace(string fieldName, Resolver resolver)
+    {
+        _resolvers[fieldName] = resolver;
+    }
+
+    public void Replace(string fieldName, Subscriber subscriber)
+    {
+        _subscribers[fieldName] = subscriber;
+    }
+
+    public void RemoveResolver(string fieldName)
+    {
+        _resolvers.Remove(fieldName);
+    }
+
+    public void RemoveSubscriber(string fieldName)
+    {
+        _subscribers.Remove(fieldName);
+    }
 }

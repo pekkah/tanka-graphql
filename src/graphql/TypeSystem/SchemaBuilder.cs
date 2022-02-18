@@ -207,7 +207,7 @@ directive @specifiedBy(url: String!) on SCALAR
             options.BuildTypesFromOrphanedExtensions
         );
 
-        typeDefinitions = RunDirectiveVisitors(typeDefinitions, options).ToList();
+        (typeDefinitions, resolvers) = RunDirectiveVisitors(typeDefinitions, options, resolvers);
 
         var namedTypeDefinitions = typeDefinitions
             .ToDictionary(type => type.Name.Value, type => type);
@@ -321,30 +321,40 @@ directive @specifiedBy(url: String!) on SCALAR
         }
     }
 
-    private IEnumerable<TypeDefinition> RunDirectiveVisitors(
+    private (IReadOnlyList<TypeDefinition> TypeDefinitions, ResolversMap Resolvers) RunDirectiveVisitors(
         IEnumerable<TypeDefinition> typeDefinitions,
-        SchemaBuildOptions options)
+        SchemaBuildOptions options, 
+        ResolversMap resolvers)
     {
         if (options.DirectiveVisitorFactories is null)
-            return typeDefinitions;
+            return (typeDefinitions.ToList(), resolvers);
 
         var visitors = options.DirectiveVisitorFactories
             .Select(factory => new KeyValuePair<string, DirectiveVisitor>(
                 factory.Key,
-                factory.Value(this) //todo: use options instead of this
+                factory.Value(this)
             ));
 
-
-        return RunDirectiveVisitors(typeDefinitions, options, visitors);
+        return RunDirectiveVisitors(
+            typeDefinitions, 
+            options, 
+            visitors,
+            resolvers);
     }
 
-    private IEnumerable<TypeDefinition> RunDirectiveVisitors(
+    private (IReadOnlyList<TypeDefinition> TypeDefinitions, ResolversMap Resolvers) RunDirectiveVisitors(
         IEnumerable<TypeDefinition> typeDefinitions,
         SchemaBuildOptions options,
-        IEnumerable<KeyValuePair<string, DirectiveVisitor>> visitors)
+        IEnumerable<KeyValuePair<string, DirectiveVisitor>> visitors,
+        ResolversMap resolvers)
     {
         var typeDefinitionList = typeDefinitions.ToList();
+        if (typeDefinitionList.Count is 0)
+            return (typeDefinitionList, resolvers);
+
         var visitorList = visitors.ToList();
+        var types = new List<TypeDefinition>();
+
         for (var typeIndex = 0; typeIndex < typeDefinitionList.Count; typeIndex++)
         {
             var typeDefinition = typeDefinitionList[typeIndex];
@@ -378,6 +388,10 @@ directive @specifiedBy(url: String!) on SCALAR
                             var resolver = options.Resolvers?.GetResolver(typeDefinition.Name, fieldDefinition.Name);
                             var subscriber =
                                 options.Subscribers?.GetSubscriber(typeDefinition.Name, fieldDefinition.Name);
+
+                            var hasResolver = resolver is not null;
+                            var hasSubscriber = subscriber is not null;
+
                             var context = new DirectiveFieldVisitorContext(
                                 fieldDefinition,
                                 resolver,
@@ -400,6 +414,12 @@ directive @specifiedBy(url: String!) on SCALAR
                                 continue;
 
                             fields.Add(maybeSameContext.Field);
+
+                            if (maybeSameContext.Resolver is not null)
+                                resolvers.Replace(typeDefinition.Name, fieldDefinition.Name, maybeSameContext.Resolver);
+
+                            if (maybeSameContext.Subscriber is not null)
+                                resolvers.Replace(typeDefinition.Name, fieldDefinition.Name, maybeSameContext.Subscriber);
                         }
 
                         if (fieldsChanged)
@@ -407,8 +427,10 @@ directive @specifiedBy(url: String!) on SCALAR
                     }
             }
 
-            yield return typeDefinition;
+            types.Add(typeDefinition);
         }
+
+        return (types, resolvers);
     }
 
     private Exception TypeAlreadyExists(Name name)

@@ -187,7 +187,7 @@ public class ServerBuilderUsageFacts
             .ConfigureWebSockets(async context =>
             {
                 called = true;
-                var succeeded = true; //todo: authorize
+                var succeeded = true; //authorize
 
                 if (succeeded)
                 {

@@ -28,7 +28,7 @@ public sealed class Import : INode
         var types = string.Empty;
 
         if (Types is not null)
-            types = $" {string.Join(',', Types.Select(t => t.Value))}";
+            types = $" {string.Join(",", Types.Select(t => t.Value))}";
 
         return $"tanka_import{types} from \"{From}\"";
     }

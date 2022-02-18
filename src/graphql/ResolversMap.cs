@@ -82,6 +82,54 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
         return true;
     }
 
+    public void Replace(string typeName, string fieldName, Resolver resolver)
+    {
+        if (!TryGetValue(typeName, out var fieldsResolvers)) 
+            fieldsResolvers = this[typeName] = new FieldResolversMap();
+
+        if (fieldsResolvers.GetResolver(fieldName) is not null)
+        {
+            fieldsResolvers.Replace(fieldName, resolver);
+        }
+        else
+            fieldsResolvers.Add(fieldName, resolver);
+    }
+
+    public void Replace(string typeName, string fieldName, Subscriber subscriber)
+    {
+        if (!TryGetValue(typeName, out var fieldsResolvers)) 
+            fieldsResolvers = this[typeName] = new FieldResolversMap();
+
+        if (fieldsResolvers.GetSubscriber(fieldName) is not null)
+        {
+            fieldsResolvers.Replace(fieldName, subscriber);
+        }
+        else
+            fieldsResolvers.Add(fieldName, subscriber);
+    }
+
+    public void RemoveResolver(string typeName, string fieldName)
+    {
+        if (!TryGetValue(typeName, out var fieldsResolvers))
+            return;
+
+        if (fieldsResolvers.GetResolver(fieldName) is not null)
+        {
+            fieldsResolvers.RemoveResolver(fieldName);
+        }
+    }
+
+    public void RemoveSubscriber(string typeName, string fieldName)
+    {
+        if (!TryGetValue(typeName, out var fieldsResolvers))
+            return;
+
+        if (fieldsResolvers.GetSubscriber(fieldName) is not null)
+        {
+            fieldsResolvers.RemoveSubscriber(fieldName);
+        }
+    }
+
     public ResolversMap Clone()
     {
         var result = new ResolversMap();

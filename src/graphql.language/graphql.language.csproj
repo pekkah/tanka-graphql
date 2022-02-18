@@ -1,11 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <AssemblyName>tanka.graphql.language</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Language</RootNamespace>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <Compile Remove="Shims/**" />
+    <Compile Remove="System.Diagnostics.CodeAnalysis/**" />
+  </ItemGroup>
 </Project>

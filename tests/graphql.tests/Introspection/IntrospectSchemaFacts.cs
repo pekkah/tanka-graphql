@@ -310,7 +310,6 @@ type Subscription {}
     public async Task Type_EnumType()
     {
         /* Given */
-        //todo(pekka): separate enumValues testing to own test
         var query = @"{ 
                             __type(name: ""Enum"") {
                                 kind
