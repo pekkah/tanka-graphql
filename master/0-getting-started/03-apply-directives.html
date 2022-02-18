@@ -104,9 +104,9 @@
                     master
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="/tanka-graphql/2.0.1">2.0.1</a>
                         <a class="dropdown-item" href="/tanka-graphql/master">master</a>
                         <a class="dropdown-item" href="/tanka-graphql/2.0.0">2.0.0</a>
+                        <a class="dropdown-item" href="/tanka-graphql/2.0.1">2.0.1</a>
                 </div>
             </li>
         </ul>
@@ -175,7 +175,7 @@
 <h3 id="schema-directives">Schema directives</h3>
 <p>Schema directives can be used to modify field for example by modifying the resolver of the field.</p>
 <pre><code class="language-csharp">
-    [Fact(Skip = &quot;todo: modifying resolvers&quot;)]
+    [Fact]
     public async Task Part3_ApplyDirectives_on_Object_fields()
     {
         // Create builder, load sdl with our types

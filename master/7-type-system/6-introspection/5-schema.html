@@ -104,9 +104,9 @@
                     master
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="/tanka-graphql/2.0.1">2.0.1</a>
                         <a class="dropdown-item" href="/tanka-graphql/master">master</a>
                         <a class="dropdown-item" href="/tanka-graphql/2.0.0">2.0.0</a>
+                        <a class="dropdown-item" href="/tanka-graphql/2.0.1">2.0.1</a>
                 </div>
             </li>
         </ul>
@@ -432,7 +432,6 @@ type Subscription {}
     public async Task Type_EnumType()
     {
         /* Given */
-        //todo(pekka): separate enumValues testing to own test
         var query = @&quot;{ 
                             __type(name: &quot;&quot;Enum&quot;&quot;) {
                                 kind
