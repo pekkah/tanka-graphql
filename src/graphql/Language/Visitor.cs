@@ -262,7 +262,7 @@ public class Visitor
 
     public virtual ListValue BeginVisitListValue(ListValue node)
     {
-        foreach (var node1 in node.Values)
+        foreach (var node1 in node)
             BeginVisitNode(node1);
 
         return EndVisitListValue(node);

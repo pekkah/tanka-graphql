@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using Tanka.GraphQL.Language.Internal;
 using Xunit;

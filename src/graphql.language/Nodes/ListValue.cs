@@ -5,14 +5,13 @@ namespace Tanka.GraphQL.Language.Nodes;
 
 public sealed class ListValue : ValueBase, ICollectionNode<ValueBase>
 {
-    //todo: remove?
-    public readonly IReadOnlyList<ValueBase> Values;
+    private readonly IReadOnlyList<ValueBase> _values;
 
     public ListValue(
         IReadOnlyList<ValueBase> values,
         in Location? location = default)
     {
-        Values = values;
+        _values = values;
         Location = location;
     }
 
@@ -22,14 +21,14 @@ public sealed class ListValue : ValueBase, ICollectionNode<ValueBase>
 
     public IEnumerator<ValueBase> GetEnumerator()
     {
-        return Values.GetEnumerator();
+        return _values.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return ((IEnumerable)Values).GetEnumerator();
+        return ((IEnumerable)_values).GetEnumerator();
     }
 
-    public int Count => Values.Count;
-    public ValueBase this[int index] => Values[index];
+    public int Count => _values.Count;
+    public ValueBase this[int index] => _values[index];
 }

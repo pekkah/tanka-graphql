@@ -21,7 +21,6 @@ public static class IntrospectionParser
     public static IntrospectionResult Deserialize(
         string introspectionResult)
     {
-        //todo: this is awkward
         var bytes = Encoding.UTF8.GetBytes(introspectionResult);
 
         var result = JsonSerializer

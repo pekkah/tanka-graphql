@@ -173,7 +173,6 @@ public static class ExecutionRules
                     return;
 
                 var schema = context.Schema;
-                //todo(pekka): should this report error?
                 if (schema.Subscription == null)
                     return;
 
@@ -213,7 +212,7 @@ public static class ExecutionRules
             {
                 var fieldName = selection.Name;
 
-                if (fieldName == "__typename") //todo: to constant
+                if (fieldName == "__typename")
                     return;
 
                 if (context.Tracker.FieldDefinition == null)
@@ -261,7 +260,7 @@ public static class ExecutionRules
             {
                 var fieldName = selection.Name;
 
-                if (fieldName == "__typename") //todo: to constant
+                if (fieldName == "__typename")
                     return;
 
                 var field = context.Tracker.FieldDefinition;
@@ -856,7 +855,6 @@ public static class ExecutionRules
     {
         return (context, rule) =>
         {
-            //todo: there's an objectkind for nullvalue but no type
             //rule.EnterNullValue += node => { };
 
             rule.EnterListValue += node => { IsValidScalar(context, node); };

@@ -349,7 +349,6 @@ public ref partial struct Parser
 
     public EnumValue ParseEnumValue()
     {
-        //todo: maybe this should be kept as byte[]?
         var enumName = ParseName();
         return new EnumValue(enumName, enumName.Location);
     }

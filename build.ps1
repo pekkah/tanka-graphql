@@ -64,13 +64,14 @@ $IsPreRelease = $PreReleaseTag -ne ''
 # Build and test
 "----------------------------------------"
 "Build"
-dotnet build -c Release
+dotnet restore
+dotnet build -c Release --no-restore
 EnsureLastExitCode("dotnet build failed")
 
 if ($OnlyBuild -eq $False) {
     "----------------------------------------"
     "Run tests"
-    dotnet test -c Release --logger trx -r $Output
+    dotnet test -c Release --logger trx -r $Output --no-restore --no-build
     EnsureLastExitCode("dotnet test failed")
 
     "----------------------------------------"

@@ -34,7 +34,7 @@ public class GraphQLWSProtocol : IProtocolHandler
         _parserOptions = new ParserOptions
         {
             ImportProviders = null
-        }; //todo: inject
+        };
     }
 
     protected ConcurrentDictionary<string, Subscription> Subscriptions { get; } = new();

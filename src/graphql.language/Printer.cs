@@ -23,12 +23,12 @@ public class PrinterContext : DocumentWalkerContextBase
 
     public void AppendJoin(char separator, IEnumerable<object> items)
     {
-        _builder.AppendJoin(separator, items);
+        _builder.Append(string.Join($"{separator}", items));
     }
 
     public bool EndsWith(char c)
     {
-        return _builder[^1] == c;
+        return _builder[_builder.Length-1] == c;
     }
 
     public void Rewind()

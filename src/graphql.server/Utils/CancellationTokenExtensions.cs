@@ -21,7 +21,7 @@ internal static class CancellationTokenExtensions
 
         var taskCompletionSource = new TaskCompletionSource<bool>();
 
-        using (cancellationToken.Register(() => { taskCompletionSource.TrySetResult(true); }))
+        await using (cancellationToken.Register(() => { taskCompletionSource.TrySetResult(true); }))
         {
             await taskCompletionSource.Task;
         }
