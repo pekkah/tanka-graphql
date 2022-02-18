@@ -6,9 +6,8 @@
     <AssemblyName>tanka.graphql.tests</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Tests</RootNamespace>
   </PropertyGroup>
-
- <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+  <ItemGroup>
+   <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NSubstitute" Version="4.3.0" />
     <PackageReference Include="System.Text.Json" Version="6.0.2" />
