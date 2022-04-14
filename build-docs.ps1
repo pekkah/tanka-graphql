@@ -67,7 +67,7 @@ $Basepath = "/tanka-graphql/"
 "Output: $DocsOutput"
 "BasePath: $Basepath"
 
-dotnet tanka-docs --output $DocsOutput --base $Basepath
+dotnet tanka-docs build --output $DocsOutput --base $Basepath
 EnsureLastExitCode("dotnet tanka-docs failed")
 
 "----------------------------------------"
