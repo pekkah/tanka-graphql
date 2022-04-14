@@ -26,7 +26,6 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: |
-            3.1.x
             6.0.x
 
       - name: Build docs
@@ -42,7 +41,7 @@ jobs:
             ./artifacts/gh-pages
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: build
     concurrency: ci-${{ github.ref }}
     steps:

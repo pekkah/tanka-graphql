@@ -8,7 +8,7 @@
     <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
     <Description>GraphQL Query, Mutation and Subscription library</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>graphql,tanka,signalr,apollo</PackageTags>
+    <PackageTags>graphql tanka signalr apollo</PackageTags>
     <Authors>Pekka Heikura</Authors>
   </PropertyGroup>
 </Project>
