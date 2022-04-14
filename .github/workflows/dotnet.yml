@@ -28,7 +28,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: |¨
+          dotnet-version: |
             3.1.x
             6.0.x
 
