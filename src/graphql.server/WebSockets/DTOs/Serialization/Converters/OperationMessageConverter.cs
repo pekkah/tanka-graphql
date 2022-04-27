@@ -23,7 +23,7 @@ public class OperationMessageConverter : JsonConverter<OperationMessage>
         var result = new OperationMessage();
         while (reader.TokenType == JsonTokenType.PropertyName)
         {
-            var propertyName = reader.GetString().ToLowerInvariant();
+            var propertyName = reader.GetString()?.ToLowerInvariant();
             reader.Read();
 
             switch (propertyName)
@@ -38,13 +38,13 @@ public class OperationMessageConverter : JsonConverter<OperationMessage>
                     break;
                 case "payload":
                     result.Payload = ReadPayload(ref reader, type, options);
+                    reader.Read();
                     break;
             }
         }
 
         EnsureTokenType(reader.TokenType, JsonTokenType.EndObject);
         reader.Read();
-
         return result;
     }
 
@@ -73,7 +73,11 @@ public class OperationMessageConverter : JsonConverter<OperationMessage>
     {
         if (reader.TokenType == JsonTokenType.Null)
         {
-            reader.Read();
+            return null;
+        }
+
+        if (payloadType is null)
+        {
             return null;
         }
 
@@ -120,6 +124,11 @@ public class OperationMessageConverter : JsonConverter<OperationMessage>
             {
                 type = reader.GetString();
                 break;
+            }
+
+            if (reader.TokenType == JsonTokenType.StartObject)
+            {
+                reader.Skip();
             }
 
             reader.Read(); // skip value

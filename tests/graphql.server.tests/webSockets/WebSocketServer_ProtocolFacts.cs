@@ -22,7 +22,7 @@ public class WebSocketServer_ProtocolFacts : WebSocketFactsBase
     {
     }
 
-    [Fact(Skip = "Test not responding")]
+    [Fact]
     public async Task Start_query()
     {
         /* Given */
@@ -43,6 +43,7 @@ public class WebSocketServer_ProtocolFacts : WebSocketFactsBase
 
         /* Then */
         var json = await ReadMessage(ws);
+        await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
         var message = DeserializeMessage(json);
         var executionResult = (ExecutionResult)message.Payload;
         executionResult.ShouldMatchJson(

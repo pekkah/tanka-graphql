@@ -1,19 +1,37 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Channels;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Server.Links;
 
 public static class RemoteSchemaTools
 {
-    public static ISchema MakeRemoteExecutable(
-        SchemaBuilder builder,
+    private static IReadOnlyList<string> RootTypes = new List<string>()
+    {
+        "Query",
+        "Mutation",
+        "Subscription"
+    };
+
+    //todo: use ResolversBuilder.AddLinkedTypes()
+    /// <summary>
+    ///     Create resolvers for ObjectTypes and ObjectType extensions in <see cref="TypeSystemDocument"/> which
+    ///     resolve the values using the given <paramref name="link"/>
+    /// </summary>
+    /// <param name="remoteTypes"></param>
+    /// <param name="link"></param>
+    /// <param name="createResolver"></param>
+    /// <param name="createSubscriber"></param>
+    /// <returns></returns>
+    public static ResolversMap CreateLinkResolvers(
+        TypeSystemDocument remoteTypes,
         ExecutionResultLink link,
         Func<ExecutionResultLink, Resolver> createResolver = null,
         Func<ExecutionResultLink, Subscriber> createSubscriber = null)
@@ -24,7 +42,54 @@ public static class RemoteSchemaTools
         if (createSubscriber == null)
             createSubscriber = DefaultCreateRemoteSubscriber;
 
-        throw new NotImplementedException($"todo: {nameof(MakeRemoteExecutable)}");
+        var objectDefinitionsAndExtensions = GetObjectDefinitions(remoteTypes);
+        var rootTypes = objectDefinitionsAndExtensions.Where(type => RootTypes.Contains(type.Name.Value))
+            .OfType<ObjectDefinition>();
+
+        ResolversMap resolvers = new ResolversMap();
+        foreach(var rootType in rootTypes)
+        {
+            foreach(var field in rootType.Fields)
+            {
+                if (rootType.Name != "Subscription")
+                {
+                    resolvers.Add(rootType.Name.Value, field.Name.Value, createResolver(link));
+                }
+                else
+                {
+                    resolvers.Add(rootType.Name.Value, field.Name.Value, createSubscriber(link));
+                }
+            }            
+        }
+
+        var resolver = DefaultDictionaryResolver();
+        foreach (var objectType in objectDefinitionsAndExtensions.Where(type => !RootTypes.Contains(type.Name.Value))
+            .OfType<ObjectDefinition>())
+        {
+            foreach (var field in objectType.Fields)
+            {
+                resolvers.Add(objectType.Name.Value, field.Name.Value, resolver);
+            }
+        }
+
+        return resolvers;
+    }
+
+    private static IEnumerable<ObjectDefinition> GetObjectDefinitions(TypeSystemDocument typeSystem)
+    {
+        if (typeSystem.TypeDefinitions != null)
+            foreach(var typeDefinition in typeSystem.TypeDefinitions)
+            {
+                if (typeDefinition is ObjectDefinition objectDefinition)
+                    yield return objectDefinition;
+            }   
+        
+        if (typeSystem.TypeExtensions != null)
+            foreach(var typeExtension in typeSystem.TypeExtensions)
+            {
+                if (typeExtension.ExtendedKind == NodeKind.ObjectDefinition)
+                    yield return (ObjectDefinition)typeExtension.Definition;
+            }
     }
 
     public static Resolver DefaultCreateRemoteResolver(ExecutionResultLink link)

@@ -71,7 +71,7 @@ public abstract class WebSocketFactsBase : IClassFixture<WebApplicationFactory<S
         var buffer = new byte[1024 * 4];
         var segment = new ArraySegment<byte>(buffer);
         var cts = new CancellationTokenSource();
-        cts.CancelAfter(TimeSpan.FromSeconds(5));
+        cts.CancelAfter(TimeSpan.FromSeconds(30));
         using var memoryStream = new MemoryStream();
         try
         {

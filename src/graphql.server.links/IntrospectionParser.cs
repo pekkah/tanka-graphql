@@ -8,9 +8,8 @@ namespace Tanka.GraphQL.Server.Links;
 
 public static class IntrospectionParser
 {
-    private static readonly JsonSerializerOptions _jsonOptions = new()
+    private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
     {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters =
         {
             new DirectiveLocationConverter(),

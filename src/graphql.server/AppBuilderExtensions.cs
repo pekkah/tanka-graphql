@@ -1,14 +1,12 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.Server.WebSockets;
 
 namespace Tanka.GraphQL.Server;
 
-public static class AppBuilderExtensions
+internal static class AppBuilderExtensions
 {
-    [Obsolete("UseEndpoints(endpoints => endpoints.MapTankaGraphQLWebSockets(\"path\"))")]
     public static IApplicationBuilder UseTankaGraphQLWebSockets(
         this IApplicationBuilder app,
         PathString path)

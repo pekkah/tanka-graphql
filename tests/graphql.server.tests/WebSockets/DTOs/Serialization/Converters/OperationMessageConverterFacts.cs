@@ -13,9 +13,8 @@ public class OperationMessageConverterFacts
 
     public OperationMessageConverterFacts()
     {
-        _options = new JsonSerializerOptions
+        _options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters =
             {
                 new OperationMessageConverter(),
@@ -183,13 +182,12 @@ public class OperationMessageConverterFacts
 
     private string CreateMessageJson(string id, string type, string payloadJson = null)
     {
-        return @"
-                {
-                    ""id"": ""{id}"",
-                    ""type"": ""{type}"",
-                    ""payload"": {payloadJson}
-                }
-                "
+        return 
+            @"{
+    ""id"": ""{id}"",
+    ""payload"": {payloadJson},
+    ""type"": ""{type}""
+ }"
             .Replace("{id}", id)
             .Replace("{type}", type)
             .Replace("{payloadJson}", payloadJson ?? "null");

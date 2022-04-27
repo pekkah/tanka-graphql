@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
@@ -8,29 +10,27 @@ namespace Tanka.GraphQL.Server.Links.Tests;
 
 public class MakeRemoteExecutableFacts
 {
-    [Fact(Skip = "TODO")]
+    [Fact]
     public async Task Execute_with_StaticLink()
     {
         /* Given */
-        var schemaOneBuilder = new SchemaBuilder()
-            .Add(
+        TypeSystemDocument schemaOne =
                 @"
-                    type User {
+                    extend type User {
                         id: ID!
                         name: String!
                     }
 
-                    type Query {
+                    extend type Query {
                         userById(id: ID!): User
                     }
 
-                    schema {
+                    extend schema {
                         query: Query
                     }
-                    ");
+                    ";
 
-        var schemaTwoBuilder = new SchemaBuilder()
-            .Add(
+        TypeSystemDocument schemaTwo = 
                 @"
                     type Address {
                         city: String!
@@ -43,11 +43,10 @@ public class MakeRemoteExecutableFacts
                     type Query {
 
                     }
-                    "
-            );
+                    ";
 
-        var schemaOne = RemoteSchemaTools.MakeRemoteExecutable(
-            schemaOneBuilder,
+        var schemaOneResolvers = RemoteSchemaTools.CreateLinkResolvers(
+            schemaOne,
             RemoteLinks.Static(new ExecutionResult
             {
                 Data = new Dictionary<string, object>
@@ -60,7 +59,7 @@ public class MakeRemoteExecutableFacts
                 }
             }));
 
-        var schemaTwo = await schemaTwoBuilder.Build(
+        var schemaTwoResolvers = 
             new ResolversMap
             {
                 ["Address"] = new()
@@ -71,11 +70,13 @@ public class MakeRemoteExecutableFacts
                 {
                     { "address", context => ResolveSync.As("Vantaa") }
                 }
-            });
+            };
 
+        var resolvers = schemaOneResolvers + schemaTwoResolvers;
         var schema = await new SchemaBuilder()
-            //.Merge(schemaOne, schemaTwo)
-            .Build(new SchemaBuildOptions());
+            .Add(schemaOne)
+            .Add(schemaTwo)
+            .Build(resolvers);
 
         /* When */
         var result = await Executor.ExecuteAsync(new ExecutionOptions
