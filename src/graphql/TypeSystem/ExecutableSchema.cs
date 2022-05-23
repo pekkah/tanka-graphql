@@ -49,6 +49,8 @@ public class ExecutableSchema : ISchema
 
     public ObjectDefinition? Subscription { get; }
 
+    public string Description { get; } = "Root types";
+
     public ObjectDefinition Query { get; }
 
     public ObjectDefinition? Mutation { get; }

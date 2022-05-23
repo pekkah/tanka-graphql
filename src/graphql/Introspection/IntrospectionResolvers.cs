@@ -23,6 +23,7 @@ public class IntrospectionResolvers : ResolversMap
 
         this[IntrospectionSchema.SchemaName] = new FieldResolversMap
         {
+            {"description", Resolve.PropertyOf<ISchema>(schema => schema.Description)},
             {
                 "types", context => ResolveSync.As(context.Schema
                     .QueryTypes<TypeDefinition>(IsNotBuiltIn)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Tanka.GraphQL.ValueResolution;
@@ -14,6 +15,8 @@ public interface ISchema : IHasDirectives
     ObjectDefinition Query { get; }
 
     ObjectDefinition? Subscription { get; }
+
+    string Description { get;  }
 
     TypeDefinition? GetNamedType(string name);
 
