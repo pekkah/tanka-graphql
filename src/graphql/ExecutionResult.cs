@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace Tanka.GraphQL;
 
@@ -13,6 +14,7 @@ public class ExecutionResult : IExecutionResult
     private List<ExecutionError>? _errors;
     private Dictionary<string, object>? _extensions;
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, object>? Data
     {
         get => _data;
@@ -28,6 +30,7 @@ public class ExecutionResult : IExecutionResult
         }
     }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, object>? Extensions
     {
         get => _extensions;
@@ -43,6 +46,7 @@ public class ExecutionResult : IExecutionResult
         }
     }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<ExecutionError>? Errors
     {
         get => _errors;

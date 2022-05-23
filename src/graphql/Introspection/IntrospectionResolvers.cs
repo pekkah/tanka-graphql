@@ -205,7 +205,8 @@ public class IntrospectionResolvers : ResolversMap
             {
                 "args",
                 Resolve.PropertyOf<DirectiveDefinition>(d => { return d.Arguments?.OrderBy(t => t.Name.Value); })
-            }
+            },
+            {"isRepeatable", Resolve.PropertyOf<DirectiveDefinition>(d => d.IsRepeatable)}
         };
     }
 

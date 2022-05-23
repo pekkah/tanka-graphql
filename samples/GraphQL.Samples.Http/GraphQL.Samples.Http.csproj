@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Tanka.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Tanka.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\graphql.language\graphql.language.csproj" />
+    <ProjectReference Include="..\..\src\graphql.server\graphql.server.csproj" />
+    <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
+  </ItemGroup>
+
+</Project>
