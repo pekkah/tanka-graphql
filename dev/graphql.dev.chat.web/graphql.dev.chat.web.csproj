@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GraphQL.Server.Ui.Playground" Version="5.2.1" />
+    <PackageReference Include="GraphQL.Server.Ui.Playground" Version="7.1.0" />
   </ItemGroup>
 
   <ItemGroup>
