@@ -5,7 +5,7 @@ namespace Tanka.GraphQL.Language;
 
 public static class Operations
 {
-    public static OperationDefinition GetOperation(ExecutableDocument document, string operationName)
+    public static OperationDefinition GetOperation(ExecutableDocument document, string? operationName)
     {
         var operations = document.OperationDefinitions;
 

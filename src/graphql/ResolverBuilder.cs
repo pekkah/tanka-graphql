@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Tanka.GraphQL.Internal;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.ValueResolution;
@@ -36,6 +37,11 @@ public class ResolverBuilder
     {
         _components.Add(middleware);
         return this;
+    }
+
+    public ResolverBuilder Use(Func<IResolverContext, Resolver, ValueTask<IResolverResult>> middleware)
+    {
+        return Use(next => context => middleware(context, next));
     }
 
     public ResolverBuilder Run(Resolver end)

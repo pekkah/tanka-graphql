@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Tanka.GraphQL.Language;
 
 namespace Tanka.GraphQL.Server;
 
@@ -32,11 +32,10 @@ public class GraphQLApplication
         GraphQLRequestPipelineBuilder builder)
     {
         var builders = new List<IEndpointConventionBuilder>();
-        foreach (var transport in _transports) 
+        foreach (var transport in _transports)
             builders.Add(transport.Map(pattern, routes, builder));
 
-        if(_optionsMonitor.CurrentValue.EnableUi)
-        {
+        if (_optionsMonitor.CurrentValue.EnableUi)
             builders.Add(routes.MapGet($"{pattern}/ui", async context =>
             {
                 var htmlStream = typeof(GraphQLApplication)
@@ -44,7 +43,6 @@ public class GraphQLApplication
 
                 await htmlStream.CopyToAsync(context.Response.Body);
             }));
-        }
 
         return new RouteHandlerBuilder(builders);
     }
@@ -59,13 +57,29 @@ public class GraphQLApplication
         IServiceProvider services)
     {
         var builder = new GraphQLRequestPipelineBuilder(services);
+        builder.Use(next => context =>
+        {
+            return UseRequestServices();
+
+            async IAsyncEnumerable<ExecutionResult> UseRequestServices()
+            {
+                await using var scope = builder.ApplicationServices.CreateAsyncScope();
+                context.RequestServices = scope.ServiceProvider;
+
+                await foreach (var item in next(context))
+                    yield return item;
+            }
+        });
 
         builder.Use(next => context =>
         {
             context.Schema = Schemas.Get(schemaName);
+            context.Document = context.Query;
+            context.Operation = Operations.GetOperation(context.Document, context.OperationName);
 
             return next(context);
         });
+
 
         builder.Use(next => context =>
         {

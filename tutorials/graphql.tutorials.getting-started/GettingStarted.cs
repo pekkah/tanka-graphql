@@ -132,7 +132,7 @@ public class GettingStarted
                         // original resolver, duplicate value and return it
                         return fieldDefinition
                             .WithResolver(resolver =>
-                                resolver.Use(async (context, next) =>
+                                resolver.Use(next => async context =>
                                 {
                                     // We need to first call the original resolver to 
                                     // get the initial value

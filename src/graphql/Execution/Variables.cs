@@ -9,7 +9,7 @@ public static class Variables
     public static IReadOnlyDictionary<string, object?> CoerceVariableValues(
         ISchema schema,
         OperationDefinition operation,
-        Dictionary<string, object> variableValues)
+        Dictionary<string, object?>? variableValues)
     {
         var coercedValues = new Dictionary<string, object?>();
         var variableDefinitions = operation.VariableDefinitions;
@@ -36,7 +36,6 @@ public static class Variables
                     schema,
                     defaultValue,
                     variableType);
-                ;
             }
 
             if (variableType is NonNullType

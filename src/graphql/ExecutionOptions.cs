@@ -67,7 +67,7 @@ public class ExecutionOptions
     /// <summary>
     ///     Variables values
     /// </summary>
-    public Dictionary<string, object> VariableValues { get; set; }
+    public Dictionary<string, object?>? VariableValues { get; set; }
 
     public static ValueTask<ValidationResult> DefaultValidate(
         IEnumerable<CombineRule> rules,

@@ -3,12 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server;
 
-public class GraphQLServiceBuilder
+public class GraphQLApplicationBuilder
 {
-    public GraphQLServiceBuilder(IServiceCollection applicationServices)
+    public GraphQLApplicationBuilder(IServiceCollection applicationServices)
     {
         ApplicationServices = applicationServices;
         ApplicationOptionsBuilder = ApplicationServices
@@ -19,25 +20,26 @@ public class GraphQLServiceBuilder
 
     public IServiceCollection ApplicationServices { get; }
 
-    private GraphQLServiceBuilder AddCore()
+    private GraphQLApplicationBuilder AddCore()
     {
         
         ApplicationServices.TryAddSingleton<IHostedService, SchemaInitializer>();
         ApplicationServices.TryAddSingleton<SchemaCollection>();
         ApplicationServices.TryAddSingleton<GraphQLApplication>();
+        ApplicationServices.TryAddSingleton<IValidator3, Validator3>();
 
         return this;
     }
 
     public OptionsBuilder<GraphQLApplicationOptions> ApplicationOptionsBuilder { get; }
 
-    public GraphQLServiceBuilder AddHttp()
+    public GraphQLApplicationBuilder AddHttp()
     {
         ApplicationServices.TryAddSingleton<IGraphQLTransport, GraphQLHttpTransport>();
         return this;
     }
 
-    public GraphQLServiceBuilder AddSchema(
+    public GraphQLApplicationBuilder AddSchema(
         string schemaName,
         Action<SchemaOptionsBuilder> configureOptions)
     {
