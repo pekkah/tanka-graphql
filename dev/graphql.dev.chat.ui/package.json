@@ -6,7 +6,7 @@
     "@apollo/client": "^3.5.10",
     "@microsoft/signalr": "^6.0.2",
     "@tanka/tanka-graphql-server-link": "file:../../src/graphql.server.link",
-    "graphiql": "1.5.19",
+    "graphiql": "2.0.12",
     "graphql": "^16.3.0",
     "react": "^17.0",
     "react-dom": "^17.0"
