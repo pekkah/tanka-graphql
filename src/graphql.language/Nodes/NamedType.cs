@@ -19,7 +19,7 @@ public sealed class NamedType : TypeBase
 
     public static implicit operator NamedType(string value)
     {
-        var parser = new Parser(Encoding.UTF8.GetBytes(value));
+        var parser = Parser.Create(value);
         return parser.ParseNamedType();
     }
 }

@@ -33,13 +33,13 @@ public sealed class DirectiveDefinition : INode
 
     public static implicit operator DirectiveDefinition(string value)
     {
-        var parser = new Parser(Encoding.UTF8.GetBytes(value));
+        var parser = Parser.Create(value);
         return parser.ParseDirectiveDefinition();
     }
 
     public static implicit operator DirectiveDefinition(in ReadOnlySpan<byte> value)
     {
-        var parser = new Parser(value);
+        var parser = Parser.Create(value);
         return parser.ParseDirectiveDefinition();
     }
 }

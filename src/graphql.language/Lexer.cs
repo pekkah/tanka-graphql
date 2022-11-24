@@ -26,7 +26,7 @@ public ref struct Lexer
 
     public bool IsExponential;
 
-    public Lexer(in ReadOnlySpan<byte> span)
+    public Lexer(ReadOnlySpan<byte> span)
     {
         _reader = new SpanReader(span);
         _currentLineStart = 0;
@@ -37,12 +37,12 @@ public ref struct Lexer
         IsExponential = false;
     }
 
-    public static Lexer Create(in ReadOnlySpan<byte> span)
+    public static Lexer Create(ReadOnlySpan<byte> span)
     {
         return new Lexer(span);
     }
 
-    public static Lexer Create(in string data)
+    public static Lexer Create(string data)
     {
         return Create(Encoding.UTF8.GetBytes(data));
     }
