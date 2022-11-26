@@ -141,7 +141,7 @@ public class ExecutorFacts
         };
 
         Schema = new SchemaBuilder()
-            .Add((TypeSystemDocument)Sdl)
+            .Add(Sdl)
             .Build(Resolvers, Resolvers).Result;
     }
 

@@ -15,11 +15,11 @@ builder.AddTankaGraphQL3()
     .AddHttp()
     .AddSchema("schemaName", schema =>
     {
-        schema.AddTypeSystem(@"
-type Query {
-  version: String!
-}
-");
+        schema.AddTypeSystem("""
+            type Query {
+              version: String!
+            }
+            """);
 
         schema.AddResolver(
             "Query",

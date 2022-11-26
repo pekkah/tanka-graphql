@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Tanka.GraphQL.Server;
 
 public class ContextExtension<T> : IExecutorExtension
+    where T: notnull
 {
     private readonly IServiceProvider _services;
 

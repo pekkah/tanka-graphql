@@ -7,7 +7,7 @@ namespace Tanka.GraphQL.Server.WebSockets.DTOs.Serialization.Converters;
 
 public class OperationMessageConverter : JsonConverter<OperationMessage>
 {
-    public override OperationMessage Read(ref Utf8JsonReader reader, Type typeToConvert,
+    public override OperationMessage? Read(ref Utf8JsonReader reader, Type typeToConvert,
         JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null)
@@ -69,7 +69,7 @@ public class OperationMessageConverter : JsonConverter<OperationMessage>
         }
     }
 
-    private object ReadPayload(ref Utf8JsonReader reader, string payloadType, JsonSerializerOptions options)
+    private object? ReadPayload(ref Utf8JsonReader reader, string? payloadType, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null)
         {
@@ -90,31 +90,31 @@ public class OperationMessageConverter : JsonConverter<OperationMessage>
         };
     }
 
-    private object ReadNull(ref Utf8JsonReader reader, JsonSerializerOptions options)
+    private object? ReadNull(ref Utf8JsonReader reader, JsonSerializerOptions options)
     {
         EnsureTokenType(reader.TokenType, JsonTokenType.Null);
         reader.Read();
         return null;
     }
 
-    private object ReadConnectionParams(ref Utf8JsonReader reader, JsonSerializerOptions options)
+    private object? ReadConnectionParams(ref Utf8JsonReader reader, JsonSerializerOptions options)
     {
-        return JsonSerializer.Deserialize<Dictionary<string, object>>(ref reader, options);
+        return JsonSerializer.Deserialize<Dictionary<string, object?>>(ref reader, options);
     }
 
-    private object ReadQuery(ref Utf8JsonReader reader, JsonSerializerOptions options)
+    private object? ReadQuery(ref Utf8JsonReader reader, JsonSerializerOptions options)
     {
         return JsonSerializer.Deserialize<OperationMessageQueryPayload>(ref reader, options);
     }
 
-    private object ReadData(ref Utf8JsonReader reader, JsonSerializerOptions options)
+    private object? ReadData(ref Utf8JsonReader reader, JsonSerializerOptions options)
     {
         return JsonSerializer.Deserialize<ExecutionResult>(ref reader, options);
     }
 
-    private string PeekPayloadType(Utf8JsonReader reader)
+    private string? PeekPayloadType(Utf8JsonReader reader)
     {
-        string type = null;
+        string? type = null;
         while (reader.TokenType == JsonTokenType.PropertyName)
         {
             var propertyName = reader.GetString().ToLowerInvariant();

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Tanka.GraphQL.Server.Links.DTOs;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
 using Tanka.GraphQL.Server.WebSockets.DTOs.Serialization.Converters;
@@ -15,6 +16,7 @@ public class OperationMessageConverterFacts
     {
         _options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Converters =
             {
                 new OperationMessageConverter(),

@@ -7,19 +7,19 @@ public class OperationMessage : IEquatable<OperationMessage>
     /// <summary>
     ///     Nullable Id
     /// </summary>
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     /// <summary>
     ///     Nullable payload
     /// </summary>
-    public object Payload { get; set; }
+    public object? Payload { get; set; }
 
     /// <summary>
     ///     Type <see cref="MessageType" />
     /// </summary>
-    public string Type { get; set; }
+    public string? Type { get; set; }
 
-    public bool Equals(OperationMessage other)
+    public bool Equals(OperationMessage? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
@@ -33,7 +33,7 @@ public class OperationMessage : IEquatable<OperationMessage>
         return $"Type: {Type} Id: {Id} Payload: {Payload}";
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;

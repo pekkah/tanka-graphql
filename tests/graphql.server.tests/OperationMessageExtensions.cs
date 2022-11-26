@@ -17,6 +17,7 @@ public static class OperationMessageExtensions
         var actualJson = JToken.FromObject(actualResult,
             JsonSerializer.Create(new JsonSerializerSettings
             {
+                NullValueHandling = NullValueHandling.Ignore,
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
 
@@ -24,6 +25,7 @@ public static class OperationMessageExtensions
             JsonConvert.DeserializeObject<OperationMessage>(expectedJson),
             JsonSerializer.Create(new JsonSerializerSettings
             {
+                NullValueHandling = NullValueHandling.Ignore,
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
 

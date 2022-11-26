@@ -19,7 +19,7 @@ public static class Mutation
                 path);
 
         var selectionSet = operation.SelectionSet;
-        var data = await SelectionSets.ExecuteSelectionSetAsync(
+        var data = await executionContext.Strategy.ExecuteSelectionSetAsync(
             executionContext,
             selectionSet,
             mutationType,

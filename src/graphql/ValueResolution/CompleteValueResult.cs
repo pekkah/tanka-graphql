@@ -118,7 +118,7 @@ public class CompleteValueResult : IResolverResult
                 context.Selection);
 
         var subSelectionSet = SelectionSets.MergeSelectionSets(context.Fields);
-        var data = await SelectionSets.ExecuteSelectionSetAsync(
+        var data = await context.ExecutionContext.Strategy.ExecuteSelectionSetAsync(
             context.ExecutionContext,
             subSelectionSet,
             actualType,
@@ -151,7 +151,7 @@ public class CompleteValueResult : IResolverResult
                 context.Selection);
 
         var subSelectionSet = SelectionSets.MergeSelectionSets(context.Fields);
-        var data = await SelectionSets.ExecuteSelectionSetAsync(
+        var data = await context.ExecutionContext.Strategy.ExecuteSelectionSetAsync(
             context.ExecutionContext,
             subSelectionSet,
             actualType,
@@ -168,7 +168,7 @@ public class CompleteValueResult : IResolverResult
         IResolverContext context)
     {
         var subSelectionSet = SelectionSets.MergeSelectionSets(context.Fields);
-        var data = await SelectionSets.ExecuteSelectionSetAsync(
+        var data = await context.ExecutionContext.Strategy.ExecuteSelectionSetAsync(
             context.ExecutionContext,
             subSelectionSet,
             objectDefinition,

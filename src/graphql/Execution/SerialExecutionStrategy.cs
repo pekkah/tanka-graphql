@@ -5,9 +5,9 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Execution;
 
-public class SerialExecutionStrategy : IExecutionStrategy
+public class SerialExecutionStrategy : SelectionSetExecutionStrategyBase
 {
-    public async Task<IDictionary<string, object?>> ExecuteGroupedFieldSetAsync(
+    protected override async Task<IDictionary<string, object?>> ExecuteGroupedFieldSetAsync(
         IExecutorContext context,
         IReadOnlyDictionary<string, List<FieldSelection>> groupedFieldSet,
         ObjectDefinition objectDefinition,

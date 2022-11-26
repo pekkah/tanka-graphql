@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <AssemblyName>Tanka.GraphQL.Extensions.ApolloFederation</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Extensions.ApolloFederation</RootNamespace>
     <Nullable>enable</Nullable>

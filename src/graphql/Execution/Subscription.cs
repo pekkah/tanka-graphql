@@ -156,7 +156,7 @@ public static class Subscription
         var subscriptionType = context.Schema.Subscription;
         var selectionSet = subscription.SelectionSet;
         var path = new NodePath();
-        var data = await SelectionSets.ExecuteSelectionSetAsync(
+        var data = await context.Strategy.ExecuteSelectionSetAsync(
             context,
             selectionSet,
             subscriptionType,

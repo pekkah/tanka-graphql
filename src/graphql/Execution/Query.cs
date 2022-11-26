@@ -25,7 +25,7 @@ public static class Query
 
         try
         {
-            data = await SelectionSets.ExecuteSelectionSetAsync(
+            data = await executionContext.Strategy.ExecuteSelectionSetAsync(
                 executionContext,
                 selectionSet,
                 queryType,

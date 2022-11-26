@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
@@ -12,35 +10,6 @@ public static class SelectionSets
 {
     public const string SkipDirectiveName = "skip";
     public const string IncludeDirectiveName = "include";
-
-    public static async Task<IDictionary<string, object>?> ExecuteSelectionSetAsync(
-        IExecutorContext executorContext,
-        SelectionSet selectionSet,
-        ObjectDefinition objectDefinition,
-        object objectValue,
-        NodePath path)
-    {
-        if (executorContext == null) throw new ArgumentNullException(nameof(executorContext));
-        if (selectionSet == null) throw new ArgumentNullException(nameof(selectionSet));
-        if (path == null) throw new ArgumentNullException(nameof(path));
-
-        var groupedFieldSet = CollectFields(
-            executorContext.Schema,
-            executorContext.Document,
-            objectDefinition,
-            selectionSet,
-            executorContext.CoercedVariableValues);
-
-        var resultMap = await executorContext.Strategy.ExecuteGroupedFieldSetAsync(
-            executorContext,
-            groupedFieldSet,
-            objectDefinition,
-            objectValue,
-            path).ConfigureAwait(false);
-
-        return resultMap;
-    }
-
 
     public static SelectionSet MergeSelectionSets(IReadOnlyCollection<FieldSelection> fields)
     {

@@ -25,11 +25,10 @@ public class OperationDelegateBuilder
         return this;
     }
 
-
     public OperationDelegate Build()
     {
         OperationDelegate pipeline = (_, _) => throw new QueryExecutionException(
-            "Operation execution pipeline error. No middleware returned any results.",
+            "Operation execution pipeline error. No terminal middleware used.",
             new NodePath());
 
         for (var c = _components.Count - 1; c >= 0; c--)
