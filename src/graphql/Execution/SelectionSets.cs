@@ -30,11 +30,11 @@ public static class SelectionSets
         ExecutableDocument document,
         ObjectDefinition objectDefinition,
         SelectionSet selectionSet,
-        IReadOnlyDictionary<string, object?> coercedVariableValues,
+        IReadOnlyDictionary<string, object?>? coercedVariableValues = null,
         List<string>? visitedFragments = null)
     {
         visitedFragments ??= new List<string>();
-
+        
         var fragments = document.FragmentDefinitions;
 
         var groupedFields = new Dictionary<string, List<FieldSelection>>();
