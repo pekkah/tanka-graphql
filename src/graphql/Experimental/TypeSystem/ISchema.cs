@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
-using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.TypeSystem;
+namespace Tanka.GraphQL.Experimental.TypeSystem;
 
-public interface ISchema : IHasDirectives
+public interface ISchema: IHasDirectives
 {
     public static readonly ISchema Empty = new EmptySchema();
 

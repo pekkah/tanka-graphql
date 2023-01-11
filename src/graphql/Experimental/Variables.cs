@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Experimental.TypeSystem;
 
-namespace Tanka.GraphQL.Execution;
+namespace Tanka.GraphQL.Experimental;
 
 public static class Variables
 {
