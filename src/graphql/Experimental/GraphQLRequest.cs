@@ -6,8 +6,13 @@ namespace Tanka.GraphQL.Experimental;
 /// <summary>
 ///     Execution options
 /// </summary>
-public record GraphQLRequest(
-    ExecutableDocument Document,
-    object? InitialValue = default,
-    string? OperationName = default,
-    IReadOnlyDictionary<string, object?>? VariableValues = default);
+public record GraphQLRequest
+{
+    public required ExecutableDocument Document { get; init; }
+
+    public object? InitialValue { get; set; }
+
+    public string? OperationName { get; set; }
+
+    public IReadOnlyDictionary<string, object?>? VariableValues { get; set; }
+}

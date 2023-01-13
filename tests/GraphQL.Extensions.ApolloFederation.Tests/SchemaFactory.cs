@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Experimental;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.ValueResolution;
+using ResolverContext = Tanka.GraphQL.Experimental.ResolverContext;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;
 
 public static class SchemaFactory
 {
-    public static async Task<ISchema> Create()
+    public static async Task<Experimental.TypeSystem.ISchema> Create()
     {
         var typeDefs = @"
 type Review @key(fields: ""id"") {
@@ -35,53 +35,49 @@ type Query {
 }
 ";
 
-        var builder = new SchemaBuilder();
-        builder.Add(typeDefs);
-
-        var resolvers = new ResolversMap
+        var builder = new ExecutableSchemaBuilder();
+        builder.AddTypeSystem(typeDefs);
+        builder.AddFederation(new FederatedSchemaBuildOptions(new DictionaryReferenceResolversMap
+        {
+            ["User"] = UserReference,
+            ["Product"] = ProductReference
+        }));
+        builder.AddResolvers(new Experimental.ResolversMap
         {
             ["User"] = new()
             {
-                { "id", Resolve.PropertyOf<User>(u => u.ID) },
+                { "id", ctx => ctx.ResolveAsPropertyOf<User>(u => u.ID) },
                 { "username", UserUsername },
                 { "reviews", UserReviews }
             },
             ["Review"] = new()
             {
-                { "id", Resolve.PropertyOf<Review>(r => r.ID) },
-                { "body", Resolve.PropertyOf<Review>(r => r.Body) },
+                { "id", ctx => ctx.ResolveAsPropertyOf<Review>(r => r.ID) },
+                { "body", ctx => ctx.ResolveAsPropertyOf<Review>(r => r.Body) },
                 { "author", ReviewAuthor },
-                { "product", Resolve.PropertyOf<Review>(r => r.Product) }
+                { "product", ctx => ctx.ResolveAsPropertyOf<Review>(r => r.Product) }
             },
             ["Product"] = new()
             {
-                { "upc", Resolve.PropertyOf<Product>(p => p.Upc) },
+                { "upc", ctx => ctx.ResolveAsPropertyOf<Product>(p => p.Upc) },
                 { "reviews", ProductReviews }
             }
-        };
-
-        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions
-        {
-            SchemaBuildOptions = new SchemaBuildOptions(resolvers),
-            ReferenceResolvers = new DictionaryReferenceResolversMap
-            {
-                ["User"] = UserReference,
-                ["Product"] = ProductReference
-            }
         });
+
+        var schema = await builder.Build();
 
         return schema;
     }
 
-    private static ValueTask<IResolverResult> UserUsername(IResolverContext context)
+    private static ValueTask UserUsername(ResolverContext context)
     {
         var user = (User)context.ObjectValue;
-
-        return ResolveSync.As(user.Username);
+        context.ResolvedValue = user.Username;
+        return default;
     }
 
     private static ValueTask<ResolveReferenceResult> ProductReference(
-        IResolverContext context,
+        ResolverContext context,
         TypeDefinition typeDefinition,
         IReadOnlyDictionary<string, object> representation)
     {
@@ -94,39 +90,40 @@ type Query {
         return new ValueTask<ResolveReferenceResult>(new ResolveReferenceResult(typeDefinition, product));
     }
 
-    private static ValueTask<IResolverResult> ProductReviews(IResolverContext context)
+    private static ValueTask ProductReviews(ResolverContext context)
     {
         var product = (Product)context.ObjectValue;
         var reviews = Db.Reviews
             .Where(r => r.Value.Product.Upc == product.Upc)
             .Select(p => p.Value);
 
-        return ResolveSync.As(reviews);
+        context.ResolvedValue = reviews;
+        return default;
     }
 
-    private static ValueTask<IResolverResult> ReviewAuthor(IResolverContext context)
+    private static ValueTask ReviewAuthor(ResolverContext context)
     {
         var review = (Review)context.ObjectValue;
 
-        return ResolveSync.As(new User
+        return context.ResolveAs(new User
         {
             ID = review.AuthorID,
             Username = Db.Usernames[review.AuthorID]
         });
     }
 
-    private static ValueTask<IResolverResult> UserReviews(IResolverContext context)
+    private static ValueTask UserReviews(ResolverContext context)
     {
         var user = (User)context.ObjectValue;
         var reviews = Db.Reviews
             .Where(r => r.Value.AuthorID == user.ID)
             .Select(r => r.Value);
 
-        return ResolveSync.As(reviews);
+        return context.ResolveAs(reviews);
     }
 
     private static ValueTask<ResolveReferenceResult> UserReference(
-        IResolverContext context,
+        ResolverContext context,
         TypeDefinition typeDefinition,
         IReadOnlyDictionary<string, object> representation)
     {

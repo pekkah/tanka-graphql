@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tanka.GraphQL.Experimental.TypeSystem;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
-namespace Tanka.GraphQL.Experimental.TypeSystem;
+namespace Tanka.GraphQL.Experimental;
 
-public static class SchemaExtensions
+public static class TypeSystemSchemaExtensions
 {
     public static T GetRequiredNamedType<T>(this ISchema schema, string name) where T : TypeDefinition
     {

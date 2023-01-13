@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Experimental;
+using Tanka.GraphQL.Experimental.TypeSystem;
 using Xunit;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;
@@ -20,28 +21,27 @@ public class FederationFacts
         /* Given */
 
         /* When */
-        var result = await Executor
-            .ExecuteAsync(new ExecutionOptions
-            {
-                IncludeExceptionDetails = true,
-                Schema = Sut,
-                Document = @"
-query($representations:[_Any!]!) {
-    _entities(representations:$representations) {
-        ...on User {
-            reviews { 
-                id 
-                body 
-                author {
-                    username
-                }
-                product {
-                    upc
-                }
-            }
-        }
-    }
-}",
+        var result = await new Experimental.Executor(Sut)
+            .ExecuteAsync(new GraphQLRequest()
+                {
+                    Document = """
+                    query($representations:[_Any!]!) {
+                        _entities(representations:$representations) {
+                            ...on User {
+                                reviews { 
+                                    id 
+                                    body 
+                                    author {
+                                        username
+                                    }
+                                    product {
+                                        upc
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    """,
                 VariableValues = new Dictionary<string, object>
                 {
                     ["representations"] = new[]
@@ -97,11 +97,9 @@ query($representations:[_Any!]!) {
         /* Given */
 
         /* When */
-        var result = await Executor
-            .ExecuteAsync(new ExecutionOptions
+        var result = await new Experimental.Executor(Sut)
+            .ExecuteAsync(new GraphQLRequest()
             {
-                IncludeExceptionDetails = true,
-                Schema = Sut,
                 Document = @"query { _service { sdl } }"
             });
 

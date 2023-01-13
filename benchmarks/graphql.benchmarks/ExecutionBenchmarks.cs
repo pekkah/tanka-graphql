@@ -20,29 +20,22 @@ public class ExecutionBenchmarks
     private ISchema _schema;
     private ExecutableDocument _subscription;
 
-    [Params(1)] public int ExecutionCount { get; set; } = 1;
-
     [Benchmark]
     public async Task Mutation_with_defaults()
     {
-        for (var i = 0; i < ExecutionCount; i++)
+    var result = await Executor.ExecuteAsync(new ExecutionOptions
         {
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
-            {
-                Document = _mutation,
-                Schema = _schema
-            });
+            Document = _mutation,
+            Schema = _schema
+        });
 
-            AssertResult(result.Errors);
-        }
+        AssertResult(result.Errors);
     }
 
     [Benchmark]
     public async Task Mutation_without_validation()
     {
-        for (var i = 0; i < ExecutionCount; i++)
-        {
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
                 Document = _mutation,
                 Schema = _schema,
@@ -50,30 +43,24 @@ public class ExecutionBenchmarks
             });
 
             AssertResult(result.Errors);
-        }
     }
 
     [Benchmark]
     public async Task Query_with_defaults()
     {
-        for (var i = 0; i < ExecutionCount; i++)
-        {
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
                 Document = _query,
                 Schema = _schema
             });
 
             AssertResult(result.Errors);
-        }
     }
 
     [Benchmark(Baseline = true)]
     public async Task Query_without_validation()
     {
-        for (var i = 0; i < ExecutionCount; i++)
-        {
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
+        var result = await Executor.ExecuteAsync(new ExecutionOptions
             {
                 Document = _query,
                 Schema = _schema,
@@ -81,7 +68,6 @@ public class ExecutionBenchmarks
             });
 
             AssertResult(result.Errors);
-        }
     }
 
     [GlobalSetup]
@@ -96,9 +82,7 @@ public class ExecutionBenchmarks
     [Benchmark]
     public async Task Subscribe_with_defaults()
     {
-        for (var i = 0; i < ExecutionCount; i++)
-        {
-            var cts = new CancellationTokenSource();
+        var cts = new CancellationTokenSource();
             var result = await Executor.SubscribeAsync(new ExecutionOptions
             {
                 Document = _subscription,
@@ -107,15 +91,12 @@ public class ExecutionBenchmarks
 
             AssertResult(result.Errors);
             cts.Cancel();
-        }
     }
 
     [Benchmark]
     public async Task Subscribe_with_defaults_and_get_value()
     {
-        for (var i = 0; i < ExecutionCount; i++)
-        {
-            var cts = new CancellationTokenSource();
+        var cts = new CancellationTokenSource();
             var result = await Executor.SubscribeAsync(new ExecutionOptions
             {
                 Document = _subscription,
@@ -127,15 +108,12 @@ public class ExecutionBenchmarks
             var value = await result.Source.Reader.ReadAsync(cts.Token);
             AssertResult(value.Errors);
             cts.Cancel();
-        }
     }
 
     [Benchmark]
     public async Task Subscribe_without_validation()
     {
-        for (var i = 0; i < ExecutionCount; i++)
-        {
-            var cts = new CancellationTokenSource();
+        var cts = new CancellationTokenSource();
             var result = await Executor.SubscribeAsync(new ExecutionOptions
             {
                 Document = _subscription,
@@ -145,7 +123,6 @@ public class ExecutionBenchmarks
 
             AssertResult(result.Errors);
             cts.Cancel();
-        }
     }
 
     private static void AssertResult(IEnumerable<ExecutionError> errors)

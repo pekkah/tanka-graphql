@@ -25,6 +25,8 @@ public class ResolverContext
 
     public Func<TypeDefinition, object?, TypeDefinition>? ResolveAbstractType { get; set; } = DefaultIsTypeOf;
 
+    public object? ResolvedValue { get; set; }
+    
     private static TypeDefinition DefaultIsTypeOf(TypeDefinition abstractType, object? value)
     {
         throw new InvalidOperationException(

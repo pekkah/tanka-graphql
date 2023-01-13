@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 
@@ -47,8 +46,8 @@ public partial class Executor
 
             var executionResult = queryContext.OperationDefinition.Operation switch
             {
-                OperationType.Query => await ExecuteQueryAsync(queryContext).ConfigureAwait(false),
-                OperationType.Mutation => throw new NotImplementedException(),
+                OperationType.Query => await ExecuteQueryAsync(queryContext),
+                OperationType.Mutation => await ExecuteQueryAsync(queryContext),
                 OperationType.Subscription => throw new NotImplementedException(),
                 _ => throw new InvalidOperationException(
                     $"Operation type {queryContext.OperationDefinition.Operation} not supported.")

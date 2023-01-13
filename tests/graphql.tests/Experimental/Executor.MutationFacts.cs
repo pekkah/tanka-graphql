@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Tanka.GraphQL.Tests.Experimental;
 
-public class QueryFacts
+public class MutationFacts
 {
     [Fact]
     public async Task Simple_Scalar()
@@ -21,7 +21,7 @@ public class QueryFacts
             .Build();
 
         ExecutableDocument query = """
-            {
+            mutation {
                 version
             }
             """;
@@ -59,7 +59,7 @@ public class QueryFacts
             .Build();
 
         ExecutableDocument query = """
-            {
+            mutation {
                 system {
                     version
                 }

@@ -86,9 +86,8 @@ public class FieldExecutor : IFieldExecutor
                 QueryContext = context
             };
 
-
-            var resolvedValue = await resolver(resolverContext);
-            return await CompleteValueAsync(resolvedValue, fieldType, resolverContext, path);
+            await resolver(resolverContext);
+            return await CompleteValueAsync(resolverContext.ResolvedValue, fieldType, resolverContext, path);
         }
         catch (Exception e)
         {

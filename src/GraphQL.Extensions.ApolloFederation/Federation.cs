@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Experimental;
+using Tanka.GraphQL.Experimental.TypeSystem;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
-using Tanka.GraphQL.ValueResolution;
+using ISchema = Tanka.GraphQL.TypeSystem.ISchema;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation;
 
-public record FederatedSchemaBuildOptions
+public record FederatedSchemaBuildOptions(IReferenceResolversMap ReferenceResolvers)
 {
-    public IReferenceResolversMap? ReferenceResolvers { get; init; }
-    public SchemaBuildOptions? SchemaBuildOptions { get; init; }
+    public static FederatedSchemaBuildOptions Default = new(new DictionaryReferenceResolversMap());
 }
 
 public static class Federation
@@ -36,28 +37,41 @@ public static class Federation
 
     private static object Service { get; } = new();
 
-    public static Task<ISchema> BuildSubgraph(this SchemaBuilder builder, FederatedSchemaBuildOptions options)
+    public static ExecutableSchemaBuilder AddFederation(this ExecutableSchemaBuilder builder, FederatedSchemaBuildOptions options)
     {
-        var schemaBuildOptions = options.SchemaBuildOptions ?? new SchemaBuildOptions();
+        builder.AddTypeSystem(new FederationConfiguration(options));
+        builder.AddValueConverter("_Any", new AnyScalarConverter());
+        builder.AddValueConverter("_FieldSet", new FieldSetScalarConverter());
 
+        return builder;
+    }
+}
+
+public class FederationConfiguration : Experimental.ITypeSystemConfiguration
+{
+    public FederationConfiguration(FederatedSchemaBuildOptions options)
+    {
+        Options = options;
+    }
+
+    public FederatedSchemaBuildOptions Options { get; }
+
+    public Task Configure(Experimental.TypeSystem.SchemaBuilder schema, Experimental.ResolversBuilder resolvers)
+    {
         // query types entity types from builder (note that anything added after this wont' show up
-        var entities = builder.QueryTypeDefinitions(type => type.HasDirective("key"), new SchemaBuildOptions
+        var entities = schema.QueryTypeDefinitions(type => type.HasDirective("key"), new SchemaBuildOptions
         {
             BuildTypesFromOrphanedExtensions = true
         }).ToList();
 
         // add federation types
-        builder.Add(FederationTypes.TypeSystem);
-
-        var resolvers = new ResolversMap(
-            schemaBuildOptions.Resolvers ?? ResolversMap.None,
-            schemaBuildOptions.Subscribers);
+        schema.Add(FederationTypes.TypeSystem);
 
         // If no types are annotated with the key directive,
         // then the _Entity union and Query._entities field should be removed from the schema.
         if (entities.Any())
         {
-            builder.Add(new TypeExtension(
+            schema.Add(new TypeExtension(
                 new UnionDefinition(
                     null,
                     "_Entity",
@@ -65,7 +79,7 @@ public static class Federation
                     new UnionMemberTypes(entities.Select(e => new NamedType(e.Name)).ToList()))
             ));
 
-            builder.Add(new TypeExtension(
+            schema.Add(new TypeExtension(
                 new ObjectDefinition(null,
                     "Query",
                     fields: new FieldsDefinition(
@@ -75,33 +89,22 @@ public static class Federation
                             "_service: _Service!"
                         }))));
 
-            resolvers += new ResolversMap
+            /*resolvers += new ResolversMap
+        {
+            { "Query", "_service", _ => ResolveSync.As(Service) },
             {
-                { "Query", "_service", _ => ResolveSync.As(Service) },
-                {
-                    "Query", "_entities",
-                    CreateEntitiesResolver(options.ReferenceResolvers ?? new DictionaryReferenceResolversMap())
-                },
+                "Query", "_entities",
+                CreateEntitiesResolver(options.ReferenceResolvers ?? new DictionaryReferenceResolversMap())
+            },
 
-                { "_Service", "sdl", CreateSdlResolver() }
-            };
+            { "_Service", "sdl", CreateSdlResolver() }
+        };*/
+            resolvers.Resolver("Query", "_service").ResolveAs("Service");
+            resolvers.Resolver("Query", "_entities").Run(CreateEntitiesResolver(Options.ReferenceResolvers));
+            resolvers.Resolver("_Service", "sdl").Run(CreateSdlResolver());
         }
 
-
-        schemaBuildOptions = schemaBuildOptions with
-        {
-            ValueConverters =
-            new Dictionary<string, IValueConverter>(schemaBuildOptions.ValueConverters ?? NoConverters)
-            {
-                { "_Any", new AnyScalarConverter() },
-                { "_FieldSet", new FieldSetScalarConverter() }
-            },
-            Resolvers = resolvers,
-            Subscribers = resolvers,
-            BuildTypesFromOrphanedExtensions = true
-        };
-
-        return builder.Build(schemaBuildOptions);
+        return Task.CompletedTask;
     }
 
     private static IReadOnlyList<NamedType> GetEntities(ISchema schema)
@@ -155,19 +158,21 @@ public static class Federation
             var document = SchemaPrinter.Print(options);*/
 
             //todo: handle ignored types
-            var schemaDefinition = context.Schema.ToTypeSystem();
+            var schemaDefinition = context.QueryContext.Schema.ToTypeSystem();
             var sdl = Printer.Print(schemaDefinition);
-            return ResolveSync.As(sdl);
+            context.ResolvedValue = sdl;
+
+            return default;
         };
     }
 
-    private static Resolver CreateEntitiesResolver(
-        IReferenceResolversMap referenceResolversMap)
+    private static Resolver CreateEntitiesResolver(IReferenceResolversMap referenceResolversMap)
     {
         return async context =>
         {
             var representations = context
-                .GetArgument<IReadOnlyCollection<object>>("representations");
+                .Arguments["representations"] as IReadOnlyCollection<object>;
+            //.GetArgument<IReadOnlyCollection<object>>("representations");
 
             var result = new List<object>();
             var types = new Dictionary<object, TypeDefinition>();
@@ -175,33 +180,37 @@ public static class Federation
             {
                 var representation = (IReadOnlyDictionary<string, object>)representationObj;
                 if (!representation.TryGetValue("__typename", out var typenameObj))
-                    throw new QueryExecutionException(
-                        "Typename not found for representation",
-                        context.Path,
-                        context.Selection);
+                    throw new QueryException(
+                        "Typename not found for representation")
+                    {
+                        Path = context.Path
+                    };
 
                 var typename = typenameObj.ToString() ??
-                               throw new QueryExecutionException(
-                                   "Representation is missing __typename",
-                                   context.Path,
-                                   context.Selection);
+                               throw new QueryException(
+                                   "Representation is missing __typename")
+                               {
+                                   Path = context.Path
+                               };
 
                 var objectType = context
-                    .ExecutionContext
+                    .QueryContext
                     .Schema
                     .GetNamedType(typename) as ObjectDefinition;
 
                 if (objectType == null)
-                    throw new QueryExecutionException(
-                        $"Could not resolve type from __typename: '{typename}'",
-                        context.Path,
-                        context.Selection);
+                    throw new QueryException(
+                        $"Could not resolve type from __typename: '{typename}'")
+                    {
+                        Path = context.Path
+                    };
 
                 if (!referenceResolversMap.TryGetReferenceResolver(typename, out var resolveReference))
-                    throw new QueryExecutionException(
-                        $"Could not find reference resolvers for  __typename: '{typename}'",
-                        context.Path,
-                        context.Selection);
+                    throw new QueryException(
+                        $"Could not find reference resolvers for  __typename: '{typename}'")
+                    {
+                        Path = context.Path
+                    };
 
                 var (namedType, reference) = await resolveReference(
                     context,
@@ -214,8 +223,9 @@ public static class Federation
                 types.TryAdd(reference, namedType);
             }
 
-
-            return Resolve.As(result, (_, reference) => types[reference]);
+            context.ResolvedValue = result;
+            context.ResolveAbstractType = (_, o) =>
+                types[o ?? throw new ArgumentNullException(nameof(o), "Cannot resolve actual type")];
         };
     }
 }

@@ -40,4 +40,9 @@ public partial class Executor
     public Executor(ISchema schema) : this(schema, new NullLogger<Executor>())
     {
     }
+
+    public Executor(ILogger<Executor> logger)
+    {
+        _logger = logger;
+    }
 }

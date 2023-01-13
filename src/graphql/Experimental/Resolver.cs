@@ -2,4 +2,4 @@
 
 namespace Tanka.GraphQL.Experimental;
 
-public delegate ValueTask<object?> Resolver(ResolverContext context);
+public delegate ValueTask Resolver(ResolverContext context);

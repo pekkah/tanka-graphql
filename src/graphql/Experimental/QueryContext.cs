@@ -24,7 +24,10 @@ public class QueryContext
     private IGraphQLRequestFeature RequestFeature => _features.Fetch(ref _features.Cache.Request, _ =>
         new GraphQLRequestFeature
         {
-            Request = new GraphQLRequest("{}", null, null, null)
+            Request = new GraphQLRequest()
+            {
+                Document = "{}"
+            }
         })!;
 
     private ICoercedVariableValuesFeature CoercedVariableValuesFeature => _features.Fetch(
