@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Tanka.GraphQL.Experimental;
 using Tanka.GraphQL.Language.Nodes;
 using Xunit;
@@ -14,9 +12,9 @@ public class MutationFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .ConfigureObject("Query", new ()
+            .ConfigureObject("Query", new()
             {
-                {"version: String!", b => b.ResolveAs("1.0")}
+                { "version: String!", b => b.ResolveAs("1.0") }
             })
             .Build();
 
@@ -28,7 +26,7 @@ public class MutationFacts
 
         /* When */
         var result = await new GraphQL.Experimental.Executor(schema)
-            .ExecuteAsync(new GraphQLRequest()
+            .ExecuteAsync(new GraphQLRequest
             {
                 Document = query
             });
@@ -48,13 +46,13 @@ public class MutationFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .ConfigureObject("System", new ()
+            .ConfigureObject("System", new()
             {
-                {"version: String!", b => b.ResolveAs("1.0")}
+                { "version: String!", b => b.ResolveAs("1.0") }
             })
-            .ConfigureObject("Query", new ()
+            .ConfigureObject("Query", new()
             {
-                {"system: System!", b => b.ResolveAs("System")}
+                { "system: System!", b => b.ResolveAs("System") }
             })
             .Build();
 
@@ -68,7 +66,7 @@ public class MutationFacts
 
         /* When */
         var result = await new GraphQL.Experimental.Executor(schema)
-            .ExecuteAsync(new GraphQLRequest()
+            .ExecuteAsync(new GraphQLRequest
             {
                 Document = query
             });
