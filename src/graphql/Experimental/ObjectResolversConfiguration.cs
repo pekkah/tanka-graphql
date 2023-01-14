@@ -6,9 +6,11 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Experimental;
 
-public class ObjectConfiguration : ITypeSystemConfiguration
+public class ObjectResolversConfiguration : ITypeSystemConfiguration
 {
-    public ObjectConfiguration(string type, IReadOnlyDictionary<FieldDefinition, Action<ResolverBuilder>> fields)
+    public ObjectResolversConfiguration(
+        string type, 
+        IReadOnlyDictionary<FieldDefinition, Action<ResolverBuilder>> fields)
     {
         Type = type;
         Fields = fields;

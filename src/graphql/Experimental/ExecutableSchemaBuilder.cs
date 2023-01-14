@@ -44,9 +44,14 @@ public class ExecutableSchemaBuilder
 
     public ExecutableSchemaBuilder ConfigureObject(
         string type,
-        Dictionary<FieldDefinition, Action<ResolverBuilder>> fields)
+        Dictionary<FieldDefinition, Action<ResolverBuilder>> resolverFields,
+        Dictionary<FieldDefinition, Action<SubscriberBuilder>>? subscriberFields = null)
     {
-        Configurations.Add(new ObjectConfiguration(type, fields));
+        Configurations.Add(new ObjectResolversConfiguration(type, resolverFields));
+
+        if (subscriberFields is not null)
+            Configurations.Add(new ObjectSubscribersConfiguration(type, subscriberFields));
+
         return this;
     }
 

@@ -6,7 +6,7 @@ using Tanka.GraphQL.Experimental.TypeSystem;
 
 namespace Tanka.GraphQL.Experimental;
 
-public class QueryContext
+public record QueryContext
 {
     private FeatureReferences<FeatureInterfaces> _features;
 
