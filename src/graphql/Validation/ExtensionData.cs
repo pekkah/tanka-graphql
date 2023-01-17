@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Tanka.GraphQL.Validation;
 
 public class ExtensionData

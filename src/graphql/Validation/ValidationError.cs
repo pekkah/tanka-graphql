@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Validation;
@@ -61,11 +58,11 @@ public class ValidationError
 
     public ExecutionError ToError()
     {
-        return new ExecutionError
+        return new()
         {
             Message = ToString(),
             Locations = Nodes.Where(n => n.Location != null).Select(n => n.Location.Value).ToList(),
-            Extensions = new Dictionary<string, object>
+            Extensions = new()
             {
                 {
                     "doc", new

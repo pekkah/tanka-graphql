@@ -1,5 +1,4 @@
-﻿using Tanka.GraphQL.Execution;
-using Xunit;
+﻿using Xunit;
 
 namespace Tanka.GraphQL.Tests.Execution;
 

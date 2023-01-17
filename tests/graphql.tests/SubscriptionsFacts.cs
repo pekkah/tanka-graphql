@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;

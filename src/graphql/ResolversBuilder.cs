@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Internal;
-using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL;
 
@@ -61,10 +58,10 @@ public class ResolversBuilder : IEnumerable
     public ResolverBuilder Resolver(string objectName, string fieldName)
     {
         if (!_fieldResolvers.TryGetValue(objectName, out var fields))
-            fields = _fieldResolvers[objectName] = new Dictionary<string, ResolverBuilder>();
+            fields = _fieldResolvers[objectName] = new();
 
         if (!fields.TryGetValue(fieldName, out var builder))
-            builder = fields[fieldName] = new ResolverBuilder();
+            builder = fields[fieldName] = new();
 
         return builder;
     }
@@ -72,10 +69,10 @@ public class ResolversBuilder : IEnumerable
     public SubscriberBuilder Subscriber(string objectName, string fieldName)
     {
         if (!_fieldSubscribers.TryGetValue(objectName, out var fields))
-            fields = _fieldSubscribers[objectName] = new Dictionary<string, SubscriberBuilder>();
+            fields = _fieldSubscribers[objectName] = new();
 
         if (!fields.TryGetValue(fieldName, out var builder))
-            builder = fields[fieldName] = new SubscriberBuilder();
+            builder = fields[fieldName] = new();
 
         return builder;
     }
@@ -150,7 +147,7 @@ public class ResolversBuilder : IEnumerable
     public void ReplaceResolver(string objectName, string fieldName, ResolverBuilder builder)
     {
         if (!_fieldResolvers.TryGetValue(objectName, out var fields))
-            fields = _fieldResolvers[objectName] = new Dictionary<string, ResolverBuilder>();
+            fields = _fieldResolvers[objectName] = new();
 
         fields[fieldName] = builder;
     }
@@ -158,7 +155,7 @@ public class ResolversBuilder : IEnumerable
     public void ReplaceSubscriber(string objectName, string fieldName, SubscriberBuilder builder)
     {
         if (!_fieldSubscribers.TryGetValue(objectName, out var fields))
-            fields = _fieldSubscribers[objectName] = new Dictionary<string, SubscriberBuilder>();
+            fields = _fieldSubscribers[objectName] = new();
 
         fields[fieldName] = builder;
     }

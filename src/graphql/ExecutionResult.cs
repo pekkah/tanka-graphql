@@ -1,21 +1,19 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Tanka.GraphQL;
 
 /// <summary>
 ///     Result of query, mutation or value of one value in the
-///     <see cref="SubscriptionResult" /> stream
+///     subscription stream
 /// </summary>
-public class ExecutionResult : IExecutionResult
+public record ExecutionResult
 {
-    private Dictionary<string, object>? _data;
-    private List<ExecutionError>? _errors;
-    private Dictionary<string, object>? _extensions;
+    private IReadOnlyDictionary<string, object?>? _data;
+    private IReadOnlyList<ExecutionError>? _errors;
+    private IReadOnlyDictionary<string, object>? _extensions;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object?>? Data
+    public IReadOnlyDictionary<string, object?>? Data
     {
         get => _data;
         set
@@ -31,7 +29,7 @@ public class ExecutionResult : IExecutionResult
     }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, object>? Extensions
+    public IReadOnlyDictionary<string, object>? Extensions
     {
         get => _extensions;
         set
@@ -47,7 +45,7 @@ public class ExecutionResult : IExecutionResult
     }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<ExecutionError>? Errors
+    public IReadOnlyList<ExecutionError>? Errors
     {
         get => _errors;
         set

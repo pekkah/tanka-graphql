@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Tests.Data;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.Execution;
@@ -12,8 +11,8 @@ public class Query
 {
     public Query()
     {
-        Container = new Container();
-        Custom = new CustomContainer();
+        Container = new();
+        Custom = new();
     }
 
     public Container Container { get; }
@@ -46,7 +45,7 @@ public class FieldErrorsFacts
 
     public FieldErrorsFacts()
     {
-        Query = new Query();
+        Query = new();
         var builder = new SchemaBuilder()
             .Add(
                 @"
@@ -78,10 +77,10 @@ public class FieldErrorsFacts
         {
             ["Container"] = new()
             {
-                { "nonNullWithNull", Resolve.PropertyOf<Container>(c => c.NonNull_WithNull) },
-                { "nonNullListAsNull", Resolve.PropertyOf<Container>(c => c.NonNullList_AsNull) },
-                { "nonNullListWithNonNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem) },
-                { "nonNullListWithNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem) }
+                { "nonNullWithNull", context => context.ResolveAsPropertyOf<Container>(c => c.NonNull_WithNull) },
+                { "nonNullListAsNull", context => context.ResolveAsPropertyOf<Container>(c => c.NonNullList_AsNull) },
+                { "nonNullListWithNonNullItem", context => context.ResolveAsPropertyOf<Container>(c => c.NonNullList_WithNullSecondItem) },
+                { "nonNullListWithNullItem", context => context.ResolveAsPropertyOf<Container>(c => c.NonNullList_WithNullSecondItem) }
             },
             ["CustomErrorContainer"] = new()
             {
@@ -92,8 +91,8 @@ public class FieldErrorsFacts
             },
             ["Query"] = new()
             {
-                { "container", context => new ValueTask<IResolverResult>(Resolve.As(Query.Container)) },
-                { "custom", context => new ValueTask<IResolverResult>(Resolve.As(Query.Custom)) }
+                { "container", context => context.ResolveAs(Query.Container) },
+                { "custom", context => context.ResolveAs(Query.Custom) }
             }
         };
 
@@ -117,11 +116,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -166,11 +161,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -215,11 +206,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         // this is valid scenario as the requirement is to only have the list non null (items can be null)
@@ -251,11 +238,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -301,11 +284,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -351,11 +330,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -403,11 +378,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(

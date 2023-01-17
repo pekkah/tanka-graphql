@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
+﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.TypeSystem;

@@ -6,6 +6,16 @@
     <AssemblyName>tanka.graphql.tests</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Tests</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ValueResolution\**" />
+    <EmbeddedResource Remove="ValueResolution\**" />
+    <None Remove="ValueResolution\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="SubscriptionsFacts.cs" />
+  </ItemGroup>
   <ItemGroup>
    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
@@ -28,7 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
+    <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
+    <ProjectReference Include="..\..\src\graphql\GraphQL.Legacy.csproj" />
     <ProjectReference Include="..\graphql.tests.data\graphql.tests.data.csproj" />
   </ItemGroup>
 
@@ -39,6 +50,10 @@
     <None Update="Files\Nested.graphql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Language\" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,5 @@
 
 public interface ITypeSystemConfiguration
 {
-    void Configure(ResolversBuilder builder);
-
-    void Configure(SchemaBuilder builder);
+    Task Configure(SchemaBuilder schema, ResolversBuilder resolvers);
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Tanka.GraphQL.Language;
+﻿using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -25,7 +23,7 @@ public static class Ast
                 var variableValue = coercedVariableValues?[variable.Name];
 
                 if (variableValue == null)
-                    throw new Exception(
+                    throw new(
                         $"If argument of {directive} is null. Variable value should not be null");
 
                 return (bool)variableValue;

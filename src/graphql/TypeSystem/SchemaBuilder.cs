@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.TypeSystem;
 
 public class SchemaBuilder
 {
@@ -155,7 +150,7 @@ directive @specifiedBy(url: String!) on SCALAR
     public SchemaBuilder Add(TypeExtension typeExtension)
     {
         var typeExtensions = _typeExtensions
-            .GetOrAdd(typeExtension.Name, _ => new ConcurrentBag<TypeExtension>());
+            .GetOrAdd(typeExtension.Name, _ => new());
 
         typeExtensions.Add(typeExtension);
 
@@ -172,7 +167,7 @@ directive @specifiedBy(url: String!) on SCALAR
     public Task<ISchema> Build(IResolverMap resolvers, ISubscriberMap? subscribers = null)
     {
         return Build(
-            new SchemaBuildOptions
+            new()
             {
                 Resolvers = resolvers,
                 Subscribers = subscribers
@@ -182,12 +177,12 @@ directive @specifiedBy(url: String!) on SCALAR
     public IEnumerable<TypeDefinition> QueryTypeDefinitions(Func<TypeDefinition, bool> filter,
         SchemaBuildOptions? options = null)
     {
-        options ??= new SchemaBuildOptions();
+        options ??= new();
         var typeDefinitions = BuildTypeDefinitions(options.BuildTypesFromOrphanedExtensions);
         return typeDefinitions.Where(filter);
     }
 
-    public async Task<ISchema> Build(SchemaBuildOptions options)
+    public Task<ISchema> Build(SchemaBuildOptions options)
     {
         if (options.IncludeBuiltInTypes) Add(BuiltInTypes);
 
@@ -199,9 +194,8 @@ directive @specifiedBy(url: String!) on SCALAR
             Add(introspection.TypeSystemDocument);
 
             resolvers += introspection.Resolvers;
+            //todo: refactor introspection
         }
-
-        await AddImports(options.ImportProviders);
 
         var typeDefinitions = BuildTypeDefinitions(
             options.BuildTypesFromOrphanedExtensions
@@ -280,7 +274,7 @@ directive @specifiedBy(url: String!) on SCALAR
             schemaDirectives
         );
 
-        return schema;
+        return Task.FromResult(schema);
     }
 
     private SchemaBuilder Add(Import importDefinition)
@@ -289,41 +283,9 @@ directive @specifiedBy(url: String!) on SCALAR
         return this;
     }
 
-    private async Task AddImports(IReadOnlyList<IImportProvider> providers)
-    {
-        if (providers.Count == 0)
-            return;
-
-        var parentOptions = new ParserOptions
-        {
-            ImportProviders = providers.ToList()
-        };
-
-        var imports = new Queue<Import>(_imports);
-        while (imports.TryDequeue(out var import))
-        {
-            var path = import.From.ToString();
-            var types = import.Types?.Select(t => t.Value).ToArray();
-            var provider = providers.FirstOrDefault(p => p.CanImport(path, types));
-
-            if (provider is null)
-                throw new InvalidOperationException(
-                    $"No import provider capable of handling import '{import}' given. " +
-                    $"Use {nameof(SchemaBuildOptions)}.{nameof(SchemaBuildOptions.ImportProviders)} to set the providers.");
-
-            var typeSystemDocument = await provider.ImportAsync(path, types, parentOptions);
-
-            if (typeSystemDocument.Imports != null)
-                foreach (var subImport in typeSystemDocument.Imports)
-                    imports.Enqueue(subImport);
-
-            Add(typeSystemDocument);
-        }
-    }
-
     private (IReadOnlyList<TypeDefinition> TypeDefinitions, ResolversMap Resolvers) RunDirectiveVisitors(
         IEnumerable<TypeDefinition> typeDefinitions,
-        SchemaBuildOptions options, 
+        SchemaBuildOptions options,
         ResolversMap resolvers)
     {
         if (options.DirectiveVisitorFactories is null)
@@ -336,8 +298,8 @@ directive @specifiedBy(url: String!) on SCALAR
             ));
 
         return RunDirectiveVisitors(
-            typeDefinitions, 
-            options, 
+            typeDefinitions,
+            options,
             visitors,
             resolvers);
     }
@@ -419,7 +381,8 @@ directive @specifiedBy(url: String!) on SCALAR
                                 resolvers.Replace(typeDefinition.Name, fieldDefinition.Name, maybeSameContext.Resolver);
 
                             if (maybeSameContext.Subscriber is not null)
-                                resolvers.Replace(typeDefinition.Name, fieldDefinition.Name, maybeSameContext.Subscriber);
+                                resolvers.Replace(typeDefinition.Name, fieldDefinition.Name,
+                                    maybeSameContext.Subscriber);
                         }
 
                         if (fieldsChanged)

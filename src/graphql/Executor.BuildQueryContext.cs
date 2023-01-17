@@ -1,54 +1,23 @@
-﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Tanka.GraphQL.Execution;
-using Tanka.GraphQL.Language;
-using Tanka.GraphQL.Validation;
+﻿namespace Tanka.GraphQL;
 
-namespace Tanka.GraphQL;
-
-public static partial class Executor
+public partial class Executor
 {
-    public static async Task<(QueryContext queryContext, ValidationResult validationResult)>
-        BuildQueryContextAsync(
-            ExecutionOptions options,
-            ExtensionsRunner extensionsRunner,
-            ILogger logger)
+    public QueryContext BuildQueryContextAsync(GraphQLRequest request)
     {
-        await extensionsRunner.BeginParseDocumentAsync();
-        var document = options.Document;
-        await extensionsRunner.EndParseDocumentAsync(document);
+        var queryContext = new QueryContext(_defaults);
 
-        var operation = Operations.GetOperation(document, options.OperationName);
-        logger.Operation(operation);
+        var document = request.Document;
+        var operation = Operations.GetOperation(document, request.OperationName);
 
         var coercedVariableValues = Variables.CoerceVariableValues(
-            options.Schema,
+            queryContext.Schema,
             operation,
-            options.VariableValues);
+            request.VariableValues);
 
-        var queryContext = new QueryContext(
-            options.FormatError,
-            document,
-            operation,
-            options.Schema,
-            coercedVariableValues,
-            options.InitialValue,
-            extensionsRunner);
+        queryContext.CoercedVariableValues = coercedVariableValues;
+        queryContext.OperationDefinition = operation;
+        queryContext.Request = request;
 
-        logger.Validate(options.Validate != null);
-        var validationResult = ValidationResult.Success;
-        if (options.Validate != null)
-        {
-            await extensionsRunner.BeginValidationAsync();
-            validationResult = await options.Validate(
-                options.Schema,
-                document,
-                coercedVariableValues);
-
-            logger.ValidationResult(validationResult);
-            await extensionsRunner.EndValidationAsync(validationResult);
-        }
-
-        return (queryContext, validationResult);
+        return queryContext;
     }
 }

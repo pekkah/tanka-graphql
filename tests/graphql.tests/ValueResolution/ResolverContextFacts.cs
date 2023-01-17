@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.ValueResolution;
@@ -23,10 +23,10 @@ public class ResolverContextFacts
         _objectType = "type Test";
         _objectValue = null;
         _field = "test: ID";
-        _selection = new FieldSelection(null, "test", null, null, null);
+        _selection = new(null, "test", null, null, null);
         _schema = new SchemaBuilder()
             .Add("type Query")
-            .Build(new SchemaBuildOptions()).Result;
+            .Build(new()).Result;
     }
 
     [Fact]
@@ -38,15 +38,17 @@ public class ResolverContextFacts
             { "double", 100.1D }
         };
 
-        var sut = new ResolverContext(
-            _objectType,
-            _objectValue,
-            _field,
-            _selection,
-            _fields,
-            arguments,
-            new NodePath(),
-            null);
+        var sut = new ResolverContext
+        {
+            ObjectDefinition = _objectType,
+            ObjectValue = _objectValue,
+            Field = _field,
+            Fields = _fields,
+            Arguments = arguments,
+            Selection = _selection,
+            Path = new NodePath(),
+            QueryContext = null!
+        };
 
         /* When */
         var value = sut.GetArgument<double>("double");
@@ -64,15 +66,17 @@ public class ResolverContextFacts
             { "float", 100.1F }
         };
 
-        var sut = new ResolverContext(
-            _objectType,
-            _objectValue,
-            _field,
-            _selection,
-            _fields,
-            arguments,
-            new NodePath(),
-            null);
+        var sut = new ResolverContext
+        {
+            ObjectDefinition = _objectType,
+            ObjectValue = _objectValue,
+            Field = _field,
+            Fields = _fields,
+            Arguments = arguments,
+            Selection = _selection,
+            Path = new NodePath(),
+            QueryContext = null!
+        };
 
         /* When */
         var value = sut.GetArgument<float>("float");
@@ -90,15 +94,17 @@ public class ResolverContextFacts
             { "int", 101 }
         };
 
-        var sut = new ResolverContext(
-            _objectType,
-            _objectValue,
-            _field,
-            _selection,
-            _fields,
-            arguments,
-            new NodePath(),
-            null);
+        var sut = new ResolverContext
+        {
+            ObjectDefinition = _objectType,
+            ObjectValue = _objectValue,
+            Field = _field,
+            Fields = _fields,
+            Arguments = arguments,
+            Selection = _selection,
+            Path = new NodePath(),
+            QueryContext = null!
+        };
 
         /* When */
         var value = sut.GetArgument<int>("int");
@@ -116,15 +122,17 @@ public class ResolverContextFacts
             { "long", 100L }
         };
 
-        var sut = new ResolverContext(
-            _objectType,
-            _objectValue,
-            _field,
-            _selection,
-            _fields,
-            arguments,
-            new NodePath(),
-            null);
+        var sut = new ResolverContext
+        {
+            ObjectDefinition = _objectType,
+            ObjectValue = _objectValue,
+            Field = _field,
+            Fields = _fields,
+            Arguments = arguments,
+            Selection = _selection,
+            Path = new NodePath(),
+            QueryContext = null!
+        };
 
         /* When */
         var value = sut.GetArgument<long>("long");
@@ -147,18 +155,20 @@ public class ResolverContextFacts
             }
         };
 
-        var sut = new ResolverContext(
-            _objectType,
-            _objectValue,
-            _field,
-            _selection,
-            _fields,
-            arguments,
-            new NodePath(),
-            null);
+        var sut = new ResolverContext
+        {
+            ObjectDefinition = _objectType,
+            ObjectValue = _objectValue,
+            Field = _field,
+            Fields = _fields,
+            Arguments = arguments,
+            Selection = _selection,
+            Path = new NodePath(),
+            QueryContext = null!
+        };
 
         /* When */
-        var value = sut.GetObjectArgument<InputArg>("input");
+        var value = sut.BindInputObject<InputArg>("input");
 
         /* Then */
         Assert.Equal("inputArg", value.Name);
@@ -185,18 +195,20 @@ public class ResolverContextFacts
             }
         };
 
-        var sut = new ResolverContext(
-            _objectType,
-            _objectValue,
-            _field,
-            _selection,
-            _fields,
-            arguments,
-            new NodePath(),
-            null);
+        var sut = new ResolverContext
+        {
+            ObjectDefinition = _objectType,
+            ObjectValue = _objectValue,
+            Field = _field,
+            Fields = _fields,
+            Arguments = arguments,
+            Selection = _selection,
+            Path = new NodePath(),
+            QueryContext = null!
+        };
 
         /* When */
-        var value = sut.GetObjectArgumentList<InputArg>("inputs");
+        var value = sut.BindInputObjectList<InputArg>("inputs");
 
         /* Then */
         Assert.Single(value, v => v.Name == "1");
@@ -225,18 +237,20 @@ public class ResolverContextFacts
             }
         };
 
-        var sut = new ResolverContext(
-            _objectType,
-            _objectValue,
-            _field,
-            _selection,
-            _fields,
-            arguments,
-            new NodePath(),
-            null);
+        var sut = new ResolverContext
+        {
+            ObjectDefinition = _objectType,
+            ObjectValue = _objectValue,
+            Field = _field,
+            Fields = _fields,
+            Arguments = arguments,
+            Selection = _selection,
+            Path = new NodePath(),
+            QueryContext = null!
+        };
 
         /* When */
-        var value = sut.GetObjectArgumentList<InputArg?>("inputs")
+        var value = sut.BindInputObjectList<InputArg?>("inputs")
             .ToList();
 
         /* Then */
@@ -254,15 +268,17 @@ public class ResolverContextFacts
             { "string", "101" }
         };
 
-        var sut = new ResolverContext(
-            _objectType,
-            _objectValue,
-            _field,
-            _selection,
-            _fields,
-            arguments,
-            new NodePath(),
-            null);
+        var sut = new ResolverContext
+        {
+            ObjectDefinition = _objectType,
+            ObjectValue = _objectValue,
+            Field = _field,
+            Fields = _fields,
+            Arguments = arguments,
+            Selection = _selection,
+            Path = new NodePath(),
+            QueryContext = null!
+        };
 
         /* When */
         var value = sut.GetArgument<string>("string");
@@ -270,14 +286,9 @@ public class ResolverContextFacts
         /* Then */
         Assert.Equal("101", value);
     }
+}
 
-    private class InputArg : IReadFromObjectDictionary
-    {
-        public string Name { get; private set; }
-
-        public void Read(IReadOnlyDictionary<string, object> source)
-        {
-            Name = source.GetValue<string>("name");
-        }
-    }
+public class InputArg
+{
+    public string Name { get; set; }
 }

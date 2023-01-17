@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.ValueResolution;
+﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL;
 

@@ -27,7 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\GraphQL.Extensions.Tracing\GraphQL.Extensions.Tracing.csproj" />
     <ProjectReference Include="..\..\src\graphql.server\graphql.server.csproj" />
-    <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
+    <ProjectReference Include="..\..\src\graphql\GraphQL.Legacy.csproj" />
     <ProjectReference Include="..\graphql.dev.chat.data\graphql.dev.chat.data.csproj" />
   </ItemGroup>
 

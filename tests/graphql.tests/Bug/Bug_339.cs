@@ -31,15 +31,11 @@ public class Bug_339
                             mutation: Mutation
                         }
                 ")
-            .Build(new SchemaBuildOptions());
+            .Build(new());
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = schema,
-            Document = Introspect.DefaultQuery
-        });
+        var result = await Executor.Execute(schema, Introspect.DefaultQuery);
 
         /* Then */
         var types = (List<object>)result.Select("__schema", "types");

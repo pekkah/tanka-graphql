@@ -1,5 +1,3 @@
-using System;
-
 namespace Tanka.GraphQL.Validation;
 
 public class ValidationException : Exception

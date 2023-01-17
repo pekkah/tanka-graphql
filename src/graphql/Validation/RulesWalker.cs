@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Validation;
 
@@ -39,17 +35,17 @@ public class RulesWalker : Visitor, IRuleVisitorContext
 
     public void Error(string code, string message, params INode[] nodes)
     {
-        _errors.Add(new ValidationError(code, message, nodes));
+        _errors.Add(new(code, message, nodes));
     }
 
     public void Error(string code, string message, INode node)
     {
-        _errors.Add(new ValidationError(code, message, node));
+        _errors.Add(new(code, message, node));
     }
 
     public void Error(string code, string message, IEnumerable<INode> nodes)
     {
-        _errors.Add(new ValidationError(code, message, nodes));
+        _errors.Add(new(code, message, nodes));
     }
 
     public List<VariableUsage> GetVariables(
@@ -63,7 +59,7 @@ public class RulesWalker : Visitor, IRuleVisitorContext
                 {
                     rule.EnterVariable += node =>
                     {
-                        usages.Add(new VariableUsage
+                        usages.Add(new()
                         {
                             Node = node,
                             Type = context.Tracker.InputType,
@@ -460,14 +456,14 @@ public class RulesWalker : Visitor, IRuleVisitorContext
 
     protected void CreateVisitors(IEnumerable<CombineRule> rules)
     {
-        Tracker = new TypeTracker(Schema);
+        Tracker = new(Schema);
 
         foreach (var createRule in rules) createRule(this, Tracker);
     }
 
     private ValidationResult BuildResult()
     {
-        return new ValidationResult
+        return new()
         {
             Errors = _errors,
             Extensions = Extensions.Data

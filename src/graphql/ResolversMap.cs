@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Tanka.GraphQL.ValueResolution;
+﻿using Tanka.GraphQL.Fields;
 
 namespace Tanka.GraphQL;
 
@@ -63,7 +62,7 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
 
     public void Add(string typeName, string fieldName, Resolver resolver, Subscriber? subscriber = null)
     {
-        if (!TryGetValue(typeName, out var fieldsResolvers)) fieldsResolvers = this[typeName] = new FieldResolversMap();
+        if (!TryGetValue(typeName, out var fieldsResolvers)) fieldsResolvers = this[typeName] = new();
 
         if (subscriber is null)
             fieldsResolvers.Add(fieldName, resolver);
@@ -73,7 +72,7 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
 
     public bool Add(string typeName, string fieldName, Subscriber subscriber)
     {
-        if (!TryGetValue(typeName, out var fieldsResolvers)) fieldsResolvers = this[typeName] = new FieldResolversMap();
+        if (!TryGetValue(typeName, out var fieldsResolvers)) fieldsResolvers = this[typeName] = new();
 
         if (fieldsResolvers.GetSubscriber(fieldName) is not null)
             return false;
@@ -84,26 +83,22 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
 
     public void Replace(string typeName, string fieldName, Resolver resolver)
     {
-        if (!TryGetValue(typeName, out var fieldsResolvers)) 
-            fieldsResolvers = this[typeName] = new FieldResolversMap();
+        if (!TryGetValue(typeName, out var fieldsResolvers))
+            fieldsResolvers = this[typeName] = new();
 
         if (fieldsResolvers.GetResolver(fieldName) is not null)
-        {
             fieldsResolvers.Replace(fieldName, resolver);
-        }
         else
             fieldsResolvers.Add(fieldName, resolver);
     }
 
     public void Replace(string typeName, string fieldName, Subscriber subscriber)
     {
-        if (!TryGetValue(typeName, out var fieldsResolvers)) 
-            fieldsResolvers = this[typeName] = new FieldResolversMap();
+        if (!TryGetValue(typeName, out var fieldsResolvers))
+            fieldsResolvers = this[typeName] = new();
 
         if (fieldsResolvers.GetSubscriber(fieldName) is not null)
-        {
             fieldsResolvers.Replace(fieldName, subscriber);
-        }
         else
             fieldsResolvers.Add(fieldName, subscriber);
     }
@@ -113,10 +108,7 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
         if (!TryGetValue(typeName, out var fieldsResolvers))
             return;
 
-        if (fieldsResolvers.GetResolver(fieldName) is not null)
-        {
-            fieldsResolvers.RemoveResolver(fieldName);
-        }
+        if (fieldsResolvers.GetResolver(fieldName) is not null) fieldsResolvers.RemoveResolver(fieldName);
     }
 
     public void RemoveSubscriber(string typeName, string fieldName)
@@ -124,10 +116,7 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
         if (!TryGetValue(typeName, out var fieldsResolvers))
             return;
 
-        if (fieldsResolvers.GetSubscriber(fieldName) is not null)
-        {
-            fieldsResolvers.RemoveSubscriber(fieldName);
-        }
+        if (fieldsResolvers.GetSubscriber(fieldName) is not null) fieldsResolvers.RemoveSubscriber(fieldName);
     }
 
     public ResolversMap Clone()

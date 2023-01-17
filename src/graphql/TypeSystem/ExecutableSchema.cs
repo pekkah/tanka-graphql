@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
-using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.TypeSystem;
 
@@ -40,7 +37,7 @@ public class ExecutableSchema : ISchema
         _resolvers = resolvers;
         _subscribers = subscribers;
         _scalarSerializers = scalarSerializers;
-        _directives = new DirectiveList(directives);
+        _directives = new(directives);
 
         Query = queryRoot;
         Mutation = mutationRoot;

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Tanka.GraphQL.Language.Nodes;
+﻿using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL;
 
@@ -11,11 +10,11 @@ public class ExecutionError
 
     public required string Message { get; set; }
 
-    public  List<object>? Path { get; set; }
+    public List<object>? Path { get; set; }
 
     public void Extend(string key, object value)
     {
-        Extensions ??= new Dictionary<string, object>();
+        Extensions ??= new();
 
         Extensions[key] = value;
     }

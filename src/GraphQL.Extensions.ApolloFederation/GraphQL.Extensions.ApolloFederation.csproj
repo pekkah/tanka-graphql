@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\graphql.language\graphql.language.csproj" />
-    <ProjectReference Include="..\graphql\graphql.csproj" />
+    <ProjectReference Include="..\graphql\GraphQL.Legacy.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Tanka.GraphQL.ValueResolution;
+﻿using Tanka.GraphQL.Fields;
 
 namespace Tanka.GraphQL;
 
@@ -20,8 +18,14 @@ internal class DictionaryResolverMap : IResolverMap, ISubscriberMap
     public Resolver? GetResolver(string typeName, string fieldName)
     {
         if (!_resolvers.TryGetValue(typeName, out var fields)) return null;
-        
+
         return fields.TryGetValue(fieldName, out var resolver) ? resolver : null;
+    }
+
+    public IEnumerable<(string TypeName, IEnumerable<string> Fields)> GetTypes()
+    {
+        foreach (var (typeName, fields) in _resolvers)
+            yield return (typeName, fields.Select(f => f.Key));
     }
 
     public Subscriber? GetSubscriber(string typeName, string fieldName)
@@ -29,11 +33,5 @@ internal class DictionaryResolverMap : IResolverMap, ISubscriberMap
         if (!_subscribers.TryGetValue(typeName, out var fields)) return null;
 
         return fields.TryGetValue(fieldName, out var subscriber) ? subscriber : null;
-    }
-
-    public IEnumerable<(string TypeName, IEnumerable<string> Fields)> GetTypes()
-    {
-        foreach (var (typeName, fields) in _resolvers) 
-            yield return (typeName, fields.Select(f => f.Key));
     }
 }

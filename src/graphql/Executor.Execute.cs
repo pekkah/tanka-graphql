@@ -1,69 +1,124 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Tanka.GraphQL.Execution;
+﻿using System.Runtime.CompilerServices;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL;
 
 /// <summary>
 ///     Execute queries, mutations and subscriptions
 /// </summary>
-public static partial class Executor
+public partial class Executor
 {
     /// <summary>
     ///     Execute query or mutation
     /// </summary>
-    /// <param name="options"></param>
+    /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public static async Task<ExecutionResult> ExecuteAsync(
-        ExecutionOptions options,
+    public async Task<ExecutionResult> ExecuteAsync(
+        GraphQLRequest request,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var extensionsRunner = await options.ExtensionsRunnerFactory.BeginScope(options);
-        var logger = options.LoggerFactory.CreateLogger(typeof(Executor).FullName);
 
-        using (logger.Begin(options.OperationName))
+        var queryContext = BuildQueryContextAsync(request);
+        var executionResult = await ExecuteAsync(queryContext, cancellationToken);
+
+        return executionResult;
+    }
+
+    public async Task<ExecutionResult> ExecuteAsync(
+        QueryContext queryContext,
+        CancellationToken cancellationToken = default)
+    {
+        using (_logger.Begin(queryContext.Request.OperationName ?? string.Empty))
         {
-            var (queryContext, validationResult) = await BuildQueryContextAsync(
-                options,
-                extensionsRunner,
-                logger);
+            //todo: validation
+            var validationResult = ValidationResult.Success;
 
             if (!validationResult.IsValid)
-                return new ExecutionResult
+                throw new QueryException("todo: validation error")
                 {
-                    Errors = validationResult.Errors.Select(e => e.ToError())
-                        .ToList(),
-                    Extensions = validationResult.Extensions.ToDictionary(kv => kv.Key, kv => kv.Value)
+                    Path = new()
                 };
 
-            ExecutionResult executionResult;
+            var executionResult = queryContext.OperationDefinition.Operation switch
+            {
+                OperationType.Query => await ExecuteQueryAsync(queryContext),
+                OperationType.Mutation => await ExecuteQueryAsync(queryContext),
+                OperationType.Subscription => throw new NotImplementedException(),
+                _ => throw new InvalidOperationException(
+                    $"Operation type {queryContext.OperationDefinition.Operation} not supported.")
+            };
+
+            _logger.ExecutionResult(executionResult);
+            return executionResult;
+        }
+    }
+
+    public static Task<ExecutionResult> Execute(
+        ISchema schema,
+        ExecutableDocument document,
+        Dictionary<string, object?>? variableValues = null,
+        object? initialValue = null,
+        string? operationName = null,
+        CancellationToken cancellationToken = default)
+    {
+        var executor = new Executor(schema);
+        return executor.ExecuteAsync(new GraphQLRequest
+        {
+            Document = document,
+            InitialValue = initialValue,
+            OperationName = operationName,
+            VariableValues = variableValues
+        }, cancellationToken);
+    }
+
+    /// <summary>
+    ///     Execute query or mutation
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public IAsyncEnumerable<ExecutionResult> SubscribeAsync(
+        GraphQLRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var queryContext = BuildQueryContextAsync(request);
+        return SubscribeAsync(queryContext, cancellationToken);
+    }
+
+    public async IAsyncEnumerable<ExecutionResult> SubscribeAsync(
+        QueryContext queryContext,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        using (_logger.Begin(queryContext.Request.OperationName ?? string.Empty))
+        {
+            //todo: validation
+            var validationResult = ValidationResult.Success;
+
+            if (!validationResult.IsValid)
+                throw new QueryException("todo: validation error")
+                {
+                    Path = new()
+                };
+
             switch (queryContext.OperationDefinition.Operation)
             {
                 case OperationType.Query:
-                    executionResult = await Query.ExecuteQueryAsync(queryContext).ConfigureAwait(false);
+                    yield return await ExecuteQueryAsync(queryContext);
                     break;
                 case OperationType.Mutation:
-                    executionResult = await Mutation.ExecuteMutationAsync(queryContext).ConfigureAwait(false);
+                    yield return await ExecuteQueryAsync(queryContext);
                     break;
                 case OperationType.Subscription:
-                    throw new InvalidOperationException($"Use {nameof(SubscribeAsync)}");
-                default:
-                    throw new InvalidOperationException(
-                        $"Operation type {queryContext.OperationDefinition.Operation} not supported.");
+                    await foreach (var er in ExecuteSubscriptionAsync(queryContext, cancellationToken)) yield return er;
+                    break;
             }
 
-            if (validationResult.Extensions != null)
-                foreach (var validationExtension in validationResult.Extensions)
-                    executionResult.AddExtension(validationExtension.Key, validationExtension.Value);
-
-            logger.ExecutionResult(executionResult);
-            await extensionsRunner.EndExecuteAsync(executionResult);
-            return executionResult;
+            ;
         }
     }
 }

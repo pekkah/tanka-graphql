@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Tanka.GraphQL.Execution;
+﻿using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Validation;
 
@@ -261,9 +257,9 @@ public class FieldSelectionMergingValidator
 
                 var responseName = field.AliasOrName;
 
-                if (!nodeAndDefs.ContainsKey(responseName)) nodeAndDefs[responseName] = new List<FieldDefPair>();
+                if (!nodeAndDefs.ContainsKey(responseName)) nodeAndDefs[responseName] = new();
 
-                nodeAndDefs[responseName].Add(new FieldDefPair
+                nodeAndDefs[responseName].Add(new()
                 {
                     ParentType = parentType,
                     Field = field,
@@ -351,7 +347,7 @@ public class FieldSelectionMergingValidator
 
         var areMutuallyExclusive =
             parentFieldsAreMutuallyExclusive ||
-            parentType1 != parentType2 && IsObjectDefinition(parentType1) && IsObjectDefinition(parentType2);
+            (parentType1 != parentType2 && IsObjectDefinition(parentType1) && IsObjectDefinition(parentType2));
 
         // return type for each field.
         var type1 = def1?.Type;
@@ -364,50 +360,50 @@ public class FieldSelectionMergingValidator
             var name2 = node2.Name;
 
             if (name1 != name2)
-                return new Conflict
+                return new()
                 {
-                    Reason = new ConflictReason
+                    Reason = new()
                     {
                         Name = responseName,
-                        Message = new Message
+                        Message = new()
                         {
                             Msg = $"{name1} and {name2} are different fields"
                         }
                     },
-                    FieldsLeft = new List<FieldSelection> { node1 },
-                    FieldsRight = new List<FieldSelection> { node2 }
+                    FieldsLeft = new() { node1 },
+                    FieldsRight = new() { node2 }
                 };
 
             // Two field calls must have the same arguments.
             if (!SameArguments(fieldDefPair1, fieldDefPair2))
-                return new Conflict
+                return new()
                 {
-                    Reason = new ConflictReason
+                    Reason = new()
                     {
                         Name = responseName,
-                        Message = new Message
+                        Message = new()
                         {
                             Msg = "they have differing arguments"
                         }
                     },
-                    FieldsLeft = new List<FieldSelection> { node1 },
-                    FieldsRight = new List<FieldSelection> { node2 }
+                    FieldsLeft = new() { node1 },
+                    FieldsRight = new() { node2 }
                 };
         }
 
         if (type1 != null && type2 != null && DoTypesConflict(type1, type2))
-            return new Conflict
+            return new()
             {
-                Reason = new ConflictReason
+                Reason = new()
                 {
                     Name = responseName,
-                    Message = new Message
+                    Message = new()
                     {
                         Msg = $"they return conflicting types {type1} and {type2}"
                     }
                 },
-                FieldsLeft = new List<FieldSelection> { node1 },
-                FieldsRight = new List<FieldSelection> { node2 }
+                FieldsLeft = new() { node1 },
+                FieldsRight = new() { node2 }
             };
 
         // Collect and compare sub-fields. Use the same "visited fragment names" list
@@ -594,7 +590,7 @@ public class FieldSelectionMergingValidator
                 nodeAndDef,
                 fragmentNames);
 
-            cached = new CachedField { NodeAndDef = nodeAndDef, Names = fragmentNames.Keys.ToList() };
+            cached = new() { NodeAndDef = nodeAndDef, Names = fragmentNames.Keys.ToList() };
             cachedFieldsAndFragmentNames.Add(selectionSet, cached);
         }
 
@@ -712,12 +708,12 @@ public class FieldSelectionMergingValidator
         FieldSelection node2)
     {
         if (conflicts.Count > 0)
-            return new Conflict
+            return new()
             {
-                Reason = new ConflictReason
+                Reason = new()
                 {
                     Name = responseName,
-                    Message = new Message
+                    Message = new()
                     {
                         Msgs = conflicts.Select(c => c.Reason).ToList()
                     }
@@ -781,7 +777,7 @@ public class FieldSelectionMergingValidator
 
         public PairSet()
         {
-            _data = new ObjMap<ObjMap<bool>>();
+            _data = new();
         }
 
         public void Add(string a, string b, bool areMutuallyExclusive)
@@ -809,7 +805,7 @@ public class FieldSelectionMergingValidator
 
             if (map == null)
             {
-                map = new ObjMap<bool>();
+                map = new();
                 _data[a] = map;
             }
 

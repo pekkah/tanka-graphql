@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Tanka.GraphQL.Directives;
-using Tanka.GraphQL.Extensions;
-using Tanka.GraphQL.Language;
-using Tanka.GraphQL.Language.ImportProviders;
+﻿using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.TypeSystem;
@@ -23,13 +18,6 @@ public record SchemaBuildOptions
     public bool BuildTypesFromOrphanedExtensions { get; set; } = false;
 
     public IReadOnlyDictionary<string, CreateDirectiveVisitor>? DirectiveVisitorFactories { get; set; }
-
-    public IReadOnlyList<IImportProvider> ImportProviders { get; set; } = new List<IImportProvider>
-    {
-        new EmbeddedResourceImportProvider(),
-        new FileSystemImportProvider(AppContext.BaseDirectory),
-        new ExtensionsImportProvider()
-    };
 
     public bool IncludeBuiltInTypes { get; set; } = true;
 

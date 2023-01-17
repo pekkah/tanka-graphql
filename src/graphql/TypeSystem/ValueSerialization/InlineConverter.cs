@@ -1,5 +1,4 @@
-﻿using System;
-using Tanka.GraphQL.Language.Nodes;
+﻿using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.TypeSystem.ValueSerialization;
 

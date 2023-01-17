@@ -1,7 +1,4 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Validation;
 
@@ -33,7 +30,7 @@ public class Validator3 : IValidator3
             document,
             variables);
 
-        return new ValueTask<ValidationResult>(visitor.Validate());
+        return new(visitor.Validate());
     }
 }
 

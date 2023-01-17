@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 
@@ -77,7 +75,7 @@ internal static class LoggerExtensions
             ValidationResultDebugAction(logger, result, null);
     }
 
-    internal static void ExecutionResult(this ILogger logger, IExecutionResult result)
+    internal static void ExecutionResult(this ILogger logger, ExecutionResult result)
     {
         if (result.Errors != null && result.Errors.Any())
             ExecutionResultWithErrorsAction(logger, result.Errors != null, result.Errors?.First().Message, null);

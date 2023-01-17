@@ -736,11 +736,6 @@ type Subscription {}
 
     private async Task<ExecutionResult> QueryAsync(string query)
     {
-        return await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _introspectionSchema,
-            Document = query,
-            IncludeExceptionDetails = true
-        });
+        return await Executor.Execute(_introspectionSchema, query);
     }
 }

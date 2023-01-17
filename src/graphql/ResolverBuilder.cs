@@ -1,80 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Tanka.GraphQL.Internal;
-using Tanka.GraphQL.Language;
-using Tanka.GraphQL.ValueResolution;
+﻿using Tanka.GraphQL.Fields;
 
 namespace Tanka.GraphQL;
 
 public class ResolverBuilder
 {
-    private readonly List<Func<Resolver, Resolver>> _components = new();
+    private readonly List<ResolverMiddleware> _middlewares = new();
 
-    protected ResolverBuilder(ResolverBuilder builder)
-    {
-        Properties = new CopyOnWriteDictionary<string, object?>(builder.Properties, StringComparer.Ordinal);
-    }
+    private Resolver? _root;
 
-    protected ResolverBuilder(IDictionary<string, object?> properties)
+    public ResolverBuilder(Resolver root)
     {
-        Properties = new CopyOnWriteDictionary<string, object?>(properties, StringComparer.Ordinal);
+        Run(root);
     }
 
     public ResolverBuilder()
     {
-        Properties = new Dictionary<string, object?>(StringComparer.Ordinal);
     }
 
-    public IDictionary<string, object?> Properties { get; }
-
-    public ResolverBuilder New()
+    /// <summary>
+    ///     Add middleware to be run before the root resolver
+    /// </summary>
+    /// <param name="middleware"></param>
+    /// <returns></returns>
+    public ResolverBuilder Use(ResolverMiddleware middleware)
     {
-        return new ResolverBuilder(this);
-    }
-
-    public ResolverBuilder Use(Func<Resolver, Resolver> middleware)
-    {
-        _components.Add(middleware);
+        _middlewares.Insert(0, middleware);
         return this;
     }
 
-    public ResolverBuilder Use(Func<IResolverContext, Resolver, ValueTask<IResolverResult>> middleware)
+    /// <summary>
+    ///     Set root resolver to be run at the end of the resolver chain
+    /// </summary>
+    /// <param name="resolver"></param>
+    /// <returns></returns>
+    public ResolverBuilder Run(Resolver resolver)
     {
-        return Use(next => context => middleware(context, next));
-    }
-
-    public ResolverBuilder Run(Resolver end)
-    {
-        return Use(_ => end);
-    }
-
-    public ResolverBuilder Prepend(Func<Resolver, Resolver> middleware)
-    {
-        _components.Insert(0, middleware);
+        _root = resolver;
         return this;
     }
 
     public Resolver Build()
     {
-        Resolver pipeline = context => throw new QueryExecutionException(
-            $"Selection {Printer.Print(context.Selection)} d.",
-            context.Path, 
-            context.Field);
+        if (_root is null)
+            throw new InvalidOperationException(
+                $"Resolver chain is missing ending. Use {nameof(Run)} to end the chain.");
 
-        for (var c = _components.Count - 1; c >= 0; c--)
-            pipeline = _components[c](pipeline);
+        var resolver = _root;
+        foreach (var middleware in _middlewares)
+        {
+            var resolver1 = resolver;
+            resolver = context => middleware(context, resolver1);
+        }
 
-        return pipeline;
-    }
-
-    protected T? GetProperty<T>(string key)
-    {
-        return Properties.TryGetValue(key, out var value) ? (T?)value : default;
-    }
-
-    protected void SetProperty<T>(string key, T value)
-    {
-        Properties[key] = value;
+        return resolver;
     }
 }
