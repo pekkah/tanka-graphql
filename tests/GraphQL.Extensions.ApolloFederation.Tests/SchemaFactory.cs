@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Experimental;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using ResolverContext = Tanka.GraphQL.Experimental.ResolverContext;
+using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;
 
 public static class SchemaFactory
 {
-    public static async Task<Experimental.TypeSystem.ISchema> Create()
+    public static async Task<ISchema> Create()
     {
         var typeDefs = @"
 type Review @key(fields: ""id"") {
@@ -37,12 +37,12 @@ type Query {
 
         var builder = new ExecutableSchemaBuilder();
         builder.AddTypeSystem(typeDefs);
-        builder.AddFederation(new FederatedSchemaBuildOptions(new DictionaryReferenceResolversMap
+        builder.AddFederation(new(new DictionaryReferenceResolversMap
         {
             ["User"] = UserReference,
             ["Product"] = ProductReference
         }));
-        builder.AddResolvers(new Experimental.ResolversMap
+        builder.AddResolvers(new ResolversMap
         {
             ["User"] = new()
             {
@@ -87,7 +87,7 @@ type Query {
             Upc = upc
         };
 
-        return new ValueTask<ResolveReferenceResult>(new ResolveReferenceResult(typeDefinition, product));
+        return new(new ResolveReferenceResult(typeDefinition, product));
     }
 
     private static ValueTask ProductReviews(ResolverContext context)
@@ -141,7 +141,7 @@ type Query {
             Username = username
         };
 
-        return new ValueTask<ResolveReferenceResult>(new ResolveReferenceResult(typeDefinition, user));
+        return new(new ResolveReferenceResult(typeDefinition, user));
     }
 }
 
@@ -149,32 +149,32 @@ public static class Db
 {
     public static Dictionary<string, Review> Reviews { get; } = new()
     {
-        ["1"] = new Review
+        ["1"] = new()
         {
             ID = "1",
             AuthorID = "1",
-            Product = new Product { Upc = "1" },
+            Product = new() { Upc = "1" },
             Body = "Love it!"
         },
-        ["2"] = new Review
+        ["2"] = new()
         {
             ID = "2",
             AuthorID = "1",
-            Product = new Product { Upc = "2" },
+            Product = new() { Upc = "2" },
             Body = "Too expensive!"
         },
-        ["3"] = new Review
+        ["3"] = new()
         {
             ID = "3",
             AuthorID = "2",
-            Product = new Product { Upc = "3" },
+            Product = new() { Upc = "3" },
             Body = "Could be better"
         },
-        ["4"] = new Review
+        ["4"] = new()
         {
             ID = "4",
             AuthorID = "2",
-            Product = new Product { Upc = "1" },
+            Product = new() { Upc = "1" },
             Body = "Prefer something else"
         }
     };

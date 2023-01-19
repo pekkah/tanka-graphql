@@ -2,13 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Experimental;
-using Tanka.GraphQL.Experimental.TypeSystem;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem.ValueSerialization;
-using ISchema = Tanka.GraphQL.TypeSystem.ISchema;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation;
 
@@ -37,9 +33,10 @@ public static class Federation
 
     private static object Service { get; } = new();
 
-    public static ExecutableSchemaBuilder AddFederation(this ExecutableSchemaBuilder builder, FederatedSchemaBuildOptions options)
+    public static ExecutableSchemaBuilder AddFederation(this ExecutableSchemaBuilder builder,
+        FederatedSchemaBuildOptions options)
     {
-        builder.AddTypeSystem(new FederationConfiguration(options));
+        builder.AddConfiguration(new FederationConfiguration(options));
         builder.AddValueConverter("_Any", new AnyScalarConverter());
         builder.AddValueConverter("_FieldSet", new FieldSetScalarConverter());
 
@@ -47,7 +44,7 @@ public static class Federation
     }
 }
 
-public class FederationConfiguration : Experimental.ITypeSystemConfiguration
+public class FederationConfiguration : IExecutableSchemaConfiguration
 {
     public FederationConfiguration(FederatedSchemaBuildOptions options)
     {
@@ -56,10 +53,10 @@ public class FederationConfiguration : Experimental.ITypeSystemConfiguration
 
     public FederatedSchemaBuildOptions Options { get; }
 
-    public Task Configure(Experimental.TypeSystem.SchemaBuilder schema, Experimental.ResolversBuilder resolvers)
+    public Task Configure(SchemaBuilder schema, ResolversBuilder resolvers)
     {
         // query types entity types from builder (note that anything added after this wont' show up
-        var entities = schema.QueryTypeDefinitions(type => type.HasDirective("key"), new SchemaBuildOptions
+        var entities = schema.QueryTypeDefinitions(type => type.HasDirective("key"), new()
         {
             BuildTypesFromOrphanedExtensions = true
         }).ToList();
@@ -76,13 +73,13 @@ public class FederationConfiguration : Experimental.ITypeSystemConfiguration
                     null,
                     "_Entity",
                     null,
-                    new UnionMemberTypes(entities.Select(e => new NamedType(e.Name)).ToList()))
+                    new(entities.Select(e => new NamedType(e.Name)).ToList()))
             ));
 
             schema.Add(new TypeExtension(
                 new ObjectDefinition(null,
                     "Query",
-                    fields: new FieldsDefinition(
+                    fields: new(
                         new FieldDefinition[]
                         {
                             "_entities(representations: [_Any!]!): [_Entity]!",

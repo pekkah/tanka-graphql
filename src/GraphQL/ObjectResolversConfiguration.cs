@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL;
 
-public class ObjectResolversConfiguration : ITypeSystemConfiguration
+public class ObjectResolversConfiguration : IExecutableSchemaConfiguration
 {
     public ObjectResolversConfiguration(
         string type,

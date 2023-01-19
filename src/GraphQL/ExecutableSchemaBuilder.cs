@@ -6,7 +6,7 @@ namespace Tanka.GraphQL;
 
 public class ExecutableSchemaBuilder
 {
-    public List<ITypeSystemConfiguration> Configurations { get; } = new();
+    public List<IExecutableSchemaConfiguration> Configurations { get; } = new();
 
     public List<TypeSystemDocument> Documents { get; } = new();
 
@@ -21,8 +21,8 @@ public class ExecutableSchemaBuilder
 
     public Dictionary<string, CreateDirectiveVisitor> DirectiveVisitorFactories { get; } = new();
 
-    public ExecutableSchemaBuilder AddTypeSystem(
-        ITypeSystemConfiguration configuration)
+    public ExecutableSchemaBuilder AddConfiguration(
+        IExecutableSchemaConfiguration configuration)
     {
         Configurations.Add(configuration);
 
@@ -91,7 +91,7 @@ public class ExecutableSchemaBuilder
 
     public ExecutableSchemaBuilder AddResolvers(IResolverMap resolversMap)
     {
-        AddTypeSystem(new ResolversConfiguration(resolversMap));
+        AddConfiguration(new ResolversConfiguration(resolversMap));
         return this;
     }
 }

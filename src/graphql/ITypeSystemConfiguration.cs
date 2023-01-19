@@ -1,6 +1,6 @@
 ﻿namespace Tanka.GraphQL;
 
-public interface ITypeSystemConfiguration
+public interface IExecutableSchemaConfiguration
 {
     Task Configure(SchemaBuilder schema, ResolversBuilder resolvers);
 }

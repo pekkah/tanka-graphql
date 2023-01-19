@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Experimental;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Xunit;
 
@@ -68,12 +68,12 @@ public class FederationSchemaBuilderFacts
                     type Address @key(fields: ""street"") {
                         street: String
                     }")
-            .AddFederation(new FederatedSchemaBuildOptions(new DictionaryReferenceResolversMap
+            .AddFederation(new(new DictionaryReferenceResolversMap
             {
-                ["Person"] = (context, type, representation) => new ValueTask<ResolveReferenceResult>(
+                ["Person"] = (context, type, representation) => new(
                     new ResolveReferenceResult(type, representation))
             }))
-            .AddResolvers(new Experimental.ResolversMap
+            .AddResolvers(new ResolversMap
             {
                 ["Person"] = new()
                 {
@@ -86,7 +86,7 @@ public class FederationSchemaBuilderFacts
         /* When */
         var schema = await builder.Build();
 
-        var result = await new Experimental.Executor(schema).ExecuteAsync(new GraphQLRequest
+        var result = await new Executor(schema).ExecuteAsync(new GraphQLRequest
         {
             Document = """
                 query Entities($reps: [_Any!]!) { 
@@ -143,7 +143,7 @@ type Product @key(fields: ""upc"") @extends {
         /* When */
         var schema = await builder.Build();
 
-        var result = await new Experimental.Executor(schema).ExecuteAsync(new GraphQLRequest
+        var result = await new Executor(schema).ExecuteAsync(new GraphQLRequest
         {
             Document = """
                 {

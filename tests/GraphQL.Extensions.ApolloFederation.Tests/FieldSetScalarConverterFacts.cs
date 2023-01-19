@@ -7,7 +7,7 @@ public class FieldSetScalarConverterFacts
 {
     public FieldSetScalarConverterFacts()
     {
-        Sut = new FieldSetScalarConverter();
+        Sut = new();
     }
 
     protected FieldSetScalarConverter Sut { get; }

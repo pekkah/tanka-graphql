@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL;
 
-public class ObjectSubscribersConfiguration : ITypeSystemConfiguration
+public class ObjectSubscribersConfiguration : IExecutableSchemaConfiguration
 {
     public ObjectSubscribersConfiguration(
         string type,

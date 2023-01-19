@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Experimental;
-using Tanka.GraphQL.Experimental.TypeSystem;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;
@@ -21,10 +20,10 @@ public class FederationFacts
         /* Given */
 
         /* When */
-        var result = await new Experimental.Executor(Sut)
-            .ExecuteAsync(new GraphQLRequest()
-                {
-                    Document = """
+        var result = await new Executor(Sut)
+            .ExecuteAsync(new GraphQLRequest
+            {
+                Document = """
                     query($representations:[_Any!]!) {
                         _entities(representations:$representations) {
                             ...on User {
@@ -97,8 +96,8 @@ public class FederationFacts
         /* Given */
 
         /* When */
-        var result = await new Experimental.Executor(Sut)
-            .ExecuteAsync(new GraphQLRequest()
+        var result = await new Executor(Sut)
+            .ExecuteAsync(new GraphQLRequest
             {
                 Document = @"query { _service { sdl } }"
             });

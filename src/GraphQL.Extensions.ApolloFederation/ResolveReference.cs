@@ -5,7 +5,7 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 namespace Tanka.GraphQL.Extensions.ApolloFederation;
 
 public delegate ValueTask<ResolveReferenceResult> ResolveReference(
-    Experimental.ResolverContext context,
+    ResolverContext context,
     TypeDefinition type,
     IReadOnlyDictionary<string, object> representation);
 

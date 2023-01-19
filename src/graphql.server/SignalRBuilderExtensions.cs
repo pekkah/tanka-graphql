@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
-using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace Tanka.GraphQL.Server;
 
@@ -11,10 +10,10 @@ public static class SignalRBuilderExtensions
     {
         builder.AddJsonProtocol(options =>
         {
-            if (!options.PayloadSerializerOptions.Converters.Any(converter =>
+            /*if (!options.PayloadSerializerOptions.Converters.Any(converter =>
                     converter is ObjectDictionaryConverter))
                 options.PayloadSerializerOptions.Converters
-                    .Add(new ObjectDictionaryConverter());
+                    .Add(new ObjectDictionaryConverter());*/
         });
 
         return builder;

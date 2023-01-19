@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
+using Tanka.GraphQL;
 using Tanka.GraphQL.Server;
-using Tanka.GraphQL.ValueResolution;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,18 +15,12 @@ builder.AddTankaGraphQL3()
     .AddHttp()
     .AddSchema("schemaName", schema =>
     {
-        schema.AddTypeSystem("""
-            type Query {
-              version: String!
-            }
-            """);
+        schema.Builder.ValidateOnStart();
 
-        schema.AddResolver(
-            "Query",
-            "version",
-            _ => ResolveSync.As("3.0.0")
-        );
-
+        schema.Configure(b => b.ConfigureObject("Query", new()
+        {
+            { "version: String!", context => context.ResolveAs("3.0") }
+        }));
     })
     //.AddWebSockets()
     //.AddSignalR()

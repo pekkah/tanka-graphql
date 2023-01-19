@@ -1,15 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net7.0</TargetFrameworks>
-    <AssemblyName>Tanka.GraphQL.Extensions.ApolloFederation</AssemblyName>
-    <RootNamespace>Tanka.GraphQL.Extensions.ApolloFederation</RootNamespace>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net7.0</TargetFrameworks>
+		<AssemblyName>Tanka.GraphQL.Extensions.ApolloFederation</AssemblyName>
+		<RootNamespace>Tanka.GraphQL.Extensions.ApolloFederation</RootNamespace>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\graphql.language\graphql.language.csproj" />
-    <ProjectReference Include="..\graphql\GraphQL.Legacy.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\graphql.language\graphql.language.csproj" />
+		<ProjectReference Include="..\GraphQL\GraphQL.csproj" />
+		<ProjectReference Include="..\graphql\GraphQL.Legacy.csproj" />
+	</ItemGroup>
 
 </Project>

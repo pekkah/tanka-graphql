@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Server;
 
-internal class SchemaInitializer: BackgroundService
+internal class SchemaInitializer : BackgroundService
 {
-    private readonly SchemaCollection _schemas;
-    private readonly IOptionsMonitor<SchemaOptions> _schemaOptions;
     private readonly IOptionsMonitor<GraphQLApplicationOptions> _applicationOptions;
+    private readonly IOptionsMonitor<SchemaOptions> _schemaOptions;
+    private readonly SchemaCollection _schemas;
 
     public SchemaInitializer(
         SchemaCollection schemas,
@@ -33,39 +29,9 @@ internal class SchemaInitializer: BackgroundService
         {
             var options = _schemaOptions.Get(schemaName);
 
-            var schemaBuilder = new SchemaBuilder();
-            var resolversBuilder = new ResolversBuilder();
-
-            foreach (var typeSystemDocument in options.Documents)
+            var schema = await options.Builder.Build(buildOptions =>
             {
-                schemaBuilder.Add(typeSystemDocument);
-            }
-
-            // remote links require refactoring links
-            // into the main library
-            //todo: Move remote links to GraphQL lib
-
-            foreach (var configuration in options.Configurations)
-            {
-                configuration.Configure(schemaBuilder);
-                configuration.Configure(resolversBuilder);
-            }
-
-            foreach (var configure in options.ConfigureSchema)
-            {
-                await configure(schemaBuilder);
-            }
-
-            foreach (var configure in options.ConfigureResolvers)
-            {
-                await configure(resolversBuilder);
-            }
-
-            var schema = await schemaBuilder.Build(new SchemaBuildOptions()
-            {
-                Resolvers = resolversBuilder.BuildResolvers(),
-                Subscribers = resolversBuilder.BuildSubscribers(),
-                BuildTypesFromOrphanedExtensions = true,
+                buildOptions.BuildTypesFromOrphanedExtensions = true;
             });
 
             _schemas.TryAdd(schemaName, schema);

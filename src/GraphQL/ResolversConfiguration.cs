@@ -1,6 +1,6 @@
 ﻿namespace Tanka.GraphQL;
 
-public class ResolversConfiguration : ITypeSystemConfiguration
+public class ResolversConfiguration : IExecutableSchemaConfiguration
 {
     private readonly IResolverMap _resolversMap;
 

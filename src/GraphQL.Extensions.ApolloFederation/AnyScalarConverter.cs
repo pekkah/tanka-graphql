@@ -1,5 +1,4 @@
 ﻿using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation;
 

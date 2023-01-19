@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace Tanka.GraphQL.Server;
 
@@ -10,6 +9,6 @@ public class GraphQLHttpRequest
 
     public string Query { get; set; } = string.Empty;
 
-    [JsonConverter(typeof(ObjectDictionaryConverter))]
+    //[JsonConverter(typeof(ObjectDictionaryConverter))]
     public Dictionary<string, object?>? Variables { get; set; }
 }
