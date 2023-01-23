@@ -59,12 +59,6 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
         if (argument is not IEnumerable<IReadOnlyDictionary<string, object?>?> inputObjectArgumentValue)
             throw new InvalidOperationException("Argument is not an input object list");
 
-        var properties = PropertyAdapterFactory.GetPropertyAdapters<T>();
-
-        //todo: do we need the input object fields in here for validation
-        // or should the schema of the object be validated already?
-        //var inputObjectFields = context.Schema.GetInputFields(name);
-
         var targetList = new List<T?>();
 
         foreach (var inputObjectValue in inputObjectArgumentValue)
