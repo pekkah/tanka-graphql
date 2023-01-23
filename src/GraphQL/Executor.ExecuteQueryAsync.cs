@@ -33,16 +33,7 @@ public partial class Executor
             return new()
             {
                 Data = result,
-                Errors = context.ErrorCollector.GetErrors().Select(e => new ExecutionError
-                {
-                    Path = (e as FieldException)?.Path.Segments.ToList() ?? path.Segments.ToList(),
-                    Message = e.Message,
-                    Extensions = new()
-                    {
-                        ["ExceptionType"] = e.GetBaseException().GetType().Name,
-                        ["StackTrace"] = e.StackTrace ?? string.Empty
-                    }
-                }).ToList()
+                Errors = context.ErrorCollector.GetErrors().ToList()
             };
         }
         catch (FieldException e)
@@ -53,16 +44,7 @@ public partial class Executor
         return new()
         {
             Data = null,
-            Errors = context.ErrorCollector.GetErrors().Select(e => new ExecutionError
-            {
-                Path = (e as FieldException)?.Path.Segments.ToList() ?? path.Segments.ToList(),
-                Message = e.Message,
-                Extensions = new()
-                {
-                    ["ExceptionType"] = e.GetBaseException().GetType().Name,
-                    ["StackTrace"] = e.StackTrace ?? string.Empty
-                }
-            }).ToList()
+            Errors = context.ErrorCollector.GetErrors().ToList()
         };
     }
 }

@@ -127,7 +127,7 @@ public class FieldErrorsFacts
   ""extensions"": null,
   ""errors"": [
     {
-      ""message"": ""Cannot return null for non-nullable field 'Container.nonNullWithNull'."",
+      ""message"": ""Cannot complete value for field 'nonNullWithNull: String!'. Completed value would be null for non-null field"",
       ""locations"": [
         {
           ""line"": 4,
@@ -137,10 +137,7 @@ public class FieldErrorsFacts
       ""path"": [
         ""container"",
         ""nonNullWithNull""
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
+      ]
     }
   ]
 }");
@@ -172,7 +169,7 @@ public class FieldErrorsFacts
   ""extensions"": null,
   ""errors"": [
     {
-      ""message"": ""Cannot return null for non-nullable field 'Container.nonNullListAsNull'."",
+      ""message"": ""Cannot complete value for field 'nonNullListAsNull: [String]!'. Completed value would be null for non-null field"",
       ""locations"": [
         {
           ""line"": 4,
@@ -182,10 +179,7 @@ public class FieldErrorsFacts
       ""path"": [
         ""container"",
         ""nonNullListAsNull""
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
+      ]
     }
   ]
 }");
@@ -246,24 +240,19 @@ public class FieldErrorsFacts
   ""data"": {
     ""container"": null
   },
-  ""extensions"": null,
   ""errors"": [
     {
-      ""message"": ""Cannot return null for non-nullable field 'Container.nonNullListWithNonNullItem'."",
       ""locations"": [
         {
           ""line"": 4,
           ""column"": 26
         }
       ],
+      ""message"": ""Cannot complete value for field 'nonNullListWithNonNullItem: [String!]!'. Completed value would be null for non-null field"",
       ""path"": [
         ""container"",
-        ""nonNullListWithNonNullItem"",
-        1
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
+        ""nonNullListWithNonNullItem""
+      ]
     }
   ]
 }");
@@ -305,10 +294,7 @@ public class FieldErrorsFacts
                       ""path"": [
                         ""custom"",
                         ""nonNullWithCustomError""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""INVALIDOPERATION""
-                      }
+                      ]
                     }
                   ]
                 }
@@ -353,10 +339,7 @@ public class FieldErrorsFacts
                       ""path"": [
                         ""custom"",
                         ""nullableWithCustomError""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""INVALIDOPERATION""
-                      }
+                      ]
                     }
                   ]
                 }
@@ -399,10 +382,7 @@ public class FieldErrorsFacts
                       ""path"": [
                         ""custom"",
                         ""nonNullListWithCustomError""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""INVALIDOPERATION""
-                      }
+                      ]
                     }
                   ]
                 }

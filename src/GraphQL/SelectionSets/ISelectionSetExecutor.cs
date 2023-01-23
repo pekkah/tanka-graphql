@@ -52,7 +52,7 @@ public class SelectionSetExecutor : ISelectionSetExecutor
                     objectType,
                     objectValue,
                     fields,
-                    path);
+                    path.Fork());
 
                 responseMap[responseKey] = completedValue;
             }
@@ -78,11 +78,12 @@ public class SelectionSetExecutor : ISelectionSetExecutor
         var tasks = new Dictionary<string, Task<object?>>();
         foreach (var (responseKey, fields) in groupedFieldSet)
         {
+            var fieldPath = path.Fork();
             var executionTask = context.ExecuteField(
                 objectType,
                 objectValue,
                 fields,
-                path);
+                fieldPath);
 
             tasks.Add(responseKey, executionTask);
         }

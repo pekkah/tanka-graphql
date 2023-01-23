@@ -131,32 +131,14 @@ public partial class Executor
             return new()
             {
                 Data = data,
-                Errors = subContext.ErrorCollector.GetErrors().Select(e => new ExecutionError
-                {
-                    Path = (e as FieldException)?.Path.Segments.ToList() ?? path.Segments.ToList(),
-                    Message = e.Message,
-                    Extensions = new()
-                    {
-                        ["ExceptionType"] = e.GetBaseException().GetType().Name,
-                        ["StackTrace"] = e.StackTrace ?? string.Empty
-                    }
-                }).ToList()
+                Errors = subContext.ErrorCollector.GetErrors().ToList()
             };
         }
         catch (FieldException x)
         {
             return new()
             {
-                Errors = subContext.ErrorCollector.GetErrors().Select(e => new ExecutionError
-                {
-                    Path = (e as FieldException)?.Path.Segments.ToList() ?? path.Segments.ToList(),
-                    Message = e.Message,
-                    Extensions = new()
-                    {
-                        ["ExceptionType"] = e.GetBaseException().GetType().Name,
-                        ["StackTrace"] = e.StackTrace ?? string.Empty
-                    }
-                }).ToList()
+                Errors = subContext.ErrorCollector.GetErrors().ToList()
             };
         }
     }

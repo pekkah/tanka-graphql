@@ -10,7 +10,7 @@ public class ExecutionError
 
     public required string Message { get; set; }
 
-    public List<object>? Path { get; set; }
+    public object[] Path { get; set; }
 
     public void Extend(string key, object value)
     {
