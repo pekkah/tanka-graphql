@@ -1,9 +1,9 @@
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.SelectionSets;
 
-public static class SelectionSets
+public static class SelectionSetExtensions
 {
     public const string SkipDirectiveName = "skip";
     public const string IncludeDirectiveName = "include";

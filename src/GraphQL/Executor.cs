@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Tanka.GraphQL.Features;
+using Tanka.GraphQL.SelectionSets;
 
 namespace Tanka.GraphQL;
 
@@ -24,10 +25,14 @@ public partial class Executor
         {
             FieldExecutor = fieldExecutor
         });
-        _defaults.Set<ISelectionSetExecutorFeature>(new SelectionSetExecutorFeature
-        {
-            SelectionSetExecutor = selectionSetExecutor
-        });
+
+        _defaults.Set<ISelectionSetExecutorFeature>(new SelectionSetExecutorFeature(async context => context.Result = await selectionSetExecutor.ExecuteSelectionSet(
+            context.QueryContext,
+            context.SelectionSet,
+            context.ObjectDefinition,
+            context.ObjectValue,
+            context.Path)));
+
         _logger = logger;
     }
 

@@ -2,6 +2,7 @@
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.SelectionSets;
 
 namespace Tanka.GraphQL;
 
@@ -32,7 +33,7 @@ public partial class Executor
         ArgumentNullException.ThrowIfNull(context.Schema.Subscription);
 
         var subscriptionType = context.Schema.Subscription;
-        var groupedFieldSet = SelectionSets.CollectFields(
+        var groupedFieldSet = SelectionSetExtensions.CollectFields(
             context.Schema,
             context.Request.Document,
             subscriptionType,

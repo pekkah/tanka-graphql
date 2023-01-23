@@ -1,8 +1,7 @@
-﻿using Tanka.GraphQL.Fields;
-using Tanka.GraphQL.Language.Nodes;
+﻿using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.SelectionSets;
 
 public interface ISelectionSetExecutor
 {
@@ -37,7 +36,7 @@ public class SelectionSetExecutor : ISelectionSetExecutor
     private static async Task<IReadOnlyDictionary<string, object?>> ExecuteSerial(QueryContext context,
         SelectionSet selectionSet, ObjectDefinition objectType, object? objectValue, NodePath path)
     {
-        var groupedFieldSet = SelectionSets.CollectFields(
+        var groupedFieldSet = SelectionSetExtensions.CollectFields(
             context.Schema,
             context.Request.Document,
             objectType,
@@ -69,7 +68,7 @@ public class SelectionSetExecutor : ISelectionSetExecutor
     private static async Task<IReadOnlyDictionary<string, object?>> ExecuteParallel(QueryContext context,
         SelectionSet selectionSet, ObjectDefinition objectType, object? objectValue, NodePath path)
     {
-        var groupedFieldSet = SelectionSets.CollectFields(
+        var groupedFieldSet = SelectionSetExtensions.CollectFields(
             context.Schema,
             context.Request.Document,
             objectType,

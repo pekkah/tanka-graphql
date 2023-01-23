@@ -1,6 +1,7 @@
 ﻿using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.Validation;
@@ -177,7 +178,7 @@ public static class ExecutionRules
                     var selectionSet = subscription.SelectionSet;
                     var variableValues = new Dictionary<string, object>();
 
-                    var groupedFieldSet = SelectionSets.CollectFields(
+                    var groupedFieldSet = SelectionSetExtensions.CollectFields(
                         schema,
                         context.Document,
                         subscriptionType,

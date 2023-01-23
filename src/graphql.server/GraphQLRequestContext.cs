@@ -1,28 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Http.Features;
-using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.TypeSystem;
 
 namespace Tanka.GraphQL.Server;
 
-public class GraphQLRequestContext
+public record GraphQLRequestContext : QueryContext
 {
-    public IFeatureCollection Features { get; } = new FeatureCollection();
-    
-    public string? OperationName { get; set; }
-    
-    public string Query { get; set; } = string.Empty;
+    private FeatureReferences<FeatureInterfaces> _features;
 
-    public Dictionary<string, object?>? Variables { get; set; }
-    
-    public ISchema? Schema { get; set; }
+    public GraphQLRequestContext(IFeatureCollection features) : base(features)
+    {
+    }
 
-    public IServiceProvider? RequestServices { get; set; }
+    public GraphQLRequestContext()
+    {
+    }
 
-    public ExecutableDocument? Document { get; set; }
-    
-    public OperationDefinition? Operation { get; set; }
+    public IServiceProvider RequestServices => ServiceProvidersFeature.RequestServices;
 
-    public IReadOnlyDictionary<string, object?>? CoercedVariables { get; set; }
+    private IServiceProvidersFeature ServiceProvidersFeature =>
+        _features.Fetch(ref _features.Cache.ServiceProviders, _ => null)!;
+
+    private struct FeatureInterfaces
+    {
+        public IServiceProvidersFeature? ServiceProviders;
+    }
 }

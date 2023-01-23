@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using Tanka.GraphQL.Features;
-using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.SelectionSets;
 
 namespace Tanka.GraphQL;
 
@@ -52,11 +52,7 @@ public record QueryContext
             FieldExecutor = IFieldExecutor.Default
         })!;
 
-    private ISelectionSetExecutorFeature SelectionSetExecutorFeature =>
-        _features.Fetch(ref _features.Cache.SelectionSetExecutor, _ => new SelectionSetExecutorFeature
-        {
-            SelectionSetExecutor = ISelectionSetExecutor.Default
-        })!;
+    internal ISelectionSetExecutorFeature SelectionSetExecutorFeature => _features.Fetch(ref _features.Cache.SelectionSetExecutor, _ => null)!;
 
     private IErrorCollectorFeature ErrorCollectorFeature =>
         _features.Fetch(ref _features.Cache.ErrorCollector, _ => new ErrorCollectorFeature
@@ -82,11 +78,13 @@ public record QueryContext
         set => FieldExecutorFeature.FieldExecutor = value;
     }
 
+    /*
     public ISelectionSetExecutor SelectionSetExecutor
     {
         get => SelectionSetExecutorFeature.SelectionSetExecutor;
         set => SelectionSetExecutorFeature.SelectionSetExecutor = value;
     }
+    */
 
     public IReadOnlyDictionary<string, object?> CoercedVariableValues
     {

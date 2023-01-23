@@ -2,6 +2,7 @@
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.TypeSystem.ValueSerialization;
 
 namespace Tanka.GraphQL.Fields;
@@ -104,7 +105,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
                 ObjectDefinition = context.ObjectDefinition
             };
 
-        var subSelectionSet = SelectionSets.MergeSelectionSets(context.Fields);
+        var subSelectionSet = SelectionSetExtensions.MergeSelectionSets(context.Fields);
         var data = await context.QueryContext.ExecuteSelectionSet(
             subSelectionSet,
             actualType,
@@ -146,7 +147,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
                 ObjectDefinition = context.ObjectDefinition
             };
 
-        var subSelectionSet = SelectionSets.MergeSelectionSets(context.Fields);
+        var subSelectionSet = SelectionSetExtensions.MergeSelectionSets(context.Fields);
         var data = await context.QueryContext.ExecuteSelectionSet(
             subSelectionSet,
             actualType,
@@ -162,7 +163,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
         NodePath path,
         ResolverContext context)
     {
-        var subSelectionSet = SelectionSets.MergeSelectionSets(context.Fields);
+        var subSelectionSet = SelectionSetExtensions.MergeSelectionSets(context.Fields);
         var data = await context.QueryContext.ExecuteSelectionSet(
             subSelectionSet,
             objectDefinition,

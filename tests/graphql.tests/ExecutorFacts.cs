@@ -38,7 +38,7 @@ public class ExecutorFacts
                 }
 
                 input NewEvent {
-                    type: String!
+                    type: EventType!
                     payload: String
                 }
 
@@ -110,7 +110,7 @@ public class ExecutorFacts
 
                             if (newEvent.Payload == null)
                             {
-                                context.ResolvedValue = new EventsModel.Failure("Failure");
+                                context.ResolvedValue = new EventsModel.Failure("Payload should be given");
                                 context.ResolveAbstractType = (definition, o) =>
                                     context.Schema.GetRequiredNamedType<ObjectDefinition>("Failure");
                                 return;

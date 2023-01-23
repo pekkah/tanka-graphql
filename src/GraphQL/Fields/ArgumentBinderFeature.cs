@@ -44,21 +44,8 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
         if (argument is not IReadOnlyDictionary<string, object?> inputObjectArgumentValue)
             throw new InvalidOperationException("Argument is not an input object");
 
-        var properties = PropertyAdapterFactory.GetPropertyAdapters<T>();
-
-        //todo: do we need the input object fields in here for validation
-        // or should the schema of the object be validated already?
-        //var inputObjectFields = context.Schema.GetInputFields(name);
-
         var target = new T();
-
-        foreach (var (fieldName, fieldValue) in inputObjectArgumentValue)
-        {
-            var propertyName = FormatPropertyName(fieldName);
-
-            if (properties.TryGetValue(propertyName, out var property)) property.SetValue(target, fieldValue);
-        }
-
+        BindInputObject<T>(inputObjectArgumentValue, target);
         return target;
     }
 
@@ -89,18 +76,31 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
             }
 
             var target = new T();
-            foreach (var (fieldName, fieldValue) in inputObjectValue)
-            {
-                var propertyName = FormatPropertyName(fieldName);
-
-                if (properties.TryGetValue(propertyName, out var property)) property.SetValue(target, fieldValue);
-            }
+            BindInputObject(inputObjectValue, target);
+            targetList.Add(target);
         }
 
         return targetList;
     }
 
-    private string FormatPropertyName(string fieldName)
+    public static void BindInputObject<T>(IReadOnlyDictionary<string, object?> inputObject, T target)
+    {
+        var properties = PropertyAdapterFactory.GetPropertyAdapters<T>();
+
+        //todo: do we need the input object fields in here for validation
+        // or should the schema of the object be validated already?
+        //var inputObjectFields = context.Schema.GetInputFields(name);
+
+        foreach (var (fieldName, fieldValue) in inputObject)
+        {
+            var propertyName = FormatPropertyName(fieldName);
+
+            if (properties.TryGetValue(propertyName, out var property))
+                property.SetValue(target, fieldValue);
+        }
+    }
+
+    private static string FormatPropertyName(string fieldName)
     {
         ArgumentException.ThrowIfNullOrEmpty(fieldName);
 

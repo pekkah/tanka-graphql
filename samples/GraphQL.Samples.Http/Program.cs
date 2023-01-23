@@ -19,12 +19,25 @@ builder.AddTankaGraphQL3()
 
         schema.Configure(b => b.ConfigureObject("Query", new()
         {
+            { "system: System!", context => context.ResolveAs<object>(new {}) }
+        }));
+
+        schema.Configure(b => b.ConfigureObject("System", new()
+        {
             { "version: String!", context => context.ResolveAs("3.0") }
         }));
     })
     //.AddWebSockets()
     //.AddSignalR()
     ;
+
+//todo: these should be added by default
+builder.Services.AddSingleton<Executor>(p =>
+{
+    // this ctor allows us to pass just the logger and rest of the dependencies are
+    // taken from the QueryContext
+    return new Executor(p.GetRequiredService<ILogger<Executor>>());
+});
 
 var app = builder.Build();
 

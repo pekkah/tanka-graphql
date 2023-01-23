@@ -12,7 +12,7 @@ public static class SelectionSetExecutorQueryContextExtensions
         object? objectValue,
         NodePath path)
     {
-        return context.SelectionSetExecutor.ExecuteSelectionSet(
+        return context.SelectionSetExecutorFeature.ExecuteSelectionSet(
             context,
             selectionSet,
             objectType,

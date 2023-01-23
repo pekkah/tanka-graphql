@@ -2,17 +2,17 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Primitives;
 
 namespace Tanka.GraphQL.Server;
 
 public class GraphQLHttpTransport : IGraphQLTransport
 {
     public IEndpointConventionBuilder Map(
-        string pattern, 
-        IEndpointRouteBuilder routes, 
+        string pattern,
+        IEndpointRouteBuilder routes,
         GraphQLRequestPipelineBuilder pipelineBuilder)
     {
         return new RouteHandlerBuilder(new[]
@@ -33,9 +33,8 @@ public class GraphQLHttpTransport : IGraphQLTransport
     {
         return async httpContext =>
         {
-            
             var context = new GraphQLRequestContext();
-            context.Features.Set(new HttpContextFeature(httpContext));
+            context.Features.Set(httpContext.Features.Get<IServiceProvidersFeature>());
 
             if (!httpContext.WebSockets.IsWebSocketRequest
                 && httpContext.Request.HasJsonContentType())
@@ -48,7 +47,7 @@ public class GraphQLHttpTransport : IGraphQLTransport
                 if (request is null)
                 {
                     httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await httpContext.Response.WriteAsJsonAsync(new ProblemDetails()
+                    await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
                     {
                         Detail = "Could not parse GraphQL request from body of the request"
                     });
@@ -56,10 +55,14 @@ public class GraphQLHttpTransport : IGraphQLTransport
                     return;
                 }
 
-                context.OperationName = request.OperationName;
-                context.Query = request.Query;
-                context.Variables = request.Variables;
-                
+                context.Request = new()
+                {
+                    InitialValue = null,
+                    Document = request.Query,
+                    OperationName = request.OperationName,
+                    VariableValues = request.Variables
+                };
+
                 var enumerator = pipeline(context).GetAsyncEnumerator();
 
                 if (await enumerator.MoveNextAsync())
@@ -67,10 +70,8 @@ public class GraphQLHttpTransport : IGraphQLTransport
                     var initialResult = enumerator.Current;
 
                     if (await enumerator.MoveNextAsync())
-                    {
                         throw new InvalidOperationException("HttpTransport does not support multiple responses.");
-                    }
-                    
+
                     stopwatch.Stop();
                     httpContext.Response.Headers["Elapsed"] = new($"{stopwatch.Elapsed.TotalSeconds}s");
                     await httpContext.Response.WriteAsJsonAsync(initialResult);
