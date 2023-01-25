@@ -1,4 +1,5 @@
-﻿using Tanka.GraphQL.Language.Nodes;
+﻿using System.Diagnostics.CodeAnalysis;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL;
 
@@ -7,6 +8,16 @@ namespace Tanka.GraphQL;
 /// </summary>
 public record GraphQLRequest
 {
+    public GraphQLRequest()
+    {
+    }
+
+    [SetsRequiredMembers]
+    public GraphQLRequest(ExecutableDocument document)
+    {
+        Document = document;
+    }
+
     public required ExecutableDocument Document { get; init; }
 
     public object? InitialValue { get; set; }

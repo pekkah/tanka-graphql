@@ -1,8 +1,7 @@
 ﻿using System.Collections;
-using System.Text.Json;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem.ValueSerialization;
+using Tanka.GraphQL.ValueSerialization;
 
 namespace Tanka.GraphQL;
 
@@ -72,7 +71,7 @@ public static class Values
 
                 object? astValue = null;
 
-                if (dictionaryValues.ContainsKey(fieldName)) 
+                if (dictionaryValues.ContainsKey(fieldName))
                     astValue = dictionaryValues[fieldName];
 
                 var coercedFieldValue = CoerceValue(schema, astValue, fieldType);

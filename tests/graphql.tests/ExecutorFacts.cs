@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -297,7 +298,7 @@ public class ExecutorFacts
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         /* When */
-        var result = new Executor(Schema).SubscribeAsync(new GraphQLRequest()
+        var result = new Executor(Schema).Subscribe(new GraphQLRequest()
         {
             Document = subscription
         }, cts.Token).GetAsyncEnumerator(cts.Token);

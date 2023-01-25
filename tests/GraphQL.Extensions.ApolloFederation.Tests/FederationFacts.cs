@@ -21,7 +21,7 @@ public class FederationFacts
 
         /* When */
         var result = await new Executor(Sut)
-            .ExecuteAsync(new GraphQLRequest
+            .Execute(new GraphQLRequest
             {
                 Document = """
                     query($representations:[_Any!]!) {
@@ -97,7 +97,7 @@ public class FederationFacts
 
         /* When */
         var result = await new Executor(Sut)
-            .ExecuteAsync(new GraphQLRequest
+            .Execute(new GraphQLRequest
             {
                 Document = @"query { _service { sdl } }"
             });

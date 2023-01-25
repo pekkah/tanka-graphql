@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Tanka.GraphQL.SelectionSets;
 
 namespace Tanka.GraphQL.Server;
 
@@ -62,6 +63,8 @@ public class GraphQLApplication
     {
         var builder = new GraphQLRequestPipelineBuilder(routes.ServiceProvider);
         configureRequest(builder);
+        builder.RunExecutor();
+
         return Map(pattern, routes, builder);
     }
 
@@ -69,14 +72,18 @@ public class GraphQLApplication
         string schemaName,
         IServiceProvider services)
     {
-        var executor = services.GetRequiredService<Executor>();
+        
         var builder = new GraphQLRequestPipelineBuilder(services);
-
+        
         builder.UseSchema(schemaName);
         builder.UseDefaultOperationResolver();
         builder.UseDefaultVariableCoercer();
+        builder.UseSelectionSetPipeline(sets =>
+        {
+            sets.UseSelectionSetExecutor();
+        });
 
-        builder.Use(_ => context => executor.SubscribeAsync(context));
+        builder.RunExecutor();
 
         return builder;
     }

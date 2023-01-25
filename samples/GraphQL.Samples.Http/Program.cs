@@ -1,7 +1,9 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using Tanka.GraphQL;
+using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.Server;
+using Tanka.GraphQL.ValueResolution;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,22 +33,21 @@ builder.AddTankaGraphQL3()
     //.AddSignalR()
     ;
 
-//todo: these should be added by default
-builder.Services.AddSingleton<Executor>(p =>
-{
-    // this ctor allows us to pass just the logger and rest of the dependencies are
-    // taken from the QueryContext
-    return new Executor(p.GetRequiredService<ILogger<Executor>>());
-});
-
 var app = builder.Build();
 
+// this uses the default pipeline
 app.MapTankaGraphQL3("/graphql", "schemaName");
 
-/*app.MapTankaGraphQL("/graphql", gql =>
+// this allows customization of the pipeline
+app.MapTankaGraphQL3("/graphql-custom", gql =>
 {
     gql.UseSchema("schemaName");
-    gql.UseDefaultOperationExecutor();
+    gql.UseDefaultOperationResolver();
+    gql.UseDefaultVariableCoercer();
+    gql.UseSelectionSetPipeline(sets =>
+    {
+        sets.UseSelectionSetExecutor();
+    });
 });
-*/
+
 app.Run();

@@ -2,7 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server;
@@ -22,11 +24,12 @@ public class GraphQLApplicationBuilder
 
     private GraphQLApplicationBuilder AddCore()
     {
-        
         ApplicationServices.TryAddSingleton<IHostedService, SchemaInitializer>();
         ApplicationServices.TryAddSingleton<SchemaCollection>();
         ApplicationServices.TryAddSingleton<GraphQLApplication>();
         ApplicationServices.TryAddSingleton<IValidator3, Validator3>();
+        ApplicationServices.AddSingleton<Executor>(p => new(p.GetRequiredService<ILogger<Executor>>()));
+        ApplicationServices.AddSingleton<ISelectionSetExecutor, SelectionSetExecutor>();
 
         return this;
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.ValueSerialization;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation;
 

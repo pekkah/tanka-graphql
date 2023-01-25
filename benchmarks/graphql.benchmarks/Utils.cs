@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -10,12 +10,12 @@ public static class Utils
 {
     public static Task<ISchema> InitializeSchema()
     {
-        var events = new SingleValueEventChannel();
+        //var events = new SingleValueEventChannel();
         var builder = new SchemaBuilder()
-            .Add(
-                @"
+            .Add("""
                     type Query {
                         simple: String
+                        complex: Complex!
                     }
 
                     type Mutation {
@@ -26,28 +26,39 @@ public static class Utils
                         simple: String
                     }
 
+                    type Complex {
+                        field: Int!
+                    }
+
                     schema {
                         query: Query
                         mutation: Mutation
                         subscription: Subscription
                     }
-                    ");
+                    """);
 
         var resolvers = new ResolversMap
         {
             {
                 "Query", new FieldResolversMap
                 {
-                    { "simple", context => new ValueTask<IResolverResult>(Resolve.As("value")) }
+                    { "simple", context => context.ResolveAs("value") },
+                    { "complex", context => context.ResolveAs("Complex") }
                 }
             },
             {
                 "Mutation", new FieldResolversMap
                 {
-                    { "simple", context => new ValueTask<IResolverResult>(Resolve.As("value")) }
+                    { "simple", context => context.ResolveAs("value") }
                 }
             },
             {
+                "Complex", new FieldResolversMap
+                {
+                    { "field", context => context.ResolveAs(123) }
+                }
+            }
+            /*{
                 "Subscription", new FieldResolversMap
                 {
                     {
@@ -56,7 +67,7 @@ public static class Utils
                         context => new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue))
                     }
                 }
-            }
+            }*/
         };
 
         return builder.Build(resolvers, resolvers);
@@ -68,6 +79,17 @@ public static class Utils
 {
     simple
 }";
+    }
+
+    public static ExecutableDocument InitializeComplexQuery()
+    {
+        return """
+            {
+                complex {
+                    field
+                }
+            }
+            """;
     }
 
     public static ExecutableDocument InitializeMutation()

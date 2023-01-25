@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,5 +15,15 @@ public static class WebApplicationExtensions
         // resolve tanka application
         var tankaApp = webApp.ServiceProvider.GetRequiredService<GraphQLApplication>();
         return tankaApp.Map(pattern, schemaName, webApp);
+    }
+
+    public static IEndpointConventionBuilder MapTankaGraphQL3(
+        this IEndpointRouteBuilder webApp,
+        string pattern,
+        Action<GraphQLRequestPipelineBuilder> configurePipeline)
+    {
+        // resolve tanka application
+        var tankaApp = webApp.ServiceProvider.GetRequiredService<GraphQLApplication>();
+        return tankaApp.Map(pattern, webApp, configurePipeline);
     }
 }

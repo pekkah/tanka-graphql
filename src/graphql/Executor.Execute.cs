@@ -15,19 +15,19 @@ public partial class Executor
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<ExecutionResult> ExecuteAsync(
+    public async Task<ExecutionResult> Execute(
         GraphQLRequest request,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         var queryContext = BuildQueryContextAsync(request);
-        var executionResult = await ExecuteAsync(queryContext, cancellationToken);
+        var executionResult = await Execute(queryContext, cancellationToken);
 
         return executionResult;
     }
 
-    public async Task<ExecutionResult> ExecuteAsync(
+    public async Task<ExecutionResult> Execute(
         QueryContext queryContext,
         CancellationToken cancellationToken = default)
     {
@@ -44,8 +44,8 @@ public partial class Executor
 
             var executionResult = queryContext.OperationDefinition.Operation switch
             {
-                OperationType.Query => await ExecuteQueryAsync(queryContext),
-                OperationType.Mutation => await ExecuteQueryAsync(queryContext),
+                OperationType.Query => await ExecuteQuery(queryContext),
+                OperationType.Mutation => await ExecuteQuery(queryContext),
                 OperationType.Subscription => throw new NotImplementedException(),
                 _ => throw new InvalidOperationException(
                     $"Operation type {queryContext.OperationDefinition.Operation} not supported.")
@@ -65,7 +65,7 @@ public partial class Executor
         CancellationToken cancellationToken = default)
     {
         var executor = new Executor(schema);
-        return executor.ExecuteAsync(new GraphQLRequest
+        return executor.Execute(new GraphQLRequest
         {
             Document = document,
             InitialValue = initialValue,

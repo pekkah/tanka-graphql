@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.TypeSystem;
 using Xunit;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;
@@ -86,7 +87,7 @@ public class FederationSchemaBuilderFacts
         /* When */
         var schema = await builder.Build();
 
-        var result = await new Executor(schema).ExecuteAsync(new GraphQLRequest
+        var result = await new Executor(schema).Execute(new GraphQLRequest
         {
             Document = """
                 query Entities($reps: [_Any!]!) { 
@@ -143,7 +144,7 @@ type Product @key(fields: ""upc"") @extends {
         /* When */
         var schema = await builder.Build();
 
-        var result = await new Executor(schema).ExecuteAsync(new GraphQLRequest
+        var result = await new Executor(schema).Execute(new GraphQLRequest
         {
             Document = """
                 {

@@ -1,4 +1,6 @@
-﻿namespace Tanka.GraphQL;
+﻿using Tanka.GraphQL.ValueResolution;
+
+namespace Tanka.GraphQL;
 
 public interface IExecutableSchemaConfiguration
 {

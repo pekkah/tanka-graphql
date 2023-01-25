@@ -54,17 +54,27 @@ public static class DefaultGraphQLRequestPipelineMiddlewares
         return builder;
     }
 
-    public static GraphQLRequestPipelineBuilder UseSelectionSetPipeline(this GraphQLRequestPipelineBuilder builder, Action<SelectionSetPipelineBuilder> configurePipeline)
+    public static GraphQLRequestPipelineBuilder UseSelectionSetPipeline(
+        this GraphQLRequestPipelineBuilder builder, 
+        Action<GraphQLSelectionSetPipelineBuilder> configurePipeline)
     {
+        var selectionSetPipelineBuilder = new GraphQLSelectionSetPipelineBuilder(builder.ApplicationServices);
+        configurePipeline(selectionSetPipelineBuilder);
+        var feature = new SelectionSetPipelineExecutorFeature(selectionSetPipelineBuilder.Build());
         builder.Use(next => context =>
         {
-            context.CoercedVariableValues = Variables.CoerceVariableValues(
-                context.Schema,
-                context.OperationDefinition,
-                context.Request.VariableValues);
+            context.Features.Set<ISelectionSetExecutorFeature>(feature);
 
             return next(context);
         });
+
+        return builder;
+    }
+
+    public static GraphQLRequestPipelineBuilder RunExecutor(this GraphQLRequestPipelineBuilder builder)
+    {
+        var executor = builder.ApplicationServices.GetRequiredService<Executor>();
+        builder.Use(_ => context => executor.Subscribe(context));
 
         return builder;
     }

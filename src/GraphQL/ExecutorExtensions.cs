@@ -12,7 +12,7 @@ public static class ExecutorExtensions
         string? operationName = null,
         CancellationToken cancellationToken = default)
     {
-        return executor.ExecuteAsync(new GraphQLRequest()
+        return executor.Execute(new GraphQLRequest()
         {
             Document = document,
             InitialValue = initialValue,

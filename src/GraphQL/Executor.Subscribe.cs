@@ -12,17 +12,17 @@ public partial class Executor
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public IAsyncEnumerable<ExecutionResult> SubscribeAsync(
+    public IAsyncEnumerable<ExecutionResult> Subscribe(
         GraphQLRequest request,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         var queryContext = BuildQueryContextAsync(request);
-        return SubscribeAsync(queryContext, cancellationToken);
+        return Subscribe(queryContext, cancellationToken);
     }
 
-    public async IAsyncEnumerable<ExecutionResult> SubscribeAsync(
+    public async IAsyncEnumerable<ExecutionResult> Subscribe(
         QueryContext queryContext,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -40,13 +40,13 @@ public partial class Executor
             switch (queryContext.OperationDefinition.Operation)
             {
                 case OperationType.Query:
-                    yield return await ExecuteQueryAsync(queryContext);
+                    yield return await ExecuteQuery(queryContext);
                     break;
                 case OperationType.Mutation:
-                    yield return await ExecuteQueryAsync(queryContext);
+                    yield return await ExecuteQuery(queryContext);
                     break;
                 case OperationType.Subscription:
-                    await foreach (var er in ExecuteSubscriptionAsync(queryContext, cancellationToken)) yield return er;
+                    await foreach (var er in ExecuteSubscription(queryContext, cancellationToken)) yield return er;
                     break;
             }
         }

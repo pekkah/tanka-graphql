@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -25,7 +26,7 @@ public class MutationFacts
 
         /* When */
         var result = await new GraphQL.Executor(schema)
-            .ExecuteAsync(new GraphQLRequest
+            .Execute(new GraphQLRequest
             {
                 Document = query
             });
@@ -65,7 +66,7 @@ public class MutationFacts
 
         /* When */
         var result = await new GraphQL.Executor(schema)
-            .ExecuteAsync(new GraphQLRequest
+            .Execute(new GraphQLRequest
             {
                 Document = query
             });
