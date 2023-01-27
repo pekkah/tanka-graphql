@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Tanka.GraphQL.SelectionSets;
 
 namespace Tanka.GraphQL.Server;
 
@@ -45,10 +44,13 @@ public class GraphQLApplication
 
         var reader = new StreamReader(htmlStream);
         var htmlTemplate = reader.ReadToEnd();
-        var html = htmlTemplate.Replace("{{httpUrl}}", apiPattern);
+
 
         return async context =>
         {
+            var requestUrl = context.Request.GetEncodedUrl();
+            var html = htmlTemplate.Replace("{{httpUrl}}", requestUrl.Replace("/ui", string.Empty));
+
             context.Response.ContentType = "text/html";
             await context.Response.WriteAsync(html);
         };
@@ -59,7 +61,8 @@ public class GraphQLApplication
         return Map(pattern, routes, CreateDefaultPipelineBuilder(schemaName, routes.ServiceProvider));
     }
 
-    public IEndpointConventionBuilder Map(string pattern, IEndpointRouteBuilder routes, Action<GraphQLRequestPipelineBuilder> configureRequest)
+    public IEndpointConventionBuilder Map(string pattern, IEndpointRouteBuilder routes,
+        Action<GraphQLRequestPipelineBuilder> configureRequest)
     {
         var builder = new GraphQLRequestPipelineBuilder(routes.ServiceProvider);
         configureRequest(builder);
@@ -72,16 +75,13 @@ public class GraphQLApplication
         string schemaName,
         IServiceProvider services)
     {
-        
         var builder = new GraphQLRequestPipelineBuilder(services);
-        
+
         builder.UseSchema(schemaName);
         builder.UseDefaultOperationResolver();
         builder.UseDefaultVariableCoercer();
-        builder.UseSelectionSetPipeline(sets =>
-        {
-            sets.UseSelectionSetExecutor();
-        });
+        builder.UseDefaultValidator();
+        builder.UseDefaultSelectionSetPipeline();
 
         builder.RunExecutor();
 

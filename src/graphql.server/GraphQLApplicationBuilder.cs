@@ -22,23 +22,27 @@ public class GraphQLApplicationBuilder
 
     public IServiceCollection ApplicationServices { get; }
 
-    private GraphQLApplicationBuilder AddCore()
+    public OptionsBuilder<GraphQLApplicationOptions> ApplicationOptionsBuilder { get; }
+
+    private void AddCore()
     {
         ApplicationServices.TryAddSingleton<IHostedService, SchemaInitializer>();
         ApplicationServices.TryAddSingleton<SchemaCollection>();
         ApplicationServices.TryAddSingleton<GraphQLApplication>();
         ApplicationServices.TryAddSingleton<IValidator3, Validator3>();
-        ApplicationServices.AddSingleton<Executor>(p => new(p.GetRequiredService<ILogger<Executor>>()));
-        ApplicationServices.AddSingleton<ISelectionSetExecutor, SelectionSetExecutor>();
-
-        return this;
+        ApplicationServices.TryAddSingleton<Executor>(p => new(p.GetRequiredService<ILogger<Executor>>()));
+        ApplicationServices.TryAddSingleton<ISelectionSetExecutor, SelectionSetExecutor>();
     }
-
-    public OptionsBuilder<GraphQLApplicationOptions> ApplicationOptionsBuilder { get; }
 
     public GraphQLApplicationBuilder AddHttp()
     {
         ApplicationServices.TryAddSingleton<IGraphQLTransport, GraphQLHttpTransport>();
+        return this;
+    }
+
+    public GraphQLApplicationBuilder AddWebSockets()
+    {
+        ApplicationServices.TryAddSingleton<IGraphQLTransport, GraphQLWSTransport>();
         return this;
     }
 
@@ -48,7 +52,7 @@ public class GraphQLApplicationBuilder
     {
         var schemaOptions = ApplicationServices
             .AddOptions<SchemaOptions>(schemaName);
-        
+
         var optionsBuilder = new SchemaOptionsBuilder(
             schemaOptions,
             ApplicationServices);

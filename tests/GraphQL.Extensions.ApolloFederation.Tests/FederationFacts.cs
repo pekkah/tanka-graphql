@@ -41,7 +41,7 @@ public class FederationFacts
                         }
                     }
                     """,
-                VariableValues = new Dictionary<string, object>
+                Variables = new Dictionary<string, object>
                 {
                     ["representations"] = new[]
                     {

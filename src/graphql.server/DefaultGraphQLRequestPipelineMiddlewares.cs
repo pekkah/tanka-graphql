@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server;
 
@@ -23,15 +24,9 @@ public static class DefaultGraphQLRequestPipelineMiddlewares
     {
         builder.Use(next => context =>
         {
- 
             context.OperationDefinition = Operations.GetOperation(
                 context.Request.Document,
                 context.Request.OperationName);
-
-            context.CoercedVariableValues = Variables.CoerceVariableValues(
-                context.Schema,
-                context.OperationDefinition,
-                context.Request.VariableValues);
 
             return next(context);
         });
@@ -46,7 +41,7 @@ public static class DefaultGraphQLRequestPipelineMiddlewares
             context.CoercedVariableValues = Variables.CoerceVariableValues(
                 context.Schema,
                 context.OperationDefinition,
-                context.Request.VariableValues);
+                context.Request.Variables);
 
             return next(context);
         });
@@ -55,16 +50,46 @@ public static class DefaultGraphQLRequestPipelineMiddlewares
     }
 
     public static GraphQLRequestPipelineBuilder UseSelectionSetPipeline(
-        this GraphQLRequestPipelineBuilder builder, 
-        Action<GraphQLSelectionSetPipelineBuilder> configurePipeline)
+        this GraphQLRequestPipelineBuilder builder,
+        Action<GraphQLSelectionSetPipelineBuilder> configurePipeline,
+        bool runSelectionSetExecutorAtEnd = true)
     {
         var selectionSetPipelineBuilder = new GraphQLSelectionSetPipelineBuilder(builder.ApplicationServices);
         configurePipeline(selectionSetPipelineBuilder);
+
+        // append the end last middleware automatically
+        if (runSelectionSetExecutorAtEnd)
+            selectionSetPipelineBuilder.RunSelectionSetExecutor();
+
         var feature = new SelectionSetPipelineExecutorFeature(selectionSetPipelineBuilder.Build());
+
         builder.Use(next => context =>
         {
             context.Features.Set<ISelectionSetExecutorFeature>(feature);
+            return next(context);
+        });
 
+        return builder;
+    }
+
+    public static GraphQLRequestPipelineBuilder UseDefaultSelectionSetPipeline(
+        this GraphQLRequestPipelineBuilder builder)
+    {
+        return builder.UseSelectionSetPipeline(
+            pipe => { }, 
+            true);
+    }
+
+    public static GraphQLRequestPipelineBuilder UseDefaultValidator(this GraphQLRequestPipelineBuilder builder)
+    {
+        var feature = new ValidatorFeature()
+        {
+            Validator = new Validator3(ExecutionRules.All)
+        };
+
+        builder.Use(next => context =>
+        {
+            context.Features.Set<IValidatorFeature>(feature);
             return next(context);
         });
 

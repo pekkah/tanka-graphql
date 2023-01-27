@@ -98,7 +98,7 @@ public class FederationSchemaBuilderFacts
                     } 
                 }
                 """,
-            VariableValues = new Dictionary<string, object>
+            Variables = new Dictionary<string, object>
             {
                 ["reps"] = new List<object>
                 {

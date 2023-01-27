@@ -17,7 +17,7 @@ public static class ExecutorExtensions
             Document = document,
             InitialValue = initialValue,
             OperationName = operationName,
-            VariableValues = variableValues
+            Variables = variableValues
         }, cancellationToken);
     }
 }

@@ -48,11 +48,12 @@
     <div id="graphiql">Loading...</div>
     <script src="https://unpkg.com/graphiql/graphiql.min.js"
             type="application/javascript"></script>
-    <script>
+<script>
         ReactDOM.render(
             React.createElement(GraphiQL, {
                 fetcher: GraphiQL.createFetcher({
                     url: '{{httpUrl}}',
+                    subscriptionUrl: '{{httpUrl}}/ws'.replace('http', "ws")
                 }),
                 defaultEditorToolsVisibility: true,
             }),

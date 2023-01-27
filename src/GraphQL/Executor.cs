@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.SelectionSets;
+using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL;
 
@@ -29,6 +30,11 @@ public partial class Executor
         _defaults.Set<ISelectionSetExecutorFeature>(new SelectionSetExecutorFeature
         {
             SelectionSetExecutor = selectionSetExecutor
+        });
+
+        _defaults.Set<IValidatorFeature>(new ValidatorFeature()
+        {
+            Validator = new Validator3(ExecutionRules.All)
         });
 
         _logger = logger;

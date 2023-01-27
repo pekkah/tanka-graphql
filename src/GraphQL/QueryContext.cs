@@ -2,6 +2,7 @@
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.SelectionSets;
+using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL;
 
@@ -66,6 +67,9 @@ public record QueryContext
     internal IArgumentBinderFeature ArgumentBinderFeature =>
         _features.Fetch(ref _features.Cache.ArgumentBinder, _ => IArgumentBinderFeature.Default)!;
 
+    internal IValidatorFeature? ValidatorFeature =>
+        _features.Fetch(ref _features.Cache.Validator, _ => null);
+
     public GraphQLRequest Request
     {
         get => RequestFeature.Request;
@@ -121,5 +125,6 @@ public record QueryContext
         public IErrorCollectorFeature? ErrorCollector;
         public IValueCompletionFeature? ValueCompletion;
         public IArgumentBinderFeature? ArgumentBinder;
+        public IValidatorFeature? Validator;
     }
 }

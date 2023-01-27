@@ -12,7 +12,7 @@ public partial class Executor
         var coercedVariableValues = Variables.CoerceVariableValues(
             queryContext.Schema,
             operation,
-            request.VariableValues);
+            request.Variables);
 
         queryContext.CoercedVariableValues = coercedVariableValues;
         queryContext.OperationDefinition = operation;

@@ -28,8 +28,7 @@ public partial class Executor
     {
         using (_logger.Begin(queryContext.Request.OperationName ?? string.Empty))
         {
-            //todo: validation
-            var validationResult = ValidationResult.Success;
+            var validationResult = await queryContext.Validate();
 
             if (!validationResult.IsValid)
                 throw new QueryException("todo: validation error")

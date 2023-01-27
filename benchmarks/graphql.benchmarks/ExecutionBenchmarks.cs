@@ -48,7 +48,7 @@ public class ExecutionBenchmarks
     //}
 
     [Benchmark(Baseline = true)]
-    public async Task Query_without_validation()
+    public async Task Query_with_validation()
     {
         var result = await _executor.Execute(new GraphQLRequest(_query));
 
@@ -56,7 +56,7 @@ public class ExecutionBenchmarks
     }
 
     [Benchmark]
-    public async Task Query_Complex_without_validation()
+    public async Task Query_Complex_with_validation()
     {
         var result = await _executor.Execute(new GraphQLRequest(_complexQuery));
 

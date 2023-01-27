@@ -5,7 +5,7 @@ namespace Tanka.GraphQL.Server;
 
 public static class DefaultGraphQLSelectionSetPipelineMiddlewares
 {
-    public static GraphQLSelectionSetPipelineBuilder UseSelectionSetExecutor(
+    public static GraphQLSelectionSetPipelineBuilder RunSelectionSetExecutor(
         this GraphQLSelectionSetPipelineBuilder builder)
     {
         var executor = builder.ApplicationServices.GetRequiredService<ISelectionSetExecutor>();

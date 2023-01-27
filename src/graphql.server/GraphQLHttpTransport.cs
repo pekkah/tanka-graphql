@@ -33,12 +33,12 @@ public class GraphQLHttpTransport : IGraphQLTransport
     {
         return async httpContext =>
         {
-            var context = new GraphQLRequestContext();
-            context.Features.Set(httpContext.Features.Get<IServiceProvidersFeature>());
-
             if (!httpContext.WebSockets.IsWebSocketRequest
                 && httpContext.Request.HasJsonContentType())
             {
+                var context = new GraphQLRequestContext();
+                context.Features.Set(httpContext.Features.Get<IServiceProvidersFeature>());
+
                 var stopwatch = Stopwatch.StartNew();
 
                 // Parse request
@@ -60,7 +60,7 @@ public class GraphQLHttpTransport : IGraphQLTransport
                     InitialValue = null,
                     Document = request.Query,
                     OperationName = request.OperationName,
-                    VariableValues = request.Variables
+                    Variables = request.Variables
                 };
 
                 var enumerator = pipeline(context).GetAsyncEnumerator();
