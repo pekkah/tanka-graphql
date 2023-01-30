@@ -16,4 +16,8 @@ public class GraphQLHttpRequest
     [JsonPropertyName("variables")]
     [JsonConverter(typeof(NestedDictionaryConverter))]
     public IReadOnlyDictionary<string, object?>? Variables { get; set; }
+
+    [JsonPropertyName("extensions")]
+    [JsonConverter(typeof(NestedDictionaryConverter))]
+    public IReadOnlyDictionary<string, object?>? Extensions { get; set; }
 }

@@ -20,7 +20,6 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageReference Include="System.IO.Pipelines" Version="6.0.2" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
-    <PackageReference Include="WebSocketPipe" Version="0.9.0" />
   </ItemGroup>
 
   <ItemGroup>

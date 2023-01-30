@@ -1,6 +1,9 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
+using Tanka.GraphQL.Fields;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Server;
+using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.ValueResolution;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +29,15 @@ builder.AddTankaGraphQL3()
             {
                 { "version: String!", context => context.ResolveAs("3.0") }
             });
+
+            b.ConfigureObject("Subscription", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+            {
+                { "randomSequence: Int!", r => r.Run(c => c.ResolveAs(c.ObjectValue)) }
+            }, new()
+            {
+                { "randomSequence: Int!", r => r.ResolveAsStream(Random) }
+            });
+
         });
     })
     //.AddWebSockets()
@@ -52,3 +64,13 @@ app.MapTankaGraphQL3("/graphql-custom", gql =>
 });
 
 app.Run();
+
+static async IAsyncEnumerable<int> Random(CancellationToken cancellationToken)
+{
+    int i = 0;
+    while (!cancellationToken.IsCancellationRequested)
+    {
+        yield return ++i;
+        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+    }
+}

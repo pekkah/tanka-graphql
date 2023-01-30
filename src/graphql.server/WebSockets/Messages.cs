@@ -21,9 +21,13 @@ public class MessageConverter: JsonConverter<MessageBase>
 
         var messageType = ReadMessageType(reader);
 
+        //todo: we could create a code generator for this converter
         return messageType switch
         {
             MessageTypes.ConnectionInit => JsonSerializer.Deserialize<ConnectionInit>(ref reader, options),
+            MessageTypes.Ping => JsonSerializer.Deserialize<Ping>(ref reader, options),
+            MessageTypes.Subscribe => JsonSerializer.Deserialize<Subscribe>(ref reader, options),
+            MessageTypes.Complete => JsonSerializer.Deserialize<Complete>(ref reader, options),
             _ => throw new JsonException()
         };
     }
@@ -49,6 +53,7 @@ public class MessageConverter: JsonConverter<MessageBase>
 
     public override void Write(Utf8JsonWriter writer, MessageBase value, JsonSerializerOptions options)
     {
+        JsonSerializer.Serialize(writer, value, value.GetType(), options);
     }
 }
 
@@ -58,6 +63,10 @@ public static class MessageTypes
     public const string ConnectionAck = "connection_ack";
     public const string Ping = "ping";
     public const string Pong = "pong";
+    public const string Subscribe = "subscribe";
+    public const string Next = "next";
+    public const string Error = "error";
+    public const string Complete = "complete";
 }
 
 public class ConnectionInit : MessageBase
@@ -69,6 +78,7 @@ public class ConnectionInit : MessageBase
 
     [JsonPropertyName("payload")]
     [JsonConverter(typeof(NestedDictionaryConverter))]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<string, object>? Payload { get; set; }
 }
 
@@ -81,6 +91,7 @@ public class ConnectionAck : MessageBase
 
     [JsonPropertyName("payload")]
     [JsonConverter(typeof(NestedDictionaryConverter))]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<string, object>? Payload { get; set; }
 }
 
@@ -93,6 +104,7 @@ public class Ping : MessageBase
 
     [JsonPropertyName("payload")]
     [JsonConverter(typeof(NestedDictionaryConverter))]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<string, object>? Payload { get; set; }
 }
 
@@ -105,5 +117,59 @@ public class Pong : MessageBase
 
     [JsonPropertyName("payload")]
     [JsonConverter(typeof(NestedDictionaryConverter))]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<string, object>? Payload { get; set; }
+}
+
+public class Subscribe: MessageBase
+{
+    public Subscribe()
+    {
+        Type = MessageTypes.Subscribe;
+    }
+
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
+
+    [JsonPropertyName("payload")]
+    public GraphQLHttpRequest Payload { get; set; }
+}
+
+public class Next: MessageBase
+{
+    public Next()
+    {
+        Type = MessageTypes.Next;
+    }
+
+    [JsonPropertyName("id")]
+    public required string Id { get; set; }
+
+    [JsonPropertyName("payload")]
+    public required ExecutionResult Payload { get; set; }
+}
+
+public class Error : MessageBase
+{
+    public Error()
+    {
+        Type = MessageTypes.Error;
+    }
+
+    [JsonPropertyName("id")]
+    public required string Id { get; set; }
+
+    [JsonPropertyName("payload")]
+    public required ExecutionError[] Payload { get; set; }
+}
+
+public class Complete: MessageBase
+{
+    public Complete()
+    {
+        Type = MessageTypes.Complete;
+    }
+
+    [JsonPropertyName("id")]
+    public required string Id { get; set; }
 }

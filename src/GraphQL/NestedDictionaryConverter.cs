@@ -46,9 +46,15 @@ public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<strin
         return dictionary;
     }
 
-    public override void Write(Utf8JsonWriter writer, IReadOnlyDictionary<string, object?> value,
+    public override void Write(
+        Utf8JsonWriter writer,
+        IReadOnlyDictionary<string, object?> value,
         JsonSerializerOptions options)
     {
+        foreach (var kv in value)
+        {
+            JsonSerializer.Serialize(writer, kv, options);
+        }
     }
 
     private object? ReadValue(ref Utf8JsonReader reader, JsonSerializerOptions options)

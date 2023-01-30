@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tanka.GraphQL.SelectionSets;
+using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server;
