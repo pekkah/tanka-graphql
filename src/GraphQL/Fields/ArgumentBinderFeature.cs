@@ -1,17 +1,18 @@
 ﻿using System.Reflection;
 using Tanka.GraphQL.Internal;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Fields;
 
 public static class ArgumentBinderQueryContextExtensions
 {
-    public static T? BindInputObject<T>(this QueryContext queryContext, ResolverContext context, string name)
+    public static T? BindInputObject<T>(this QueryContext queryContext, ResolverContextBase context, string name)
         where T : new()
     {
         return queryContext.ArgumentBinderFeature.BindInputObject<T>(context, name);
     }
 
-    public static IEnumerable<T?>? BindInputObjectList<T>(this QueryContext queryContext, ResolverContext context,
+    public static IEnumerable<T?>? BindInputObjectList<T>(this QueryContext queryContext, ResolverContextBase context,
         string name)
         where T : new()
     {
@@ -23,17 +24,15 @@ public interface IArgumentBinderFeature
 {
     static IArgumentBinderFeature Default = new ArgumentBinderFeature();
 
-    T? BindInputObject<T>(ResolverContext context, string name)
+    T? BindInputObject<T>(ResolverContextBase context, string name)
         where T : new();
 
-    IEnumerable<T?>? BindInputObjectList<T>(ResolverContext context, string name) where T : new();
+    IEnumerable<T?>? BindInputObjectList<T>(ResolverContextBase context, string name) where T : new();
 }
 
 public class ArgumentBinderFeature : IArgumentBinderFeature
 {
-    private static Dictionary<Type, List<PropertyInfo>> _cache = new();
-
-    public T? BindInputObject<T>(ResolverContext context, string name)
+    public T? BindInputObject<T>(ResolverContextBase context, string name)
         where T : new()
     {
         var argument = context.Arguments[name];
@@ -49,7 +48,7 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
         return target;
     }
 
-    public IEnumerable<T?>? BindInputObjectList<T>(ResolverContext context, string name) where T : new()
+    public IEnumerable<T?>? BindInputObjectList<T>(ResolverContextBase context, string name) where T : new()
     {
         var argument = context.Arguments[name];
 

@@ -31,7 +31,7 @@ public partial class Executor
             var validationResult = await queryContext.Validate();
 
             if (!validationResult.IsValid)
-                throw new QueryException("todo: validation error")
+                throw new QueryException(validationResult.Errors.First().Message)
                 {
                     Path = new()
                 };

@@ -5,7 +5,7 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.ValueSerialization;
 
-namespace Tanka.GraphQL.Fields;
+namespace Tanka.GraphQL.ValueResolution;
 
 public interface IValueCompletionFeature
 {

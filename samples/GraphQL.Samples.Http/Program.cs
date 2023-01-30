@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using Tanka.GraphQL.Fields;
@@ -32,10 +33,14 @@ builder.AddTankaGraphQL3()
 
             b.ConfigureObject("Subscription", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
             {
-                { "randomSequence: Int!", r => r.Run(c => c.ResolveAs(c.ObjectValue)) }
+                { "counter: Int!", r => r.Run(c => c.ResolveAs(c.ObjectValue)) }
             }, new()
             {
-                { "randomSequence: Int!", r => r.ResolveAsStream(Random) }
+                { "counter(to: Int!): Int!", r => r.Run((c, ct) =>
+                {
+                    c.ResolvedValue = Wrap(Count(c.GetArgument<int>("to"), ct));
+                    return default;
+                })}
             });
 
         });
@@ -65,12 +70,22 @@ app.MapTankaGraphQL3("/graphql-custom", gql =>
 
 app.Run();
 
-static async IAsyncEnumerable<int> Random(CancellationToken cancellationToken)
+static async IAsyncEnumerable<object?> Wrap<T>(IAsyncEnumerable<T> source)
+{
+    await foreach (var o in source)
+        yield return o;
+}
+
+static async IAsyncEnumerable<int> Count(int to, [EnumeratorCancellation] CancellationToken cancellationToken)
 {
     int i = 0;
     while (!cancellationToken.IsCancellationRequested)
     {
         yield return ++i;
-        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+
+        if (i == to)
+            break;
+
+        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
     }
 }

@@ -1,5 +1,4 @@
-﻿using Tanka.GraphQL.Fields;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
+﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.ValueSerialization;
 

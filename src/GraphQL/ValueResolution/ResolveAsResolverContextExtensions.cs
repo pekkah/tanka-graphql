@@ -1,4 +1,4 @@
-﻿namespace Tanka.GraphQL.Fields;
+﻿namespace Tanka.GraphQL.ValueResolution;
 
 public static class ResolveAsResolverContextExtensions
 {

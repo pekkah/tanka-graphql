@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
