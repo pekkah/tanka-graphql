@@ -222,7 +222,6 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
                 {
                     var message = await Output.Reader.ReadAsync();
                     var bytes = JsonSerializer.SerializeToUtf8Bytes<T>(message, _jsonOptions);
-                    var json = JsonSerializer.Serialize<T>(message, _jsonOptions);
 
                     //todo: do we need cancellation token
                     await socket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
