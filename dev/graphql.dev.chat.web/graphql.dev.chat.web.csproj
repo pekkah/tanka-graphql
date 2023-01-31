@@ -21,12 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GraphQL.Server.Ui.Playground" Version="5.2.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\GraphQL.Extensions.Tracing\GraphQL.Extensions.Tracing.csproj" />
     <ProjectReference Include="..\..\src\graphql.server\graphql.server.csproj" />
+    <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
     <ProjectReference Include="..\..\src\graphql\GraphQL.Legacy.csproj" />
     <ProjectReference Include="..\graphql.dev.chat.data\graphql.dev.chat.data.csproj" />
   </ItemGroup>

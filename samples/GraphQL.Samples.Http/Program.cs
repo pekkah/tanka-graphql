@@ -16,7 +16,6 @@ builder.Services.Configure<JsonOptions>(json =>
 
 // configure services
 builder.AddTankaGraphQL3()
-    .AddHttp()
     .AddSchema("schemaName", schema =>
     {
         schema.Configure(b =>
@@ -45,11 +44,10 @@ builder.AddTankaGraphQL3()
 
         });
     })
-    //.AddWebSockets()
+    .AddHttp()
+    .AddWebSockets()
     //.AddSignalR()
     ;
-
-builder.Services.AddSingleton<IGraphQLTransport, GraphQLWSTransport>();
 
 var app = builder.Build();
 

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
 using Tanka.GraphQL.Server.WebSockets.WebSocketPipe;
 
 namespace Tanka.GraphQL.Server.WebSockets;
@@ -62,7 +61,7 @@ public class ServerMethods
         var context = new GraphQLRequestContext();
 
         //todo: replace this with context.RequestService = _httpContext.RequestServices
-        context.Features.Set(_httpContext.Features.Get<IServiceProvidersFeature>());
+        context.RequestServices = _httpContext.RequestServices;
         context.Request = new()
         {
             InitialValue = null,

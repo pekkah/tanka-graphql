@@ -37,7 +37,7 @@ public class GraphQLHttpTransport : IGraphQLTransport
                 && httpContext.Request.HasJsonContentType())
             {
                 var context = new GraphQLRequestContext();
-                context.Features.Set(httpContext.Features.Get<IServiceProvidersFeature>());
+                context.RequestServices = httpContext.RequestServices;
 
                 var stopwatch = Stopwatch.StartNew();
 

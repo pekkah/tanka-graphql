@@ -8,6 +8,12 @@ public static class ResolveAsResolverBuilderExtensions
         return builder;
     }
 
+    public static ResolverBuilder ResolveAsPropertyOf<T>(this ResolverBuilder builder, Func<T, object?> valueFunc)
+    {
+        builder.Run(ctx => ctx.ResolveAsPropertyOf<T>(valueFunc));
+        return builder;
+    }
+
     public static SubscriberBuilder ResolveAsStream<T>(this SubscriberBuilder builder, Func<CancellationToken, IAsyncEnumerable<T?>> generator)
     {
         builder.Run((ctx, unsubscribe) =>

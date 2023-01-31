@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Tanka.GraphQL.Server.WebSockets;
 
-namespace Tanka.GraphQL.Server.WebSockets;
+namespace Tanka.GraphQL.Server;
 
 /// <summary>
 ///     WebSocket transport compliant with graphql-ws protocol

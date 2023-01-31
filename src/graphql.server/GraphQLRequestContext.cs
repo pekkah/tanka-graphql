@@ -9,19 +9,24 @@ public record GraphQLRequestContext : QueryContext
 
     public GraphQLRequestContext(IFeatureCollection features) : base(features)
     {
+        _features.Initalize(features);
     }
 
-    public GraphQLRequestContext()
+    public GraphQLRequestContext(): this(new FeatureCollection(5))
     {
     }
 
-    public IServiceProvider RequestServices => ServiceProvidersFeature.RequestServices;
+    public IServiceProvider RequestServices
+    {
+        get => ServiceProvidersFeature.RequestServices;
+        set => ServiceProvidersFeature.RequestServices = value;
+    } 
 
-    private IServiceProvidersFeature ServiceProvidersFeature =>
-        _features.Fetch(ref _features.Cache.ServiceProviders, _ => null)!;
+    private IRequestServicesFeature ServiceProvidersFeature =>
+        _features.Fetch(ref _features.Cache.ServiceProviders, _ => new RequestServicesFeature())!;
 
     private struct FeatureInterfaces
     {
-        public IServiceProvidersFeature? ServiceProviders;
+        public IRequestServicesFeature? ServiceProviders;
     }
 }

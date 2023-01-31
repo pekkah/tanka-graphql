@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tanka.GraphQL.SelectionSets;
-using Tanka.GraphQL.Server.WebSockets;
+using Tanka.GraphQL.Server;
 using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server;
@@ -37,13 +37,13 @@ public class GraphQLApplicationBuilder
 
     public GraphQLApplicationBuilder AddHttp()
     {
-        ApplicationServices.TryAddSingleton<IGraphQLTransport, GraphQLHttpTransport>();
+        ApplicationServices.TryAddEnumerable(ServiceDescriptor.Singleton<IGraphQLTransport, GraphQLHttpTransport>());
         return this;
     }
 
     public GraphQLApplicationBuilder AddWebSockets()
     {
-        ApplicationServices.TryAddSingleton<IGraphQLTransport, GraphQLWSTransport>();
+        ApplicationServices.TryAddEnumerable(ServiceDescriptor.Singleton<IGraphQLTransport, GraphQLWSTransport>());
         return this;
     }
 

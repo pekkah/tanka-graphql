@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Samples.Chat.Data.Domain;
 
@@ -20,12 +18,7 @@ public class Message
     public DateTimeOffset Timestamp { get; set; }
 }
 
-public class InputMessage : IReadFromObjectDictionary
+public class InputMessage
 {
     public string Content { get; set; }
-
-    public void Read(IReadOnlyDictionary<string, object> source)
-    {
-        Content = source.GetValue<string>("content");
-    }
 }
