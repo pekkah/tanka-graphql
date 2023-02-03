@@ -18,7 +18,7 @@ public partial class Executor
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var queryContext = BuildQueryContextAsync(request);
+        QueryContext queryContext = BuildQueryContextAsync(request);
         return Subscribe(queryContext, cancellationToken);
     }
 
@@ -28,12 +28,12 @@ public partial class Executor
     {
         using (_logger.Begin(queryContext.Request.OperationName ?? string.Empty))
         {
-            var validationResult = await queryContext.Validate();
+            ValidationResult validationResult = await queryContext.Validate();
 
             if (!validationResult.IsValid)
                 throw new QueryException(validationResult.Errors.First().Message)
                 {
-                    Path = new()
+                    Path = new NodePath()
                 };
 
             switch (queryContext.OperationDefinition.Operation)
@@ -45,9 +45,28 @@ public partial class Executor
                     yield return await ExecuteQuery(queryContext);
                     break;
                 case OperationType.Subscription:
-                    await foreach (var er in ExecuteSubscription(queryContext, cancellationToken)) yield return er;
+                    await foreach (ExecutionResult er in ExecuteSubscription(queryContext, cancellationToken))
+                        yield return er;
                     break;
             }
         }
+    }
+
+    public static IAsyncEnumerable<ExecutionResult> Subscribe(
+        ISchema schema,
+        ExecutableDocument document,
+        CancellationToken cancellationToken,
+        Dictionary<string, object?>? variableValues = null,
+        object? initialValue = null,
+        string? operationName = null)
+    {
+        var executor = new Executor(schema);
+        return executor.Subscribe(new GraphQLRequest
+        {
+            Document = document,
+            InitialValue = initialValue,
+            OperationName = operationName,
+            Variables = variableValues
+        }, cancellationToken);
     }
 }

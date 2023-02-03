@@ -12,10 +12,6 @@
     <EmbeddedResource Remove="ValueResolution\**" />
     <None Remove="ValueResolution\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="SubscriptionsFacts.cs" />
-  </ItemGroup>
   <ItemGroup>
    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

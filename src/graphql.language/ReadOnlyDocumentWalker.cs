@@ -10,15 +10,26 @@ public class ReadOnlyDocumentWalker<TContext>
 {
     private readonly TContext _context;
     private readonly IReadOnlyList<IReadOnlyDocumentVisitor<TContext>> _visitors;
+    private readonly Func<INode, bool> _visitNode;
 
-    public ReadOnlyDocumentWalker(IReadOnlyList<IReadOnlyDocumentVisitor<TContext>> visitors, TContext context)
+    public ReadOnlyDocumentWalker(
+        IReadOnlyList<IReadOnlyDocumentVisitor<TContext>> visitors, 
+        TContext context,
+        Func<INode, bool>? visitNode)
     {
         _visitors = visitors;
         _context = context;
+        _visitNode = visitNode ?? (_ => true);
     }
 
     public virtual void Visit(INode? node)
     {
+        if (node is null)
+            return;
+
+        if (!_visitNode(node))
+            return;
+
         switch (node)
         {
             case null:

@@ -927,6 +927,22 @@ multiple lines
         AssertPrintedEquals(source, actual);
     }
 
+    [Fact]
+    public void DirectiveDefinition()
+    {
+        /* Given */
+        var source = @"directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE";
+
+        var node = Parser.Create(source)
+            .ParseDirectiveDefinition();
+
+        /* When */
+        var actual = Printer.Print(node);
+
+        /* Then */
+        AssertPrintedEquals(source, actual);
+    }
+
     private void AssertPrintedEquals(string expected, string actual)
     {
         string Normalize(string str)

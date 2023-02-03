@@ -1,8 +1,6 @@
-﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
+﻿namespace Tanka.GraphQL.Extensions.ApolloFederation;
 
-namespace Tanka.GraphQL.Extensions.ApolloFederation;
-
-public static class FederationTypes
+public static class SubgraphTypes
 {
     public static TypeSystemDocument TypeSystem =>
         @"

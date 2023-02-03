@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;
@@ -22,7 +23,7 @@ public class FederationSchemaBuilderFacts
                     type Address {
                         street: String
                     }")
-            .AddFederation(FederatedSchemaBuildOptions.Default);
+            .AddSubgraph(SubgraphOptions.Default);
 
         /* When */
         var schema = await builder.Build();
@@ -44,7 +45,7 @@ public class FederationSchemaBuilderFacts
                     type Person @key(fields: ""id"") {
                         id: ID!
                     }")
-            .AddFederation(FederatedSchemaBuildOptions.Default);
+            .AddSubgraph(SubgraphOptions.Default);
 
         /* When */
         var schema = await builder.Build();
@@ -69,7 +70,7 @@ public class FederationSchemaBuilderFacts
                     type Address @key(fields: ""street"") {
                         street: String
                     }")
-            .AddFederation(new(new DictionaryReferenceResolversMap
+            .AddSubgraph(new(new DictionaryReferenceResolversMap
             {
                 ["Person"] = (context, type, representation) => new(
                     new ResolveReferenceResult(type, representation))
@@ -140,7 +141,7 @@ type Review  @key(fields: ""id"") {
 type Product @key(fields: ""upc"") @extends {
   upc: String! @external
 }")
-            .AddFederation(FederatedSchemaBuildOptions.Default);
+            .AddSubgraph(SubgraphOptions.Default);
         /* When */
         var schema = await builder.Build();
 

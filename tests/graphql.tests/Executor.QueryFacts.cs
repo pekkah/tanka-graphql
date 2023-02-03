@@ -25,7 +25,7 @@ public class QueryFacts
             """;
 
         /* When */
-        var result = await new GraphQL.Executor(schema)
+        var result = await new Executor(schema)
             .Execute(new GraphQLRequest
             {
                 Document = query

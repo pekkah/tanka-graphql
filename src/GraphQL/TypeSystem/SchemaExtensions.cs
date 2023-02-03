@@ -28,8 +28,13 @@ public static class TypeSystemSchemaExtensions
 
     public static TypeSystemDocument ToTypeSystem(this ISchema schema)
     {
-        var typeDefinitions = schema.QueryTypes<TypeDefinition>().ToList();
-        var directiveDefinitions = schema.QueryDirectiveTypes().ToList();
+        var typeDefinitions = schema.QueryTypes<TypeDefinition>()
+            .OrderBy(d => d.Name.Value)
+            .ToList();
+        
+        var directiveDefinitions = schema.QueryDirectiveTypes()
+            .OrderBy(t => t.Name.Value)
+            .ToList();
 
         var schemaDefinition = schema.ToSchemaDefinition();
         return new(

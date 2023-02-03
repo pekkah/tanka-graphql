@@ -326,6 +326,7 @@ public class ParserFacts
         Assert.Equal("name", directive.Name);
     }
 
+    
     [Fact]
     public void Directive_Arguments()
     {
@@ -343,7 +344,7 @@ public class ParserFacts
     public void Directives()
     {
         /* Given */
-        var sut = Parser.Create("@name(a: 1, b: true, c: null) @version {");
+        var sut = Parser.Create("@name(a: 1, b: true, c: null) @version");
 
         /* When */
         var directives = sut.ParseOptionalDirectives();

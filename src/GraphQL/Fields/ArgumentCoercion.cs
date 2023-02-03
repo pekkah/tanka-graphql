@@ -69,7 +69,7 @@ public static class ArgumentCoercion
         ISchema schema,
         ObjectDefinition objectDefinition,
         FieldSelection field,
-        IReadOnlyDictionary<string, object?> coercedVariableValues)
+        IReadOnlyDictionary<string, object?>? coercedVariableValues)
     {
         var coercedValues = new Dictionary<string, object?>();
 

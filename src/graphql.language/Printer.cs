@@ -9,60 +9,71 @@ namespace Tanka.GraphQL.Language;
 
 public class PrinterContext : DocumentWalkerContextBase
 {
-    private StringBuilder _builder { get; } = new();
+    private readonly bool _printDescriptions;
+
+    public PrinterContext(bool printDescriptions = false)
+    {
+        _printDescriptions = printDescriptions;
+    }
+
+    private StringBuilder Builder { get; } = new();
 
     public void Append(object obj)
     {
-        _builder.Append(obj);
+        Builder.Append(obj);
     }
 
     public void AppendLine()
     {
-        _builder.AppendLine();
+        Builder.AppendLine();
     }
 
     public void AppendJoin(char separator, IEnumerable<object> items)
     {
-        _builder.Append(string.Join($"{separator}", items));
+        Builder.Append(string.Join($"{separator}", items));
     }
 
     public bool EndsWith(char c)
     {
-        return _builder[_builder.Length-1] == c;
+        return Builder[Builder.Length-1] == c;
     }
 
     public void Rewind()
     {
-        _builder.Remove(_builder.Length - 1, 1);
+        Builder.Remove(Builder.Length - 1, 1);
     }
 
     public override string ToString()
     {
-        return _builder.ToString().Trim(' ');
+        return Builder.ToString().Trim(' ');
     }
 
     public void AppendDescription(StringValue? description)
     {
-        if (string.IsNullOrEmpty(description))
+        if (!_printDescriptions)
             return;
 
-        var str = description.ToString();
-        Append("\"\"\"");
+        var str = description?.ToString();
+        if (string.IsNullOrEmpty(str))
+            return;
+
+        Append(@"""""""");
         Append(str);
-        Append("\"\"\"");
+        Append(@"""""""");
         Append(" ");
     }
 }
 
 public class Printer : ReadOnlyDocumentVisitorBase<PrinterContext>
 {
-    public static string Print(INode node)
+    public static string Print(INode node, Func<INode, bool>? printNode = null, bool printDescriptions = true)
     {
         var printer = new Printer();
-        var context = new PrinterContext();
+        var context = new PrinterContext(printDescriptions);
         var walker = new ReadOnlyDocumentWalker<PrinterContext>(
             new[] { printer },
-            context
+            context, 
+            printNode
         );
 
         walker.Visit(node);
@@ -75,7 +86,8 @@ public class Printer : ReadOnlyDocumentVisitorBase<PrinterContext>
         var context = new PrinterContext();
         var walker = new ReadOnlyDocumentWalker<PrinterContext>(
             new[] { printer },
-            context
+            context,
+            null
         );
 
         walker.Visit(nodes);
@@ -115,15 +127,15 @@ public class Printer : ReadOnlyDocumentVisitorBase<PrinterContext>
     {
         if (stringValue.ValueSpan.IndexOf((byte)'\n') != -1)
         {
-            context.Append("\"\"\"");
-            context.Append(Encoding.UTF8.GetString(stringValue.ValueSpan));
-            context.Append("\"\"\"");
+            context.Append(@"""""""");
+            context.Append(stringValue.ToString());
+            context.Append(@"""""""");
         }
         else
         {
-            context.Append("\"");
-            context.Append(Encoding.UTF8.GetString(stringValue.ValueSpan));
-            context.Append("\"");
+            context.Append(@"""");
+            context.Append(stringValue.ToString());
+            context.Append(@"""");
         }
     }
 
@@ -332,12 +344,6 @@ public class Printer : ReadOnlyDocumentVisitorBase<PrinterContext>
         context.Append("directive");
         context.Append(' ');
         context.Append($"@{directiveDefinition.Name}");
-
-        if (directiveDefinition.IsRepeatable)
-        {
-            context.Append(' ');
-            context.Append("repeatable");
-        }
     }
 
     protected override void EnterArgumentsDefinition(PrinterContext context, ArgumentsDefinition argumentsDefinition)
@@ -374,6 +380,12 @@ public class Printer : ReadOnlyDocumentVisitorBase<PrinterContext>
 
     protected override void ExitDirectiveDefinition(PrinterContext context, DirectiveDefinition directiveDefinition)
     {
+        if (directiveDefinition.IsRepeatable)
+        {
+            context.Append(' ');
+            context.Append("repeatable");
+        }
+
         context.Append(" on");
         context.Append(' ');
 

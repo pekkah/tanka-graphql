@@ -23,4 +23,19 @@ public class SelectionSetPipelineBuilder
 
         return pipeline;
     }
+
+    public SelectionSetPipelineBuilder RunSelectionSetExecutor()
+    {
+        var executor = new SelectionSetExecutor();
+        return Use(_ => async context =>
+        {
+            context.Result =
+                await executor.ExecuteSelectionSet(
+                    context.QueryContext,
+                    context.SelectionSet,
+                    context.ObjectDefinition,
+                    context.ObjectValue,
+                    context.Path);
+        });
+    }
 }

@@ -76,6 +76,19 @@ directive @name repeatable on MUTATION");
         Assert.True(definition.IsRepeatable);
     }
 
+    [Fact]
+    public void DirectiveDefinition_Repeatable2()
+    {
+        /* Given */
+        var sut = Parser.Create("directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE");
+
+        /* When */
+        var definition = sut.ParseDirectiveDefinition();
+
+        /* Then */
+        Assert.True(definition.IsRepeatable);
+    }
+
     [Theory]
     [InlineData("on FIELD", ExecutableDirectiveLocations.FIELD)]
     [InlineData("on | FIELD", ExecutableDirectiveLocations.FIELD)]

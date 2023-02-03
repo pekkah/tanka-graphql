@@ -24,12 +24,15 @@ public record GraphQLRequest
     public required ExecutableDocument Document { get; init; }
 
     [JsonPropertyName("initialValue")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public object? InitialValue { get; set; }
 
     [JsonPropertyName("operationName")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? OperationName { get; set; }
 
     [JsonPropertyName("variables")]
     [JsonConverter(typeof(NestedDictionaryConverter))]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<string, object?>? Variables { get; set; }
 }

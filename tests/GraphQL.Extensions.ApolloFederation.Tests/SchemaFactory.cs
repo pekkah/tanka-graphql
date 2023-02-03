@@ -37,7 +37,7 @@ type Query {
 
         var builder = new ExecutableSchemaBuilder();
         builder.AddTypeSystem(typeDefs);
-        builder.AddFederation(new(new DictionaryReferenceResolversMap
+        builder.AddSubgraph(new(new DictionaryReferenceResolversMap
         {
             ["User"] = UserReference,
             ["Product"] = ProductReference

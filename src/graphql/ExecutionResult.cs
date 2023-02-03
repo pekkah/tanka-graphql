@@ -12,6 +12,7 @@ public record ExecutionResult
     private IReadOnlyList<ExecutionError>? _errors;
     private IReadOnlyDictionary<string, object>? _extensions;
 
+    [JsonPropertyName("data")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<string, object?>? Data
     {
@@ -28,7 +29,9 @@ public record ExecutionResult
         }
     }
 
+    [JsonPropertyName("extensions")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(NestedDictionaryConverter))]
     public IReadOnlyDictionary<string, object>? Extensions
     {
         get => _extensions;
@@ -44,6 +47,7 @@ public record ExecutionResult
         }
     }
 
+    [JsonPropertyName("errors")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyList<ExecutionError>? Errors
     {

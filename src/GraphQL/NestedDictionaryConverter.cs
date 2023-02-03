@@ -27,11 +27,11 @@ public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<strin
         var dictionary = new Dictionary<string, object?>();
         while (reader.Read())
         {
-            if (reader.TokenType == JsonTokenType.EndObject) return dictionary;
+            if (reader.TokenType == JsonTokenType.EndObject)
+                break;
 
             EnsureToken(reader.TokenType, JsonTokenType.PropertyName);
-
-
+            
             var propertyName = reader.GetString();
 
             if (propertyName is null)
@@ -112,7 +112,7 @@ public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<strin
         if (v is null)
             throw new JsonException("Invalid number");
 
-        reader.Read();
+        //reader.Read();
         return v;
     }
 
@@ -120,7 +120,7 @@ public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<strin
     private object? ReadString(ref Utf8JsonReader reader)
     {
         var v = reader.GetString();
-        reader.Read();
+        //reader.Read();
         return v;
     }
 

@@ -18,7 +18,7 @@ public static class ArgumentsResolverContextExtensions
     {
         return context.QueryContext.BindInputObject<T>(context, name);
     }
-    public static IEnumerable<T?> BindInputObjectList<T>(this ResolverContextBase context, string name)
+    public static IEnumerable<T?>? BindInputObjectList<T>(this ResolverContextBase context, string name)
         where T : new()
     {
         return context.QueryContext.BindInputObjectList<T>(context, name);

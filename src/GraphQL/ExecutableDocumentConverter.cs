@@ -11,7 +11,6 @@ public class ExecutableDocumentConverter : JsonConverter<ExecutableDocument>
     {
         //todo: we could use the reader.CopyString to use span
         var text = reader.GetString();
-        //reader.Read();
         if (string.IsNullOrEmpty(text))
             return null;
 

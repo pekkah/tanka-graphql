@@ -212,7 +212,11 @@ public class IntrospectionResolvers : ResolversMap
             { "locations", context => context.ResolveAsPropertyOf<DirectiveDefinition>(d => LocationsOf(d.DirectiveLocations)) },
             {
                 "args",
-                context => context.ResolveAsPropertyOf<DirectiveDefinition>(d => { return d.Arguments?.OrderBy(t => t.Name.Value); })
+                context => context.ResolveAsPropertyOf<DirectiveDefinition>(d =>
+                {
+                    return d.Arguments?.OrderBy(t => t.Name.Value)
+                        ?? Enumerable.Empty<InputValueDefinition>();
+                })
             },
             { "isRepeatable", context => context.ResolveAsPropertyOf<DirectiveDefinition>(d => d.IsRepeatable) }
         };

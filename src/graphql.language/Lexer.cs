@@ -70,6 +70,12 @@ public ref struct Lexer
                 return true;
             }
 
+            /*if (_reader.IsNext(Constants.EscapedQuote))
+            {
+                ReadStringValue();
+                return true;
+            }*/
+
             if (Constants.IsPunctuator(code))
             {
                 ReadPunctuator();
@@ -301,6 +307,8 @@ public ref struct Lexer
                     _reader.Advance();
                     StartNewLine();
                     break;
+                case Constants.Backslash:
+
                 case Constants.Return:
                     _reader.Advance();
                     break;

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Subscriptions;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -15,10 +18,15 @@ public class Message
 public class SubscriptionsFacts
 {
     private readonly ISchema _executable;
-    private readonly EventChannel<Message> _messagesChannel;
+    private readonly BroadcastChannel<Message> _messageBroadcast;
+    private readonly Channel<Message> _messageChannel;
 
     public SubscriptionsFacts()
     {
+        // data
+        var messages = new List<Message>();
+        _messageChannel = Channel.CreateUnbounded<Message>();
+        _messageBroadcast = new BroadcastChannel<Message>(_messageChannel);
         // schema
         var builder = new SchemaBuilder()
             .Add(@"
@@ -36,24 +44,21 @@ type Subscription {
 
 ");
 
-        // data
-        var messages = new List<Message>();
-        _messagesChannel = new EventChannel<Message>();
-
         // resolvers
-        ValueTask<IResolverResult> GetMessagesAsync(IResolverContext context)
+        ValueTask GetMessagesAsync(ResolverContext context)
         {
-            return ResolveSync.As(messages);
+            return context.ResolveAs(messages);
         }
 
-        ValueTask<ISubscriberResult> OnMessageAdded(IResolverContext context, CancellationToken unsubscribe)
+        ValueTask OnMessageAdded(SubscriberContext context, CancellationToken unsubscribe)
         {
-            return ResolveSync.Subscribe(_messagesChannel, unsubscribe);
+            context.ResolvedValue = _messageBroadcast.Subscribe(unsubscribe);
+            return default;
         }
 
-        ValueTask<IResolverResult> ResolveMessage(IResolverContext context)
+        ValueTask ResolveMessage(ResolverContext context)
         {
-            return ResolveSync.As(context.ObjectValue);
+            return context.ResolveAs(context.ObjectValue);
         }
 
         var resolvers = new ResolversMap
@@ -68,7 +73,7 @@ type Subscription {
             },
             ["Message"] = new()
             {
-                { "content", Resolve.PropertyOf<Message>(r => r.Content) }
+                { "content", context => context.ResolveAsPropertyOf<Message>(r => r.Content) }
             }
         };
 
@@ -91,23 +96,22 @@ type Subscription {
                 }
                 ";
 
-        /* When */
-        var result = await Executor.SubscribeAsync(new ExecutionOptions
-        {
-            Document = query,
-            Schema = _executable
-        }, unsubscribe.Token).ConfigureAwait(false);
+        /* When */ 
+        await using var result = Executor.Subscribe(_executable, query, unsubscribe.Token)
+            .GetAsyncEnumerator(unsubscribe.Token);
 
         for (var i = 0; i < count; i++)
         {
             var expected = new Message { Content = i.ToString() };
-            await _messagesChannel.WriteAsync(expected);
+            await _messageChannel.Writer.WriteAsync(expected);
         }
 
         /* Then */
+        var readCount = 0;
         for (var i = 0; i < count; i++)
         {
-            var actualResult = await result.Source.Reader.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
+            await result.MoveNextAsync();
+            var actualResult = result.Current;
 
             actualResult.ShouldMatchJson(@"{
                     ""data"":{
@@ -116,8 +120,11 @@ type Subscription {
                         }
                     }
                 }".Replace("{counter}", i.ToString()));
+
+            readCount++;
         }
 
+        Assert.Equal(count, readCount);
         unsubscribe.Cancel();
     }
 
@@ -137,16 +144,14 @@ type Subscription {
                 ";
 
         /* When */
-        var result = await Executor.SubscribeAsync(new ExecutionOptions
-        {
-            Document = query,
-            Schema = _executable
-        }, unsubscribe.Token).ConfigureAwait(false);
+        await using var result = Executor.Subscribe(_executable, query, unsubscribe.Token)
+            .GetAsyncEnumerator(unsubscribe.Token);
 
-        await _messagesChannel.WriteAsync(expected);
+        await _messageChannel.Writer.WriteAsync(expected);
 
         /* Then */
-        var actualResult = await result.Source.Reader.ReadAsync(unsubscribe.Token).ConfigureAwait(false);
+        await result.MoveNextAsync();
+        var actualResult = result.Current;
         unsubscribe.Cancel();
 
         actualResult.ShouldMatchJson(@"{
