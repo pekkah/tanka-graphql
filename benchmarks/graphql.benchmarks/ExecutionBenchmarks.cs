@@ -5,14 +5,18 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+using Microsoft.Extensions.Logging.Abstractions;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Benchmarks.Experimental;
 
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [MemoryDiagnoser]
-[MarkdownExporterAttribute.GitHub]
+//[MarkdownExporterAttribute.GitHub]
 public class ExecutionBenchmarks
 {
     private ExecutableDocument _complexQuery;
@@ -21,6 +25,7 @@ public class ExecutionBenchmarks
     private ExecutableDocument _query;
     private ISchema _schema;
     private ExecutableDocument _subscription;
+    private Executor _nonValidatingExecutor;
 
     //[Benchmark]
     //public async Task Mutation_with_defaults()
@@ -47,10 +52,18 @@ public class ExecutionBenchmarks
     //        AssertResult(result.Errors);
     //}
 
-    [Benchmark(Baseline = true)]
+    [Benchmark]
     public async Task Query_with_validation()
     {
         var result = await _executor.Execute(new GraphQLRequest(_query));
+
+        AssertResult(result.Errors);
+    }
+
+    [Benchmark(Baseline = true)]
+    public async Task Query_without_validation()
+    {
+        var result = await _nonValidatingExecutor.Execute(new GraphQLRequest(_query));
 
         AssertResult(result.Errors);
     }
@@ -63,18 +76,13 @@ public class ExecutionBenchmarks
         AssertResult(result.Errors);
     }
 
-    //[Benchmark(Baseline = true)]
-    //public async Task Query_without_validation()
-    //{
-    //    var result = await Executor.ExecuteAsync(new ExecutionOptions
-    //        {
-    //            Document = _query,
-    //            Schema = _schema,
-    //            Validate = null
-    //        });
+    [Benchmark]
+    public async Task Query_Complex_without_validation()
+    {
+        var result = await _nonValidatingExecutor.Execute(new GraphQLRequest(_complexQuery));
 
-    //        AssertResult(result.Errors);
-    //}
+        AssertResult(result.Errors);
+    }
 
     [GlobalSetup]
     public void Setup()
@@ -85,6 +93,9 @@ public class ExecutionBenchmarks
         _mutation = Utils.InitializeMutation();
         _subscription = Utils.InitializeSubscription();
         _executor = new Executor(_schema);
+        _nonValidatingExecutor = new Executor(_schema, new OperationExecutorFeature(),
+            new SelectionSetExecutorFeature(), new FieldExecutorFeature(), new NoValidationFeature(),
+            new NullLogger<Executor>());
     }
 
     //[Benchmark]

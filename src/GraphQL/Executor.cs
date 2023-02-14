@@ -18,6 +18,7 @@ public partial class Executor
         IOperationExecutorFeature operationExecutor,
         ISelectionSetExecutorFeature selectionSetExecutor,
         IFieldExecutorFeature fieldExecutor,
+        IValidatorFeature validator,
         ILogger<Executor> logger)
     {
         _defaults.Set<ISchemaFeature>(new SchemaFeature
@@ -28,11 +29,7 @@ public partial class Executor
         _defaults.Set<IOperationExecutorFeature>(operationExecutor);
         _defaults.Set<ISelectionSetExecutorFeature>(selectionSetExecutor);
         _defaults.Set<IFieldExecutorFeature>(fieldExecutor);
-
-        _defaults.Set<IValidatorFeature>(new ValidatorFeature()
-        {
-            Validator = new Validator3(ExecutionRules.All)
-        });
+        _defaults.Set<IValidatorFeature>(validator);
 
         _defaults.Set<IValueCompletionFeature>(new ValueCompletionFeature());
         _defaults.Set<IErrorCollectorFeature>(new ConcurrentBagErrorCollectorFeature());
@@ -46,6 +43,10 @@ public partial class Executor
         new OperationExecutorFeature(),
         new SelectionSetExecutorFeature(),
         new FieldExecutorFeature(),
+        new ValidatorFeature()
+        {
+            Validator = new Validator3(ExecutionRules.All)
+        },
         logger)
     {
     }

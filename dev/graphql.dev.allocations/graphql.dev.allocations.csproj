@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\benchmarks\graphql.benchmarks\graphql.benchmarks.csproj" />
     <ProjectReference Include="..\..\src\graphql.language\graphql.language.csproj" />
   </ItemGroup>
 
