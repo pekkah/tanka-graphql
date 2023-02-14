@@ -178,7 +178,7 @@ public static class ExecutionRules
                     var selectionSet = subscription.SelectionSet;
                     var variableValues = new Dictionary<string, object>();
 
-                    var groupedFieldSet = SelectionSetExtensions.CollectFields(
+                    var groupedFieldSet = FieldCollector.CollectFields(
                         schema,
                         context.Document,
                         subscriptionType,

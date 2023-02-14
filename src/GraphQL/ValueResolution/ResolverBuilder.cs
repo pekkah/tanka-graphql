@@ -2,53 +2,25 @@
 
 public class ResolverBuilder
 {
-    private readonly List<ResolverMiddleware> _middlewares = new();
+    private readonly List<Func<Resolver, Resolver>> _components = new();
 
-    private Resolver? _root;
-
-    public ResolverBuilder(Resolver root)
+    public ResolverBuilder Use(Func<Resolver, Resolver> middleware)
     {
-        Run(root);
-    }
-
-    public ResolverBuilder()
-    {
-    }
-
-    /// <summary>
-    ///     Add middleware to be run before the root resolver
-    /// </summary>
-    /// <param name="middleware"></param>
-    /// <returns></returns>
-    public ResolverBuilder Use(ResolverMiddleware middleware)
-    {
-        _middlewares.Insert(0, middleware);
+        _components.Add(middleware);
         return this;
     }
 
-    /// <summary>
-    ///     Set root resolver to be run at the end of the resolver chain
-    /// </summary>
-    /// <param name="resolver"></param>
-    /// <returns></returns>
     public ResolverBuilder Run(Resolver resolver)
     {
-        _root = resolver;
-        return this;
+        return Use(_ => resolver);
     }
 
     public Resolver Build()
     {
-        if (_root is null)
-            throw new InvalidOperationException(
-                $"Resolver chain is missing ending. Use {nameof(Run)} to end the chain.");
+        Resolver resolver = context => ValueTask.CompletedTask;
 
-        var resolver = _root;
-        foreach (var middleware in _middlewares)
-        {
-            var resolver1 = resolver;
-            resolver = context => middleware(context, resolver1);
-        }
+        for (int c = _components.Count - 1; c >= 0; c--)
+            resolver = _components[c](resolver);
 
         return resolver;
     }

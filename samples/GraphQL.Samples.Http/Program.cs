@@ -60,10 +60,12 @@ app.MapTankaGraphQL3("/graphql", "schemaName");
 app.MapTankaGraphQL3("/graphql-custom", gql =>
 {
     gql.UseSchema("schemaName");
+    gql.UseDefaultOperationExecutor();
     gql.UseDefaultOperationResolver();
     gql.UseDefaultVariableCoercer();
     gql.UseDefaultValidator();
     gql.UseDefaultSelectionSetPipeline();
+    gql.RunOperation();
 });
 
 app.Run();

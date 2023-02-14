@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.Validation;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL;
 
@@ -14,36 +15,38 @@ public partial class Executor
 
     public Executor(
         ISchema schema,
-        ISelectionSetExecutor selectionSetExecutor,
-        IFieldExecutor fieldExecutor,
+        IOperationExecutorFeature operationExecutor,
+        ISelectionSetExecutorFeature selectionSetExecutor,
+        IFieldExecutorFeature fieldExecutor,
         ILogger<Executor> logger)
     {
         _defaults.Set<ISchemaFeature>(new SchemaFeature
         {
             Schema = schema
         });
-        _defaults.Set<IFieldExecutorFeature>(new FieldExecutorFeature
-        {
-            FieldExecutor = fieldExecutor
-        });
 
-        _defaults.Set<ISelectionSetExecutorFeature>(new SelectionSetExecutorFeature
-        {
-            SelectionSetExecutor = selectionSetExecutor
-        });
+        _defaults.Set<IOperationExecutorFeature>(operationExecutor);
+        _defaults.Set<ISelectionSetExecutorFeature>(selectionSetExecutor);
+        _defaults.Set<IFieldExecutorFeature>(fieldExecutor);
 
         _defaults.Set<IValidatorFeature>(new ValidatorFeature()
         {
             Validator = new Validator3(ExecutionRules.All)
         });
 
+        _defaults.Set<IValueCompletionFeature>(new ValueCompletionFeature());
+        _defaults.Set<IErrorCollectorFeature>(new ConcurrentBagErrorCollectorFeature());
+        _defaults.Set<IArgumentBinderFeature>(new ArgumentBinderFeature());
+
         _logger = logger;
     }
 
     public Executor(ISchema schema, ILogger<Executor> logger) : this(
         schema,
-        ISelectionSetExecutor.Default,
-        IFieldExecutor.Default, logger)
+        new OperationExecutorFeature(),
+        new SelectionSetExecutorFeature(),
+        new FieldExecutorFeature(),
+        logger)
     {
     }
 

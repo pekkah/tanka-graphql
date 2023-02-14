@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Tanka.GraphQL.Internal;
+﻿using Tanka.GraphQL.Internal;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Fields;
@@ -9,14 +8,18 @@ public static class ArgumentBinderQueryContextExtensions
     public static T? BindInputObject<T>(this QueryContext queryContext, ResolverContextBase context, string name)
         where T : new()
     {
-        return queryContext.ArgumentBinderFeature.BindInputObject<T>(context, name);
+        ArgumentNullException.ThrowIfNull(queryContext.ArgumentBinder);
+
+        return queryContext.ArgumentBinder.BindInputObject<T>(context, name);
     }
 
     public static IEnumerable<T?>? BindInputObjectList<T>(this QueryContext queryContext, ResolverContextBase context,
         string name)
         where T : new()
     {
-        return queryContext.ArgumentBinderFeature.BindInputObjectList<T>(context, name);
+        ArgumentNullException.ThrowIfNull(queryContext.ArgumentBinder);
+
+        return queryContext.ArgumentBinder.BindInputObjectList<T>(context, name);
     }
 }
 
@@ -35,10 +38,10 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
     public T? BindInputObject<T>(ResolverContextBase context, string name)
         where T : new()
     {
-        var argument = context.Arguments[name];
+        object? argument = context.Arguments[name];
 
         if (argument is null)
-            return default;
+            return default(T?);
 
         if (argument is not IReadOnlyDictionary<string, object?> inputObjectArgumentValue)
             throw new InvalidOperationException("Argument is not an input object");
@@ -50,21 +53,21 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
 
     public IEnumerable<T?>? BindInputObjectList<T>(ResolverContextBase context, string name) where T : new()
     {
-        var argument = context.Arguments[name];
+        object? argument = context.Arguments[name];
 
         if (argument is null)
-            return default;
+            return default(IEnumerable<T?>?);
 
         if (argument is not IEnumerable<IReadOnlyDictionary<string, object?>?> inputObjectArgumentValue)
             throw new InvalidOperationException("Argument is not an input object list");
 
         var targetList = new List<T?>();
 
-        foreach (var inputObjectValue in inputObjectArgumentValue)
+        foreach (IReadOnlyDictionary<string, object?>? inputObjectValue in inputObjectArgumentValue)
         {
             if (inputObjectValue is null)
             {
-                targetList.Add(default);
+                targetList.Add(default(T));
                 continue;
             }
 
@@ -78,17 +81,17 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
 
     public static void BindInputObject<T>(IReadOnlyDictionary<string, object?> inputObject, T target)
     {
-        var properties = PropertyAdapterFactory.GetPropertyAdapters<T>();
+        IReadOnlyDictionary<string, IPropertyAdapter<T>> properties = PropertyAdapterFactory.GetPropertyAdapters<T>();
 
         //todo: do we need the input object fields in here for validation
         // or should the schema of the object be validated already?
         //var inputObjectFields = context.Schema.GetInputFields(name);
 
-        foreach (var (fieldName, fieldValue) in inputObject)
+        foreach ((string fieldName, object? fieldValue) in inputObject)
         {
-            var propertyName = FormatPropertyName(fieldName);
+            string propertyName = FormatPropertyName(fieldName);
 
-            if (properties.TryGetValue(propertyName, out var property))
+            if (properties.TryGetValue(propertyName, out IPropertyAdapter<T>? property))
                 property.SetValue(target, fieldValue);
         }
     }
@@ -97,8 +100,8 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
     {
         ArgumentException.ThrowIfNullOrEmpty(fieldName);
 
-        var a = fieldName.ToCharArray();
+        char[] a = fieldName.ToCharArray();
         a[0] = char.ToUpper(a[0]);
-        return new(a);
+        return new string(a);
     }
 }

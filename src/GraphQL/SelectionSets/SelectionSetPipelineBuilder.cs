@@ -1,8 +1,64 @@
-﻿namespace Tanka.GraphQL.SelectionSets;
+﻿using Tanka.GraphQL.Internal;
+
+namespace Tanka.GraphQL.SelectionSets;
 
 public class SelectionSetPipelineBuilder
 {
+    private const string ApplicationServicesKey = "ApplicationServices";
+
     private readonly List<Func<SelectionSetDelegate, SelectionSetDelegate>> _components = new();
+
+    protected SelectionSetPipelineBuilder(SelectionSetPipelineBuilder builder)
+    {
+        Properties = new CopyOnWriteDictionary<string, object?>(builder.Properties, StringComparer.Ordinal);
+    }
+
+    protected SelectionSetPipelineBuilder(IDictionary<string, object?> properties)
+    {
+        Properties = new CopyOnWriteDictionary<string, object?>(properties, StringComparer.Ordinal);
+    }
+
+    public SelectionSetPipelineBuilder(IServiceProvider applicationServices)
+    {
+        Properties = new Dictionary<string, object?>(StringComparer.Ordinal);
+        SetProperty(ApplicationServicesKey, applicationServices);
+    }
+
+    public IDictionary<string, object?> Properties { get; }
+
+    public IServiceProvider ApplicationServices => GetRequiredProperty<IServiceProvider>(ApplicationServicesKey);
+
+    public SelectionSetDelegate Build()
+    {
+        SelectionSetDelegate pipeline = _ => throw new QueryException(
+            "SelectionSet execution pipeline error. No middleware set any results.")
+        {
+            Path = new NodePath()
+        };
+
+        for (int c = _components.Count - 1; c >= 0; c--)
+            pipeline = _components[c](pipeline);
+
+        return pipeline;
+    }
+
+    public SelectionSetPipelineBuilder New()
+    {
+        return new SelectionSetPipelineBuilder(this);
+    }
+
+    public SelectionSetPipelineBuilder RunExecute()
+    {
+        return Use(_ => async context =>
+        {
+            context.Result = await SelectionSetExecutorFeature.ExecuteSelectionSet(
+                context.QueryContext,
+                context.GroupedFieldSet,
+                context.ObjectDefinition,
+                context.ObjectValue,
+                context.Path);
+        });
+    }
 
     public SelectionSetPipelineBuilder Use(Func<SelectionSetDelegate, SelectionSetDelegate> middleware)
     {
@@ -10,32 +66,37 @@ public class SelectionSetPipelineBuilder
         return this;
     }
 
-    public SelectionSetDelegate Build()
+    public SelectionSetPipelineBuilder UseFieldCollector()
     {
-        SelectionSetDelegate pipeline = _ => throw new QueryException(
-            "Request execution pipeline error. No middleware returned any results.")
+        return Use(next => context =>
         {
-            Path = new()
-        };
+            context.GroupedFieldSet = FieldCollector.CollectFields(
+                context.QueryContext.Schema,
+                context.QueryContext.Request.Document,
+                context.ObjectDefinition,
+                context.SelectionSet,
+                context.QueryContext.CoercedVariableValues);
 
-        for (var c = _components.Count - 1; c >= 0; c--)
-            pipeline = _components[c](pipeline);
-
-        return pipeline;
+            return next(context);
+        });
     }
 
-    public SelectionSetPipelineBuilder RunSelectionSetExecutor()
+    public T? GetProperty<T>(string key)
     {
-        var executor = new SelectionSetExecutor();
-        return Use(_ => async context =>
-        {
-            context.Result =
-                await executor.ExecuteSelectionSet(
-                    context.QueryContext,
-                    context.SelectionSet,
-                    context.ObjectDefinition,
-                    context.ObjectValue,
-                    context.Path);
-        });
+        return Properties.TryGetValue(key, out object? value) ? (T?)value : default(T?);
+    }
+
+    public T GetRequiredProperty<T>(string key)
+    {
+        T? value = GetProperty<T>(key);
+
+        ArgumentNullException.ThrowIfNull(value);
+
+        return value;
+    }
+
+    public void SetProperty<T>(string key, T value)
+    {
+        Properties[key] = value;
     }
 }

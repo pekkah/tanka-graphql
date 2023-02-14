@@ -8,5 +8,7 @@ public interface IGraphQLTransport
     IEndpointConventionBuilder Map(
         string pattern, 
         IEndpointRouteBuilder routes, 
-        GraphQLRequestPipelineBuilder pipelineBuilder);
+        GraphQLRequestDelegate requestDelegate);
+
+    void Build(GraphQLRequestPipelineBuilder builder);
 }

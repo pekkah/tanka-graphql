@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.Validation;
+﻿using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL;
 
@@ -17,40 +15,12 @@ public partial class Executor
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
         QueryContext queryContext = BuildQueryContextAsync(request);
-        return Subscribe(queryContext, cancellationToken);
+        queryContext.RequestCancelled = cancellationToken;
+
+        return ExecuteOperation(queryContext);
     }
 
-    public async IAsyncEnumerable<ExecutionResult> Subscribe(
-        QueryContext queryContext,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        using (_logger.Begin(queryContext.Request.OperationName ?? string.Empty))
-        {
-            ValidationResult validationResult = await queryContext.Validate();
-
-            if (!validationResult.IsValid)
-                throw new QueryException(validationResult.Errors.First().Message)
-                {
-                    Path = new NodePath()
-                };
-
-            switch (queryContext.OperationDefinition.Operation)
-            {
-                case OperationType.Query:
-                    yield return await ExecuteQuery(queryContext);
-                    break;
-                case OperationType.Mutation:
-                    yield return await ExecuteQuery(queryContext);
-                    break;
-                case OperationType.Subscription:
-                    await foreach (ExecutionResult er in ExecuteSubscription(queryContext, cancellationToken))
-                        yield return er;
-                    break;
-            }
-        }
-    }
 
     public static IAsyncEnumerable<ExecutionResult> Subscribe(
         ISchema schema,

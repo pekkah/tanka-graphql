@@ -2,5 +2,5 @@
 
 public class SchemaFeature : ISchemaFeature
 {
-    public required ISchema Schema { get; set; }
+    public ISchema Schema { get; set; } = ISchema.Empty;
 }

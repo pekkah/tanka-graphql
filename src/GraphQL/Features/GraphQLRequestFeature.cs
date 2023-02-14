@@ -2,5 +2,5 @@
 
 internal class GraphQLRequestFeature : IGraphQLRequestFeature
 {
-    public required GraphQLRequest Request { get; set; }
+    public GraphQLRequest? Request { get; set; }
 }

@@ -4,5 +4,12 @@ namespace Tanka.GraphQL.Features;
 
 public class OperationFeature : IOperationFeature
 {
-    public required OperationDefinition Operation { get; set; }
+    public OperationFeature()
+    {
+        Operation = Empty;
+    }
+
+    public static OperationDefinition Empty = "{}";
+
+    public OperationDefinition Operation { get; set; }
 }

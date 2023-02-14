@@ -2,49 +2,25 @@
 
 public class SubscriberBuilder
 {
-    private readonly List<SubscriberMiddleware> _middlewares = new();
+    private readonly List<Func<Subscriber, Subscriber>> _components = new();
 
-    private Subscriber _root;
-
-    public SubscriberBuilder(Subscriber root)
+    public SubscriberBuilder Use(Func<Subscriber, Subscriber> middleware)
     {
-        Run(root);
-    }
-
-    public SubscriberBuilder()
-    {
-    }
-
-    /// <summary>
-    ///     Add middlware to be run before the root of the chain
-    /// </summary>
-    /// <param name="middleware"></param>
-    /// <returns></returns>
-    public SubscriberBuilder Use(SubscriberMiddleware middleware)
-    {
-        _middlewares.Insert(0, middleware);
+        _components.Add(middleware);
         return this;
     }
 
-    /// <summary>
-    ///     Set root subscriber to be run at the end of the subscriber chain
-    /// </summary>
-    /// <param name="resolver"></param>
-    /// <returns></returns>
     public SubscriberBuilder Run(Subscriber subscriber)
     {
-        _root = subscriber;
-        return this;
+        return Use(_ => subscriber);
     }
 
     public Subscriber Build()
     {
-        var subscriber = _root;
-        foreach (var middleware in _middlewares)
-        {
-            var subscriber1 = subscriber;
-            subscriber = (context, unsubscribe) => middleware(context, unsubscribe, subscriber1);
-        }
+        Subscriber subscriber = (_, _) => ValueTask.CompletedTask;
+
+        for (int c = _components.Count - 1; c >= 0; c--)
+            subscriber = _components[c](subscriber);
 
         return subscriber;
     }

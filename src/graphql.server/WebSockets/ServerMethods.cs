@@ -58,20 +58,21 @@ public class ServerMethods
     private async Task Execute(Subscribe subscribe, CancellationTokenSource unsubscribeOrAborted)
     {
         var cancellationToken = unsubscribeOrAborted.Token;
-        var context = new GraphQLRequestContext();
-
-        //todo: replace this with context.RequestService = _httpContext.RequestServices
-        context.RequestServices = _httpContext.RequestServices;
-        context.Request = new()
+        var context = new GraphQLRequestContext
         {
-            InitialValue = null,
-            Document = subscribe.Payload.Query,
-            OperationName = subscribe.Payload.OperationName,
-            Variables = subscribe.Payload.Variables
+            HttpContext = _httpContext,
+            RequestServices = _httpContext.RequestServices,
+            Request = new()
+            {
+                InitialValue = null,
+                Document = subscribe.Payload.Query,
+                OperationName = subscribe.Payload.OperationName,
+                Variables = subscribe.Payload.Variables
+            }
         };
 
-        await using var enumerator = _requestDelegate(context).WithCancellation(cancellationToken)
-            .GetAsyncEnumerator();
+        await _requestDelegate(context);
+        await using var enumerator = context.Response.GetAsyncEnumerator(cancellationToken);
 
         try
         {

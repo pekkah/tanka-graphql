@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.SelectionSets;
@@ -8,32 +9,31 @@ namespace Tanka.GraphQL;
 
 public partial class Executor
 {
-    private IAsyncEnumerable<ExecutionResult> ExecuteSubscription(
-        QueryContext queryContext,
-        CancellationToken cancellationToken)
+    public static Task ExecuteSubscription(QueryContext queryContext)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        queryContext.RequestCancelled.ThrowIfCancellationRequested();
 
         var sourceStream = CreateSourceEventStream(
             queryContext,
-            cancellationToken);
+            queryContext.RequestCancelled);
 
         var responseStream = MapSourceToResponseEventStream(
             queryContext,
             sourceStream,
-            cancellationToken);
+            queryContext.RequestCancelled);
 
-        return responseStream;
+        queryContext.Response = responseStream;
+        return Task.CompletedTask;
     }
 
-    public async IAsyncEnumerable<object?> CreateSourceEventStream(
+    public static async IAsyncEnumerable<object?> CreateSourceEventStream(
         QueryContext context,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context.Schema.Subscription);
 
         var subscriptionType = context.Schema.Subscription;
-        var groupedFieldSet = SelectionSetExtensions.CollectFields(
+        var groupedFieldSet = FieldCollector.CollectFields(
             context.Schema,
             context.Request.Document,
             subscriptionType,
@@ -86,7 +86,7 @@ public partial class Executor
         await foreach (var evnt in resolverContext.ResolvedValue.WithCancellation(cancellationToken)) yield return evnt;
     }
 
-    public async IAsyncEnumerable<ExecutionResult> MapSourceToResponseEventStream(
+    public static async IAsyncEnumerable<ExecutionResult> MapSourceToResponseEventStream(
         QueryContext context,
         IAsyncEnumerable<object?> sourceStream,
         [EnumeratorCancellation] CancellationToken cancellationToken)
@@ -108,7 +108,7 @@ public partial class Executor
         }
     }
 
-    public async Task<ExecutionResult> ExecuteSourceEvent(
+    public static async Task<ExecutionResult> ExecuteSourceEvent(
         QueryContext context,
         SelectionSet selectionSet,
         ObjectDefinition subscriptionType,
@@ -117,8 +117,9 @@ public partial class Executor
     {
         var subContext = context with
         {
-            ErrorCollector = new ConcurrentBagErrorCollector()
         };
+
+        subContext.Features.Set<IErrorCollectorFeature>(new ConcurrentBagErrorCollectorFeature());
 
         try
         {
@@ -131,14 +132,14 @@ public partial class Executor
             return new()
             {
                 Data = data,
-                Errors = subContext.ErrorCollector.GetErrors().ToList()
+                Errors = subContext.GetErrors().ToList()
             };
         }
         catch (FieldException x)
         {
             return new()
             {
-                Errors = subContext.ErrorCollector.GetErrors().ToList()
+                Errors = subContext.GetErrors().ToList()
             };
         }
     }

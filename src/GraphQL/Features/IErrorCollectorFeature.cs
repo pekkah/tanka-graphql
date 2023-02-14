@@ -2,5 +2,6 @@
 
 public interface IErrorCollectorFeature
 {
-    public IErrorCollector ErrorCollector { get; set; }
+    void Add(Exception error);
+    IEnumerable<ExecutionError> GetErrors();
 }

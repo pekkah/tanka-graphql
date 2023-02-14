@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Tanka.GraphQL.Language.Nodes;
-using Tanka.GraphQL.Validation;
+﻿using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL;
 
@@ -15,44 +13,14 @@ public partial class Executor
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<ExecutionResult> Execute(
-        GraphQLRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<ExecutionResult> Execute(GraphQLRequest request, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        QueryContext queryContext = BuildQueryContextAsync(request);
+        queryContext.RequestCancelled = cancellationToken;
 
-        var queryContext = BuildQueryContextAsync(request);
-        var executionResult = await Execute(queryContext, cancellationToken);
+        IAsyncEnumerable<ExecutionResult> executionResult = ExecuteOperation(queryContext);
 
-        return executionResult;
-    }
-
-    public async Task<ExecutionResult> Execute(
-        QueryContext queryContext,
-        CancellationToken cancellationToken = default)
-    {
-        using (_logger.Begin(queryContext.Request.OperationName ?? string.Empty))
-        {
-            var validationResult = await queryContext.Validate();
-
-            if (!validationResult.IsValid)
-                throw new QueryException("todo: validation error")
-                {
-                    Path = new()
-                };
-
-            var executionResult = queryContext.OperationDefinition.Operation switch
-            {
-                OperationType.Query => await ExecuteQuery(queryContext),
-                OperationType.Mutation => await ExecuteQuery(queryContext),
-                OperationType.Subscription => throw new NotImplementedException(),
-                _ => throw new InvalidOperationException(
-                    $"Operation type {queryContext.OperationDefinition.Operation} not supported.")
-            };
-
-            _logger.ExecutionResult(executionResult);
-            return executionResult;
-        }
+        return await executionResult.SingleAsync(queryContext.RequestCancelled);
     }
 
     public static Task<ExecutionResult> Execute(

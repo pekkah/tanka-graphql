@@ -20,19 +20,6 @@ public class GraphQLWSTransport : IGraphQLTransport
     /// </summary>
     public static string SubProcol = "graphql-transport-ws";
 
-    public IEndpointConventionBuilder Map(
-        string pattern,
-        IEndpointRouteBuilder routes,
-        GraphQLRequestPipelineBuilder pipelineBuilder)
-    {
-        return routes.Map(pattern + "/ws", CreateRequestDelegate(pipelineBuilder));
-    }
-
-    private RequestDelegate CreateRequestDelegate(GraphQLRequestPipelineBuilder pipelineBuilder)
-    {
-        var pipeline = pipelineBuilder.Build();
-        return ProcessRequest(pipeline);
-    }
 
     private RequestDelegate ProcessRequest(GraphQLRequestDelegate pipeline)
     {
@@ -74,5 +61,14 @@ public class GraphQLWSTransport : IGraphQLTransport
     {
         var connection = new GraphQLWSConnection(webSocket, requestPipeline, httpContext);
         await connection.Connect(httpContext.RequestAborted);
+    }
+
+    public IEndpointConventionBuilder Map(string pattern, IEndpointRouteBuilder routes, GraphQLRequestDelegate requestDelegate)
+    {
+        return routes.Map(pattern + "/ws", ProcessRequest(requestDelegate));
+    }
+
+    public void Build(GraphQLRequestPipelineBuilder builder)
+    {
     }
 }

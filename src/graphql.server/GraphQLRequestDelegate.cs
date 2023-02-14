@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Threading.Tasks;
 
 namespace Tanka.GraphQL.Server;
 
-public delegate IAsyncEnumerable<ExecutionResult> GraphQLRequestDelegate(GraphQLRequestContext context);
+public delegate Task GraphQLRequestDelegate(GraphQLRequestContext context);

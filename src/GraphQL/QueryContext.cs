@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
@@ -16,91 +17,68 @@ public record QueryContext
         _features.Initalize(defaults, defaults.Revision);
     }
 
-    public QueryContext() : this(new FeatureCollection(4))
+    public QueryContext() : this(new FeatureCollection(12))
     {
     }
+
+
+    public CancellationToken RequestCancelled { get; set; } = default;
 
     public IFeatureCollection Features => _features.Collection;
 
-    private IGraphQLRequestFeature RequestFeature => _features.Fetch(ref _features.Cache.Request, _ =>
-        new GraphQLRequestFeature
-        {
-            Request = new()
-            {
-                Document = "{}"
-            }
-        })!;
+    private IResponseStreamFeature ResponseFeature =>
+        _features.Fetch(
+            ref _features.Cache.Response,
+            _ => new DefaultResponseStreamFeature())!;
+
+    private IGraphQLRequestFeature RequestFeature => _features.Fetch(
+        ref _features.Cache.Request,
+        _ => new GraphQLRequestFeature())!;
 
     private ICoercedVariableValuesFeature CoercedVariableValuesFeature => _features.Fetch(
-        ref _features.Cache.CoercedVariableValues, _ => new CoercedVariableValuesFeature
-        {
-            CoercedVariableValues = new Dictionary<string, object?>(0)
-        })!;
+        ref _features.Cache.CoercedVariableValues,
+        _ => new CoercedVariableValuesFeature())!;
 
-    private IOperationFeature OperationFeature => _features.Fetch(ref _features.Cache.Operation, _ =>
-        new OperationFeature
-        {
-            Operation = "{}"
-        })!;
+    private IOperationFeature OperationFeature => _features.Fetch(
+        ref _features.Cache.Operation,
+        _ => new OperationFeature())!;
 
-    private ISchemaFeature SchemaFeature => _features.Fetch(ref _features.Cache.Schema, _ => new SchemaFeature
-    {
-        Schema = ISchema.Empty
-    })!;
+    private ISchemaFeature SchemaFeature => _features.Fetch(
+        ref _features.Cache.Schema,
+        _ => new SchemaFeature())!;
 
-    private IFieldExecutorFeature FieldExecutorFeature =>
-        _features.Fetch(ref _features.Cache.FieldExecutor, _ => new FieldExecutorFeature
-        {
-            FieldExecutor = IFieldExecutor.Default
-        })!;
+    private ISelectionSetExecutorFeature? SelectionSetExecutorFeature =>
+        _features.Fetch(ref _features.Cache.SelectionSetExecutor, _ => null);
 
-    internal ISelectionSetExecutorFeature SelectionSetExecutorFeature => _features.Fetch(ref _features.Cache.SelectionSetExecutor, _ => null)!;
+    private IErrorCollectorFeature? ErrorCollectorFeature =>
+        _features.Fetch(ref _features.Cache.ErrorCollector, _ => null);
 
-    private IErrorCollectorFeature ErrorCollectorFeature =>
-        _features.Fetch(ref _features.Cache.ErrorCollector, _ => new ErrorCollectorFeature
-        {
-            ErrorCollector = IErrorCollector.Default()
-        })!;
+    private IValueCompletionFeature? ValueCompletionFeature =>
+        _features.Fetch(ref _features.Cache.ValueCompletion, _ => null);
 
-    internal IValueCompletionFeature ValueCompletionFeature =>
-        _features.Fetch(ref _features.Cache.ValueCompletion, _ => new ValueCompletionFeature())!;
+    public IArgumentBinderFeature? ArgumentBinder =>
+        _features.Fetch(ref _features.Cache.ArgumentBinder, _ => null);
 
-    internal IArgumentBinderFeature ArgumentBinderFeature =>
-        _features.Fetch(ref _features.Cache.ArgumentBinder, _ => IArgumentBinderFeature.Default)!;
-
-    internal IValidatorFeature? ValidatorFeature =>
+    private IValidatorFeature? ValidatorFeature =>
         _features.Fetch(ref _features.Cache.Validator, _ => null);
+
+    private IFieldExecutorFeature? FieldExecutorFeature =>
+        _features.Fetch(ref _features.Cache.FieldExecutor, _ => null);
+
+    private IOperationExecutorFeature? OperationExecutorFeature =>
+        _features.Fetch(ref _features.Cache.OperationExecutor, _ => null);
 
     public GraphQLRequest Request
     {
-        get => RequestFeature.Request;
+        get => RequestFeature.Request ?? throw new InvalidOperationException("Request not set");
         set => RequestFeature.Request = value;
     }
 
-    public IFieldExecutor FieldExecutor
-    {
-        get => FieldExecutorFeature.FieldExecutor;
-        set => FieldExecutorFeature.FieldExecutor = value;
-    }
-
-    /*
-    public ISelectionSetExecutor SelectionSetExecutor
-    {
-        get => SelectionSetExecutorFeature.SelectionSetExecutor;
-        set => SelectionSetExecutorFeature.SelectionSetExecutor = value;
-    }
-    */
 
     public IReadOnlyDictionary<string, object?> CoercedVariableValues
     {
         get => CoercedVariableValuesFeature.CoercedVariableValues;
         set => CoercedVariableValuesFeature.CoercedVariableValues = value;
-    }
-
-    public IErrorCollector ErrorCollector
-    {
-        get => ErrorCollectorFeature.ErrorCollector;
-        set => ErrorCollectorFeature.ErrorCollector = value;
     }
 
     public OperationDefinition OperationDefinition
@@ -115,6 +93,74 @@ public record QueryContext
         set => SchemaFeature.Schema = value;
     }
 
+    public IAsyncEnumerable<ExecutionResult> Response
+    {
+        get => ResponseFeature.Response;
+        set => ResponseFeature.Response = value;
+    }
+
+    public void AddError(Exception x)
+    {
+        ArgumentNullException.ThrowIfNull(ErrorCollectorFeature);
+        ErrorCollectorFeature.Add(x);
+    }
+
+    public ValueTask CompleteValueAsync(
+        ResolverContext context,
+        TypeBase fieldType,
+        NodePath path)
+    {
+        ArgumentNullException.ThrowIfNull(ValueCompletionFeature);
+        return ValueCompletionFeature.CompleteValueAsync(context, fieldType, path);
+    }
+
+    public Task<object?> ExecuteField(ObjectDefinition objectDefinition,
+        object? objectValue,
+        IReadOnlyCollection<FieldSelection> fields,
+        NodePath path)
+    {
+        ArgumentNullException.ThrowIfNull(FieldExecutorFeature);
+        return FieldExecutorFeature.Execute(this, objectDefinition, objectValue, fields, path);
+    }
+
+    public Task ExecuteOperation()
+    {
+        ArgumentNullException.ThrowIfNull(OperationExecutorFeature);
+        return OperationExecutorFeature.Execute(this);
+    }
+
+    public Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
+        SelectionSet selectionSet,
+        ObjectDefinition objectType,
+        object? objectValue,
+        NodePath path)
+    {
+        ArgumentNullException.ThrowIfNull(SelectionSetExecutorFeature);
+        return SelectionSetExecutorFeature.ExecuteSelectionSet(
+            this,
+            selectionSet,
+            objectType,
+            objectValue,
+            path);
+    }
+
+    public IEnumerable<ExecutionError> GetErrors()
+    {
+        ArgumentNullException.ThrowIfNull(ErrorCollectorFeature);
+        return ErrorCollectorFeature.GetErrors();
+    }
+
+    public ValueTask<ValidationResult> Validate()
+    {
+        ArgumentNullException.ThrowIfNull(ValidatorFeature);
+
+        return ValidatorFeature.Validate(
+            Schema,
+            Request.Document,
+            Request.Variables
+        );
+    }
+
     private struct FeatureInterfaces
     {
         public IGraphQLRequestFeature? Request;
@@ -127,5 +173,7 @@ public record QueryContext
         public IValueCompletionFeature? ValueCompletion;
         public IArgumentBinderFeature? ArgumentBinder;
         public IValidatorFeature? Validator;
+        public IResponseStreamFeature? Response;
+        public IOperationExecutorFeature? OperationExecutor;
     }
 }

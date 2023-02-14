@@ -28,7 +28,7 @@ public static class ExceptionExtensions
         if (fieldType is NonNullType)
             throw exception;
 
-        context.ErrorCollector.Add(exception);
+        context.AddError(exception);
         return completedValue;
     }
 }

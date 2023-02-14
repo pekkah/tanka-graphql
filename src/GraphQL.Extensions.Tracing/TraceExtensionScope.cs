@@ -3,11 +3,43 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Extensions.Tracing;
+
+public static class TraceOperationBuilderExtensions
+{
+    public static OperationPipelineBuilder UseTrace(this OperationPipelineBuilder builder)
+    {
+        return builder.Use(next => async context =>
+        {
+            var trace = TraceFeature.StartNew();
+            context.Features.Set<TraceFeature>(trace);
+            await next(context);
+        });
+    }
+}
+
+public static class TraceQueryContextExtensions
+{
+    public static TraceFeature GetTrace(this QueryContext context)
+    {
+        return context.Features.GetRequiredFeature<TraceFeature>();
+    }
+}
+
+public class TraceFeature
+{
+    public static TraceFeature StartNew()
+    {
+        var trace = new TraceFeature();
+        return trace;
+    }
+}
+
 
 public class TraceExtensionScope
 {

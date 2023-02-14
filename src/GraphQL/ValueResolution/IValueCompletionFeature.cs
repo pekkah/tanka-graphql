@@ -236,7 +236,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
             {
                 if (innerType is NonNullType) throw;
 
-                context.QueryContext.ErrorCollector.Add(e);
+                context.QueryContext.AddError(e);
                 result.Add(null);
             }
         }

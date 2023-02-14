@@ -14,7 +14,7 @@ public static class WebApplicationExtensions
     {
         // resolve tanka application
         var tankaApp = webApp.ServiceProvider.GetRequiredService<GraphQLApplication>();
-        return tankaApp.Map(pattern, schemaName, webApp);
+        return tankaApp.MapDefault(pattern, schemaName, webApp);
     }
 
     public static IEndpointConventionBuilder MapTankaGraphQL3(

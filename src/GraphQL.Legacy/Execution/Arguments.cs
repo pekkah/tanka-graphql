@@ -3,6 +3,7 @@ using System.Linq;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueSerialization;
 
 namespace Tanka.GraphQL.Execution;
 

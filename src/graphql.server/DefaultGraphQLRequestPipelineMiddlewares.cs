@@ -1,21 +1,19 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Tanka.GraphQL.Features;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Server;
 
 public static class DefaultGraphQLRequestPipelineMiddlewares
 {
-    public static GraphQLRequestPipelineBuilder UseSchema(this GraphQLRequestPipelineBuilder builder, string schemaName)
+    public static GraphQLRequestPipelineBuilder RunOperation(this GraphQLRequestPipelineBuilder builder)
     {
-        var schemaCollection = builder.ApplicationServices.GetRequiredService<SchemaCollection>();
-        builder.Use(next => context =>
-        {
-            context.Schema = schemaCollection.Get(schemaName);
-            return next(context);
-        });
+        builder.Use(_ => context => context.ExecuteOperation());
 
         return builder;
     }
@@ -34,6 +32,72 @@ public static class DefaultGraphQLRequestPipelineMiddlewares
         return builder;
     }
 
+    public static GraphQLRequestPipelineBuilder UseDefaultOperationExecutor(
+        this GraphQLRequestPipelineBuilder builder)
+    {
+        var feature = new OperationExecutorFeature();
+        return builder.Use(next => context =>
+        {
+            context.Features.Set<IOperationExecutorFeature>(feature);
+            return next(context);
+        });
+    }
+
+    public static GraphQLRequestPipelineBuilder UseDefaultValueCompletion(
+        this GraphQLRequestPipelineBuilder builder)
+    {
+        var feature = new ValueCompletionFeature();
+        return builder.Use(next => context =>
+        {
+            context.Features.Set<IValueCompletionFeature>(feature);
+            return next(context);
+        });
+    }
+
+    public static GraphQLRequestPipelineBuilder UseDefaultFieldPipeline(
+        this GraphQLRequestPipelineBuilder builder)
+    {
+        var feature = new FieldExecutorFeature();
+        return builder.Use(next => context =>
+        {
+            context.Features.Set<IFieldExecutorFeature>(feature);
+            return next(context);
+        });
+    }
+
+    public static GraphQLRequestPipelineBuilder UseDefaultErrorCollector(
+        this GraphQLRequestPipelineBuilder builder)
+    {
+        var feature = new ConcurrentBagErrorCollectorFeature();
+        return builder.Use(next => context =>
+        {
+            context.Features.Set<IErrorCollectorFeature>(feature);
+            return next(context);
+        });
+    }
+
+    public static GraphQLRequestPipelineBuilder UseDefaultSelectionSetPipeline(
+        this GraphQLRequestPipelineBuilder builder)
+    {
+        return builder.UseSelectionSetPipeline(pipe => pipe.UseFieldCollector().RunExecute());
+    }
+
+    public static GraphQLRequestPipelineBuilder UseDefaultValidator(this GraphQLRequestPipelineBuilder builder)
+    {
+        var feature = new ValidatorFeature
+        {
+            Validator = new Validator3(ExecutionRules.All)
+        };
+
+        builder.Use(next => context =>
+        {
+            context.Features.Set<IValidatorFeature>(feature);
+            return next(context);
+        });
+                      
+        return builder;
+    }
+
     public static GraphQLRequestPipelineBuilder UseDefaultVariableCoercer(this GraphQLRequestPipelineBuilder builder)
     {
         builder.Use(next => context =>
@@ -49,17 +113,24 @@ public static class DefaultGraphQLRequestPipelineMiddlewares
         return builder;
     }
 
+    public static GraphQLRequestPipelineBuilder UseSchema(this GraphQLRequestPipelineBuilder builder, string schemaName)
+    {
+        SchemaCollection schemaCollection = builder.ApplicationServices.GetRequiredService<SchemaCollection>();
+        builder.Use(next => context =>
+        {
+            context.Schema = schemaCollection.Get(schemaName);
+            return next(context);
+        });
+
+        return builder;
+    }
+
     public static GraphQLRequestPipelineBuilder UseSelectionSetPipeline(
         this GraphQLRequestPipelineBuilder builder,
-        Action<GraphQLSelectionSetPipelineBuilder> configurePipeline,
-        bool runSelectionSetExecutorAtEnd = true)
+        Action<SelectionSetPipelineBuilder> configurePipeline)
     {
-        var selectionSetPipelineBuilder = new GraphQLSelectionSetPipelineBuilder(builder.ApplicationServices);
+        var selectionSetPipelineBuilder = new SelectionSetPipelineBuilder(builder.ApplicationServices);
         configurePipeline(selectionSetPipelineBuilder);
-
-        // append the end last middleware automatically
-        if (runSelectionSetExecutorAtEnd)
-            selectionSetPipelineBuilder.RunSelectionSetExecutor();
 
         var feature = new SelectionSetPipelineExecutorFeature(selectionSetPipelineBuilder.Build());
 
@@ -68,38 +139,6 @@ public static class DefaultGraphQLRequestPipelineMiddlewares
             context.Features.Set<ISelectionSetExecutorFeature>(feature);
             return next(context);
         });
-
-        return builder;
-    }
-
-    public static GraphQLRequestPipelineBuilder UseDefaultSelectionSetPipeline(
-        this GraphQLRequestPipelineBuilder builder)
-    {
-        return builder.UseSelectionSetPipeline(
-            pipe => { }, 
-            true);
-    }
-
-    public static GraphQLRequestPipelineBuilder UseDefaultValidator(this GraphQLRequestPipelineBuilder builder)
-    {
-        var feature = new ValidatorFeature()
-        {
-            Validator = new Validator3(ExecutionRules.All)
-        };
-
-        builder.Use(next => context =>
-        {
-            context.Features.Set<IValidatorFeature>(feature);
-            return next(context);
-        });
-
-        return builder;
-    }
-
-    public static GraphQLRequestPipelineBuilder RunExecutor(this GraphQLRequestPipelineBuilder builder)
-    {
-        var executor = builder.ApplicationServices.GetRequiredService<Executor>();
-        builder.Use(_ => context => executor.Subscribe(context));
 
         return builder;
     }

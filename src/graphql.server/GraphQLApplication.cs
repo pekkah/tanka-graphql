@@ -22,69 +22,77 @@ public class GraphQLApplication
         _transports = transports;
     }
 
-    public RouteHandlerBuilder Map(
-        string pattern,
-        IEndpointRouteBuilder routes,
-        GraphQLRequestPipelineBuilder builder)
+
+    public IEndpointConventionBuilder MapDefault(string pattern, string schemaName, IEndpointRouteBuilder routes)
     {
         var builders = new List<IEndpointConventionBuilder>();
-        foreach (var transport in _transports)
-            builders.Add(transport.Map(pattern, routes, builder));
+        foreach (IGraphQLTransport transport in _transports)
+            builders.Add(MapTransport(pattern, routes, transport, b => ConfigureDefaultPipeline(b, schemaName)));
 
         if (_optionsMonitor.CurrentValue.EnableUi)
             builders.Add(routes.MapGet($"{pattern}/ui", CreateUiDelegate(pattern)));
 
-        return new(builders);
+        return new RouteHandlerBuilder(builders);
+    }
+
+    public IEndpointConventionBuilder Map(string pattern, IEndpointRouteBuilder routes, Action<GraphQLRequestPipelineBuilder> configureRequest)
+    {
+        var builders = new List<IEndpointConventionBuilder>();
+        foreach (IGraphQLTransport transport in _transports)
+            builders.Add(MapTransport(pattern, routes, transport, configureRequest));
+
+        if (_optionsMonitor.CurrentValue.EnableUi)
+            builders.Add(routes.MapGet($"{pattern}/ui", CreateUiDelegate(pattern)));
+
+        return new RouteHandlerBuilder(builders);
+    }
+
+
+    private void ConfigureDefaultPipeline(GraphQLRequestPipelineBuilder builder, string schemaName)
+    {
+        builder.UseDefaultErrorCollector();
+        builder.UseSchema(schemaName);
+        builder.UseDefaultOperationExecutor();
+        builder.UseDefaultOperationResolver();
+        builder.UseDefaultVariableCoercer();
+        builder.UseDefaultValidator();
+        builder.UseDefaultSelectionSetPipeline();
+        builder.UseDefaultFieldPipeline();
+        builder.UseDefaultValueCompletion();
+
+        builder.RunOperation();
     }
 
     private RequestDelegate CreateUiDelegate(string apiPattern)
     {
-        var htmlStream = typeof(GraphQLApplication)
+        //todo: needs cleanup
+        Stream? htmlStream = typeof(GraphQLApplication)
             .Assembly.GetManifestResourceStream("Tanka.GraphQL.Server.GraphiQL.host.html");
 
         var reader = new StreamReader(htmlStream);
-        var htmlTemplate = reader.ReadToEnd();
+        string htmlTemplate = reader.ReadToEnd();
 
 
         return async context =>
         {
-            var requestUrl = context.Request.GetEncodedUrl();
-            var html = htmlTemplate.Replace("{{httpUrl}}", requestUrl.Replace("/ui", string.Empty));
+            string requestUrl = context.Request.GetEncodedUrl();
+            string html = htmlTemplate.Replace("{{httpUrl}}", requestUrl.Replace("/ui", string.Empty));
 
             context.Response.ContentType = "text/html";
             await context.Response.WriteAsync(html);
         };
     }
 
-    public IEndpointConventionBuilder Map(string pattern, string schemaName, IEndpointRouteBuilder routes)
-    {
-        return Map(pattern, routes, CreateDefaultPipelineBuilder(schemaName, routes.ServiceProvider));
-    }
-
-    public IEndpointConventionBuilder Map(string pattern, IEndpointRouteBuilder routes,
+    private IEndpointConventionBuilder MapTransport(
+        string pattern,
+        IEndpointRouteBuilder routes,
+        IGraphQLTransport transport,
         Action<GraphQLRequestPipelineBuilder> configureRequest)
     {
-        var builder = new GraphQLRequestPipelineBuilder(routes.ServiceProvider);
-        configureRequest(builder);
-        builder.RunExecutor();
+        var pipelineBuilder = new GraphQLRequestPipelineBuilder(routes.ServiceProvider);
+        transport.Build(pipelineBuilder);
+        configureRequest(pipelineBuilder);
 
-        return Map(pattern, routes, builder);
-    }
-
-    private GraphQLRequestPipelineBuilder CreateDefaultPipelineBuilder(
-        string schemaName,
-        IServiceProvider services)
-    {
-        var builder = new GraphQLRequestPipelineBuilder(services);
-
-        builder.UseSchema(schemaName);
-        builder.UseDefaultOperationResolver();
-        builder.UseDefaultVariableCoercer();
-        builder.UseDefaultValidator();
-        builder.UseDefaultSelectionSetPipeline();
-
-        builder.RunExecutor();
-
-        return builder;
+        return transport.Map(pattern, routes, pipelineBuilder.Build());
     }
 }

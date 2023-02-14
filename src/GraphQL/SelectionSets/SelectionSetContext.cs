@@ -17,4 +17,6 @@ public record SelectionSetContext
     public required NodePath Path { get; set; }
 
     public IReadOnlyDictionary<string, object?> Result { get; set; } = ImmutableDictionary<string, object?>.Empty;
+
+    public IReadOnlyDictionary<string, List<FieldSelection>> GroupedFieldSet { get; set; } = ImmutableDictionary<string, List<FieldSelection>>.Empty;
 }

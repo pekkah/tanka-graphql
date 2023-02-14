@@ -9,5 +9,5 @@ public class CoercedVariableValuesFeature : ICoercedVariableValuesFeature
 
     private static IReadOnlyDictionary<string, object?> Empty { get; } = new Dictionary<string, object?>();
 
-    public required IReadOnlyDictionary<string, object?> CoercedVariableValues { get; set; }
+    public IReadOnlyDictionary<string, object?> CoercedVariableValues { get; set; }
 }
