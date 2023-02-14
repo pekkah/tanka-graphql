@@ -11,4 +11,7 @@
 		<PackageTags>graphql tanka signalr apollo</PackageTags>
 		<Authors>Pekka Heikura</Authors>
 	</PropertyGroup>
+	<PropertyGroup>
+		<PackageOutputPath>$(SolutionDir)artifacts</PackageOutputPath>
+	</PropertyGroup>
 </Project>
