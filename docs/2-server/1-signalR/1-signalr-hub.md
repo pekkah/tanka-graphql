@@ -9,9 +9,9 @@ used with the provided hub.
 Configure SignalR server
 
 ```csharp
-#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddSignalRServer
+//todo: add sample
 ```
 
 ```csharp
-#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseSignalRServer
+//todo: add sample
 ```

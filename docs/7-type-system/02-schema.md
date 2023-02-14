@@ -5,7 +5,7 @@
 Schema is defined by `ISchema`-interface.
 
 ```csharp
-#include::xref://src:graphql/TypeSystem/ISchema.cs
+#include::xref://src:GraphQL/TypeSystem/ISchema.cs
 ```
 
 ### Defaults
@@ -13,5 +13,5 @@ Schema is defined by `ISchema`-interface.
 By default following type system is included when building a schema using `SchemaBuilder`.
 
 ```csharp
-#include::xref://src:graphql/TypeSystem/SchemaBuilder.cs?s=Tanka.GraphQL.SchemaBuilder.BuiltInTypes
+#include::xref://src:GraphQL/TypeSystem/SchemaBuilder.cs?s=Tanka.GraphQL.SchemaBuilder.BuiltInTypes
 ```

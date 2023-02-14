@@ -96,7 +96,7 @@ Example
 [{Tanka.GraphQL.Tests.Language.ImportProviders.FileSystemImportFacts.Parse_Sdl}]
 
 ```csharp
-#include::xref://tests:graphql.tests/Language/ImportProviders/FileSystemImportFacts.cs?s=Tanka.GraphQL.Tests.Language.ImportProviders.FileSystemImportFacts.Parse_Sdl
+//todo: update sample
 ```
 
 #### `EmbeddedResourceImportProvider`
