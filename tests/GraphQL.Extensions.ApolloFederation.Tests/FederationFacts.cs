@@ -20,29 +20,28 @@ public class FederationFacts
         /* Given */
 
         /* When */
-        var result = await Executor
-            .ExecuteAsync(new ExecutionOptions
+        var result = await new Executor(Sut)
+            .Execute(new GraphQLRequest
             {
-                IncludeExceptionDetails = true,
-                Schema = Sut,
-                Document = @"
-query($representations:[_Any!]!) {
-    _entities(representations:$representations) {
-        ...on User {
-            reviews { 
-                id 
-                body 
-                author {
-                    username
-                }
-                product {
-                    upc
-                }
-            }
-        }
-    }
-}",
-                VariableValues = new Dictionary<string, object>
+                Document = """
+                    query($representations:[_Any!]!) {
+                        _entities(representations:$representations) {
+                            ...on User {
+                                reviews { 
+                                    id 
+                                    body 
+                                    author {
+                                        username
+                                    }
+                                    product {
+                                        upc
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    """,
+                Variables = new Dictionary<string, object>
                 {
                     ["representations"] = new[]
                     {
@@ -97,26 +96,24 @@ query($representations:[_Any!]!) {
         /* Given */
 
         /* When */
-        var result = await Executor
-            .ExecuteAsync(new ExecutionOptions
+        var result = await new Executor(Sut)
+            .Execute(new GraphQLRequest
             {
-                IncludeExceptionDetails = true,
-                Schema = Sut,
                 Document = @"query { _service { sdl } }"
             });
 
         /* Then */
         Assert.Null(result.Errors);
-        //todo: fix test when builtin type ignored when printing
-        /*result.ShouldMatchJson(@"
-{
-""data"": {
-""_service"": {
-  ""sdl"": ""type Review  @key(fields: \""id\"") { id: ID! body: String author: User @provides(fields: \""username\"") product: Product }  type User  @key(fields: \""id\"") @extends { id: ID! @external username: String @external reviews: [Review] }  type Product  @key(fields: \""upc\"") @extends { upc: String! @external reviews: [Review] }""
-}
-},
-""extensions"": null,
-""errors"": null
-}");*/
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "_service": {
+                  "sdl": "directive @specifiedBy(url: String!) on SCALAR type Product  @key(fields: \"upc\") @extends { upc: String! @external reviews: [Review] }  type Review  @key(fields: \"id\") { id: ID! body: String author: User @provides(fields: \"username\") product: Product }  type User  @key(fields: \"id\") @extends { id: ID! @external username: String @external reviews: [Review] }"
+                }
+              },
+              "extensions": null,
+              "errors": null
+            }
+            """);
     }
 }

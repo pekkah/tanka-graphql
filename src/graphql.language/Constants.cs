@@ -52,6 +52,8 @@ public static class Constants
 
     private static readonly bool[] _isPunctuator = new bool[256];
 
+    public static ReadOnlySpan<byte> EscapedQuote => "\\\""u8;
+
     public static ReadOnlyMemory<byte> Spread = new(new[]
     {
         Dot,

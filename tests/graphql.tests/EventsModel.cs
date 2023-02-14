@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.ValueResolution;
+
 
 namespace Tanka.GraphQL.Tests;
 
@@ -21,7 +21,7 @@ public class EventsModel
         Events = new List<Event>();
     }
 
-    public EventChannel<Event> Broadcast { get; set; } = new();
+    public Channel<Event> Broadcast { get; set; } = Channel.CreateUnbounded<Event>();
 
     public List<Event> Events { get; set; }
 
@@ -37,14 +37,14 @@ public class EventsModel
             Payload = newEvent.Payload
         };
         Events.Add(ev);
-        await Broadcast.WriteAsync(ev);
+        await Broadcast.Writer.WriteAsync(ev);
 
         return LastId;
     }
 
-    public ISubscriberResult Subscribe(CancellationToken unsubscribe)
+    public IAsyncEnumerable<object?> Subscribe(CancellationToken unsubscribe)
     {
-        return Broadcast.Subscribe(unsubscribe);
+        return Broadcast.Reader.ReadAllAsync(unsubscribe);
     }
 
     public class Event
@@ -66,16 +66,11 @@ public class EventsModel
         public string Message { get; set; }
     }
 
-    public class NewEvent : IReadFromObjectDictionary
+    public class NewEvent
     {
         public string Payload { get; set; }
         public EventType Type { get; set; }
 
-        public void Read(IReadOnlyDictionary<string, object> source)
-        {
-            Type = (EventType)Enum.Parse(typeof(EventType), source.GetValue<string>("type"));
-            Payload = source.GetValue<string>("payload");
-        }
     }
 
     public class Success

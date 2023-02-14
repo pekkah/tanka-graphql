@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Tanka.GraphQL.Language.Nodes;
+﻿namespace Tanka.GraphQL.Language.Nodes;
 
 public sealed class OperationDefinition : INode
 {
@@ -34,7 +32,7 @@ public sealed class OperationDefinition : INode
 
     public static implicit operator OperationDefinition(string value)
     {
-        var parser = new Parser(Encoding.UTF8.GetBytes(value));
+        var parser = Parser.Create(value);
         return parser.ParseOperationDefinition();
     }
 }

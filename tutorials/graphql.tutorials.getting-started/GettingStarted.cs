@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.TypeSystem.ValueSerialization;
 using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.ValueSerialization;
 using Xunit;
 
 namespace Tanka.GraphQL.Tutorials.GettingStarted;
@@ -60,26 +60,23 @@ public class GettingStarted
             Resolvers = new ResolversMap
             {
                 {
-                    "Query", "name", context =>
-                    {
-                        // Create result using Test as the value
-                        var result = Resolve.As("Test");
-
-                        // Resolvers can be sync or async so
-                        // ValueTask result is used to reduce 
-                        // allocations
-                        return new ValueTask<IResolverResult>(result);
-                    }
+                    "Query", "name", context => context.ResolveAs("Test")
                 }
             }
         });
 
-        // Get resolver for Query.name field
-        var nameResolver = schema.GetResolver(schema.Query.Name, "name")!;
+        // Quickest but least configurable way to execute 
+        // queries against the schema is to use static
+        // execute method of the Executor
+        var result = await Executor.Execute(schema, @"{ name }");
 
-        // Execute the resolver. This is normally handled by the executor.
-        var nameValue = await nameResolver(null);
-        Assert.Equal("Test", nameValue.Value);
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "name": "Test"
+              }
+            }
+            """);
     }
 
     [Fact]
@@ -96,8 +93,6 @@ public class GettingStarted
                     }
                     ");
 
-        // todo: This is not currently working and resolvers are being modified but
-        // those modified resolvers are not taken into use by anything
         // build schema with resolvers and directives
         var schema = await builder.Build(new SchemaBuildOptions
         {
@@ -107,11 +102,7 @@ public class GettingStarted
                     "Query", new FieldResolversMap
                     {
                         {
-                            "name", context =>
-                            {
-                                var result = Resolve.As("Test");
-                                return new ValueTask<IResolverResult>(result);
-                            }
+                            "name", context => context.ResolveAs("Test")
                         }
                     }
                 }
@@ -132,29 +123,37 @@ public class GettingStarted
                         // original resolver, duplicate value and return it
                         return fieldDefinition
                             .WithResolver(resolver =>
-                                resolver.Use(async (context, next) =>
+                                // we will build a new resolver with a middlware to duplicate the value
+                                resolver.Use(next => async context =>
                                 {
                                     // We need to first call the original resolver to 
                                     // get the initial value
-                                    var result = await next(context);
+                                     await next(context);
+
+                                     // context should now have the ResolvedValue set by the original resolver
+                                     var resolvedValue = context.ResolvedValue;
 
                                     // for simplicity we expect value to be string
-                                    var initialValue = result.Value.ToString();
+                                    var initialValue = resolvedValue!.ToString();
 
                                     // return new value
-                                    return Resolve.As(initialValue + initialValue);
-                                }).Run(fieldDefinition.Resolver));
+                                    context.ResolvedValue = $"{initialValue} {initialValue}";
+                                }).Run(fieldDefinition.Resolver ?? throw new InvalidOperationException()));
                     }
                 }
             }
         });
 
-        // Get resolver for Query.name field
-        var nameResolver = schema.GetResolver(schema.Query.Name, "name")!;
+        // execute the query
+        var result = await Executor.Execute(schema, @"{ name }");
 
-        // Execute the resolver. This is normally handled by the executor.
-        var nameValue = await nameResolver(null);
-        Assert.Equal("TestTest", nameValue.Value);
+        result.ShouldMatchJson("""
+             {
+                "data": {
+                    "name": "Test Test"
+                    }
+            }
+            """);
     }
 
     [Fact]
@@ -181,7 +180,7 @@ public class GettingStarted
                     "Query", new FieldResolversMap
                     {
                         {
-                            "url", context => ResolveSync.As(new Uri("https://localhost/"))
+                            "url", context => context.ResolveAs(new Uri("https://localhost/"))
                         }
                     }
                 }
@@ -210,13 +209,14 @@ public class GettingStarted
 
 
         // execute query
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = schema,
-            Document = @"{ url }"
-        });
+        var result = await Executor.Execute(schema, @"{ url }");
 
-        var url = result.Data["url"];
-        Assert.Equal("https://localhost/", url.ToString());
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "url": "https://localhost/"
+              }
+            }
+            """);
     }
 }

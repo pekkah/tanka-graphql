@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
@@ -12,8 +11,8 @@ public class Query
 {
     public Query()
     {
-        Container = new Container();
-        Custom = new CustomContainer();
+        Container = new();
+        Custom = new();
     }
 
     public Container Container { get; }
@@ -46,7 +45,7 @@ public class FieldErrorsFacts
 
     public FieldErrorsFacts()
     {
-        Query = new Query();
+        Query = new();
         var builder = new SchemaBuilder()
             .Add(
                 @"
@@ -78,10 +77,10 @@ public class FieldErrorsFacts
         {
             ["Container"] = new()
             {
-                { "nonNullWithNull", Resolve.PropertyOf<Container>(c => c.NonNull_WithNull) },
-                { "nonNullListAsNull", Resolve.PropertyOf<Container>(c => c.NonNullList_AsNull) },
-                { "nonNullListWithNonNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem) },
-                { "nonNullListWithNullItem", Resolve.PropertyOf<Container>(c => c.NonNullList_WithNullSecondItem) }
+                { "nonNullWithNull", context => context.ResolveAsPropertyOf<Container>(c => c.NonNull_WithNull) },
+                { "nonNullListAsNull", context => context.ResolveAsPropertyOf<Container>(c => c.NonNullList_AsNull) },
+                { "nonNullListWithNonNullItem", context => context.ResolveAsPropertyOf<Container>(c => c.NonNullList_WithNullSecondItem) },
+                { "nonNullListWithNullItem", context => context.ResolveAsPropertyOf<Container>(c => c.NonNullList_WithNullSecondItem) }
             },
             ["CustomErrorContainer"] = new()
             {
@@ -92,8 +91,8 @@ public class FieldErrorsFacts
             },
             ["Query"] = new()
             {
-                { "container", context => new ValueTask<IResolverResult>(Resolve.As(Query.Container)) },
-                { "custom", context => new ValueTask<IResolverResult>(Resolve.As(Query.Custom)) }
+                { "container", context => context.ResolveAs(Query.Container) },
+                { "custom", context => context.ResolveAs(Query.Custom) }
             }
         };
 
@@ -117,11 +116,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -132,7 +127,7 @@ public class FieldErrorsFacts
   ""extensions"": null,
   ""errors"": [
     {
-      ""message"": ""Cannot return null for non-nullable field 'Container.nonNullWithNull'."",
+      ""message"": ""Cannot complete value for field 'nonNullWithNull: String!'. Completed value would be null for non-null field"",
       ""locations"": [
         {
           ""line"": 4,
@@ -142,10 +137,7 @@ public class FieldErrorsFacts
       ""path"": [
         ""container"",
         ""nonNullWithNull""
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
+      ]
     }
   ]
 }");
@@ -166,11 +158,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -181,7 +169,7 @@ public class FieldErrorsFacts
   ""extensions"": null,
   ""errors"": [
     {
-      ""message"": ""Cannot return null for non-nullable field 'Container.nonNullListAsNull'."",
+      ""message"": ""Cannot complete value for field 'nonNullListAsNull: [String]!'. Completed value would be null for non-null field"",
       ""locations"": [
         {
           ""line"": 4,
@@ -191,10 +179,7 @@ public class FieldErrorsFacts
       ""path"": [
         ""container"",
         ""nonNullListAsNull""
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
+      ]
     }
   ]
 }");
@@ -215,11 +200,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         // this is valid scenario as the requirement is to only have the list non null (items can be null)
@@ -251,11 +232,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -263,24 +240,19 @@ public class FieldErrorsFacts
   ""data"": {
     ""container"": null
   },
-  ""extensions"": null,
   ""errors"": [
     {
-      ""message"": ""Cannot return null for non-nullable field 'Container.nonNullListWithNonNullItem'."",
       ""locations"": [
         {
           ""line"": 4,
           ""column"": 26
         }
       ],
+      ""message"": ""Cannot complete value for field 'nonNullListWithNonNullItem: [String!]!'. Completed value would be null for non-null field"",
       ""path"": [
         ""container"",
-        ""nonNullListWithNonNullItem"",
-        1
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
+        ""nonNullListWithNonNullItem""
+      ]
     }
   ]
 }");
@@ -301,11 +273,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -326,10 +294,7 @@ public class FieldErrorsFacts
                       ""path"": [
                         ""custom"",
                         ""nonNullWithCustomError""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""INVALIDOPERATION""
-                      }
+                      ]
                     }
                   ]
                 }
@@ -351,11 +316,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -378,10 +339,7 @@ public class FieldErrorsFacts
                       ""path"": [
                         ""custom"",
                         ""nullableWithCustomError""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""INVALIDOPERATION""
-                      }
+                      ]
                     }
                   ]
                 }
@@ -403,11 +361,7 @@ public class FieldErrorsFacts
 
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -428,10 +382,7 @@ public class FieldErrorsFacts
                       ""path"": [
                         ""custom"",
                         ""nonNullListWithCustomError""
-                      ],
-                      ""extensions"": {
-                        ""code"": ""INVALIDOPERATION""
-                      }
+                      ]
                     }
                   ]
                 }

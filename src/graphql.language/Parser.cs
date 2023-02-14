@@ -14,19 +14,19 @@ public ref partial struct Parser
     private StringValue? _description;
     private Lexer _lexer;
 
-    public Parser(in ReadOnlySpan<byte> span)
+    public Parser(ReadOnlySpan<byte> span)
     {
         _description = null;
         _lexer = Lexer.Create(span);
         _lexer.Advance();
     }
 
-    public static Parser Create(in ReadOnlySpan<byte> span)
+    public static Parser Create(ReadOnlySpan<byte> span)
     {
         return new Parser(span);
     }
 
-    public static Parser Create(in string data)
+    public static Parser Create(string data)
     {
         return Create(Encoding.UTF8.GetBytes(data));
     }

@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using NSubstitute;
-using Tanka.GraphQL.Execution;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.ValueResolution;
@@ -22,12 +21,14 @@ type Failure
 union Result = Success | Failure
 type Query
 "
-            ).Build(new SchemaBuildOptions());
+            ).Build(new());
         var value = new object();
-        var context = Substitute.For<IResolverContext>();
-        context.ExecutionContext.Schema.Returns(schema);
-        context.FieldName.Returns("field");
-        context.Field.Returns("field: Result");
+        var context = Substitute.For<ResolverContext>();
+        context.QueryContext = new QueryContext()
+        {
+            Schema = schema
+        };
+        context.Field = "field: Result";
 
 
         var sut = new CompleteValueResult(value, null);
@@ -53,7 +54,7 @@ type Failure
 union Result = Success | Failure
 type Query
 "
-            ).Build(new SchemaBuildOptions());
+            ).Build(new());
         var value = new object();
         var context = Substitute.For<IResolverContext>();
         context.ExecutionContext.Schema.Returns(schema);
@@ -84,7 +85,7 @@ type Failure
 union Result = Success | Failure
 type Query
 "
-            ).Build(new SchemaBuildOptions());
+            ).Build(new());
         var mockValue = new object();
         var context = Substitute.For<IResolverContext>();
         context.ExecutionContext.Schema.Returns(schema);
@@ -114,7 +115,7 @@ type Failure
 union Result = Success | Failure
 type Query
 "
-            ).Build(new SchemaBuildOptions());
+            ).Build(new());
 
         var mockValue = new object();
         var context = Substitute.For<IResolverContext>();

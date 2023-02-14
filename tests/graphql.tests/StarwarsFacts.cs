@@ -2,7 +2,6 @@
 using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.Tests.Data.Starwars;
 using Xunit;
-using static Tanka.GraphQL.Executor;
 
 namespace Tanka.GraphQL.Tests;
 
@@ -23,13 +22,7 @@ public class StarwarsFacts : IClassFixture<StarwarsFixture>
         var schema = await _fixture.CreateSchema(starwars);
 
         /* When */
-        var result = await ExecuteAsync(
-            new ExecutionOptions
-            {
-                Document = GraphQL.Introspection.Introspect.DefaultQuery,
-                Schema = schema,
-                IncludeExceptionDetails = true
-            }).ConfigureAwait(false);
+        var result = await Executor.Execute(schema, GraphQL.Introspection.Introspect.DefaultQuery);
 
         /* Then */
         Assert.NotNull(result.Data);
@@ -59,17 +52,9 @@ public class StarwarsFacts : IClassFixture<StarwarsFixture>
 
 
         var executableSchema = await _fixture.CreateSchema(starwars);
-        var options = new ExecutionOptions
-        {
-            Schema = executableSchema,
-            Document = query,
-            OperationName = null,
-            InitialValue = null,
-            VariableValues = null
-        };
 
         /* When */
-        var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        var actual = await Executor.Execute(executableSchema, query);
 
         /* Then */
         actual.ShouldMatchJson(
@@ -101,17 +86,9 @@ public class StarwarsFacts : IClassFixture<StarwarsFixture>
 }}";
 
         var executableSchema = await _fixture.CreateSchema(starwars);
-        var options = new ExecutionOptions
-        {
-            Schema = executableSchema,
-            Document = query,
-            OperationName = null,
-            InitialValue = null,
-            VariableValues = null
-        };
 
         /* When */
-        var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        var actual = await Executor.Execute(executableSchema, query);
 
         /* Then */
         actual.ShouldMatchJson(
@@ -147,17 +124,9 @@ public class StarwarsFacts : IClassFixture<StarwarsFixture>
 }}";
 
         var executableSchema = await _fixture.CreateSchema(starwars);
-        var options = new ExecutionOptions
-        {
-            Schema = executableSchema,
-            Document = query,
-            OperationName = null,
-            InitialValue = null,
-            VariableValues = null
-        };
 
         /* When */
-        var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        var actual = await Executor.Execute(executableSchema, query);
 
         /* Then */
         actual.ShouldMatchJson(
@@ -193,17 +162,9 @@ public class StarwarsFacts : IClassFixture<StarwarsFixture>
                 }";
 
         var executableSchema = await _fixture.CreateSchema(starwars);
-        var options = new ExecutionOptions
-        {
-            Schema = executableSchema,
-            Document = query,
-            OperationName = null,
-            InitialValue = null,
-            VariableValues = null
-        };
 
         /* When */
-        var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        var actual = await Executor.Execute(executableSchema, query);
 
         /* Then */
         actual.ShouldMatchJson(
@@ -251,17 +212,9 @@ public class StarwarsFacts : IClassFixture<StarwarsFixture>
 }}";
 
         var executableSchema = await _fixture.CreateSchema(starwars);
-        var options = new ExecutionOptions
-        {
-            Schema = executableSchema,
-            Document = query,
-            OperationName = null,
-            InitialValue = null,
-            VariableValues = null
-        };
 
         /* When */
-        var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        var actual = await Executor.Execute(executableSchema, query);
 
         /* Then */
         actual.ShouldMatchJson(
@@ -291,17 +244,9 @@ public class StarwarsFacts : IClassFixture<StarwarsFixture>
 }}";
 
         var executableSchema = await _fixture.CreateSchema(starwars);
-        var options = new ExecutionOptions
-        {
-            Schema = executableSchema,
-            Document = query,
-            OperationName = null,
-            InitialValue = null,
-            VariableValues = null
-        };
 
         /* When */
-        var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        var actual = await Executor.Execute(executableSchema, query);
 
         /* Then */
         actual.ShouldMatchJson(
@@ -332,17 +277,10 @@ public class StarwarsFacts : IClassFixture<StarwarsFixture>
     }
 }";
         var executableSchema = await _fixture.CreateSchema(starwars);
-        var options = new ExecutionOptions
-        {
-            Schema = executableSchema,
-            Document = query,
-            OperationName = null,
-            InitialValue = null,
-            VariableValues = null
-        };
+
 
         /* When */
-        var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        var actual = await Executor.Execute(executableSchema, query);
 
         /* Then */
         actual.ShouldMatchJson(
@@ -404,17 +342,9 @@ fragment friendsAndFriends on Human {{
 
 
         var executableSchema = await _fixture.CreateSchema(starwars);
-        var options = new ExecutionOptions
-        {
-            Schema = executableSchema,
-            Document = query,
-            OperationName = null,
-            InitialValue = null,
-            VariableValues = null
-        };
 
         /* When */
-        var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        var actual = await Executor.Execute(executableSchema, query);
 
         /* Then */
         actual.ShouldMatchJson(

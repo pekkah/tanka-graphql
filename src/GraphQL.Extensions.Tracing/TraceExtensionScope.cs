@@ -3,13 +3,45 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Extensions.Tracing;
 
-public class TraceExtensionScope : IExtensionScope
+public static class TraceOperationBuilderExtensions
+{
+    public static OperationPipelineBuilder UseTrace(this OperationPipelineBuilder builder)
+    {
+        return builder.Use(next => async context =>
+        {
+            var trace = TraceFeature.StartNew();
+            context.Features.Set<TraceFeature>(trace);
+            await next(context);
+        });
+    }
+}
+
+public static class TraceQueryContextExtensions
+{
+    public static TraceFeature GetTrace(this QueryContext context)
+    {
+        return context.Features.GetRequiredFeature<TraceFeature>();
+    }
+}
+
+public class TraceFeature
+{
+    public static TraceFeature StartNew()
+    {
+        var trace = new TraceFeature();
+        return trace;
+    }
+}
+
+
+public class TraceExtensionScope
 {
     private readonly List<TraceExtensionRecord.ResolverTrace> _resolverTraces = new();
     private readonly DateTime _startTime;
@@ -19,12 +51,8 @@ public class TraceExtensionScope : IExtensionScope
     private TimeSpan _validationEnded;
     private TimeSpan _validationStarted;
 
-    public TraceExtensionScope(ExecutionOptions options) :
-        this(() => DateTime.UtcNow, options)
-    {
-    }
 
-    public TraceExtensionScope(Func<DateTime> utcNow, ExecutionOptions options)
+    public TraceExtensionScope(Func<DateTime> utcNow)
     {
         if (utcNow == null) throw new ArgumentNullException(nameof(utcNow));
 
@@ -44,7 +72,7 @@ public class TraceExtensionScope : IExtensionScope
         return default;
     }
 
-    public ValueTask EndExecuteAsync(IExecutionResult executionResult)
+    public ValueTask EndExecuteAsync(ExecutionResult executionResult)
     {
         _stopwatch.Stop();
 
@@ -79,7 +107,7 @@ public class TraceExtensionScope : IExtensionScope
             }
         };
 
-        executionResult.AddExtension("tracing", record);
+        //executionResult.AddExtension("tracing", record);
         return default;
     }
 
@@ -95,25 +123,26 @@ public class TraceExtensionScope : IExtensionScope
         return default;
     }
 
-    public ValueTask BeginResolveAsync(IResolverContext context)
+    public ValueTask BeginResolveAsync(ResolverContext context)
     {
         var start = _stopwatch.Elapsed;
         var record = new TraceExtensionRecord.ResolverTrace
         {
             StartOffset = start.TotalNanoSeconds(),
             ParentType = context.ObjectDefinition.Name,
-            FieldName = context.FieldName,
+            FieldName = context.Field.Name,
             Path = context.Path.Segments.ToList(),
             ReturnType = context.Field.Type.ToString()
         };
-        context.Items.Add("trace", record);
+        //context.Items.Add("trace", record);
         return default;
     }
 
-    public ValueTask EndResolveAsync(IResolverContext context, IResolverResult result)
+    public ValueTask EndResolveAsync(ResolverContext context)
     {
         var end = _stopwatch.Elapsed.TotalNanoSeconds();
 
+        /*
         if (context.Items.TryGetValue("trace", out var recordItem))
         {
             if (!(recordItem is TraceExtensionRecord.ResolverTrace record))
@@ -121,8 +150,7 @@ public class TraceExtensionScope : IExtensionScope
 
             record.Duration = end - record.StartOffset;
             _resolverTraces.Add(record);
-        }
-
+        }*/
         return default;
     }
 }

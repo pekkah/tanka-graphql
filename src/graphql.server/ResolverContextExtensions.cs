@@ -1,31 +1,19 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Server;
 
 public static class ResolverContextExtensions
 {
-    /// <summary>
-    ///     Use context extension from execution scope
-    /// </summary>
-    /// <typeparam name="TContext"></typeparam>
-    /// <param name="context"></param>
-    /// <returns></returns>
-    public static TContext ContextExtension<TContext>(this IResolverContext context)
+    public static T GetRequiredService<T>(this ResolverContextBase context) where T : notnull
     {
-        return context.Extension<ContextExtensionScope<TContext>>().Context;
-    }
+        var serviceProviderFeature = context.QueryContext.Features.Get<IRequestServicesFeature>();
 
-    /// <summary>
-    ///     Get service from execution scope service provider
-    /// </summary>
-    /// <typeparam name="TService"></typeparam>
-    /// <param name="context"></param>
-    /// <returns></returns>
-    public static TService Use<TService>(this IResolverContext context)
-    {
-        return context.ContextExtension<IServiceScope>()
-            .ServiceProvider
-            .GetRequiredService<TService>();
+        if (serviceProviderFeature is null)
+            throw new InvalidOperationException($"{nameof(IRequestServicesFeature)} is not set in the query context");
+
+        return serviceProviderFeature.RequestServices.GetRequiredService<T>();
     }
 }

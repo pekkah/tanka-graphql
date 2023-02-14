@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
-using static Tanka.GraphQL.ValueResolution.Resolve;
+using static Tanka.GraphQL.Tests.Data.Starwars.Starwars;
 
 namespace Tanka.GraphQL.Tests.Data.Starwars;
 
@@ -12,51 +12,54 @@ public class StarwarsResolvers
 {
     public static IResolverMap BuildResolvers(Starwars starwars)
     {
-        async ValueTask<IResolverResult> ResolveCharacter(IResolverContext context)
+        async ValueTask ResolveCharacter(ResolverContext context)
         {
             var id = (string)context.Arguments["id"];
             var character = await starwars.GetCharacter(id).ConfigureAwait(false);
-            return As(context.ExecutionContext.Schema.GetRequiredNamedType<ObjectDefinition>("Human"), character);
+            context.ResolvedValue = character;
+            context.ResolveAbstractType = (definition, o) => context.Schema.GetRequiredNamedType<ObjectDefinition>("Human");
         }
 
-        async ValueTask<IResolverResult> ResolveHuman(IResolverContext context)
+        async ValueTask ResolveHuman(ResolverContext context)
         {
             var id = (string)context.Arguments["id"];
 
             var human = await starwars.GetHuman(id).ConfigureAwait(false);
-            return As(human);
+            context.ResolvedValue = human;
         }
 
-        async ValueTask<IResolverResult> ResolveFriends(IResolverContext context)
+        async ValueTask ResolveFriends(ResolverContext context)
         {
             var character = (Starwars.Character)context.ObjectValue;
             var friends = character.GetFriends();
             await Task.Delay(0).ConfigureAwait(false);
-            return As(friends, (_, friend) => CharacterIsTypeOf(friend, context));
+            context.ResolvedValue = friends;
+            context.ResolveAbstractType = (definition, o) => CharacterIsTypeOf(o, context);
         }
 
-        ObjectDefinition CharacterIsTypeOf(object character, IResolverContext context)
+        ObjectDefinition CharacterIsTypeOf(object character, ResolverContext context)
         {
             return character switch
             {
-                Starwars.Human human => context.ExecutionContext.Schema.GetRequiredNamedType<ObjectDefinition>("Human"),
+                Starwars.Human human => context.Schema.GetRequiredNamedType<ObjectDefinition>("Human"),
                 _ => throw new ArgumentOutOfRangeException(nameof(character))
             };
         }
 
-        async ValueTask<IResolverResult> ResolveCharacters(IResolverContext context)
+        async ValueTask ResolveCharacters(ResolverContext context)
         {
             await Task.Delay(0).ConfigureAwait(false);
-            return As(starwars.Characters, (_, character) => CharacterIsTypeOf(character, context));
+            context.ResolvedValue = starwars.Characters;
+            context.ResolveAbstractType = (definition, o) => CharacterIsTypeOf(o, context);
         }
 
-        async ValueTask<IResolverResult> AddHuman(IResolverContext context)
+        async ValueTask AddHuman(ResolverContext context)
         {
             var humanInput = (IDictionary<string, object>)context.Arguments["human"];
             var human = starwars.AddHuman(humanInput["name"].ToString());
 
             await Task.Delay(0).ConfigureAwait(false);
-            return As(human);
+            context.ResolvedValue = human;
         }
 
         var resolverMap = new ResolversMap
@@ -78,11 +81,11 @@ public class StarwarsResolvers
             // ObjectType
             ["Human"] = new()
             {
-                { "id", PropertyOf<Starwars.Human>(c => c.Id) },
-                { "name", PropertyOf<Starwars.Human>(c => c.Name) },
-                { "homePlanet", PropertyOf<Starwars.Human>(c => c.HomePlanet) },
+                { "id", context => context.ResolveAsPropertyOf<Starwars.Human>(c => c.Id) },
+                { "name", context => context.ResolveAsPropertyOf<Starwars.Human>(c => c.Name) },
+                { "homePlanet", context => context.ResolveAsPropertyOf<Starwars.Human>(c => c.HomePlanet) },
                 { "friends", ResolveFriends },
-                { "appearsIn", PropertyOf<Starwars.Human>(h => h.AppearsIn) }
+                { "appearsIn", context => context.ResolveAsPropertyOf<Starwars.Human>(h => h.AppearsIn) }
             }
         };
 

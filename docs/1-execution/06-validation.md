@@ -5,7 +5,7 @@
 ### Execution
 
 ```csharp
-#include::xref://tests:graphql.tests/Validation/ValidatorFacts.cs?s=Tanka.GraphQL.Tests.Validation.ValidatorFacts.Validate
+//todo: add sample
 ```
 
 ### Rules
@@ -13,5 +13,5 @@
 All execution rules
 
 ```csharp
-#include::xref://src:graphql/Validation/ExecutionRules.cs?s=Tanka.GraphQL.Validation.ExecutionRules.All
+#include::xref://src:GraphQL/Validation/ExecutionRules.cs?s=Tanka.GraphQL.Validation.ExecutionRules.All
 ```

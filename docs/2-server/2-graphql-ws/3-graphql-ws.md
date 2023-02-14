@@ -9,7 +9,7 @@ compatible websocket server. This server can be used with
 This will add the required services to execution pipeline.
 
 ```csharp
-#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_WebSockets
+//todo: add sample
 ```
 
 ### Add middleware to app pipeline
@@ -27,5 +27,5 @@ the connection and sends `connection_ack` message back to the client. You can
 configure this behavior with your own logic.
 
 ```csharp
-#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_WebSockets_with_Accept
+//todo: add sample
 ```

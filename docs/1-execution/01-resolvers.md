@@ -5,13 +5,13 @@ Resolving values is done with two specialized delegates. One is used resolving v
 Resolve fields
 
 ```csharp
-#include::xref://src:graphql/ValueResolution/Resolver.cs
+#include::xref://src:GraphQL/ValueResolution/Resolver.cs
 ```
 
 Resolve subscription event streams
 
 ```csharp
-#include::xref://src:graphql/ValueResolution/Subscriber.cs
+#include::xref://src:GraphQL/ValueResolution/Subscriber.cs
 ```
 
 ### Resolver
@@ -46,26 +46,14 @@ Resolver middlwares can be used to build an execution chain.
 
 Middlwares are implemented as a delegate method taking in the context and delegate for the next middlware to execute. Last link in the chain is usually the actual resolver but chain can be also interrupted before it by returning a result from the middleware.
 
-Signature of the value resolver middlware:
-
-```csharp
-#include::xref://src:graphql/ValueResolution/ResolverMiddleware.cs
-```
-
-Signature of the subscription middlware:
-
-```csharp
-#include::xref://src:graphql/ValueResolution/SubscriberMiddleware.cs
-```
-
 ### Using resolver and subscriber maps
 
 Dictionary based implementation is provided for setting up both resolvers and subscribers but other implementations can be easily provided.
 
 ```csharp
-#include::xref://src:graphql/IResolverMap.cs
+#include::xref://src:GraphQL/ValueResolution/IResolverMap.cs
 ```
 
 ```csharp
-#include::xref://src:graphql/ISubscriberMap.cs
+#include::xref://src:GraphQL/ValueResolution/ISubscriberMap.cs
 ```

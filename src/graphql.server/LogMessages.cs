@@ -31,9 +31,9 @@ internal static class LogMessages
             default,
             "Unsubscribed '{OperationName}'");
 
-    internal static void Query(this ILogger logger, Query query)
+    internal static void Query(this ILogger logger, GraphQLRequest query)
     {
-        QueryAction(logger, query.OperationName, query.Document.ToGraphQL(), null);
+        QueryAction(logger, query.OperationName, Printer.Print(query.Document), null);
     }
 
     internal static void Executed(this ILogger logger, string operationName, Dictionary<string, object> variables,

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
@@ -39,28 +40,28 @@ type Mutation {
             {
                 "Query", new FieldResolversMap
                 {
-                    { "root", context => new ValueTask<IResolverResult>(Resolve.As(new { })) }
+                    { "root", context => context.ResolveAs(new { }) }
                 }
             },
             {
                 "Mutation", new FieldResolversMap
                 {
-                    { "root", context => new ValueTask<IResolverResult>(Resolve.As(new { })) }
+                    { "root", context => context.ResolveAs(new { }) }
                 }
             },
             {
                 "Node", new FieldResolversMap
                 {
-                    { "child", context => new ValueTask<IResolverResult>(Resolve.As(new { })) },
+                    { "child", context => context.ResolveAs(new { }) },
                     {
-                        "children", context => new ValueTask<IResolverResult>(Resolve.As(new[]
+                        "children", context => context.ResolveAs(new[]
                         {
                             new { id = 0 },
                             new { id = 1 }
-                        }))
+                        })
                     },
-                    { "value", context => new ValueTask<IResolverResult>(Resolve.As("value")) },
-                    { "path", context => new ValueTask<IResolverResult>(Resolve.As(context.Path.Segments)) }
+                    { "value", context => context.ResolveAs("value") },
+                    { "path", context => context.ResolveAs(context.Path.Segments.ToArray()) }
                 }
             }
         };
@@ -90,11 +91,7 @@ mutation Root {
 ";
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         var rootPath = result.Select("root", "path") as IEnumerable<object>;
@@ -143,21 +140,17 @@ mutation Root {
 ";
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        });
+        var result = await Executor.Execute(_schema, query);
 
         /* Then */
         var rootPath = result.Select("root", "path") as IEnumerable<object>;
-        Assert.Equal(new object[]
+        Assert.Equal(new List<object>()
         {
             "root",
             "path"
         }, rootPath);
         var rootChildPath = result.Select("root", "child", "path") as IEnumerable<object>;
-        Assert.Equal(new object[]
+        Assert.Equal(new List<object>()
         {
             "root",
             "child",
@@ -165,7 +158,7 @@ mutation Root {
         }, rootChildPath);
 
         var rootChildrenFirstPath = result.Select("root", "children", 0, "path") as IEnumerable<object>;
-        Assert.Equal(new object[]
+        Assert.Equal(new List<object>()
         {
             "root",
             "children",

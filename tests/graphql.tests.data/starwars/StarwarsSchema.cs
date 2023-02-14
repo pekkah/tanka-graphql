@@ -1,3 +1,5 @@
+using Tanka.GraphQL.TypeSystem;
+
 namespace Tanka.GraphQL.Tests.Data.Starwars;
 
 public class StarwarsSchema

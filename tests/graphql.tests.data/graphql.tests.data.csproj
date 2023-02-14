@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <AssemblyName>tanka.graphql.tests.data</AssemblyName>
     <RootNamespace>Tanka.Graphql.Tests.Data</RootNamespace>
     <IsPackable>false</IsPackable>
@@ -9,12 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="xunit" Version="2.4.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
+    <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
   </ItemGroup>
 
 </Project>

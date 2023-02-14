@@ -1,9 +1,6 @@
-﻿using System.Threading;
-using Tanka.GraphQL.Channels;
-using Tanka.GraphQL.ValueResolution;
+﻿namespace Tanka.GraphQL.Benchmarks;
 
-namespace Tanka.GraphQL.Benchmarks;
-
+/*
 public class SingleValueEventChannel : EventChannel<string>
 {
     public override void OnSubscribed(ISubscriberResult subscription)
@@ -13,3 +10,4 @@ public class SingleValueEventChannel : EventChannel<string>
             .Wait();
     }
 }
+*/

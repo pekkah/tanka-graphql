@@ -27,6 +27,7 @@ jobs:
         with:
           dotnet-version: |
             6.0.x
+            7.0.x
 
       - name: Build docs
         shell: pwsh

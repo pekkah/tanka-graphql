@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation;
 
 public delegate ValueTask<ResolveReferenceResult> ResolveReference(
-    IResolverContext context,
+    ResolverContext context,
     TypeDefinition type,
     IReadOnlyDictionary<string, object> representation);
 

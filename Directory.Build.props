@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Project>
-  <PropertyGroup>
-    <LangVersion>10.0</LangVersion>
-    <Copyright>Pekka Heikura</Copyright>
-    <PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
-    <Description>GraphQL Query, Mutation and Subscription library</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>graphql tanka signalr apollo</PackageTags>
-    <Authors>Pekka Heikura</Authors>
-  </PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>11</LangVersion>
+		<Copyright>Pekka Heikura</Copyright>
+		<PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
+		<Description>GraphQL Query, Mutation and Subscription library</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>graphql tanka signalr apollo</PackageTags>
+		<Authors>Pekka Heikura</Authors>
+	</PropertyGroup>
 </Project>

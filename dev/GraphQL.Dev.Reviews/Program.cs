@@ -1,18 +1,40 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+﻿using GraphQL.Dev.Reviews;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Tanka.GraphQL.Extensions.ApolloFederation;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Server;
 
-namespace GraphQL.Dev.Reviews;
 
-public class Program
-{
-    public static void Main(string[] args)
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<ReviewsReferenceResolvers>();
+builder.Services.AddSingleton<ReviewsResolvers>();
+
+// configure services
+builder.AddTankaGraphQL3()
+    .AddSchema("reviews", options =>
     {
-        CreateHostBuilder(args).Build().Run();
-    }
+        options.AddReviews();
 
-    public static IHostBuilder CreateHostBuilder(string[] args)
-    {
-        return Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
-    }
-}
+        // add federation as last step
+        options.Configure<ReviewsReferenceResolvers>((schema, referenceResolvers) =>
+        {
+            // federation should be added as last step so
+            // that all entity types are correctly detected
+            schema.AddSubgraph(new(referenceResolvers));
+        });
+    })
+    .AddHttp()
+    .AddWebSockets();
+
+
+var app = builder.Build();
+
+app.UseWebSockets();
+
+// this uses the default pipeline
+app.MapTankaGraphQL3("/graphql", "reviews");
+
+app.Run();

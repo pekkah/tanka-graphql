@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Channels;
 using Tanka.GraphQL.Samples.Chat.Data.Domain;
-using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.Subscriptions;
 
 namespace Tanka.GraphQL.Samples.Chat.Data;
 
@@ -22,19 +22,20 @@ public interface IChat
         string id,
         string content);
 
-    ValueTask<ISubscriberResult> JoinAsync(CancellationToken unsubscribe);
+    IAsyncEnumerable<Message> JoinAsync(CancellationToken unsubscribe);
 }
 
 public class Chat : IChat
 {
     private readonly Queue<Message> _messages = new();
-    private readonly EventChannel<Message> _messageStream;
+    private readonly BroadcastChannel<Message> _broadcast;
 
+    private Channel<Message> _messageChannel = Channel.CreateUnbounded<Message>();
     private int _lastId;
 
     public Chat()
     {
-        _messageStream = new EventChannel<Message>();
+        _broadcast = new BroadcastChannel<Message>(_messageChannel);
     }
 
     public async Task<IEnumerable<Message>> GetMessagesAsync(int latest)
@@ -57,7 +58,7 @@ public class Chat : IChat
         };
 
         _messages.Enqueue(message);
-        await _messageStream.WriteAsync(message);
+        await _messageChannel.Writer.WriteAsync(message);
         return message;
     }
 
@@ -73,9 +74,9 @@ public class Chat : IChat
         return originalMessage;
     }
 
-    public ValueTask<ISubscriberResult> JoinAsync(CancellationToken unsubscribe)
+    public IAsyncEnumerable<Message> JoinAsync(CancellationToken unsubscribe)
     {
-        return new ValueTask<ISubscriberResult>(_messageStream.Subscribe(unsubscribe));
+        return _broadcast.Subscribe(unsubscribe);
     }
 
     private async Task<From> GetFromAsync(string fromId)

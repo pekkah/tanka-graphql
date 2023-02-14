@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
@@ -41,20 +40,20 @@ public class NullErrorsFacts
         {
             ["Query"] = new()
             {
-                { "nonNull", context => new ValueTask<IResolverResult>(Resolve.As(null)) },
-                { "nonNullNested", context => new ValueTask<IResolverResult>(Resolve.As(nestedNonNullData)) },
+                { "nonNull", context => context.ResolveAs<object?>(null) },
+                { "nonNullNested", context => context.ResolveAs(nestedNonNullData) },
                 {
                     "nonNullListItem",
-                    context => new ValueTask<IResolverResult>(Resolve.As(new[] { "str", null, "str" }))
+                    context => context.ResolveAs(new[] { "str", null, "str" })
                 },
-                { "nonNullList", context => new ValueTask<IResolverResult>(Resolve.As(null)) },
-                { "nullableNested", context => new ValueTask<IResolverResult>(Resolve.As(nestedNonNullData)) },
-                { "nullable", context => new ValueTask<IResolverResult>(Resolve.As("hello")) }
+                { "nonNullList", context => context.ResolveAs<object>(null) },
+                { "nullableNested", context => context.ResolveAs(nestedNonNullData) },
+                { "nullable", context => context.ResolveAs("hello") }
             },
 
             ["Nest"] = new()
             {
-                { "nestedNonNull", Resolve.PropertyOf<Dictionary<string, string>>(d => d["nestedNonNull"]) }
+                { "nestedNonNull", context => context.ResolveAsPropertyOf<Dictionary<string, string>>(d => d["nestedNonNull"]) }
             }
         };
 
@@ -74,11 +73,7 @@ public class NullErrorsFacts
 }";
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        }).ConfigureAwait(false);
+        var result = await Executor.Execute(_schema, query);
 
 
         /* Then */
@@ -88,7 +83,7 @@ public class NullErrorsFacts
   ""extensions"": null,
   ""errors"": [
     {
-      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
+      ""message"": ""Cannot complete value for field 'nestedNonNull: String!'. Completed value would be null for non-null field"",
       ""locations"": [
         {
           ""line"": 4,
@@ -98,10 +93,7 @@ public class NullErrorsFacts
       ""path"": [
         ""nonNullNested"",
         ""nestedNonNull""
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
+      ]
     }
   ]
 }");
@@ -120,11 +112,7 @@ public class NullErrorsFacts
 }";
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        }).ConfigureAwait(false);
+        var result = await Executor.Execute(_schema, query); ;
 
 
         /* Then */
@@ -134,10 +122,9 @@ public class NullErrorsFacts
     ""nullable"": ""hello"",
     ""nullableNested"": null
   },
-  ""extensions"": null,
   ""errors"": [
     {
-      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
+      ""message"": ""Cannot complete value for field 'nestedNonNull: String!'. Completed value would be null for non-null field"",
       ""locations"": [
         {
           ""line"": 5,
@@ -147,10 +134,7 @@ public class NullErrorsFacts
       ""path"": [
         ""nullableNested"",
         ""nestedNonNull""
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
+      ]
     }
   ]
 }");
@@ -168,11 +152,7 @@ public class NullErrorsFacts
 }";
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        }).ConfigureAwait(false);
+        var result = await Executor.Execute(_schema, query); ;
 
 
         /* Then */
@@ -184,7 +164,7 @@ public class NullErrorsFacts
   ""extensions"": null,
   ""errors"": [
     {
-      ""message"": ""Cannot return null for non-nullable field 'Nest.nestedNonNull'."",
+      ""message"": ""Cannot complete value for field 'nestedNonNull: String!'. Completed value would be null for non-null field"",
       ""locations"": [
         {
           ""line"": 4,
@@ -194,10 +174,7 @@ public class NullErrorsFacts
       ""path"": [
         ""nullableNested"",
         ""nestedNonNull""
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
+      ]
     }
   ]
 }");
@@ -213,35 +190,27 @@ public class NullErrorsFacts
 }";
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = _schema,
-            Document = query
-        }).ConfigureAwait(false);
+        var result = await Executor.Execute(_schema, query); ;
 
 
         /* Then */
-        result.ShouldMatchJson(@"
+        result.ShouldMatchJson("""
+            {
+              "errors": [
                 {
-  ""data"": null,
-  ""extensions"": null,
-  ""errors"": [
-    {
-      ""message"": ""Cannot return null for non-nullable field 'Query.nonNull'."",
-      ""locations"": [
-        {
-          ""line"": 3,
-          ""column"": 6
-        }
-      ],
-      ""path"": [
-        ""nonNull""
-      ],
-      ""extensions"": {
-        ""code"": ""NULLVALUEFORNONNULLTYPE""
-      }
-    }
-  ]
-}");
+                  "locations": [
+                    {
+                      "line": 3,
+                      "column": 6
+                    }
+                  ],
+                  "message": "Cannot complete value for field 'nonNull: String!'. Completed value would be null for non-null field",
+                  "path": [
+                    "nonNull"
+                  ]
+                }
+              ]
+            }
+            """);
     }
 }

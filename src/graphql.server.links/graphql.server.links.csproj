@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <AssemblyName>tanka.graphql.server.links</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Server.Links</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\graphql\graphql.csproj" />
+    <ProjectReference Include="..\graphql\GraphQL.Legacy.csproj" />
   </ItemGroup>
 
   <ItemGroup>

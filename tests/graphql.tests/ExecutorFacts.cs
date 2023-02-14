@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
@@ -39,7 +39,7 @@ public class ExecutorFacts
                 }
 
                 input NewEvent {
-                    type: String!
+                    type: EventType!
                     payload: String
                 }
 
@@ -64,41 +64,41 @@ public class ExecutorFacts
 
     public ExecutorFacts(ITestOutputHelper atr)
     {
-        Model = new EventsModel();
-        Resolvers = new ResolversMap
+        Model = new();
+        Resolvers = new()
         {
             {
                 "Success", new FieldResolversMap
                 {
-                    { "id", Resolve.PropertyOf<EventsModel.Success>(m => m.Id) },
-                    { "event", Resolve.PropertyOf<EventsModel.Success>(m => m.Event) }
+                    { "id", context => context.ResolveAsPropertyOf<EventsModel.Success>(m => m.Id) },
+                    { "event", context => context.ResolveAsPropertyOf<EventsModel.Success>(m => m.Event) }
                 }
             },
             {
                 "Failure", new FieldResolversMap
                 {
-                    { "message", Resolve.PropertyOf<EventsModel.Failure>(m => m.Message) }
+                    { "message", context => context.ResolveAsPropertyOf<EventsModel.Failure>(m => m.Message) }
                 }
             },
             {
                 "Event", new FieldResolversMap
                 {
-                    { "id", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Id) },
-                    { "type", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Type) },
-                    { "payload", Resolve.PropertyOf<EventsModel.Event>(ev => ev.Payload) }
+                    { "id", context => context.ResolveAsPropertyOf<EventsModel.Event>(ev => ev.Id) },
+                    { "type", context => context.ResolveAsPropertyOf<EventsModel.Event>(ev => ev.Type) },
+                    { "payload", context => context.ResolveAsPropertyOf<EventsModel.Event>(ev => ev.Payload) }
                 }
             },
             {
                 "NewEvent", new FieldResolversMap
                 {
-                    { "type", Resolve.PropertyOf<EventsModel.NewEvent>(type => type.Type) },
-                    { "payload", Resolve.PropertyOf<EventsModel.NewEvent>(type => type.Payload) }
+                    { "type", context => context.ResolveAsPropertyOf<EventsModel.NewEvent>(type => type.Type) },
+                    { "payload", context => context.ResolveAsPropertyOf<EventsModel.NewEvent>(type => type.Payload) }
                 }
             },
             {
                 "Query", new FieldResolversMap
                 {
-                    { "events", context => new ValueTask<IResolverResult>(Resolve.As(Model.Events)) }
+                    { "events", context => context.ResolveAs(Model.Events) }
                 }
             },
             {
@@ -107,19 +107,23 @@ public class ExecutorFacts
                     {
                         "create", async context =>
                         {
-                            var newEvent = context.GetObjectArgument<EventsModel.NewEvent>("event");
+                            var newEvent = context.BindInputObject<EventsModel.NewEvent>("event");
 
                             if (newEvent.Payload == null)
-                                return Resolve.As(
-                                    context.ExecutionContext.Schema.GetRequiredNamedType<ObjectDefinition>("Failure"),
-                                    new EventsModel.Failure("Payload should be given"));
+                            {
+                                context.ResolvedValue = new EventsModel.Failure("Payload should be given");
+                                context.ResolveAbstractType = (definition, o) =>
+                                    context.Schema.GetRequiredNamedType<ObjectDefinition>("Failure");
+                                return;
+                            }
 
                             var id = await Model.AddAsync(newEvent);
                             var ev = Model.Events.Single(e => e.Id == id);
 
-                            return Resolve.As(
-                                context.ExecutionContext.Schema.GetRequiredNamedType<ObjectDefinition>("Success"),
-                                new EventsModel.Success(id, ev));
+
+                            context.ResolvedValue = new EventsModel.Success(id, ev);
+                            context.ResolveAbstractType = (definition, o) =>
+                                context.Schema.GetRequiredNamedType<ObjectDefinition>("Success");
                         }
                     }
                 }
@@ -131,17 +135,16 @@ public class ExecutorFacts
                         "events", async (context, unsubscribe) =>
                         {
                             await Task.Delay(0);
-                            var source = Model.Subscribe(unsubscribe);
-                            return source;
+                            context.ResolvedValue = Model.Subscribe(unsubscribe);
                         },
-                        context => new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue))
+                        context => context.ResolveAs(context.ObjectValue)
                     }
                 }
             }
         };
 
         Schema = new SchemaBuilder()
-            .Add((TypeSystemDocument)Sdl)
+            .Add(Sdl)
             .Build(Resolvers, Resolvers).Result;
     }
 
@@ -175,12 +178,7 @@ public class ExecutorFacts
         var variables = NewEvent(EventsModel.EventType.INSERT, "payload");
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = Schema,
-            Document = mutation,
-            VariableValues = variables
-        });
+        var result = await Executor.Execute(Schema, mutation, variables);
 
         /* Then */
         result.ShouldMatchJson(
@@ -218,12 +216,7 @@ public class ExecutorFacts
         var variables = NewEvent(EventsModel.EventType.INSERT, null);
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = Schema,
-            Document = mutation,
-            VariableValues = variables
-        });
+        var result = await Executor.Execute(Schema, mutation, variables);
 
         /* Then */
         result.ShouldMatchJson(
@@ -241,13 +234,13 @@ public class ExecutorFacts
     public async Task Query()
     {
         /* Given */
-        await Model.AddAsync(new EventsModel.NewEvent
+        await Model.AddAsync(new()
         {
             Type = EventsModel.EventType.DELETE,
             Payload = "payload1"
         });
 
-        await Model.AddAsync(new EventsModel.NewEvent
+        await Model.AddAsync(new()
         {
             Type = EventsModel.EventType.UPDATE,
             Payload = "payload2"
@@ -264,11 +257,7 @@ public class ExecutorFacts
                 }";
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = Schema,
-            Document = query
-        });
+        var result = await Executor.Execute(Schema, query);
 
         /* Then */
         result.ShouldMatchJson(
@@ -309,19 +298,19 @@ public class ExecutorFacts
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         /* When */
-        var result = await Executor.SubscribeAsync(new ExecutionOptions
+        var result = new Executor(Schema).Subscribe(new GraphQLRequest()
         {
-            Schema = Schema,
             Document = subscription
-        }, cts.Token);
+        }, cts.Token).GetAsyncEnumerator(cts.Token);
 
-        await Model.AddAsync(new EventsModel.NewEvent
+        await Model.AddAsync(new()
         {
             Type = EventsModel.EventType.DELETE,
             Payload = "payload1"
         });
 
-        var ev = await result.Source.Reader.ReadAsync(cts.Token);
+        await result.MoveNextAsync();
+        var ev = result.Current;
 
         // unsubscribe
         cts.Cancel();
@@ -342,7 +331,7 @@ public class ExecutorFacts
 
     private static Dictionary<string, object> NewEvent(EventsModel.EventType type, string payload)
     {
-        return new Dictionary<string, object>
+        return new()
         {
             {
                 "event", new Dictionary<string, object>

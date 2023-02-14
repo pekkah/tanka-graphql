@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AssemblyName>graphql.benchmarks</AssemblyName>
     <RootNamespace>Tanka.GraphQL.Benchmarks</RootNamespace>
     <IsPackable>false</IsPackable>
@@ -19,13 +19,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
-    <PackageReference Include="GraphQL-Parser" Version="8.0.0" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.4" />
+    <PackageReference Include="GraphQL-Parser" Version="8.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\graphql.language\graphql.language.csproj" />
-    <ProjectReference Include="..\..\src\graphql\graphql.csproj" />
+    <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
   </ItemGroup>
 
 </Project>

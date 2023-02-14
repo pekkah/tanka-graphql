@@ -11,7 +11,7 @@ internal ref struct SpanReader
 
     public long Length => Span.Length;
 
-    public SpanReader(in ReadOnlySpan<byte> span)
+    public SpanReader(ReadOnlySpan<byte> span)
     {
         Span = span;
         Position = -1;

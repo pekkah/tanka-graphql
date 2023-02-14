@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -14,17 +15,18 @@ public class FederationSchemaBuilderFacts
     public async Task EntityUnion_does_not_contain_object_without_key_directive()
     {
         /* Given */
-        var builder = new SchemaBuilder()
-            .Add(@"
+        var builder = new ExecutableSchemaBuilder()
+            .AddTypeSystem(@"
                     type Person @key(fields: ""id"") {
                         id: ID!
                     }
                     type Address {
                         street: String
-                    }");
+                    }")
+            .AddSubgraph(SubgraphOptions.Default);
 
         /* When */
-        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions());
+        var schema = await builder.Build();
 
         var entityUnion = schema.GetRequiredNamedType<UnionDefinition>("_Entity");
         var entities = schema.GetPossibleTypes(entityUnion)
@@ -38,14 +40,15 @@ public class FederationSchemaBuilderFacts
     public async Task EntityUnion_has_possible_type_with_key_directive()
     {
         /* Given */
-        var builder = new SchemaBuilder()
-            .Add(@"
+        var builder = new ExecutableSchemaBuilder()
+            .AddTypeSystem(@"
                     type Person @key(fields: ""id"") {
                         id: ID!
-                    }");
+                    }")
+            .AddSubgraph(SubgraphOptions.Default);
 
         /* When */
-        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions());
+        var schema = await builder.Build();
 
         var entityUnion = schema.GetRequiredNamedType<UnionDefinition>("_Entity");
         var entities = schema.GetPossibleTypes(entityUnion);
@@ -58,47 +61,45 @@ public class FederationSchemaBuilderFacts
     public async Task Query_entities()
     {
         /* Given */
-        var builder = new SchemaBuilder()
-            .Add(@"
+        var builder = new ExecutableSchemaBuilder()
+            .AddTypeSystem(@"
                     type Person @key(fields: ""id"") {
                         id: ID!
                         name: String!
                     }
                     type Address @key(fields: ""street"") {
                         street: String
-                    }");
-
-        var resolvers = new ResolversMap
-        {
-            ["Person"] = new()
+                    }")
+            .AddSubgraph(new(new DictionaryReferenceResolversMap
             {
-                { "id", context => ResolveSync.As("ID123") },
-                { "name", context => ResolveSync.As("Name 123") }
-            }
-        };
+                ["Person"] = (context, type, representation) => new(
+                    new ResolveReferenceResult(type, representation))
+            }))
+            .AddResolvers(new ResolversMap
+            {
+                ["Person"] = new()
+                {
+                    { "id", context => context.ResolveAs("ID123") },
+                    { "name", context => context.ResolveAs("Name 123") }
+                }
+            });
+
 
         /* When */
-        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions
-        {
-            SchemaBuildOptions = new SchemaBuildOptions(resolvers),
-            ReferenceResolvers = new DictionaryReferenceResolversMap
-            {
-                ["Person"] = (context, type, representation) => new ValueTask<ResolveReferenceResult>(
-                    new ResolveReferenceResult(type, representation))
-            }
-        });
+        var schema = await builder.Build();
 
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        var result = await new Executor(schema).Execute(new GraphQLRequest
         {
-            Schema = schema,
-            Document = @"query Entities($reps: [_Any!]!) { 
-_entities(representations: $reps) { 
-    ... on Person { 
-        id 
-        } 
-    } 
-}",
-            VariableValues = new Dictionary<string, object>
+            Document = """
+                query Entities($reps: [_Any!]!) { 
+                _entities(representations: $reps) { 
+                    ... on Person { 
+                        id 
+                        } 
+                    } 
+                }
+                """,
+            Variables = new Dictionary<string, object>
             {
                 ["reps"] = new List<object>
                 {
@@ -129,8 +130,8 @@ _entities(representations: $reps) {
     public async Task Query_sdl()
     {
         /* Given */
-        var builder = new SchemaBuilder()
-            .Add(@"
+        var builder = new ExecutableSchemaBuilder()
+            .AddTypeSystem(@"
 type Review  @key(fields: ""id"") {
   id: ID!
   product: Product
@@ -139,26 +140,20 @@ type Review  @key(fields: ""id"") {
 
 type Product @key(fields: ""upc"") @extends {
   upc: String! @external
-}");
+}")
+            .AddSubgraph(SubgraphOptions.Default);
         /* When */
-        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions
-        {
-            SchemaBuildOptions = new SchemaBuildOptions
-            {
-                BuildTypesFromOrphanedExtensions = true
-            },
-            ReferenceResolvers = new DictionaryReferenceResolversMap()
-        });
+        var schema = await builder.Build();
 
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
+        var result = await new Executor(schema).Execute(new GraphQLRequest
         {
-            Schema = schema,
-            Document = @"
-{
-    _service {
-        sdl
-    }
-}"
+            Document = """
+                {
+                    _service {
+                        sdl
+                    }
+                }
+                """
         });
 
         /* Then */

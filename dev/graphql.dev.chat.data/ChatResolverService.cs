@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Samples.Chat.Data.Domain;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.ValueResolution;
@@ -8,41 +9,38 @@ namespace Tanka.GraphQL.Samples.Chat.Data;
 
 public class ChatResolverService : IChatResolverService
 {
-    public async ValueTask<IResolverResult> GetMessagesAsync(IResolverContext context)
+    public async ValueTask GetMessagesAsync(ResolverContext context)
     {
-        var messages = await context.Use<IChat>().GetMessagesAsync(100);
-        return Resolve.As(messages);
+        var messages = await context.GetRequiredService<IChat>().GetMessagesAsync(100);
+        context.ResolvedValue = messages;
     }
 
-    public async ValueTask<IResolverResult> AddMessageAsync(IResolverContext context)
+    public async ValueTask AddMessageAsync(ResolverContext context)
     {
-        var input = context.GetObjectArgument<InputMessage>("message");
-        var message = await context.Use<IChat>().AddMessageAsync(
+        var input = context.BindInputObject<InputMessage>("message");
+        var message = await context.GetRequiredService<IChat>().AddMessageAsync(
             "1",
             input.Content);
 
-        return Resolve.As(message);
+        context.ResolvedValue = message;
     }
 
-    public async ValueTask<IResolverResult> EditMessageAsync(IResolverContext context)
+    public async ValueTask EditMessageAsync(ResolverContext context)
     {
         var id = context.GetArgument<string>("id");
-        var input = context.GetObjectArgument<InputMessage>("message");
+        var input = context.BindInputObject<InputMessage>("message");
 
-        var message = await context.Use<IChat>().EditMessageAsync(
+        var message = await context.GetRequiredService<IChat>().EditMessageAsync(
             id,
             input.Content);
 
-        return Resolve.As(message);
+        context.ResolvedValue = message;
     }
 
-    public ValueTask<ISubscriberResult> StreamMessagesAsync(IResolverContext context, CancellationToken unsubscribe)
+    public async ValueTask StreamMessagesAsync(SubscriberContext context, CancellationToken unsubscribe)
     {
-        return context.Use<IChat>().JoinAsync(unsubscribe);
+        context.ResolvedValue = context.GetRequiredService<IChat>().JoinAsync(unsubscribe);
     }
 
-    public ValueTask<IResolverResult> ResolveMessageAsync(IResolverContext context)
-    {
-        return ResolveSync.As(context.ObjectValue);
-    }
+    public ValueTask ResolveMessageAsync(ResolverContext context) => context.ResolveAs(context.ObjectValue);
 }

@@ -28,7 +28,7 @@ public sealed class FragmentDefinition : INode
 
     public static implicit operator FragmentDefinition(string value)
     {
-        var parser = new Parser(Encoding.UTF8.GetBytes(value));
+        var parser = Parser.Create(value);
         return parser.ParseFragmentDefinition();
     }
 }

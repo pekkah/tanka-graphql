@@ -1,40 +1,52 @@
 ﻿using Tanka.GraphQL.Samples.Chat.Data.Domain;
-using static Tanka.GraphQL.ValueResolution.Resolve;
+using Tanka.GraphQL.Server;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Samples.Chat.Data;
 
-public class ChatResolvers : ResolversMap
+public static class ChatSchemaConfigurationExtensions
 {
-    public ChatResolvers(IChatResolverService resolverService)
+    public static ExecutableSchemaBuilder AddChat(this ExecutableSchemaBuilder builder)
     {
-        this["Query"] = new FieldResolversMap
+        builder.ConfigureObject("Query", new()
         {
-            { "messages", resolverService.GetMessagesAsync }
-        };
+            { "messages: [Message!]!", b => b.Run(r => r.GetRequiredService<IChatResolverService>().GetMessagesAsync(r)) }
+        });
 
-        this["Mutation"] = new FieldResolversMap
+        builder.ConfigureObject("Mutation", new()
         {
-            { "addMessage", resolverService.AddMessageAsync },
-            { "editMessage", resolverService.EditMessageAsync }
-        };
+            { "addMessage(message: InputMessage!): Message!", b => b.Run(r => r.GetRequiredService<IChatResolverService>().AddMessageAsync(r)) },
+            { "editMessage(id: String!, message: InputMessage!): Message", b => b.Run(r => r.GetRequiredService<IChatResolverService>().EditMessageAsync(r)) }
+        });
 
-        this["Subscription"] = new FieldResolversMap
+        builder.ConfigureObject("Subscription", new()
         {
-            { "messages", resolverService.StreamMessagesAsync, resolverService.ResolveMessageAsync }
-        };
+            { "messages: Message!", b => b.Run(r => r.GetRequiredService<IChatResolverService>().ResolveMessageAsync(r)) }
+        }, new()
+        {
+            { "messages: Message!", b => b.Run((r, ct) => r.GetRequiredService<IChatResolverService>().StreamMessagesAsync(r, ct)) }
+        });
 
-        this["Message"] = new FieldResolversMap
+        builder.ConfigureObject("Message", new()
         {
-            { "id", PropertyOf<Message>(m => m.Id) },
-            { "from", PropertyOf<Message>(m => m.From) },
-            { "content", PropertyOf<Message>(m => m.Content) },
-            { "timestamp", PropertyOf<Message>(m => m.Timestamp) }
-        };
+            { "id: String!", context => context.ResolveAsPropertyOf<Message>(m => m.Id) },
+            { "from: From!", context => context.ResolveAsPropertyOf<Message>(m => m.From) },
+            { "content: String!", context => context.ResolveAsPropertyOf<Message>(m => m.Content) },
+            { "timestamp: String!", context => context.ResolveAsPropertyOf<Message>(m => m.Timestamp) }
+        });
 
-        this["From"] = new FieldResolversMap
+        builder.ConfigureObject("From", new()
         {
-            { "userId", PropertyOf<From>(f => f.UserId) },
-            { "name", PropertyOf<From>(f => f.Name) }
-        };
+            { "userId: String!", context => context.ResolveAsPropertyOf<From>(f => f.UserId) },
+            { "name: String!", context => context.ResolveAsPropertyOf<From>(f => f.Name) }
+        });
+
+        builder.AddTypeSystem("""
+            input InputMessage {
+                content: String!
+            }
+            """);
+
+        return builder;
     }
 }

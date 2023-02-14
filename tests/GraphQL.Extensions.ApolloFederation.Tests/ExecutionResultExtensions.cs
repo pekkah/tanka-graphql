@@ -14,14 +14,14 @@ public static class ExecutionResultExtensions
         if (actualResult == null) throw new ArgumentNullException(nameof(actualResult));
 
         var actualJson = JToken.FromObject(actualResult,
-            JsonSerializer.Create(new JsonSerializerSettings
+            JsonSerializer.Create(new()
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
 
         var expectedJsonObject = JObject.FromObject(
             JsonConvert.DeserializeObject<ExecutionResult>(expectedJson),
-            JsonSerializer.Create(new JsonSerializerSettings
+            JsonSerializer.Create(new()
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
