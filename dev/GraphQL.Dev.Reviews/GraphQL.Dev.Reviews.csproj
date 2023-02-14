@@ -8,7 +8,6 @@
     <ProjectReference Include="..\..\src\GraphQL.Extensions.ApolloFederation\GraphQL.Extensions.ApolloFederation.csproj" />
     <ProjectReference Include="..\..\src\graphql.server\graphql.server.csproj" />
     <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
-    <ProjectReference Include="..\..\src\graphql\GraphQL.Legacy.csproj" />
   </ItemGroup>
 
 

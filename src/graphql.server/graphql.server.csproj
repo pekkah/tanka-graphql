@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GraphQL\GraphQL.csproj" />
-    <ProjectReference Include="..\graphql\GraphQL.Legacy.csproj" />
   </ItemGroup>
 
 </Project>
