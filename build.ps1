@@ -76,7 +76,7 @@ if ($OnlyBuild -eq $False) {
 
     "----------------------------------------"
     "Pack NuGet"
-    dotnet pack -c Release -p:PublishDir=$Output -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+    dotnet pack -c Release -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
     EnsureLastExitCode("dotnet pack failed")
 
     "----------------------------------------"
