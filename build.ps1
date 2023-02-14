@@ -71,12 +71,12 @@ EnsureLastExitCode("dotnet build failed")
 if ($OnlyBuild -eq $False) {
     "----------------------------------------"
     "Run tests"
-    dotnet test -c Release --logger trx -r $Output --no-restore --no-build
+    dotnet test -c Release --logger trx --results-directory $Output --no-restore --no-build
     EnsureLastExitCode("dotnet test failed")
 
     "----------------------------------------"
     "Pack NuGet"
-    dotnet pack -c Release -o $Output -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+    dotnet pack -c Release -p:PublishDir=$Output -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
     EnsureLastExitCode("dotnet pack failed")
 
     "----------------------------------------"
