@@ -152,19 +152,16 @@
                 <h2 id="resolvers">Resolvers</h2>
 <p>Resolving values is done with two specialized delegates. One is used resolving values and one for subscribing to streams when using subscriptions.</p>
 <p>Resolve fields</p>
-<pre><code class="language-csharp">﻿using System.Threading.Tasks;
+<pre><code class="language-csharp">﻿namespace Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.ValueResolution;
-
-public delegate ValueTask&lt;IResolverResult&gt; Resolver(IResolverContext context);
+public delegate ValueTask Resolver(ResolverContext context);
 </code></pre>
 <p>Resolve subscription event streams</p>
-<pre><code class="language-csharp">﻿using System.Threading;
-using System.Threading.Tasks;
+<pre><code class="language-csharp">﻿namespace Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.ValueResolution;
-
-public delegate ValueTask&lt;ISubscriberResult&gt; Subscriber(IResolverContext context, CancellationToken unsubscribe);
+public delegate ValueTask Subscriber(
+    SubscriberContext context,
+    CancellationToken unsubscribe);
 </code></pre>
 <h3 id="resolver">Resolver</h3>
 <p>When executing query or mutation <code>Resolver</code> is used to resolve the value of the field. Resolver can use the context to access field arguments, schema, and other details about the context of the execution.</p>
@@ -194,26 +191,23 @@ public delegate ValueTask&lt;ISubscriberResult&gt; Subscriber(IResolverContext c
             Resolvers = new ResolversMap
             {
                 {
-                    &quot;Query&quot;, &quot;name&quot;, context =&gt;
-                    {
-                        // Create result using Test as the value
-                        var result = Resolve.As(&quot;Test&quot;);
-
-                        // Resolvers can be sync or async so
-                        // ValueTask result is used to reduce 
-                        // allocations
-                        return new ValueTask&lt;IResolverResult&gt;(result);
-                    }
+                    &quot;Query&quot;, &quot;name&quot;, context =&gt; context.ResolveAs(&quot;Test&quot;)
                 }
             }
         });
 
-        // Get resolver for Query.name field
-        var nameResolver = schema.GetResolver(schema.Query.Name, &quot;name&quot;)!;
+        // Quickest but least configurable way to execute 
+        // queries against the schema is to use static
+        // execute method of the Executor
+        var result = await Executor.Execute(schema, @&quot;{ name }&quot;);
 
-        // Execute the resolver. This is normally handled by the executor.
-        var nameValue = await nameResolver(null);
-        Assert.Equal(&quot;Test&quot;, nameValue.Value);
+        result.ShouldMatchJson(&quot;&quot;&quot;
+            {
+              &quot;data&quot;: {
+                &quot;name&quot;: &quot;Test&quot;
+              }
+            }
+            &quot;&quot;&quot;);
     }
 
 </code></pre>
@@ -221,29 +215,11 @@ public delegate ValueTask&lt;ISubscriberResult&gt; Subscriber(IResolverContext c
 </code></pre>
 <p>Resolver middlwares can be used to build an execution chain.</p>
 <p>Middlwares are implemented as a delegate method taking in the context and delegate for the next middlware to execute. Last link in the chain is usually the actual resolver but chain can be also interrupted before it by returning a result from the middleware.</p>
-<p>Signature of the value resolver middlware:</p>
-<pre><code class="language-csharp">﻿using System.Threading.Tasks;
-
-namespace Tanka.GraphQL.ValueResolution;
-
-public delegate ValueTask&lt;IResolverResult&gt; ResolverMiddleware(IResolverContext context, Resolver next);
-</code></pre>
-<p>Signature of the subscription middlware:</p>
-<pre><code class="language-csharp">﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace Tanka.GraphQL.ValueResolution;
-
-public delegate ValueTask&lt;ISubscriberResult&gt; SubscriberMiddleware(IResolverContext context,
-    CancellationToken unsubscribe, Subscriber next);
-</code></pre>
 <h3 id="using-resolver-and-subscriber-maps">Using resolver and subscriber maps</h3>
 <p>Dictionary based implementation is provided for setting up both resolvers and subscribers but other implementations can be easily provided.</p>
-<pre><code class="language-csharp">﻿using System.Collections.Generic;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.ValueResolution;
+<pre><code class="language-csharp">﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.ValueResolution;
 
 public interface IResolverMap
 {
@@ -260,11 +236,9 @@ public static class ResolverMapExtensions
     }
 }
 </code></pre>
-<pre><code class="language-csharp">﻿using System.Collections.Generic;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.ValueResolution;
+<pre><code class="language-csharp">﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.ValueResolution;
 
 public interface ISubscriberMap
 {

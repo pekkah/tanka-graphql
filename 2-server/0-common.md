@@ -10,7 +10,7 @@ and subscriptions. Main service added is `IQueryStreamService`
 which handles the plumping of execution.
 
 ```csharp
-#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.AddTankaGraphQL
+todo: add sample
 ```
 
 ### Configure schema
@@ -21,14 +21,14 @@ used to get the schema for execution.
 Simple without dependencies
 
 ```csharp
-#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_Schema
+todo: add sample
 ```
 
 Overloads are provided for providing a function with dependencies resolved from
 services.
 
 ```csharp
-#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_Schema_with_dependency
+todo: add sample
 ```
 
 ### Configure rules
@@ -39,19 +39,19 @@ specified in the specification are included.
 Add MaxCost validation rule
 
 ```csharp
-#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_Rules
+todo: add sample
 ```
 
 Remove all rules
 
 ```csharp
-#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_Rules_remove_all
+todo: add sample
 ```
 
 With up to three dependencies resolved from service provider
 
 ```csharp
-#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Configure_Rules_with_dependency
+todo: add sample
 ```
 
 ### Add extensions
@@ -59,5 +59,5 @@ With up to three dependencies resolved from service provider
 Add Apollo tracing extension
 
 ```csharp
-#include::xref://tests:graphql.server.tests/Usages/ServerBuilderUsageFacts.cs?s=Tanka.GraphQL.Server.Tests.Usages.ServerBuilderUsageFacts.Add_Extension
+todo: add sample
 ```

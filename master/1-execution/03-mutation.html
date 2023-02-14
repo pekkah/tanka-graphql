@@ -179,12 +179,7 @@
         var variables = NewEvent(EventsModel.EventType.INSERT, &quot;payload&quot;);
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = Schema,
-            Document = mutation,
-            VariableValues = variables
-        });
+        var result = await Executor.Execute(Schema, mutation, variables);
 
         /* Then */
         result.ShouldMatchJson(
@@ -224,12 +219,7 @@
         var variables = NewEvent(EventsModel.EventType.INSERT, null);
 
         /* When */
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = Schema,
-            Document = mutation,
-            VariableValues = variables
-        });
+        var result = await Executor.Execute(Schema, mutation, variables);
 
         /* Then */
         result.ShouldMatchJson(
@@ -272,7 +262,7 @@
                 }
 
                 input NewEvent {
-                    type: String!
+                    type: EventType!
                     payload: String
                 }
 
@@ -299,41 +289,41 @@
 <pre><code class="language-csharp">
     public ExecutorFacts(ITestOutputHelper atr)
     {
-        Model = new EventsModel();
-        Resolvers = new ResolversMap
+        Model = new();
+        Resolvers = new()
         {
             {
                 &quot;Success&quot;, new FieldResolversMap
                 {
-                    { &quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id) },
-                    { &quot;event&quot;, Resolve.PropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event) }
+                    { &quot;id&quot;, context =&gt; context.ResolveAsPropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Id) },
+                    { &quot;event&quot;, context =&gt; context.ResolveAsPropertyOf&lt;EventsModel.Success&gt;(m =&gt; m.Event) }
                 }
             },
             {
                 &quot;Failure&quot;, new FieldResolversMap
                 {
-                    { &quot;message&quot;, Resolve.PropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message) }
+                    { &quot;message&quot;, context =&gt; context.ResolveAsPropertyOf&lt;EventsModel.Failure&gt;(m =&gt; m.Message) }
                 }
             },
             {
                 &quot;Event&quot;, new FieldResolversMap
                 {
-                    { &quot;id&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id) },
-                    { &quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type) },
-                    { &quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload) }
+                    { &quot;id&quot;, context =&gt; context.ResolveAsPropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Id) },
+                    { &quot;type&quot;, context =&gt; context.ResolveAsPropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Type) },
+                    { &quot;payload&quot;, context =&gt; context.ResolveAsPropertyOf&lt;EventsModel.Event&gt;(ev =&gt; ev.Payload) }
                 }
             },
             {
                 &quot;NewEvent&quot;, new FieldResolversMap
                 {
-                    { &quot;type&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type) },
-                    { &quot;payload&quot;, Resolve.PropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload) }
+                    { &quot;type&quot;, context =&gt; context.ResolveAsPropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Type) },
+                    { &quot;payload&quot;, context =&gt; context.ResolveAsPropertyOf&lt;EventsModel.NewEvent&gt;(type =&gt; type.Payload) }
                 }
             },
             {
                 &quot;Query&quot;, new FieldResolversMap
                 {
-                    { &quot;events&quot;, context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(Model.Events)) }
+                    { &quot;events&quot;, context =&gt; context.ResolveAs(Model.Events) }
                 }
             },
             {
@@ -342,19 +332,23 @@
                     {
                         &quot;create&quot;, async context =&gt;
                         {
-                            var newEvent = context.GetObjectArgument&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
+                            var newEvent = context.BindInputObject&lt;EventsModel.NewEvent&gt;(&quot;event&quot;);
 
                             if (newEvent.Payload == null)
-                                return Resolve.As(
-                                    context.ExecutionContext.Schema.GetRequiredNamedType&lt;ObjectDefinition&gt;(&quot;Failure&quot;),
-                                    new EventsModel.Failure(&quot;Payload should be given&quot;));
+                            {
+                                context.ResolvedValue = new EventsModel.Failure(&quot;Payload should be given&quot;);
+                                context.ResolveAbstractType = (definition, o) =&gt;
+                                    context.Schema.GetRequiredNamedType&lt;ObjectDefinition&gt;(&quot;Failure&quot;);
+                                return;
+                            }
 
                             var id = await Model.AddAsync(newEvent);
                             var ev = Model.Events.Single(e =&gt; e.Id == id);
 
-                            return Resolve.As(
-                                context.ExecutionContext.Schema.GetRequiredNamedType&lt;ObjectDefinition&gt;(&quot;Success&quot;),
-                                new EventsModel.Success(id, ev));
+
+                            context.ResolvedValue = new EventsModel.Success(id, ev);
+                            context.ResolveAbstractType = (definition, o) =&gt;
+                                context.Schema.GetRequiredNamedType&lt;ObjectDefinition&gt;(&quot;Success&quot;);
                         }
                     }
                 }
@@ -366,17 +360,16 @@
                         &quot;events&quot;, async (context, unsubscribe) =&gt;
                         {
                             await Task.Delay(0);
-                            var source = Model.Subscribe(unsubscribe);
-                            return source;
+                            context.ResolvedValue = Model.Subscribe(unsubscribe);
                         },
-                        context =&gt; new ValueTask&lt;IResolverResult&gt;(Resolve.As(context.ObjectValue))
+                        context =&gt; context.ResolveAs(context.ObjectValue)
                     }
                 }
             }
         };
 
         Schema = new SchemaBuilder()
-            .Add((TypeSystemDocument)Sdl)
+            .Add(Sdl)
             .Build(Resolvers, Resolvers).Result;
     }
 

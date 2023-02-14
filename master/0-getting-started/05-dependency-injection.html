@@ -162,46 +162,7 @@ the builtin dependency injection services.</p>
 as the schema does not change. This adds a challenge when using
 services which require scoped lifetime. Usually the scope is defined
 as HTTP request.</p>
-<h3 id="dependency-injection-1">Dependency injection</h3>
-<p>Tanka GraphQL server starts an dependency injection scope at the beginning of
-execution and disposes it at the end. You can access this scope by using <code>Use&lt;T&gt;</code>
-extensions methods of <code>IResolverContext</code>.</p>
-<p>Steps</p>
-<ol>
-<li>Add service using the <code>Add{Lifetime}</code> etc. methods of the <code>IServiceCollection</code></li>
-<li>Use service in resolver using <code>Use&lt;T&gt;</code>.</li>
-</ol>
-<h4 id="add-service">1. Add service</h4>
-<p>Define service</p>
-<pre><code class="language-csharp">
-public class ResolverController
-{
-    public ValueTask&lt;IResolverResult&gt; QueryLastName()
-    {
-        return ResolveSync.As(&quot;GraphQL&quot;);
-    }
-}
-
-</code></pre>
-<p>Add service</p>
-<pre><code class="language-csharp">
-    private void AddExecutionScopedService(IServiceCollection services)
-    {
-        services.AddScoped&lt;ResolverController&gt;();
-    }
-
-</code></pre>
-<h4 id="use-service-in-resolver">3. Use service in resolver</h4>
-<p>See <a href="master/0-getting-started/04-server.html">Server</a> for usage for below method.</p>
-<pre><code class="language-csharp">
-    private Resolver UseService()
-    {
-        return context =&gt; context
-            .Use&lt;ResolverController&gt;()
-            .QueryLastName();
-    }
-
-</code></pre>
+<p>todo: update</p>
                     
             </main>
         </div>

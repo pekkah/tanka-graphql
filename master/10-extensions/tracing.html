@@ -132,33 +132,8 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h2 id="tracing">Tracing</h2>
-<p>Add execution measurements to response extensions.</p>
-<blockquote class="blockquote">
-<p><a href="https://github.com/apollographql/apollo-tracing">Specification</a></p>
-</blockquote>
-<h3 id="installation">Installation</h3>
-<p>Support is provided as an NuGet package.</p>
-<pre><code class="language-ps">dotnet add package Tanka.GraphQL.Extensions.Tracing
-</code></pre>
-<h3 id="usage">Usage</h3>
-<p>Add Tracing extension</p>
-<pre><code class="language-csharp">
-    [Fact]
-    public void Add_Extension()
-    {
-        /* When */
-        Services.AddTankaGraphQL()
-            .ConfigureSchema(() =&gt; default)
-            // add trace execution extension
-            .AddExtension&lt;TraceExtension&gt;();
-
-        /* Then */
-        var provider = Services.BuildServiceProvider();
-        var executorExtensions = provider.GetService&lt;IEnumerable&lt;IExecutorExtension&gt;&gt;();
-        Assert.Contains(executorExtensions, extension =&gt; extension is TraceExtension);
-    }
-
-</code></pre>
+<p>Apollo tracing has been deprecated.</p>
+<p>todo: investigate if resolver level traces could be provided with federation</p>
                     
             </main>
         </div>

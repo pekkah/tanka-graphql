@@ -163,31 +163,7 @@ this type of attack is to limit the query cost based on complexity.</p>
 <a href="master/2-server/5-extensions/5-query-cost-analysis.html">Query Cost Analysis</a>.</p>
 <h2 id="usage-with-server">Usage with server</h2>
 <p>Add cost limiting validation rule to options</p>
-<pre><code class="language-csharp">
-    [Fact]
-    public void Configure_Rules()
-    {
-        /* Given */
-        var schema = Substitute.For&lt;ISchema&gt;();
-        var maxCost = CostAnalyzer.MaxCost(100);
-
-        /* When */
-        Services.AddTankaGraphQL()
-            .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema))
-            // rules factory function with the default rules as the parameter
-            .ConfigureRules(rules =&gt; rules.Concat(new[]
-            {
-                // append max query cost validation rule
-                maxCost
-            }).ToArray());
-
-        /* Then */
-        var provider = Services.BuildServiceProvider();
-        var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
-        var actual = options.ValidationRules;
-        Assert.Contains(actual, rule =&gt; rule == maxCost);
-    }
-
+<pre><code class="language-csharp">//todo: add sample
 </code></pre>
                     
             </main>

@@ -181,132 +181,30 @@ or separately.</p>
 <h3 id="build-schema">1. Build schema</h3>
 <p>First step for either server is to configure your schema options
 for execution. Schema should be built only once and cached as singleton.</p>
-<pre><code class="language-csharp">
-    private async Task&lt;ISchema&gt; Create()
-    {
-        // Build simple schema from SDL string
-        var builder = new SchemaBuilder()
-            .Add(
-                @&quot;
-                    type Query {
-                        firstName: String!
-                        lastName: String!
-                    }
-
-                    schema {
-                        query: Query
-                    }
-                    &quot;);
-
-        // Bind resolvers and build
-        return await builder.Build(new ResolversMap
-        {
-            [&quot;Query&quot;] = new()
-            {
-                { &quot;firstName&quot;, context =&gt; ResolveSync.As(&quot;Tanka&quot;) },
-                { &quot;lastName&quot;, UseService() }
-            }
-        });
-    }
-
+<pre><code class="language-csharp">//todo: update sample
 </code></pre>
 <h3 id="configure">2. Configure</h3>
 <p>Next needed step is to configure server options. These options tell
 the executor where to get the schema and also allows configuring the validation
 rules for the execution. By default all validation rules from the GraphQL
 specification are included.</p>
-<pre><code class="language-csharp">
-    private static void AddTanka(IServiceCollection services)
-    {
-        // Configure schema options
-        services.AddTankaGraphQL()
-            .ConfigureSchema&lt;SchemaCache&gt;(async cache =&gt; await cache.GetOrAdd());
-    }
-
+<pre><code class="language-csharp">//todo: update sample
 </code></pre>
 <h3 id="configure-server">3. Configure server</h3>
 <p>Server components require calling their <code>Add*</code> methods to add required
 services and configure their options. Depending on the server also
 middleware needs to be configured using the paired <code>Use*</code> methods.</p>
 <p>Configure SignalR server</p>
-<pre><code class="language-csharp">
-    private static void AddSignalRServer(IServiceCollection services)
-    {
-        // Configure Tanka server
-        services.AddSignalR()
-            .AddTankaGraphQL();
-    }
-
+<pre><code class="language-csharp">//todo: update sample
 </code></pre>
 <p>Use SignalR server</p>
-<pre><code class="language-csharp">
-    private static void UseSignalRServer(IApplicationBuilder app)
-    {
-        // add SignalR
-        app.UseEndpoints(routes =&gt; { routes.MapTankaGraphQLSignalR(&quot;/graphql/hub&quot;); });
-    }
-
+<pre><code class="language-csharp">//todo: update sample
 </code></pre>
 <p>Configure GraphQL WS server</p>
-<pre><code class="language-csharp">
-    private void AddWebSocketsServer(IServiceCollection services)
-    {
-        // Configure websockets
-        services.AddWebSockets(options =&gt; { options.AllowedOrigins.Add(&quot;https://localhost:5000&quot;); });
-
-        // Add Tanka GraphQL-WS server
-        services.AddTankaGraphQL()
-            .ConfigureWebSockets();
-    }
-
+<pre><code class="language-csharp">//todo: update sample
 </code></pre>
 <p>Use GraphQL WS Server</p>
-<pre><code class="language-csharp">
-    private void UseWebSocketsServer(IApplicationBuilder app)
-    {
-        // Add Websockets middleware
-        app.UseWebSockets();
-
-        // Add Tanka GraphQL-WS middleware
-        app.UseEndpoints(endpoints =&gt; endpoints.MapTankaGraphQLWebSockets(&quot;/graphql/ws&quot;));
-    }
-
-</code></pre>
-<h3 id="http-api">4. HTTP API</h3>
-<p>Tanka Server does not provide out of the box &quot;server&quot; for basic
-HTTP/JSON API as that can be easily implemented.</p>
-<p>Here's an example of ASP.NET Core MVC Controller taken from the
-<code>Tanka.GraphQL.Samples.Chat.Web</code> project included in the solution.</p>
-<p><code>IQueryStreamService</code> is registered by the <code>AddTankaGraphQL</code>
-and is also used by the SignalR and GraphQL-WS based servers to
-execute the queries.</p>
-<p>[]</p>
-<pre><code class="language-csharp">
-[Route(&quot;api/graphql&quot;)]
-public class QueryController : Controller
-{
-    private readonly IQueryStreamService _queryStreamService;
-
-    public QueryController(IQueryStreamService queryStreamService)
-    {
-        _queryStreamService = queryStreamService;
-    }
-
-    [HttpPost]
-    public async Task&lt;IActionResult&gt; Post([FromBody] OperationRequest request)
-    {
-        var stream = await _queryStreamService.QueryAsync(new Query
-        {
-            Document = request.Query,
-            Variables = request.Variables,
-            OperationName = request.OperationName
-        }, Request.HttpContext.RequestAborted);
-
-        var result = await stream.Reader.ReadAsync();
-
-        return Ok(result);
-    }
-}
+<pre><code class="language-csharp">//todo: update sample
 </code></pre>
                     
             </main>

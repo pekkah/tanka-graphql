@@ -160,165 +160,33 @@ same underlying services for query execution.</p>
 <p>Add services required for executing GraphQL queries, mutations
 and subscriptions. Main service added is <code>IQueryStreamService</code>
 which handles the plumping of execution.</p>
-<pre><code class="language-csharp">
-    [Fact]
-    public void AddTankaGraphQL()
-    {
-        /* When */
-        Services.AddTankaGraphQL()
-            .ConfigureSchema(() =&gt; default);
-
-        /* Then */
-        var provider = Services.BuildServiceProvider();
-
-        // Options is added by the AddTankaGraphQL
-        Assert.NotNull(provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;());
-
-        // Query stream service is added by AddTankaGraphQL
-        Assert.NotNull(provider.GetService&lt;IQueryStreamService&gt;());
-    }
-
+<pre><code class="language-csharp">todo: add sample
 </code></pre>
 <h3 id="configure-schema">Configure schema</h3>
 <p>Configure <code>ISchema</code> for execution by providing a factory function (can be async)
 used to get the schema for execution.</p>
 <p>Simple without dependencies</p>
-<pre><code class="language-csharp">
-    [Fact]
-    public async Task Configure_Schema()
-    {
-        /* Given */
-        var schema = Substitute.For&lt;ISchema&gt;();
-
-        /* When */
-        Services.AddTankaGraphQL()
-            // simple factory function for setting up the schema
-            .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema));
-
-        /* Then */
-        var provider = Services.BuildServiceProvider();
-        var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
-        var actual = await options.GetSchema(null);
-        Assert.Same(schema, actual);
-    }
-
+<pre><code class="language-csharp">todo: add sample
 </code></pre>
 <p>Overloads are provided for providing a function with dependencies resolved from
 services.</p>
-<pre><code class="language-csharp">
-    [Fact]
-    public async Task Configure_Schema_with_dependency()
-    {
-        /* Given */
-        var schema = Substitute.For&lt;ISchema&gt;();
-
-        /* When */
-        Services.AddTankaGraphQL()
-            // factory function with one dependency resolved from service provider
-            .ConfigureSchema&lt;IMemoryCache&gt;(async cache =&gt;
-                await cache.GetOrCreateAsync(&quot;schema&quot;, entry =&gt; Task.FromResult(schema)));
-
-        /* Then */
-        var provider = Services.BuildServiceProvider();
-        var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
-        var actual = await options.GetSchema(null);
-        Assert.Same(schema, actual);
-    }
-
+<pre><code class="language-csharp">todo: add sample
 </code></pre>
 <h3 id="configure-rules">Configure rules</h3>
 <p>Configure validation rules for execution. Note that by default all rules
 specified in the specification are included.</p>
 <p>Add MaxCost validation rule</p>
-<pre><code class="language-csharp">
-    [Fact]
-    public void Configure_Rules()
-    {
-        /* Given */
-        var schema = Substitute.For&lt;ISchema&gt;();
-        var maxCost = CostAnalyzer.MaxCost(100);
-
-        /* When */
-        Services.AddTankaGraphQL()
-            .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema))
-            // rules factory function with the default rules as the parameter
-            .ConfigureRules(rules =&gt; rules.Concat(new[]
-            {
-                // append max query cost validation rule
-                maxCost
-            }).ToArray());
-
-        /* Then */
-        var provider = Services.BuildServiceProvider();
-        var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
-        var actual = options.ValidationRules;
-        Assert.Contains(actual, rule =&gt; rule == maxCost);
-    }
-
+<pre><code class="language-csharp">todo: add sample
 </code></pre>
 <p>Remove all rules</p>
-<pre><code class="language-csharp">
-    [Fact]
-    public void Configure_Rules_remove_all()
-    {
-        /* Given */
-        var schema = Substitute.For&lt;ISchema&gt;();
-
-        /* When */
-        Services.AddTankaGraphQL()
-            .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema))
-            // rules factory function with the default rules as the parameter
-            .ConfigureRules(rules =&gt; new CombineRule[0]);
-
-        /* Then */
-        var provider = Services.BuildServiceProvider();
-        var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
-        var actual = options.ValidationRules;
-        Assert.Empty(actual);
-    }
-
+<pre><code class="language-csharp">todo: add sample
 </code></pre>
 <p>With up to three dependencies resolved from service provider</p>
-<pre><code class="language-csharp">
-
-    [Fact]
-    public void Configure_Rules_with_dependency()
-    {
-        /* Given */
-        var schema = Substitute.For&lt;ISchema&gt;();
-
-        /* When */
-        Services.AddTankaGraphQL()
-            .ConfigureSchema(() =&gt; new ValueTask&lt;ISchema&gt;(schema))
-            // rules factory function with default rules and dependency resolved from service provider
-            .ConfigureRules&lt;ILogger&lt;ServerBuilderUsageFacts&gt;&gt;((rules, logger) =&gt; new CombineRule[0]);
-
-        /* Then */
-        var provider = Services.BuildServiceProvider();
-        var options = provider.GetService&lt;IOptions&lt;ServerOptions&gt;&gt;().Value;
-        var actual = options.ValidationRules;
-        Assert.Empty(actual);
-    }
-
+<pre><code class="language-csharp">todo: add sample
 </code></pre>
 <h3 id="add-extensions">Add extensions</h3>
 <p>Add Apollo tracing extension</p>
-<pre><code class="language-csharp">
-    [Fact]
-    public void Add_Extension()
-    {
-        /* When */
-        Services.AddTankaGraphQL()
-            .ConfigureSchema(() =&gt; default)
-            // add trace execution extension
-            .AddExtension&lt;TraceExtension&gt;();
-
-        /* Then */
-        var provider = Services.BuildServiceProvider();
-        var executorExtensions = provider.GetService&lt;IEnumerable&lt;IExecutorExtension&gt;&gt;();
-        Assert.Contains(executorExtensions, extension =&gt; extension is TraceExtension);
-    }
-
+<pre><code class="language-csharp">todo: add sample
 </code></pre>
                     
             </main>

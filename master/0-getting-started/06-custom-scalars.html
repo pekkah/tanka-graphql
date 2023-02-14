@@ -185,7 +185,7 @@ logic.</p>
                     &quot;Query&quot;, new FieldResolversMap
                     {
                         {
-                            &quot;url&quot;, context =&gt; ResolveSync.As(new Uri(&quot;https://localhost/&quot;))
+                            &quot;url&quot;, context =&gt; context.ResolveAs(new Uri(&quot;https://localhost/&quot;))
                         }
                     }
                 }
@@ -214,14 +214,15 @@ logic.</p>
 
 
         // execute query
-        var result = await Executor.ExecuteAsync(new ExecutionOptions
-        {
-            Schema = schema,
-            Document = @&quot;{ url }&quot;
-        });
+        var result = await Executor.Execute(schema, @&quot;{ url }&quot;);
 
-        var url = result.Data[&quot;url&quot;];
-        Assert.Equal(&quot;https://localhost/&quot;, url.ToString());
+        result.ShouldMatchJson(&quot;&quot;&quot;
+            {
+              &quot;data&quot;: {
+                &quot;url&quot;: &quot;https://localhost/&quot;
+              }
+            }
+            &quot;&quot;&quot;);
     }
 
 </code></pre>

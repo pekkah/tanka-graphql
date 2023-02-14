@@ -43,12 +43,12 @@ value of the argument can be used as mulpliplier for the complexity.
 Using SDL import
 
 ```csharp
-#include::xref://tests:graphql.tests/Extensions/CostAnalysisImportFacts.cs?s=Tanka.GraphQL.Tests.Extensions.CostAnalysisImportFacts.Parse_Sdl
+//todo: add sample
 ```
 
-Or you can include it manually using the `SchemaBuilder.Include`
+Or you can include it manually using the `SchemaBuilder.Add`
 
 ```csharp
 var builder = new SchemaBuilder()
-    .Include(CostAnalyzer.CostDirective);
+    .Add(CostAnalyzer.CostDirective);
 ```

@@ -192,22 +192,23 @@
 <p><a href="https://facebook.github.io/graphql/June2018/#sec-Schema">Specification</a></p>
 </blockquote>
 <p>Schema is defined by <code>ISchema</code>-interface.</p>
-<pre><code class="language-csharp">﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem.ValueSerialization;
+<pre><code class="language-csharp">﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.ValueSerialization;
 
 namespace Tanka.GraphQL.TypeSystem;
 
 public interface ISchema : IHasDirectives
 {
+    public static readonly ISchema Empty = new EmptySchema();
+
     ObjectDefinition? Mutation { get; }
 
     ObjectDefinition Query { get; }
 
     ObjectDefinition? Subscription { get; }
+
+    string Description { get; }
 
     TypeDefinition? GetNamedType(string name);
 
@@ -238,57 +239,7 @@ public interface ISchema : IHasDirectives
 </code></pre>
 <h3 id="defaults">Defaults</h3>
 <p>By default following type system is included when building a schema using <code>SchemaBuilder</code>.</p>
-<pre><code class="language-csharp">
-    public static TypeSystemDocument BuiltInTypes =&gt; @&quot;
-&quot;&quot;&quot;&quot;&quot;&quot;
-The `Boolean` scalar type represents `true` or `false`
-&quot;&quot;&quot;&quot;&quot;&quot;
-scalar Boolean
-
-&quot;&quot;&quot;&quot;&quot;&quot;
-The `Float` scalar type represents signed double-precision fractional values
-as specified by '[IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)
-&quot;&quot;&quot;&quot;&quot;&quot;
-scalar Float
-
-&quot;&quot;&quot;&quot;&quot;&quot;
-The ID scalar type represents a unique identifier, often used to refetch an object
-or as the key for a cache. The ID type is serialized in the same way as a String;
-however, it is not intended to be human‐readable. While it is often numeric, it
-should always serialize as a String.
-&quot;&quot;&quot;&quot;&quot;&quot;
-scalar ID
-
-&quot;&quot;&quot;&quot;&quot;&quot;
-The `Int` scalar type represents non-fractional signed whole numeric values
-&quot;&quot;&quot;&quot;&quot;&quot;
-scalar Int
-
-&quot;&quot;&quot;&quot;&quot;&quot;
-The `String` scalar type represents textual data, represented as UTF-8
-character sequences. The String type is most often used by GraphQL to
-represent free-form human-readable text.
-&quot;&quot;&quot;&quot;&quot;&quot;
-scalar String
-
-
-directive @deprecated(reason: String) on
-    | FIELD_DEFINITION
-    | ENUM_VALUE
-
-directive @include(if: Boolean!) on
-    | FIELD
-    | FRAGMENT_SPREAD
-    | INLINE_FRAGMENT
-
-directive @skip(if: Boolean!) on
-    | FIELD
-    | FRAGMENT_SPREAD
-    | INLINE_FRAGMENT
-
-directive @specifiedBy(url: String!) on SCALAR
-&quot;;
-
+<pre><code class="language-csharp">Tanka.GraphQL.SchemaBuilder.BuiltInTypes
 </code></pre>
                     
             </main>

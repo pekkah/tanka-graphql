@@ -189,8 +189,6 @@
                     }
                     &quot;);
 
-        // todo: This is not currently working and resolvers are being modified but
-        // those modified resolvers are not taken into use by anything
         // build schema with resolvers and directives
         var schema = await builder.Build(new SchemaBuildOptions
         {
@@ -200,11 +198,7 @@
                     &quot;Query&quot;, new FieldResolversMap
                     {
                         {
-                            &quot;name&quot;, context =&gt;
-                            {
-                                var result = Resolve.As(&quot;Test&quot;);
-                                return new ValueTask&lt;IResolverResult&gt;(result);
-                            }
+                            &quot;name&quot;, context =&gt; context.ResolveAs(&quot;Test&quot;)
                         }
                     }
                 }
@@ -225,29 +219,37 @@
                         // original resolver, duplicate value and return it
                         return fieldDefinition
                             .WithResolver(resolver =&gt;
-                                resolver.Use(async (context, next) =&gt;
+                                // we will build a new resolver with a middlware to duplicate the value
+                                resolver.Use(next =&gt; async context =&gt;
                                 {
                                     // We need to first call the original resolver to 
                                     // get the initial value
-                                    var result = await next(context);
+                                     await next(context);
+
+                                     // context should now have the ResolvedValue set by the original resolver
+                                     var resolvedValue = context.ResolvedValue;
 
                                     // for simplicity we expect value to be string
-                                    var initialValue = result.Value.ToString();
+                                    var initialValue = resolvedValue!.ToString();
 
                                     // return new value
-                                    return Resolve.As(initialValue + initialValue);
-                                }).Run(fieldDefinition.Resolver));
+                                    context.ResolvedValue = $&quot;{initialValue} {initialValue}&quot;;
+                                }).Run(fieldDefinition.Resolver ?? throw new InvalidOperationException()));
                     }
                 }
             }
         });
 
-        // Get resolver for Query.name field
-        var nameResolver = schema.GetResolver(schema.Query.Name, &quot;name&quot;)!;
+        // execute the query
+        var result = await Executor.Execute(schema, @&quot;{ name }&quot;);
 
-        // Execute the resolver. This is normally handled by the executor.
-        var nameValue = await nameResolver(null);
-        Assert.Equal(&quot;TestTest&quot;, nameValue.Value);
+        result.ShouldMatchJson(&quot;&quot;&quot;
+             {
+                &quot;data&quot;: {
+                    &quot;name&quot;: &quot;Test Test&quot;
+                    }
+            }
+            &quot;&quot;&quot;);
     }
 
 </code></pre>

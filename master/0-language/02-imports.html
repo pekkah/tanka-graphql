@@ -201,39 +201,7 @@ tanka_import from &quot;path/to/file&quot;
 <p>If no file extension provided then &quot;.graphql&quot; will be appended to the path.</p>
 <p>Example
 []</p>
-<pre><code class="language-csharp">    [Fact]
-    public async Task Parse_Sdl()
-    {
-        /* Given */
-        var sdl =
-            @&quot;
-                    &quot;&quot;&quot;&quot;&quot;&quot;
-                    tanka_import from &quot;&quot;Files/Import&quot;&quot;
-                    &quot;&quot;&quot;&quot;&quot;&quot;
-
-                    type Query {
-                        imported: ImportedType
-                    }
-                 &quot;;
-
-        /* When */
-        var builder = new SchemaBuilder()
-            // BuiltIn import providers are used
-            .Add(sdl);
-
-        var schema = await builder.Build(new SchemaBuildOptions());
-
-        /* Then */
-        var importedType = schema.GetNamedType(&quot;ImportedType&quot;);
-        Assert.NotNull(importedType);
-
-        var importedField = schema.GetField(schema.Query.Name, &quot;imported&quot;);
-        Assert.Equal(importedType.Name, importedField.Type.Unwrap().Name);
-
-        var nestedType = schema.GetNamedType(&quot;NestedObject&quot;);
-        Assert.NotNull(nestedType);
-    }
-
+<pre><code class="language-csharp">//todo: update sample
 </code></pre>
 <h4 id="embeddedresourceimportprovider"><code>EmbeddedResourceImportProvider</code></h4>
 <p>This import provider allows importing files embedded into the assembly. These files are parsed using the

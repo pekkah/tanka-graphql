@@ -210,17 +210,9 @@
                 }&quot;;
 
         var executableSchema = await _fixture.CreateSchema(starwars);
-        var options = new ExecutionOptions
-        {
-            Schema = executableSchema,
-            Document = query,
-            OperationName = null,
-            InitialValue = null,
-            VariableValues = null
-        };
 
         /* When */
-        var actual = await ExecuteAsync(options).ConfigureAwait(false);
+        var actual = await Executor.Execute(executableSchema, query);
 
         /* Then */
         actual.ShouldMatchJson(

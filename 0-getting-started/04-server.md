@@ -27,7 +27,7 @@ First step for either server is to configure your schema options
 for execution. Schema should be built only once and cached as singleton.
 
 ```csharp
-#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.SchemaCache.Create
+//todo: update sample
 ```
 
 ### 2. Configure
@@ -38,7 +38,7 @@ rules for the execution. By default all validation rules from the GraphQL
 specification are included.
 
 ```csharp
-#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddTanka
+//todo: update sample
 ```
 
 ### 3. Configure server
@@ -50,41 +50,23 @@ middleware needs to be configured using the paired `Use*` methods.
 Configure SignalR server
 
 ```csharp
-#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddSignalRServer
+//todo: update sample
 ```
 
 Use SignalR server
 
 ```csharp
-#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseSignalRServer
+//todo: update sample
 ```
 
 Configure GraphQL WS server
 
 ```csharp
-#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.AddWebSocketsServer
+//todo: update sample
 ```
 
 Use GraphQL WS Server
 
 ```csharp
-#include::xref://tutorials:GettingStartedServer.cs?s=Tanka.GraphQL.Tutorials.GettingStarted.Startup.UseWebSocketsServer
-```
-
-### 4. HTTP API
-
-Tanka Server does not provide out of the box "server" for basic
-HTTP/JSON API as that can be easily implemented.
-
-Here's an example of ASP.NET Core MVC Controller taken from the
-`Tanka.GraphQL.Samples.Chat.Web` project included in the solution.
-
-`IQueryStreamService` is registered by the `AddTankaGraphQL`
-and is also used by the SignalR and GraphQL-WS based servers to
-execute the queries.
-
-[{Tanka.GraphQL.Samples.Chat.Web.Controllers.QueryController}]
-
-```csharp
-#include::xref://dev:graphql.dev.chat.web\Controllers\QueryController.cs?s=Tanka.GraphQL.Samples.Chat.Web.Controllers.QueryController
+//todo: update sample
 ```

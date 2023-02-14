@@ -159,22 +159,9 @@ and subscriptions. This projects provides an Apollo Link implementation to be
 used with the provided hub.</p>
 <h3 id="graphql-server">GraphQL Server</h3>
 <p>Configure SignalR server</p>
-<pre><code class="language-csharp">
-    private static void AddSignalRServer(IServiceCollection services)
-    {
-        // Configure Tanka server
-        services.AddSignalR()
-            .AddTankaGraphQL();
-    }
-
+<pre><code class="language-csharp">//todo: add sample
 </code></pre>
-<pre><code class="language-csharp">
-    private static void UseSignalRServer(IApplicationBuilder app)
-    {
-        // add SignalR
-        app.UseEndpoints(routes =&gt; { routes.MapTankaGraphQLSignalR(&quot;/graphql/hub&quot;); });
-    }
-
+<pre><code class="language-csharp">//todo: add sample
 </code></pre>
                     
             </main>

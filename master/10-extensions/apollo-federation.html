@@ -181,40 +181,36 @@ type Query {
 }
 &quot;;
 
-        var builder = new SchemaBuilder();
-        builder.Add(typeDefs);
-
-        var resolvers = new ResolversMap
+        var builder = new ExecutableSchemaBuilder();
+        builder.AddTypeSystem(typeDefs);
+        builder.AddSubgraph(new(new DictionaryReferenceResolversMap
+        {
+            [&quot;User&quot;] = UserReference,
+            [&quot;Product&quot;] = ProductReference
+        }));
+        builder.AddResolvers(new ResolversMap
         {
             [&quot;User&quot;] = new()
             {
-                { &quot;id&quot;, Resolve.PropertyOf&lt;User&gt;(u =&gt; u.ID) },
+                { &quot;id&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;User&gt;(u =&gt; u.ID) },
                 { &quot;username&quot;, UserUsername },
                 { &quot;reviews&quot;, UserReviews }
             },
             [&quot;Review&quot;] = new()
             {
-                { &quot;id&quot;, Resolve.PropertyOf&lt;Review&gt;(r =&gt; r.ID) },
-                { &quot;body&quot;, Resolve.PropertyOf&lt;Review&gt;(r =&gt; r.Body) },
+                { &quot;id&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Review&gt;(r =&gt; r.ID) },
+                { &quot;body&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Review&gt;(r =&gt; r.Body) },
                 { &quot;author&quot;, ReviewAuthor },
-                { &quot;product&quot;, Resolve.PropertyOf&lt;Review&gt;(r =&gt; r.Product) }
+                { &quot;product&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Review&gt;(r =&gt; r.Product) }
             },
             [&quot;Product&quot;] = new()
             {
-                { &quot;upc&quot;, Resolve.PropertyOf&lt;Product&gt;(p =&gt; p.Upc) },
+                { &quot;upc&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Product&gt;(p =&gt; p.Upc) },
                 { &quot;reviews&quot;, ProductReviews }
             }
-        };
-
-        var schema = await builder.BuildSubgraph(new FederatedSchemaBuildOptions
-        {
-            SchemaBuildOptions = new SchemaBuildOptions(resolvers),
-            ReferenceResolvers = new DictionaryReferenceResolversMap
-            {
-                [&quot;User&quot;] = UserReference,
-                [&quot;Product&quot;] = ProductReference
-            }
         });
+
+        var schema = await builder.Build();
 
         return schema;
     }

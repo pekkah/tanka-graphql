@@ -268,42 +268,11 @@ value of the argument can be used as mulpliplier for the complexity.</p>
 </code></pre>
 <h2 id="import-directive">Import directive</h2>
 <p>Using SDL import</p>
-<pre><code class="language-csharp">    [Fact]
-    public async Task Parse_Sdl()
-    {
-        /* Given */
-        var sdl =
-            @&quot;
-                    &quot;&quot;&quot;&quot;&quot;&quot;
-                    tanka_import from &quot;&quot;tanka://cost-analysis&quot;&quot;
-                    &quot;&quot;&quot;&quot;&quot;&quot;
-
-                    type ObjectType {
-	                    property: Int! @cost(complexity: 1)
-                    }
-
-                    type Query {
-                        obj: ObjectType
-                    }
-                 &quot;;
-
-        /* When */
-        var schema = await new SchemaBuilder()
-            .Add(sdl)
-            // BuiltIn import providers are used
-            .Build(new SchemaBuildOptions());
-
-
-        /* Then */
-        var objectType = schema.GetRequiredNamedType&lt;ObjectDefinition&gt;(&quot;ObjectType&quot;);
-        var property = schema.GetField(objectType.Name, &quot;property&quot;);
-        Assert.Single(property.Directives, directive =&gt; directive.Name == &quot;cost&quot;);
-    }
-
+<pre><code class="language-csharp">//todo: add sample
 </code></pre>
-<p>Or you can include it manually using the <code>SchemaBuilder.Include</code></p>
+<p>Or you can include it manually using the <code>SchemaBuilder.Add</code></p>
 <pre><code class="language-csharp">var builder = new SchemaBuilder()
-    .Include(CostAnalyzer.CostDirective);
+    .Add(CostAnalyzer.CostDirective);
 </code></pre>
                     
             </main>

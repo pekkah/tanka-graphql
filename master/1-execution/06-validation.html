@@ -154,22 +154,7 @@
 <p><a href="https://facebook.github.io/graphql/June2018/#sec-Validation">Specification</a></p>
 </blockquote>
 <h3 id="execution">Execution</h3>
-<pre><code class="language-csharp">
-    private ValidationResult Validate(
-        ExecutableDocument document,
-        CombineRule rule,
-        Dictionary&lt;string, object&gt; variables = null)
-    {
-        if (document == null) throw new ArgumentNullException(nameof(document));
-        if (rule == null) throw new ArgumentNullException(nameof(rule));
-
-        return Validator.Validate(
-            new[] { rule },
-            Schema,
-            document,
-            variables);
-    }
-
+<pre><code class="language-csharp">//todo: add sample
 </code></pre>
 <h3 id="rules">Rules</h3>
 <p>All execution rules</p>
