@@ -687,6 +687,22 @@ schema { query: TypeName }");
     }
 
     [Fact]
+    public void SchemaDefinition_Extend_with_directive()
+    {
+        /* Given */
+        var sut = Parser.Create("extend schema @import");
+
+        /* When */
+        var definition = sut
+            .ParseTypeSystemDocument()
+            .SchemaExtensions!
+            .Single();
+
+        /* Then */
+        Assert.Equal(1, definition.Directives?.Count);
+    }
+
+    [Fact]
     public void SchemaDefinition_AllRootTypes()
     {
         /* Given */

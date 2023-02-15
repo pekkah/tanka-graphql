@@ -74,6 +74,49 @@ public static class Keywords
         Encoding.UTF8.GetBytes("from"));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsBoolean(in ReadOnlySpan<byte> span, out bool value)
+    {
+        if (True.Match(span) || True2.Match(span))
+        {
+            value = true;
+            return true;
+        }
+
+        if (False.Match(span) || False2.Match(span))
+        {
+            value = false;
+            return true;
+        }
+
+        value = false;
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsFragment(in ReadOnlySpan<byte> value)
+    {
+        return Fragment.Span.SequenceEqual(value);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsImplements(in ReadOnlySpan<byte> value)
+    {
+        return Implements.Span.SequenceEqual(value);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsNull(in ReadOnlySpan<byte> span)
+    {
+        return Null.Span.SequenceEqual(span);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsOn(in ReadOnlySpan<byte> value)
+    {
+        return On.Span.SequenceEqual(value);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsOperation(in ReadOnlySpan<byte> span, out OperationType operation)
     {
         if (Query.Span.SequenceEqual(span))
@@ -94,57 +137,14 @@ public static class Keywords
             return true;
         }
 
-        operation = default;
+        operation = default(OperationType);
         return false;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsNull(in ReadOnlySpan<byte> span)
-    {
-        return Null.Span.SequenceEqual(span);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsBoolean(in ReadOnlySpan<byte> span, out bool value)
-    {
-        if (True.Match(span) || True2.Match(span))
-        {
-            value = true;
-            return true;
-        }
-
-        if (False.Match(span) || False2.Match(span))
-        {
-            value = false;
-            return true;
-        }
-
-        value = false;
-        return false;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsOn(in ReadOnlySpan<byte> value)
-    {
-        return On.Span.SequenceEqual(value);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsFragment(in ReadOnlySpan<byte> value)
-    {
-        return Fragment.Span.SequenceEqual(value);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsRepeatable(in ReadOnlySpan<byte> value)
     {
         return Repeatable.Span.SequenceEqual(value);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsImplements(in ReadOnlySpan<byte> value)
-    {
-        return Implements.Span.SequenceEqual(value);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
