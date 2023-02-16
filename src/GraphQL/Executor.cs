@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.Validation;
@@ -10,53 +8,65 @@ namespace Tanka.GraphQL;
 
 public partial class Executor
 {
-    private readonly FeatureCollection _defaults = new(1);
-    private readonly ILogger<Executor> _logger;
+    private readonly FeatureCollection _defaults = new(8);
 
+    /// <summary>
+    ///     Provide all the features required for query execution. Alternative is to
+    ///     use <see cref="OperationPipelineBuilder" /> and set the <see cref="OperationPipelineExecutorFeature" />
+    ///     for the <see cref="QueryContext" />.
+    /// </summary>
+    /// <param name="schema"></param>
+    /// <param name="operationExecutor"></param>
+    /// <param name="selectionSetExecutor"></param>
+    /// <param name="fieldExecutor"></param>
+    /// <param name="validator"></param>
+    /// <param name="valueCompletion"></param>
     public Executor(
         ISchema schema,
         IOperationExecutorFeature operationExecutor,
         ISelectionSetExecutorFeature selectionSetExecutor,
         IFieldExecutorFeature fieldExecutor,
         IValidatorFeature validator,
-        ILogger<Executor> logger)
+        IValueCompletionFeature valueCompletion)
     {
         _defaults.Set<ISchemaFeature>(new SchemaFeature
         {
             Schema = schema
         });
 
-        _defaults.Set<IOperationExecutorFeature>(operationExecutor);
-        _defaults.Set<ISelectionSetExecutorFeature>(selectionSetExecutor);
-        _defaults.Set<IFieldExecutorFeature>(fieldExecutor);
-        _defaults.Set<IValidatorFeature>(validator);
+        _defaults.Set(operationExecutor);
+        _defaults.Set(validator);
+        _defaults.Set(selectionSetExecutor);
+        _defaults.Set(fieldExecutor);
+        _defaults.Set(valueCompletion);
 
-        _defaults.Set<IValueCompletionFeature>(new ValueCompletionFeature());
         _defaults.Set<IErrorCollectorFeature>(new ConcurrentBagErrorCollectorFeature());
         _defaults.Set<IArgumentBinderFeature>(new ArgumentBinderFeature());
-
-        _logger = logger;
     }
 
-    public Executor(ISchema schema, ILogger<Executor> logger) : this(
+    /// <summary>
+    ///     Create executor with sane defaults and use given <see cref="ISchema" />.
+    /// </summary>
+    /// <param name="schema"></param>
+    public Executor(ISchema schema) : this(
         schema,
-        new OperationExecutorFeature(),
+        new DefaultOperationExecutorFeature(),
         new SelectionSetExecutorFeature(),
         new FieldExecutorFeature(),
-        new ValidatorFeature()
+        new ValidatorFeature
         {
             Validator = new Validator3(ExecutionRules.All)
         },
-        logger)
+        new ValueCompletionFeature())
     {
     }
 
-    public Executor(ISchema schema) : this(schema, new NullLogger<Executor>())
+    /// <summary>
+    ///     Create executor without any defaults.
+    ///     When executing queries the <see cref="QueryContext" /> must provide
+    ///     the features required for the execution of the query or the query will fail.
+    /// </summary>
+    public Executor()
     {
-    }
-
-    public Executor(ILogger<Executor> logger)
-    {
-        _logger = logger;
     }
 }

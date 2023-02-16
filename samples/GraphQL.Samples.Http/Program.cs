@@ -59,13 +59,7 @@ app.MapTankaGraphQL3("/graphql", "schemaName");
 // this allows customization of the pipeline
 app.MapTankaGraphQL3("/graphql-custom", gql =>
 {
-    gql.UseSchema("schemaName");
-    gql.UseDefaultOperationExecutor();
-    gql.UseDefaultOperationResolver();
-    gql.UseDefaultVariableCoercer();
-    gql.UseDefaultValidator();
-    gql.UseDefaultSelectionSetPipeline();
-    gql.RunOperation();
+    gql.UseDefaults("schemaName");
 });
 
 app.Run();

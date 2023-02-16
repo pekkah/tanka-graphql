@@ -50,17 +50,7 @@ public class GraphQLApplication
 
     private void ConfigureDefaultPipeline(GraphQLRequestPipelineBuilder builder, string schemaName)
     {
-        builder.UseDefaultErrorCollector();
-        builder.UseSchema(schemaName);
-        builder.UseDefaultOperationExecutor();
-        builder.UseDefaultOperationResolver();
-        builder.UseDefaultVariableCoercer();
-        builder.UseDefaultValidator();
-        builder.UseDefaultSelectionSetPipeline();
-        builder.UseDefaultFieldPipeline();
-        builder.UseDefaultValueCompletion();
-
-        builder.RunOperation();
+        builder.UseDefaults(schemaName);
     }
 
     private RequestDelegate CreateUiDelegate(string apiPattern)

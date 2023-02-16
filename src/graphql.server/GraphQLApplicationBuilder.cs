@@ -1,8 +1,6 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Validation;
 
@@ -23,24 +21,9 @@ public class GraphQLApplicationBuilder
 
     public OptionsBuilder<GraphQLApplicationOptions> ApplicationOptionsBuilder { get; }
 
-    private void AddCore()
-    {
-        ApplicationServices.TryAddSingleton<IHostedService, SchemaInitializer>();
-        ApplicationServices.TryAddSingleton<SchemaCollection>();
-        ApplicationServices.TryAddSingleton<GraphQLApplication>();
-        ApplicationServices.TryAddSingleton<IValidator3, Validator3>();
-        ApplicationServices.TryAddSingleton<Executor>(p => new(p.GetRequiredService<ILogger<Executor>>()));
-    }
-
     public GraphQLApplicationBuilder AddHttp()
     {
         ApplicationServices.TryAddEnumerable(ServiceDescriptor.Singleton<IGraphQLTransport, GraphQLHttpTransport>());
-        return this;
-    }
-
-    public GraphQLApplicationBuilder AddWebSockets()
-    {
-        ApplicationServices.TryAddEnumerable(ServiceDescriptor.Singleton<IGraphQLTransport, GraphQLWSTransport>());
         return this;
     }
 
@@ -48,7 +31,7 @@ public class GraphQLApplicationBuilder
         string schemaName,
         Action<SchemaOptionsBuilder> configureOptions)
     {
-        var schemaOptions = ApplicationServices
+        OptionsBuilder<SchemaOptions> schemaOptions = ApplicationServices
             .AddOptions<SchemaOptions>(schemaName);
 
         var optionsBuilder = new SchemaOptionsBuilder(
@@ -60,5 +43,18 @@ public class GraphQLApplicationBuilder
         ApplicationOptionsBuilder.Configure(options => options.SchemaNames.Add(schemaName));
 
         return this;
+    }
+
+    public GraphQLApplicationBuilder AddWebSockets()
+    {
+        ApplicationServices.TryAddEnumerable(ServiceDescriptor.Singleton<IGraphQLTransport, GraphQLWSTransport>());
+        return this;
+    }
+
+    private void AddCore()
+    {
+        ApplicationServices.TryAddSingleton<IHostedService, SchemaInitializer>();
+        ApplicationServices.TryAddSingleton<SchemaCollection>();
+        ApplicationServices.TryAddSingleton<GraphQLApplication>();
     }
 }

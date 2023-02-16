@@ -93,7 +93,7 @@ public class ExecutionBenchmarks
         _mutation = Utils.InitializeMutation();
         _subscription = Utils.InitializeSubscription();
         _executor = new Executor(_schema);
-        _nonValidatingExecutor = new Executor(_schema, new OperationExecutorFeature(),
+        _nonValidatingExecutor = new Executor(_schema, new DefaultOperationExecutorFeature(),
             new SelectionSetExecutorFeature(), new FieldExecutorFeature(), new NoValidationFeature(),
             new NullLogger<Executor>());
     }
