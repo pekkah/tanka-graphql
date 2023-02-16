@@ -11,6 +11,7 @@ using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Benchmarks.Experimental;
 
@@ -93,9 +94,13 @@ public class ExecutionBenchmarks
         _mutation = Utils.InitializeMutation();
         _subscription = Utils.InitializeSubscription();
         _executor = new Executor(_schema);
-        _nonValidatingExecutor = new Executor(_schema, new DefaultOperationExecutorFeature(),
-            new SelectionSetExecutorFeature(), new FieldExecutorFeature(), new NoValidationFeature(),
-            new NullLogger<Executor>());
+        _nonValidatingExecutor = new Executor(
+            _schema, 
+            new DefaultOperationExecutorFeature(),
+            new SelectionSetExecutorFeature(), 
+            new FieldExecutorFeature(), 
+            new NoValidationFeature(),
+            new ValueCompletionFeature());
     }
 
     //[Benchmark]
