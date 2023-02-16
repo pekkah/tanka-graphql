@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Tanka.GraphQL.Internal;
+﻿using Tanka.GraphQL.Internal;
 
 namespace Tanka.GraphQL.Server;
 
@@ -28,7 +26,6 @@ public class GraphQLRequestPipelineBuilder
     public IDictionary<string, object?> Properties { get; }
 
     public IServiceProvider ApplicationServices => GetRequiredProperty<IServiceProvider>(ApplicationServicesKey);
-
 
     public GraphQLRequestDelegate Build()
     {
