@@ -95,8 +95,7 @@ public class ExecutionBenchmarks
         _subscription = Utils.InitializeSubscription();
         _executor = new Executor(_schema);
         _nonValidatingExecutor = new Executor(
-            _schema, 
-            new DefaultOperationExecutorFeature(),
+            _schema,
             new SelectionSetExecutorFeature(), 
             new FieldExecutorFeature(), 
             new NoValidationFeature(),

@@ -23,6 +23,11 @@ public partial class Executor
         return await executionResult.SingleAsync(queryContext.RequestCancelled);
     }
 
+    public async Task ExecuteContext(QueryContext context)
+    {
+        await _operationDelegate(context);
+    }
+
     public static Task<ExecutionResult> Execute(
         ISchema schema,
         ExecutableDocument document,

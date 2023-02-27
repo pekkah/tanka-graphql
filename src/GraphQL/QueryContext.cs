@@ -65,9 +65,6 @@ public record QueryContext
     private IFieldExecutorFeature? FieldExecutorFeature =>
         _features.Fetch(ref _features.Cache.FieldExecutor, _ => null);
 
-    private IOperationExecutorFeature? OperationExecutorFeature =>
-        _features.Fetch(ref _features.Cache.OperationExecutor, _ => null);
-
     public GraphQLRequest Request
     {
         get => RequestFeature.Request ?? throw new InvalidOperationException("Request not set");
@@ -123,12 +120,6 @@ public record QueryContext
         return FieldExecutorFeature.Execute(this, objectDefinition, objectValue, fields, path);
     }
 
-    public Task ExecuteOperation()
-    {
-        ArgumentNullException.ThrowIfNull(OperationExecutorFeature);
-        return OperationExecutorFeature.Execute(this);
-    }
-
     public Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
         SelectionSet selectionSet,
         ObjectDefinition objectType,
@@ -174,6 +165,5 @@ public record QueryContext
         public IArgumentBinderFeature? ArgumentBinder;
         public IValidatorFeature? Validator;
         public IResponseStreamFeature? Response;
-        public IOperationExecutorFeature? OperationExecutor;
     }
 }
