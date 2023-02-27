@@ -2,9 +2,9 @@
 
 public partial class Executor
 {
-    public static async IAsyncEnumerable<ExecutionResult> ExecuteOperation(QueryContext context)
+    public async IAsyncEnumerable<ExecutionResult> ExecuteOperation(QueryContext context)
     {
-        await context.ExecuteOperation();
+        await _operationDelegate(context);
 
         await foreach (ExecutionResult er in context.Response.WithCancellation(context.RequestCancelled))
             yield return er;

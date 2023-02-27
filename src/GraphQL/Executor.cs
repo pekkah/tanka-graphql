@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.Features;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.Validation;
@@ -8,49 +8,53 @@ namespace Tanka.GraphQL;
 
 public partial class Executor
 {
-    private readonly FeatureCollection _defaults = new(8);
+    private static readonly IServiceProvider EmptyProvider = new ServiceCollection().BuildServiceProvider();
+
+    private readonly OperationDelegate _operationDelegate;
 
     /// <summary>
-    ///     Provide all the features required for query execution. Alternative is to
-    ///     use <see cref="OperationPipelineBuilder" /> and set the <see cref="OperationPipelineExecutorFeature" />
-    ///     for the <see cref="QueryContext" />.
+    ///     Create executor with default execution pipeline using
+    ///     the provided features.
     /// </summary>
     /// <param name="schema"></param>
-    /// <param name="operationExecutor"></param>
     /// <param name="selectionSetExecutor"></param>
     /// <param name="fieldExecutor"></param>
     /// <param name="validator"></param>
     /// <param name="valueCompletion"></param>
     public Executor(
         ISchema schema,
-        IOperationExecutorFeature operationExecutor,
         ISelectionSetExecutorFeature selectionSetExecutor,
         IFieldExecutorFeature fieldExecutor,
         IValidatorFeature validator,
         IValueCompletionFeature valueCompletion)
     {
-        _defaults.Set<ISchemaFeature>(new SchemaFeature
-        {
-            Schema = schema
-        });
+        _operationDelegate = new OperationPipelineBuilder(EmptyProvider)
+            .AddFeature<ISchemaFeature>(new SchemaFeature
+            {
+                Schema = schema
+            })
+            .AddFeature(validator)
+            .AddFeature(selectionSetExecutor)
+            .AddFeature(fieldExecutor)
+            .AddFeature(valueCompletion)
+            .AddDefaultErrorCollectorFeature()
+            .AddDefaultArgumentBinderFeature()
 
-        _defaults.Set(operationExecutor);
-        _defaults.Set(validator);
-        _defaults.Set(selectionSetExecutor);
-        _defaults.Set(fieldExecutor);
-        _defaults.Set(valueCompletion);
-
-        _defaults.Set<IErrorCollectorFeature>(new ConcurrentBagErrorCollectorFeature());
-        _defaults.Set<IArgumentBinderFeature>(new ArgumentBinderFeature());
+            .UseDefaultOperationResolver()
+            .UseDefaultVariableCoercer()
+            .WhenOperationTypeUse(
+                q => q.RunQueryOrMutation(), 
+                m => m.RunQueryOrMutation(), 
+                s => s.RunSubscription())
+            .Build();
     }
 
     /// <summary>
-    ///     Create executor with sane defaults and use given <see cref="ISchema" />.
+    ///     Create executor with defaults and use given <see cref="ISchema" />.
     /// </summary>
     /// <param name="schema"></param>
     public Executor(ISchema schema) : this(
         schema,
-        new DefaultOperationExecutorFeature(),
         new SelectionSetExecutorFeature(),
         new FieldExecutorFeature(),
         new ValidatorFeature
@@ -61,12 +65,8 @@ public partial class Executor
     {
     }
 
-    /// <summary>
-    ///     Create executor without any defaults.
-    ///     When executing queries the <see cref="QueryContext" /> must provide
-    ///     the features required for the execution of the query or the query will fail.
-    /// </summary>
-    public Executor()
+    public Executor(OperationDelegate operationDelegate)
     {
+        _operationDelegate = operationDelegate;
     }
 }

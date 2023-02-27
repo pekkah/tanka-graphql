@@ -4,23 +4,25 @@ namespace Tanka.GraphQL.Server;
 
 public static class DefaultGraphQLRequestPipelineMiddlewares
 {
-    public static GraphQLRequestPipelineBuilder RunOperationPipeline(
+    public static GraphQLRequestPipelineBuilder RunOperationExecutor(
         this GraphQLRequestPipelineBuilder builder,
         Action<OperationPipelineBuilder> configureOperation)
     {
-        var operationBuilder = new OperationPipelineBuilder(builder.ApplicationServices);
-        configureOperation(operationBuilder);
-        OperationDelegate operationDelegate = operationBuilder.Build();
+        var operationDelegateBuilder = new OperationPipelineBuilder(builder.ApplicationServices);
+        configureOperation(operationDelegateBuilder);
+        OperationDelegate operationDelegate = operationDelegateBuilder.Build();
 
-        return builder.Use(_ => async context => { await operationDelegate(context); });
+        var executor = new Executor(operationDelegate);
+        return builder.Use(_ => context => executor.ExecuteContext(context));
     }
 
-    public static GraphQLRequestPipelineBuilder UseDefaults(this GraphQLRequestPipelineBuilder builder,
+    public static GraphQLRequestPipelineBuilder UseDefaults(
+        this GraphQLRequestPipelineBuilder builder,
         string schemaName)
     {
         return builder
             .UseSchema(schemaName)
-            .RunOperationPipeline(operation => operation.UseDefaults());
+            .RunOperationExecutor(operation => operation.UseDefaults());
     }
 
     /// <summary>

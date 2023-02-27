@@ -1,4 +1,5 @@
 ﻿using Tanka.GraphQL.Features;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 
@@ -6,7 +7,16 @@ namespace Tanka.GraphQL;
 
 public static class DefaultOperationPipelineBuilderExtensions
 {
-    public static OperationPipelineBuilder UseDefaultErrorCollector(
+    public static OperationPipelineBuilder AddFeature<TFeature>(this OperationPipelineBuilder builder, TFeature feature)
+    {
+        return builder.Use(next => context =>
+        {
+            context.Features.Set<TFeature>(feature);
+            return next(context);
+        });
+    }
+
+    public static OperationPipelineBuilder AddDefaultErrorCollectorFeature(
         this OperationPipelineBuilder builder)
     {
         var feature = new ConcurrentBagErrorCollectorFeature();
@@ -17,7 +27,7 @@ public static class DefaultOperationPipelineBuilderExtensions
         });
     }
 
-    public static OperationPipelineBuilder UseDefaultFieldPipeline(
+    public static OperationPipelineBuilder AddDefaultFieldPipelineFeature(
         this OperationPipelineBuilder builder)
     {
         var feature = new FieldExecutorFeature();
@@ -28,13 +38,13 @@ public static class DefaultOperationPipelineBuilderExtensions
         });
     }
 
-    public static OperationPipelineBuilder UseDefaultOperationExecutor(
+    public static OperationPipelineBuilder AddDefaultArgumentBinderFeature(
         this OperationPipelineBuilder builder)
     {
-        var feature = new DefaultOperationExecutorFeature();
+        var feature = new ArgumentBinderFeature();
         return builder.Use(next => context =>
         {
-            context.Features.Set<IOperationExecutorFeature>(feature);
+            context.Features.Set<IArgumentBinderFeature>(feature);
             return next(context);
         });
     }
@@ -60,26 +70,38 @@ public static class DefaultOperationPipelineBuilderExtensions
     /// <returns></returns>
     public static OperationPipelineBuilder UseDefaults(this OperationPipelineBuilder builder)
     {
-        builder.UseDefaultErrorCollector();
-        builder.UseDefaultOperationExecutor();
+        builder.AddDefaultErrorCollectorFeature();
+        builder.AddDefaultFieldPipelineFeature();
+        builder.AddDefaultValidator();
+        builder.AddDefaultSelectionSetPipeline();
+        builder.AddDefaultValueCompletion();
+
         builder.UseDefaultOperationResolver();
         builder.UseDefaultVariableCoercer();
-        builder.UseDefaultValidator();
-        builder.UseDefaultSelectionSetPipeline();
-        builder.UseDefaultFieldPipeline();
-        builder.UseDefaultValueCompletion();
-        builder.RunOperation();
+        
+        builder.WhenOperationTypeUse(query =>
+            {
+                query.RunQueryOrMutation();
+            },
+            mutation =>
+            {
+                mutation.RunQueryOrMutation();
+            },
+            subscriptions =>
+            {
+                subscriptions.RunSubscription();
+            });
 
         return builder;
     }
 
-    public static OperationPipelineBuilder UseDefaultSelectionSetPipeline(
+    public static OperationPipelineBuilder AddDefaultSelectionSetPipeline(
         this OperationPipelineBuilder builder)
     {
-        return builder.UseSelectionSetPipeline(pipe => pipe.UseFieldCollector().RunExecute());
+        return builder.AddSelectionSetPipeline(pipe => pipe.UseFieldCollector().RunExecute());
     }
 
-    public static OperationPipelineBuilder UseDefaultValidator(this OperationPipelineBuilder builder)
+    public static OperationPipelineBuilder AddDefaultValidator(this OperationPipelineBuilder builder)
     {
         var feature = new ValidatorFeature
         {
@@ -95,7 +117,7 @@ public static class DefaultOperationPipelineBuilderExtensions
         return builder;
     }
 
-    public static OperationPipelineBuilder UseDefaultValueCompletion(
+    public static OperationPipelineBuilder AddDefaultValueCompletion(
         this OperationPipelineBuilder builder)
     {
         var feature = new ValueCompletionFeature();
@@ -119,5 +141,54 @@ public static class DefaultOperationPipelineBuilderExtensions
         });
 
         return builder;
+    }
+
+    public static OperationPipelineBuilder WhenOperationTypeUse(
+        this OperationPipelineBuilder builder,
+        Action<OperationPipelineBuilder> queryAction,
+        Action<OperationPipelineBuilder> mutationAction,
+        Action<OperationPipelineBuilder> subscriptionAction)
+    {
+        var queryBuilder = new OperationPipelineBuilder(builder.ApplicationServices);
+        queryAction(queryBuilder);
+        var queryDelegate = queryBuilder.Build();
+
+        var mutationBuilder = new OperationPipelineBuilder(builder.ApplicationServices);
+        mutationAction(mutationBuilder);
+        var mutationDelegate = mutationBuilder.Build();
+
+        var subscriptionBuilder = new OperationPipelineBuilder(builder.ApplicationServices);
+        subscriptionAction(subscriptionBuilder);
+        var subscriptionDelegate = subscriptionBuilder.Build();
+
+        return builder.Use(_ => async context =>
+        {
+            Task execute = context.OperationDefinition.Operation switch
+            {
+                OperationType.Query => queryDelegate(context),
+                OperationType.Mutation => mutationDelegate(context),
+                OperationType.Subscription => subscriptionDelegate(context),
+                _ => throw new InvalidOperationException(
+                    $"Operation type {context.OperationDefinition.Operation} not supported.")
+            };
+
+            await execute;
+        });
+    }
+
+    public static OperationPipelineBuilder RunQueryOrMutation(this OperationPipelineBuilder builder)
+    {
+        return builder.Use(_ => async context =>
+        {
+            await Executor.ExecuteQueryOrMutation(context);
+        });
+    }
+
+    public static OperationPipelineBuilder RunSubscription(this OperationPipelineBuilder builder)
+    {
+        return builder.Use(_ => async context =>
+        {
+            await Executor.ExecuteSubscription(context);
+        });
     }
 }

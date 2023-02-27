@@ -4,7 +4,7 @@ namespace Tanka.GraphQL;
 
 public static class UseSelectionSetPipelineOperationPipelineBuilderExtensions
 {
-    public static OperationPipelineBuilder UseSelectionSetPipeline(
+    public static OperationPipelineBuilder AddSelectionSetPipeline(
         this OperationPipelineBuilder builder,
         Action<SelectionSetPipelineBuilder> configurePipeline)
     {
