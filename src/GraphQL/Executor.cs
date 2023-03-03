@@ -72,7 +72,8 @@ public partial class Executor
             .AddDefaultSelectionSetExecutorFeature()
             .AddDefaultFieldExecutorFeature()
             .AddDefaultErrorCollectorFeature()
-            .AddDefaultArgumentBinderFeature();
+            .AddDefaultArgumentBinderFeature()
+            .AddDefaultValueCompletionFeature();
 
         if (options.ValidationEnabled)
             builder
