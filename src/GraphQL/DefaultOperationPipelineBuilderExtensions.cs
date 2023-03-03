@@ -1,13 +1,14 @@
-﻿using Tanka.GraphQL.Features;
+﻿using Tanka.GraphQL.Extensions.Trace;
+using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL;
 
-public static class DefaultOperationPipelineBuilderExtensions
+public static class DefaultOperationDelegateBuilderExtensions
 {
-    public static OperationPipelineBuilder AddFeature<TFeature>(this OperationPipelineBuilder builder, TFeature feature)
+    public static OperationDelegateBuilder AddFeature<TFeature>(this OperationDelegateBuilder builder, TFeature feature)
     {
         return builder.Use(next => context =>
         {
@@ -16,8 +17,8 @@ public static class DefaultOperationPipelineBuilderExtensions
         });
     }
 
-    public static OperationPipelineBuilder AddDefaultErrorCollectorFeature(
-        this OperationPipelineBuilder builder)
+    public static OperationDelegateBuilder AddDefaultErrorCollectorFeature(
+        this OperationDelegateBuilder builder)
     {
         var feature = new ConcurrentBagErrorCollectorFeature();
         return builder.Use(next => context =>
@@ -27,19 +28,10 @@ public static class DefaultOperationPipelineBuilderExtensions
         });
     }
 
-    public static OperationPipelineBuilder AddDefaultFieldPipelineFeature(
-        this OperationPipelineBuilder builder)
-    {
-        var feature = new FieldExecutorFeature();
-        return builder.Use(next => context =>
-        {
-            context.Features.Set<IFieldExecutorFeature>(feature);
-            return next(context);
-        });
-    }
 
-    public static OperationPipelineBuilder AddDefaultArgumentBinderFeature(
-        this OperationPipelineBuilder builder)
+
+    public static OperationDelegateBuilder AddDefaultArgumentBinderFeature(
+        this OperationDelegateBuilder builder)
     {
         var feature = new ArgumentBinderFeature();
         return builder.Use(next => context =>
@@ -49,7 +41,7 @@ public static class DefaultOperationPipelineBuilderExtensions
         });
     }
 
-    public static OperationPipelineBuilder UseDefaultOperationResolver(this OperationPipelineBuilder builder)
+    public static OperationDelegateBuilder UseDefaultOperationResolver(this OperationDelegateBuilder builder)
     {
         builder.Use(next => context =>
         {
@@ -68,17 +60,24 @@ public static class DefaultOperationPipelineBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static OperationPipelineBuilder UseDefaults(this OperationPipelineBuilder builder)
+    public static OperationDelegateBuilder UseDefaults(this OperationDelegateBuilder builder)
     {
-        builder.AddDefaultErrorCollectorFeature();
-        builder.AddDefaultFieldPipelineFeature();
-        builder.AddDefaultValidator();
-        builder.AddDefaultSelectionSetPipeline();
-        builder.AddDefaultValueCompletion();
+        if (builder.GetProperty<bool>("TraceEnabled"))
+        {
+            builder.UseTrace();
+        }
 
+        // extend query context with required features
+        builder.AddDefaultErrorCollectorFeature();
+        
+        builder.AddDefaultSelectionSetExecutorFeature();
+        builder.AddDefaultFieldExecutorFeature();
+        builder.AddDefaultValueCompletionFeature();
+
+        // actual flow
+        builder.UseDefaultValidator();
         builder.UseDefaultOperationResolver();
         builder.UseDefaultVariableCoercer();
-        
         builder.WhenOperationTypeUse(query =>
             {
                 query.RunQueryOrMutation();
@@ -95,30 +94,27 @@ public static class DefaultOperationPipelineBuilderExtensions
         return builder;
     }
 
-    public static OperationPipelineBuilder AddDefaultSelectionSetPipeline(
-        this OperationPipelineBuilder builder)
-    {
-        return builder.AddSelectionSetPipeline(pipe => pipe.UseFieldCollector().RunExecute());
-    }
+    
 
-    public static OperationPipelineBuilder AddDefaultValidator(this OperationPipelineBuilder builder)
+    public static OperationDelegateBuilder UseDefaultValidator(this OperationDelegateBuilder builder)
     {
-        var feature = new ValidatorFeature
-        {
-            Validator = new Validator3(ExecutionRules.All)
-        };
+        var validator = new Validator3(ExecutionRules.All);
 
-        builder.Use(next => context =>
+        builder.Use(next => async context =>
         {
-            context.Features.Set<IValidatorFeature>(feature);
-            return next(context);
+            var result = await validator.Validate(context.Schema, context.Request.Document, context.Request.Variables);
+
+            if (!result.IsValid)
+                throw new ValidationException(result);
+
+            await next(context);
         });
 
         return builder;
     }
 
-    public static OperationPipelineBuilder AddDefaultValueCompletion(
-        this OperationPipelineBuilder builder)
+    public static OperationDelegateBuilder AddDefaultValueCompletionFeature(
+        this OperationDelegateBuilder builder)
     {
         var feature = new ValueCompletionFeature();
         return builder.Use(next => context =>
@@ -128,7 +124,7 @@ public static class DefaultOperationPipelineBuilderExtensions
         });
     }
 
-    public static OperationPipelineBuilder UseDefaultVariableCoercer(this OperationPipelineBuilder builder)
+    public static OperationDelegateBuilder UseDefaultVariableCoercer(this OperationDelegateBuilder builder)
     {
         builder.Use(next => context =>
         {
@@ -143,21 +139,21 @@ public static class DefaultOperationPipelineBuilderExtensions
         return builder;
     }
 
-    public static OperationPipelineBuilder WhenOperationTypeUse(
-        this OperationPipelineBuilder builder,
-        Action<OperationPipelineBuilder> queryAction,
-        Action<OperationPipelineBuilder> mutationAction,
-        Action<OperationPipelineBuilder> subscriptionAction)
+    public static OperationDelegateBuilder WhenOperationTypeUse(
+        this OperationDelegateBuilder builder,
+        Action<OperationDelegateBuilder> queryAction,
+        Action<OperationDelegateBuilder> mutationAction,
+        Action<OperationDelegateBuilder> subscriptionAction)
     {
-        var queryBuilder = new OperationPipelineBuilder(builder.ApplicationServices);
+        var queryBuilder = new OperationDelegateBuilder(builder.ApplicationServices);
         queryAction(queryBuilder);
         var queryDelegate = queryBuilder.Build();
 
-        var mutationBuilder = new OperationPipelineBuilder(builder.ApplicationServices);
+        var mutationBuilder = new OperationDelegateBuilder(builder.ApplicationServices);
         mutationAction(mutationBuilder);
         var mutationDelegate = mutationBuilder.Build();
 
-        var subscriptionBuilder = new OperationPipelineBuilder(builder.ApplicationServices);
+        var subscriptionBuilder = new OperationDelegateBuilder(builder.ApplicationServices);
         subscriptionAction(subscriptionBuilder);
         var subscriptionDelegate = subscriptionBuilder.Build();
 
@@ -176,7 +172,7 @@ public static class DefaultOperationPipelineBuilderExtensions
         });
     }
 
-    public static OperationPipelineBuilder RunQueryOrMutation(this OperationPipelineBuilder builder)
+    public static OperationDelegateBuilder RunQueryOrMutation(this OperationDelegateBuilder builder)
     {
         return builder.Use(_ => async context =>
         {
@@ -184,7 +180,7 @@ public static class DefaultOperationPipelineBuilderExtensions
         });
     }
 
-    public static OperationPipelineBuilder RunSubscription(this OperationPipelineBuilder builder)
+    public static OperationDelegateBuilder RunSubscription(this OperationDelegateBuilder builder)
     {
         return builder.Use(_ => async context =>
         {

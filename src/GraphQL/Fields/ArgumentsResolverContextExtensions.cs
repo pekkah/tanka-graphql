@@ -6,7 +6,7 @@ public static class ArgumentsResolverContextExtensions
 {
     public static T? GetArgument<T>(this ResolverContextBase context, string name)
     {
-        if (!context.Arguments.TryGetValue(name, out var arg))
+        if (!context.ArgumentValues.TryGetValue(name, out var arg))
             throw new ArgumentOutOfRangeException(nameof(name), name,
                 $"Field '{context.Field.Name}' does not contain argument with name '{name}''");
 

@@ -51,7 +51,7 @@ public class SelectionSetPipelineBuilder
     {
         return Use(_ => async context =>
         {
-            context.Result = await SelectionSetExecutorFeature.ExecuteSelectionSet(
+            context.Result = await DefaultSelectionSetExecutorFeature.ExecuteSelectionSet(
                 context.QueryContext,
                 context.GroupedFieldSet,
                 context.ObjectDefinition,

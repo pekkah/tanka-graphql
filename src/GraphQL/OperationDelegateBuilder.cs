@@ -1,23 +1,23 @@
 ﻿using Tanka.GraphQL.Internal;
 
-namespace Tanka.GraphQL.Server;
+namespace Tanka.GraphQL;
 
-public class GraphQLRequestPipelineBuilder
+public class OperationDelegateBuilder
 {
     private const string ApplicationServicesKey = "ApplicationServices";
-    private List<Func<GraphQLRequestDelegate, GraphQLRequestDelegate>> _components = new();
+    private readonly List<Func<OperationDelegate, OperationDelegate>> _components = new();
 
-    protected GraphQLRequestPipelineBuilder(GraphQLRequestPipelineBuilder builder)
+    protected OperationDelegateBuilder(OperationDelegateBuilder builder)
     {
         Properties = new CopyOnWriteDictionary<string, object?>(builder.Properties, StringComparer.Ordinal);
     }
 
-    protected GraphQLRequestPipelineBuilder(IDictionary<string, object?> properties)
+    protected OperationDelegateBuilder(IDictionary<string, object?> properties)
     {
         Properties = new CopyOnWriteDictionary<string, object?>(properties, StringComparer.Ordinal);
     }
 
-    public GraphQLRequestPipelineBuilder(IServiceProvider applicationServices)
+    public OperationDelegateBuilder(IServiceProvider applicationServices)
     {
         Properties = new Dictionary<string, object?>(StringComparer.Ordinal);
         SetProperty(ApplicationServicesKey, applicationServices);
@@ -27,10 +27,10 @@ public class GraphQLRequestPipelineBuilder
 
     public IServiceProvider ApplicationServices => GetRequiredProperty<IServiceProvider>(ApplicationServicesKey);
 
-    public GraphQLRequestDelegate Build()
+    public OperationDelegate Build()
     {
-        GraphQLRequestDelegate pipeline = _ => throw new QueryException(
-            "Request execution pipeline error. No middleware returned any results.")
+        OperationDelegate pipeline = _ => throw new QueryException(
+            "Operation execution pipeline error. No ending middleware.")
         {
             Path = new NodePath()
         };
@@ -41,13 +41,10 @@ public class GraphQLRequestPipelineBuilder
         return pipeline;
     }
 
-    public GraphQLRequestPipelineBuilder Clone()
+    public OperationDelegateBuilder Clone()
     {
-        var clone = new GraphQLRequestPipelineBuilder(this)
-        {
-            _components = _components
-        };
-
+        var clone = new OperationDelegateBuilder(this);
+        clone._components.AddRange(_components);
         return clone;
     }
 
@@ -65,12 +62,18 @@ public class GraphQLRequestPipelineBuilder
         return value;
     }
 
+
+    public OperationDelegateBuilder New()
+    {
+        return new OperationDelegateBuilder(this);
+    }
+
     public void SetProperty<T>(string key, T value)
     {
         Properties[key] = value;
     }
 
-    public GraphQLRequestPipelineBuilder Use(Func<GraphQLRequestDelegate, GraphQLRequestDelegate> middleware)
+    public OperationDelegateBuilder Use(Func<OperationDelegate, OperationDelegate> middleware)
     {
         _components.Add(middleware);
         return this;

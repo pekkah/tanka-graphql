@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Tanka.GraphQL.Extensions.Trace;
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.SelectionSets;
-using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL;
@@ -25,26 +25,24 @@ public partial class Executor
         ISchema schema,
         ISelectionSetExecutorFeature selectionSetExecutor,
         IFieldExecutorFeature fieldExecutor,
-        IValidatorFeature validator,
         IValueCompletionFeature valueCompletion)
     {
-        _operationDelegate = new OperationPipelineBuilder(EmptyProvider)
+        _operationDelegate = new OperationDelegateBuilder(EmptyProvider)
             .AddFeature<ISchemaFeature>(new SchemaFeature
             {
                 Schema = schema
             })
-            .AddFeature(validator)
             .AddFeature(selectionSetExecutor)
             .AddFeature(fieldExecutor)
             .AddFeature(valueCompletion)
             .AddDefaultErrorCollectorFeature()
             .AddDefaultArgumentBinderFeature()
-
+            .UseDefaultValidator()
             .UseDefaultOperationResolver()
             .UseDefaultVariableCoercer()
             .WhenOperationTypeUse(
-                q => q.RunQueryOrMutation(), 
-                m => m.RunQueryOrMutation(), 
+                q => q.RunQueryOrMutation(),
+                m => m.RunQueryOrMutation(),
                 s => s.RunSubscription())
             .Build();
     }
@@ -53,20 +51,56 @@ public partial class Executor
     ///     Create executor with defaults and use given <see cref="ISchema" />.
     /// </summary>
     /// <param name="schema"></param>
-    public Executor(ISchema schema) : this(
-        schema,
-        new SelectionSetExecutorFeature(),
-        new FieldExecutorFeature(),
-        new ValidatorFeature
-        {
-            Validator = new Validator3(ExecutionRules.All)
-        },
-        new ValueCompletionFeature())
+    public Executor(ISchema schema) : this(new ExecutorOptions()
     {
+        Schema = schema
+    })
+    {
+    }
+
+    public Executor(ExecutorOptions options)
+    {
+        OperationDelegateBuilder builder = new OperationDelegateBuilder(EmptyProvider);
+
+        if (options.TraceEnabled)
+            builder.UseTrace();
+        
+        builder.AddFeature<ISchemaFeature>(new SchemaFeature
+            {
+                Schema = options.Schema
+            })
+            .AddDefaultSelectionSetExecutorFeature()
+            .AddDefaultFieldExecutorFeature()
+            .AddDefaultErrorCollectorFeature()
+            .AddDefaultArgumentBinderFeature();
+
+        if (options.ValidationEnabled)
+            builder
+                .UseDefaultValidator();
+
+        builder
+            .UseDefaultOperationResolver()
+            .UseDefaultVariableCoercer()
+            .WhenOperationTypeUse(
+                q => q.RunQueryOrMutation(),
+                m => m.RunQueryOrMutation(),
+                s => s.RunSubscription())
+            .Build();
+
+        _operationDelegate = builder.Build();
     }
 
     public Executor(OperationDelegate operationDelegate)
     {
         _operationDelegate = operationDelegate;
     }
+}
+
+public record ExecutorOptions
+{
+    public required ISchema Schema { get; set; }
+
+    public bool TraceEnabled { get; set; } = false;
+
+    public bool ValidationEnabled { get; set; } = true;
 }

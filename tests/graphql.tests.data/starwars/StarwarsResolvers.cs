@@ -14,7 +14,7 @@ public class StarwarsResolvers
     {
         async ValueTask ResolveCharacter(ResolverContext context)
         {
-            var id = (string)context.Arguments["id"];
+            var id = (string)context.ArgumentValues["id"];
             var character = await starwars.GetCharacter(id).ConfigureAwait(false);
             context.ResolvedValue = character;
             context.ResolveAbstractType = (definition, o) => context.Schema.GetRequiredNamedType<ObjectDefinition>("Human");
@@ -22,7 +22,7 @@ public class StarwarsResolvers
 
         async ValueTask ResolveHuman(ResolverContext context)
         {
-            var id = (string)context.Arguments["id"];
+            var id = (string)context.ArgumentValues["id"];
 
             var human = await starwars.GetHuman(id).ConfigureAwait(false);
             context.ResolvedValue = human;
@@ -55,7 +55,7 @@ public class StarwarsResolvers
 
         async ValueTask AddHuman(ResolverContext context)
         {
-            var humanInput = (IDictionary<string, object>)context.Arguments["human"];
+            var humanInput = (IDictionary<string, object>)context.ArgumentValues["human"];
             var human = starwars.AddHuman(humanInput["name"].ToString());
 
             await Task.Delay(0).ConfigureAwait(false);

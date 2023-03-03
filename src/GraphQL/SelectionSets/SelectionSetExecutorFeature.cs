@@ -3,7 +3,7 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.SelectionSets;
 
-public class SelectionSetExecutorFeature : ISelectionSetExecutorFeature
+public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
 {
     public Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
         QueryContext context,

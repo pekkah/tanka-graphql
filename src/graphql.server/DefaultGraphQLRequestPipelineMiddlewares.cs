@@ -6,9 +6,9 @@ public static class DefaultGraphQLRequestPipelineMiddlewares
 {
     public static GraphQLRequestPipelineBuilder RunOperationExecutor(
         this GraphQLRequestPipelineBuilder builder,
-        Action<OperationPipelineBuilder> configureOperation)
+        Action<OperationDelegateBuilder> configureOperation)
     {
-        var operationDelegateBuilder = new OperationPipelineBuilder(builder.ApplicationServices);
+        var operationDelegateBuilder = new OperationDelegateBuilder(builder.ApplicationServices);
         configureOperation(operationDelegateBuilder);
         OperationDelegate operationDelegate = operationDelegateBuilder.Build();
 
@@ -22,7 +22,12 @@ public static class DefaultGraphQLRequestPipelineMiddlewares
     {
         return builder
             .UseSchema(schemaName)
-            .RunOperationExecutor(operation => operation.UseDefaults());
+            .RunOperationExecutor(operation =>
+            {
+                //todo: for now use this to pass the trace enabled allowing setting it up without modifying whole pipeline
+                operation.SetProperty("TraceEnabled", builder.GetProperty<bool>("TraceEnabled", false));
+                operation.UseDefaults();
+            });
     }
 
     /// <summary>

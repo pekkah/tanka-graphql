@@ -6,7 +6,8 @@ namespace Tanka.GraphQL.Fields;
 
 public class FieldExecutorFeature : IFieldExecutorFeature
 {
-    public async Task<object?> Execute(QueryContext context,
+    public async Task<object?> Execute(
+        QueryContext context,
         ObjectDefinition objectDefinition,
         object? objectValue,
         IReadOnlyCollection<FieldSelection> fields,
@@ -58,7 +59,7 @@ public class FieldExecutorFeature : IFieldExecutorFeature
 
             var resolverContext = new ResolverContext
             {
-                Arguments = argumentValues,
+                ArgumentValues = argumentValues,
                 Field = field,
                 Fields = fields,
                 ObjectDefinition = objectDefinition,
