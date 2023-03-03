@@ -3,11 +3,11 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.SelectionSets;
 
-public class SelectionSetPipelineExecutorFeature : ISelectionSetExecutorFeature
+public class SelectionSetDelegateExecutorFeature : ISelectionSetExecutorFeature
 {
     private readonly SelectionSetDelegate _pipeline;
 
-    public SelectionSetPipelineExecutorFeature(SelectionSetDelegate pipeline)
+    public SelectionSetDelegateExecutorFeature(SelectionSetDelegate pipeline)
     {
         _pipeline = pipeline;
     }

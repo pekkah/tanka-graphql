@@ -1,23 +1,24 @@
 ﻿using Tanka.GraphQL.Internal;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.Fields;
 
-public class OperationPipelineBuilder
+public class FieldDelegateBuilder
 {
     private const string ApplicationServicesKey = "ApplicationServices";
-    private readonly List<Func<OperationDelegate, OperationDelegate>> _components = new();
 
-    protected OperationPipelineBuilder(OperationPipelineBuilder builder)
+    private readonly List<Func<FieldDelegate, FieldDelegate>> _components = new();
+
+    protected FieldDelegateBuilder(FieldDelegateBuilder builder)
     {
         Properties = new CopyOnWriteDictionary<string, object?>(builder.Properties, StringComparer.Ordinal);
     }
 
-    protected OperationPipelineBuilder(IDictionary<string, object?> properties)
+    protected FieldDelegateBuilder(IDictionary<string, object?> properties)
     {
         Properties = new CopyOnWriteDictionary<string, object?>(properties, StringComparer.Ordinal);
     }
 
-    public OperationPipelineBuilder(IServiceProvider applicationServices)
+    public FieldDelegateBuilder(IServiceProvider applicationServices)
     {
         Properties = new Dictionary<string, object?>(StringComparer.Ordinal);
         SetProperty(ApplicationServicesKey, applicationServices);
@@ -27,10 +28,10 @@ public class OperationPipelineBuilder
 
     public IServiceProvider ApplicationServices => GetRequiredProperty<IServiceProvider>(ApplicationServicesKey);
 
-    public OperationDelegate Build()
+    public FieldDelegate Build()
     {
-        OperationDelegate pipeline = _ => throw new QueryException(
-            "Operation execution pipeline error. No ending middleware.")
+        FieldDelegate pipeline = _ => throw new QueryException(
+            "Field execution pipeline error. No middleware set any results.")
         {
             Path = new NodePath()
         };
@@ -41,11 +42,16 @@ public class OperationPipelineBuilder
         return pipeline;
     }
 
-    public OperationPipelineBuilder Clone()
+    public FieldDelegateBuilder New()
     {
-        var clone = new OperationPipelineBuilder(this);
-        clone._components.AddRange(_components);
-        return clone;
+        return new FieldDelegateBuilder(this);
+    }
+
+
+    public FieldDelegateBuilder Use(Func<FieldDelegate, FieldDelegate> middleware)
+    {
+        _components.Add(middleware);
+        return this;
     }
 
     public T? GetProperty<T>(string key)
@@ -62,20 +68,8 @@ public class OperationPipelineBuilder
         return value;
     }
 
-
-    public OperationPipelineBuilder New()
-    {
-        return new OperationPipelineBuilder(this);
-    }
-
     public void SetProperty<T>(string key, T value)
     {
         Properties[key] = value;
-    }
-
-    public OperationPipelineBuilder Use(Func<OperationDelegate, OperationDelegate> middleware)
-    {
-        _components.Add(middleware);
-        return this;
     }
 }

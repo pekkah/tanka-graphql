@@ -59,6 +59,7 @@ app.MapTankaGraphQL3("/graphql", "schemaName");
 // this allows customization of the pipeline
 app.MapTankaGraphQL3("/graphql-custom", gql =>
 {
+    gql.SetProperty("TraceEnabled", app.Environment.IsDevelopment());
     gql.UseDefaults("schemaName");
 });
 

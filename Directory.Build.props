@@ -12,6 +12,10 @@
 		<Authors>Pekka Heikura</Authors>
 	</PropertyGroup>
 	<PropertyGroup>
+		<AssemblyName Condition="'$(AssemblyName)' == ''">Tanka.$(MSBuildProjectName)</AssemblyName>
+		<RootNamespace Condition="'$(RootNamespace)' == ''">Tanka.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+	</PropertyGroup>
+	<PropertyGroup>
 		<PackageOutputPath>$(SolutionDir)artifacts</PackageOutputPath>
 	</PropertyGroup>
 </Project>

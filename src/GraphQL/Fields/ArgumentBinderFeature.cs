@@ -38,7 +38,7 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
     public T? BindInputObject<T>(ResolverContextBase context, string name)
         where T : new()
     {
-        object? argument = context.Arguments[name];
+        object? argument = context.ArgumentValues[name];
 
         if (argument is null)
             return default(T?);
@@ -53,7 +53,7 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
 
     public IEnumerable<T?>? BindInputObjectList<T>(ResolverContextBase context, string name) where T : new()
     {
-        object? argument = context.Arguments[name];
+        object? argument = context.ArgumentValues[name];
 
         if (argument is null)
             return default(IEnumerable<T?>?);

@@ -68,7 +68,7 @@ public partial class Executor
 
         var resolverContext = new SubscriberContext
         {
-            Arguments = coercedArgumentValues,
+            ArgumentValues = coercedArgumentValues,
             Field = field,
             Fields = fields,
             ObjectDefinition = subscriptionType,

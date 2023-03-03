@@ -59,9 +59,6 @@ public record QueryContext
     public IArgumentBinderFeature? ArgumentBinder =>
         _features.Fetch(ref _features.Cache.ArgumentBinder, _ => null);
 
-    private IValidatorFeature? ValidatorFeature =>
-        _features.Fetch(ref _features.Cache.Validator, _ => null);
-
     private IFieldExecutorFeature? FieldExecutorFeature =>
         _features.Fetch(ref _features.Cache.FieldExecutor, _ => null);
 
@@ -141,17 +138,6 @@ public record QueryContext
         return ErrorCollectorFeature.GetErrors();
     }
 
-    public ValueTask<ValidationResult> Validate()
-    {
-        ArgumentNullException.ThrowIfNull(ValidatorFeature);
-
-        return ValidatorFeature.Validate(
-            Schema,
-            Request.Document,
-            Request.Variables
-        );
-    }
-
     private struct FeatureInterfaces
     {
         public IGraphQLRequestFeature? Request;
@@ -163,7 +149,6 @@ public record QueryContext
         public IErrorCollectorFeature? ErrorCollector;
         public IValueCompletionFeature? ValueCompletion;
         public IArgumentBinderFeature? ArgumentBinder;
-        public IValidatorFeature? Validator;
         public IResponseStreamFeature? Response;
     }
 }
