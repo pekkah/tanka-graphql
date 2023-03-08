@@ -2,8 +2,9 @@
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.Request;
+using Tanka.GraphQL.Response;
 using Tanka.GraphQL.SelectionSets;
-using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL;
@@ -29,7 +30,7 @@ public record QueryContext
     private IResponseStreamFeature ResponseFeature =>
         _features.Fetch(
             ref _features.Cache.Response,
-            _ => new DefaultResponseStreamFeature())!;
+            _ => new GraphQLResponseFeature())!;
 
     private IGraphQLRequestFeature RequestFeature => _features.Fetch(
         ref _features.Cache.Request,

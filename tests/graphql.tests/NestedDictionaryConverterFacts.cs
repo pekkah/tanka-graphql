@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using Tanka.GraphQL.Json;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
 
 public class NestedDictionaryConverterFacts
 {
-    public static readonly JsonSerializerOptions Options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+    public static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
     {
         Converters =
         {
@@ -16,42 +16,45 @@ public class NestedDictionaryConverterFacts
     };
 
     [Fact]
-    public void Deserialize_simple_string_value()
+    public void Deserialize_federation_request()
     {
         /* Given */
         var json = """
                 {
-                    "key":"string"
+                "representations":[{"__typename":"Product","upc":"1"},{"__typename":"Product","upc":"2"},{ "__typename":"Product","upc":"3"}]
                 }
                 """;
 
         /* When */
-        var actual = JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>>(json, Options);
+        IReadOnlyDictionary<string, object> actual =
+            JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>?>(json, Options);
 
 
         /* Then */
-        Assert.True(actual.ContainsKey("key"));
-        Assert.Equal("string", actual["key"]);
+        object actualValue = actual.Select("representations", 1, "__typename");
+        Assert.Equal("Product", actualValue);
     }
 
     [Fact]
-    public void Deserialize_nested_string_value()
+    public void Deserialize_nested_array_with_object_value_with_string_property()
     {
         /* Given */
         var json = """
                 {
-                    "key": {
-                        "nestedKey": "string"
-                    }
+                    "key": [{
+                        "Product": "test"
+                        }]                    
                 }
                 """;
 
         /* When */
-        var actual = JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>>(json, Options);
+        IReadOnlyDictionary<string, object> actual =
+            JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>>(json, Options);
 
 
         /* Then */
-        Assert.Equal("string", actual.NestedOrNull("key")!["nestedKey"]);
+        object actualValue = actual.Select("key", 0, "Product");
+        Assert.Equal("test", actualValue);
     }
 
     [Fact]
@@ -69,51 +72,53 @@ public class NestedDictionaryConverterFacts
                 """;
 
         /* When */
-        var actual = JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>>(json, Options);
+        IReadOnlyDictionary<string, object> actual =
+            JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>>(json, Options);
 
 
         /* Then */
-        var actualValue = actual.Select("key", "nestedObject", "Product");
+        object actualValue = actual.Select("key", "nestedObject", "Product");
         Assert.Equal("test", actualValue);
     }
 
     [Fact]
-    public void Deserialize_nested_array_with_object_value_with_string_property()
+    public void Deserialize_nested_string_value()
     {
         /* Given */
         var json = """
                 {
-                    "key": [{
-                        "Product": "test"
-                        }]                    
+                    "key": {
+                        "nestedKey": "string"
+                    }
                 }
                 """;
 
         /* When */
-        var actual = JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>>(json, Options);
+        IReadOnlyDictionary<string, object> actual =
+            JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>>(json, Options);
 
 
         /* Then */
-        var actualValue = actual.Select("key", 0, "Product");
-        Assert.Equal("test", actualValue);
+        Assert.Equal("string", actual.NestedOrNull("key")!["nestedKey"]);
     }
 
     [Fact]
-    public void Deserialize_federation_request()
+    public void Deserialize_simple_string_value()
     {
         /* Given */
         var json = """
                 {
-                "representations":[{"__typename":"Product","upc":"1"},{"__typename":"Product","upc":"2"},{ "__typename":"Product","upc":"3"}]
+                    "key":"string"
                 }
                 """;
 
         /* When */
-        var actual = JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>?>(json, Options);
+        IReadOnlyDictionary<string, object> actual =
+            JsonSerializer.Deserialize<IReadOnlyDictionary<string, object?>>(json, Options);
 
 
         /* Then */
-        var actualValue = actual.Select( "representations", 1, "__typename");
-        Assert.Equal("Product", actualValue);
+        Assert.True(actual.ContainsKey("key"));
+        Assert.Equal("string", actual["key"]);
     }
 }

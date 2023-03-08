@@ -1,6 +1,6 @@
 ﻿using Tanka.GraphQL.SelectionSets;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.Execution;
 
 public static class SelectionSetExecutorOperationDelegateBuilderExtensions
 {
@@ -20,17 +20,5 @@ public static class SelectionSetExecutorOperationDelegateBuilderExtensions
         });
 
         return builder;
-    }
-
-    public static OperationDelegateBuilder AddDefaultSelectionSetExecutorFeature(
-        this OperationDelegateBuilder builder)
-    {
-        var feature = new DefaultSelectionSetExecutorFeature();
-
-        return builder.Use(next => context =>
-        {
-            context.Features.Set<ISelectionSetExecutorFeature>(feature);
-            return next(context);
-        });
     }
 }

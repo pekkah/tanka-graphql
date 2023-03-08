@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.Json;
 
 public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<string, object?>>
 {
@@ -13,9 +13,9 @@ public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<strin
         _useDecimals = useDecimals;
     }
 
-    public NestedDictionaryConverter():this(false)
+    public NestedDictionaryConverter() : this(false)
     {
-        
+
     }
 
 
@@ -31,7 +31,7 @@ public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<strin
                 break;
 
             EnsureToken(reader.TokenType, JsonTokenType.PropertyName);
-            
+
             var propertyName = reader.GetString();
 
             if (propertyName is null)
