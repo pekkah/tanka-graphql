@@ -1,6 +1,7 @@
 ﻿using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Validation;
 
-namespace Tanka.GraphQL.Validation;
+namespace Tanka.GraphQL.Features;
 
 public interface IValidatorFeature
 {

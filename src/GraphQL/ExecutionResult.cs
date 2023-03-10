@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Tanka.GraphQL.Json;
 
 namespace Tanka.GraphQL;
 

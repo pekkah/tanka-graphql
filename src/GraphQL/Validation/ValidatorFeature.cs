@@ -1,4 +1,5 @@
-﻿using Tanka.GraphQL.Language.Nodes;
+﻿using Tanka.GraphQL.Features;
+using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Validation;
 

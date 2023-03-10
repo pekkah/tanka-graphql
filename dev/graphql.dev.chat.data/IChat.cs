@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Samples.Chat.Data.Domain;
-using Tanka.GraphQL.Subscriptions;
 
 namespace Tanka.GraphQL.Samples.Chat.Data;
 

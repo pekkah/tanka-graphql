@@ -1,4 +1,4 @@
-﻿namespace Tanka.GraphQL;
+﻿namespace Tanka.GraphQL.Features;
 
 public interface IResponseStreamFeature
 {

@@ -1,4 +1,6 @@
-﻿namespace Tanka.GraphQL;
+﻿using Tanka.GraphQL.Request;
+
+namespace Tanka.GraphQL;
 
 public partial class Executor
 {

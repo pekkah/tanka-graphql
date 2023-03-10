@@ -1,4 +1,5 @@
 ﻿using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Request;
 
 namespace Tanka.GraphQL;
 

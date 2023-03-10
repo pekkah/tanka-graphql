@@ -1,6 +1,6 @@
 ﻿using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.Executable;
 
 public interface IExecutableSchemaConfiguration
 {

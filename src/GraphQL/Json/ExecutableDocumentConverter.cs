@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.Json;
 
 public class ExecutableDocumentConverter : JsonConverter<ExecutableDocument>
 {

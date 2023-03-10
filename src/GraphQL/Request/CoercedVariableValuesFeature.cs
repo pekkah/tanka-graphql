@@ -1,4 +1,6 @@
-﻿namespace Tanka.GraphQL.Features;
+﻿using Tanka.GraphQL.Features;
+
+namespace Tanka.GraphQL.Request;
 
 public class CoercedVariableValuesFeature : ICoercedVariableValuesFeature
 {

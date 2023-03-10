@@ -8,6 +8,7 @@ using BenchmarkDotNet.Order;
 using Microsoft.Extensions.Logging.Abstractions;
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Request;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;

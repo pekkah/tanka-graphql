@@ -1,6 +1,6 @@
 ﻿using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.Executable;
 
 public class ResolversConfiguration : IExecutableSchemaConfiguration
 {
@@ -14,12 +14,12 @@ public class ResolversConfiguration : IExecutableSchemaConfiguration
     public Task Configure(SchemaBuilder schema, ResolversBuilder resolvers)
     {
         foreach (var (typeName, fields) in _resolversMap.GetTypes())
-        foreach (var field in fields)
-        {
-            var resolver = _resolversMap.GetResolver(typeName, field);
-            if (resolver is not null)
-                resolvers.Add(typeName, field, r => r.Run(resolver));
-        }
+            foreach (var field in fields)
+            {
+                var resolver = _resolversMap.GetResolver(typeName, field);
+                if (resolver is not null)
+                    resolvers.Add(typeName, field, r => r.Run(resolver));
+            }
 
         return Task.CompletedTask;
     }
