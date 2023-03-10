@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Request;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;

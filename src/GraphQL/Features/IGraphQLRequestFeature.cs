@@ -1,4 +1,6 @@
-﻿namespace Tanka.GraphQL.Features;
+﻿using Tanka.GraphQL.Request;
+
+namespace Tanka.GraphQL.Features;
 
 public interface IGraphQLRequestFeature
 {

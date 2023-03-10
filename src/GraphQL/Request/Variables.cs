@@ -1,7 +1,7 @@
 ﻿using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.ValueSerialization;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.Request;
 
 public static class Variables
 {

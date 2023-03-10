@@ -1,4 +1,6 @@
-﻿namespace Tanka.GraphQL.Execution;
+﻿using Tanka.GraphQL.Features;
+
+namespace Tanka.GraphQL.Execution;
 
 public static class FieldExecutionOperationDelegateBuilderExtensions
 {

@@ -1,7 +1,7 @@
 ﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.Executable;
 
 public class ObjectResolversConfiguration : IExecutableSchemaConfiguration
 {

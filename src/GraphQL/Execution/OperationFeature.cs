@@ -1,6 +1,7 @@
-﻿using Tanka.GraphQL.Language.Nodes;
+﻿using Tanka.GraphQL.Features;
+using Tanka.GraphQL.Language.Nodes;
 
-namespace Tanka.GraphQL.Features;
+namespace Tanka.GraphQL.Execution;
 
 public class OperationFeature : IOperationFeature
 {

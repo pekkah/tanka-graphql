@@ -1,4 +1,6 @@
-﻿namespace Tanka.GraphQL.Extensions.ApolloFederation;
+﻿using Tanka.GraphQL.Executable;
+
+namespace Tanka.GraphQL.Extensions.ApolloFederation;
 
 public static class FederationExecutableSchemaBuilderExtensions
 {

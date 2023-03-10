@@ -1,7 +1,7 @@
 ﻿using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL.Fields;
+namespace Tanka.GraphQL.Features;
 
 public interface IFieldExecutorFeature
 {

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using Tanka.GraphQL.Features;
 
-namespace Tanka.GraphQL.Features;
+namespace Tanka.GraphQL;
 
 public class ConcurrentBagErrorCollectorFeature : IErrorCollectorFeature
 {

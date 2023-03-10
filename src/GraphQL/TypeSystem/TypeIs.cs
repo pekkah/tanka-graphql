@@ -1,7 +1,7 @@
 ﻿using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.TypeSystem;
 
 public static class TypeIs
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Threading.Channels;
 
-namespace Tanka.GraphQL.Subscriptions;
+namespace Tanka.GraphQL;
 
 public class BroadcastChannel<T> : IAsyncDisposable
 {

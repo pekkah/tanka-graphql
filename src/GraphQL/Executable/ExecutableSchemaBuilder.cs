@@ -3,7 +3,7 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.ValueSerialization;
 
-namespace Tanka.GraphQL;
+namespace Tanka.GraphQL.Executable;
 
 public class ExecutableSchemaBuilder
 {

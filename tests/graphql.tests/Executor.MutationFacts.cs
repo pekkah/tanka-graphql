@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
+using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Request;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
