@@ -95,6 +95,9 @@ public record QueryContext
         set => ResponseFeature.Response = value;
     }
 
+    //todo: turn into a feature
+    public IServiceProvider RequestServices { get; set; }
+
     public void AddError(Exception x)
     {
         ArgumentNullException.ThrowIfNull(ErrorCollectorFeature);

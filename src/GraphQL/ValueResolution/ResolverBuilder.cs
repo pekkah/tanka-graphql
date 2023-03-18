@@ -15,6 +15,16 @@ public class ResolverBuilder
         return Use(_ => resolver);
     }
 
+    public ResolverBuilder Run(Delegate resolver)
+    {
+        return Use(_ => CreateResolver(resolver));
+    }
+
+    public Resolver CreateResolver(Delegate resolverDelegate)
+    {
+        return DelegateResolverFactory.Create(resolverDelegate);
+    }
+
     public Resolver Build()
     {
         Resolver resolver = context => ValueTask.CompletedTask;
