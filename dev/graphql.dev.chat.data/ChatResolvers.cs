@@ -1,4 +1,7 @@
-﻿using Tanka.GraphQL.Executable;
+﻿using System;
+using System.Collections.Generic;
+using Tanka.GraphQL.Executable;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Samples.Chat.Data.Domain;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.ValueResolution;
@@ -9,18 +12,18 @@ public static class ChatSchemaConfigurationExtensions
 {
     public static ExecutableSchemaBuilder AddChat(this ExecutableSchemaBuilder builder)
     {
-        builder.ConfigureObject("Query", new()
+        builder.Object("Query", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
         {
             { "messages: [Message!]!", b => b.Run(r => r.GetRequiredService<IChatResolverService>().GetMessagesAsync(r)) }
         });
 
-        builder.ConfigureObject("Mutation", new()
+        builder.Object("Mutation", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
         {
             { "addMessage(message: InputMessage!): Message!", b => b.Run(r => r.GetRequiredService<IChatResolverService>().AddMessageAsync(r)) },
             { "editMessage(id: String!, message: InputMessage!): Message", b => b.Run(r => r.GetRequiredService<IChatResolverService>().EditMessageAsync(r)) }
         });
 
-        builder.ConfigureObject("Subscription", new()
+        builder.Object("Subscription", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
         {
             { "messages: Message!", b => b.Run(r => r.GetRequiredService<IChatResolverService>().ResolveMessageAsync(r)) }
         }, new()
@@ -28,7 +31,7 @@ public static class ChatSchemaConfigurationExtensions
             { "messages: Message!", b => b.Run((r, ct) => r.GetRequiredService<IChatResolverService>().StreamMessagesAsync(r, ct)) }
         });
 
-        builder.ConfigureObject("Message", new()
+        builder.Object("Message", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
         {
             { "id: String!", context => context.ResolveAsPropertyOf<Message>(m => m.Id) },
             { "from: From!", context => context.ResolveAsPropertyOf<Message>(m => m.From) },
@@ -36,7 +39,7 @@ public static class ChatSchemaConfigurationExtensions
             { "timestamp: String!", context => context.ResolveAsPropertyOf<Message>(m => m.Timestamp) }
         });
 
-        builder.ConfigureObject("From", new()
+        builder.Object("From", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
         {
             { "userId: String!", context => context.ResolveAsPropertyOf<From>(f => f.UserId) },
             { "name: String!", context => context.ResolveAsPropertyOf<From>(f => f.Name) }
