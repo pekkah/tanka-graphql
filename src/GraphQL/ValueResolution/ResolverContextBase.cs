@@ -24,4 +24,6 @@ public class ResolverContextBase
     public ISchema Schema => QueryContext.Schema;
 
     public string FieldName => Selection.Name.Value;
+
+    public IServiceProvider RequestServices => QueryContext.RequestServices;
 }

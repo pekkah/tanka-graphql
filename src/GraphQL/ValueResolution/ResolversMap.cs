@@ -68,6 +68,16 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
             fieldsResolvers.Add(fieldName, subscriber, resolver);
     }
 
+    public void Add(string typeName, string fieldName, Delegate resolver, Subscriber? subscriber = null)
+    {
+        if (!TryGetValue(typeName, out var fieldsResolvers)) fieldsResolvers = this[typeName] = new();
+
+        if (subscriber is null)
+            fieldsResolvers.Add(fieldName, resolver);
+        else
+            fieldsResolvers.Add(fieldName, subscriber, resolver);
+    }
+
     public bool Add(string typeName, string fieldName, Subscriber subscriber)
     {
         if (!TryGetValue(typeName, out var fieldsResolvers)) fieldsResolvers = this[typeName] = new();

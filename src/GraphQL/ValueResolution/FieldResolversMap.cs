@@ -43,6 +43,11 @@ public class FieldResolversMap : IEnumerable<Resolver>, IEnumerable<Subscriber>
         _resolvers.Add(key, resolver);
     }
 
+    public void Add(string key, Delegate resolver)
+    {
+        _resolvers.Add(key, DelegateResolverFactory.GetOrCreate(resolver));
+    }
+
     public void Add(string key, Subscriber subscriber)
     {
         _subscribers.Add(key, subscriber);
@@ -56,6 +61,16 @@ public class FieldResolversMap : IEnumerable<Resolver>, IEnumerable<Subscriber>
 
         _subscribers.Add(key, subscriber);
         _resolvers.Add(key, resolver);
+    }
+
+    public void Add(string key, Subscriber subscriber, Delegate resolver)
+    {
+        if (key == null) throw new ArgumentNullException(nameof(key));
+        if (subscriber == null) throw new ArgumentNullException(nameof(subscriber));
+        if (resolver == null) throw new ArgumentNullException(nameof(resolver));
+
+        _subscribers.Add(key, subscriber);
+        _resolvers.Add(key, DelegateResolverFactory.GetOrCreate(resolver));
     }
 
     public Resolver? GetResolver(string key)

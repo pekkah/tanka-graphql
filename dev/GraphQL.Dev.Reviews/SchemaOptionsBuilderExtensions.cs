@@ -8,7 +8,7 @@ public static class SchemaOptionsBuilderExtensions
     {
         options.Configure<ReviewsResolvers>((schema, resolvers) =>
         {
-            schema.AddTypeSystem("""
+            schema.Add("""
                 type Review @key(fields: "id") {
                     id: ID!
                     body: String
@@ -28,7 +28,7 @@ public static class SchemaOptionsBuilderExtensions
                 }
                 """);
 
-            schema.AddResolvers(resolvers);
+            schema.Add(resolvers);
         });
 
         return options;

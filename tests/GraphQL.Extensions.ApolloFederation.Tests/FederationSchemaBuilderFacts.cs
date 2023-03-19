@@ -18,7 +18,7 @@ public class FederationSchemaBuilderFacts
     {
         /* Given */
         var builder = new ExecutableSchemaBuilder()
-            .AddTypeSystem(@"
+            .Add(@"
                     type Person @key(fields: ""id"") {
                         id: ID!
                     }
@@ -43,7 +43,7 @@ public class FederationSchemaBuilderFacts
     {
         /* Given */
         var builder = new ExecutableSchemaBuilder()
-            .AddTypeSystem(@"
+            .Add(@"
                     type Person @key(fields: ""id"") {
                         id: ID!
                     }")
@@ -64,7 +64,7 @@ public class FederationSchemaBuilderFacts
     {
         /* Given */
         var builder = new ExecutableSchemaBuilder()
-            .AddTypeSystem(@"
+            .Add(@"
                     type Person @key(fields: ""id"") {
                         id: ID!
                         name: String!
@@ -77,7 +77,7 @@ public class FederationSchemaBuilderFacts
                 ["Person"] = (context, type, representation) => new(
                     new ResolveReferenceResult(type, representation))
             }))
-            .AddResolvers(new ResolversMap
+            .Add(new ResolversMap
             {
                 ["Person"] = new()
                 {
@@ -133,7 +133,7 @@ public class FederationSchemaBuilderFacts
     {
         /* Given */
         var builder = new ExecutableSchemaBuilder()
-            .AddTypeSystem(@"
+            .Add(@"
 type Review  @key(fields: ""id"") {
   id: ID!
   product: Product

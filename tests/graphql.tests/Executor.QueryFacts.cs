@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
@@ -14,7 +17,7 @@ public class QueryFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .ConfigureObject("Query", new()
+            .Object("Query", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
@@ -48,11 +51,11 @@ public class QueryFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .ConfigureObject("System", new()
+            .Object("System", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
-            .ConfigureObject("Query", new()
+            .Object("Query", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
             {
                 { "system: System!", b => b.ResolveAs("System") }
             })

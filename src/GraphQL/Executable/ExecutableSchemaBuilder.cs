@@ -22,7 +22,7 @@ public class ExecutableSchemaBuilder
 
     public Dictionary<string, CreateDirectiveVisitor> DirectiveVisitorFactories { get; } = new();
 
-    public ExecutableSchemaBuilder AddConfiguration(
+    public ExecutableSchemaBuilder Add(
         IExecutableSchemaConfiguration configuration)
     {
         Configurations.Add(configuration);
@@ -30,7 +30,7 @@ public class ExecutableSchemaBuilder
         return this;
     }
 
-    public ExecutableSchemaBuilder AddTypeSystem(
+    public ExecutableSchemaBuilder Add(
         TypeSystemDocument document)
     {
         Documents.Add(document);
@@ -38,7 +38,7 @@ public class ExecutableSchemaBuilder
         return this;
     }
 
-    public ExecutableSchemaBuilder ConfigureObject(
+    public ExecutableSchemaBuilder Object(
         string type,
         Dictionary<FieldDefinition, Action<ResolverBuilder>> resolverFields,
         Dictionary<FieldDefinition, Action<SubscriberBuilder>>? subscriberFields = null)
@@ -51,15 +51,35 @@ public class ExecutableSchemaBuilder
         return this;
     }
 
-    public ExecutableSchemaBuilder AddValueConverter(string type, IValueConverter converter)
+    public ExecutableSchemaBuilder Object(
+        string type,
+        Dictionary<FieldDefinition, Delegate> resolverFields,
+        Dictionary<FieldDefinition, Action<SubscriberBuilder>>? subscriberFields = null)
+    {
+        Configurations.Add(new ObjectDelegateResolversConfiguration(type, resolverFields));
+
+        if (subscriberFields is not null)
+            //todo: subscriber fields should be delegates as well
+            Configurations.Add(new ObjectSubscribersConfiguration(type, subscriberFields));
+
+        return this;
+    }
+
+    public ExecutableSchemaBuilder Add(string type, IValueConverter converter)
     {
         ValueConverters[type] = converter;
         return this;
     }
 
-    public ExecutableSchemaBuilder AddDirectiveVisitor(string type, CreateDirectiveVisitor visitor)
+    public ExecutableSchemaBuilder Add(string type, CreateDirectiveVisitor visitor)
     {
         DirectiveVisitorFactories[type] = visitor;
+        return this;
+    }
+
+    public ExecutableSchemaBuilder Add(IResolverMap resolversMap)
+    {
+        Add(new ResolversConfiguration(resolversMap));
         return this;
     }
 
@@ -68,10 +88,11 @@ public class ExecutableSchemaBuilder
         var schemaBuilder = new SchemaBuilder();
         var resolversBuilder = new ResolversBuilder();
 
-        foreach (var typeSystemDocument in Documents)
+        foreach (TypeSystemDocument typeSystemDocument in Documents)
             schemaBuilder.Add(typeSystemDocument);
 
-        foreach (var configuration in Configurations) await configuration.Configure(schemaBuilder, resolversBuilder);
+        foreach (IExecutableSchemaConfiguration configuration in Configurations)
+            await configuration.Configure(schemaBuilder, resolversBuilder);
 
         var buildOptions = new SchemaBuildOptions
         {
@@ -85,14 +106,8 @@ public class ExecutableSchemaBuilder
 
         configureBuildOptions?.Invoke(buildOptions);
 
-        var schema = await schemaBuilder.Build(buildOptions);
+        ISchema schema = await schemaBuilder.Build(buildOptions);
 
         return schema;
-    }
-
-    public ExecutableSchemaBuilder AddResolvers(IResolverMap resolversMap)
-    {
-        AddConfiguration(new ResolversConfiguration(resolversMap));
-        return this;
     }
 }

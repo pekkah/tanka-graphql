@@ -37,13 +37,13 @@ type Query {
 ";
 
         var builder = new ExecutableSchemaBuilder();
-        builder.AddTypeSystem(typeDefs);
+        builder.Add(typeDefs);
         builder.AddSubgraph(new(new DictionaryReferenceResolversMap
         {
             ["User"] = UserReference,
             ["Product"] = ProductReference
         }));
-        builder.AddResolvers(new ResolversMap
+        builder.Add(new ResolversMap
         {
             ["User"] = new()
             {

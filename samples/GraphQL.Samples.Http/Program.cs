@@ -20,20 +20,21 @@ builder.AddTankaGraphQL3()
     {
         schema.Configure(b =>
         {
-            b.ConfigureObject("Query", new()
+            b.Object("Query", new Dictionary<FieldDefinition, Delegate>()
             {
-                { "system: System!", context => context.ResolveAs<object>(new { }) }
+                { "system: System!", () => new {} }
             });
 
-            b.ConfigureObject("System", new()
+            b.Object("System", new Dictionary<FieldDefinition, Delegate>()
             {
-                { "version: String!", context => context.ResolveAs("3.0") }
+                { "version: String!", () => "3.0" }
             });
 
-            b.ConfigureObject("Subscription", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+            b.Object("Subscription", new Dictionary<FieldDefinition, Delegate>()
             {
-                { "counter: Int!", r => r.Run(c => c.ResolveAs(c.ObjectValue)) }
-            }, new()
+                { "counter: Int!", (int objectValue) => objectValue }
+            }, 
+                new()
             {
                 { "counter(to: Int!): Int!", r => r.Run((c, ct) =>
                 {

@@ -41,13 +41,13 @@ public class SchemaOptionsBuilder
 
     public SchemaOptionsBuilder AddConfiguration(IExecutableSchemaConfiguration configuration)
     {
-        Builder.Configure(options => options.Builder.AddConfiguration(configuration));
+        Builder.Configure(options => options.Builder.Add(configuration));
         return this;
     }
 
     public SchemaOptionsBuilder AddTypeSystem(TypeSystemDocument document)
     {
-        Builder.Configure(options => options.Builder.AddTypeSystem(document));
+        Builder.Configure(options => options.Builder.Add(document));
         return this;
     }
 }
