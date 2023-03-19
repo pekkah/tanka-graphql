@@ -8,6 +8,7 @@ namespace Tanka.GraphQL.ValueResolution;
 public static class DelegateResolverFactory
 {
     private static readonly ParameterExpression ContextParam = Expression.Parameter(typeof(ResolverContext), "context");
+
     private static readonly IReadOnlyDictionary<string, Expression> ContextParamProperties = typeof(ResolverContext)
         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
         .ToDictionary(p => p.Name.ToLowerInvariant(), p => (Expression)Expression.Property(ContextParam, p));
@@ -15,27 +16,23 @@ public static class DelegateResolverFactory
     public static Resolver Create(Delegate resolverDelegate)
     {
 #if DEBUG
-        Trace.WriteLine($"Available context parameters:\n {string.Join(',', ContextParamProperties.Select(p => string.Concat($"{p.Key}: {p.Value.Type}")))}");
+        Trace.WriteLine(
+            $"Available context parameters:\n {string.Join(',', ContextParamProperties.Select(p => string.Concat($"{p.Key}: {p.Value.Type}")))}");
 #endif
 
-        var invokeMethod = resolverDelegate.Method;
+        MethodInfo invokeMethod = resolverDelegate.Method;
 
         Expression instanceExpression = null;
-        if (!invokeMethod.IsStatic)
-        {
-            instanceExpression = Expression.Constant(resolverDelegate.Target);
-        }
+        if (!invokeMethod.IsStatic) instanceExpression = Expression.Constant(resolverDelegate.Target);
 
         IEnumerable<Expression> argumentsExpressions = invokeMethod.GetParameters()
             .Select(p =>
             {
-                if (p.ParameterType == typeof(ResolverContext))
-                {
-                    return ContextParam;
-                }
+                if (p.ParameterType == typeof(ResolverContext)) return ContextParam;
 
                 if (p.Name is not null)
-                    if (ContextParamProperties.TryGetValue(p.Name.ToLowerInvariant(), out var propertyExpression))
+                    if (ContextParamProperties.TryGetValue(p.Name.ToLowerInvariant(),
+                            out Expression? propertyExpression))
                     {
                         if (p.ParameterType == propertyExpression.Type)
                             return propertyExpression;
@@ -43,8 +40,8 @@ public static class DelegateResolverFactory
                         return Expression.Convert(propertyExpression, p.ParameterType);
                     }
 
-                var serviceProviderProperty = Expression.Property(ContextParam, "RequestServices");
-                var getServiceMethodInfo = typeof(ServiceProviderServiceExtensions)
+                MemberExpression serviceProviderProperty = Expression.Property(ContextParam, "RequestServices");
+                MethodInfo? getServiceMethodInfo = typeof(ServiceProviderServiceExtensions)
                     .GetMethods()
                     .FirstOrDefault(m => m.Name == nameof(ServiceProviderServiceExtensions.GetRequiredService)
                                          && m.GetParameters().Length == 1
@@ -54,19 +51,19 @@ public static class DelegateResolverFactory
                 if (getServiceMethodInfo is null)
                     throw new InvalidOperationException("Could not find GetRequiredService method");
 
-                var serviceType = p.ParameterType;
-                var genericMethodInfo = getServiceMethodInfo.MakeGenericMethod(serviceType);
+                Type serviceType = p.ParameterType;
+                MethodInfo genericMethodInfo = getServiceMethodInfo.MakeGenericMethod(serviceType);
                 var getRequiredServiceCall = (Expression)Expression.Call(
                     null,
                     genericMethodInfo,
                     serviceProviderProperty);
 
-                return (Expression)Expression.Block(
+                return Expression.Block(
                     getRequiredServiceCall
                 );
             });
 
-        var invokeExpression = Expression.Call(
+        MethodCallExpression invokeExpression = Expression.Call(
             instanceExpression,
             invokeMethod,
             argumentsExpressions
@@ -80,7 +77,7 @@ public static class DelegateResolverFactory
         else if (invokeMethod.ReturnType == typeof(Task))
         {
             valueTaskExpression = Expression.New(
-                typeof(ValueTask).GetConstructor(new[] { typeof(Task) }),
+                typeof(ValueTask).GetConstructor(new[] { typeof(Task) })!,
                 invokeExpression
             );
         }
@@ -91,9 +88,22 @@ public static class DelegateResolverFactory
                 Expression.Constant(ValueTask.CompletedTask)
             );
         }
+        else if (invokeMethod.ReturnType.IsGenericType &&
+                 invokeMethod.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+        {
+            var t = invokeMethod.ReturnType.GetGenericArguments()[0];
+            valueTaskExpression = Expression.Call(ResolveValueTaskMethod.MakeGenericMethod(t), invokeExpression, ContextParam);
+        }
+        else if (invokeMethod.ReturnType.IsGenericType &&
+                 invokeMethod.ReturnType.GetGenericTypeDefinition() == typeof(ValueTask<>))
+        {
+            var t = invokeMethod.ReturnType.GetGenericArguments()[0];
+            valueTaskExpression = Expression.Call(ResolveValueValueTaskMethod.MakeGenericMethod(t), invokeExpression, ContextParam);
+        }
         else
         {
-            throw new ArgumentException($"Unsupported delegate return type {invokeMethod.ReturnType}", nameof(resolverDelegate));
+            throw new ArgumentException($"Unsupported delegate return type {invokeMethod.ReturnType}",
+                nameof(resolverDelegate));
         }
 
 
@@ -103,5 +113,43 @@ public static class DelegateResolverFactory
         );
 
         return lambda.Compile();
+    }
+
+    private static readonly MethodInfo ResolveValueTaskMethod = typeof(DelegateResolverFactory)
+        .GetMethod(nameof(ResolveValueTask), BindingFlags.Static | BindingFlags.NonPublic)!;
+
+    private static readonly MethodInfo ResolveValueValueTaskMethod = typeof(DelegateResolverFactory)
+        .GetMethod(nameof(ResolveValueValueTask), BindingFlags.Static | BindingFlags.NonPublic)!;
+
+    private static ValueTask ResolveValueTask<T>(Task<T> task, ResolverContext context)
+    {
+        static async ValueTask AwaitResolveValue(Task<T> task, ResolverContext context)
+        {
+            context.ResolvedValue = await task;
+        }
+
+        if (task.IsCompletedSuccessfully)
+        {
+            context.ResolvedValue = task.Result;
+            return default;
+        }
+
+        return AwaitResolveValue(task, context);
+    }
+
+    private static ValueTask ResolveValueValueTask<T>(ValueTask<T> task, ResolverContext context)
+    {
+        static async ValueTask AwaitResolveValue(ValueTask<T> task, ResolverContext context)
+        {
+            context.ResolvedValue = await task;
+        }
+
+        if (task.IsCompletedSuccessfully)
+        {
+            context.ResolvedValue = task.Result;
+            return default;
+        }
+
+        return AwaitResolveValue(task, context);
     }
 }

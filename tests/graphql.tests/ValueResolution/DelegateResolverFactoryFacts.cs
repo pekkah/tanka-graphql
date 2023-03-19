@@ -363,11 +363,45 @@ public class DelegateResolverFactoryFacts
         Assert.True(called);
     }
 
-    [Fact(Skip = "todo")]
+    [Fact]
     public async Task ReturnValue_is_TaskT()
     {
         /* Given */
         static async Task<bool> AsyncResolver()
+        {
+            await Task.Delay(0);
+            return true;
+        }
+
+        Delegate resolverDelegate = AsyncResolver;
+
+        /* When */
+        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+
+        /* Then */
+        var context = new ResolverContext
+        {
+            ObjectDefinition = null,
+            ObjectValue = null,
+            Field = null,
+            Selection = null,
+            Fields = null,
+            ArgumentValues = null,
+            Path = null,
+            QueryContext = null
+        };
+
+        await resolver(context);
+
+        Assert.NotNull(context.ResolvedValue);
+        Assert.True((bool)context.ResolvedValue);
+    }
+
+    [Fact]
+    public async Task ReturnValue_is_ValueTaskT()
+    {
+        /* Given */
+        static async ValueTask<bool> AsyncResolver()
         {
             await Task.Delay(0);
             return true;
