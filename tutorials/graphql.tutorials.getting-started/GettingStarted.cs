@@ -60,7 +60,7 @@ public class GettingStarted
             Resolvers = new ResolversMap
             {
                 {
-                    "Query", "name", context => context.ResolveAs("Test")
+                    "Query", "name", () => "Test"
                 }
             }
         });
@@ -102,7 +102,7 @@ public class GettingStarted
                     "Query", new FieldResolversMap
                     {
                         {
-                            "name", context => context.ResolveAs("Test")
+                            "name", () => "Test"
                         }
                     }
                 }
@@ -180,7 +180,7 @@ public class GettingStarted
                     "Query", new FieldResolversMap
                     {
                         {
-                            "url", context => context.ResolveAs(new Uri("https://localhost/"))
+                            "url", () => new Uri("https://localhost/")
                         }
                     }
                 }
