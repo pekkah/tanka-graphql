@@ -185,7 +185,7 @@ logic.</p>
                     &quot;Query&quot;, new FieldResolversMap
                     {
                         {
-                            &quot;url&quot;, context =&gt; context.ResolveAs(new Uri(&quot;https://localhost/&quot;))
+                            &quot;url&quot;, () =&gt; new Uri(&quot;https://localhost/&quot;)
                         }
                     }
                 }

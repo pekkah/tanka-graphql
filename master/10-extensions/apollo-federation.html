@@ -182,13 +182,13 @@ type Query {
 &quot;;
 
         var builder = new ExecutableSchemaBuilder();
-        builder.AddTypeSystem(typeDefs);
+        builder.Add(typeDefs);
         builder.AddSubgraph(new(new DictionaryReferenceResolversMap
         {
             [&quot;User&quot;] = UserReference,
             [&quot;Product&quot;] = ProductReference
         }));
-        builder.AddResolvers(new ResolversMap
+        builder.Add(new ResolversMap
         {
             [&quot;User&quot;] = new()
             {

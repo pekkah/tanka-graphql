@@ -189,7 +189,7 @@ GraphQL operation into your logic.</p>
             Resolvers = new ResolversMap
             {
                 {
-                    &quot;Query&quot;, &quot;name&quot;, context =&gt; context.ResolveAs(&quot;Test&quot;)
+                    &quot;Query&quot;, &quot;name&quot;, () =&gt; &quot;Test&quot;
                 }
             }
         });
