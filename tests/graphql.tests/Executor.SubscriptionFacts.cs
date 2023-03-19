@@ -5,7 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Request;
+using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -19,8 +21,8 @@ public class SubscriptionFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .ConfigureObject("Query", new())
-            .ConfigureObject("Subscription", new()
+            .Object("Query", new Dictionary<FieldDefinition, Action<ResolverBuilder>>())
+            .Object("Subscription", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
                 {
                     {
                         "count: Int!", b => b.Run(ctx =>

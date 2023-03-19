@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,17 @@ public static class DelegateResolverFactory
     private static readonly IReadOnlyDictionary<string, Expression> ContextParamProperties = typeof(ResolverContext)
         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
         .ToDictionary(p => p.Name.ToLowerInvariant(), p => (Expression)Expression.Property(ContextParam, p));
+
+
+    private static readonly ConcurrentDictionary<Delegate, Resolver> Cache = new ConcurrentDictionary<Delegate, Resolver>();
+
+    public static Resolver GetOrCreate(Delegate resolverDelegate)
+    {
+        if (Cache.TryGetValue(resolverDelegate, out var resolver))
+            return resolver;
+
+        return Create(resolverDelegate);
+    }
 
     public static Resolver Create(Delegate resolverDelegate)
     {
@@ -102,8 +114,8 @@ public static class DelegateResolverFactory
         }
         else
         {
-            throw new ArgumentException($"Unsupported delegate return type {invokeMethod.ReturnType}",
-                nameof(resolverDelegate));
+            var t = invokeMethod.ReturnType;
+            valueTaskExpression = Expression.Call(ResolveValueObjectMethod.MakeGenericMethod(t), invokeExpression, ContextParam);
         }
 
 
@@ -112,7 +124,9 @@ public static class DelegateResolverFactory
             ContextParam
         );
 
-        return lambda.Compile();
+        var compiledLambda = lambda.Compile();
+        Cache.TryAdd(resolverDelegate, compiledLambda);
+        return compiledLambda;
     }
 
     private static readonly MethodInfo ResolveValueTaskMethod = typeof(DelegateResolverFactory)
@@ -120,6 +134,9 @@ public static class DelegateResolverFactory
 
     private static readonly MethodInfo ResolveValueValueTaskMethod = typeof(DelegateResolverFactory)
         .GetMethod(nameof(ResolveValueValueTask), BindingFlags.Static | BindingFlags.NonPublic)!;
+
+    private static readonly MethodInfo ResolveValueObjectMethod = typeof(DelegateResolverFactory)
+        .GetMethod(nameof(ResolveValueObject), BindingFlags.Static | BindingFlags.NonPublic)!;
 
     private static ValueTask ResolveValueTask<T>(Task<T> task, ResolverContext context)
     {
@@ -151,5 +168,11 @@ public static class DelegateResolverFactory
         }
 
         return AwaitResolveValue(task, context);
+    }
+
+    private static ValueTask ResolveValueObject<T>(T result, ResolverContext context)
+    {
+        context.ResolvedValue = result;
+        return ValueTask.CompletedTask;
     }
 }

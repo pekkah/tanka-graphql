@@ -13,7 +13,6 @@ public static class DefaultOperationDelegateBuilderExtensions
     public static OperationDelegateBuilder AddDefaultFeatures(
         this OperationDelegateBuilder builder)
     {
-        var errorFeature = new ConcurrentBagErrorCollectorFeature();
         var argumentBinderFeature = new ArgumentBinderFeature();
         var defaultSelectionSetExecutorFeature = new DefaultSelectionSetExecutorFeature();
         var fieldExecutorFeature = new FieldExecutorFeature();
@@ -21,7 +20,8 @@ public static class DefaultOperationDelegateBuilderExtensions
 
         return builder.Use(next => context =>
         {
-            context.Features.Set<IErrorCollectorFeature>(errorFeature);
+            // errors use state
+            context.Features.Set<IErrorCollectorFeature>(new ConcurrentBagErrorCollectorFeature());
             context.Features.Set<IArgumentBinderFeature>(argumentBinderFeature);
             context.Features.Set<ISelectionSetExecutorFeature>(defaultSelectionSetExecutorFeature);
             context.Features.Set<IFieldExecutorFeature>(fieldExecutorFeature);

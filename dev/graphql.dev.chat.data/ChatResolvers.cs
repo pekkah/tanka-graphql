@@ -42,7 +42,7 @@ public static class ChatSchemaConfigurationExtensions
             { "name: String!", context => context.ResolveAsPropertyOf<From>(f => f.Name) }
         });
 
-        builder.AddTypeSystem("""
+        builder.Add("""
             input InputMessage {
                 content: String!
             }

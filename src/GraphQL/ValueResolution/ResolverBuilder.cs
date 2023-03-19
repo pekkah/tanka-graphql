@@ -17,12 +17,7 @@ public class ResolverBuilder
 
     public ResolverBuilder Run(Delegate resolver)
     {
-        return Use(_ => CreateResolver(resolver));
-    }
-
-    public Resolver CreateResolver(Delegate resolverDelegate)
-    {
-        return DelegateResolverFactory.Create(resolverDelegate);
+        return Use(_ => DelegateResolverFactory.GetOrCreate(resolver));
     }
 
     public Resolver Build()

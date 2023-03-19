@@ -430,4 +430,37 @@ public class DelegateResolverFactoryFacts
         Assert.NotNull(context.ResolvedValue);
         Assert.True((bool)context.ResolvedValue);
     }
+
+    [Fact]
+    public async Task ReturnValue_is_T()
+    {
+        /* Given */
+        static bool Resolver()
+        {
+            return true;
+        }
+
+        Delegate resolverDelegate = Resolver;
+
+        /* When */
+        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+
+        /* Then */
+        var context = new ResolverContext
+        {
+            ObjectDefinition = null,
+            ObjectValue = null,
+            Field = null,
+            Selection = null,
+            Fields = null,
+            ArgumentValues = null,
+            Path = null,
+            QueryContext = null
+        };
+
+        await resolver(context);
+
+        Assert.NotNull(context.ResolvedValue);
+        Assert.True((bool)context.ResolvedValue);
+    }
 }
