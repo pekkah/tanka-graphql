@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Request;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.ValueSerialization;
@@ -291,6 +293,89 @@ public class GettingStarted
     }
 
     [Fact]
+    public async Task Part5_ServiceProvider_RequestServices()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@"
+                type Query {
+                    name: String
+                }
+                ");
+
+        // Build schema with the resolver
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    "Query", "name", async (ResolverContext context) =>
+                    {
+                        context.ResolvedValue = await context.RequestServices.GetRequiredService<Service>().CallService();
+                    }
+                }
+            }
+        });
+
+        // we create an executor with ServiceProvider
+        var result = await new Executor(new ExecutorOptions()
+        {
+            Schema = schema,
+            ServiceProvider = new ServiceCollection()
+                .AddSingleton<Service>()
+                .BuildServiceProvider()
+        }).Execute(new GraphQLRequest("{name}"));
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "name": "Test"
+              }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Part5_ServiceProvider_Delegate_with_parameters()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@"
+                type Query {
+                    name: String
+                }
+                ");
+
+        // Build schema with the resolver
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    "Query", "name", async (Service service) => await service.CallService()
+                }
+            }
+        });
+
+        // we create an executor with ServiceProvider
+        var result = await new Executor(new ExecutorOptions()
+        {
+            Schema = schema,
+            ServiceProvider = new ServiceCollection()
+                .AddSingleton<Service>()
+                .BuildServiceProvider()
+        }).Execute(new GraphQLRequest("{name}"));
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "name": "Test"
+              }
+            }
+            """);
+    }
+
+    [Fact]
     public async Task Part6_Custom_Scalar()
     {
         // Create builder and load sdl
@@ -353,4 +438,14 @@ public class GettingStarted
             }
             """);
     }
+
+    public class Service
+    {
+        public async Task<string> CallService()
+        {
+            await Task.Delay(100);
+            return "Test";
+        }
+    }
 }
+

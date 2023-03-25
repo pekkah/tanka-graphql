@@ -4,11 +4,12 @@ using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.ValueResolution;
 
-WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // configure services
 builder.AddTankaGraphQL3()
-    .AddSchema("schemaName", schema =>
+    // add named schema
+    .AddSchema("System", schema =>
     {
         schema.Add("Query", new FieldsWithResolvers
         {
@@ -27,8 +28,8 @@ builder.AddTankaGraphQL3()
             new FieldsWithSubscribers
             {
                 {
-                    "counter(to: Int!): Int!",
-                    (SubscriberContext c, CancellationToken ct) => Count(c.GetArgument<int>("to"), ct)
+                    "counter(to: Int!): Int!", (SubscriberContext c, CancellationToken ct) 
+                        => Count(c.GetArgument<int>("to"), ct)
                 }
             });
     })
@@ -37,20 +38,22 @@ builder.AddTankaGraphQL3()
 
 WebApplication? app = builder.Build();
 
+// this is required by the websocket transport
 app.UseWebSockets();
 
 // this uses the default pipeline
-app.MapTankaGraphQL3("/graphql", "schemaName");
+app.MapTankaGraphQL3("/graphql", "System");
 
 // this allows customization of the pipeline
 app.MapTankaGraphQL3("/graphql-custom", gql =>
 {
     gql.SetProperty("TraceEnabled", app.Environment.IsDevelopment());
-    gql.UseDefaults("schemaName");
+    gql.UseDefaults("System");
 });
 
 app.Run();
 
+// simple subscriber generating numbers from 0 to the given number
 static async IAsyncEnumerable<int> Count(int to, [EnumeratorCancellation] CancellationToken cancellationToken)
 {
     var i = 0;
