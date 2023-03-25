@@ -7,4 +7,6 @@ public record ExecutorOptions
     public bool TraceEnabled { get; set; } = false;
 
     public bool ValidationEnabled { get; set; } = true;
+
+    public IServiceProvider? ServiceProvider { get; set; }
 }

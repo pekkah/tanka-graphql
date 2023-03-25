@@ -24,15 +24,19 @@ public partial class Executor
 
     public Executor(ExecutorOptions options)
     {
-        OperationDelegateBuilder builder = new OperationDelegateBuilder(EmptyProvider);
+        OperationDelegateBuilder builder = new(options.ServiceProvider ?? EmptyProvider);
 
         if (options.TraceEnabled)
             builder.UseTrace();
-        
+
+        builder.UseDefaultRequestServices();
+
         builder.AddFeature<ISchemaFeature>(new SchemaFeature
             {
                 Schema = options.Schema
-            }).AddDefaultFeatures();
+            });
+
+        builder.AddDefaultFeatures();
 
         if (options.ValidationEnabled)
             builder

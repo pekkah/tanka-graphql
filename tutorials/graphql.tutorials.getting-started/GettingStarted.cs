@@ -44,7 +44,7 @@ public class GettingStarted
     }
 
     [Fact]
-    public async Task Part2_BindResolvers_Manual()
+    public async Task Part2_BindResolvers_ReturnValue()
     {
         // Create builder and load sdl
         var builder = new SchemaBuilder()
@@ -74,6 +74,140 @@ public class GettingStarted
             {
               "data": {
                 "name": "Test"
+              }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Part2_BindResolvers_UseContext()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@"
+                type Query {
+                    name: String
+                }
+                ");
+
+        // Build schema with the resolver
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    "Query", "name", (ResolverContext context) =>
+                    {
+                        context.ResolvedValue = "Test";
+                        return default;
+                    }
+                }
+            }
+        });
+
+        var result = await Executor.Execute(schema, @"{ name }");
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "name": "Test"
+              }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Part2_BindResolvers_ObjectValue()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add("""
+                type Query {
+                    vader: Parent
+                }
+
+                type Parent {
+                    luke: String
+                }
+                
+                """);
+
+        // Build schema with the resolvers
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    "Query", "vader", () => "I am your father"
+                },
+                {
+                    "Parent", "luke", (string objectValue) => $"Luke, {objectValue}"
+                }
+            }
+        });
+
+
+        var result = await Executor.Execute(schema, @"{ vader { luke }}");
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "vader": {
+                    "luke": "Luke, I am your father"
+                }
+              }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Part2_BindResolvers_ResolversBuilder()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add("""
+                type Query {
+                    vader: Parent
+                }
+
+                type Parent {
+                    luke: String
+                }
+                
+                """);
+
+        // Build schema with the resolvers
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversBuilder()
+                .Resolvers("Query", new Dictionary<string, Action<ResolverBuilder>>()
+                {
+                    ["vader"] = b => b
+                    // use middleware to modify the ResolvedValue    
+                    .Use(next => async context =>
+                    {
+                        await next(context);
+                        context.ResolvedValue = $"------ {context.ResolvedValue}";
+                    })
+                    // this is the the actual resolver
+                    .Run(() => "I am your father"),
+                })
+                .Resolvers("Parent", new Dictionary<string, Action<ResolverBuilder>>()
+                {
+                    ["luke"] = b => b.Run((string objectValue) => $"Luke, {objectValue}")
+                })
+                .BuildResolvers()
+        });
+
+
+        var result = await Executor.Execute(schema, @"{ vader { luke }}");
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "vader": {
+                    "luke": "Luke, ------ I am your father"
+                }
               }
             }
             """);
