@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/tanka-graphql/">
+    <title>5-schema - Tanka GraphQL</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="master/prism.css" />
+    <style>
+        body {
+            height: 100%;
+            width: 100%;         
+        }
+
+        a {
+            color: rgba(0,0,0,.65);
+        }
+
+        a:hover {
+            color: rgba(8, 8, 8, 0.65);
+        }
+
+        blockquote {
+            border: 1px solid rgba(94, 94, 94, 0.65);
+            border-left: 5px solid rgba(94, 94, 94, 0.65);
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;            
+        }
+
+        .sidebar {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .nav-item {
+            list-style: none;
+        }
+
+        .sidebar .nav-link {
+            display: block;
+            padding: .25rem 1.5rem;
+            font-size: 90%;
+            color: rgba(0,0,0,.65);
+        }
+
+        .sidebar .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .content h1,
+        .content h2,
+        .content h3,
+        .content h4,
+        .content h5,
+        .content h6 {
+            font-weight: 300;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Tanka GraphQL</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="master/0-getting-started/00-getting-started.html">Getting Started</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/2-language/01-parser.html">Language</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/3-server/0-common.html">Server</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/7-type-system/02-schema.html">Type System</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="master/10-extensions/tracing.html">Extensions</a>
+                </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+             <li class="nav-item">
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
+            </li>
+            <li class="nav-item dropdown justify-content-end">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    master
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/tanka-graphql/master">master</a>
+                        <a class="dropdown-item" href="/tanka-graphql/2.0.1">2.0.1</a>
+                        <a class="dropdown-item" href="/tanka-graphql/2.0.0">2.0.0</a>
+                </div>
+            </li>
+        </ul>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row flex-xl-nowrap">
+            <nav class="col-12 col-md-3 col-xl-2 sidebar">
+                <div class="sidebar-sticky">
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/02-schema.html>Schema</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/00-SDL.html>SDL</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/01-builder.html>Builder</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/04-types.html>Types</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/05-scalars.html>Scalars</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/06-objects.html>Objects</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/07-interfaces.html>Interfaces</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/08-unions.html>Unions</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/09-enums.html>Enums</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/10-input-objects.html>Input Objects</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/11-list.html>List</a>
+    <ul>
+    </ul>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/12-non-null.html>Non-null</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/13-directives.html>Directives</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/6-introspection/5-schema.html>Introspection</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/7-type-system/6-introspection/4-type-name.html>Type name</a>
+    <ul>
+    </ul>
+</li>    </ul>
+</li>    </nav>
+                </div>
+            </nav>
+            <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
+                <h2 id="schema-introspection">Schema Introspection</h2>
+<blockquote class="blockquote">
+<p><a href="https://facebook.github.io/graphql/June2018/#sec-Schema-Introspection">Specification</a></p>
+</blockquote>
+<p>Introspecting a schema produces an executable schema. Queries can be executed against this schema normally.</p>
+<p>Create and introspect a schema</p>
+<pre><code class="language-csharp">
+    public IntrospectSchemaFacts()
+    {
+        var builder = new SchemaBuilder();
+        builder.Add(@&quot;
+
+&quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+interface Interface 
+{
+    int: Int    
+}
+
+&quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+type Object implements Interface
+{
+    int: Int
+    &quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+    nonNullInt(arg1: Float = 1): Int!
+}
+
+type Object2 
+{
+    int: [Int]
+}
+
+&quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+union Union = Object | Object2
+
+&quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+enum Enum {
+    &quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+    VALUE1
+    
+    &quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+    VALUE2 @deprecated(reason: &quot;&quot;reason&quot;&quot;)
+}
+
+&quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+input InputObject 
+{
+    &quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+    field1: Boolean = true
+}
+
+type Query {
+    object: Object
+    union: Union
+    enum: Enum
+    listOfObjects: [Object2]
+    nonNullObject: Object1!
+
+    &quot;&quot;&quot;&quot;&quot;&quot;Description&quot;&quot;&quot;&quot;&quot;&quot;
+    inputObjectArg(arg1: InputObject): Boolean!
+}
+
+type Mutation {}
+type Subscription {}
+&quot;);
+
+
+        _introspectionSchema = builder.Build(new SchemaBuildOptions()
+        {
+            IncludeIntrospection = true // note: on by default
+        }).Result;
+    }
+
+</code></pre>
+<p>Combination of the source schema and the introspection schema can be used to provide the normal executable schema with introspection support.</p>
+<h3 id="type-kinds">Type Kinds</h3>
+<p>Scalar</p>
+<pre><code class="language-csharp">
+    [Fact]
+    public async Task Type_ScalarType()
+    {
+        /* Given */
+        var query = @&quot;{ 
+                            __type(name: &quot;&quot;Int&quot;&quot;) {
+                                kind
+                                name
+                                description
+                            }
+                        }&quot;;
+
+        /* When */
+        var result = await QueryAsync(query);
+
+        /* Then */
+        result.ShouldMatchJson(
+            @&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;__type&quot;&quot;: {
+                      &quot;&quot;name&quot;&quot;: &quot;&quot;Int&quot;&quot;,
+                      &quot;&quot;description&quot;&quot;: &quot;&quot;The `Int` scalar type represents non-fractional signed whole numeric values&quot;&quot;,
+                      &quot;&quot;kind&quot;&quot;: &quot;&quot;SCALAR&quot;&quot;
+                    }
+                  }
+                }&quot;);
+    }
+
+</code></pre>
+<p>Object type</p>
+<pre><code class="language-csharp">
+    [Fact]
+    public async Task Type_ObjectType()
+    {
+        /* Given */
+        var query = @&quot;{ 
+                            __type(name: &quot;&quot;Object&quot;&quot;) {
+                                kind
+                                name
+                                description
+                                fields { name }
+                                interfaces { name }
+                            }
+                        }&quot;;
+
+        /* When */
+        var result = await QueryAsync(query);
+
+        /* Then */
+        result.ShouldMatchJson(
+            @&quot;{
+  &quot;&quot;data&quot;&quot;: {
+    &quot;&quot;__type&quot;&quot;: {
+      &quot;&quot;kind&quot;&quot;: &quot;&quot;OBJECT&quot;&quot;,
+      &quot;&quot;name&quot;&quot;: &quot;&quot;Object&quot;&quot;,
+      &quot;&quot;description&quot;&quot;: &quot;&quot;Description&quot;&quot;,
+      &quot;&quot;fields&quot;&quot;: [
+        {
+          &quot;&quot;name&quot;&quot;: &quot;&quot;int&quot;&quot;
+        },
+        {
+          &quot;&quot;name&quot;&quot;: &quot;&quot;nonNullInt&quot;&quot;
+        }
+      ],
+      &quot;&quot;interfaces&quot;&quot;: [
+        {
+          &quot;&quot;name&quot;&quot;: &quot;&quot;Interface&quot;&quot;
+        }
+      ]
+    }
+  },
+  &quot;&quot;extensions&quot;&quot;: null,
+  &quot;&quot;errors&quot;&quot;: null
+}&quot;);
+    }
+
+</code></pre>
+<p>Union type</p>
+<pre><code class="language-csharp">
+    [Fact]
+    public async Task Type_UnionType()
+    {
+        /* Given */
+        var query = @&quot;{ 
+                            __type(name: &quot;&quot;Union&quot;&quot;) {
+                                kind
+                                name
+                                description
+                                possibleTypes { name }
+                            }
+                        }&quot;;
+
+        /* When */
+        var result = await QueryAsync(query);
+
+        /* Then */
+        result.ShouldMatchJson(
+            @&quot;{
+  &quot;&quot;data&quot;&quot;: {
+    &quot;&quot;__type&quot;&quot;: {
+      &quot;&quot;kind&quot;&quot;: &quot;&quot;UNION&quot;&quot;,
+      &quot;&quot;name&quot;&quot;: &quot;&quot;Union&quot;&quot;,
+      &quot;&quot;description&quot;&quot;: &quot;&quot;Description&quot;&quot;,
+      &quot;&quot;possibleTypes&quot;&quot;: [
+        {
+          &quot;&quot;name&quot;&quot;: &quot;&quot;Object&quot;&quot;
+        },
+        {
+          &quot;&quot;name&quot;&quot;: &quot;&quot;Object2&quot;&quot;
+        }
+      ]
+    }
+  },
+  &quot;&quot;extensions&quot;&quot;: null,
+  &quot;&quot;errors&quot;&quot;: null
+}&quot;);
+    }
+
+</code></pre>
+<p>Interface type</p>
+<pre><code class="language-csharp">
+    [Fact]
+    public async Task Type_InterfaceType()
+    {
+        /* Given */
+        var query = @&quot;{ 
+                            __type(name: &quot;&quot;Interface&quot;&quot;) {
+                                kind
+                                name
+                                description
+                                fields { name }
+                                possibleTypes { name }
+                            }
+                        }&quot;;
+
+        /* When */
+        var result = await QueryAsync(query);
+
+        /* Then */
+        result.ShouldMatchJson(
+            @&quot;{
+                  &quot;&quot;data&quot;&quot;: {
+                    &quot;&quot;__type&quot;&quot;: {
+                      &quot;&quot;possibleTypes&quot;&quot;: [
+                        {
+                          &quot;&quot;name&quot;&quot;: &quot;&quot;Object&quot;&quot;
+                        }
+                      ],
+                      &quot;&quot;name&quot;&quot;: &quot;&quot;Interface&quot;&quot;,
+                      &quot;&quot;kind&quot;&quot;: &quot;&quot;INTERFACE&quot;&quot;,
+                      &quot;&quot;fields&quot;&quot;: [
+                        {
+                          &quot;&quot;name&quot;&quot;: &quot;&quot;int&quot;&quot;
+                        }
+                      ],
+                      &quot;&quot;description&quot;&quot;: &quot;&quot;Description&quot;&quot;
+                    }
+                  }
+                }&quot;);
+    }
+
+</code></pre>
+<p>Enum type</p>
+<pre><code class="language-csharp">
+    [Fact]
+    public async Task Type_EnumType()
+    {
+        /* Given */
+        var query = @&quot;{ 
+                            __type(name: &quot;&quot;Enum&quot;&quot;) {
+                                kind
+                                name
+                                description
+                                enumValues { 
+                                  name
+                                  description
+                                  isDeprecated
+                                  deprecationReason
+                                }
+                            }
+                        }&quot;;
+
+        /* When */
+        var result = await QueryAsync(query);
+
+        /* Then */
+        result.ShouldMatchJson(
+            @&quot;{
+  &quot;&quot;data&quot;&quot;: {
+    &quot;&quot;__type&quot;&quot;: {
+      &quot;&quot;kind&quot;&quot;: &quot;&quot;ENUM&quot;&quot;,
+      &quot;&quot;name&quot;&quot;: &quot;&quot;Enum&quot;&quot;,
+      &quot;&quot;description&quot;&quot;: &quot;&quot;Description&quot;&quot;,
+      &quot;&quot;enumValues&quot;&quot;: [
+        {
+          &quot;&quot;name&quot;&quot;: &quot;&quot;VALUE1&quot;&quot;,
+          &quot;&quot;description&quot;&quot;: &quot;&quot;Description&quot;&quot;,
+          &quot;&quot;isDeprecated&quot;&quot;: false,
+          &quot;&quot;deprecationReason&quot;&quot;: null
+        }
+      ]
+    }
+  },
+  &quot;&quot;extensions&quot;&quot;: null,
+  &quot;&quot;errors&quot;&quot;: null
+}&quot;);
+    }
+
+</code></pre>
+<p>Input object</p>
+<pre><code class="language-csharp">
+    [Fact]
+    public async Task Type_InputObjectType()
+    {
+        /* Given */
+        var query = @&quot;{ 
+                            __type(name: &quot;&quot;InputObject&quot;&quot;) {
+                                kind
+                                name
+                                description
+                            }
+                        }&quot;;
+
+        /* When */
+        var result = await QueryAsync(query);
+
+        /* Then */
+        result.ShouldMatchJson(
+            @&quot;{
+  &quot;&quot;data&quot;&quot;: {
+    &quot;&quot;__type&quot;&quot;: {
+      &quot;&quot;kind&quot;&quot;: &quot;&quot;INPUT_OBJECT&quot;&quot;,
+      &quot;&quot;name&quot;&quot;: &quot;&quot;InputObject&quot;&quot;,
+      &quot;&quot;description&quot;&quot;: &quot;&quot;Description&quot;&quot;
+    }
+  },
+  &quot;&quot;extensions&quot;&quot;: null,
+  &quot;&quot;errors&quot;&quot;: null
+}&quot;);
+    }
+
+</code></pre>
+                    
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="master/prism.js"></script>
+</body>
+</html>
