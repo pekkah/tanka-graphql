@@ -9,8 +9,8 @@ public static class FederationExecutableSchemaBuilderExtensions
         SubgraphOptions options)
     {
         builder.Add(new SubgraphConfiguration(options));
-        builder.Add("_Any", new AnyScalarConverter());
-        builder.Add("_FieldSet", new FieldSetScalarConverter());
+        builder.AddConverter("_Any", new AnyScalarConverter());
+        builder.AddConverter("_FieldSet", new FieldSetScalarConverter());
 
         return builder;
     }

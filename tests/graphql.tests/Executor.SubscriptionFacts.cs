@@ -21,8 +21,8 @@ public class SubscriptionFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Object("Query", new Dictionary<FieldDefinition, Action<ResolverBuilder>>())
-            .Object("Subscription", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+            .Add("Query", new ())
+            .Add("Subscription", new ()
                 {
                     {
                         "count: Int!", b => b.Run(ctx =>

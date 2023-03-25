@@ -984,7 +984,7 @@ public static class ExecutionRules
             try
             {
                 var converter = context.Schema.GetValueConverter(type.Name) ?? throw new ValueCoercionException(
-                    $"Value converter for '{Printer.Print(type)}' not found from schema.",
+                    $"Value converter for '{type.Name}' not found from schema.",
                     type,
                     type);
 

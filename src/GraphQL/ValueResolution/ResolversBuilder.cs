@@ -35,9 +35,12 @@ public class ResolversBuilder : IEnumerable
         configure(Resolver(objectName, fieldName));
     }
 
-    public void Add(string objectName, string fieldName, Action<SubscriberBuilder> configure)
+    public void Add(string objectName, string fieldName,
+        Action<SubscriberBuilder> configureSubscriber,
+        Action<ResolverBuilder> configureResolver)
     {
-        configure(Subscriber(objectName, fieldName));
+        configureSubscriber(Subscriber(objectName, fieldName));
+        configureResolver(Resolver(objectName, fieldName));
     }
 
     public ResolversBuilder Resolvers(string objectName, Dictionary<string, Action<ResolverBuilder>> resolvers)

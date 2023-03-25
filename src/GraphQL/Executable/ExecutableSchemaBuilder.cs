@@ -7,106 +7,83 @@ namespace Tanka.GraphQL.Executable;
 
 public class ExecutableSchemaBuilder
 {
-    public List<IExecutableSchemaConfiguration> Configurations { get; } = new();
+    public SchemaBuilder Schema { get; }
 
-    public List<TypeSystemDocument> Documents { get; } = new();
+    public ResolversBuilder Resolvers { get; }
 
-    public Dictionary<string, IValueConverter> ValueConverters { get; } = new()
+    public ValueConvertersBuilder ValueConverters { get; }
+
+    public Dictionary<string, CreateDirectiveVisitor> DirectiveVisitorFactories { get; }
+
+    public ExecutableSchemaBuilder()
     {
-        [Scalars.String.Name] = new StringConverter(),
-        [Scalars.Int.Name] = new IntConverter(),
-        [Scalars.Float.Name] = new DoubleConverter(),
-        [Scalars.Boolean.Name] = new BooleanConverter(),
-        [Scalars.ID.Name] = new IdConverter()
-    };
+        Schema = new SchemaBuilder();
+        Resolvers = new ResolversBuilder();
+        ValueConverters = new ValueConvertersBuilder()
+            .AddDefaults();
 
-    public Dictionary<string, CreateDirectiveVisitor> DirectiveVisitorFactories { get; } = new();
+        DirectiveVisitorFactories = new Dictionary<string, CreateDirectiveVisitor>();
+    }
 
-    public ExecutableSchemaBuilder Add(
-        IExecutableSchemaConfiguration configuration)
+    public ExecutableSchemaBuilder Add(TypeSystemDocument document)
     {
-        Configurations.Add(configuration);
+        Schema.Add(document);
+        return this;
+    }
 
+    public ExecutableSchemaBuilder Add(IExecutableSchemaConfiguration configuration)
+    {
+        configuration.Configure(Schema, Resolvers);
+        return this;
+    }
+
+    public ExecutableSchemaBuilder Add(IResolverMap resolverMap)
+    {
+        Add(new ResolversConfiguration(resolverMap));
+        return this;
+    }
+
+    public ExecutableSchemaBuilder Add(TypeDefinition[] types)
+    {
+        Schema.Add(types);
         return this;
     }
 
     public ExecutableSchemaBuilder Add(
-        TypeSystemDocument document)
+        string typeName, 
+        FieldsWithResolvers fields,
+        FieldsWithSubscribers? subscribers = null)
     {
-        Documents.Add(document);
+        Add(new ObjectResolversConfiguration(typeName, fields));
+
+        if (subscribers != null)
+            Add(new ObjectSubscribersConfiguration(typeName, subscribers));
 
         return this;
     }
 
-    public ExecutableSchemaBuilder Object(
-        string type,
-        Dictionary<FieldDefinition, Action<ResolverBuilder>> resolverFields,
-        Dictionary<FieldDefinition, Action<SubscriberBuilder>>? subscriberFields = null)
+    public ExecutableSchemaBuilder AddConverter(
+        string typeName,
+        IValueConverter valueConverter)
     {
-        Configurations.Add(new ObjectResolversConfiguration(type, resolverFields));
-
-        if (subscriberFields is not null)
-            Configurations.Add(new ObjectSubscribersConfiguration(type, subscriberFields));
-
+        ValueConverters.Add(typeName, valueConverter);
         return this;
     }
-
-    public ExecutableSchemaBuilder Object(
-        string type,
-        Dictionary<FieldDefinition, Delegate> resolverFields,
-        Dictionary<FieldDefinition, Action<SubscriberBuilder>>? subscriberFields = null)
-    {
-        Configurations.Add(new ObjectDelegateResolversConfiguration(type, resolverFields));
-
-        if (subscriberFields is not null)
-            //todo: subscriber fields should be delegates as well
-            Configurations.Add(new ObjectSubscribersConfiguration(type, subscriberFields));
-
-        return this;
-    }
-
-    public ExecutableSchemaBuilder Add(string type, IValueConverter converter)
-    {
-        ValueConverters[type] = converter;
-        return this;
-    }
-
-    public ExecutableSchemaBuilder Add(string type, CreateDirectiveVisitor visitor)
-    {
-        DirectiveVisitorFactories[type] = visitor;
-        return this;
-    }
-
-    public ExecutableSchemaBuilder Add(IResolverMap resolversMap)
-    {
-        Add(new ResolversConfiguration(resolversMap));
-        return this;
-    }
-
+    
     public async Task<ISchema> Build(Action<SchemaBuildOptions>? configureBuildOptions = null)
     {
-        var schemaBuilder = new SchemaBuilder();
-        var resolversBuilder = new ResolversBuilder();
-
-        foreach (TypeSystemDocument typeSystemDocument in Documents)
-            schemaBuilder.Add(typeSystemDocument);
-
-        foreach (IExecutableSchemaConfiguration configuration in Configurations)
-            await configuration.Configure(schemaBuilder, resolversBuilder);
-
         var buildOptions = new SchemaBuildOptions
         {
-            Resolvers = resolversBuilder.BuildResolvers(),
-            Subscribers = resolversBuilder.BuildSubscribers(),
-            ValueConverters = ValueConverters,
+            Resolvers = Resolvers.BuildResolvers(),
+            Subscribers = Resolvers.BuildSubscribers(),
+            ValueConverters = ValueConverters.Build(),
             DirectiveVisitorFactories = DirectiveVisitorFactories.ToDictionary(kv => kv.Key, kv => kv.Value),
             BuildTypesFromOrphanedExtensions = true
         };
 
-
         configureBuildOptions?.Invoke(buildOptions);
 
-        ISchema schema = await schemaBuilder.Build(buildOptions);
+        ISchema schema = await Schema.Build(buildOptions);
 
         return schema;
     }

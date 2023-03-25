@@ -13,7 +13,7 @@ builder.Services.Configure<JsonOptions>(json =>
 });
 // configure services
 builder.AddTankaGraphQL3()
-    .AddSchema("chat", options => { options.Configure(schema => schema.AddChat()); })
+    .AddOptions("chat", options => { options.Configure(schema => schema.AddChat()); })
     .AddHttp()
     .AddWebSockets();
 

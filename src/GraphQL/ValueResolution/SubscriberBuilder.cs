@@ -15,6 +15,11 @@ public class SubscriberBuilder
         return Use(_ => subscriber);
     }
 
+    public SubscriberBuilder Run(Delegate subscriber)
+    {
+        return Use(_ => DelegateSubscriberFactory.GetOrCreate(subscriber));
+    }
+
     public Subscriber Build()
     {
         Subscriber subscriber = (_, _) => ValueTask.CompletedTask;

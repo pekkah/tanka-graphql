@@ -12,18 +12,18 @@ public static class ChatSchemaConfigurationExtensions
 {
     public static ExecutableSchemaBuilder AddChat(this ExecutableSchemaBuilder builder)
     {
-        builder.Object("Query", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+        builder.Add("Query", new ()
         {
             { "messages: [Message!]!", b => b.Run(r => r.GetRequiredService<IChatResolverService>().GetMessagesAsync(r)) }
         });
 
-        builder.Object("Mutation", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+        builder.Add("Mutation", new ()
         {
             { "addMessage(message: InputMessage!): Message!", b => b.Run(r => r.GetRequiredService<IChatResolverService>().AddMessageAsync(r)) },
             { "editMessage(id: String!, message: InputMessage!): Message", b => b.Run(r => r.GetRequiredService<IChatResolverService>().EditMessageAsync(r)) }
         });
 
-        builder.Object("Subscription", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+        builder.Add("Subscription", new ()
         {
             { "messages: Message!", b => b.Run(r => r.GetRequiredService<IChatResolverService>().ResolveMessageAsync(r)) }
         }, new()
@@ -31,7 +31,7 @@ public static class ChatSchemaConfigurationExtensions
             { "messages: Message!", b => b.Run((r, ct) => r.GetRequiredService<IChatResolverService>().StreamMessagesAsync(r, ct)) }
         });
 
-        builder.Object("Message", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+        builder.Add("Message", new()
         {
             { "id: String!", context => context.ResolveAsPropertyOf<Message>(m => m.Id) },
             { "from: From!", context => context.ResolveAsPropertyOf<Message>(m => m.From) },
@@ -39,7 +39,7 @@ public static class ChatSchemaConfigurationExtensions
             { "timestamp: String!", context => context.ResolveAsPropertyOf<Message>(m => m.Timestamp) }
         });
 
-        builder.Object("From", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+        builder.Add("From", new ()
         {
             { "userId: String!", context => context.ResolveAsPropertyOf<From>(f => f.UserId) },
             { "name: String!", context => context.ResolveAsPropertyOf<From>(f => f.Name) }

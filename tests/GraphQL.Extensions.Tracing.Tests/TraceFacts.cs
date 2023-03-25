@@ -12,7 +12,7 @@ namespace Tanka.GraphQL.Extensions.Tracing.Tests
         public TraceFacts()
         {
             Schema = new ExecutableSchemaBuilder()
-                .Object("Query", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+                .Add("Query", new ()
                 {
                     ["simple: String!"] = b => b.ResolveAs("string")
                 })
