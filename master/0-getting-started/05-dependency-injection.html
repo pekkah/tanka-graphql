@@ -74,19 +74,16 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="master/0-getting-started/01-create-schema.html">Getting Started</a>
+                    <a class="nav-link" href="master/0-getting-started/00-getting-started.html">Getting Started</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/0-language/01-parser.html">Language</a>
+                    <a class="nav-link" href="master/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/1-execution/01-resolvers.html">Execution</a>
+                    <a class="nav-link" href="master/3-server/0-common.html">Server</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/2-server/0-common.html">Server</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="master/3-code-generator/1-installation.html">Code Generation</a>
+                    <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/7-type-system/02-schema.html">Type System</a>
@@ -124,7 +121,7 @@
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/01-create-schema.html>Getting started</a>
+    <a class="nav-link" href=master/0-getting-started/00-getting-started.html>Getting started</a>
     <ul>
 <li class="nav-item">
     <a class="nav-link" href=master/0-getting-started/01-create-schema.html>Create schema</a>
@@ -162,7 +159,111 @@ the builtin dependency injection services.</p>
 as the schema does not change. This adds a challenge when using
 services which require scoped lifetime. Usually the scope is defined
 as HTTP request.</p>
-<p>todo: update</p>
+<h3 id="lets-define-a-dependency">Lets define a dependency</h3>
+<pre><code class="language-csharp">
+    public class Service
+    {
+        public async Task&lt;string&gt; CallService()
+        {
+            await Task.Delay(100);
+            return &quot;Test&quot;;
+        }
+    }
+
+</code></pre>
+<ul>
+<li>Use <code>ResolverContext</code>: context has an property called `RequestServices.</li>
+</ul>
+<pre><code class="language-csharp">
+    [Fact]
+    public async Task Part5_ServiceProvider_RequestServices()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@&quot;
+                type Query {
+                    name: String
+                }
+                &quot;);
+
+        // Build schema with the resolver
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    &quot;Query&quot;, &quot;name&quot;, async (ResolverContext context) =&gt;
+                    {
+                        context.ResolvedValue = await context.RequestServices.GetRequiredService&lt;Service&gt;().CallService();
+                    }
+                }
+            }
+        });
+
+        // we create an executor with ServiceProvider
+        var result = await new Executor(new ExecutorOptions()
+        {
+            Schema = schema,
+            ServiceProvider = new ServiceCollection()
+                .AddSingleton&lt;Service&gt;()
+                .BuildServiceProvider()
+        }).Execute(new GraphQLRequest(&quot;{name}&quot;));
+
+        result.ShouldMatchJson(&quot;&quot;&quot;
+            {
+              &quot;data&quot;: {
+                &quot;name&quot;: &quot;Test&quot;
+              }
+            }
+            &quot;&quot;&quot;);
+    }
+
+</code></pre>
+<ul>
+<li>Use a parameter on delegate, if the property with the name does not exists on <code>ResolverContext</code> it will be resolved from <code>RequestServices</code></li>
+</ul>
+<pre><code class="language-csharp">
+    [Fact]
+    public async Task Part5_ServiceProvider_Delegate_with_parameters()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@&quot;
+                type Query {
+                    name: String
+                }
+                &quot;);
+
+        // Build schema with the resolver
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    &quot;Query&quot;, &quot;name&quot;, async (Service service) =&gt; await service.CallService()
+                }
+            }
+        });
+
+        // we create an executor with ServiceProvider
+        var result = await new Executor(new ExecutorOptions()
+        {
+            Schema = schema,
+            ServiceProvider = new ServiceCollection()
+                .AddSingleton&lt;Service&gt;()
+                .BuildServiceProvider()
+        }).Execute(new GraphQLRequest(&quot;{name}&quot;));
+
+        result.ShouldMatchJson(&quot;&quot;&quot;
+            {
+              &quot;data&quot;: {
+                &quot;name&quot;: &quot;Test&quot;
+              }
+            }
+            &quot;&quot;&quot;);
+    }
+
+</code></pre>
                     
             </main>
         </div>
