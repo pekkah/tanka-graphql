@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Tanka.GraphQL.Executable;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.TypeSystem;
+﻿using Tanka.GraphQL.Executable;
 
 namespace Tanka.GraphQL.Server;
 
@@ -11,5 +6,5 @@ public class SchemaOptions
 {
     public string SchemaName { get; set; } = string.Empty;
 
-    public ExecutableSchemaBuilder Builder = new();
+    public ExecutableSchemaBuilder Builder { get; } = new();
 }

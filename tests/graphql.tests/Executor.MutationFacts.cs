@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language.Nodes;
@@ -17,7 +16,7 @@ public class MutationFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Object("Mutation", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+            .Add("Mutation", new ()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
@@ -51,11 +50,11 @@ public class MutationFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Object("System", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+            .Add("System", new ()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
-            .Object("Mutation", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+            .Add("Mutation", new ()
             {
                 { "system: System!", b => b.ResolveAs("System") }
             })

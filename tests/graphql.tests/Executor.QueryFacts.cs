@@ -17,7 +17,7 @@ public class QueryFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Object("Query", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+            .Add("Query", new ()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
@@ -51,11 +51,11 @@ public class QueryFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Object("System", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+            .Add("System", new ()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
-            .Object("Query", new Dictionary<FieldDefinition, Action<ResolverBuilder>>()
+            .Add("Query", new()
             {
                 { "system: System!", b => b.ResolveAs("System") }
             })

@@ -14,7 +14,7 @@ builder.Services.AddSingleton<ReviewsResolvers>();
 
 // configure services
 builder.AddTankaGraphQL3()
-    .AddSchema("reviews", options =>
+    .AddOptions("reviews", options =>
     {
         options.AddReviews();
 
