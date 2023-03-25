@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Request;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.ValueSerialization;
@@ -44,7 +46,7 @@ public class GettingStarted
     }
 
     [Fact]
-    public async Task Part2_BindResolvers_Manual()
+    public async Task Part2_BindResolvers_ReturnValue()
     {
         // Create builder and load sdl
         var builder = new SchemaBuilder()
@@ -74,6 +76,140 @@ public class GettingStarted
             {
               "data": {
                 "name": "Test"
+              }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Part2_BindResolvers_UseContext()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@"
+                type Query {
+                    name: String
+                }
+                ");
+
+        // Build schema with the resolver
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    "Query", "name", (ResolverContext context) =>
+                    {
+                        context.ResolvedValue = "Test";
+                        return default;
+                    }
+                }
+            }
+        });
+
+        var result = await Executor.Execute(schema, @"{ name }");
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "name": "Test"
+              }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Part2_BindResolvers_ObjectValue()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add("""
+                type Query {
+                    vader: Parent
+                }
+
+                type Parent {
+                    luke: String
+                }
+                
+                """);
+
+        // Build schema with the resolvers
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    "Query", "vader", () => "I am your father"
+                },
+                {
+                    "Parent", "luke", (string objectValue) => $"Luke, {objectValue}"
+                }
+            }
+        });
+
+
+        var result = await Executor.Execute(schema, @"{ vader { luke }}");
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "vader": {
+                    "luke": "Luke, I am your father"
+                }
+              }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Part2_BindResolvers_ResolversBuilder()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add("""
+                type Query {
+                    vader: Parent
+                }
+
+                type Parent {
+                    luke: String
+                }
+                
+                """);
+
+        // Build schema with the resolvers
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversBuilder()
+                .Resolvers("Query", new Dictionary<string, Action<ResolverBuilder>>()
+                {
+                    ["vader"] = b => b
+                    // use middleware to modify the ResolvedValue    
+                    .Use(next => async context =>
+                    {
+                        await next(context);
+                        context.ResolvedValue = $"------ {context.ResolvedValue}";
+                    })
+                    // this is the the actual resolver
+                    .Run(() => "I am your father"),
+                })
+                .Resolvers("Parent", new Dictionary<string, Action<ResolverBuilder>>()
+                {
+                    ["luke"] = b => b.Run((string objectValue) => $"Luke, {objectValue}")
+                })
+                .BuildResolvers()
+        });
+
+
+        var result = await Executor.Execute(schema, @"{ vader { luke }}");
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "vader": {
+                    "luke": "Luke, ------ I am your father"
+                }
               }
             }
             """);
@@ -157,6 +293,89 @@ public class GettingStarted
     }
 
     [Fact]
+    public async Task Part5_ServiceProvider_RequestServices()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@"
+                type Query {
+                    name: String
+                }
+                ");
+
+        // Build schema with the resolver
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    "Query", "name", async (ResolverContext context) =>
+                    {
+                        context.ResolvedValue = await context.RequestServices.GetRequiredService<Service>().CallService();
+                    }
+                }
+            }
+        });
+
+        // we create an executor with ServiceProvider
+        var result = await new Executor(new ExecutorOptions()
+        {
+            Schema = schema,
+            ServiceProvider = new ServiceCollection()
+                .AddSingleton<Service>()
+                .BuildServiceProvider()
+        }).Execute(new GraphQLRequest("{name}"));
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "name": "Test"
+              }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Part5_ServiceProvider_Delegate_with_parameters()
+    {
+        // Create builder and load sdl
+        var builder = new SchemaBuilder()
+            .Add(@"
+                type Query {
+                    name: String
+                }
+                ");
+
+        // Build schema with the resolver
+        var schema = await builder.Build(new SchemaBuildOptions
+        {
+            Resolvers = new ResolversMap
+            {
+                {
+                    "Query", "name", async (Service service) => await service.CallService()
+                }
+            }
+        });
+
+        // we create an executor with ServiceProvider
+        var result = await new Executor(new ExecutorOptions()
+        {
+            Schema = schema,
+            ServiceProvider = new ServiceCollection()
+                .AddSingleton<Service>()
+                .BuildServiceProvider()
+        }).Execute(new GraphQLRequest("{name}"));
+
+        result.ShouldMatchJson("""
+            {
+              "data": {
+                "name": "Test"
+              }
+            }
+            """);
+    }
+
+    [Fact]
     public async Task Part6_Custom_Scalar()
     {
         // Create builder and load sdl
@@ -219,4 +438,14 @@ public class GettingStarted
             }
             """);
     }
+
+    public class Service
+    {
+        public async Task<string> CallService()
+        {
+            await Task.Delay(100);
+            return "Test";
+        }
+    }
 }
+

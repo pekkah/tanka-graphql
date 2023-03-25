@@ -1,4 +1,5 @@
-﻿using Tanka.GraphQL.Execution;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Extensions.Trace;
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Request;
@@ -10,6 +11,16 @@ namespace Tanka.GraphQL;
 
 public static class DefaultOperationDelegateBuilderExtensions
 {
+    public static OperationDelegateBuilder UseDefaultRequestServices(this OperationDelegateBuilder builder)
+    {
+        return builder.Use(next => async context =>
+        {
+            await using AsyncServiceScope scope = builder.ApplicationServices.CreateAsyncScope();
+            context.RequestServices = scope.ServiceProvider;
+            await next(context);
+        });
+    }
+
     public static OperationDelegateBuilder AddDefaultFeatures(
         this OperationDelegateBuilder builder)
     {
@@ -62,6 +73,7 @@ public static class DefaultOperationDelegateBuilderExtensions
     public static OperationDelegateBuilder UseDefaults(this OperationDelegateBuilder builder)
     {
         if (builder.GetProperty<bool>("TraceEnabled")) builder.UseTrace();
+        builder.UseDefaultRequestServices();
 
         // extend query context with required features
         builder.AddDefaultFeatures();
