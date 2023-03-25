@@ -13,6 +13,7 @@ branches:
       - tutorials
       - dev
       - artifacts
+      - samples
 tags:
   2.*:
     input_path:
