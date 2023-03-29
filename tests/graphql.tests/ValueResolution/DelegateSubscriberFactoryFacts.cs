@@ -27,7 +27,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -37,9 +37,9 @@ public class DelegateSubscriberFactoryFacts
             Field = null,
             Selection = null,
             Fields = null,
-            ArgumentValues = null,
+            ArgumentValues = new Dictionary<string, object?>(),
             Path = null,
-            QueryContext = null,
+            QueryContext = new QueryContext(),
         };
 
         await subscriber(context, CancellationToken.None);
@@ -61,7 +61,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -100,7 +100,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -134,7 +134,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -178,7 +178,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -213,7 +213,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -246,7 +246,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -282,7 +282,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -316,7 +316,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -352,7 +352,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = Subscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -386,7 +386,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = Subscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext

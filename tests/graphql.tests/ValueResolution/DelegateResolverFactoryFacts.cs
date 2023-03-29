@@ -26,7 +26,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -60,7 +60,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -99,7 +99,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -133,7 +133,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -176,7 +176,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -210,7 +210,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -243,7 +243,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -278,7 +278,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -310,7 +310,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = Resolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -344,7 +344,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = Resolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -377,7 +377,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -413,7 +413,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -451,7 +451,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -487,7 +487,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -531,7 +531,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -564,7 +564,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = Resolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext

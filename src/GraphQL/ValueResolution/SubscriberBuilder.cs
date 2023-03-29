@@ -17,7 +17,7 @@ public class SubscriberBuilder
 
     public SubscriberBuilder Run(Delegate subscriber)
     {
-        return Use(_ => DelegateSubscriberFactory.GetOrCreate(subscriber));
+        return Use(_ => DelegateSubscriberFactory.Get(subscriber));
     }
 
     public Subscriber Build()
