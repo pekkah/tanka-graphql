@@ -24,7 +24,7 @@ builder.AddTankaGraphQL3()
         schema.Add("Subscription", new FieldsWithResolvers
             {
                 { "counter: Int!", (int objectValue) => objectValue }
-            },
+            }, 
             new FieldsWithSubscribers
             {
                 {

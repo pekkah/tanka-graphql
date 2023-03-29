@@ -6,6 +6,11 @@ namespace Tanka.GraphQL.Fields;
 
 public class ArgumentBinderFeature : IArgumentBinderFeature
 {
+    public bool HasArgument(ResolverContextBase context, string name)
+    {
+        return context.ArgumentValues.ContainsKey(name);
+    }
+
     public T? BindInputObject<T>(ResolverContextBase context, string name)
         where T : new()
     {
@@ -17,7 +22,9 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
         if (argument is not IReadOnlyDictionary<string, object?> inputObjectArgumentValue)
             throw new InvalidOperationException("Argument is not an input object");
 
+
         var target = new T();
+
         BindInputObject<T>(inputObjectArgumentValue, target);
         return target;
     }
@@ -65,6 +72,11 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
             if (properties.TryGetValue(propertyName, out IPropertyAdapter<T>? property))
                 property.SetValue(target, fieldValue);
         }
+    }
+
+    public T? BindValueArgument<T>(ResolverContextBase context, string name)
+    {
+        return context.GetArgument<T>(name);
     }
 
     private static string FormatPropertyName(string fieldName)
