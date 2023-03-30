@@ -10,6 +10,13 @@ public class SubscriberBuilder
         return this;
     }
 
+    public SubscriberBuilder Use(Delegate middleware)
+    {
+        var middlewareFunc = DelegateSubscriberMiddlewareFactory.Get(middleware);
+        _components.Add(next => (context, unsubscribe) => middlewareFunc(context, next, unsubscribe));
+        return this;
+    }
+
     public SubscriberBuilder Run(Subscriber subscriber)
     {
         return Use(_ => subscriber);

@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Executable;
-using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server;
 
@@ -28,18 +27,14 @@ public class GraphQLApplicationBuilder
         return this;
     }
 
-    public GraphQLApplicationBuilder AddOptions(
+    public GraphQLApplicationBuilder AddSchemaOptions(
         string schemaName,
-        Action<SchemaOptionsBuilder> configureOptions)
+        Action<OptionsBuilder<SchemaOptions>> configureOptions)
     {
         OptionsBuilder<SchemaOptions> schemaOptions = ApplicationServices
             .AddOptions<SchemaOptions>(schemaName);
-
-        var optionsBuilder = new SchemaOptionsBuilder(
-            schemaOptions,
-            ApplicationServices);
-
-        configureOptions(optionsBuilder);
+        
+        configureOptions(schemaOptions);
 
         ApplicationOptionsBuilder.Configure(options => options.SchemaNames.Add(schemaName));
 
@@ -50,17 +45,7 @@ public class GraphQLApplicationBuilder
         string schemaName,
         Action<ExecutableSchemaBuilder> configureExecutable)
     {
-        OptionsBuilder<SchemaOptions> schemaOptions = ApplicationServices
-            .AddOptions<SchemaOptions>(schemaName);
-
-        var optionsBuilder = new SchemaOptionsBuilder(
-            schemaOptions,
-            ApplicationServices);
-
-        ApplicationOptionsBuilder.Configure(options => options.SchemaNames.Add(schemaName));
-        optionsBuilder.Configure(configureExecutable);
-
-        return this;
+        return AddSchemaOptions(schemaName, builder => builder.Configure(opt => configureExecutable(opt.Builder)));
     }
 
     public GraphQLApplicationBuilder AddWebSockets()

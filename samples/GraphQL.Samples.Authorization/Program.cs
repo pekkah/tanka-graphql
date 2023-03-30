@@ -18,17 +18,8 @@ builder.AddTankaGraphQL()
             "Query",
             new FieldsWithResolvers
             {
-                // We will just return new object as resolved value
-                { "system: System!", () => new SystemDefinition() }
-            });
-
-        // Add system type with version field of type String!
-        schema.Add(
-            "System",
-            new FieldsWithResolvers
-            {
-                // version is resolved from the objectValue (the parent value of type SystemDefinition)
-                { "version: String!", (SystemDefinition objectValue) => objectValue.Version }
+                // Simple string field with hard coded resolved value
+                { "hello: String!", () => "Hello World"}
             });
 
         // add Subscription root
@@ -37,12 +28,22 @@ builder.AddTankaGraphQL()
             new FieldsWithResolvers
             {
                 // this will resolve the actual resolved value from the produced values
-                { "counter: Int!", (int objectValue) => objectValue }
+                { "hello: String!", (string objectValue) => objectValue }
             },
             new FieldsWithSubscribers
             {
                 // this is our subscription producer
-                { "counter(to: Int!): Int!", Count }
+                { "hello: String!", (CancellationToken unsubscribe) =>
+                {
+                    return Hello(unsubscribe);
+
+                    static async IAsyncEnumerable<string> Hello([EnumeratorCancellation]CancellationToken unsubscribe)
+                    {
+                        yield return "Hello";
+                        await Task.Delay(TimeSpan.FromSeconds(5), unsubscribe);
+                        yield return "World";
+                    }
+                }}
             });
     });
 
@@ -56,20 +57,3 @@ app.UseWebSockets();
 app.MapTankaGraphQL("/graphql", "System");
 
 app.Run();
-
-// simple subscription generating numbers from 0 to the given number
-static async IAsyncEnumerable<int> Count(int to, [EnumeratorCancellation] CancellationToken cancellationToken)
-{
-    var i = 0;
-    while (!cancellationToken.IsCancellationRequested)
-    {
-        yield return ++i;
-
-        if (i == to)
-            break;
-
-        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-    }
-}
-
-public record SystemDefinition(string Version = "3.0");

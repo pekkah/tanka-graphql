@@ -12,8 +12,8 @@ builder.Services.Configure<JsonOptions>(json =>
     json.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
 // configure services
-builder.AddTankaGraphQL3()
-    .AddOptions("chat", options => { options.Configure(schema => schema.AddChat()); })
+builder.AddTankaGraphQL()
+    .AddSchemaOptions("chat", options => { options.Configure(schema => schema.AddChat()); })
     .AddHttp()
     .AddWebSockets();
 
@@ -25,6 +25,6 @@ var app = builder.Build();
 app.UseWebSockets();
 
 // this uses the default pipeline
-app.MapTankaGraphQL3("/graphql", "chat");
+app.MapTankaGraphQL("/graphql", "chat");
 
 app.Run();

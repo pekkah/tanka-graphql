@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Internal;
 
 namespace Tanka.GraphQL.ValueResolution;
@@ -88,13 +87,21 @@ public class ResolversBuilder : IEnumerable
         return builder;
     }
 
+    public ResolversBuilder Subscriber(
+        string objectName,
+        string fieldName,
+        Action<SubscriberBuilder> configureResolver)
+    {
+        configureResolver(Subscriber(objectName, fieldName));
+        return this;
+    }
+
     public SubscriberBuilder Subscriber(
         string objectName,
         string fieldName,
-        Action<ResolverBuilder> configureResolver)
+        Delegate subscriber)
     {
-        configureResolver(Resolver(objectName, fieldName));
-        return Subscriber(objectName, fieldName);
+        return Subscriber(objectName, fieldName).Run(subscriber);
     }
 
     public bool HasResolver(string objectName, string fieldName)

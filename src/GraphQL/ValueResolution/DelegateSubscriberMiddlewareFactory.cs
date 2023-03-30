@@ -1,39 +1,37 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Tanka.GraphQL.ValueResolution;
 
-public class DelegateSubscriberFactory : DelegateFactoryBase<SubscriberContext, Subscriber>
+public class DelegateSubscriberMiddlewareFactory : DelegateFactoryBase<SubscriberContext, Func<SubscriberContext, Subscriber, CancellationToken, ValueTask>>
 {
-    internal static readonly MethodInfo ResolveAsyncEnumerableT = typeof(DelegateSubscriberFactory)
-        .GetMethod(nameof(ResolveAsyncEnumerable), BindingFlags.Static | BindingFlags.NonPublic)!;
+    private static readonly Lazy<DelegateSubscriberMiddlewareFactory> InstanceFactory = new(() => new DelegateSubscriberMiddlewareFactory());
 
-    private static readonly Lazy<DelegateSubscriberFactory>
-        InstanceFactory = new(() => new DelegateSubscriberFactory());
+    public static DelegateSubscriberMiddlewareFactory Instance => InstanceFactory.Value;
+
+    private static readonly ParameterExpression NextParam = Expression.Parameter(typeof(Subscriber), "next");
 
     public readonly ParameterExpression CancellationTokenParam =
         Expression.Parameter(typeof(CancellationToken), "unsubscribe");
 
-    public static DelegateSubscriberFactory Instance => InstanceFactory.Value;
-
-    public static Subscriber Get(Delegate subscriberDelegate)
+    public static Func<SubscriberContext, Subscriber, CancellationToken, ValueTask> Get(Delegate middlewareDelegate)
     {
-        return Instance.GetOrCreate(subscriberDelegate);
+        return Instance.GetOrCreate(middlewareDelegate);
     }
 
     protected override Expression GetArgumentExpression(ParameterInfo p, IReadOnlyDictionary<string, Expression> contextProperties)
     {
+        if (p.ParameterType == typeof(Subscriber))
+            return NextParam;
+
         if (p.ParameterType == typeof(CancellationToken))
             return CancellationTokenParam;
 
         return base.GetArgumentExpression(p, contextProperties);
-
     }
 
-    public override Subscriber Create(Delegate subscriberDelegate)
+    public override Func<SubscriberContext, Subscriber, CancellationToken, ValueTask> Create(Delegate subscriberDelegate)
     {
         MethodInfo invokeMethod = subscriberDelegate.Method;
         MethodCallExpression invokeExpression = GetDelegateMethodCallExpression(
@@ -64,7 +62,7 @@ public class DelegateSubscriberFactory : DelegateFactoryBase<SubscriberContext, 
                  invokeMethod.ReturnType.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>))
         {
             Type t = invokeMethod.ReturnType.GetGenericArguments()[0];
-            valueTaskExpression = Expression.Call(ResolveAsyncEnumerableT.MakeGenericMethod(t), invokeExpression,
+            valueTaskExpression = Expression.Call(DelegateSubscriberFactory.ResolveAsyncEnumerableT.MakeGenericMethod(t), invokeExpression,
                 CancellationTokenParam, ContextParam);
         }
         else
@@ -74,28 +72,14 @@ public class DelegateSubscriberFactory : DelegateFactoryBase<SubscriberContext, 
         }
 
 
-        var lambda = Expression.Lambda<Subscriber>(
+        var lambda = Expression.Lambda<Func<SubscriberContext, Subscriber, CancellationToken, ValueTask>>(
             valueTaskExpression,
             ContextParam,
+            NextParam,
             CancellationTokenParam
         );
 
-        Subscriber compiledLambda = lambda.Compile();
+        var compiledLambda = lambda.Compile();
         return compiledLambda;
-    }
-
-    private static ValueTask ResolveAsyncEnumerable<T>(IAsyncEnumerable<T> task, CancellationToken cancellationToken,
-        SubscriberContext context)
-    {
-        context.ResolvedValue = Wrap(task, cancellationToken);
-        return ValueTask.CompletedTask;
-
-        [DebuggerStepThrough]
-        static async IAsyncEnumerable<object?> Wrap(
-            IAsyncEnumerable<T> task,
-            [EnumeratorCancellation] CancellationToken cancellationToken)
-        {
-            await foreach (T item in task.WithCancellation(cancellationToken)) yield return item;
-        }
     }
 }

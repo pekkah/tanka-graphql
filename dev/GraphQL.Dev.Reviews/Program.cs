@@ -13,8 +13,8 @@ builder.Services.AddSingleton<ReviewsReferenceResolvers>();
 builder.Services.AddSingleton<ReviewsResolvers>();
 
 // configure services
-builder.AddTankaGraphQL3()
-    .AddOptions("reviews", options =>
+builder.AddTankaGraphQL()
+    .AddSchemaOptions("reviews", options =>
     {
         options.AddReviews();
 
@@ -35,6 +35,6 @@ var app = builder.Build();
 app.UseWebSockets();
 
 // this uses the default pipeline
-app.MapTankaGraphQL3("/graphql", "reviews");
+app.MapTankaGraphQL("/graphql", "reviews");
 
 app.Run();

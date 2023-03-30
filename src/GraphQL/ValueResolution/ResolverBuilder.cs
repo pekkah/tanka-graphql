@@ -10,6 +10,13 @@ public class ResolverBuilder
         return this;
     }
 
+    public ResolverBuilder Use(Delegate middleware)
+    {
+        var middlewareFunc = DelegateResolverMiddlewareFactory.Get(middleware);
+        _components.Add(next => context => middlewareFunc(context, next));
+        return this;
+    }
+
     public ResolverBuilder Run(Resolver resolver)
     {
         return Use(_ => resolver);

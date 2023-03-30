@@ -22,9 +22,6 @@ public abstract class DelegateFactoryBase<TContext, TLambda>
             new[] { typeof(ResolverContextBase), typeof(string) }
         )!;
 
-    public readonly ParameterExpression CancellationTokenParam =
-        Expression.Parameter(typeof(CancellationToken), "cancellationToken");
-
     public readonly ParameterExpression ContextParam =
         Expression.Parameter(typeof(TContext), "context");
 
@@ -56,34 +53,36 @@ public abstract class DelegateFactoryBase<TContext, TLambda>
         return resolver;
     }
 
-    protected IEnumerable<Expression> GetArgumentExpressions(MethodInfo invokeMethod)
+    protected virtual IEnumerable<Expression> GetArgumentExpressions(MethodInfo invokeMethod)
     {
         IReadOnlyDictionary<string, Expression> contextProperties = GetContextParamProperties();
         return invokeMethod.GetParameters()
-            .Select(p =>
+            .Select(p => GetArgumentExpression(p, contextProperties));
+    }
+
+    protected virtual Expression GetArgumentExpression(ParameterInfo p, IReadOnlyDictionary<string, Expression> contextProperties)
+    {
+        if (p.ParameterType == typeof(TContext))
+            return ContextParam;
+
+        if (p.Name is not null)
+            if (contextProperties.TryGetValue(p.Name.ToLowerInvariant(),
+                    out Expression? propertyExpression))
             {
-                if (p.ParameterType == typeof(TContext))
-                    return ContextParam;
+                if (p.ParameterType == propertyExpression.Type)
+                    return propertyExpression;
 
-                if (p.Name is not null)
-                    if (contextProperties.TryGetValue(p.Name.ToLowerInvariant(),
-                            out Expression? propertyExpression))
-                    {
-                        if (p.ParameterType == propertyExpression.Type)
-                            return propertyExpression;
+                return Expression.Convert(propertyExpression, p.ParameterType);
+            }
 
-                        return Expression.Convert(propertyExpression, p.ParameterType);
-                    }
-
-                Expression hasArgumentCall = HasArgumentCall(p);
-                Expression resolveArgumentCall = ResolveArgumentCall(p);
-                Expression getRequiredServiceCall = GetRequiredServiceCall(p);
-                return Expression.Condition(
-                    hasArgumentCall,
-                    resolveArgumentCall,
-                    getRequiredServiceCall
-                );
-            });
+        Expression hasArgumentCall = HasArgumentCall(p);
+        Expression resolveArgumentCall = ResolveArgumentCall(p);
+        Expression getRequiredServiceCall = GetRequiredServiceCall(p);
+        return Expression.Condition(
+            hasArgumentCall,
+            resolveArgumentCall,
+            getRequiredServiceCall
+        );
     }
 
 

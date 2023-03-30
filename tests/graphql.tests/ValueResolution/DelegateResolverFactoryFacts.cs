@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -12,7 +11,6 @@ namespace Tanka.GraphQL.Tests.ValueResolution;
 
 public class DelegateResolverFactoryFacts
 {
- 
     [Fact]
     public async Task ReturnValue_is_Task()
     {

@@ -5,19 +5,19 @@ namespace Tanka.GraphQL.ValueResolution;
 
 public class DelegateResolverFactory : DelegateFactoryBase<ResolverContext, Resolver>
 {
-    private static readonly MethodInfo ResolveValueTaskMethod = typeof(DelegateResolverFactory)
+    internal static readonly MethodInfo ResolveValueTaskMethod = typeof(DelegateResolverFactory)
         .GetMethod(nameof(ResolveValueTask), BindingFlags.Static | BindingFlags.NonPublic)!;
 
-    private static readonly MethodInfo ResolveValueValueTaskMethod = typeof(DelegateResolverFactory)
+    internal static readonly MethodInfo ResolveValueValueTaskMethod = typeof(DelegateResolverFactory)
         .GetMethod(nameof(ResolveValueValueTask), BindingFlags.Static | BindingFlags.NonPublic)!;
 
-    private static readonly MethodInfo ResolveValueObjectMethod = typeof(DelegateResolverFactory)
+    internal static readonly MethodInfo ResolveValueObjectMethod = typeof(DelegateResolverFactory)
         .GetMethod(nameof(ResolveValueObject), BindingFlags.Static | BindingFlags.NonPublic)!;
     
     private static readonly Lazy<DelegateResolverFactory> InstanceFactory = new(() => new DelegateResolverFactory());
-
+    
     public static DelegateResolverFactory Instance => InstanceFactory.Value;
-
+    
     public static Resolver Get(Delegate resolverDelegate)
     {
         return Instance.GetOrCreate(resolverDelegate);
