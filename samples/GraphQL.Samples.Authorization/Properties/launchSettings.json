@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "GraphQL.Samples.Http": {
+    "GraphQL.Samples.Authorization": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "https://localhost:7239/graphql/ui",
