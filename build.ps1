@@ -62,7 +62,7 @@ $IsPreRelease = $PreReleaseTag -ne ''
 "PreReleaseTag: $PreReleaseTag, IsPreRelease: $IsPreRelease"
 
 # Build and test
-"----------------------------------------"
+"----------------------------------------
 "Build"
 dotnet restore
 dotnet build -c Release --no-restore
@@ -71,7 +71,7 @@ EnsureLastExitCode("dotnet build failed")
 if ($OnlyBuild -eq $False) {
     "----------------------------------------"
     "Run tests"
-    dotnet test -c Release --logger trx --results-directory $Output --no-restore --no-build
+    dotnet test -c Release --results-directory $Output --no-restore --no-build --collect:"XPlat Code Coverage"
     EnsureLastExitCode("dotnet test failed")
 
     "----------------------------------------"
