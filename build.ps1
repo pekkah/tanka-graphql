@@ -62,7 +62,7 @@ $IsPreRelease = $PreReleaseTag -ne ''
 "PreReleaseTag: $PreReleaseTag, IsPreRelease: $IsPreRelease"
 
 # Build and test
-"----------------------------------------
+"----------------------------------------"
 "Build"
 dotnet restore
 dotnet build -c Release --no-restore
