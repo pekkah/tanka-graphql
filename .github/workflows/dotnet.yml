@@ -32,11 +32,13 @@ jobs:
             3.1.x
             6.0.x
             7.0.x
-
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
       - name: Build packages
         shell: pwsh
         run: |
           ./build.ps1 -Output ./artifacts -CurrentBranch $Env:GITHUB_REF_NAME
+
 
       - name: Publish build artifacts
         uses: actions/upload-artifact@v2
