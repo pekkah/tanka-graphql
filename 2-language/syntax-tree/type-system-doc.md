@@ -1,3 +1,0 @@
-## Type System Document
-
-TODO:

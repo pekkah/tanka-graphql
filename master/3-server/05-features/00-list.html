@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>3-graphql-ws - Tanka GraphQL</title>
+    <title>00-list - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -80,7 +80,7 @@
                     <a class="nav-link" href="master/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/3-server/0-common.html">Server</a>
+                    <a class="nav-link" href="master/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
@@ -115,60 +115,30 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/0-common.html>Common</a>
+    <a class="nav-link" href=master/3-server/00-index.html>Introduction</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-query-cost-limit.html>Query Cost Limitting</a>
+    <a class="nav-link" href=master/3-server/05-features/00-list.html>Features</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/3-server/05-features/01-http.html>Http and WebSockets</a>
     <ul>
     </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/1-signalr-hub.html>SignalR</a>
-    <ul>
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/2-apollo-link.html>Apollo Link</a>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/3-server/05-features/02-authorization.html>Authorization</a>
     <ul>
     </ul>
 </li>    </ul>
 </li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-graphql-ws/3-graphql-ws.html>GraphQL-WS</a>
-    <ul>
-    </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/5-extensions/5-query-cost-analysis.html>Extensions</a>
-    <ul>
-    </ul>
-</li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="graphql-ws">GraphQL WS</h2>
-<p>Besides the SignalR based server Tanka also provides a graphql-ws protocol
-compatible websocket server. This server can be used with
-<a href="https://www.apollographql.com/docs/link/links/ws">apollo-link-ws</a>.</p>
-<h3 id="configure-required-services">Configure required services</h3>
-<p>This will add the required services to execution pipeline.</p>
-<pre><code class="language-csharp">//todo: add sample
-</code></pre>
-<h3 id="add-middleware-to-app-pipeline">Add middleware to app pipeline</h3>
-<pre><code class="language-csharp">app.UseWebSockets();
-app.UseTankaGraphQLWebSockets(&quot;/api/graphql&quot;);
-</code></pre>
-<h3 id="configure-protocol">Configure protocol</h3>
-<p>When <code>connection_init</code> message is received from client the protocol calls
-<code>AcceptAsync</code> of the options to accept the connection. By default it accepts
-the connection and sends <code>connection_ack</code> message back to the client. You can
-configure this behavior with your own logic.</p>
-<pre><code class="language-csharp">//todo: add sample
-</code></pre>
+                <h2 id="features">Features</h2>
+<p>Features are show by a sample projects. Samples shows how to use the feature with minimal code.
+Full source code of each sample is available at <a href="https://github.com/pekkah/tanka-graphql">GitHub</a>.</p>
                     
             </main>
         </div>

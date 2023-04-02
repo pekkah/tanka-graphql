@@ -1,2 +1,3 @@
-- [Language](xref://01-parser.md)
-- [Imports](xref://02-imports.md)
+- [Parser](xref://01-parser.md)
+- [Executable Document](xref://02-executable-doc.md)
+- [Type System Document](xref://03-type-system-doc.md)

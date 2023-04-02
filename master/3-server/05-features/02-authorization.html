@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>0-common - Tanka GraphQL</title>
+    <title>02-authorization - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -80,7 +80,7 @@
                     <a class="nav-link" href="master/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/3-server/0-common.html">Server</a>
+                    <a class="nav-link" href="master/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
@@ -115,75 +115,118 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/0-common.html>Common</a>
+    <a class="nav-link" href=master/3-server/00-index.html>Introduction</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-query-cost-limit.html>Query Cost Limitting</a>
+    <a class="nav-link" href=master/3-server/05-features/00-list.html>Features</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/3-server/05-features/01-http.html>Http and WebSockets</a>
     <ul>
     </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/1-signalr-hub.html>SignalR</a>
-    <ul>
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/2-apollo-link.html>Apollo Link</a>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/3-server/05-features/02-authorization.html>Authorization</a>
     <ul>
     </ul>
 </li>    </ul>
 </li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-graphql-ws/3-graphql-ws.html>GraphQL-WS</a>
-    <ul>
-    </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/5-extensions/5-query-cost-analysis.html>Extensions</a>
-    <ul>
-    </ul>
-</li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="common-options">Common options</h2>
-<p>Tanka provides SignalR hub and websockets server. Both of these use
-same underlying services for query execution.</p>
-<h3 id="add-required-common-services">Add required common services</h3>
-<p>Add services required for executing GraphQL queries, mutations
-and subscriptions. Main service added is <code>IQueryStreamService</code>
-which handles the plumping of execution.</p>
-<pre><code class="language-csharp">todo: add sample
-</code></pre>
-<h3 id="configure-schema">Configure schema</h3>
-<p>Configure <code>ISchema</code> for execution by providing a factory function (can be async)
-used to get the schema for execution.</p>
-<p>Simple without dependencies</p>
-<pre><code class="language-csharp">todo: add sample
-</code></pre>
-<p>Overloads are provided for providing a function with dependencies resolved from
-services.</p>
-<pre><code class="language-csharp">todo: add sample
-</code></pre>
-<h3 id="configure-rules">Configure rules</h3>
-<p>Configure validation rules for execution. Note that by default all rules
-specified in the specification are included.</p>
-<p>Add MaxCost validation rule</p>
-<pre><code class="language-csharp">todo: add sample
-</code></pre>
-<p>Remove all rules</p>
-<pre><code class="language-csharp">todo: add sample
-</code></pre>
-<p>With up to three dependencies resolved from service provider</p>
-<pre><code class="language-csharp">todo: add sample
-</code></pre>
-<h3 id="add-extensions">Add extensions</h3>
-<p>Add Apollo tracing extension</p>
-<pre><code class="language-csharp">todo: add sample
+                <h2 id="authorization">Authorization</h2>
+<p>This sample supports both websockets and HTTP requests. It uses a simple cookie authentication
+to authenticate the user and then applies a authorization policy to the GraphQL endpoint.</p>
+<pre><code class="language-csharp">using System.Runtime.CompilerServices;
+using System.Security.Claims;
+using System.Security.Principal;
+using Microsoft.AspNetCore.Authentication;
+using Tanka.GraphQL.Executable;
+using Tanka.GraphQL.Server;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// add required services
+builder.AddTankaGraphQL()
+    // add http transport
+    .AddHttp()
+    // add websocket transport for subscriptions
+    .AddWebSockets()
+    // add named schema
+    .AddSchema(&quot;System&quot;, schema =&gt;
+    {
+        // add Query root
+        schema.Add(
+            &quot;Query&quot;,
+            new FieldsWithResolvers
+            {
+                // Simple string field with hard coded resolved value
+                { &quot;hello: String!&quot;, () =&gt; &quot;Hello World&quot; }
+            });
+
+        // add Subscription root
+        schema.Add(
+            &quot;Subscription&quot;,
+            new FieldsWithResolvers
+            {
+                // this will resolve the actual resolved value from the produced values
+                { &quot;hello: String!&quot;, (string objectValue) =&gt; objectValue }
+            },
+            new FieldsWithSubscribers
+            {
+                // this is our subscription producer
+                {
+                    &quot;hello: String!&quot;, (CancellationToken unsubscribe) =&gt;
+                    {
+                        return Hello(unsubscribe);
+
+                        static async IAsyncEnumerable&lt;string&gt; Hello(
+                            [EnumeratorCancellation] CancellationToken unsubscribe)
+                        {
+                            yield return &quot;Hello&quot;;
+                            await Task.Delay(TimeSpan.FromSeconds(1), unsubscribe);
+                            yield return &quot;World&quot;;
+                        }
+                    }
+                }
+            });
+    });
+
+// add cookie authentication
+builder.Services.AddAuthentication().AddCookie(options =&gt;
+{
+    options.LoginPath = &quot;/login&quot;;
+    options.LogoutPath = &quot;/logout&quot;;
+    options.AccessDeniedPath = &quot;/login&quot;;
+});
+
+builder.Services.AddAuthorization();
+
+WebApplication? app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+// this is required by the websocket transport
+app.UseWebSockets();
+
+// this uses the default pipeline
+// you can access GraphiQL at &quot;/graphql/ui&quot;
+app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;System&quot;)
+    // we require a user name User
+    .RequireAuthorization(policy =&gt; policy.RequireUserName(&quot;User&quot;));
+
+// map login (required by the cookie authentication)
+app.MapGet(&quot;/login&quot;, async (HttpContext http, string returnUrl) =&gt;
+{
+    // login as hardcoded user
+    await http.SignInAsync(new ClaimsPrincipal(new GenericIdentity(&quot;User&quot;)));
+    return Results.Redirect(returnUrl);
+});
+
+
+app.Run();
 </code></pre>
                     
             </main>

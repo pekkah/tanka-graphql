@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>1-signalr-hub - Tanka GraphQL</title>
+    <title>02-executable-doc - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -80,7 +80,7 @@
                     <a class="nav-link" href="master/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/3-server/0-common.html">Server</a>
+                    <a class="nav-link" href="master/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
@@ -115,50 +115,68 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/0-common.html>Common</a>
+    <a class="nav-link" href=master/2-language/01-parser.html>Parser</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-query-cost-limit.html>Query Cost Limitting</a>
+    <a class="nav-link" href=master/2-language/02-executable-doc.html>Executable Document</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/1-signalr-hub.html>SignalR</a>
-    <ul>
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/2-apollo-link.html>Apollo Link</a>
-    <ul>
-    </ul>
-</li>    </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-graphql-ws/3-graphql-ws.html>GraphQL-WS</a>
-    <ul>
-    </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/5-extensions/5-query-cost-analysis.html>Extensions</a>
+    <a class="nav-link" href=master/2-language/03-type-system-doc.html>Type System Document</a>
     <ul>
     </ul>
 </li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="signalr-hub">SignalR Hub</h2>
-<p>Server is implemented as a SignalR Core Hub and it handles queries, mutations
-and subscriptions. This projects provides an Apollo Link implementation to be
-used with the provided hub.</p>
-<h3 id="graphql-server">GraphQL Server</h3>
-<p>Configure SignalR server</p>
-<pre><code class="language-csharp">//todo: add sample
-</code></pre>
-<pre><code class="language-csharp">//todo: add sample
+                <h2 id="executable-document">Executable Document</h2>
+<p>Tanka GraphQL splits the GraphQL document into two parts: executable document and type system document.
+Executable document is the part of the document that is executed by the GraphQL server. Type system document
+is the part of the document that is used to define the GraphQL schema.</p>
+<p>Here's the definition of executable document:</p>
+<pre><code class="language-csharp">﻿using System;
+using System.Text;
+
+namespace Tanka.GraphQL.Language.Nodes;
+
+public sealed class ExecutableDocument : INode
+{
+    public readonly FragmentDefinitions? FragmentDefinitions;
+    public readonly OperationDefinitions? OperationDefinitions;
+
+    public ExecutableDocument(
+        OperationDefinitions? operationDefinitions,
+        FragmentDefinitions? fragmentDefinitions)
+    {
+        OperationDefinitions = operationDefinitions;
+        FragmentDefinitions = fragmentDefinitions;
+    }
+
+    public NodeKind Kind =&gt; NodeKind.ExecutableDocument;
+    public Location? Location =&gt; null;
+
+    public static implicit operator ExecutableDocument(string value)
+    {
+        var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
+        return parser.ParseExecutableDocument();
+    }
+
+    public static implicit operator ExecutableDocument(ReadOnlySpan&lt;byte&gt; value)
+    {
+        var parser = Parser.Create(value);
+        return parser.ParseExecutableDocument();
+    }
+
+    public override string ToString()
+    {
+        return Printer.Print(this);
+    }
+}
 </code></pre>
                     
             </main>

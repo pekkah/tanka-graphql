@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>executable-doc - Tanka GraphQL</title>
+    <title>01-http - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -80,7 +80,7 @@
                     <a class="nav-link" href="master/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/3-server/0-common.html">Server</a>
+                    <a class="nav-link" href="master/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
@@ -115,26 +115,20 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/2-language/01-parser.html>Language</a>
+    <a class="nav-link" href=master/3-server/00-index.html>Introduction</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/2-language/02-imports.html>Imports</a>
-    <ul>
-    </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/2-language/syntax-tree/tree.html>Syntax Tree</a>
+    <a class="nav-link" href=master/3-server/05-features/00-list.html>Features</a>
     <ul>
 <li class="nav-item">
-    <a class="nav-link" href=master/2-language/syntax-tree/executable-doc.html>ExecutableDocument</a>
+    <a class="nav-link" href=master/3-server/05-features/01-http.html>Http and WebSockets</a>
     <ul>
     </ul>
 </li><li class="nav-item">
-    <a class="nav-link" href=master/2-language/syntax-tree/type-system-doc.html>TypeSystemDocument</a>
+    <a class="nav-link" href=master/3-server/05-features/02-authorization.html>Authorization</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -142,8 +136,86 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="executable-document">Executable Document</h2>
-<p>TODO:</p>
+                <h2 id="http-and-websockets">Http and WebSockets</h2>
+<p>This sample provides a basic HTTP and WebSockets server with GraphQL schema and query execution.
+It supports both GET and POST requests and uses WebSockets for subscriptions.</p>
+<p>WebSockets transport uses the newer <a href="https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md">graphql-ws</a> protocol</p>
+<pre><code class="language-csharp">using System.Runtime.CompilerServices;
+using Tanka.GraphQL.Executable;
+using Tanka.GraphQL.Server;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// add required services
+builder.AddTankaGraphQL()
+    // add http transport
+    .AddHttp()
+    // add websocket transport for subscriptions
+    .AddWebSockets()
+    // add named schema
+    .AddSchema(&quot;System&quot;, schema =&gt;
+    {
+        // add Query root
+        schema.Add(
+            &quot;Query&quot;,
+            new FieldsWithResolvers
+            {
+                // We will just return new object as resolved value
+                { &quot;system: System!&quot;, () =&gt; new SystemDefinition() }
+            });
+
+        // Add system type with version field of type String!
+        schema.Add(
+            &quot;System&quot;,
+            new FieldsWithResolvers
+            {
+                // version is resolved from the objectValue (the parent value of type SystemDefinition)
+                { &quot;version: String!&quot;, (SystemDefinition objectValue) =&gt; objectValue.Version }
+            });
+
+        // add Subscription root
+        schema.Add(
+            &quot;Subscription&quot;,
+            new FieldsWithResolvers
+            {
+                // this will resolve the actual resolved value from the produced values
+                { &quot;counter: Int!&quot;, (int objectValue) =&gt; objectValue }
+            },
+            new FieldsWithSubscribers
+            {
+                // this is our subscription producer
+                { &quot;counter(to: Int!): Int!&quot;, Count }
+            });
+    });
+
+WebApplication? app = builder.Build();
+
+// this is required by the websocket transport
+app.UseWebSockets();
+
+// this uses the default pipeline
+// you can access GraphiQL at &quot;/graphql/ui&quot;
+app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;System&quot;);
+
+app.Run();
+
+// simple subscription generating numbers from 0 to the given number
+static async IAsyncEnumerable&lt;int&gt; Count(int to, [EnumeratorCancellation] CancellationToken cancellationToken)
+{
+    var i = 0;
+    while (!cancellationToken.IsCancellationRequested)
+    {
+        yield return ++i;
+
+        if (i == to)
+            break;
+
+        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+    }
+}
+
+public record SystemDefinition(string Version = &quot;3.0&quot;);
+</code></pre>
                     
             </main>
         </div>

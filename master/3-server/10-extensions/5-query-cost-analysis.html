@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>1-dotnet-client - Tanka GraphQL</title>
+    <title>5-query-cost-analysis - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -80,7 +80,7 @@
                     <a class="nav-link" href="master/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/3-server/0-common.html">Server</a>
+                    <a class="nav-link" href="master/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
@@ -115,42 +115,148 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/0-common.html>Common</a>
+    <a class="nav-link" href=master/3-server/00-index.html>Introduction</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-query-cost-limit.html>Query Cost Limitting</a>
+    <a class="nav-link" href=master/3-server/05-features/00-list.html>Features</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/3-server/05-features/01-http.html>Http and WebSockets</a>
     <ul>
     </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/1-signalr-hub.html>SignalR</a>
-    <ul>
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/2-apollo-link.html>Apollo Link</a>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/3-server/05-features/02-authorization.html>Authorization</a>
     <ul>
     </ul>
 </li>    </ul>
 </li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-graphql-ws/3-graphql-ws.html>GraphQL-WS</a>
-    <ul>
-    </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/5-extensions/5-query-cost-analysis.html>Extensions</a>
-    <ul>
-    </ul>
-</li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <p>Dotnet client is available at <a href="https://github.com/anttikajanus/tanka-graphql-net-client">https://github.com/anttikajanus/tanka-graphql-net-client</a></p>
+                <h2 id="query-cost-analysis">Query Cost Analysis</h2>
+<p>Query cost analysis can be used to limit the complexity of the executed queries and
+to protect the service against various attacks (DoS etc).</p>
+<p>Cost of the query is defined by calculating complexity value for each field and
+setting a maximum allowed cost. Complexity can be set by setting a default field complexity
+which will be used for all fields in a query and/or by using <code>@cost</code> directive on the schema.</p>
+<h2 id="example">Example</h2>
+<p>Example schema has few fields with and without set complexity.</p>
+<pre><code class="language-csharp">    public CostFacts()
+    {
+        var sdl =
+            @&quot;
+                schema {
+                    query: Query
+                }
+
+                type Query {
+                    default: Int
+                    withCost: Int @cost(complexity: 1)
+                    withMultiplier(count: Int!): Int @cost(complexity: 2, multipliers: [&quot;&quot;count&quot;&quot;])
+                }
+                &quot;;
+
+        Schema = new SchemaBuilder()
+            .Add(sdl)
+            .Build(new SchemaBuildOptions()).Result;
+    }
+
+</code></pre>
+<h3 id="default-field-complexity">Default field complexity</h3>
+<p>Default field complexity will be used when <code>@cost</code> directive is not present in the field.</p>
+<pre><code class="language-csharp">
+    [Fact]
+    public void Cost_above_max_cost_with_defaultComplexity()
+    {
+        /* Given */
+        var document =
+            @&quot;{
+                    default
+                }&quot;;
+
+        /* When */
+        var result = Validate(
+            document,
+            CostAnalyzer.MaxCost(
+                0,
+                1)
+        );
+
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error =&gt; error.Code == &quot;MAX_COST&quot;);
+    }
+
+</code></pre>
+<h3 id="cost-directive">Cost Directive</h3>
+<p>Complexity of field is set with <code>@cost</code> directive.</p>
+<pre><code class="language-csharp">
+    [Fact]
+    public void Cost_above_max_cost_with_costDirective()
+    {
+        /* Given */
+        var document =
+            @&quot;{
+                    withCost
+                }&quot;;
+
+        /* When */
+        var result = Validate(
+            document,
+            CostAnalyzer.MaxCost(
+                0,
+                0)
+        );
+
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error =&gt; error.Code == &quot;MAX_COST&quot;);
+    }
+
+</code></pre>
+<p>In some cases the complexity of the field is related to its arguments. In these cases
+value of the argument can be used as mulpliplier for the complexity.</p>
+<pre><code class="language-csharp">
+    [Fact]
+    public void Cost_above_max_cost_with_costDirective_and_multiplier()
+    {
+        /* Given */
+        var document =
+            @&quot;{
+                    withMultiplier(count: 5)
+                }&quot;;
+
+        /* When */
+        var result = Validate(
+            document,
+            CostAnalyzer.MaxCost(
+                5,
+                0)
+        );
+
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error =&gt; error.Code == &quot;MAX_COST&quot;);
+    }
+
+</code></pre>
+<h2 id="import-directive">Import directive</h2>
+<p>Using SDL import</p>
+<pre><code class="language-csharp">//todo: add sample
+</code></pre>
+<p>Or you can include it manually using the <code>SchemaBuilder.Add</code></p>
+<pre><code class="language-csharp">var builder = new SchemaBuilder()
+    .Add(CostAnalyzer.CostDirective);
+</code></pre>
                     
             </main>
         </div>

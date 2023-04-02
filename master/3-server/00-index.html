@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>2-query-cost-limit - Tanka GraphQL</title>
+    <title>00-index - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -80,7 +80,7 @@
                     <a class="nav-link" href="master/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/3-server/0-common.html">Server</a>
+                    <a class="nav-link" href="master/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
@@ -115,53 +115,35 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/0-common.html>Common</a>
+    <a class="nav-link" href=master/3-server/00-index.html>Introduction</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-query-cost-limit.html>Query Cost Limitting</a>
+    <a class="nav-link" href=master/3-server/05-features/00-list.html>Features</a>
+    <ul>
+<li class="nav-item">
+    <a class="nav-link" href=master/3-server/05-features/01-http.html>Http and WebSockets</a>
     <ul>
     </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/1-signalr-hub.html>SignalR</a>
-    <ul>
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/1-signalR/2-apollo-link.html>Apollo Link</a>
+</li><li class="nav-item">
+    <a class="nav-link" href=master/3-server/05-features/02-authorization.html>Authorization</a>
     <ul>
     </ul>
 </li>    </ul>
 </li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/2-graphql-ws/3-graphql-ws.html>GraphQL-WS</a>
-    <ul>
-    </ul>
-</li>    </nav>
-    <nav class="nav flex-column">
-<li class="nav-item">
-    <a class="nav-link" href=master/3-server/5-extensions/5-query-cost-analysis.html>Extensions</a>
-    <ul>
-    </ul>
-</li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="query-cost-limit">Query Cost Limit</h2>
-<p>GraphQL has some unique characteristics which open services
-for various types of attacks. Common attack is to overwhelm
-the service with resource heavy queries. Common way to counter
-this type of attack is to limit the query cost based on complexity.</p>
-<h2 id="query-cost-analysis">Query Cost Analysis</h2>
-<p>See the detailed explanation and schema configuration in
-<a href="master/3-server/5-extensions/5-query-cost-analysis.html">Query Cost Analysis</a>.</p>
-<h2 id="usage-with-server">Usage with server</h2>
-<p>Add cost limiting validation rule to options</p>
-<pre><code class="language-csharp">//todo: add sample
+                <h2 id="tanka-graphql-server">Tanka GraphQL Server</h2>
+<p>Server provides a way to host GraphQL schema and execute queries against it. It runs on top
+of ASP.NET Core and has transports for HTTP and WebSockets.</p>
+<h3 id="installation">Installation</h3>
+<p>Server is available as a NuGet package:</p>
+<pre><code class="language-csharp">dotnet add package tanka.graphql.server
 </code></pre>
+<p>See features on the side for more information.</p>
                     
             </main>
         </div>

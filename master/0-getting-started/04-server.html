@@ -80,7 +80,7 @@
                     <a class="nav-link" href="master/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/3-server/0-common.html">Server</a>
+                    <a class="nav-link" href="master/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
@@ -159,47 +159,57 @@ required then you can implement your own server.</p>
 <blockquote class="blockquote">
 <p>See also</p>
 <ul>
-<li><a href="master/3-server/0-common.html">Server</a></li>
+<li><a href="master/3-server/00-index.html">Server</a></li>
 </ul>
 </blockquote>
 <h3 id="simple-example-with-http-and-websockets">Simple example with HTTP and websockets</h3>
 <pre><code class="language-csharp">using System.Runtime.CompilerServices;
 using Tanka.GraphQL.Executable;
-using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Server;
-using Tanka.GraphQL.ValueResolution;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// configure services
-builder.AddTankaGraphQL3()
+// add required services
+builder.AddTankaGraphQL()
+    // add http transport
+    .AddHttp()
+    // add websocket transport for subscriptions
+    .AddWebSockets()
     // add named schema
     .AddSchema(&quot;System&quot;, schema =&gt;
     {
-        schema.Add(&quot;Query&quot;, new FieldsWithResolvers
-        {
-            { &quot;system: System!&quot;, () =&gt; new { } }
-        });
-
-        schema.Add(&quot;System&quot;, new FieldsWithResolvers
-        {
-            { &quot;version: String!&quot;, () =&gt; &quot;3.0&quot; }
-        });
-
-        schema.Add(&quot;Subscription&quot;, new FieldsWithResolvers
+        // add Query root
+        schema.Add(
+            &quot;Query&quot;,
+            new FieldsWithResolvers
             {
+                // We will just return new object as resolved value
+                { &quot;system: System!&quot;, () =&gt; new SystemDefinition() }
+            });
+
+        // Add system type with version field of type String!
+        schema.Add(
+            &quot;System&quot;,
+            new FieldsWithResolvers
+            {
+                // version is resolved from the objectValue (the parent value of type SystemDefinition)
+                { &quot;version: String!&quot;, (SystemDefinition objectValue) =&gt; objectValue.Version }
+            });
+
+        // add Subscription root
+        schema.Add(
+            &quot;Subscription&quot;,
+            new FieldsWithResolvers
+            {
+                // this will resolve the actual resolved value from the produced values
                 { &quot;counter: Int!&quot;, (int objectValue) =&gt; objectValue }
             },
             new FieldsWithSubscribers
             {
-                {
-                    &quot;counter(to: Int!): Int!&quot;, (SubscriberContext c, CancellationToken ct) 
-                        =&gt; Count(c.GetArgument&lt;int&gt;(&quot;to&quot;), ct)
-                }
+                // this is our subscription producer
+                { &quot;counter(to: Int!): Int!&quot;, Count }
             });
-    })
-    .AddHttp()
-    .AddWebSockets();
+    });
 
 WebApplication? app = builder.Build();
 
@@ -207,18 +217,12 @@ WebApplication? app = builder.Build();
 app.UseWebSockets();
 
 // this uses the default pipeline
-app.MapTankaGraphQL3(&quot;/graphql&quot;, &quot;System&quot;);
-
-// this allows customization of the pipeline
-app.MapTankaGraphQL3(&quot;/graphql-custom&quot;, gql =&gt;
-{
-    gql.SetProperty(&quot;TraceEnabled&quot;, app.Environment.IsDevelopment());
-    gql.UseDefaults(&quot;System&quot;);
-});
+// you can access GraphiQL at &quot;/graphql/ui&quot;
+app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;System&quot;);
 
 app.Run();
 
-// simple subscriber generating numbers from 0 to the given number
+// simple subscription generating numbers from 0 to the given number
 static async IAsyncEnumerable&lt;int&gt; Count(int to, [EnumeratorCancellation] CancellationToken cancellationToken)
 {
     var i = 0;
@@ -232,6 +236,8 @@ static async IAsyncEnumerable&lt;int&gt; Count(int to, [EnumeratorCancellation] 
         await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
     }
 }
+
+public record SystemDefinition(string Version = &quot;3.0&quot;);
 </code></pre>
                     
             </main>
