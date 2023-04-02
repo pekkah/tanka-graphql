@@ -1,8 +1,8 @@
 ﻿using GraphQL.Dev.Reviews;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Tanka.GraphQL.Dev.Reviews;
 using Tanka.GraphQL.Extensions.ApolloFederation;
-using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Server;
 
 
@@ -19,8 +19,10 @@ builder.AddTankaGraphQL()
         options.AddReviews();
 
         // add federation as last step
-        options.Configure<ReviewsReferenceResolvers>((schema, referenceResolvers) =>
+        options.Configure<ReviewsReferenceResolvers>((options, referenceResolvers) =>
         {
+            var schema = options.Builder;
+
             // federation should be added as last step so
             // that all entity types are correctly detected
             schema.AddSubgraph(new(referenceResolvers));
