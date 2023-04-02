@@ -6,7 +6,7 @@ required then you can implement your own server.
 
 > See also
 >
-> - [Server](xref://server:0-index.md)
+> - [Server](xref://server:00-index.md)
 
 
 ### Simple example with HTTP and websockets
