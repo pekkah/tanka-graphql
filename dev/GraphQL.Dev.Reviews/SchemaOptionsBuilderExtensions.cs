@@ -1,14 +1,17 @@
+using GraphQL.Dev.Reviews;
+using Microsoft.Extensions.Options;
 using Tanka.GraphQL.Server;
 
-namespace GraphQL.Dev.Reviews;
+namespace Tanka.GraphQL.Dev.Reviews;
 
 public static class SchemaOptionsBuilderExtensions
 {
-    public static SchemaOptionsBuilder AddReviews(this SchemaOptionsBuilder options)
+    public static OptionsBuilder<SchemaOptions> AddReviews(this OptionsBuilder<SchemaOptions> optionsBuilder)
     {
-        options.Configure<ReviewsResolvers>((schema, resolvers) =>
+        optionsBuilder.Configure<ReviewsResolvers>((options, resolvers) =>
         {
-            schema.Add("""
+            var builder = options.Builder;
+            builder.Add("""
                 type Review @key(fields: "id") {
                     id: ID!
                     body: String
@@ -28,9 +31,9 @@ public static class SchemaOptionsBuilderExtensions
                 }
                 """);
 
-            schema.Add(resolvers);
+            builder.Add(resolvers);
         });
 
-        return options;
+        return optionsBuilder;
     }
 }

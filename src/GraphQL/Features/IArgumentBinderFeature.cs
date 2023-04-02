@@ -10,4 +10,6 @@ public interface IArgumentBinderFeature
         where T : new();
 
     IEnumerable<T?>? BindInputObjectList<T>(ResolverContextBase context, string name) where T : new();
+    
+    bool HasArgument(ResolverContextBase context, string name);
 }

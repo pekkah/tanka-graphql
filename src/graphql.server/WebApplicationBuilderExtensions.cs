@@ -5,12 +5,12 @@ namespace Tanka.GraphQL.Server;
 
 public static class WebApplicationBuilderExtensions
 {
-    public static GraphQLApplicationBuilder AddTankaGraphQL3(this WebApplicationBuilder builder)
+    public static GraphQLApplicationBuilder AddTankaGraphQL(this WebApplicationBuilder builder)
     {
-        return builder.Services.AddTankaGraphQL3();
+        return builder.Services.AddTankaGraphQL();
     }
 
-    public static GraphQLApplicationBuilder AddTankaGraphQL3(this IServiceCollection services)
+    public static GraphQLApplicationBuilder AddTankaGraphQL(this IServiceCollection services)
     {
         return new GraphQLApplicationBuilder(services);
     }

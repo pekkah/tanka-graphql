@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Tanka.GraphQL.Server;
+﻿namespace Tanka.GraphQL.Server;
 
 public class GraphQLApplicationOptions
 {

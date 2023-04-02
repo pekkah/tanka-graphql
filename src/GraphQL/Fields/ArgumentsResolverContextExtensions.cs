@@ -8,7 +8,7 @@ public static class ArgumentsResolverContextExtensions
     {
         if (!context.ArgumentValues.TryGetValue(name, out var arg))
             throw new ArgumentOutOfRangeException(nameof(name), name,
-                $"Field '{context.Field.Name}' does not contain argument with name '{name}''");
+                $"Field '{context.Field?.Name}' does not contain argument with name '{name}''");
 
         return (T?)arg;
     }
@@ -18,9 +18,17 @@ public static class ArgumentsResolverContextExtensions
     {
         return context.QueryContext.BindInputObject<T>(context, name);
     }
+
     public static IEnumerable<T?>? BindInputObjectList<T>(this ResolverContextBase context, string name)
         where T : new()
     {
         return context.QueryContext.BindInputObjectList<T>(context, name);
+    }
+
+    public static bool HasArgument(
+        this ResolverContextBase context,
+        string name)
+    {
+        return context.QueryContext.HasArgument(context, name);
     }
 }

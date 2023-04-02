@@ -59,7 +59,7 @@ public record QueryContext
         _features.Fetch(ref _features.Cache.ValueCompletion, _ => null);
 
     public IArgumentBinderFeature? ArgumentBinder =>
-        _features.Fetch(ref _features.Cache.ArgumentBinder, _ => null);
+        _features.Fetch(ref _features.Cache.ArgumentBinder, _ => new ArgumentBinderFeature());
 
     private IFieldExecutorFeature? FieldExecutorFeature =>
         _features.Fetch(ref _features.Cache.FieldExecutor, _ => null);

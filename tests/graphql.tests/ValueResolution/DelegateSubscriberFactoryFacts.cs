@@ -27,7 +27,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -37,9 +37,9 @@ public class DelegateSubscriberFactoryFacts
             Field = null,
             Selection = null,
             Fields = null,
-            ArgumentValues = null,
+            ArgumentValues = new Dictionary<string, object?>(),
             Path = null,
-            QueryContext = null,
+            QueryContext = new QueryContext(),
         };
 
         await subscriber(context, CancellationToken.None);
@@ -61,7 +61,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -71,13 +71,13 @@ public class DelegateSubscriberFactoryFacts
             Field = null,
             Selection = null,
             Fields = null,
-            ArgumentValues = null,
+            ArgumentValues = new Dictionary<string, object?>(),
             Path = null,
             QueryContext = new QueryContext()
             {
                 RequestServices = new ServiceCollection()
                     .AddSingleton<IMyDependency, MyDependency>()
-                    .BuildServiceProvider()
+                    .BuildServiceProvider(),
             }
         };
 
@@ -100,7 +100,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -134,7 +134,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -178,7 +178,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -213,7 +213,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -246,7 +246,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -282,7 +282,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = AsyncSubscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -303,6 +303,44 @@ public class DelegateSubscriberFactoryFacts
     }
 
     [Fact]
+    public async Task ReturnValue_is_ValueTask_with_string_arg1()
+    {
+        /* Given */
+        string? arg1test = null;
+        ValueTask AsyncSubscriber(string arg1)
+        {
+            arg1test = arg1;
+            return default;
+        }
+
+        Delegate subscriberDelegate = AsyncSubscriber;
+
+        /* When */
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
+
+        /* Then */
+        var context = new SubscriberContext
+        {
+            ObjectDefinition = null,
+            ObjectValue = null,
+            Field = null,
+            Selection = null,
+            Fields = null,
+            ArgumentValues = new Dictionary<string, object?>()
+            {
+                ["arg1"] = "test"
+            },
+            Path = null,
+            QueryContext = new QueryContext()
+        };
+
+        await subscriber(context, CancellationToken.None);
+
+        Assert.NotNull(arg1test);
+        Assert.Equal("test", arg1test);
+    }
+
+    [Fact]
     public async Task ReturnValue_is_void()
     {
         /* Given */
@@ -314,7 +352,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = Subscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext
@@ -348,7 +386,7 @@ public class DelegateSubscriberFactoryFacts
         Delegate subscriberDelegate = Subscriber;
 
         /* When */
-        Subscriber subscriber = DelegateSubscriberFactory.Create(subscriberDelegate);
+        Subscriber subscriber = DelegateSubscriberFactory.Get(subscriberDelegate);
 
         /* Then */
         var context = new SubscriberContext

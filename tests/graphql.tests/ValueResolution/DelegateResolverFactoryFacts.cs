@@ -11,7 +11,6 @@ namespace Tanka.GraphQL.Tests.ValueResolution;
 
 public class DelegateResolverFactoryFacts
 {
- 
     [Fact]
     public async Task ReturnValue_is_Task()
     {
@@ -25,7 +24,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -59,7 +58,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -69,13 +68,13 @@ public class DelegateResolverFactoryFacts
             Field = null,
             Selection = null,
             Fields = null,
-            ArgumentValues = null,
+            ArgumentValues = new Dictionary<string, object?>(),
             Path = null,
             QueryContext = new QueryContext()
             {
                 RequestServices = new ServiceCollection()
                     .AddSingleton<IMyDependency, MyDependency>()
-                    .BuildServiceProvider()
+                    .BuildServiceProvider(),
             }
         };
 
@@ -98,7 +97,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -132,7 +131,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -175,7 +174,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -209,7 +208,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -242,7 +241,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -277,7 +276,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -309,7 +308,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = Resolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -343,7 +342,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = Resolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -376,7 +375,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -397,6 +396,126 @@ public class DelegateResolverFactoryFacts
         Assert.True((bool)context.ResolvedValue);
     }
 
+    [Theory]
+    [InlineData(123)]
+    [InlineData(null)]
+    public async Task ReturnValue_is_TaskT_with_argument_binding_to_NullableInt(int? value)
+    {
+        /* Given */
+        static async Task<int?> AsyncResolver(int? arg1)
+        {
+            await Task.Delay(0);
+            return arg1;
+        }
+
+        Delegate resolverDelegate = AsyncResolver;
+
+        /* When */
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
+
+        /* Then */
+        var context = new ResolverContext
+        {
+            ObjectDefinition = null,
+            ObjectValue = null,
+            Field = null,
+            Selection = null,
+            Fields = null,
+            ArgumentValues = new Dictionary<string, object?>()
+            {
+                ["arg1"] = value
+            },
+            Path = null,
+            QueryContext = new QueryContext()
+        };
+
+        await resolver(context);
+
+        Assert.Equal(value, context.ResolvedValue);
+    }
+
+    [Theory]
+    [InlineData("test test")]
+    [InlineData(null)]
+    public async Task ReturnValue_is_TaskT_with_argument_binding_to_string(string? value)
+    {
+        /* Given */
+        static async Task<string?> AsyncResolver(string? arg1)
+        {
+            await Task.Delay(0);
+            return arg1;
+        }
+
+        Delegate resolverDelegate = AsyncResolver;
+
+        /* When */
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
+
+        /* Then */
+        var context = new ResolverContext
+        {
+            ObjectDefinition = null,
+            ObjectValue = null,
+            Field = null,
+            Selection = null,
+            Fields = null,
+            ArgumentValues = new Dictionary<string, object?>()
+            {
+                ["arg1"] = value
+            },
+            Path = null,
+            QueryContext = new QueryContext()
+        };
+
+        await resolver(context);
+
+        Assert.Equal(value, context.ResolvedValue);
+    }
+
+    [Fact]
+    public async Task ReturnValue_is_TaskT_with_argument_binding_to_class()
+    {
+        /* Given */
+        static async Task<MyInputClass?> AsyncResolver(MyInputClass arg1)
+        {
+            await Task.Delay(0);
+            return arg1;
+        }
+
+        Delegate resolverDelegate = AsyncResolver;
+
+        /* When */
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
+
+        /* Then */
+        var context = new ResolverContext
+        {
+            ObjectDefinition = null,
+            ObjectValue = null,
+            Field = null,
+            Selection = null,
+            Fields = null,
+            ArgumentValues = new Dictionary<string, object?>()
+            {
+                ["arg1"] = new Dictionary<string, object?>()
+                {
+                    [nameof(MyInputClass.DoubleField)] = 123.456,
+                    [nameof(MyInputClass.NullableIntField1)] = null,
+                }
+            },
+            Path = null,
+            QueryContext = new QueryContext()
+        };
+
+        await resolver(context);
+
+        Assert.Equal(new MyInputClass()
+        {
+            DoubleField = 123.456,
+            NullableIntField1 = null
+        }, context.ResolvedValue);
+    }
+
     [Fact]
     public async Task ReturnValue_is_ValueTaskT()
     {
@@ -410,7 +529,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = AsyncResolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -443,7 +562,7 @@ public class DelegateResolverFactoryFacts
         Delegate resolverDelegate = Resolver;
 
         /* When */
-        Resolver resolver = DelegateResolverFactory.Create(resolverDelegate);
+        Resolver resolver = DelegateResolverFactory.Get(resolverDelegate);
 
         /* Then */
         var context = new ResolverContext
@@ -463,4 +582,11 @@ public class DelegateResolverFactoryFacts
         Assert.NotNull(context.ResolvedValue);
         Assert.True((bool)context.ResolvedValue);
     }
+}
+
+public record class MyInputClass
+{
+    public int? NullableIntField1 { get; set; }
+
+    public double DoubleField { get; set; }
 }

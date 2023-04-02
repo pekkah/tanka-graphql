@@ -6,7 +6,7 @@ namespace Tanka.GraphQL.Server;
 
 public static class WebApplicationExtensions
 {
-    public static IEndpointConventionBuilder MapTankaGraphQL3(
+    public static IEndpointConventionBuilder MapTankaGraphQL(
         this IEndpointRouteBuilder webApp,
         string pattern,
         string schemaName)
@@ -16,7 +16,7 @@ public static class WebApplicationExtensions
         return tankaApp.MapDefault(pattern, schemaName, webApp);
     }
 
-    public static IEndpointConventionBuilder MapTankaGraphQL3(
+    public static IEndpointConventionBuilder MapTankaGraphQL(
         this IEndpointRouteBuilder webApp,
         string pattern,
         Action<GraphQLRequestPipelineBuilder> configurePipeline)
