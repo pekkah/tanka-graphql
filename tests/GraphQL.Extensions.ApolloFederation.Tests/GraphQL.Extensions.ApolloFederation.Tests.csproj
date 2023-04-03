@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GraphQL.Extensions.ApolloFederation\GraphQL.Extensions.ApolloFederation.csproj" />
-    <ProjectReference Include="..\..\src\graphql.language\GraphQL.Language.csproj" />
+    <ProjectReference Include="..\..\src\GraphQL.Language\GraphQL.Language.csproj" />
     <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
   </ItemGroup>
 

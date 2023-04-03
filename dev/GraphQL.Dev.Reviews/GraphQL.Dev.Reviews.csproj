@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GraphQL.Extensions.ApolloFederation\GraphQL.Extensions.ApolloFederation.csproj" />
-    <ProjectReference Include="..\..\src\graphql.server\GraphQL.Server.csproj" />
+    <ProjectReference Include="..\..\src\GraphQL.Server\GraphQL.Server.csproj" />
     <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
   </ItemGroup>
 

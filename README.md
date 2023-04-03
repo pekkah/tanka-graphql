@@ -47,20 +47,20 @@ Start the client by following instructions below:
 
 ```bash
 # Install dependencies
-src\graphql.server.link> npm i
+src\GraphQL.server.link> npm i
 
 # Watch for source changes and recompile the link
-src\graphql.server.link> npm run watch
+src\GraphQL.server.link> npm run watch
 
 # Install dependencies
-dev\graphql.dev.chat.ui> npm i
+dev\GraphQL.dev.chat.ui> npm i
 
 # Watch for source changes and recompile the sample
-dev\graphql.dev.chat.ui> npm start
+dev\GraphQL.dev.chat.ui> npm start
 ```
 
 ### Run benchmarks
 
 ```bash
-src\graphql.benchmarks> dotnet run --configuration release --framework net5.0
+src\GraphQL.benchmarks> dotnet run --configuration release --framework net5.0
 ```

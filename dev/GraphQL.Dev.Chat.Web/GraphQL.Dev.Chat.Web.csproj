@@ -21,9 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\graphql.server\GraphQL.Server.csproj" />
+    <ProjectReference Include="..\..\src\GraphQL.Server\GraphQL.Server.csproj" />
     <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
-    <ProjectReference Include="..\graphql.dev.chat.data\GraphQL.Dev.Chat.Data.csproj" />
+    <ProjectReference Include="..\GraphQL.dev.chat.data\GraphQL.Dev.Chat.Data.csproj" />
   </ItemGroup>
 
 </Project>
