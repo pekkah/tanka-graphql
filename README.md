@@ -37,5 +37,5 @@ dotnet package add Tanka.GraphQL.Server
 ### Run benchmarks
 
 ```bash
-src\GraphQL.benchmarks> dotnet run --configuration release --framework net5.0
+src\GraphQL.benchmarks> dotnet run --configuration release --framework net7.0
 ```
