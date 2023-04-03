@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Mock.Data", "tests\GraphQL.Tests.Data\GraphQL.Mock.Data.csproj", "{A284D636-220D-4754-958C-8D380E0B2277}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Tests2", "tests\GraphQL.Tests\GraphQL.Tests2.csproj", "{5574DD9F-E44A-4119-BB8E-45E8A7765805}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Tests", "tests\GraphQL.Tests\GraphQL.Tests.csproj", "{5574DD9F-E44A-4119-BB8E-45E8A7765805}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev", "dev", "{56733FE3-0AB2-491B-9514-AE59DCC94428}"
 EndProject
