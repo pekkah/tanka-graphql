@@ -34,7 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Benchmarks", "bench
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Dev.Chat.Data", "dev\GraphQL.Dev.Chat.Data\GraphQL.Dev.Chat.Data.csproj", "{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Dev.Chat.Web", "dev\GraphQL.Dev.Chat.web\GraphQL.Dev.Chat.Web.csproj", "{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Dev.Chat.Web", "dev\GraphQL.Dev.Chat.Web\GraphQL.Dev.Chat.Web.csproj", "{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Tutorials.GettingStarted", "tutorials\GraphQL.Tutorials.Getting-Started\GraphQL.Tutorials.GettingStarted.csproj", "{917EF279-90B7-421B-92D0-B113FD9E2ECA}"
 EndProject
