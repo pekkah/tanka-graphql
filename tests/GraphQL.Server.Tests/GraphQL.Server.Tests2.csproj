@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\graphql.server\GraphQL.Server.csproj" />
-    <ProjectReference Include="..\graphql.tests.data\GraphQL.Tests.Data.csproj" />
+    <ProjectReference Include="..\GraphQL.Tests.Data\GraphQL.Mock.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
