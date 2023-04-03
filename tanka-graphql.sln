@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Server", "src\Graph
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Server.Tests", "tests\GraphQL.Server.Tests\GraphQL.Server.Tests.csproj", "{948AB756-4897-4719-A432-173B23DFF003}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Benchmarks", "Benchmarks\GraphQL.Benchmarks\GraphQL.Benchmarks.csproj", "{595FA390-AE0C-404D-8845-C16008490B65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Benchmarks", "benchmarks\GraphQL.Benchmarks\GraphQL.Benchmarks.csproj", "{595FA390-AE0C-404D-8845-C16008490B65}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Dev.Chat.Data", "dev\GraphQL.Dev.Chat.Data\GraphQL.Dev.Chat.Data.csproj", "{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}"
 EndProject
