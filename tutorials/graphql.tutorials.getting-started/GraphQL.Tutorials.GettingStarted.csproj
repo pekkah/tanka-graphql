@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\graphql.language\graphql.language.csproj" />
-    <ProjectReference Include="..\..\src\graphql.server\graphql.server.csproj" />
+    <ProjectReference Include="..\..\src\graphql.language\GraphQL.Language.csproj" />
+    <ProjectReference Include="..\..\src\graphql.server\GraphQL.Server.csproj" />
     <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
   </ItemGroup>
 

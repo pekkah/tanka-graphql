@@ -1,25 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFrameworks>net7.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <AssemblyName>tanka.graphql.language.tests</AssemblyName>
-    <RootNamespace>Tanka.GraphQL.Language.Tests</RootNamespace>
-    <Nullabl>enable</Nullabl>
+    <AssemblyName>tanka.graphql.server.tests</AssemblyName>
+    <RootNamespace>Tanka.GraphQL.Server.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="RealWorldSchemas\github.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="RealWorldSchemas\github.graphql">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="NSubstitute" Version="5.0.0" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
       <PrivateAssets>all</PrivateAssets>
@@ -29,9 +20,16 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\graphql.language\graphql.language.csproj" />
+    <ProjectReference Include="..\..\src\graphql.server\GraphQL.Server.csproj" />
+    <ProjectReference Include="..\graphql.tests.data\GraphQL.Tests.Data.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="WebSockets\" />
+  </ItemGroup>
+
 </Project>

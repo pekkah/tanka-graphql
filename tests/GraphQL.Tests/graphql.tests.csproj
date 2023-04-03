@@ -38,7 +38,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
-    <ProjectReference Include="..\graphql.tests.data\graphql.tests.data.csproj" />
+    <ProjectReference Include="..\graphql.tests.data\GraphQL.Tests.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
