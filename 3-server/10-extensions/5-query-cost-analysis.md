@@ -12,7 +12,7 @@ which will be used for all fields in a query and/or by using `@cost` directive o
 Example schema has few fields with and without set complexity.
 
 ```csharp
-#include::xref://tests:graphql.tests/Analysis/CostFacts.cs?s=Tanka.GraphQL.Tests.Analysis.CostFacts.CostFacts
+#include::xref://tests:GraphQL.Tests/Analysis/CostFacts.cs?s=Tanka.GraphQL.Tests.Analysis.CostFacts.CostFacts
 ```
 
 ### Default field complexity
@@ -20,7 +20,7 @@ Example schema has few fields with and without set complexity.
 Default field complexity will be used when `@cost` directive is not present in the field.
 
 ```csharp
-#include::xref://tests:graphql.tests/Analysis/CostFacts.cs?s=Tanka.GraphQL.Tests.Analysis.CostFacts.Cost_above_max_cost_with_defaultComplexity
+#include::xref://tests:GraphQL.Tests/Analysis/CostFacts.cs?s=Tanka.GraphQL.Tests.Analysis.CostFacts.Cost_above_max_cost_with_defaultComplexity
 ```
 
 ### Cost Directive
@@ -28,14 +28,14 @@ Default field complexity will be used when `@cost` directive is not present in t
 Complexity of field is set with `@cost` directive.
 
 ```csharp
-#include::xref://tests:graphql.tests/Analysis/CostFacts.cs?s=Tanka.GraphQL.Tests.Analysis.CostFacts.Cost_above_max_cost_with_costDirective
+#include::xref://tests:GraphQL.Tests/Analysis/CostFacts.cs?s=Tanka.GraphQL.Tests.Analysis.CostFacts.Cost_above_max_cost_with_costDirective
 ```
 
 In some cases the complexity of the field is related to its arguments. In these cases
 value of the argument can be used as mulpliplier for the complexity.
 
 ```csharp
-#include::xref://tests:graphql.tests/Analysis/CostFacts.cs?s=Tanka.GraphQL.Tests.Analysis.CostFacts.Cost_above_max_cost_with_costDirective_and_multiplier
+#include::xref://tests:GraphQL.Tests/Analysis/CostFacts.cs?s=Tanka.GraphQL.Tests.Analysis.CostFacts.Cost_above_max_cost_with_costDirective_and_multiplier
 ```
 
 ## Import directive

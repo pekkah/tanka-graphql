@@ -9,13 +9,13 @@ and parser turns these tokens into syntax tree.
 ### Example: Parser usage
 
 ```csharp
-#include::xref://tests:graphql.language.tests/ParserFacts.cs?s=Tanka.GraphQL.Language.Tests.ParserFacts.ExecutableDocument
+#include::xref://tests:GraphQL.Language.Tests/ParserFacts.cs?s=Tanka.GraphQL.Language.Tests.ParserFacts.ExecutableDocument
 ```
 
 ### Example: Parser usage simplified
 
 ```csharp
-#include::xref://tests:graphql.language.tests/Nodes/ObjectDefinitionFacts.cs?s=Tanka.GraphQL.Language.Tests.Nodes.ObjectDefinitionFacts.FromString
+#include::xref://tests:GraphQL.Language.Tests/Nodes/ObjectDefinitionFacts.cs?s=Tanka.GraphQL.Language.Tests.Nodes.ObjectDefinitionFacts.FromString
 ```
 
 [draft]: http://spec.graphql.org/draft/

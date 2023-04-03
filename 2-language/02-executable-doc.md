@@ -7,5 +7,5 @@ is the part of the document that is used to define the GraphQL schema.
 Here's the definition of executable document:
 
 ```csharp
-#include::xref://src:graphql.language/Nodes/ExecutableDocument.cs
+#include::xref://src:GraphQL.Language/Nodes/ExecutableDocument.cs
 ```

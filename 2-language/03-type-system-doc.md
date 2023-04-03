@@ -6,5 +6,5 @@ GraphQL server to validate the query and to resolve the query.
 Here's the definition of type system document:
 
 ```csharp
-#include::xref://src:graphql.language/Nodes/TypeSystem/TypeSystemDocument.cs
+#include::xref://src:GraphQL.Language/Nodes/TypeSystem/TypeSystemDocument.cs
 ```
