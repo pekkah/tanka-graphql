@@ -79,20 +79,6 @@ if ($OnlyBuild -eq $False) {
     dotnet pack -c Release -p:Version=$Version -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
     EnsureLastExitCode("dotnet pack failed")
 
-    "----------------------------------------"
-    "Pack NPM"
-    $Exclude = [string[]]@("node_modules")
-    Copy-Item -Recurse -Exclude $Exclude ./src/graphql.server.link/ $Output/graphql.server.link
-    Set-Location $Output/graphql.server.link
-    npm i
-    npm run build
-    EnsureLastExitCode("npm run build failed")
-    npm --no-git-tag-version --allow-same-version version $Version
-    Set-Location $Location
-    Set-Location $Output
-    npm pack ./graphql.server.link
-    EnsureLastExitCode("npm pack failed")
-
     Set-Location $Location
 
 }
