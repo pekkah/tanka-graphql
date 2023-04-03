@@ -7,7 +7,7 @@ Introspecting a schema produces an executable schema. Queries can be executed ag
 Create and introspect a schema
 
 ```csharp
-#include::xref://tests:graphql.tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.IntrospectSchemaFacts
+#include::xref://tests:GraphQL.Tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.IntrospectSchemaFacts
 ```
 
 Combination of the source schema and the introspection schema can be used to provide the normal executable schema with introspection support.
@@ -17,35 +17,35 @@ Combination of the source schema and the introspection schema can be used to pro
 Scalar
 
 ```csharp
-#include::xref://tests:graphql.tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_ScalarType
+#include::xref://tests:GraphQL.Tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_ScalarType
 ```
 
 Object type
 
 ```csharp
-#include::xref://tests:graphql.tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_ObjectType
+#include::xref://tests:GraphQL.Tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_ObjectType
 ```
 
 Union type
 
 ```csharp
-#include::xref://tests:graphql.tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_UnionType
+#include::xref://tests:GraphQL.Tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_UnionType
 ```
 
 Interface type
 
 ```csharp
-#include::xref://tests:graphql.tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_InterfaceType
+#include::xref://tests:GraphQL.Tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_InterfaceType
 ```
 
 Enum type
 
 ```csharp
-#include::xref://tests:graphql.tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_EnumType
+#include::xref://tests:GraphQL.Tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_EnumType
 ```
 
 Input object
 
 ```csharp
-#include::xref://tests:graphql.tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_InputObjectType
+#include::xref://tests:GraphQL.Tests/Introspection/IntrospectSchemaFacts.cs?s=Tanka.GraphQL.Tests.Introspection.IntrospectSchemaFacts.Type_InputObjectType
 ```
