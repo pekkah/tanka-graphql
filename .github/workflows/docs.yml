@@ -42,7 +42,7 @@ jobs:
             ./artifacts/gh-pages
 
   deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     needs: build
     concurrency: ci-${{ github.ref }}
     steps:
