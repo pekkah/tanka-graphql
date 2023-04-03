@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/dev/graphql.dev.chat.web/graphql.dev.chat.web.csproj",
+                "${workspaceFolder}/dev/GraphQL.dev.chat.web/graphql.dev.chat.web.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\graphql.language\graphql.language.csproj" />
+		<ProjectReference Include="..\GraphQL.Language\GraphQL.Language.csproj" />
 		<ProjectReference Include="..\GraphQL\GraphQL.csproj" />
 	</ItemGroup>
 

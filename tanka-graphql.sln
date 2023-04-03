@@ -17,32 +17,28 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		.github\workflows\on-tag-do-release.yml = .github\workflows\on-tag-do-release.yml
 		README.md = README.md
-		run-benchmarks.ps1 = run-benchmarks.ps1
+		run-Benchmarks.ps1 = run-Benchmarks.ps1
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.tests.data", "tests\graphql.tests.data\graphql.tests.data.csproj", "{A284D636-220D-4754-958C-8D380E0B2277}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Mock.Data", "tests\GraphQL.Tests.Data\GraphQL.Mock.Data.csproj", "{A284D636-220D-4754-958C-8D380E0B2277}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.tests", "tests\graphql.tests\graphql.tests.csproj", "{5574DD9F-E44A-4119-BB8E-45E8A7765805}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Tests", "tests\GraphQL.Tests\GraphQL.Tests.csproj", "{5574DD9F-E44A-4119-BB8E-45E8A7765805}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev", "dev", "{56733FE3-0AB2-491B-9514-AE59DCC94428}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.server", "src\graphql.server\graphql.server.csproj", "{4E6817CE-E8C5-488F-867A-EE9A20B3D6C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Server", "src\GraphQL.Server\GraphQL.Server.csproj", "{4E6817CE-E8C5-488F-867A-EE9A20B3D6C4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.server.tests", "tests\graphql.server.tests\graphql.server.tests.csproj", "{948AB756-4897-4719-A432-173B23DFF003}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Server.Tests", "tests\GraphQL.Server.Tests\GraphQL.Server.Tests.csproj", "{948AB756-4897-4719-A432-173B23DFF003}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.benchmarks", "benchmarks\graphql.benchmarks\graphql.benchmarks.csproj", "{595FA390-AE0C-404D-8845-C16008490B65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Benchmarks", "benchmarks\GraphQL.Benchmarks\GraphQL.Benchmarks.csproj", "{595FA390-AE0C-404D-8845-C16008490B65}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.dev.chat.data", "dev\graphql.dev.chat.data\graphql.dev.chat.data.csproj", "{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Tutorials.GettingStarted", "tutorials\GraphQL.Tutorials.Getting-Started\GraphQL.Tutorials.GettingStarted.csproj", "{917EF279-90B7-421B-92D0-B113FD9E2ECA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.dev.chat.web", "dev\graphql.dev.chat.web\graphql.dev.chat.web.csproj", "{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Language.Tests", "tests\GraphQL.Language.Tests\GraphQL.Language.Tests.csproj", "{9C8ED4B3-E633-4435-9202-36FE3FFA991E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.tutorials.getting-started", "tutorials\graphql.tutorials.getting-started\graphql.tutorials.getting-started.csproj", "{917EF279-90B7-421B-92D0-B113FD9E2ECA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Language", "src\GraphQL.Language\GraphQL.Language.csproj", "{BE7F1B1C-7455-43CB-8316-60B2BC7BF807}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.language.tests", "tests\graphql.language.tests\graphql.language.tests.csproj", "{9C8ED4B3-E633-4435-9202-36FE3FFA991E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.language", "src\graphql.language\graphql.language.csproj", "{BE7F1B1C-7455-43CB-8316-60B2BC7BF807}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql.dev.allocations", "dev\graphql.dev.allocations\graphql.dev.allocations.csproj", "{44CA7F79-94E3-4DAD-BB73-39FA98D86902}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Dev.Allocations", "dev\GraphQL.Dev.Allocations\GraphQL.Dev.Allocations.csproj", "{44CA7F79-94E3-4DAD-BB73-39FA98D86902}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQL.Extensions.ApolloFederation", "src\GraphQL.Extensions.ApolloFederation\GraphQL.Extensions.ApolloFederation.csproj", "{E6AD4890-44A0-4A7A-BEB2-BA4F8F9F97BE}"
 EndProject
@@ -132,30 +128,6 @@ Global
 		{595FA390-AE0C-404D-8845-C16008490B65}.Release|x64.Build.0 = Release|Any CPU
 		{595FA390-AE0C-404D-8845-C16008490B65}.Release|x86.ActiveCfg = Release|Any CPU
 		{595FA390-AE0C-404D-8845-C16008490B65}.Release|x86.Build.0 = Release|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Debug|x64.Build.0 = Debug|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Debug|x86.Build.0 = Debug|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Release|x64.ActiveCfg = Release|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Release|x64.Build.0 = Release|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Release|x86.ActiveCfg = Release|Any CPU
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3}.Release|x86.Build.0 = Release|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Debug|x64.Build.0 = Debug|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Debug|x86.Build.0 = Debug|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Release|x64.ActiveCfg = Release|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Release|x64.Build.0 = Release|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Release|x86.ActiveCfg = Release|Any CPU
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F}.Release|x86.Build.0 = Release|Any CPU
 		{917EF279-90B7-421B-92D0-B113FD9E2ECA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{917EF279-90B7-421B-92D0-B113FD9E2ECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{917EF279-90B7-421B-92D0-B113FD9E2ECA}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -293,8 +265,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{D1ADDCD6-7DB1-44B6-BA0B-C1BC7F9417D3} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
-		{2E65DD3E-7AA0-41D1-A5A8-F20C798FF62F} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
 		{44CA7F79-94E3-4DAD-BB73-39FA98D86902} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
 		{60709A73-4981-4973-8AF7-752B24E425B7} = {56733FE3-0AB2-491B-9514-AE59DCC94428}
 		{8B3C3296-8AE2-47F0-93B8-9CFF929EBAA4} = {B9BE1B74-A36A-4A10-9BCE-E5EFDF6D15A8}

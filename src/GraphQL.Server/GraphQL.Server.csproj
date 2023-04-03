@@ -2,8 +2,6 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
-		<AssemblyName>tanka.graphql.server</AssemblyName>
-		<RootNamespace>Tanka.GraphQL.Server</RootNamespace>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
