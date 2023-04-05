@@ -3,8 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net7.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <AssemblyName>tanka.graphql.server.tests</AssemblyName>
-    <RootNamespace>Tanka.GraphQL.Server.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

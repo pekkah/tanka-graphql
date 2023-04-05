@@ -2,9 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0</TargetFrameworks>
-    <AssemblyName>tanka.graphql.tests.data</AssemblyName>
-    <RootNamespace>Tanka.Graphql.Tests.Data</RootNamespace>
-    <IsPackable>false</IsPackable>
+	  <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 

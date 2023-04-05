@@ -3,9 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net7.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <AssemblyName>tanka.graphql.language.tests</AssemblyName>
-    <RootNamespace>Tanka.GraphQL.Language.Tests</RootNamespace>
-    <Nullabl>enable</Nullabl>
+	  <Nullabl>enable</Nullabl>
   </PropertyGroup>
 
   <ItemGroup>
