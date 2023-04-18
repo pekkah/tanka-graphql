@@ -29,4 +29,8 @@
 		<ProjectReference Include="..\..\src\GraphQL.Server.SourceGenerators\GraphQL.Server.SourceGenerators.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Snapshots\" />
+	</ItemGroup>
+
 </Project>

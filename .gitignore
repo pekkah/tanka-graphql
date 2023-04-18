@@ -272,4 +272,3 @@ _build/
 
 *.received.cs
 *.received/
-/tests/GraphQL.Server.SourceGenerators.Tests/Snapshots/SchemaGeneratorFacts.Generate_model#Tanka.GraphQL.Server.SourceGenerators.SchemaAttribute.verified.cs
