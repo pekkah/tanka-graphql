@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>1-installation - Tanka GraphQL</title>
+    <title>1-samples-basic - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -83,7 +83,7 @@
                     <a class="nav-link" href="master/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/4-code-generator/1-installation.html">Code Generation</a>
+                    <a class="nav-link" href="master/4-code-generator/1-samples-basic.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/7-type-system/02-schema.html">Type System</a>
@@ -115,7 +115,7 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/4-code-generator/1-installation.html>Installation</a>
+    <a class="nav-link" href=master/4-code-generator/1-samples-basic.html>Installation</a>
     <ul>
     </ul>
 </li>    </nav>
@@ -123,7 +123,47 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h2 id="code-generator">Code Generator</h2>
-<p>New code generator based on Roslyn Source Generators is in the works. Old source generator has been removed.</p>
+<p>Tanka GraphQL includes a source generator package which will allow a developer to generate the schema and resolvers from C# code model.
+This is a great way to get started with GraphQL and Tanka GraphQL.</p>
+<p>WARN: This feature is still in preview and may change in the future.</p>
+<p>Install package</p>
+<pre><code class="language-bash">dotnet add Tanka.GraphQL.Server.SourceGenerators
+</code></pre>
+<h3 id="tanka.graphql.samples.sourcegenerators">Tanka.GraphQL.Samples.SourceGenerators</h3>
+<pre><code class="language-csharp">using Tanka.GraphQL.Server;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.AddTankaGraphQL()
+    .AddHttp()
+    .AddWebSockets()
+    .AddSchemaOptions(&quot;Default&quot;, options =&gt;
+    {
+        options.AddGeneratedTypes(types =&gt;
+        {
+            types.AddQueryController();
+            types.AddWorldController();
+        });
+    });
+
+WebApplication? app = builder.Build();
+app.UseWebSockets();
+
+app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;Default&quot;);
+app.Run();
+
+[ObjectType]
+public static class Query
+{
+    public static World World() =&gt; new World();
+}
+
+[ObjectType]
+public class World
+{
+    public string Hello =&gt; &quot;Hello World!&quot;;
+}
+</code></pre>
                     
             </main>
         </div>

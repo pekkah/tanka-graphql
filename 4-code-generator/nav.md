@@ -1,1 +1,1 @@
-- [Installation](xref://1-installation.md)
+- [Installation](xref://1-samples-basic.md)
