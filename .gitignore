@@ -269,3 +269,6 @@ BenchmarkDotNet.Artifacts/
 gh-pages/
 *.saved.bak
 _build/
+
+*.received.cs
+*.received/

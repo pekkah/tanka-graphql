@@ -2,9 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0</TargetFrameworks>
-    <RootNamespace>Tanka.GraphQL.Tutorials.GettingStarted</RootNamespace>
-    <IsPackable>false</IsPackable>
-    <AssemblyName>tanka.graphql.tutorials.getting-started</AssemblyName>
+	  <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

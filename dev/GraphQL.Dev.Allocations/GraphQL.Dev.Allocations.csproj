@@ -4,8 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <AssemblyName>tanka.graphql.dev.allocations</AssemblyName>
-    <RootNamespace>Tanka.GraphQL.Dev.Allocations</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

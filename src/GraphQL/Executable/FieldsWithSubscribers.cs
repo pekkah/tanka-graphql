@@ -12,4 +12,12 @@ public class FieldsWithSubscribers : Dictionary<FieldDefinition, Action<Subscrib
             throw new InvalidOperationException($"{fieldDefinition} already has an subscriber");
         }
     }
+
+    public void Add(FieldDefinition fieldDefinition, Subscriber subscriber)
+    {
+        if (!TryAdd(fieldDefinition, b => b.Run(subscriber)))
+        {
+            throw new InvalidOperationException($"{fieldDefinition} already has an subscriber");
+        }
+    }
 }

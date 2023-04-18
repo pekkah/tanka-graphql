@@ -2,8 +2,6 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net7.0</TargetFrameworks>
-		<AssemblyName>Tanka.GraphQL.Extensions.ApolloFederation</AssemblyName>
-		<RootNamespace>Tanka.GraphQL.Extensions.ApolloFederation</RootNamespace>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
