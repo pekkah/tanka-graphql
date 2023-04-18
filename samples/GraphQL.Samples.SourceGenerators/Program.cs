@@ -29,5 +29,5 @@ public static class Query
 [ObjectType]
 public class World
 {
-    public string Hello() => "Hello World!";
+    public string Hello => "Hello World!";
 }
