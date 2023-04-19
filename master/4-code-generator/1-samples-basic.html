@@ -169,10 +169,7 @@ app.Run();
 [ObjectType]
 public static class Query
 {
-    public static World World()
-    {
-        return new World();
-    }
+    public static World World() =&gt; new();
 }
 
 [ObjectType]
@@ -183,10 +180,7 @@ public class World
     /// &lt;/summary&gt;
     /// &lt;param name=&quot;name&quot;&gt;name: String!&lt;/param&gt;
     /// &lt;returns&gt;String!&lt;/returns&gt;
-    public string Hello(string name)
-    {
-        return $&quot;Hello {name}&quot;;
-    }
+    public string Hello(string name) =&gt; $&quot;Hello {name}&quot;;
 }
 </code></pre>
                     
