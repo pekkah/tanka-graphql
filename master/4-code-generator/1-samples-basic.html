@@ -181,6 +181,13 @@ public class World
     /// &lt;param name=&quot;name&quot;&gt;name: String!&lt;/param&gt;
     /// &lt;returns&gt;String!&lt;/returns&gt;
     public string Hello(string name) =&gt; $&quot;Hello {name}&quot;;
+
+    /// &lt;summary&gt;
+    ///     This is the async version of the Hello method
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;name&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
+    public async Task&lt;string&gt; HelloAsync(string name) =&gt; await Task.FromResult($&quot;Hello {name}&quot;);
 }
 </code></pre>
                     
