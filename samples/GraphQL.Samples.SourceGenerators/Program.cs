@@ -49,4 +49,11 @@ public class World
     /// <param name="name">name: String!</param>
     /// <returns>String!</returns>
     public string Hello(string name) => $"Hello {name}";
+
+    /// <summary>
+    ///     This is the async version of the Hello method
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public async Task<string> HelloAsync(string name) => await Task.FromResult($"Hello {name}");
 }
