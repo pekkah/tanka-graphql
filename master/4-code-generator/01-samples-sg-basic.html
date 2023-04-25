@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>00-getting-started - Tanka GraphQL</title>
+    <title>01-samples-sg-basic - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -115,48 +115,96 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/index.html>Home</a>
+    <a class="nav-link" href=master/4-code-generator/01-samples-sg-basic.html>Installation &amp; basics</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/00-getting-started.html>Getting started</a>
+    <a class="nav-link" href=master/4-code-generator/02-samples-sg-arguments.html>Arguments</a>
     <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/01-create-schema.html>Create schema</a>
+    <a class="nav-link" href=master/4-code-generator/03-samples-sg-namespace.html>Namespace</a>
     <ul>
     </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/02-bind-resolvers.html>Bind resolvers</a>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/4-code-generator/04-samples-sg-services.html>Dependency injection</a>
     <ul>
     </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/03-apply-directives.html>Apply directives</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/04-server.html>Server</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/05-dependency-injection.html>Depedency Injection</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/06-custom-scalars.html>Custom Scalars</a>
-    <ul>
-    </ul>
-</li>    </ul>
 </li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="getting-started">Getting Started</h1>
-<p>These getting started topics are meant to introduce the basic building blocks of
-using Tanka GraphQL. It should get the end user quickly up and running.</p>
-<p>For those more familiar with GraphQL and other GraphQL libraries head to the
-server and code generation sections.</p>
+                <h2 id="code-generator">Code Generator</h2>
+<p>Tanka GraphQL includes a source generator package which will allow a developer to generate the schema and resolvers from C# code model.
+This is a great way to get started with GraphQL and Tanka GraphQL.</p>
+<p>WARN: This feature is still in preview and may change in the future.</p>
+<p>Install package</p>
+<pre><code class="language-bash">dotnet add Tanka.GraphQL.Server.SourceGenerators
+</code></pre>
+<h3 id="tanka.graphql.samples.sg.basic">Tanka.GraphQL.Samples.SG.Basic</h3>
+<pre><code class="language-csharp">using Tanka.GraphQL.Server;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.AddTankaGraphQL()
+    .AddHttp()
+    .AddWebSockets()
+    .AddSchemaOptions(&quot;Default&quot;, options =&gt;
+    {
+        // This extension point is used by the generator to add
+        // type controllers
+        options.AddGeneratedTypes(types =&gt;
+        {
+            // Add generated controllers
+            types
+                .AddWorldController()
+                .AddQueryController();
+        });
+    });
+
+WebApplication app = builder.Build();
+app.UseWebSockets();
+
+app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;Default&quot;);
+app.Run();
+
+/// &lt;summary&gt;
+///     Root query type by naming convention
+///     &lt;remarks&gt;
+///         We define it as static class so that the generator does not try
+///         to use the initialValue as the source of it.
+///     &lt;/remarks&gt;
+/// &lt;/summary&gt;
+[ObjectType]
+public static class Query
+{
+    public static World World() =&gt; new();
+}
+
+[ObjectType]
+public class World
+{
+    /// &lt;summary&gt;
+    ///     Simple field with one string argument and string return type
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;name&quot;&gt;name: String!&lt;/param&gt;
+    /// &lt;returns&gt;String!&lt;/returns&gt;
+    public string Hello(string name) =&gt; $&quot;Hello {name}&quot;;
+
+    /// &lt;summary&gt;
+    ///     This is the async version of the Hello method
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;name&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
+    public async Task&lt;string&gt; HelloAsync(string name) =&gt; await Task.FromResult($&quot;Hello {name}&quot;);
+}
+</code></pre>
                     
             </main>
         </div>

@@ -83,7 +83,7 @@
                     <a class="nav-link" href="master/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="master/4-code-generator/1-samples-basic.html">Code Generation</a>
+                    <a class="nav-link" href="master/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="master/7-type-system/02-schema.html">Type System</a>
@@ -188,7 +188,7 @@ builder.AddTankaGraphQL()
             });
     });
 
-WebApplication? app = builder.Build();
+WebApplication app = builder.Build();
 
 // this is required by the websocket transport
 app.UseWebSockets();

@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>00-getting-started - Tanka GraphQL</title>
+    <title>04-samples-sg-services - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -115,48 +115,101 @@
                 <div class="sidebar-sticky">
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/index.html>Home</a>
+    <a class="nav-link" href=master/4-code-generator/01-samples-sg-basic.html>Installation &amp; basics</a>
     <ul>
     </ul>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/00-getting-started.html>Getting started</a>
+    <a class="nav-link" href=master/4-code-generator/02-samples-sg-arguments.html>Arguments</a>
     <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
 <li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/01-create-schema.html>Create schema</a>
+    <a class="nav-link" href=master/4-code-generator/03-samples-sg-namespace.html>Namespace</a>
     <ul>
     </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/02-bind-resolvers.html>Bind resolvers</a>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=master/4-code-generator/04-samples-sg-services.html>Dependency injection</a>
     <ul>
     </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/03-apply-directives.html>Apply directives</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/04-server.html>Server</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/05-dependency-injection.html>Depedency Injection</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=master/0-getting-started/06-custom-scalars.html>Custom Scalars</a>
-    <ul>
-    </ul>
-</li>    </ul>
 </li>    </nav>
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h1 id="getting-started">Getting Started</h1>
-<p>These getting started topics are meant to introduce the basic building blocks of
-using Tanka GraphQL. It should get the end user quickly up and running.</p>
-<p>For those more familiar with GraphQL and other GraphQL libraries head to the
-server and code generation sections.</p>
+                <h2 id="services">Services</h2>
+<p>Generator supports injecting services into the generated resolvers.</p>
+<p>By default the generated code will first check the field arguments for
+the argument and then fallback to the DI. It's recommended to use
+[FromServices] attribute to make the intent clear and simplify the generated
+code.</p>
+<h3 id="tanka.graphql.samples.sg.services">Tanka.GraphQL.Samples.SG.Services</h3>
+<pre><code class="language-csharp">using Microsoft.AspNetCore.Mvc;
+using Tanka.GraphQL.Server;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Add HttpContext accessor as service
+builder.Services.AddHttpContextAccessor();
+
+// Add tanka graphql
+builder.AddTankaGraphQL()
+    .AddHttp()
+    .AddWebSockets()
+    .AddSchemaOptions(&quot;Default&quot;, options =&gt;
+    {
+        options.AddGeneratedTypes(types =&gt;
+        {
+            // add object type controllers from &lt;global&gt; namespace
+            types.AddGlobalControllers();
+        });
+    });
+
+WebApplication app = builder.Build();
+app.UseWebSockets();
+
+app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;Default&quot;);
+app.Run();
+
+
+[ObjectType]
+public static class Query
+{
+    public static HttpContextResponse? HttpContext(
+        // Use [FromServices] to inject service from DI to the resolver;
+        // without the attribute the generated code would first check if there's an
+        // GraphQL argument with the same name and use it instead and if there's
+        // no argument then it would try to resolve the service from the DI.
+        // Services can be registered as scoped, singleton or transient.
+        [FromServices]IHttpContextAccessor httpContextAccessor)
+    {
+        if (httpContextAccessor.HttpContext == null)
+            return null;
+
+        return new HttpContextResponse(httpContextAccessor.HttpContext);
+    }
+}
+
+[ObjectType]
+public class HttpContextResponse
+{
+    private readonly HttpContext _httpContext;
+
+    public HttpContextResponse(HttpContext httpContext)
+    {
+        _httpContext = httpContext;
+    }
+
+    public string Path =&gt; _httpContext.Request.Path;
+    
+    public string Method =&gt; _httpContext.Request.Method;
+
+    public string Protocol =&gt; _httpContext.Request.Protocol;
+}
+</code></pre>
                     
             </main>
         </div>
