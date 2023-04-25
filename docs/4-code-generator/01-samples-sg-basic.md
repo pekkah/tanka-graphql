@@ -10,9 +10,9 @@ Install package
 dotnet add Tanka.GraphQL.Server.SourceGenerators
 ```
 
-### Tanka.GraphQL.Samples.SourceGenerators
+### Tanka.GraphQL.Samples.SG.Basic
 
 ```csharp
-#include::xref://samples:GraphQL.Samples.SourceGenerators/Program.cs
+#include::xref://samples:GraphQL.Samples.SG.Basic/Program.cs
 ```
 

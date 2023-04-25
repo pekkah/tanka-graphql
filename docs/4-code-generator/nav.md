@@ -1,1 +1,4 @@
-- [Installation](xref://1-samples-basic.md)
+- [Installation & basics](xref://01-samples-sg-basic.md)
+- [Arguments](xref://02-samples-sg-arguments.md)
+- [Namespace](xref://03-samples-sg-namespace.md)
+- [Dependency injection](xref://04-samples-sg-services.md)

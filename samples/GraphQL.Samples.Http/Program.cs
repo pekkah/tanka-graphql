@@ -46,7 +46,7 @@ builder.AddTankaGraphQL()
             });
     });
 
-WebApplication? app = builder.Build();
+WebApplication app = builder.Build();
 
 // this is required by the websocket transport
 app.UseWebSockets();

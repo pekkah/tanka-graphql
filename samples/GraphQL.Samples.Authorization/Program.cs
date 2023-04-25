@@ -63,7 +63,7 @@ builder.Services.AddAuthentication().AddCookie(options =>
 
 builder.Services.AddAuthorization();
 
-WebApplication? app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
