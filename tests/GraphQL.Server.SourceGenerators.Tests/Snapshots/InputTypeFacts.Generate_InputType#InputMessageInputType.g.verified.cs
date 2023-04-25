@@ -22,6 +22,7 @@ public static class InputMessageInputTypeExtensions
                     content: String!
                 }
                 """
+                )
             );
 
         return builder;

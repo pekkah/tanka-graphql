@@ -32,3 +32,8 @@ public class SourceGeneratedTypesBuilder
 public class ObjectTypeAttribute: Attribute
 {
 }
+
+[AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public class FromArgumentsAttribute: Attribute
+{
+}
