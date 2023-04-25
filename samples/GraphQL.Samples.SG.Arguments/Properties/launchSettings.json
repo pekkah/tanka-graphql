@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "GraphQL.Samples.SG.Arguments": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "https://localhost:7239/graphql/ui",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:7239",
+      "dotnetRunMessages": true
+    }
+  }
+}

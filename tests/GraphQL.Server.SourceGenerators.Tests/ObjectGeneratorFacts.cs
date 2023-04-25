@@ -46,6 +46,28 @@ public class ObjectGeneratorFacts
     }
 
     [Fact]
+    public Task Generate_ObjectType_type_name_no_namespace()
+    {
+        var source = """
+                     using Tanka.GraphQL.Server;
+                    
+                     [ObjectType]
+                     public static class Query
+                     {
+                        public static Person Person(int id) = new Person();
+                     }
+
+                     [ObjectType]
+                     public class Person 
+                     {
+                        public string Name { get; set;}
+                     }
+                     """;
+
+        return TestHelper<ObjectTypeGenerator>.Verify(source);
+    }
+
+    [Fact]
     public Task StaticClass_Generate_property_resolver()
     {
         var source = """

@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
+using System.Text.Json;
 using Microsoft.CodeAnalysis;
 
 namespace Tanka.GraphQL.Server.SourceGenerators;
@@ -45,6 +47,17 @@ public class ObjectTypeEmitter
         { "{{fieldName}}: {{fieldType}}", {{resolverMethod}} }
         """;
 
+    public const string NamespaceAddTemplate = """
+        using System;
+        using System.Threading.Tasks;
+        using Microsoft.Extensions.Options;
+        using Tanka.GraphQL.Server;
+        using Tanka.GraphQL.Executable;
+        using Tanka.GraphQL.ValueResolution;
+        using Tanka.GraphQL.Fields;
+       
+        """;
+
 
     public static void Emit(
         SourceProductionContext context,
@@ -68,6 +81,50 @@ public class ObjectTypeEmitter
         context.AddSource($"{ns}{definition.TargetType}Controller.g.cs", builder.ToString());
     }
 
+
+    public static void EmitNamespaceAddMethod(
+        SourceProductionContext context,
+        ImmutableArray<ObjectControllerDefinition> objectControllerDefinitions)
+    {
+        var grouped = objectControllerDefinitions
+            .GroupBy(x => x.Namespace)
+            .ToImmutableArray();
+
+        foreach (IGrouping<string?, ObjectControllerDefinition>? group in grouped)
+        {
+            string? nsName = group.Key;
+            var classNames = group.Select(x => x.TargetType).ToList();
+
+
+            var builder = new IndentedStringBuilder();
+            builder.AppendLine(NamespaceAddTemplate);
+
+            if (!string.IsNullOrEmpty(nsName))
+                builder.AppendLine($"namespace {nsName};");
+            else
+                nsName = "Global";
+
+            string nsClassName = nsName.Replace(".", "");
+
+            builder.AppendLine($"public static class {nsClassName}SourceGeneratedTypesExtensions");
+            builder.AppendLine("{");
+            builder.IncrementIndent();
+
+            builder.AppendLine(
+                $"public static SourceGeneratedTypesBuilder Add{nsClassName}Controllers(this SourceGeneratedTypesBuilder builder)");
+            builder.AppendLine("{");
+            builder.IncrementIndent();
+            foreach (string className in classNames) builder.AppendLine($"builder.Add{className}Controller();");
+            builder.AppendLine("return builder;");
+            builder.DecrementIndent();
+            builder.AppendLine("}");
+            builder.DecrementIndent();
+            builder.AppendLine("}");
+
+            context.AddSource($"{nsClassName}ControllerExtensions.cs", builder.ToString());
+        }
+    }
+
     private static string EmitFieldsWithResolvers(ObjectControllerDefinition definition)
     {
         var builder = new IndentedStringBuilder();
@@ -75,7 +132,7 @@ public class ObjectTypeEmitter
         {
             ObjectPropertyDefinition property = definition.Properties[index];
             builder.Append(FieldWithResolverTemplate
-                .Replace("{{fieldName}}", System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(property.Name))
+                .Replace("{{fieldName}}", JsonNamingPolicy.CamelCase.ConvertName(property.Name))
                 .Replace("{{fieldType}}", property.ClosestMatchingGraphQLTypeName)
                 .Replace("{{resolverMethod}}", $"{definition.TargetType}Controller.{property.Name}")
             );
@@ -100,14 +157,15 @@ public class ObjectTypeEmitter
         {
             ObjectMethodDefinition method = definition.Methods[index];
 
-            var fieldName = System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(method.Name);
-            var fieldType = method.ClosestMatchingGraphQLTypeName;
+            string fieldName = JsonNamingPolicy.CamelCase.ConvertName(method.Name);
+            string fieldType = method.ClosestMatchingGraphQLTypeName;
             var fieldArguments = method.Parameters
                 .Where(p => p.FromArguments == true || p.IsPrimitive)
                 .Select(a => $"{a.Name}: {a.ClosestMatchingGraphQLTypeName}")
                 .ToList();
 
-            string fieldDefinition = fieldArguments.Any() ? $"{fieldName}({string.Join(", ", fieldArguments)})" : fieldName;
+            string fieldDefinition =
+                fieldArguments.Any() ? $"{fieldName}({string.Join(", ", fieldArguments)})" : fieldName;
 
             builder.Append(FieldWithResolverTemplate
                 .Replace("{{fieldName}}", fieldDefinition)
