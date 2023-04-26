@@ -127,7 +127,7 @@ public class TypeHelper
 
     public static bool HasAttribute(
         SyntaxList<AttributeListSyntax> attributeLists,
-        string attributeName)
+        string searchAttributeName)
     {
         // Check if the parameter has any attributes
         if (!attributeLists.Any())
@@ -139,8 +139,52 @@ public class TypeHelper
         {
             foreach (var attribute in attributeList.Attributes)
             {
+                var attributeName = attribute.Name.ToString();
                 // should probably check fully qualified name
-                if (attribute.Name.ToString() == attributeName)
+                var possibleNames = new[]
+                {
+                    attributeName,
+                    attributeName.EndsWith("Attribute")
+                        ? attributeName.Substring(0, attributeName.Length - 9)
+                        : $"{attributeName}Attribute"
+                };
+
+                // should probably check fully qualified name
+                if (possibleNames.Contains(searchAttributeName))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static bool HasAnyOfAttributes(
+        SyntaxList<AttributeListSyntax> attributeLists,
+        params string[] searchAttributeNames)
+    {
+        // Check if the parameter has any attributes
+        if (!attributeLists.Any())
+        {
+            return false;
+        }
+
+        foreach (var attributeList in attributeLists)
+        {
+            foreach (var attribute in attributeList.Attributes)
+            {
+                var attributeName = attribute.Name.ToString();
+                // should probably check fully qualified name
+                var possibleNames = new[]
+                {
+                    attributeName,
+                    attributeName.EndsWith("Attribute")
+                        ? attributeName.Substring(0, attributeName.Length - 9)
+                        : $"{attributeName}Attribute"
+                };
+
+                if (searchAttributeNames.Any(n => possibleNames.Contains(n)))
                 {
                     return true;
                 }

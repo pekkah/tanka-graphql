@@ -10,12 +10,8 @@ builder.AddTankaGraphQL()
     {
         options.AddGeneratedTypes(types =>
         {
-            // add object type controllers from <global> namespace
-            types.AddGlobalControllers();
-
-            // Add generated input type to schema
-            //todo: make a namespace add all method for this
-            types.AddQueryOptionsInputType();
+            // add types in current namespace
+            types.AddGlobalTypes();
         });
     });
 

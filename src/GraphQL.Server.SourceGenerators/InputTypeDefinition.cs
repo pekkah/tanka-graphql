@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Tanka.GraphQL.Server.SourceGenerators;
 
-public class InputTypeDefinition: IEquatable<InputTypeDefinition>
+public class InputTypeDefinition: TypeDefinition, IEquatable<InputTypeDefinition>
 {
     public string? Namespace { get; init; }
 

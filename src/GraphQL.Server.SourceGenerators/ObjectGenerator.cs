@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
@@ -94,9 +95,7 @@ public class ObjectTypeGenerator : IIncrementalGenerator
                 .WithComparer(EqualityComparer<ObjectControllerDefinition>.Default)
                 .WithTrackingName("ObjectTypes");
 
-
         context.RegisterSourceOutput(objectDefinitions, ObjectTypeEmitter.Emit);
-        context.RegisterSourceOutput(objectDefinitions.Collect(), ObjectTypeEmitter.EmitNamespaceAddMethod);
 
         IncrementalValuesProvider<InputTypeDefinition> inputDefinitions = context
             .SyntaxProvider
@@ -112,12 +111,30 @@ public class ObjectTypeGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(inputDefinitions, (spc, inputDefinition) => new InputTypeEmitter(spc).Emit(inputDefinition));
 
-        var inputDefinitionsByNamespace = inputDefinitions
+        var typesWithNamespace = context.SyntaxProvider
+            .CreateSyntaxProvider((n, _) => n is ClassDeclarationSyntax classDeclaration 
+                                            && TypeHelper.HasAnyOfAttributes(classDeclaration.AttributeLists, ObjectTypeAttributeName, InputTypeAttributeName),
+                (ctx, ct) =>
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    var classDeclaration = (ClassDeclarationSyntax)ctx.Node;
+
+                    if (TypeHelper.HasAttribute(classDeclaration.AttributeLists, ObjectTypeAttributeName))
+                        return (Namespace: TypeHelper.GetNamespace(classDeclaration), Name: classDeclaration.Identifier.Text, Type: "ObjectType");
+ 
+                    return (Namespace: TypeHelper.GetNamespace(classDeclaration), Name: classDeclaration.Identifier.Text, Type: "InputType");
+                });
+
+        var typesByNamespace = typesWithNamespace
             .Collect()
             .SelectMany((ns, _) =>
             {
                 var group = ns.GroupBy(n => n.Namespace);
                 return group;
-            });
+            })
+            .Select((g, _) => (Namespace: g.Key, Types: g.Select(g => (Name: g.Name, Type: g.Type)).ToList()));
+
+        context.RegisterSourceOutput(typesByNamespace, NamespaceEmitter.EmitNamespaceAddMethod);
     }
 }
