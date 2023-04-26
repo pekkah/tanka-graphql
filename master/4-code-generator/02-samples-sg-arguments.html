@@ -158,12 +158,8 @@ builder.AddTankaGraphQL()
     {
         options.AddGeneratedTypes(types =&gt;
         {
-            // add object type controllers from &lt;global&gt; namespace
-            types.AddGlobalControllers();
-
-            // Add generated input type to schema
-            //todo: make a namespace add all method for this
-            types.AddQueryOptionsInputType();
+            // add types in current namespace
+            types.AddGlobalTypes();
         });
     });
 
@@ -226,12 +222,8 @@ builder.AddTankaGraphQL()
     {
         options.AddGeneratedTypes(types =&gt;
         {
-            // add object type controllers from &lt;global&gt; namespace
-            types.AddGlobalControllers();
-
-            // Add generated input type to schema
-            //todo: make a namespace add all method for this
-            types.AddInputMessageInputType();
+            // add types from current namespace
+            types.AddGlobalTypes();
         });
     });
 

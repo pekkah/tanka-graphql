@@ -165,8 +165,8 @@ builder.AddTankaGraphQL()
         // type controllers
         options.AddGeneratedTypes(types =&gt;
         {
-            // Add all controllers in namespace
-            types.AddTankaGraphQLSamplesSGNamespaceControllers();
+            // Add all types in current namespace
+            types.AddTankaGraphQLSamplesSGNamespaceTypes();
         });
     });
 
@@ -179,13 +179,6 @@ app.Run();
 
 namespace Tanka.GraphQL.Samples.SG.Namespace
 {
-    /// &lt;summary&gt;
-    ///     Root query type by naming convention
-    ///     &lt;remarks&gt;
-    ///         We define it as static class so that the generator does not try
-    ///         to use the initialValue as the source of it.
-    ///     &lt;/remarks&gt;
-    /// &lt;/summary&gt;
     [ObjectType]
     public static class Query
     {
@@ -195,20 +188,17 @@ namespace Tanka.GraphQL.Samples.SG.Namespace
     [ObjectType]
     public class World
     {
-        /// &lt;summary&gt;
-        ///     Simple field with one string argument and string return type
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;name&quot;&gt;name: String!&lt;/param&gt;
-        /// &lt;returns&gt;String!&lt;/returns&gt;
-        public string Hello(string name) =&gt; $&quot;Hello {name}&quot;;
+        public string Hello([FromArguments]HelloInput input) =&gt; $&quot;Hello {input.Name}&quot;;
 
-        /// &lt;summary&gt;
-        ///     This is the async version of the Hello method
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;name&quot;&gt;&lt;/param&gt;
-        /// &lt;returns&gt;&lt;/returns&gt;
-        public async Task&lt;string&gt; HelloAsync(string name) =&gt; await Task.FromResult($&quot;Hello {name}&quot;);
     }
+
+    [InputType]
+    public class HelloInput
+    {
+        public string Name { get; set; }
+    }
+
+
 }
 </code></pre>
                     

@@ -163,8 +163,8 @@ builder.AddTankaGraphQL()
     {
         options.AddGeneratedTypes(types =&gt;
         {
-            // add object type controllers from &lt;global&gt; namespace
-            types.AddGlobalControllers();
+            // add types from current namespace
+            types.AddGlobalTypes();
         });
     });
 
