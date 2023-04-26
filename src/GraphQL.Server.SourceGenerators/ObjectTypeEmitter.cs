@@ -82,49 +82,6 @@ public class ObjectTypeEmitter
     }
 
 
-    public static void EmitNamespaceAddMethod(
-        SourceProductionContext context,
-        ImmutableArray<ObjectControllerDefinition> objectControllerDefinitions)
-    {
-        var grouped = objectControllerDefinitions
-            .GroupBy(x => x.Namespace)
-            .ToImmutableArray();
-
-        foreach (IGrouping<string?, ObjectControllerDefinition>? group in grouped)
-        {
-            string? nsName = group.Key;
-            var classNames = group.Select(x => x.TargetType).ToList();
-
-
-            var builder = new IndentedStringBuilder();
-            builder.AppendLine(NamespaceAddTemplate);
-
-            if (!string.IsNullOrEmpty(nsName))
-                builder.AppendLine($"namespace {nsName};");
-            else
-                nsName = "Global";
-
-            string nsClassName = nsName.Replace(".", "");
-
-            builder.AppendLine($"public static class {nsClassName}SourceGeneratedTypesExtensions");
-            builder.AppendLine("{");
-            builder.IncrementIndent();
-
-            builder.AppendLine(
-                $"public static SourceGeneratedTypesBuilder Add{nsClassName}Controllers(this SourceGeneratedTypesBuilder builder)");
-            builder.AppendLine("{");
-            builder.IncrementIndent();
-            foreach (string className in classNames) builder.AppendLine($"builder.Add{className}Controller();");
-            builder.AppendLine("return builder;");
-            builder.DecrementIndent();
-            builder.AppendLine("}");
-            builder.DecrementIndent();
-            builder.AppendLine("}");
-
-            context.AddSource($"{nsClassName}ControllerExtensions.cs", builder.ToString());
-        }
-    }
-
     private static string EmitFieldsWithResolvers(ObjectControllerDefinition definition)
     {
         var builder = new IndentedStringBuilder();

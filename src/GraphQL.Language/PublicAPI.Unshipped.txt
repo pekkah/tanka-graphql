@@ -1,0 +1,7 @@
+#nullable enabled
+static Tanka.GraphQL.Language.Parser.Create(string! data) -> Tanka.GraphQL.Language.Parser!
+static Tanka.GraphQL.Language.Parser.Create(System.ReadOnlySpan<byte> span) -> Tanka.GraphQL.Language.Parser!
+Tanka.GraphQL.Language.Parser.ParseExecutableDocument() -> Tanka.GraphQL.Language.Nodes.ExecutableDocument!
+Tanka.GraphQL.Language.Parser.Parser() -> void
+Tanka.GraphQL.Language.Parser.ParseTypeSystemDocument() -> Tanka.GraphQL.Language.Nodes.TypeSystem.TypeSystemDocument!
+Tanka.GraphQL.Language.TokenKind

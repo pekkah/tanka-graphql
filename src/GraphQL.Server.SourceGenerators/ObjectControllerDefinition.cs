@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Tanka.GraphQL.Server.SourceGenerators;
 
-public class ObjectControllerDefinition: IEquatable<ObjectControllerDefinition>
+public class ObjectControllerDefinition: TypeDefinition, IEquatable<ObjectControllerDefinition>
 {
     public string? Namespace { get; init; }
 
@@ -18,8 +18,6 @@ public class ObjectControllerDefinition: IEquatable<ObjectControllerDefinition>
 
     public bool IsStatic { get; init; }
 
-    public List<string> Usings { get; set; } = new List<string>();
-
     public virtual bool Equals(ObjectControllerDefinition? other)
     {
         if (ReferenceEquals(null, other)) return false;
@@ -28,8 +26,7 @@ public class ObjectControllerDefinition: IEquatable<ObjectControllerDefinition>
         return Namespace == other.Namespace
                && TargetType == other.TargetType
                && Properties.SequenceEqual(other.Properties, EqualityComparer<ObjectPropertyDefinition>.Default)
-               && Methods.SequenceEqual(other.Methods, EqualityComparer<ObjectMethodDefinition>.Default)
-               && Usings.SequenceEqual(other.Usings, EqualityComparer<string>.Default);
+               && Methods.SequenceEqual(other.Methods, EqualityComparer<ObjectMethodDefinition>.Default);
     }
 
     public override int GetHashCode()
@@ -40,7 +37,6 @@ public class ObjectControllerDefinition: IEquatable<ObjectControllerDefinition>
             hashCode = (hashCode * 397) ^ TargetType.GetHashCode();
             hashCode = (hashCode * 397) ^ Properties.GetHashCode();
             hashCode = (hashCode * 397) ^ Methods.GetHashCode();
-            hashCode = (hashCode * 397) ^ Usings.GetHashCode();
             hashCode = (hashCode * 397) ^ (ParentClass != null ? ParentClass.GetHashCode() : 0);
             return hashCode;
         }

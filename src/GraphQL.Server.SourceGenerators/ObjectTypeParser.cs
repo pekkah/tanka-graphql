@@ -27,7 +27,6 @@ namespace Tanka.GraphQL.Server.SourceGenerators
             return new ObjectControllerDefinition()
             {
                 IsStatic = classDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword),
-                Usings = classDeclaration.SyntaxTree.GetCompilationUnitRoot().Usings.Select(u => u.Name.ToString()).ToList(),
                 Namespace = TypeHelper.GetNamespace(classDeclaration),
                 TargetType = classDeclaration.Identifier.Text,
                 Properties = properties,
