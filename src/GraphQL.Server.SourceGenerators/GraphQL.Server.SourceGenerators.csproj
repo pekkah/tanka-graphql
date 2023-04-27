@@ -9,6 +9,7 @@
         <DevelopmentDependency>true</DevelopmentDependency>
         <NoWarn>NU5100</NoWarn>
         <IncludeSymbols>false</IncludeSymbols>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
     </PropertyGroup>
 
     <ItemGroup>
