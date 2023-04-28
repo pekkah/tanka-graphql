@@ -62,6 +62,7 @@ namespace Tanka.GraphQL.Server.SourceGenerators
                     var methodDeclaration = (MethodDeclarationSyntax)memberDeclarationSyntax;
                     var methodDefinition = new ObjectMethodDefinition()
                     {
+                        IsStatic = methodDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword),
                         Name = methodDeclaration.Identifier.Text,
                         ReturnType = TypeHelper.UnwrapTaskType(methodDeclaration.ReturnType).ToString(),
                         ClosestMatchingGraphQLTypeName = GetClosestMatchingGraphQLTypeName(context.SemanticModel, TypeHelper.UnwrapTaskType(methodDeclaration.ReturnType)),

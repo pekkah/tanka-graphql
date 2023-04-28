@@ -13,4 +13,6 @@ public record ObjectMethodDefinition
     public string ReturnType { get; init; }
 
     public string ClosestMatchingGraphQLTypeName { get; set; }
+
+    public bool IsStatic { get; set; }
 }

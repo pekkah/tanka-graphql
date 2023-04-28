@@ -179,12 +179,12 @@ public class ObjectTypeEmitter
 
             builder.IncrementIndent();
 
-            if (!definition.IsStatic)
+            if (!method.IsStatic)
                 builder.AppendLine($"var objectValue = ({definition.TargetType})context.ObjectValue;");
 
             string parameters = GetParameters(method);
 
-            if (!definition.IsStatic)
+            if (!method.IsStatic)
                 builder.AppendLine(isAsync
                     ? $"context.ResolvedValue = await objectValue.{method.Name}{parameters}"
                     : $"context.ResolvedValue = objectValue.{method.Name}{parameters}");
@@ -275,7 +275,7 @@ public class ObjectTypeEmitter
             else if (parameter.FromServices == true)
             {
                 builder.Append(parameter.IsNullable
-                    ? $"context.QueryContext.RequestServices.GetService<{parameter.Type}>()"
+                    ? $"context.RequestServices.GetService<{parameter.Type}>()"
                     : $"context.GetRequiredService<{parameter.Type}>()");
             }
             else if (parameter.IsPrimitive)
