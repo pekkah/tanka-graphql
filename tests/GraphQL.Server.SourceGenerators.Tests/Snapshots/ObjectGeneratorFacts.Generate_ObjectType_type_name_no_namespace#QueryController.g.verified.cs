@@ -1,11 +1,12 @@
 ﻿//HintName: QueryController.g.cs
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using Tanka.GraphQL.Server;
 using Tanka.GraphQL.Executable;
-using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.Fields;
+using Tanka.GraphQL.Server;
+using Tanka.GraphQL.ValueResolution;
+
 
 
 

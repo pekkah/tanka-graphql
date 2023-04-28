@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+
+using Microsoft.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis.CSharp;
@@ -24,7 +26,7 @@ public class TypeHelper
 
         bool isNullable = IsNullable(typeSymbol, out typeSymbol);
 
-        var typeName = string.Empty;
+        string typeName;
         
         // Handle primitive types
         if (typeSymbol.SpecialType != SpecialType.None && typeSymbol.SpecialType != SpecialType.System_Void)
@@ -349,7 +351,7 @@ public class TypeHelper
         return parentClassInfo;
     }
 
-    public static string GetResource(string nameSpace, ParentClass? parentClass)
+    public static string GetResource(string nameSpace, ParentClass? parentClass, string resource)
     {
         var sb = new StringBuilder();
 
@@ -383,10 +385,8 @@ public class TypeHelper
             parentClass = parentClass.Child; // repeat with the next child
         }
 
-        // Write the actual target generation code here. Not shown for brevity
-        sb.AppendLine(@"public partial readonly struct TestId
-    {
-    }");
+        // Write the actual target code
+        sb.AppendLine(resource);
 
         // We need to "close" each of the parent types, so write
         // the required number of '}'
@@ -403,5 +403,13 @@ public class TypeHelper
         return kind == SyntaxKind.ClassDeclaration ||
                kind == SyntaxKind.StructDeclaration ||
                kind == SyntaxKind.RecordDeclaration;
+    }
+
+    public static IReadOnlyList<string> GetUsings(ClassDeclarationSyntax classDeclaration)
+    {
+        return classDeclaration.SyntaxTree.GetCompilationUnitRoot()
+            .Usings
+            .Select(u => u.ToString())
+            .ToList();
     }
 }

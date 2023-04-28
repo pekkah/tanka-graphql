@@ -1,10 +1,8 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Reflection;
 
 namespace Tanka.GraphQL.Server.SourceGenerators
 {
@@ -31,7 +29,8 @@ namespace Tanka.GraphQL.Server.SourceGenerators
                 TargetType = classDeclaration.Identifier.Text,
                 Properties = properties,
                 Methods = methods,
-                ParentClass = TypeHelper.GetParentClasses(classDeclaration)
+                ParentClass = TypeHelper.GetParentClasses(classDeclaration),
+                Usings = TypeHelper.GetUsings(classDeclaration)
             };
         }
 

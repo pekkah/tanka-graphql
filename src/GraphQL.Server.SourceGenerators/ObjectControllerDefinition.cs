@@ -18,6 +18,8 @@ public class ObjectControllerDefinition: TypeDefinition, IEquatable<ObjectContro
 
     public bool IsStatic { get; init; }
 
+    public IReadOnlyList<string> Usings { get; init; }
+
     public virtual bool Equals(ObjectControllerDefinition? other)
     {
         if (ReferenceEquals(null, other)) return false;

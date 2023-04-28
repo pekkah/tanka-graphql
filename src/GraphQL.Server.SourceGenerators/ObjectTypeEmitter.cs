@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -9,13 +11,7 @@ namespace Tanka.GraphQL.Server.SourceGenerators;
 public class ObjectTypeEmitter
 {
     public const string ObjectTypeTemplate = """
-        using System;
-        using System.Threading.Tasks;
-        using Microsoft.Extensions.Options;
-        using Tanka.GraphQL.Server;
-        using Tanka.GraphQL.Executable;
-        using Tanka.GraphQL.ValueResolution;
-        using Tanka.GraphQL.Fields;
+        {{usings}}
 
         {{namespace}}
 
@@ -58,6 +54,16 @@ public class ObjectTypeEmitter
        
         """;
 
+    public static IReadOnlyList<string> DefaultUsings = new List<string>()
+    {
+        "using System;",
+        "using System.Threading.Tasks;",
+        "using Microsoft.Extensions.Options;",
+        "using Tanka.GraphQL.Server;",
+        "using Tanka.GraphQL.Executable;",
+        "using Tanka.GraphQL.ValueResolution;",
+        "using Tanka.GraphQL.Fields;"
+    };
 
     public static void Emit(
         SourceProductionContext context,
@@ -71,6 +77,7 @@ public class ObjectTypeEmitter
 
         string ns = string.IsNullOrEmpty(definition.Namespace) ? "" : $"{definition.Namespace}";
         builder.AppendLine(ObjectTypeTemplate
+            .Replace("{{usings}}", GetUsings(definition.Usings))
             .Replace("{{properties}}", properties)
             .Replace("{{methods}}", methods)
             .Replace("{{namespace}}", string.IsNullOrEmpty(ns) ? "" : $"namespace {ns};")
@@ -79,6 +86,23 @@ public class ObjectTypeEmitter
         );
 
         context.AddSource($"{ns}{definition.TargetType}Controller.g.cs", builder.ToString());
+    }
+
+    private static string GetUsings(IReadOnlyList<string> usings)
+    {
+        var allUsings = DefaultUsings
+            .Union(usings)
+            .Distinct()
+            .OrderBy(u => u)
+            .ToList();
+
+        var builder = new IndentedStringBuilder();
+        foreach (string @using in allUsings)
+        {
+            builder.AppendLine(@using);
+        }
+
+        return builder.ToString();
     }
 
 
