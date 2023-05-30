@@ -13,8 +13,7 @@ public class ExecutionError
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<Location>? Locations { get; set; }
 
-    [JsonPropertyName("message")]
-    public required string Message { get; set; }
+    [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
 
     [JsonPropertyName("path")] public object[] Path { get; set; } = Array.Empty<object>();
 

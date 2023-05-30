@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Tanka.GraphQL.Json;
 
@@ -11,6 +9,11 @@ public abstract class MessageBase
 {
     [JsonPropertyName("type")] 
     public string Type { get; set; } = null!;
+
+    public override string ToString()
+    {
+        return $"Message({Type})";
+    }
 }
 
 public class MessageConverter: JsonConverter<MessageBase>
@@ -134,6 +137,11 @@ public class Subscribe: MessageBase
 
     [JsonPropertyName("payload")]
     public GraphQLHttpRequest Payload { get; set; }
+
+    public override string ToString()
+    {
+        return $"Subscribe: {Id}";
+    }
 }
 
 public class Next: MessageBase
@@ -173,4 +181,9 @@ public class Complete: MessageBase
 
     [JsonPropertyName("id")]
     public required string Id { get; set; }
+
+    public override string ToString()
+    {
+        return $"Complete: {Id}";
+    }
 }

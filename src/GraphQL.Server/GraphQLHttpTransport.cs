@@ -1,11 +1,19 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 
 namespace Tanka.GraphQL.Server;
 
-public class GraphQLHttpTransport : IGraphQLTransport
+public partial class GraphQLHttpTransport : IGraphQLTransport
 {
+    private readonly ILogger<GraphQLHttpTransport> _logger;
+
+    public GraphQLHttpTransport(ILogger<GraphQLHttpTransport> logger)
+    {
+        _logger = logger;
+    }
+
     public IEndpointConventionBuilder Map(
         string pattern,
         IEndpointRouteBuilder routes,
@@ -30,6 +38,7 @@ public class GraphQLHttpTransport : IGraphQLTransport
             if (!httpContext.WebSockets.IsWebSocketRequest
                 && httpContext.Request.HasJsonContentType())
             {
+                Log.BeginRequest(_logger);
                 var context = new GraphQLRequestContext
                 {
                     RequestServices = httpContext.RequestServices,
@@ -42,7 +51,17 @@ public class GraphQLHttpTransport : IGraphQLTransport
                 });
 
                 await pipeline(context);
+                Log.EndRequest(_logger);
             }
         };
+    }
+
+    private static partial class Log
+    {
+        [LoggerMessage(1, LogLevel.Information,  "Processing GraphQL Http request")]
+        public static partial void BeginRequest(ILogger logger);
+
+        [LoggerMessage(int.MaxValue, LogLevel.Information, "Processing GraphQL Http request completed")]
+        public static partial void EndRequest(ILogger logger);
     }
 }

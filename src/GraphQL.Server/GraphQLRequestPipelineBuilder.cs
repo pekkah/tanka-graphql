@@ -1,4 +1,6 @@
-﻿using Tanka.GraphQL.Internal;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+using Tanka.GraphQL.Internal;
 
 namespace Tanka.GraphQL.Server;
 
@@ -74,5 +76,13 @@ public class GraphQLRequestPipelineBuilder
     {
         _components.Add(middleware);
         return this;
+    }
+
+    public GraphQLRequestPipelineBuilder Use<T>()
+        where T: IGraphQLRequestMiddleware
+    {
+        var middleware = ApplicationServices.GetRequiredService<T>();
+
+        return Use(next => async context => await middleware.Invoke(context, next));
     }
 }
