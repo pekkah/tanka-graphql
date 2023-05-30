@@ -65,4 +65,9 @@ public record ExecutionResult
             _errors = value;
         }
     }
+
+    public override string ToString()
+    {
+        return PrettyJsonLog.PrettyJson(this);
+    }
 }

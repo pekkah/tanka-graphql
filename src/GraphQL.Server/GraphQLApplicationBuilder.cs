@@ -23,6 +23,7 @@ public class GraphQLApplicationBuilder
 
     public GraphQLApplicationBuilder AddHttp()
     {
+        ApplicationServices.TryAddSingleton<GraphQLHttpTransportMiddleware>();
         ApplicationServices.TryAddEnumerable(ServiceDescriptor.Singleton<IGraphQLTransport, GraphQLHttpTransport>());
         return this;
     }

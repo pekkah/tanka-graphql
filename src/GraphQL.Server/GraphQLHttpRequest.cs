@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+
 using Tanka.GraphQL.Json;
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Server;
 
-public class GraphQLHttpRequest
+public record GraphQLHttpRequest
 {
     [JsonPropertyName("operationName")]
     public string? OperationName { get; set; }
@@ -21,4 +21,10 @@ public class GraphQLHttpRequest
     [JsonPropertyName("extensions")]
     [JsonConverter(typeof(NestedDictionaryConverter))]
     public IReadOnlyDictionary<string, object?>? Extensions { get; set; }
+
+    public override string ToString()
+    {
+        return PrettyJsonLog.PrettyJson(this);
+    }
+
 }

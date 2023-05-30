@@ -1,9 +1,10 @@
 ﻿using System.Net.WebSockets;
-using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+
 using Tanka.GraphQL.Server.WebSockets;
 
 namespace Tanka.GraphQL.Server;
@@ -18,7 +19,26 @@ public class GraphQLWSTransport : IGraphQLTransport
     ///     Due to historical reasons this actually is the protocol name used
     ///     by the newer protocol.
     /// </summary>
-    public static string SubProcol = "graphql-transport-ws";
+    public static string SubProtocol = "graphql-transport-ws";
+
+    public IEndpointConventionBuilder Map(string pattern, IEndpointRouteBuilder routes,
+        GraphQLRequestDelegate requestDelegate)
+    {
+        return routes.Map(pattern + "/ws", ProcessRequest(requestDelegate));
+    }
+
+    public void Build(GraphQLRequestPipelineBuilder builder)
+    {
+    }
+
+    private async Task HandleProtocol(
+        HttpContext httpContext,
+        WebSocket webSocket,
+        GraphQLRequestDelegate requestPipeline)
+    {
+        var connection = new GraphQLWSConnection(webSocket, requestPipeline, httpContext);
+        await connection.Connect(httpContext.RequestAborted);
+    }
 
 
     private RequestDelegate ProcessRequest(GraphQLRequestDelegate pipeline)
@@ -36,39 +56,21 @@ public class GraphQLWSTransport : IGraphQLTransport
                 return;
             }
 
-            if (httpContext.WebSockets.WebSocketRequestedProtocols?.Contains(SubProcol) == false)
+            if (httpContext.WebSockets.WebSocketRequestedProtocols?.Contains(SubProtocol) == false)
             {
                 httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
                 {
-                    Detail = $"Request does not contain sub-protocol '{SubProcol}'."
+                    Detail = $"Request does not contain sub-protocol '{SubProtocol}'."
                 });
 
                 return;
             }
 
-            var webSocket = await httpContext.WebSockets
-                .AcceptWebSocketAsync(SubProcol);
+            WebSocket webSocket = await httpContext.WebSockets
+                .AcceptWebSocketAsync(SubProtocol);
 
             await HandleProtocol(httpContext, webSocket, pipeline);
         };
-    }
-
-    private async Task HandleProtocol(
-        HttpContext httpContext,
-        WebSocket webSocket,
-        GraphQLRequestDelegate requestPipeline)
-    {
-        var connection = new GraphQLWSConnection(webSocket, requestPipeline, httpContext);
-        await connection.Connect(httpContext.RequestAborted);
-    }
-
-    public IEndpointConventionBuilder Map(string pattern, IEndpointRouteBuilder routes, GraphQLRequestDelegate requestDelegate)
-    {
-        return routes.Map(pattern + "/ws", ProcessRequest(requestDelegate));
-    }
-
-    public void Build(GraphQLRequestPipelineBuilder builder)
-    {
     }
 }
