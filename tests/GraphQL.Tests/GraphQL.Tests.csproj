@@ -13,7 +13,7 @@
     <Compile Remove="ValueResolution\UnionCompletionFacts.cs" />
   </ItemGroup>
   <ItemGroup>
-   <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+   <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NSubstitute" Version="5.0.0" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
