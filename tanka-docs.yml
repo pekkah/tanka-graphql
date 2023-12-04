@@ -1,10 +1,10 @@
 ﻿base_path: "/"
 title: "Tanka GraphQL"
-index_page: xref://root@master:index.md
+index_page: xref://root@main:index.md
 output_path: "artifacts/gh-pages"
 build_path: "_build"
 branches:
-  master:
+  main:
     input_path:
       - ui-bundle
       - docs

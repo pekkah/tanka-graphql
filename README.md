@@ -1,14 +1,14 @@
-# Tanka GraphQL library (TGQL)
+# Tanka GraphQL library
 
 - Execute queries, mutations and subscriptions
-- Validation (new implementation in v0.3.0)
-- graphql-ws compatible web socket server (compatible with latest Apollo Client) (since v3)
-- Code generation
-- New and improved parser for executable and type system documents (since v2.0.0)
-- Delegates as resolvers and subscriptions (also middleware) (since v3)
+- Validation 
+- Source Generator based source code generation (Schema types from classes)
+- New and improved parser for executable and type system documents
+- Delegates as resolvers and subscriptions (also middleware)
 - New middleware based execution pipelines (since v3)
 - New server and executor implementations (since v3)
 - Apollo Federation subgraph support (since v3)
+- [graphql-ws](https://github.com/enisdenjo/graphql-ws) compatible web socket server (compatible with latest Apollo Client) (since v3)
 
 
 ## Documentation and packages
@@ -24,6 +24,7 @@ Both beta and release packages are available from NuGet and NPM
 ## Samples
 
 See [Samples](https://github.com/pekkah/tanka-graphql/tree/master/samples) in the repository.
+See [Tanka Chat](https://github.com/pekkah/tanka-graphql-samples) for a more complete example.
 
 
 ## Install
