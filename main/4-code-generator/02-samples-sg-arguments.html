@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/tanka-graphql/">
+    <title>02-samples-sg-arguments - Tanka GraphQL</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="main/prism.css" />
+    <style>
+        body {
+            height: 100%;
+            width: 100%;         
+        }
+
+        a {
+            color: rgba(0,0,0,.65);
+        }
+
+        a:hover {
+            color: rgba(8, 8, 8, 0.65);
+        }
+
+        blockquote {
+            border: 1px solid rgba(94, 94, 94, 0.65);
+            border-left: 5px solid rgba(94, 94, 94, 0.65);
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;            
+        }
+
+        .sidebar {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .nav-item {
+            list-style: none;
+        }
+
+        .sidebar .nav-link {
+            display: block;
+            padding: .25rem 1.5rem;
+            font-size: 90%;
+            color: rgba(0,0,0,.65);
+        }
+
+        .sidebar .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .content h1,
+        .content h2,
+        .content h3,
+        .content h4,
+        .content h5,
+        .content h6 {
+            font-weight: 300;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Tanka GraphQL</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="main/0-getting-started/00-getting-started.html">Getting Started</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/2-language/01-parser.html">Language</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/10-extensions/tracing.html">Extensions</a>
+                </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+             <li class="nav-item">
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
+            </li>
+            <li class="nav-item dropdown justify-content-end">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    main
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/tanka-graphql/main">main</a>
+                        <a class="dropdown-item" href="/tanka-graphql/2.0.1">2.0.1</a>
+                        <a class="dropdown-item" href="/tanka-graphql/2.0.0">2.0.0</a>
+                </div>
+            </li>
+        </ul>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row flex-xl-nowrap">
+            <nav class="col-12 col-md-3 col-xl-2 sidebar">
+                <div class="sidebar-sticky">
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=main/4-code-generator/01-samples-sg-basic.html>Installation &amp; basics</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=main/4-code-generator/02-samples-sg-arguments.html>Arguments</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=main/4-code-generator/03-samples-sg-namespace.html>Namespace</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=main/4-code-generator/04-samples-sg-services.html>Dependency injection</a>
+    <ul>
+    </ul>
+</li>    </nav>
+                </div>
+            </nav>
+            <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
+                <h2 id="arguments">Arguments</h2>
+<p>Code generator will extract the arguments from the resolver and generate calls
+to bind the arguments from the resolver context. It will also generate the
+correct field definition for the field. Arguments can be primitive types or
+input object types.</p>
+<h3 id="tanka.graphql.samples.sg.arguments">Tanka.GraphQL.Samples.SG.Arguments</h3>
+<pre><code class="language-csharp">using Tanka.GraphQL.Server;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Add tanka graphql
+builder.AddTankaGraphQL()
+    .AddHttp()
+    .AddWebSockets()
+    .AddSchemaOptions(&quot;Default&quot;, options =&gt;
+    {
+        options.AddGeneratedTypes(types =&gt;
+        {
+            // add types in current namespace
+            types.AddGlobalTypes();
+        });
+    });
+
+WebApplication app = builder.Build();
+app.UseWebSockets();
+
+app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;Default&quot;);
+app.Run();
+
+
+[ObjectType]
+public static class Query
+{
+    /// &lt;summary&gt;
+    ///     Resolver with two primitive arguments
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;start&quot;&gt;Bound automatically from args&lt;/param&gt;
+    /// &lt;param name=&quot;count&quot;&gt;Bound automatically from args&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
+    public static int[] Range(int start, int count)
+    {
+        return Enumerable.Range(start, count).ToArray();
+    }
+
+    /// &lt;summary&gt;
+    ///     Resolver with input object argument
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;options&quot;&gt;todo: bug - requires [FromArguments] in combination with [InputObject]&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
+    public static int[] RangeWithInputObject([FromArguments]QueryOptions options)
+    {
+        return Enumerable.Range(options.Start, options.Count).ToArray();
+    }
+}
+
+
+[InputType]
+public class QueryOptions
+{
+    public int Start { get; set; } = 0;
+
+    public int Count { get; set; } = 100;
+}
+</code></pre>
+<h3 id="tanka.graphql.samples.sg.inputtype">Tanka.GraphQL.Samples.SG.InputType</h3>
+<pre><code class="language-csharp">using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Mvc;
+using Tanka.GraphQL.Server;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Simple in memory db for messages
+builder.Services.AddSingleton&lt;Db&gt;();
+
+// Add tanka graphql
+builder.AddTankaGraphQL()
+    .AddHttp()
+    .AddWebSockets()
+    .AddSchemaOptions(&quot;Default&quot;, options =&gt;
+    {
+        options.AddGeneratedTypes(types =&gt;
+        {
+            // add types from current namespace
+            types.AddGlobalTypes();
+        });
+    });
+
+WebApplication app = builder.Build();
+app.UseWebSockets();
+
+app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;Default&quot;);
+app.Run();
+
+
+[ObjectType]
+public static class Query
+{
+    /// &lt;summary&gt;
+    ///     Simple query with one dependency resolved from DI
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    ///     [FromServices] is provided by Microsoft.AspNetCore.Mvc
+    /// &lt;/remarks&gt;
+    /// &lt;param name=&quot;db&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
+    public static Message[] Messages([FromServices]Db db)
+    {
+        return db.Messages.ToArray();
+    }
+}
+
+[ObjectType]
+public static class Mutation
+{
+    /// &lt;summary&gt;
+    ///     Simple mutation with one InputObject argument and one dependency resolved from DI
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;
+    ///     [FromArguments} is provided by Tanka.GraphQL.Server
+    /// &lt;/remarks&gt;
+    /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
+    /// &lt;param name=&quot;db&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
+    public static Message Post([FromArguments]InputMessage input, [FromServices]Db db)
+    {
+        var message = new Message
+        {
+            Id = Guid.NewGuid().ToString(),
+            Text = input.Text
+        };
+
+        db.Messages.Add(message);
+        return message;
+    }
+}
+
+[ObjectType]
+public class Message
+{
+    public required string Id { get; set; }
+
+    public required string Text { get; set; }
+}
+
+[InputType]
+public class InputMessage
+{
+    public string Text { get; set; } = string.Empty;
+}
+
+public class Db
+{
+    public ConcurrentBag&lt;Message&gt; Messages { get; } = new();
+}
+</code></pre>
+                    
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="main/prism.js"></script>
+</body>
+</html>
