@@ -3,12 +3,12 @@ name: Build docs
 on:
   push:
     branches:
-      - master
+      - main
       - release/**
     tags:
       - '*'
   pull_request:
-    branches: [master]
+    branches: [main]
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -23,11 +23,12 @@ jobs:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: |
             6.0.x
             7.0.x
+            8.0.x
 
       - name: Build docs
         shell: pwsh
@@ -59,7 +60,7 @@ jobs:
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.2.3
-        if: github.ref_name == 'master' || startsWith(github.ref, 'refs/tags/')
+        if: github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/')
         with:
           branch: gh-pages
           folder: ./docs
