@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Extensions.Trace;
 using Tanka.GraphQL.Features;
@@ -15,10 +16,7 @@ public partial class Executor
     ///     Create executor with defaults and use given <see cref="ISchema" />.
     /// </summary>
     /// <param name="schema"></param>
-    public Executor(ISchema schema) : this(new ExecutorOptions()
-    {
-        Schema = schema
-    })
+    public Executor(ISchema schema) : this(new ExecutorOptions { Schema = schema })
     {
     }
 
@@ -32,9 +30,9 @@ public partial class Executor
         builder.UseDefaultRequestServices();
 
         builder.AddFeature<ISchemaFeature>(new SchemaFeature
-            {
-                Schema = options.Schema
-            });
+        {
+            Schema = options.Schema
+        });
 
         builder.AddDefaultFeatures();
 
