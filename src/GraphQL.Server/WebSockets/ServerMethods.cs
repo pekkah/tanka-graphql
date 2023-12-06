@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
+
 using Microsoft.AspNetCore.Http;
 using Tanka.GraphQL.Server.WebSockets.WebSocketPipe;
+using Tanka.GraphQL.Validation;
 
 namespace Tanka.GraphQL.Server.WebSockets;
 
@@ -58,24 +56,25 @@ public class ServerMethods
     private async Task Execute(Subscribe subscribe, CancellationTokenSource unsubscribeOrAborted)
     {
         var cancellationToken = unsubscribeOrAborted.Token;
-        var context = new GraphQLRequestContext
-        {
-            HttpContext = _httpContext,
-            RequestServices = _httpContext.RequestServices,
-            Request = new()
-            {
-                InitialValue = null,
-                Document = subscribe.Payload.Query,
-                OperationName = subscribe.Payload.OperationName,
-                Variables = subscribe.Payload.Variables
-            }
-        };
-
-        await _requestDelegate(context);
-        await using var enumerator = context.Response.GetAsyncEnumerator(cancellationToken);
-
+        
         try
         {
+            var context = new GraphQLRequestContext
+            {
+                HttpContext = _httpContext,
+                RequestServices = _httpContext.RequestServices,
+                Request = new()
+                {
+                    InitialValue = null,
+                    Document = subscribe.Payload.Query,
+                    OperationName = subscribe.Payload.OperationName,
+                    Variables = subscribe.Payload.Variables
+                }
+            };
+
+            await _requestDelegate(context);
+            await using var enumerator = context.Response.GetAsyncEnumerator(cancellationToken);
+
             while (await enumerator.MoveNextAsync())
             {
                 await Client.Next(new Next()
@@ -97,6 +96,15 @@ public class ServerMethods
         {
             // noop
         }
+        catch (ValidationException x)
+        {
+            var validationResult = x.Result;
+            await Client.Error(new Error()
+            {
+                Id = subscribe.Id,
+                Payload = validationResult.Errors.Select(ve => ve.ToError()).ToArray()
+            }, cancellationToken);
+        }
         catch (QueryException x)
         {
             await Client.Error(new Error()
@@ -114,7 +122,7 @@ public class ServerMethods
         }
         finally
         {
-            unsubscribeOrAborted.Cancel();
+            await unsubscribeOrAborted.CancelAsync();
             Subscriptions.TryRemove(subscribe.Id, out _);
         }
     }
@@ -125,7 +133,7 @@ public class ServerMethods
         {
             var (unsubscribe, worker) = pair;
 
-            unsubscribe.Cancel();
+            await unsubscribe.CancelAsync();
             await worker;
         }
     }

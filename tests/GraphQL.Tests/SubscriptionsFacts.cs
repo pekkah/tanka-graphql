@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
 
@@ -160,5 +161,26 @@ type Subscription {
                     }
                 }
             }");
+    }
+
+    [Fact]
+    public async Task Should_error_on_invalid_query()
+    {
+        /* Given */
+        var unsubscribe = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        var query = @"
+                subscription MessageAdded {
+                    messageAdded {
+                        doesNotExists
+                    }
+                }
+                ";
+
+        await using var result = Executor.Subscribe(_executable, query, unsubscribe.Token)
+            .GetAsyncEnumerator(unsubscribe.Token);
+
+        /* When */
+        /* Then */
+        await Assert.ThrowsAsync<ValidationException>(()=> result.MoveNextAsync().AsTask());
     }
 }
