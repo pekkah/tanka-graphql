@@ -217,8 +217,9 @@ WebApplication app = builder.Build();
 app.UseWebSockets();
 
 // this uses the default pipeline
-// you can access GraphiQL at &quot;/graphql/ui&quot;
 app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;System&quot;);
+// you can access GraphiQL at &quot;/graphql/ui&quot;
+app.MapGraphiQL(&quot;/graphql/ui&quot;);
 
 app.Run();
 
