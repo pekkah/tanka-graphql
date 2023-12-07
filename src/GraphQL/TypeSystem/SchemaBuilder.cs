@@ -408,12 +408,12 @@ directive @specifiedBy(url: String!) on SCALAR
         var extensions = _schemaExtensions.ToList();
         var extensionDirectives = extensions
             .Where(e => e.Directives is not null)
-            .SelectMany(e => e.Directives)
+            .SelectMany(e => e.Directives!)
             .ToList();
 
         var extensionOperations = extensions
             .Where(e => e.Operations is not null)
-            .SelectMany(e => e.Operations)
+            .SelectMany(e => e.Operations!)
             .ToList();
 
         foreach (var schemaDefinition in _schemaDefinitions)

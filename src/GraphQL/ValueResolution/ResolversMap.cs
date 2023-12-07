@@ -11,7 +11,11 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
     {
     }
 
-    public static IResolverMap None { get; } = new ResolversMap();
+    private static ResolversMap Empty { get; } = new ResolversMap();
+    
+    public static IResolverMap None { get; } = Empty;
+
+    public static ISubscriberMap SubscribersNone { get; } = Empty;
 
     public Resolver? GetResolver(string typeName, string fieldName)
     {

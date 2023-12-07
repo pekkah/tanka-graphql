@@ -1,19 +1,10 @@
-﻿using Microsoft.AspNetCore.Connections;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Data.Common;
+﻿using System.Buffers;
 using System.IO.Pipelines;
-using System.Linq;
 using System.Net.WebSockets;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Channels;
-using System.Threading.Tasks;
+
 using Microsoft.Extensions.Logging;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
 {
@@ -29,18 +20,18 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
 
         public ChannelWriter<T> Writer => Output.Writer;
 
-        protected Pipe _application { get; }
+        private Pipe Application { get; }
 
         private readonly TimeSpan _closeTimeout = TimeSpan.FromSeconds(5);
         private bool _aborted;
 
-        private JsonSerializerOptions _jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
 
         public WebSocketMessageChannel(WebSocket socket, ILogger<WebSocketMessageChannel<T>> logger)
         {
             _socket = socket;
             _logger = logger;
-            _application = new Pipe();
+            Application = new Pipe();
             Input = Channel.CreateUnbounded<T>();
             Output = Channel.CreateUnbounded<T>();
         }
@@ -64,7 +55,7 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
                 // 2. Waiting for a websocket send to complete
 
                 // Cancel the application so that ReadAsync yields
-                _application.Reader.CancelPendingRead();
+                Application.Reader.CancelPendingRead();
 
                 using (var delayCts = new CancellationTokenSource())
                 {
@@ -82,7 +73,7 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
                     }
                     else
                     {
-                        delayCts.Cancel();
+                        await delayCts.CancelAsync();
                     }
                 }
             }
@@ -94,24 +85,22 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
                 // 1. Waiting for websocket data
                 // 2. Waiting on a flush to complete (backpressure being applied)
 
-                using (var delayCts = new CancellationTokenSource())
+                using var delayCts = new CancellationTokenSource();
+                var resultTask = await Task.WhenAny(receiving, Task.Delay(_closeTimeout, delayCts.Token));
+
+                if (resultTask != receiving)
                 {
-                    var resultTask = await Task.WhenAny(receiving, Task.Delay(_closeTimeout, delayCts.Token));
+                    // Abort the websocket if we're stuck in a pending receive from the client
+                    _aborted = true;
 
-                    if (resultTask != receiving)
-                    {
-                        // Abort the websocket if we're stuck in a pending receive from the client
-                        _aborted = true;
+                    _socket.Abort();
 
-                        _socket.Abort();
-
-                        // Cancel any pending flush so that we can quit
-                        _application.Writer.CancelPendingFlush();
-                    }
-                    else
-                    {
-                        delayCts.Cancel();
-                    }
+                    // Cancel any pending flush so that we can quit
+                    Application.Writer.CancelPendingFlush();
+                }
+                else
+                {
+                    await delayCts.CancelAsync();
                 }
             }
         }
@@ -120,7 +109,7 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var messageResult = await _application.Reader.ReadAsync(cancellationToken);
+                var messageResult = await Application.Reader.ReadAsync(cancellationToken);
 
                 if (messageResult.IsCanceled)
                     break;
@@ -128,8 +117,11 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
                 var buffer = messageResult.Buffer;
                 var message = ReadMessageCore(buffer);
 
+                if (message is null)
+                    continue;
+                
                 await Input.Writer.WriteAsync(message);
-                _application.Reader.AdvanceTo(buffer.End);
+                Application.Reader.AdvanceTo(buffer.End);
 
                 if (messageResult.IsCompleted)
                     break;
@@ -158,7 +150,7 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
                         return;
                     }
 
-                    var memory = _application.Writer.GetMemory();
+                    var memory = Application.Writer.GetMemory();
 
                     var receiveResult = await socket.ReceiveAsync(memory, token);
 
@@ -174,11 +166,11 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
                         receiveResult.Count,
                         receiveResult.EndOfMessage);
 
-                    _application.Writer.Advance(receiveResult.Count);
+                    Application.Writer.Advance(receiveResult.Count);
 
                     if (receiveResult.EndOfMessage)
                     {
-                        var flushResult = await _application.Writer.FlushAsync();
+                        var flushResult = await Application.Writer.FlushAsync();
                     
                         // We canceled in the middle of applying back pressure
                         // or if the consumer is done
@@ -202,13 +194,13 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
             {
                 if (!_aborted && !token.IsCancellationRequested)
                 {
-                    _application.Writer.Complete(ex);
+                    await Application.Writer.CompleteAsync(ex);
                 }
             }
             finally
             {
                 // We're done writing
-                _application.Writer.Complete();
+                await Application.Writer.CompleteAsync();
             }
         }
 

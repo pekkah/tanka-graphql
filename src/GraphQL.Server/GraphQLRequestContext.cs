@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 
 namespace Tanka.GraphQL.Server;
@@ -15,12 +14,6 @@ public record GraphQLRequestContext : QueryContext
 
     public GraphQLRequestContext(): this(new FeatureCollection(2))
     {
-    }
-
-    public IServiceProvider RequestServices
-    {
-        get => ServiceProvidersFeature.RequestServices;
-        set => ServiceProvidersFeature.RequestServices = value;
     }
 
     public HttpContext HttpContext

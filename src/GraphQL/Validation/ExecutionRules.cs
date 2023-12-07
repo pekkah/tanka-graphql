@@ -176,7 +176,7 @@ public static class ExecutionRules
                 foreach (var subscription in subscriptions)
                 {
                     var selectionSet = subscription.SelectionSet;
-                    var variableValues = new Dictionary<string, object>();
+                    var variableValues = new Dictionary<string, object?>();
 
                     var groupedFieldSet = FieldCollector.CollectFields(
                         schema,

@@ -23,14 +23,14 @@ public class Query
 public class Container
 {
     public string NonNull => "value";
-    public string NonNull_WithNull => null;
+    public string NonNull_WithNull => null!;
 
-    public List<string> NonNullList_AsNull => null;
+    public List<string> NonNullList_AsNull => null!;
 
     public List<string> NonNullList_WithNullSecondItem => new()
     {
         "first",
-        null,
+        null!,
         "third"
     };
 }

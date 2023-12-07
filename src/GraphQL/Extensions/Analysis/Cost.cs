@@ -53,7 +53,7 @@ public static class CostAnalyzer
                             IEnumerable<object> multipliers)
                             foreach (var multiplier in multipliers.Select(o => o.ToString()))
                             {
-                                var multiplierName = multiplier;
+                                var multiplierName = multiplier ?? string.Empty;
                                 field.TryGetArgument(multiplierName, out var multiplierArgDef);
 
                                 if (multiplierArgDef == null)

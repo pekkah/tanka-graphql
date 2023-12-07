@@ -25,7 +25,7 @@ public static class Operations
             };
         }
 
-        var operation = operations.SingleOrDefault(op => op.Name.Value == operationName);
+        var operation = operations.SingleOrDefault(op => op.Name?.Value == operationName);
 
         if (operation == null)
             throw new QueryException(

@@ -35,7 +35,7 @@ public class ExecutableSchema : ISchema
         _inputFields = inputFields;
         _directiveTypes = directiveTypes;
         _resolvers = resolvers;
-        _subscribers = subscribers;
+        _subscribers = subscribers ?? ResolversMap.SubscribersNone;
         _scalarSerializers = scalarSerializers;
         _directives = new(directives);
 

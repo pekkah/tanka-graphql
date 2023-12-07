@@ -1,17 +1,20 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.DependencyInjection;
+
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.Response;
-using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL;
 
 public record QueryContext
 {
+    private static readonly IServiceProvider EmptyServices = new ServiceCollection().BuildServiceProvider();
+    
     private FeatureReferences<FeatureInterfaces> _features;
 
     public QueryContext(IFeatureCollection defaults)
@@ -96,7 +99,7 @@ public record QueryContext
     }
 
     //todo: turn into a feature
-    public IServiceProvider RequestServices { get; set; }
+    public IServiceProvider RequestServices { get; set; } = EmptyServices;
 
     public void AddError(Exception x)
     {
