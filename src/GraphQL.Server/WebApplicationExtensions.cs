@@ -25,4 +25,13 @@ public static class WebApplicationExtensions
         var tankaApp = webApp.ServiceProvider.GetRequiredService<GraphQLApplication>();
         return tankaApp.Map(pattern, webApp, configurePipeline);
     }
+
+    public static IEndpointConventionBuilder MapGraphiQL(
+        this IEndpointRouteBuilder webApp,
+        string pattern)
+    {
+        // resolve tanka application
+        var tankaApp = webApp.ServiceProvider.GetRequiredService<GraphQLApplication>();
+        return tankaApp.MapUi(pattern, webApp);
+    }
 }

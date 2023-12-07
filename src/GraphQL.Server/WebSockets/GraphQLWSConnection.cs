@@ -54,7 +54,8 @@ public partial class GraphQLWSConnection
             ConnectionInit => TooManyInitializationRequests(),
             Subscribe subscribe => HandleSubscribe(subscribe, cancellationToken),
             Ping ping => HandlePing(ping, cancellationToken),
-            Complete complete => HandleComplete(complete, cancellationToken)
+            Complete complete => HandleComplete(complete, cancellationToken),
+            _ => throw new ArgumentOutOfRangeException(nameof(message), message, null)
         };
 
         await task;

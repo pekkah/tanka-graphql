@@ -3,17 +3,10 @@ using Tanka.GraphQL.Features;
 
 namespace Tanka.GraphQL;
 
-public class ConcurrentBagErrorCollectorFeature : IErrorCollectorFeature
+public class ConcurrentBagErrorCollectorFeature(bool includeCode = false, bool includeStackTrace = false)
+    : IErrorCollectorFeature
 {
-    private readonly bool _includeCode;
-    private readonly bool _includeStackTrace;
-    private readonly ConcurrentBag<Exception> _bag = new();
-
-    public ConcurrentBagErrorCollectorFeature(bool includeCode = false, bool includeStackTrace = false)
-    {
-        _includeCode = includeCode;
-        _includeStackTrace = includeStackTrace;
-    }
+    private readonly ConcurrentBag<Exception> _bag = [];
 
     public void Add(Exception error)
     {
@@ -34,16 +27,17 @@ public class ConcurrentBagErrorCollectorFeature : IErrorCollectorFeature
             Message = message
         };
 
-        if (_includeCode)
+        if (includeCode)
             EnrichWithErrorCode(error, rootCause);
 
-        if (_includeStackTrace)
+        if (includeStackTrace)
             EnrichWithStackTrace(error, rootCause);
 
         return exception switch
         {
             FieldException fieldException => FormatFieldException(fieldException, error),
-            QueryException queryException => FormatQueryException(queryException, error)
+            QueryException queryException => FormatQueryException(queryException, error),
+            _ => error
         };
     }
 

@@ -6,7 +6,7 @@ namespace Tanka.GraphQL.TypeSystem;
 
 internal class EmptySchema : ExecutableSchema
 {
-    private static readonly ObjectDefinition Query = """
+    private static readonly ObjectDefinition EmptyQuery = """
         type Query 
         {
         }
@@ -29,7 +29,7 @@ internal class EmptySchema : ExecutableSchema
         Fields,
         InputFields,
         DirectiveTypes,
-        Query,
+        EmptyQuery,
         ResolversMap.None,
         ScalarSerializers)
     {
@@ -37,6 +37,6 @@ internal class EmptySchema : ExecutableSchema
 
     private static Dictionary<string, TypeDefinition> Types => new(1)
     {
-        ["Query"] = Query
+        ["Query"] = EmptyQuery
     };
 }

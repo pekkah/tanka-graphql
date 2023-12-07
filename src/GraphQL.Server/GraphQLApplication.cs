@@ -19,15 +19,11 @@ public class GraphQLApplication
         _transports = transports;
     }
 
-
     public IEndpointConventionBuilder MapDefault(string pattern, string schemaName, IEndpointRouteBuilder routes)
     {
         var builders = new List<IEndpointConventionBuilder>();
         foreach (IGraphQLTransport transport in _transports)
             builders.Add(MapTransport(pattern, routes, transport, b => ConfigureDefaultPipeline(b, schemaName)));
-
-        if (_optionsMonitor.CurrentValue.EnableUi)
-            builders.Add(routes.MapGet($"{pattern}/ui", CreateUiDelegate(pattern)));
 
         return new RouteHandlerBuilder(builders);
     }
@@ -38,12 +34,18 @@ public class GraphQLApplication
         foreach (IGraphQLTransport transport in _transports)
             builders.Add(MapTransport(pattern, routes, transport, configureRequest));
 
-        if (_optionsMonitor.CurrentValue.EnableUi)
-            builders.Add(routes.MapGet($"{pattern}/ui", CreateUiDelegate(pattern)));
-
         return new RouteHandlerBuilder(builders);
     }
 
+    public IEndpointConventionBuilder MapUi(string pattern, IEndpointRouteBuilder routes)
+    {
+        var builders = new List<IEndpointConventionBuilder>
+        {
+            routes.MapGet($"{pattern}", CreateUiDelegate(pattern))
+        };
+
+        return new RouteHandlerBuilder(builders);
+    }
 
     private void ConfigureDefaultPipeline(GraphQLRequestPipelineBuilder builder, string schemaName)
     {
@@ -56,7 +58,7 @@ public class GraphQLApplication
         Stream? htmlStream = typeof(GraphQLApplication)
             .Assembly.GetManifestResourceStream("Tanka.GraphQL.Server.GraphiQL.host.html");
 
-        var reader = new StreamReader(htmlStream);
+        var reader = new StreamReader(htmlStream ?? throw new InvalidOperationException());
         string htmlTemplate = reader.ReadToEnd();
 
 

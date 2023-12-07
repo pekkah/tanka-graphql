@@ -3,6 +3,4 @@
 public class GraphQLApplicationOptions
 {
     public List<string> SchemaNames { get; } = new();
-
-    public bool EnableUi { get; set; } = true;
 }

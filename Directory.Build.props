@@ -2,7 +2,6 @@
 
 <Project>
 	<PropertyGroup>
-		<LangVersion>11</LangVersion>
 		<Copyright>Pekka Heikura</Copyright>
 		<PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>

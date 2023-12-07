@@ -26,8 +26,8 @@ public static class Variables
                 throw new VariableException("Variable is not of input type", variableName, variableType);
 
             var defaultValue = variableDefinition.DefaultValue?.Value;
-            var hasValue = variableValues.ContainsKey(variableName);
-            var value = hasValue ? variableValues[variableName] : null;
+            var hasValue = variableValues?.ContainsKey(variableName) == true;
+            var value = hasValue ? variableValues?[variableName] : null;
 
             if (!hasValue && defaultValue != null)
                 coercedValues[variableName] = Values.CoerceValue(

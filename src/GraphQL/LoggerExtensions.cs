@@ -6,7 +6,7 @@ namespace Tanka.GraphQL;
 
 internal static class LoggerExtensions
 {
-    private static readonly Func<ILogger, string, IDisposable> BeginAction = LoggerMessage
+    private static readonly Func<ILogger, string, IDisposable?> BeginAction = LoggerMessage
         .DefineScope<string>("Executing '{OperationName}'");
 
     private static readonly Action<ILogger, bool, Exception> ExecutionResultAction =
@@ -15,38 +15,38 @@ internal static class LoggerExtensions
             default,
             "Execution complete. HasErrors: {HasErrors}");
 
-    private static readonly Action<ILogger, bool, string, Exception> ExecutionResultWithErrorsAction =
+    private static readonly Action<ILogger, bool, string, Exception?> ExecutionResultWithErrorsAction =
         LoggerMessage.Define<bool, string>(
             LogLevel.Information,
             default,
             "Execution complete. HasErrors: {HasErrors}, First: '{error}'");
 
-    private static readonly Action<ILogger, string, string, Exception> OperationAction = LoggerMessage
+    private static readonly Action<ILogger, string, string, Exception?> OperationAction = LoggerMessage
         .Define<string, string>(
             LogLevel.Information,
             default,
             "Executing operation '{OperationType} {Name}'"
         );
 
-    private static readonly Action<ILogger, bool, Exception> ValidateAction = LoggerMessage
+    private static readonly Action<ILogger, bool, Exception?> ValidateAction = LoggerMessage
         .Define<bool>(
             LogLevel.Information,
             default,
             "Validation requested: '{Validate}'");
 
-    private static readonly Action<ILogger, bool, Exception> ValidationResultAction =
+    private static readonly Action<ILogger, bool, Exception?> ValidationResultAction =
         LoggerMessage.Define<bool>(
             LogLevel.Information,
             default,
             "Validation IsValid: '{IsValid}'");
 
-    private static readonly Action<ILogger, ValidationResult, Exception> ValidationResultDebugAction =
+    private static readonly Action<ILogger, ValidationResult, Exception?> ValidationResultDebugAction =
         LoggerMessage.Define<ValidationResult>(
             LogLevel.Debug,
             default,
             "Validation result: '{ValidationResult}'");
 
-    internal static IDisposable Begin(this ILogger logger, string operationName)
+    internal static IDisposable? Begin(this ILogger logger, string operationName)
     {
         return BeginAction(logger, operationName);
     }
@@ -56,7 +56,8 @@ internal static class LoggerExtensions
         OperationAction(
             logger,
             operation.Operation.ToString().ToLowerInvariant(),
-            operation.Name, null);
+            operation.Name ?? string.Empty, 
+            null);
     }
 
     internal static void Validate(this ILogger logger, bool validate)
@@ -78,7 +79,7 @@ internal static class LoggerExtensions
     internal static void ExecutionResult(this ILogger logger, ExecutionResult result)
     {
         if (result.Errors != null && result.Errors.Any())
-            ExecutionResultWithErrorsAction(logger, result.Errors != null, result.Errors?.First().Message, null);
+            ExecutionResultWithErrorsAction(logger, result.Errors != null, result.Errors?[0].Message ?? string.Empty, null);
         else
             ExecutionResultAction(logger, result.Errors != null, null);
     }

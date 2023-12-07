@@ -4,12 +4,12 @@ namespace Tanka.GraphQL.Validation;
 
 public class RulesWalker : Visitor, IRuleVisitorContext
 {
-    private readonly List<ValidationError> _errors = new();
+    private readonly List<ValidationError> _errors = [];
 
-    private readonly Dictionary<OperationDefinition, List<FragmentDefinition>> _fragments = new();
+    private readonly Dictionary<OperationDefinition, List<FragmentDefinition>> _fragments = [];
 
 
-    private readonly Dictionary<OperationDefinition, List<VariableUsage>> _variables = new();
+    private readonly Dictionary<OperationDefinition, List<VariableUsage>> _variables = [];
 
     public RulesWalker(
         IEnumerable<CombineRule> rules,
@@ -20,6 +20,7 @@ public class RulesWalker : Visitor, IRuleVisitorContext
         Schema = schema;
         Document = document;
         VariableValues = variableValues;
+        Tracker = new TypeTracker(Schema);
         CreateVisitors(rules);
     }
 
@@ -456,8 +457,6 @@ public class RulesWalker : Visitor, IRuleVisitorContext
 
     protected void CreateVisitors(IEnumerable<CombineRule> rules)
     {
-        Tracker = new(Schema);
-
         foreach (var createRule in rules) createRule(this, Tracker);
     }
 

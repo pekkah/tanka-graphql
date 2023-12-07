@@ -1,22 +1,14 @@
-﻿using Tanka.GraphQL.Fields;
-using Tanka.GraphQL.Language;
+﻿using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.Validation;
 
-public class FieldSelectionMergingValidator
+public class FieldSelectionMergingValidator(IRuleVisitorContext context)
 {
-    private readonly IRuleVisitorContext _context;
-
-    public FieldSelectionMergingValidator(IRuleVisitorContext context)
-    {
-        _context = context;
-    }
-
     public void Validate(SelectionSet selectionSet)
     {
-        if (_context.Tracker.ParentType is null)
+        if (context.Tracker.ParentType is null)
             return;
 
         var comparedFragmentPairs = new PairSet();
@@ -24,14 +16,14 @@ public class FieldSelectionMergingValidator
         var conflicts = FindConflictsWithinSelectionSet(
             cachedFieldsAndFragmentNames,
             comparedFragmentPairs,
-            _context.Tracker.ParentType ?? throw new InvalidOperationException("todo: ParentType is null"),
+            context.Tracker.ParentType ?? throw new InvalidOperationException("todo: ParentType is null"),
             selectionSet);
 
         foreach (var conflict in conflicts)
-            _context.Error(
+            context.Error(
                 ValidationErrorCodes.R532FieldSelectionMerging,
                 FieldsConflictMessage(conflict.Reason.Name, conflict.Reason),
-                conflict.FieldsLeft.Concat(conflict.FieldsRight)
+                conflict?.FieldsLeft.Concat(conflict.FieldsRight) ?? []
             );
     }
 
@@ -83,11 +75,9 @@ public class FieldSelectionMergingValidator
         string fragmentName)
     {
         // Memoize so a fragment is not compared for conflicts more than once.
-        if (comparedFragments.ContainsKey(fragmentName)) return;
+        if (!comparedFragments.TryAdd(fragmentName, true)) return;
 
-        comparedFragments[fragmentName] = true;
-
-        var fragment = _context.Document
+        var fragment = context.Document
             .FragmentDefinitions
             ?.SingleOrDefault(f => f.FragmentName == fragmentName);
 
@@ -143,9 +133,10 @@ public class FieldSelectionMergingValidator
 
         comparedFragmentPairs.Add(fragmentName1, fragmentName2, areMutuallyExclusive);
 
-        var fragments = _context.Document
-            ?.FragmentDefinitions
-            .ToList();
+        var fragments = context
+            .Document
+            .FragmentDefinitions
+            ?.ToList() ?? [];
 
         var fragment1 = fragments.SingleOrDefault(f => f.FragmentName == fragmentName1);
         var fragment2 = fragments.SingleOrDefault(f => f.FragmentName == fragmentName2);
@@ -253,7 +244,7 @@ public class FieldSelectionMergingValidator
                 var fieldName = field.Name;
                 FieldDefinition? fieldDef = null;
                 if (parentType is not null && (IsObjectDefinition(parentType) || IsInterfaceType(parentType)))
-                    fieldDef = _context.Schema.GetField(parentType.Name, fieldName);
+                    fieldDef = context.Schema.GetField(parentType.Name, fieldName);
 
                 var responseName = field.AliasOrName;
 
@@ -277,7 +268,7 @@ public class FieldSelectionMergingValidator
                 if (typeCondition is not null)
                 {
                     var inlineFragmentType =
-                        _context.Schema.GetNamedType(typeCondition.Name) ?? parentType;
+                        context.Schema.GetNamedType(typeCondition.Name) ?? parentType;
 
                     CollectFieldsAndFragmentNames(
                         inlineFragmentType,
@@ -302,8 +293,8 @@ public class FieldSelectionMergingValidator
 
         if (type2 is NonNullType) return true;
 
-        var typeDefinition1 = Ast.UnwrapAndResolveType(_context.Schema, type1);
-        var typeDefinition2 = Ast.UnwrapAndResolveType(_context.Schema, type2);
+        var typeDefinition1 = Ast.UnwrapAndResolveType(context.Schema, type1);
+        var typeDefinition2 = Ast.UnwrapAndResolveType(context.Schema, type2);
 
         if (typeDefinition1 is ScalarDefinition || typeDefinition2 is ScalarDefinition)
             return !Equals(typeDefinition1, typeDefinition2);
@@ -328,11 +319,11 @@ public class FieldSelectionMergingValidator
         FieldDefPair fieldDefPair1,
         FieldDefPair fieldDefPair2)
     {
-        var parentType1 = _context.Schema.GetNamedType(fieldDefPair1.ParentType.Name);
+        var parentType1 = context.Schema.GetNamedType(fieldDefPair1.ParentType.Name);
         var node1 = fieldDefPair1.Field;
         var def1 = fieldDefPair1.FieldDef;
 
-        var parentType2 = _context.Schema.GetNamedType(fieldDefPair2.ParentType.Name);
+        var parentType2 = context.Schema.GetNamedType(fieldDefPair2.ParentType.Name);
         var node2 = fieldDefPair2.Field;
         var def2 = fieldDefPair2.FieldDef;
 
@@ -418,9 +409,9 @@ public class FieldSelectionMergingValidator
                 cachedFieldsAndFragmentNames,
                 comparedFragmentPairs,
                 areMutuallyExclusive,
-                Ast.UnwrapAndResolveType(_context.Schema, type1),
+                Ast.UnwrapAndResolveType(context.Schema, type1),
                 selectionSet1,
-                Ast.UnwrapAndResolveType(_context.Schema, type2),
+                Ast.UnwrapAndResolveType(context.Schema, type2),
                 selectionSet2);
 
             return SubfieldConflicts(conflicts, responseName, node1, node2);
@@ -610,7 +601,7 @@ public class FieldSelectionMergingValidator
         var fragmentType = fragment.TypeCondition;
         return GetFieldsAndFragmentNames(
             cachedFieldsAndFragmentNames,
-            _context.Schema.GetNamedType(fragmentType.Name) ??
+            context.Schema.GetNamedType(fragmentType.Name) ??
             throw new InvalidOperationException($"Could not find type '{fragmentType.Name}' from schema."),
             fragment.SelectionSet);
     }
@@ -671,15 +662,15 @@ public class FieldSelectionMergingValidator
                 fieldDefPair2.FieldDef?.TryGetArgument(arg1.Key, out var argDef2) == true)
             {
                 var value1 = ArgumentCoercion.CoerceArgumentValue(
-                    _context.Schema,
-                    _context.VariableValues,
+                    context.Schema,
+                    context.VariableValues,
                     arg1.Key,
                     argDef1,
                     arg1.Value);
 
                 var value2 = ArgumentCoercion.CoerceArgumentValue(
-                    _context.Schema,
-                    _context.VariableValues,
+                    context.Schema,
+                    context.VariableValues,
                     arg1.Key,
                     argDef2,
                     arg2);

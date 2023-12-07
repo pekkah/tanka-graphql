@@ -11,7 +11,7 @@ public interface IRuleVisitorContext
 
     TypeTracker Tracker { get; }
 
-    IReadOnlyDictionary<string, object?> VariableValues { get; }
+    IReadOnlyDictionary<string, object?>? VariableValues { get; }
 
     void Error(string code, string message, params INode[] nodes);
 

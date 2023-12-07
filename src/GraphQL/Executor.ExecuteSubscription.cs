@@ -135,7 +135,7 @@ public partial class Executor
                 Errors = subContext.GetErrors().ToList()
             };
         }
-        catch (FieldException x)
+        catch (FieldException)
         {
             return new()
             {
