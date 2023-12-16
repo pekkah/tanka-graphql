@@ -122,7 +122,7 @@ public class SpanReaderFacts
     public void TryReadWhileAny()
     {
         /* Given */
-        var sut = new SpanReader(Encoding.UTF8.GetBytes("2.0 }"));
+        var sut = new SpanReader("2.0 }"u8);
 
         /* When */
         Assert.True(sut.TryReadWhileAny(out var integerPart, Constants.IsDigit));
@@ -139,7 +139,7 @@ public class SpanReaderFacts
     public void TryReadWhileNotAny()
     {
         /* Given */
-        var sut = new SpanReader(Encoding.UTF8.GetBytes("test test test\n test"));
+        var sut = new SpanReader("test test test\n test"u8);
 
         /* When */
         sut.TryReadWhileNotAny(

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -13,8 +15,7 @@ public class EnumDefinitionFacts
     {
         /* Given */
         /* When */
-        EnumDefinition original = Encoding.UTF8.GetBytes("enum ENUM { V1, V2 }")
-            .AsReadOnlySpan();
+        EnumDefinition original = "enum ENUM { V1, V2 }"u8;
 
         /* Then */
         Assert.Equal("ENUM", original.Name);
@@ -38,7 +39,7 @@ public class EnumDefinitionFacts
         EnumDefinition original = @"enum ENUM { V1, V2 }";
 
         /* When */
-        var modified = original
+        EnumDefinition modified = original
             .WithDescription("Description");
 
         /* Then */
@@ -53,7 +54,7 @@ public class EnumDefinitionFacts
         EnumDefinition original = @"enum ENUM { V1, V2 }";
 
         /* When */
-        var modified = original
+        EnumDefinition modified = original
             .WithName("Renamed");
 
         /* Then */
@@ -68,11 +69,8 @@ public class EnumDefinitionFacts
         EnumDefinition original = @"enum ENUM { V1, V2 }";
 
         /* When */
-        var modified = original
-            .WithValues(new List<EnumValueDefinition>
-            {
-                "V3 @new"
-            });
+        EnumDefinition modified = original
+            .WithValues(new List<EnumValueDefinition> { "V3 @new" });
 
         /* Then */
         Assert.Equal(2, original.Values?.Count);
@@ -86,16 +84,13 @@ public class EnumDefinitionFacts
         EnumDefinition original = @"enum ENUM { V1, V2 }";
 
         /* When */
-        var modified = original
-            .WithDirectives(new List<Directive>
-            {
-                "@a"
-            });
+        EnumDefinition modified = original
+            .WithDirectives(new List<Directive> { "@a" });
 
         /* Then */
         Assert.Null(original.Directives);
         Assert.NotNull(modified.Directives);
-        var a = Assert.Single(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
         Assert.Equal("a", a?.Name);
     }
 }

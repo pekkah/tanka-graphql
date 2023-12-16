@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -13,8 +15,7 @@ public class EnumValueDefinitionFacts
     {
         /* Given */
         /* When */
-        EnumValueDefinition original = Encoding.UTF8.GetBytes("V1")
-            .AsReadOnlySpan();
+        EnumValueDefinition original = "V1"u8;
 
         /* Then */
         Assert.Equal("V1", original.Value.Name);
@@ -38,7 +39,7 @@ public class EnumValueDefinitionFacts
         EnumValueDefinition original = @"V1";
 
         /* When */
-        var modified = original
+        EnumValueDefinition modified = original
             .WithDescription("Description");
 
         /* Then */
@@ -53,7 +54,7 @@ public class EnumValueDefinitionFacts
         EnumValueDefinition original = @"V1";
 
         /* When */
-        var modified = original
+        EnumValueDefinition modified = original
             .WithValue(new EnumValue("RENAMED"));
 
         /* Then */
@@ -68,16 +69,13 @@ public class EnumValueDefinitionFacts
         EnumValueDefinition original = @"V1";
 
         /* When */
-        var modified = original
-            .WithDirectives(new List<Directive>
-            {
-                "@a"
-            });
+        EnumValueDefinition modified = original
+            .WithDirectives(new List<Directive> { "@a" });
 
         /* Then */
         Assert.Null(original.Directives);
         Assert.NotNull(modified.Directives);
-        var a = Assert.Single(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
         Assert.Equal("a", a?.Name);
     }
 }

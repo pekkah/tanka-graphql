@@ -12,7 +12,6 @@ namespace Tanka.GraphQL.Benchmarks;
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]
 [MemoryDiagnoser]
-[MarkdownExporterAttribute.GitHub]
 public class LanguageParserBenchmarks
 {
     public Memory<byte> IntrospectionQueryMemory;
@@ -38,7 +37,7 @@ public class LanguageParserBenchmarks
     [Benchmark]
     public void Tanka_GraphQL_Parser_IntrospectionQuery()
     {
-        var parser = Language.Parser.Create(IntrospectionQueryMemory.Span);
+        var parser = Language.Parser.Create(Introspect.DefaultQueryBytes);
         var document = parser.ParseExecutableDocument();
 
         if (document.OperationDefinitions == null || !document.OperationDefinitions.Any())

@@ -30,10 +30,7 @@ public class OperationDelegateBuilder
     public OperationDelegate Build()
     {
         OperationDelegate pipeline = _ => throw new QueryException(
-            "Operation execution pipeline error. No ending middleware.")
-        {
-            Path = new NodePath()
-        };
+            "Operation execution pipeline error. No ending middleware.") { Path = new NodePath() };
 
         for (int c = _components.Count - 1; c >= 0; c--)
             pipeline = _components[c](pipeline);
@@ -55,7 +52,7 @@ public class OperationDelegateBuilder
 
     public T GetRequiredProperty<T>(string key)
     {
-        T? value = GetProperty<T>(key);
+        var value = GetProperty<T>(key);
 
         ArgumentNullException.ThrowIfNull(value);
 

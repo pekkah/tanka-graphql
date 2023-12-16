@@ -1,77 +1,65 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Language;
 
 public static class Extensions
 {
-    public static bool Match(this in ReadOnlyMemory<byte> memory, in ReadOnlySpan<byte> value)
+    public static bool Match(this in ReadOnlySpan<byte> memory, in ReadOnlySpan<byte> value)
     {
-        return memory.Span.SequenceEqual(value);
+        return memory.SequenceEqual(value);
     }
 }
 
 public static class Keywords
 {
-    public static ReadOnlyMemory<byte> Query = new(Encoding.UTF8.GetBytes("query"));
+    public static ReadOnlySpan<byte> Query => "query"u8;
 
-    public static ReadOnlyMemory<byte> Mutation = new(Encoding.UTF8.GetBytes("mutation"));
+    public static ReadOnlySpan<byte> Mutation => "mutation"u8;
 
-    public static ReadOnlyMemory<byte> Subscription = new(Encoding.UTF8.GetBytes("subscription"));
+    public static ReadOnlySpan<byte> Subscription => "subscription"u8;
 
-    public static ReadOnlyMemory<byte> Fragment = new(Encoding.UTF8.GetBytes("fragment"));
+    public static ReadOnlySpan<byte> Fragment => "fragment"u8;
 
-    public static ReadOnlyMemory<byte> Null = new(Encoding.UTF8.GetBytes("null"));
+    public static ReadOnlySpan<byte> Null => "null"u8;
 
-    public static ReadOnlyMemory<byte> True = new(Encoding.UTF8.GetBytes("true"));
+    public static ReadOnlySpan<byte> True => "true"u8;
 
-    public static ReadOnlyMemory<byte> False = new(Encoding.UTF8.GetBytes("false"));
+    public static ReadOnlySpan<byte> False => "false"u8;
 
-    public static ReadOnlyMemory<byte> True2 = new(Encoding.UTF8.GetBytes("True"));
+    public static ReadOnlySpan<byte> True2 => "True"u8;
 
-    public static ReadOnlyMemory<byte> False2 = new(Encoding.UTF8.GetBytes("False"));
+    public static ReadOnlySpan<byte> False2 => "False"u8;
 
-    public static ReadOnlyMemory<byte> On = new(Encoding.UTF8.GetBytes("on"));
+    public static ReadOnlySpan<byte> On => "on"u8;
 
-    public static ReadOnlyMemory<byte> Repeatable = new(Encoding.UTF8.GetBytes("repeatable"));
+    public static ReadOnlySpan<byte> Repeatable => "repeatable"u8;
 
-    public static ReadOnlyMemory<byte> Schema = new(
-        Encoding.UTF8.GetBytes("schema"));
+    public static ReadOnlySpan<byte> Schema => "schema"u8;
 
-    public static ReadOnlyMemory<byte> Directive = new(
-        Encoding.UTF8.GetBytes("directive"));
+    public static ReadOnlySpan<byte> Directive => "directive"u8;
 
-    public static ReadOnlyMemory<byte> Type = new(
-        Encoding.UTF8.GetBytes("type"));
+    public static ReadOnlySpan<byte> Type => "type"u8;
 
-    public static ReadOnlyMemory<byte> Scalar = new(
-        Encoding.UTF8.GetBytes("scalar"));
+    public static ReadOnlySpan<byte> Scalar => "scalar"u8;
 
-    public static ReadOnlyMemory<byte> Interface = new(
-        Encoding.UTF8.GetBytes("interface"));
+    public static ReadOnlySpan<byte> Interface => "interface"u8;
 
-    public static ReadOnlyMemory<byte> Extend = new(
-        Encoding.UTF8.GetBytes("extend"));
+    public static ReadOnlySpan<byte> Extend => "extend"u8;
 
-    public static ReadOnlyMemory<byte> Implements = new(
-        Encoding.UTF8.GetBytes("implements"));
+    public static ReadOnlySpan<byte> Implements => "implements"u8;
 
-    public static ReadOnlyMemory<byte> Union = new(
-        Encoding.UTF8.GetBytes("union"));
+    public static ReadOnlySpan<byte> Union => "union"u8;
 
-    public static ReadOnlyMemory<byte> Enum = new(
-        Encoding.UTF8.GetBytes("enum"));
+    public static ReadOnlySpan<byte> Enum => "enum"u8;
 
-    public static ReadOnlyMemory<byte> Input = new(
-        Encoding.UTF8.GetBytes("input"));
+    public static ReadOnlySpan<byte> Input => "input"u8;
 
-    public static ReadOnlyMemory<byte> Import = new(
-        Encoding.UTF8.GetBytes("tanka_import"));
+    public static ReadOnlySpan<byte> Import => "tanka_import"u8;
 
-    public static ReadOnlyMemory<byte> From = new(
-        Encoding.UTF8.GetBytes("from"));
+    public static ReadOnlySpan<byte> From => "from"u8;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsBoolean(in ReadOnlySpan<byte> span, out bool value)
@@ -95,56 +83,56 @@ public static class Keywords
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsFragment(in ReadOnlySpan<byte> value)
     {
-        return Fragment.Span.SequenceEqual(value);
+        return Fragment.SequenceEqual(value);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsImplements(in ReadOnlySpan<byte> value)
     {
-        return Implements.Span.SequenceEqual(value);
+        return Implements.SequenceEqual(value);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsNull(in ReadOnlySpan<byte> span)
     {
-        return Null.Span.SequenceEqual(span);
+        return Null.SequenceEqual(span);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsOn(in ReadOnlySpan<byte> value)
     {
-        return On.Span.SequenceEqual(value);
+        return On.SequenceEqual(value);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsOperation(in ReadOnlySpan<byte> span, out OperationType operation)
     {
-        if (Query.Span.SequenceEqual(span))
+        if (Query.SequenceEqual(span))
         {
             operation = OperationType.Query;
             return true;
         }
 
-        if (Mutation.Span.SequenceEqual(span))
+        if (Mutation.SequenceEqual(span))
         {
             operation = OperationType.Mutation;
             return true;
         }
 
-        if (Subscription.Span.SequenceEqual(span))
+        if (Subscription.SequenceEqual(span))
         {
             operation = OperationType.Subscription;
             return true;
         }
 
-        operation = default(OperationType);
+        operation = default;
         return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsRepeatable(in ReadOnlySpan<byte> value)
     {
-        return Repeatable.Span.SequenceEqual(value);
+        return Repeatable.SequenceEqual(value);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

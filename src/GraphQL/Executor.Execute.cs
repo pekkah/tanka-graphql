@@ -24,11 +24,26 @@ public partial class Executor
         return await executionResult.SingleAsync(queryContext.RequestCancelled);
     }
 
+    /// <summary>
+    ///     Execute operation with given <paramref name="context"/>.
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     public async Task ExecuteContext(QueryContext context)
     {
         await _operationDelegate(context);
     }
 
+    /// <summary>
+    ///     Static execute method for executing query or mutation operation.
+    /// </summary>
+    /// <param name="schema"></param>
+    /// <param name="document"></param>
+    /// <param name="variableValues"></param>
+    /// <param name="initialValue"></param>
+    /// <param name="operationName"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public static Task<ExecutionResult> Execute(
         ISchema schema,
         ExecutableDocument document,

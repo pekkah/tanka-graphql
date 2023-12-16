@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -13,8 +14,7 @@ public class ScalarDefinitionFacts
     {
         /* Given */
         /* When */
-        ScalarDefinition original = Encoding.UTF8.GetBytes("scalar Name")
-            .AsReadOnlySpan();
+        ScalarDefinition original = "scalar Name"u8;
 
         /* Then */
         Assert.Equal("Name", original.Name);
@@ -35,10 +35,10 @@ public class ScalarDefinitionFacts
     public void WithDescription()
     {
         /* Given */
-        ScalarDefinition original = @"scalar Name";
+        ScalarDefinition original = "scalar Name";
 
         /* When */
-        var modified = original
+        ScalarDefinition modified = original
             .WithDescription("Description");
 
         /* Then */
@@ -50,10 +50,10 @@ public class ScalarDefinitionFacts
     public void WithName()
     {
         /* Given */
-        ScalarDefinition original = @"scalar Name";
+        ScalarDefinition original = "scalar Name";
 
         /* When */
-        var modified = original
+        ScalarDefinition modified = original
             .WithName("Renamed");
 
         /* Then */
@@ -65,19 +65,16 @@ public class ScalarDefinitionFacts
     public void WithDirectives()
     {
         /* Given */
-        ScalarDefinition original = @"scalar Name";
+        ScalarDefinition original = "scalar Name";
 
         /* When */
-        var modified = original
-            .WithDirectives(new List<Directive>
-            {
-                "@a"
-            });
+        ScalarDefinition modified = original
+            .WithDirectives(new List<Directive> { "@a" });
 
         /* Then */
         Assert.Null(original.Directives);
         Assert.NotNull(modified.Directives);
-        var a = Assert.Single(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
         Assert.Equal("a", a?.Name);
     }
 }

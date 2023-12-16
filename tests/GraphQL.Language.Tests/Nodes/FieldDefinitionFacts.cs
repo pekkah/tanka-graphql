@@ -1,6 +1,8 @@
 ﻿using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -12,8 +14,7 @@ public class FieldDefinitionFacts
     {
         /* Given */
         /* When */
-        FieldDefinition original = Encoding.UTF8.GetBytes("field: String")
-            .AsReadOnlySpan();
+        FieldDefinition original = "field: String"u8;
 
         /* Then */
         Assert.Equal("field", original.Name);
@@ -39,7 +40,7 @@ public class FieldDefinitionFacts
         FieldDefinition original = @"field: Int";
 
         /* When */
-        var withDescription = original
+        FieldDefinition withDescription = original
             .WithDescription("Description");
 
         /* Then */
@@ -54,7 +55,7 @@ public class FieldDefinitionFacts
         FieldDefinition original = @"field: Int";
 
         /* When */
-        var renamed = original
+        FieldDefinition renamed = original
             .WithName("renamed");
 
         /* Then */
@@ -70,15 +71,12 @@ public class FieldDefinitionFacts
         FieldDefinition original = @"field: Int";
 
         /* When */
-        var modified = original
-            .WithArguments(new InputValueDefinition[]
-            {
-                "id: ID!"
-            });
+        FieldDefinition modified = original
+            .WithArguments(new InputValueDefinition[] { "id: ID!" });
 
         /* Then */
         Assert.NotNull(modified.Arguments);
-        var id = Assert.Single(modified.Arguments);
+        InputValueDefinition id = Assert.Single(modified.Arguments);
         Assert.Equal("id", id?.Name);
     }
 
@@ -89,7 +87,7 @@ public class FieldDefinitionFacts
         FieldDefinition original = @"field: Int";
 
         /* When */
-        var modified = original
+        FieldDefinition modified = original
             .WithType("String!");
 
         /* Then */
@@ -105,15 +103,12 @@ public class FieldDefinitionFacts
         FieldDefinition original = @"field: Int";
 
         /* When */
-        var modified = original
-            .WithDirectives(new[]
-            {
-                new Directive("a", null)
-            });
+        FieldDefinition modified = original
+            .WithDirectives(new[] { new Directive("a", null) });
 
         /* Then */
         Assert.NotNull(modified.Directives);
-        var a = Assert.Single(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
         Assert.Equal("a", a?.Name);
     }
 }

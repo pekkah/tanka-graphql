@@ -5,6 +5,13 @@ namespace Tanka.GraphQL;
 
 public partial class Executor
 {
+    /// <summary>
+    ///     Static method to execute a query or mutation operation using the given <paramref name="context"/>.
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <exception cref="QueryException"></exception>
     public static async Task ExecuteQueryOrMutation(QueryContext context)
     {
         var path = new NodePath();

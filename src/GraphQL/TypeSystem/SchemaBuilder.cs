@@ -24,6 +24,9 @@ public class SchemaBuilder
     private readonly ConcurrentDictionary<string, TypeDefinition> _typeDefinitions = new();
     private readonly ConcurrentDictionary<string, ConcurrentBag<TypeExtension>> _typeExtensions = new();
 
+    /// <summary>
+    ///     Default type system with built-in types
+    /// </summary>
     public static TypeSystemDocument BuiltInTypes => @"
 """"""
 The `Boolean` scalar type represents `true` or `false`
@@ -56,7 +59,6 @@ represent free-form human-readable text.
 """"""
 scalar String
 
-
 directive @deprecated(reason: String) on
     | FIELD_DEFINITION
     | ENUM_VALUE
@@ -74,10 +76,18 @@ directive @skip(if: Boolean!) on
 directive @specifiedBy(url: String!) on SCALAR
 ";
 
-    public static IReadOnlyList<string> BuiltInTypeNames => BuiltInTypes.GetNamedTypes()
+    /// <summary>
+    ///     Get list of built-in type names
+    /// </summary>
+    public static IReadOnlyList<string> BuiltInTypeNames = BuiltInTypes.GetNamedTypes()
         .Select(n => n.Name.Value)
         .ToList();
 
+    /// <summary>
+    ///     Add types from <see cref="TypeSystemDocument" /> into the builder
+    /// </summary>
+    /// <param name="typeSystem"></param>
+    /// <returns></returns>
     public SchemaBuilder Add(TypeSystemDocument typeSystem)
     {
         if (typeSystem.Imports is not null)
@@ -107,47 +117,83 @@ directive @specifiedBy(url: String!) on SCALAR
         return this;
     }
 
+    /// <summary>
+    ///     Parse type system document from SDL and add types into the builder
+    /// </summary>
+    /// <param name="typeSystemSdl"></param>
+    /// <returns></returns>
     public SchemaBuilder Add(string typeSystemSdl)
     {
         return Add((TypeSystemDocument)typeSystemSdl);
     }
 
+    /// <summary>
+    ///     Add schema definition into the builder
+    /// </summary>
+    /// <param name="schemaDefinition"></param>
+    /// <returns></returns>
     public SchemaBuilder Add(SchemaDefinition schemaDefinition)
     {
         _schemaDefinitions.Add(schemaDefinition);
         return this;
     }
 
+    /// <summary>
+    ///     Add schema extension into the builder
+    /// </summary>
+    /// <param name="schemaExtension"></param>
+    /// <returns></returns>
     public SchemaBuilder Add(SchemaExtension schemaExtension)
     {
         _schemaExtensions.Add(schemaExtension);
         return this;
     }
 
+    /// <summary>
+    ///     Add type definition into the builder
+    /// </summary>
+    /// <param name="typeDefinition"></param>
     public void Add(TypeDefinition typeDefinition)
     {
         if (!_typeDefinitions.TryAdd(typeDefinition.Name, typeDefinition))
             throw TypeAlreadyExists(typeDefinition.Name);
     }
 
+    /// <summary>
+    ///     Add type definitions into the builder
+    /// </summary>
+    /// <param name="typeDefinitions"></param>
     public void Add(TypeDefinition[] typeDefinitions)
     {
         foreach (var typeDefinition in typeDefinitions)
             Add(typeDefinition);
     }
 
+    /// <summary>
+    ///     Add directive definition into the builder
+    /// </summary>
+    /// <param name="directiveDefinition"></param>
     public void Add(DirectiveDefinition directiveDefinition)
     {
         if (!_directiveDefinitions.TryAdd(directiveDefinition.Name, directiveDefinition))
             throw TypeAlreadyExists(directiveDefinition.Name);
     }
 
+    /// <summary>
+    ///     Add directive definitions into the builder
+    /// </summary>
+    /// <param name="directiveDefinitions"></param>
     public void Add(DirectiveDefinition[] directiveDefinitions)
     {
         foreach (var directiveDefinition in directiveDefinitions)
             Add(directiveDefinition);
     }
 
+    /// <summary>
+    ///     Add type extension into the builder
+    /// </summary>
+    /// <param name="typeExtension"></param>
+    /// <returns></returns>
     public SchemaBuilder Add(TypeExtension typeExtension)
     {
         var typeExtensions = _typeExtensions
@@ -158,6 +204,11 @@ directive @specifiedBy(url: String!) on SCALAR
         return this;
     }
 
+    /// <summary>
+    ///     Add type extensions into the builder
+    /// </summary>
+    /// <param name="typeExtensions"></param>
+    /// <returns></returns>
     public SchemaBuilder Add(TypeExtension[] typeExtensions)
     {
         foreach (var typeExtension in typeExtensions) Add(typeExtension);
@@ -165,6 +216,12 @@ directive @specifiedBy(url: String!) on SCALAR
         return this;
     }
 
+    /// <summary>
+    ///     Build schema from the builder
+    /// </summary>
+    /// <param name="resolvers"></param>
+    /// <param name="subscribers"></param>
+    /// <returns></returns>
     public Task<ISchema> Build(IResolverMap resolvers, ISubscriberMap? subscribers = null)
     {
         return Build(
@@ -175,7 +232,14 @@ directive @specifiedBy(url: String!) on SCALAR
             });
     }
 
-    public IEnumerable<TypeDefinition> QueryTypeDefinitions(Func<TypeDefinition, bool> filter,
+    /// <summary>
+    ///     Query types to be built by the builder
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    public IEnumerable<TypeDefinition> QueryTypeDefinitions(
+        Func<TypeDefinition, bool> filter,
         SchemaBuildOptions? options = null)
     {
         options ??= new();
@@ -183,6 +247,11 @@ directive @specifiedBy(url: String!) on SCALAR
         return typeDefinitions.Where(filter);
     }
 
+    /// <summary>
+    ///     Build schema from the builder using the given <paramref name="options"/>
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public Task<ISchema> Build(SchemaBuildOptions options)
     {
         if (options.IncludeBuiltInTypes) Add(BuiltInTypes);
@@ -278,6 +347,11 @@ directive @specifiedBy(url: String!) on SCALAR
         return Task.FromResult(schema);
     }
 
+    /// <summary>
+    ///     Add import definition into the builder
+    /// </summary>
+    /// <param name="importDefinition"></param>
+    /// <returns></returns>
     private SchemaBuilder Add(Import importDefinition)
     {
         _imports.Add(importDefinition);

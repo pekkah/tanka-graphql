@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -13,8 +14,7 @@ public class DirectiveFacts
     {
         /* Given */
         /* When */
-        Directive original = Encoding.UTF8.GetBytes("@a(x: 100, y: 100)")
-            .AsReadOnlySpan();
+        Directive original = "@a(x: 100, y: 100)"u8;
 
         /* Then */
         Assert.Equal("a", original.Name);
@@ -42,13 +42,10 @@ public class DirectiveFacts
         Directive original = "@a(x: 100, y: 100)";
 
         /* When */
-        var modified = original
+        Directive modified = original
             .WithArguments(
                 new List<Argument>(original.Arguments ?? Enumerable.Empty<Argument>())
-                    .Concat(new[]
-                    {
-                        new Argument("x", new IntValue(100))
-                    }).ToList()
+                    .Concat(new[] { new Argument("x", new IntValue(100)) }).ToList()
             );
 
         /* Then */
@@ -63,7 +60,7 @@ public class DirectiveFacts
         Directive original = "@a(x: 100, y: 100)";
 
         /* When */
-        var modified = original
+        Directive modified = original
             .WithName("b");
 
         /* Then */

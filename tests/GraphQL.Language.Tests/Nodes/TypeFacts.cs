@@ -1,5 +1,5 @@
-﻿using System.Text;
-using Tanka.GraphQL.Language.Nodes;
+﻿using Tanka.GraphQL.Language.Nodes;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -11,8 +11,7 @@ public class TypeFacts
     {
         /* Given */
         /* When */
-        TypeBase original = Encoding.UTF8.GetBytes("String")
-            .AsReadOnlySpan();
+        TypeBase original = "String"u8;
 
         /* Then */
         Assert.IsType<NamedType>(original);

@@ -5,7 +5,7 @@ namespace Tanka.GraphQL;
 
 public static class PrettyJsonLog
 {
-    private static JsonSerializerOptions Pretty = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+    private static readonly JsonSerializerOptions Pretty = new JsonSerializerOptions(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault

@@ -1,5 +1,7 @@
 ﻿using System.Text;
+
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -11,8 +13,7 @@ public class TypeDefinitionFacts
     {
         /* Given */
         /* When */
-        TypeDefinition original = Encoding.UTF8.GetBytes("enum Enum")
-            .AsReadOnlySpan();
+        TypeDefinition original = "enum Enum"u8;
 
         /* Then */
         Assert.IsType<EnumDefinition>(original);

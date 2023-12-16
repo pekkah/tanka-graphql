@@ -144,7 +144,7 @@ public ref partial struct Parser
 
     private Import ParseTankaImportInternal()
     {
-        var location = SkipKeyword(Keywords.Import.Span);
+        var location = SkipKeyword(Keywords.Import);
 
         var types = new List<Name>();
         if (!Keywords.From.Match(_lexer.Value))
@@ -153,7 +153,7 @@ public ref partial struct Parser
                 types.Add(ParseName());
 
         // from
-        SkipKeyword(Keywords.From.Span);
+        SkipKeyword(Keywords.From);
 
         // from
         var from = ParseStringValue();
@@ -217,7 +217,7 @@ public ref partial struct Parser
         /* Description? schema Directives? { RootOperationTypeDefinition[] } */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Schema.Span);
+        SkipKeyword(Keywords.Schema);
         var directives = ParseOptionalDirectives(true);
         var operations = ParseRootOperationDefinitions();
 
@@ -233,8 +233,8 @@ public ref partial struct Parser
         /* Description? extend schema Directives? { RootOperationTypeDefinition[] } */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Extend.Span, !hasExtend);
-        SkipKeyword(Keywords.Schema.Span);
+        SkipKeyword(Keywords.Extend, !hasExtend);
+        SkipKeyword(Keywords.Schema);
         var directives = ParseOptionalDirectives(true);
         var operations = ParseOptionalRootOperationDefinitions();
 
@@ -282,7 +282,7 @@ public ref partial struct Parser
         var description = ParseOptionalDescription();
 
         // skip: directive
-        SkipKeyword(Keywords.Directive.Span);
+        SkipKeyword(Keywords.Directive);
 
         // skip: @
         Skip(TokenKind.At);
@@ -318,7 +318,7 @@ public ref partial struct Parser
         on |? DirectiveLocation 
         */
 
-        SkipKeyword(Keywords.On.Span);
+        SkipKeyword(Keywords.On);
 
         if (_lexer.Kind == TokenKind.Pipe)
             _lexer.Advance();
@@ -390,7 +390,7 @@ public ref partial struct Parser
         /* Description? scalar Name Directives? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Scalar.Span);
+        SkipKeyword(Keywords.Scalar);
         var name = ParseName();
         var directives = ParseOptionalDirectives(true);
 
@@ -406,8 +406,8 @@ public ref partial struct Parser
         /* Description? extend scalar Name Directives? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Extend.Span, !hasExtend);
-        SkipKeyword(Keywords.Scalar.Span);
+        SkipKeyword(Keywords.Extend, !hasExtend);
+        SkipKeyword(Keywords.Scalar);
         var name = ParseName();
         var directives = ParseOptionalDirectives(true);
 
@@ -424,7 +424,7 @@ public ref partial struct Parser
         /* Description? type Name ImplementsInterfaces? Directives? FieldsDefinition? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Type.Span);
+        SkipKeyword(Keywords.Type);
         var name = ParseName();
         var interfaces = ParseOptionalImplementsInterfaces();
         var directives = ParseOptionalDirectives(true);
@@ -444,8 +444,8 @@ public ref partial struct Parser
         /* Description? extend type Name ImplementsInterfaces? Directives? FieldsDefinition? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Extend.Span, !hasExtend);
-        SkipKeyword(Keywords.Type.Span);
+        SkipKeyword(Keywords.Extend, !hasExtend);
+        SkipKeyword(Keywords.Type);
         var name = ParseName();
         var interfaces = ParseOptionalImplementsInterfaces();
         var directives = ParseOptionalDirectives(true);
@@ -466,7 +466,7 @@ public ref partial struct Parser
         /* Description interface Name ImplementsInterfaces? Directives? FieldsDefinition? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Interface.Span);
+        SkipKeyword(Keywords.Interface);
         var name = ParseName();
         var interfaces = ParseOptionalImplementsInterfaces();
         var directives = ParseOptionalDirectives(true);
@@ -486,8 +486,8 @@ public ref partial struct Parser
         /* Description extend interface Name ImplementsInterfaces? Directives? FieldsDefinition? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Extend.Span, !hasExtend);
-        SkipKeyword(Keywords.Interface.Span);
+        SkipKeyword(Keywords.Extend, !hasExtend);
+        SkipKeyword(Keywords.Interface);
         var name = ParseName();
         var interfaces = ParseOptionalImplementsInterfaces();
         var directives = ParseOptionalDirectives(true);
@@ -508,7 +508,7 @@ public ref partial struct Parser
         /* Description? union Name Directives? UnionMemberTypes? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Union.Span);
+        SkipKeyword(Keywords.Union);
         var name = ParseName();
         var directives = ParseOptionalDirectives(true);
         var members = ParseOptionalUnionMembers();
@@ -526,8 +526,8 @@ public ref partial struct Parser
         /* Description? extend union Name Directives? UnionMemberTypes? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Extend.Span, !hasExtend);
-        SkipKeyword(Keywords.Union.Span);
+        SkipKeyword(Keywords.Extend, !hasExtend);
+        SkipKeyword(Keywords.Union);
         var name = ParseName();
         var directives = ParseOptionalDirectives(true);
         var members = ParseOptionalUnionMembers();
@@ -546,7 +546,7 @@ public ref partial struct Parser
         /* Description? enum Name Directives? EnumValuesDefinition? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Enum.Span);
+        SkipKeyword(Keywords.Enum);
         var name = ParseName();
         var directives = ParseOptionalDirectives(true);
         var values = ParseOptionalEnumValueDefinitions();
@@ -564,8 +564,8 @@ public ref partial struct Parser
         /* Description? extend enum Name Directives? EnumValuesDefinition? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Extend.Span, !hasExtend);
-        SkipKeyword(Keywords.Enum.Span);
+        SkipKeyword(Keywords.Extend, !hasExtend);
+        SkipKeyword(Keywords.Enum);
         var name = ParseName();
         var directives = ParseOptionalDirectives(true);
         var values = ParseOptionalEnumValueDefinitions();
@@ -618,7 +618,7 @@ public ref partial struct Parser
         /* Description? input Name Directives? InputFieldsDefinition? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Input.Span);
+        SkipKeyword(Keywords.Input);
         var name = ParseName();
         var directives = ParseOptionalDirectives(true);
         var fields = ParseOptionalInputObjectFields();
@@ -636,8 +636,8 @@ public ref partial struct Parser
         /* Description? extend input Name Directives? InputFieldsDefinition? */
         var location = GetLocation();
         var description = ParseOptionalDescription();
-        SkipKeyword(Keywords.Extend.Span, !hasExtend);
-        SkipKeyword(Keywords.Input.Span);
+        SkipKeyword(Keywords.Extend, !hasExtend);
+        SkipKeyword(Keywords.Input);
         var name = ParseName();
         var directives = ParseOptionalDirectives(true);
         var fields = ParseOptionalInputObjectFields();
@@ -750,7 +750,7 @@ public ref partial struct Parser
         if (!Keywords.IsImplements(_lexer.Value))
             return null;
 
-        SkipKeyword(Keywords.Implements.Span);
+        SkipKeyword(Keywords.Implements);
 
         // skip &
         if (_lexer.Kind == TokenKind.Ampersand)

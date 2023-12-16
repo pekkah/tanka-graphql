@@ -1,6 +1,6 @@
 - [Schema](xref://02-schema.md)
-  - [SDL](xref://00-SDL.md)
-  - [Builder](xref://01-builder.md)
+  - [SchemaBuilder](xref://01_1-builder.md)
+  - [ExecutableSchemaBuilder](xref://01_2-executablebuilder.md)
 - [Types](xref://04-types.md)
   - [Scalars](xref://05-scalars.md)
   - [Objects](xref://06-objects.md)

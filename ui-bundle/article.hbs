@@ -83,17 +83,22 @@
                     <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
                 </li>
             {{/section}}
-            {{#section Section.Version "server"}}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
-                </li>
-            {{/section}}
-            {{#section Section.Version "codegen"}}
+            {{#section Section.Version "execution"}}
                 <li class="nav-item">
                     <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
                 </li>
             {{/section}}
             {{#section Section.Version "types"}}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
+                </li>
+            {{/section}}
+                        {{#section Section.Version "codegen"}}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
+                </li>
+            {{/section}}
+            {{#section Section.Version "server"}}
                 <li class="nav-item">
                     <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
                 </li>
