@@ -8,6 +8,4 @@
   - [Unions](xref://08-unions.md)
   - [Enums](xref://09-enums.md)
   - [Input Objects](xref://10-input-objects.md)
-  - [List](xref://11-list.md)
-  - [Non-null](xref://12-non-null.md)
 - [Directives](xref://13-directives.md)

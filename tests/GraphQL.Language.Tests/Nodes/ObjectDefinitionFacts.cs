@@ -23,6 +23,8 @@ public class ObjectDefinitionFacts
         /* Then */
         Assert.Equal("Obj", original.Name);
         Assert.NotNull(original.Fields);
+        var field1 = Assert.Single(original.Fields);
+        Assert.Equal("field1", field1?.Name);
     }
 
     [Fact]
@@ -38,6 +40,8 @@ public class ObjectDefinitionFacts
         /* Then */
         Assert.Equal("Obj", original.Name);
         Assert.NotNull(original.Fields);
+        var field1 = Assert.Single(original.Fields);
+        Assert.Equal("field1", field1?.Name);
     }
 
     [Fact]

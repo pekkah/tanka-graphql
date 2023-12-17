@@ -2,12 +2,10 @@
 
 > [Specification](https://facebook.github.io/graphql/June2018/#sec-Unions)
 
-Unions are created as instances of `UnionType`.
+Unions are created as instances of `UnionDefinition`.
 
-### Creating union
-
-Union with two possible values
+### Examples
 
 ```csharp
-// todo: docs
+#include::xref://tests:GraphQL.Language.Tests/Nodes/UnionDefinitionFacts.cs
 ```

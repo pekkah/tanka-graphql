@@ -2,32 +2,10 @@
 
 > [Specification](https://facebook.github.io/graphql/June2018/#sec-Enums)
 
-Enums are created as instances of `EnumType`.
+Enums are created as instances of `EnumDefinition`. Special value converter `EnumConverter` is used to convert enum values.
 
-### Creating enum
-
-Direction enum
+### Examples
 
 ```csharp
-// todo: docs
-```
-
-### Serialization
-
-From input value
-
-```csharp
-// todo: docs
-```
-
-From AST node value
-
-```csharp
-// todo: docs
-```
-
-Serialize
-
-```csharp
-// todo: docs
+#include::xref://tests:GraphQL.Language.Tests/Nodes/EnumDefinitionFacts.cs
 ```
