@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -15,13 +16,15 @@ public class ObjectDefinitionFacts
         /* Given */
         /* When */
         ObjectDefinition original =
-            Encoding.UTF8.GetBytes(@"type Obj {
+            @"type Obj {
                     field1: String
-                }").AsReadOnlySpan();
+                }"u8;
 
         /* Then */
         Assert.Equal("Obj", original.Name);
         Assert.NotNull(original.Fields);
+        var field1 = Assert.Single(original.Fields);
+        Assert.Equal("field1", field1?.Name);
     }
 
     [Fact]
@@ -37,6 +40,8 @@ public class ObjectDefinitionFacts
         /* Then */
         Assert.Equal("Obj", original.Name);
         Assert.NotNull(original.Fields);
+        var field1 = Assert.Single(original.Fields);
+        Assert.Equal("field1", field1?.Name);
     }
 
     [Fact]
@@ -46,7 +51,7 @@ public class ObjectDefinitionFacts
         ObjectDefinition original = @"type Obj";
 
         /* When */
-        var modified = original
+        ObjectDefinition modified = original
             .WithDescription("Description");
 
         /* Then */
@@ -61,7 +66,7 @@ public class ObjectDefinitionFacts
         ObjectDefinition original = @"type Obj";
 
         /* When */
-        var modified = original
+        ObjectDefinition modified = original
             .WithName("Renamed");
 
         /* Then */
@@ -76,11 +81,8 @@ public class ObjectDefinitionFacts
         ObjectDefinition original = @"type Obj";
 
         /* When */
-        var modified = original
-            .WithFields(new List<FieldDefinition>
-            {
-                "field: String!"
-            });
+        ObjectDefinition modified = original
+            .WithFields(new List<FieldDefinition> { "field: String!" });
 
         /* Then */
         Assert.Null(original.Fields);
@@ -95,7 +97,7 @@ public class ObjectDefinitionFacts
         ObjectDefinition original = @"type Obj { field: String }";
 
         /* When */
-        var modified = original
+        ObjectDefinition modified = original
             .WithFields(original
                 .Fields?
                 .Select(originalField => originalField
@@ -105,7 +107,7 @@ public class ObjectDefinitionFacts
 
         /* Then */
         Assert.NotNull(modified.Fields);
-        var field = Assert.Single(modified.Fields);
+        FieldDefinition field = Assert.Single(modified.Fields);
         Assert.Equal("Description", field?.Description);
     }
 
@@ -116,16 +118,13 @@ public class ObjectDefinitionFacts
         ObjectDefinition original = @"type Obj";
 
         /* When */
-        var modified = original
-            .WithDirectives(new List<Directive>
-            {
-                "@a"
-            });
+        ObjectDefinition modified = original
+            .WithDirectives(new List<Directive> { "@a" });
 
         /* Then */
         Assert.Null(original.Directives);
         Assert.NotNull(modified.Directives);
-        var a = Assert.Single(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
         Assert.Equal("a", a?.Name);
     }
 
@@ -136,12 +135,8 @@ public class ObjectDefinitionFacts
         ObjectDefinition original = @"type Obj";
 
         /* When */
-        var modified = original
-            .WithInterfaces(new List<NamedType>
-            {
-                "Inf1",
-                "Inf2"
-            });
+        ObjectDefinition modified = original
+            .WithInterfaces(new List<NamedType> { "Inf1", "Inf2" });
 
         /* Then */
         Assert.Null(original.Interfaces);

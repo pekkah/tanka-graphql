@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -15,9 +17,9 @@ public class InputInputObjectDefinitionFacts
         /* Given */
         /* When */
         InputObjectDefinition original =
-            Encoding.UTF8.GetBytes(@"input Obj {
+            @"input Obj {
                     field1: String
-                }").AsReadOnlySpan();
+                }"u8;
 
         /* Then */
         Assert.Equal("Obj", original.Name);
@@ -46,7 +48,7 @@ public class InputInputObjectDefinitionFacts
         InputObjectDefinition original = @"input Obj";
 
         /* When */
-        var modified = original
+        InputObjectDefinition modified = original
             .WithDescription("Description");
 
         /* Then */
@@ -61,7 +63,7 @@ public class InputInputObjectDefinitionFacts
         InputObjectDefinition original = @"input Obj";
 
         /* When */
-        var modified = original
+        InputObjectDefinition modified = original
             .WithName("Renamed");
 
         /* Then */
@@ -76,11 +78,8 @@ public class InputInputObjectDefinitionFacts
         InputObjectDefinition original = @"input Obj";
 
         /* When */
-        var modified = original
-            .WithFields(new List<InputValueDefinition>
-            {
-                "field: Float!"
-            });
+        InputObjectDefinition modified = original
+            .WithFields(new List<InputValueDefinition> { "field: Float!" });
 
         /* Then */
         Assert.Null(original.Fields);
@@ -95,7 +94,7 @@ public class InputInputObjectDefinitionFacts
         InputObjectDefinition original = @"input Obj { field: String }";
 
         /* When */
-        var modified = original
+        InputObjectDefinition modified = original
             .WithFields(original
                 .Fields?
                 .Select(originalField => originalField
@@ -105,7 +104,7 @@ public class InputInputObjectDefinitionFacts
 
         /* Then */
         Assert.NotNull(modified.Fields);
-        var field = Assert.Single(modified.Fields);
+        InputValueDefinition field = Assert.Single(modified.Fields);
         Assert.Equal("Description", field?.Description);
     }
 
@@ -116,16 +115,13 @@ public class InputInputObjectDefinitionFacts
         InputObjectDefinition original = @"input Obj";
 
         /* When */
-        var modified = original
-            .WithDirectives(new List<Directive>
-            {
-                "@a"
-            });
+        InputObjectDefinition modified = original
+            .WithDirectives(new List<Directive> { "@a" });
 
         /* Then */
         Assert.Null(original.Directives);
         Assert.NotNull(modified.Directives);
-        var a = Assert.Single(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
         Assert.Equal("a", a?.Name);
     }
 }

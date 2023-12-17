@@ -10,7 +10,6 @@ namespace Tanka.GraphQL.Benchmarks;
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]
 [MemoryDiagnoser]
-[MarkdownExporterAttribute.GitHub]
 public class LanguageLexerBenchmarks
 {
     public string IntrospectionQuery { get; set; }
@@ -37,7 +36,7 @@ public class LanguageLexerBenchmarks
     [Benchmark]
     public void Tanka_GraphQL_Lexer_IntrospectionQuery()
     {
-        var lexer = Language.Lexer.Create(IntrospectionQueryMemory.Span);
+        var lexer = Language.Lexer.Create(Introspect.DefaultQueryBytes);
         while (lexer.Advance())
         {
             //noop

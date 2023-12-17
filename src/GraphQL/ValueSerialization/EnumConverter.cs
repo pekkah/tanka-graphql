@@ -4,21 +4,14 @@ using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL.ValueSerialization;
 
-public class EnumConverter : IValueConverter
+public class EnumConverter(EnumDefinition enumDefinition) : IValueConverter
 {
-    private readonly EnumDefinition _enumDefinition;
-
-    public EnumConverter(EnumDefinition enumDefinition)
-    {
-        _enumDefinition = enumDefinition;
-    }
-
     public object? Serialize(object? value)
     {
         if (value == null)
             return null;
 
-        var enumValue = _enumDefinition.Values?.SingleOrDefault(v => v.Value.Equals(value));
+        var enumValue = enumDefinition.Values?.SingleOrDefault(v => v.Value.Equals(value));
         return enumValue?.Value.Name.Value;
     }
 
@@ -41,7 +34,7 @@ public class EnumConverter : IValueConverter
 
         if (stringInput == null) return null;
 
-        var value = _enumDefinition.Values?.SingleOrDefault(v => v.Value.Equals(stringInput));
+        var value = enumDefinition.Values?.SingleOrDefault(v => v.Value.Equals(stringInput));
         return value?.Value.Name;
     }
 
@@ -51,7 +44,7 @@ public class EnumConverter : IValueConverter
             return null;
 
         var enumValue = (EnumValue)input;
-        var value = _enumDefinition.Values?.SingleOrDefault(v => v.Value.Equals(enumValue));
+        var value = enumDefinition.Values?.SingleOrDefault(v => v.Value.Equals(enumValue));
         return value?.Value;
     }
 }

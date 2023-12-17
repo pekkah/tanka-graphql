@@ -6,7 +6,7 @@ namespace Tanka.GraphQL;
 public partial class Executor
 {
     /// <summary>
-    ///     Execute query or mutation
+    ///     Execute subscription operation with given <paramref name="request"/>.
     /// </summary>
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
@@ -23,6 +23,16 @@ public partial class Executor
     }
 
 
+    /// <summary>
+    ///     Static method for executing subscription operation with given <paramref name="request"/> and defaults.
+    /// </summary>
+    /// <param name="schema"></param>
+    /// <param name="document"></param>
+    /// <param name="cancellationToken"></param>
+    /// <param name="variableValues"></param>
+    /// <param name="initialValue"></param>
+    /// <param name="operationName"></param>
+    /// <returns></returns>
     public static IAsyncEnumerable<ExecutionResult> Subscribe(
         ISchema schema,
         ExecutableDocument document,

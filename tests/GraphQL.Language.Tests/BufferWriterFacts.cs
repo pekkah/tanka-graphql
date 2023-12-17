@@ -22,7 +22,7 @@ public class BufferWriterFacts
     public void Write()
     {
         /* Given */
-        ReadOnlySpan<byte> data = Encoding.UTF8.GetBytes("12345");
+        ReadOnlySpan<byte> data = "12345"u8;
 
         const int bufferSize = 1024;
         using var sut = new BufferWriter(bufferSize);
@@ -41,7 +41,7 @@ public class BufferWriterFacts
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
         {
-            ReadOnlySpan<byte> data = Encoding.UTF8.GetBytes("12345");
+            ReadOnlySpan<byte> data = "12345"u8;
             const int bufferSize = 4;
             using var sut = new BufferWriter(bufferSize);
             sut.Write(data);

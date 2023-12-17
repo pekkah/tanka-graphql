@@ -2,18 +2,10 @@
 
 > [Specification](https://facebook.github.io/graphql/June2018/#sec-Input-Objects)
 
-Input objects are created as instances of `InputObjectType`.
+Input objects are created as instances of `InputObjectDefinition`.
 
-### Creating input object
-
-```csharp
-// todo: docs
-```
-
-> When using List or NonNull wrappers make sure that the wrapped type passes `TypeIs.IsInputType`.
-
-### Input Coercion
+### Examples
 
 ```csharp
-// todo: docs
+#include::xref://tests:GraphQL.Language.Tests/Nodes/InputObjectDefinitionFacts.cs
 ```

@@ -6,6 +6,9 @@ using Tanka.GraphQL.Features;
 
 namespace Tanka.GraphQL;
 
+/// <summary>
+///     GraphQL operation executor.
+/// </summary>
 public partial class Executor
 {
     private static readonly IServiceProvider EmptyProvider = new ServiceCollection().BuildServiceProvider();
@@ -13,13 +16,17 @@ public partial class Executor
     private readonly OperationDelegate _operationDelegate;
 
     /// <summary>
-    ///     Create executor with defaults and use given <see cref="ISchema" />.
+    ///     Create executor with defaults <see cref="OperationDelegate" /> using the given <see cref="ISchema" />.
     /// </summary>
     /// <param name="schema"></param>
     public Executor(ISchema schema) : this(new ExecutorOptions { Schema = schema })
     {
     }
 
+    /// <summary>
+    ///     Create executor with <see cref="OperationDelegate" /> created using the given <paramref name="options" />
+    /// </summary>
+    /// <param name="options"></param>
     public Executor(ExecutorOptions options)
     {
         OperationDelegateBuilder builder = new(options.ServiceProvider ?? EmptyProvider);
@@ -29,10 +36,7 @@ public partial class Executor
 
         builder.UseDefaultRequestServices();
 
-        builder.AddFeature<ISchemaFeature>(new SchemaFeature
-        {
-            Schema = options.Schema
-        });
+        builder.AddFeature<ISchemaFeature>(new SchemaFeature { Schema = options.Schema });
 
         builder.AddDefaultFeatures();
 
@@ -52,6 +56,10 @@ public partial class Executor
         _operationDelegate = builder.Build();
     }
 
+    /// <summary>
+    ///     Create executor with given <paramref name="operationDelegate" /> .
+    /// </summary>
+    /// <param name="operationDelegate"></param>
     public Executor(OperationDelegate operationDelegate)
     {
         _operationDelegate = operationDelegate;

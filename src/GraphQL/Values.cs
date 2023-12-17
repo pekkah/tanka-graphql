@@ -71,8 +71,8 @@ public static class Values
 
                 object? astValue = null;
 
-                if (dictionaryValues.ContainsKey(fieldName))
-                    astValue = dictionaryValues[fieldName];
+                if (dictionaryValues.TryGetValue(fieldName, out object? dictionaryValue))
+                    astValue = dictionaryValue;
 
                 var coercedFieldValue = CoerceValue(schema, astValue, fieldType);
 

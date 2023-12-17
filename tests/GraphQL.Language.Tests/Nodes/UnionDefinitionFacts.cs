@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -13,8 +14,7 @@ public class UnionDefinitionFacts
     {
         /* Given */
         /* When */
-        UnionDefinition original = Encoding.UTF8.GetBytes("union Name = MemberA | MemberB")
-            .AsReadOnlySpan();
+        UnionDefinition original = "union Name = MemberA | MemberB"u8;
 
         /* Then */
         Assert.Equal("Name", original.Name);
@@ -40,7 +40,7 @@ public class UnionDefinitionFacts
         UnionDefinition original = "union Name = MemberA | MemberB";
 
         /* When */
-        var modified = original
+        UnionDefinition modified = original
             .WithDescription("Description");
 
         /* Then */
@@ -55,7 +55,7 @@ public class UnionDefinitionFacts
         UnionDefinition original = "union Name = MemberA | MemberB";
 
         /* When */
-        var modified = original
+        UnionDefinition modified = original
             .WithName("Renamed");
 
         /* Then */
@@ -70,16 +70,13 @@ public class UnionDefinitionFacts
         UnionDefinition original = "union Name = MemberA | MemberB";
 
         /* When */
-        var modified = original
-            .WithDirectives(new List<Directive>
-            {
-                "@a"
-            });
+        UnionDefinition modified = original
+            .WithDirectives(new List<Directive> { "@a" });
 
         /* Then */
         Assert.Null(original.Directives);
         Assert.NotNull(modified.Directives);
-        var a = Assert.Single(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
         Assert.Equal("a", a?.Name);
     }
 
@@ -90,15 +87,12 @@ public class UnionDefinitionFacts
         UnionDefinition original = "union Name = MemberA | MemberB";
 
         /* When */
-        var modified = original
-            .WithMembers(new List<NamedType>
-            {
-                "a"
-            });
+        UnionDefinition modified = original
+            .WithMembers(new List<NamedType> { "a" });
 
         /* Then */
         Assert.NotNull(modified.Members);
-        var a = Assert.Single(modified.Members);
+        NamedType a = Assert.Single(modified.Members);
         Assert.Equal("a", a?.Name);
     }
 }

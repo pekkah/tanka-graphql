@@ -1,5 +1,8 @@
 ﻿namespace Tanka.GraphQL;
 
+/// <summary>
+///     Tracks the path of a node in the GraphQL document.
+/// </summary>
 public class NodePath
 {
     private readonly List<object> _path = new();

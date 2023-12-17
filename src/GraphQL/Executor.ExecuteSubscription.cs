@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
@@ -9,31 +10,44 @@ namespace Tanka.GraphQL;
 
 public partial class Executor
 {
-    public static Task ExecuteSubscription(QueryContext queryContext)
+    /// <summary>
+    ///     Static method to execute subscription operation using given <paramref name="context" />
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static Task ExecuteSubscription(QueryContext context)
     {
-        queryContext.RequestCancelled.ThrowIfCancellationRequested();
+        context.RequestCancelled.ThrowIfCancellationRequested();
 
-        var sourceStream = CreateSourceEventStream(
-            queryContext,
-            queryContext.RequestCancelled);
+        IAsyncEnumerable<object?> sourceStream = CreateSourceEventStream(
+            context,
+            context.RequestCancelled);
 
-        var responseStream = MapSourceToResponseEventStream(
-            queryContext,
+        IAsyncEnumerable<ExecutionResult> responseStream = MapSourceToResponseEventStream(
+            context,
             sourceStream,
-            queryContext.RequestCancelled);
+            context.RequestCancelled);
 
-        queryContext.Response = responseStream;
+        context.Response = responseStream;
         return Task.CompletedTask;
     }
 
+
+    /// <summary>
+    ///     Create subscription source event stream for given <paramref name="context" />.
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="QueryException"></exception>
     public static async IAsyncEnumerable<object?> CreateSourceEventStream(
         QueryContext context,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context.Schema.Subscription);
 
-        var subscriptionType = context.Schema.Subscription;
-        var groupedFieldSet = FieldCollector.CollectFields(
+        ObjectDefinition? subscriptionType = context.Schema.Subscription;
+        IReadOnlyDictionary<string, List<FieldSelection>> groupedFieldSet = FieldCollector.CollectFields(
             context.Schema,
             context.Request.Document,
             subscriptionType,
@@ -41,23 +55,23 @@ public partial class Executor
             context.CoercedVariableValues
         );
 
-        var fields = groupedFieldSet.Values.First();
-        var fieldName = fields.First().Name;
-        var fieldSelection = fields.First();
+        List<FieldSelection> fields = groupedFieldSet.Values.First();
+        Name fieldName = fields.First().Name;
+        FieldSelection fieldSelection = fields.First();
 
-        var coercedArgumentValues = ArgumentCoercion.CoerceArgumentValues(
+        IReadOnlyDictionary<string, object?> coercedArgumentValues = ArgumentCoercion.CoerceArgumentValues(
             context.Schema,
             subscriptionType,
             fieldSelection,
             context.CoercedVariableValues);
 
-        var field = context.Schema.GetField(subscriptionType.Name, fieldName);
+        FieldDefinition? field = context.Schema.GetField(subscriptionType.Name, fieldName);
 
         if (field is null)
             yield break;
 
         var path = new NodePath();
-        var subscriber = context.Schema.GetSubscriber(subscriptionType.Name, fieldName);
+        Subscriber? subscriber = context.Schema.GetSubscriber(subscriptionType.Name, fieldName);
 
         if (subscriber == null)
             throw new QueryException(
@@ -83,9 +97,18 @@ public partial class Executor
         if (resolverContext.ResolvedValue is null)
             yield break;
 
-        await foreach (var evnt in resolverContext.ResolvedValue.WithCancellation(cancellationToken)) yield return evnt;
+        await foreach (object? evnt in resolverContext.ResolvedValue.WithCancellation(cancellationToken))
+            yield return evnt;
     }
 
+    /// <summary>
+    ///     Map subscription source event stream to response event stream for given <paramref name="context" />
+    ///     and <paramref name="sourceStream" />.
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="sourceStream"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public static async IAsyncEnumerable<ExecutionResult> MapSourceToResponseEventStream(
         QueryContext context,
         IAsyncEnumerable<object?> sourceStream,
@@ -93,10 +116,10 @@ public partial class Executor
     {
         ArgumentNullException.ThrowIfNull(context.Schema.Subscription);
 
-        var subscriptionType = context.Schema.Subscription;
-        var selectionSet = context.OperationDefinition.SelectionSet;
+        ObjectDefinition? subscriptionType = context.Schema.Subscription;
+        SelectionSet selectionSet = context.OperationDefinition.SelectionSet;
 
-        await foreach (var sourceEvnt in sourceStream.WithCancellation(cancellationToken))
+        await foreach (object? sourceEvnt in sourceStream.WithCancellation(cancellationToken))
         {
             var path = new NodePath();
             yield return await ExecuteSourceEvent(
@@ -108,39 +131,40 @@ public partial class Executor
         }
     }
 
+    /// <summary>
+    ///     Execute subscription source event <paramref name="sourceEvent" /> for given <paramref name="context" />, <paramref name="selectionSet" />,
+    ///     <paramref name="subscriptionType" />.
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="selectionSet"></param>
+    /// <param name="subscriptionType"></param>
+    /// <param name="sourceEvent"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public static async Task<ExecutionResult> ExecuteSourceEvent(
         QueryContext context,
         SelectionSet selectionSet,
         ObjectDefinition subscriptionType,
-        object? sourceEvnt,
+        object? sourceEvent,
         NodePath path)
     {
-        var subContext = context with
-        {
-        };
-
+        //todo: use pooled feature or similar
+        QueryContext subContext = context with { };
         subContext.Features.Set<IErrorCollectorFeature>(new ConcurrentBagErrorCollectorFeature());
 
         try
         {
-            var data = await subContext.ExecuteSelectionSet(
+            IReadOnlyDictionary<string, object?> data = await subContext.ExecuteSelectionSet(
                 selectionSet,
                 subscriptionType,
-                sourceEvnt,
+                sourceEvent,
                 path);
 
-            return new()
-            {
-                Data = data,
-                Errors = subContext.GetErrors().ToList()
-            };
+            return new ExecutionResult { Data = data, Errors = subContext.GetErrors().ToList() };
         }
         catch (FieldException)
         {
-            return new()
-            {
-                Errors = subContext.GetErrors().ToList()
-            };
+            return new ExecutionResult { Errors = subContext.GetErrors().ToList() };
         }
     }
 }

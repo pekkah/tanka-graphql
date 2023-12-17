@@ -7,23 +7,14 @@ namespace Tanka.GraphQL.Executable;
 
 public class ExecutableSchemaBuilder
 {
-    public SchemaBuilder Schema { get; }
+    public SchemaBuilder Schema { get; } = new();
 
-    public ResolversBuilder Resolvers { get; }
+    public ResolversBuilder Resolvers { get; } = new();
 
-    public ValueConvertersBuilder ValueConverters { get; }
+    public ValueConvertersBuilder ValueConverters { get; } = new ValueConvertersBuilder()
+        .AddDefaults();
 
-    public Dictionary<string, CreateDirectiveVisitor> DirectiveVisitorFactories { get; }
-
-    public ExecutableSchemaBuilder()
-    {
-        Schema = new SchemaBuilder();
-        Resolvers = new ResolversBuilder();
-        ValueConverters = new ValueConvertersBuilder()
-            .AddDefaults();
-
-        DirectiveVisitorFactories = new Dictionary<string, CreateDirectiveVisitor>();
-    }
+    public Dictionary<string, CreateDirectiveVisitor> DirectiveVisitorFactories { get; } = new();
 
     public ExecutableSchemaBuilder Add(TypeSystemDocument document)
     {
@@ -77,7 +68,11 @@ public class ExecutableSchemaBuilder
             Resolvers = Resolvers.BuildResolvers(),
             Subscribers = Resolvers.BuildSubscribers(),
             ValueConverters = ValueConverters.Build(),
-            DirectiveVisitorFactories = DirectiveVisitorFactories.ToDictionary(kv => kv.Key, kv => kv.Value),
+            DirectiveVisitorFactories = DirectiveVisitorFactories
+                .ToDictionary(
+                    kv => kv.Key, 
+                    kv => kv.Value
+                    ),
             BuildTypesFromOrphanedExtensions = true
         };
 

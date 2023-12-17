@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -13,8 +15,7 @@ public class InputValueDefinitionFacts
     {
         /* Given */
         /* When */
-        InputValueDefinition original = Encoding.UTF8.GetBytes("field: ENUM")
-            .AsReadOnlySpan();
+        InputValueDefinition original = "field: ENUM"u8;
 
         /* Then */
         Assert.Equal("field", original.Name);
@@ -40,7 +41,7 @@ public class InputValueDefinitionFacts
         InputValueDefinition original = "field: ENUM!";
 
         /* When */
-        var modified = original
+        InputValueDefinition modified = original
             .WithDescription("Description");
 
         /* Then */
@@ -54,7 +55,7 @@ public class InputValueDefinitionFacts
         InputValueDefinition original = "field: ENUM!";
 
         /* When */
-        var modified = original
+        InputValueDefinition modified = original
             .WithName("b");
 
         /* Then */
@@ -69,7 +70,7 @@ public class InputValueDefinitionFacts
         InputValueDefinition original = @"field: Int";
 
         /* When */
-        var modified = original
+        InputValueDefinition modified = original
             .WithType("String!");
 
         /* Then */
@@ -85,15 +86,12 @@ public class InputValueDefinitionFacts
         InputValueDefinition original = @"field: Int";
 
         /* When */
-        var modified = original
-            .WithDirectives(new List<Directive>
-            {
-                "@a"
-            });
+        InputValueDefinition modified = original
+            .WithDirectives(new List<Directive> { "@a" });
 
         /* Then */
         Assert.NotNull(modified.Directives);
-        var a = Assert.Single(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
         Assert.Equal("a", a?.Name);
     }
 }

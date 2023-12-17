@@ -1,5 +1,7 @@
 ﻿using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -11,8 +13,7 @@ public class ExecutableDocumentFacts
     {
         /* Given */
         /* When */
-        ExecutableDocument original = Encoding.UTF8.GetBytes("{ field1 field2 }")
-            .AsReadOnlySpan();
+        ExecutableDocument original = "{ field1 field2 }"u8;
 
         /* Then */
         Assert.NotNull(original.OperationDefinitions);
@@ -35,11 +36,11 @@ public class ExecutableDocumentFacts
     public void OverrideToString()
     {
         /* Given */
-        var expected = "{ field1 field2 }";
+        string expected = "{ field1 field2 }";
         ExecutableDocument original = expected;
 
         /* When */
-        var actual = original.ToString();
+        string actual = original.ToString();
 
         /* Then */
         Assert.Equal(expected, actual);

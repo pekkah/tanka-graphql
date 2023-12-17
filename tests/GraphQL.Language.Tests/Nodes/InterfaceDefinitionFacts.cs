@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -15,9 +17,9 @@ public class InterfaceDefinitionFacts
         /* Given */
         /* When */
         InterfaceDefinition original =
-            Encoding.UTF8.GetBytes(@"interface Inf {
+            @"interface Inf {
                     field1: String
-                }").AsReadOnlySpan();
+                }"u8;
 
         /* Then */
         Assert.Equal("Inf", original.Name);
@@ -46,7 +48,7 @@ public class InterfaceDefinitionFacts
         InterfaceDefinition original = @"interface Inf";
 
         /* When */
-        var modified = original
+        InterfaceDefinition modified = original
             .WithDescription("Description");
 
         /* Then */
@@ -61,16 +63,13 @@ public class InterfaceDefinitionFacts
         InterfaceDefinition original = @"interface Inf";
 
         /* When */
-        var modified = original
-            .WithDirectives(new List<Directive>
-            {
-                "@a"
-            });
+        InterfaceDefinition modified = original
+            .WithDirectives(new List<Directive> { "@a" });
 
         /* Then */
         Assert.Null(original.Directives);
         Assert.NotNull(modified.Directives);
-        var a = Assert.Single(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
         Assert.Equal("a", a?.Name);
     }
 
@@ -81,11 +80,8 @@ public class InterfaceDefinitionFacts
         InterfaceDefinition original = @"interface Inf";
 
         /* When */
-        var modified = original
-            .WithFields(new List<FieldDefinition>
-            {
-                "field: String!"
-            });
+        InterfaceDefinition modified = original
+            .WithFields(new List<FieldDefinition> { "field: String!" });
 
         /* Then */
         Assert.Null(original.Fields);
@@ -100,7 +96,7 @@ public class InterfaceDefinitionFacts
         InterfaceDefinition original = @"interface Inf { field: String }";
 
         /* When */
-        var modified = original
+        InterfaceDefinition modified = original
             .WithFields(original
                 .Fields?
                 .Select(originalField => originalField
@@ -110,7 +106,7 @@ public class InterfaceDefinitionFacts
 
         /* Then */
         Assert.NotNull(modified.Fields);
-        var field = Assert.Single(modified.Fields);
+        FieldDefinition field = Assert.Single(modified.Fields);
         Assert.Equal("Description", field?.Description);
     }
 
@@ -121,12 +117,8 @@ public class InterfaceDefinitionFacts
         InterfaceDefinition original = @"interface Inf";
 
         /* When */
-        var modified = original
-            .WithInterfaces(new List<NamedType>
-            {
-                "Inf1",
-                "Inf2"
-            });
+        InterfaceDefinition modified = original
+            .WithInterfaces(new List<NamedType> { "Inf1", "Inf2" });
 
         /* Then */
         Assert.Null(original.Interfaces);
@@ -141,7 +133,7 @@ public class InterfaceDefinitionFacts
         InterfaceDefinition original = @"interface Inf";
 
         /* When */
-        var modified = original
+        InterfaceDefinition modified = original
             .WithName("Renamed");
 
         /* Then */

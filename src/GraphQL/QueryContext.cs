@@ -11,10 +11,13 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL;
 
+/// <summary>
+///     GraphQL query context used by <see cref="OperationDelegate"/> for execution of the operation.
+/// </summary>
 public record QueryContext
 {
     private static readonly IServiceProvider EmptyServices = new ServiceCollection().BuildServiceProvider();
-    
+
     private FeatureReferences<FeatureInterfaces> _features;
 
     public QueryContext(IFeatureCollection defaults)
@@ -26,9 +29,14 @@ public record QueryContext
     {
     }
 
-
+    /// <summary>
+    ///     Request cancellation token.
+    /// </summary>
     public CancellationToken RequestCancelled { get; set; } = default;
 
+    /// <summary>
+    ///     Context features
+    /// </summary>
     public IFeatureCollection Features => _features.Collection;
 
     private IResponseStreamFeature ResponseFeature =>
@@ -67,46 +75,74 @@ public record QueryContext
     private IFieldExecutorFeature? FieldExecutorFeature =>
         _features.Fetch(ref _features.Cache.FieldExecutor, _ => null);
 
+    /// <summary>
+    /// GraphQL request
+    /// </summary>
     public GraphQLRequest Request
     {
         get => RequestFeature.Request ?? throw new InvalidOperationException("Request not set");
         set => RequestFeature.Request = value;
     }
 
-
+    /// <summary>
+    ///     Coerced variable values
+    /// </summary>
     public IReadOnlyDictionary<string, object?> CoercedVariableValues
     {
         get => CoercedVariableValuesFeature.CoercedVariableValues;
         set => CoercedVariableValuesFeature.CoercedVariableValues = value;
     }
 
+    /// <summary>
+    ///     Operation to execute
+    /// </summary>
     public OperationDefinition OperationDefinition
     {
         get => OperationFeature.Operation;
         set => OperationFeature.Operation = value;
     }
 
+    /// <summary>
+    ///     Schema to execute against
+    /// </summary>
     public ISchema Schema
     {
         get => SchemaFeature.Schema;
         set => SchemaFeature.Schema = value;
     }
 
+    /// <summary>
+    ///     Response stream
+    /// </summary>
     public IAsyncEnumerable<ExecutionResult> Response
     {
         get => ResponseFeature.Response;
         set => ResponseFeature.Response = value;
     }
 
+    /// <summary>
+    ///     Request services
+    /// </summary>
     //todo: turn into a feature
     public IServiceProvider RequestServices { get; set; } = EmptyServices;
 
+    /// <summary>
+    ///     Add error to the context
+    /// </summary>
+    /// <param name="x"></param>
     public void AddError(Exception x)
     {
         ArgumentNullException.ThrowIfNull(ErrorCollectorFeature);
         ErrorCollectorFeature.Add(x);
     }
 
+    /// <summary>
+    ///     Complete resolved value
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="fieldType"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public ValueTask CompleteValueAsync(
         ResolverContext context,
         TypeBase fieldType,
@@ -116,6 +152,14 @@ public record QueryContext
         return ValueCompletionFeature.CompleteValueAsync(context, fieldType, path);
     }
 
+    /// <summary>
+    ///     Execute field
+    /// </summary>
+    /// <param name="objectDefinition"></param>
+    /// <param name="objectValue"></param>
+    /// <param name="fields"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public Task<object?> ExecuteField(ObjectDefinition objectDefinition,
         object? objectValue,
         IReadOnlyCollection<FieldSelection> fields,
@@ -125,6 +169,14 @@ public record QueryContext
         return FieldExecutorFeature.Execute(this, objectDefinition, objectValue, fields, path);
     }
 
+    /// <summary>
+    ///     Execute selection set
+    /// </summary>
+    /// <param name="selectionSet"></param>
+    /// <param name="objectType"></param>
+    /// <param name="objectValue"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
         SelectionSet selectionSet,
         ObjectDefinition objectType,
@@ -140,6 +192,10 @@ public record QueryContext
             path);
     }
 
+    /// <summary>
+    ///     Get errors from the context
+    /// </summary>
+    /// <returns></returns>
     public IEnumerable<ExecutionError> GetErrors()
     {
         ArgumentNullException.ThrowIfNull(ErrorCollectorFeature);

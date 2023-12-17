@@ -1,5 +1,5 @@
-﻿using System.Text;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
+﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Nodes;
@@ -11,8 +11,7 @@ public class TypeSystemDocumentFacts
     {
         /* Given */
         /* When */
-        TypeSystemDocument original = Encoding.UTF8.GetBytes("scalar Scalar extend scalar Scalar @a")
-            .AsReadOnlySpan();
+        TypeSystemDocument original = "scalar Scalar extend scalar Scalar @a"u8;
 
         /* Then */
         Assert.NotNull(original.TypeDefinitions);
