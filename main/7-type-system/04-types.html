@@ -80,13 +80,16 @@
                     <a class="nav-link" href="main/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
+                    <a class="nav-link" href="main/6-executor/01-executor.html">Executor</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
+                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/10-extensions/tracing.html">Extensions</a>
@@ -118,11 +121,11 @@
     <a class="nav-link" href=main/7-type-system/02-schema.html>Schema</a>
     <ul>
 <li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/00-SDL.html>SDL</a>
+    <a class="nav-link" href=main/7-type-system/01_1-builder.html>SchemaBuilder</a>
     <ul>
     </ul>
 </li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/01-builder.html>Builder</a>
+    <a class="nav-link" href=main/7-type-system/01_2-executablebuilder.html>ExecutableSchemaBuilder</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -155,14 +158,6 @@
     <a class="nav-link" href=main/7-type-system/10-input-objects.html>Input Objects</a>
     <ul>
     </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/11-list.html>List</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/12-non-null.html>Non-null</a>
-    <ul>
-    </ul>
 </li>    </ul>
 </li>    </nav>
     <nav class="nav flex-column">
@@ -190,22 +185,42 @@
 </blockquote>
 <p>Following types are supported:</p>
 <ul>
-<li><code>ScalarType</code></li>
-<li><code>ObjectType</code></li>
-<li><code>InterfaceType</code></li>
-<li><code>UnionType</code></li>
-<li><code>EnumType</code></li>
-<li><code>InputObjectType</code></li>
+<li><code>ScalarDefinition</code></li>
+<li><code>ObjectDefinition</code></li>
+<li><code>InterfaceDefinition</code></li>
+<li><code>UnionDefinition</code></li>
+<li><code>EnumDefinition</code></li>
+<li><code>InputObjectDefinition</code></li>
 </ul>
-<p>These all exists in <code>Tanka.GraphQL.Language.Nodes</code> namespace and implement <code>TypeDefinition</code> base class</p>
-<pre><code class="language-csharp">// todo: docs
+<p>These all exists in <code>Tanka.GraphQL.Language.Nodes.TypeSystem</code> namespace and implement <code>TypeDefinition</code> base class.</p>
+<h3 id="examples-of-creating-type-instances">Examples of creating type instances</h3>
+<p>Following shows how to create <code>ScalarDefinition</code> from bytes or string. Other types are created in similar way. You can also create actual instance of the type class but that can get quite verbose
+for more complicated types.</p>
+<pre><code class="language-csharp">    [Fact]
+    public void FromBytes()
+    {
+        /* Given */
+        /* When */
+        ScalarDefinition original = &quot;scalar Name&quot;u8;
+
+        /* Then */
+        Assert.Equal(&quot;Name&quot;, original.Name);
+    }
+
+
+
+    [Fact]
+    public void FromString()
+    {
+        /* Given */
+        /* When */
+        ScalarDefinition original = &quot;scalar Name&quot;;
+
+        /* Then */
+        Assert.Equal(&quot;Name&quot;, original.Name);
+    }
+
 </code></pre>
-<h3 id="wrapping-types">Wrapping types</h3>
-<p>Two built-in implementations are provided</p>
-<ul>
-<li><code>LisType</code></li>
-<li><code>NonNullType</code></li>
-</ul>
                     
             </main>
         </div>

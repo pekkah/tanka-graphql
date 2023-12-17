@@ -80,13 +80,16 @@
                     <a class="nav-link" href="main/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
+                    <a class="nav-link" href="main/6-executor/01-executor.html">Executor</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
+                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/10-extensions/tracing.html">Extensions</a>
@@ -118,11 +121,11 @@
     <a class="nav-link" href=main/7-type-system/02-schema.html>Schema</a>
     <ul>
 <li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/00-SDL.html>SDL</a>
+    <a class="nav-link" href=main/7-type-system/01_1-builder.html>SchemaBuilder</a>
     <ul>
     </ul>
 </li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/01-builder.html>Builder</a>
+    <a class="nav-link" href=main/7-type-system/01_2-executablebuilder.html>ExecutableSchemaBuilder</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -153,14 +156,6 @@
     </ul>
 </li><li class="nav-item">
     <a class="nav-link" href=main/7-type-system/10-input-objects.html>Input Objects</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/11-list.html>List</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/12-non-null.html>Non-null</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -197,46 +192,127 @@ namespace Tanka.GraphQL.TypeSystem;
 
 public interface ISchema : IHasDirectives
 {
+    /// &lt;summary&gt;
+    ///     Static schema instance with a query type containing no fields
+    /// &lt;/summary&gt;
     public static readonly ISchema Empty = new EmptySchema();
 
+    /// &lt;summary&gt;
+    ///     Optional root mutation type
+    /// &lt;/summary&gt;
     ObjectDefinition? Mutation { get; }
 
+    /// &lt;summary&gt;
+    ///     Root query type
+    /// &lt;/summary&gt;
     ObjectDefinition Query { get; }
 
+    /// &lt;summary&gt;
+    ///     Optional root subscription type
+    /// &lt;/summary&gt;
     ObjectDefinition? Subscription { get; }
 
+    /// &lt;summary&gt;
+    ///     Schema description
+    /// &lt;/summary&gt;
     string Description { get; }
 
+    /// &lt;summary&gt;
+    ///     Finds a named type from the schema
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;name&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     TypeDefinition? GetNamedType(string name);
 
+    /// &lt;summary&gt;
+    ///     Gets a field of type 
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;type&quot;&gt;&lt;/param&gt;
+    /// &lt;param name=&quot;name&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     FieldDefinition? GetField(string type, string name);
 
+    /// &lt;summary&gt;
+    ///     Get all fields of type
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;type&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     IEnumerable&lt;KeyValuePair&lt;string, FieldDefinition&gt;&gt; GetFields(string type);
 
+    /// &lt;summary&gt;
+    ///     Query types matching given filter and type
+    /// &lt;/summary&gt;
+    /// &lt;typeparam name=&quot;T&quot;&gt;&lt;/typeparam&gt;
+    /// &lt;param name=&quot;filter&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     IQueryable&lt;T&gt; QueryTypes&lt;T&gt;(Predicate&lt;T&gt;? filter = null) where T : TypeDefinition;
 
+    /// &lt;summary&gt;
+    ///     Get named directive type from schema
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;name&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     DirectiveDefinition? GetDirectiveType(string name);
 
+    /// &lt;summary&gt;
+    ///     Query directive types matching given filter
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;filter&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     IQueryable&lt;DirectiveDefinition&gt; QueryDirectiveTypes(Predicate&lt;DirectiveDefinition&gt;? filter = null);
 
+    /// &lt;summary&gt;
+    ///     Get all input fields on an input object type
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;type&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     IEnumerable&lt;KeyValuePair&lt;string, InputValueDefinition&gt;&gt; GetInputFields(string type);
 
+    /// &lt;summary&gt;
+    ///     Get input field on an input object type
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;type&quot;&gt;&lt;/param&gt;
+    /// &lt;param name=&quot;name&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     InputValueDefinition? GetInputField(string type, string name);
 
+    /// &lt;summary&gt;
+    ///     Get possible types of an interface type
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;abstractType&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     IEnumerable&lt;TypeDefinition&gt; GetPossibleTypes(InterfaceDefinition abstractType);
 
+    /// &lt;summary&gt;
+    ///     Get possible types of a union type
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;abstractType&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     IEnumerable&lt;ObjectDefinition&gt; GetPossibleTypes(UnionDefinition abstractType);
 
+    /// &lt;summary&gt;
+    ///     Get resolver for a field of object type
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;type&quot;&gt;&lt;/param&gt;
+    /// &lt;param name=&quot;fieldName&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     Resolver? GetResolver(string type, string fieldName);
 
+    /// &lt;summary&gt;
+    ///     Get subscriber for a field of object type
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;type&quot;&gt;&lt;/param&gt;
+    /// &lt;param name=&quot;fieldName&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     Subscriber? GetSubscriber(string type, string fieldName);
 
+    /// &lt;summary&gt;
+    ///     Get value converter for a field of object type
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;type&quot;&gt;&lt;/param&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
     IValueConverter? GetValueConverter(string type);
 }
-</code></pre>
-<h3 id="defaults">Defaults</h3>
-<p>By default following type system is included when building a schema using <code>SchemaBuilder</code>.</p>
-<pre><code class="language-csharp">Tanka.GraphQL.SchemaBuilder.BuiltInTypes
 </code></pre>
                     
             </main>

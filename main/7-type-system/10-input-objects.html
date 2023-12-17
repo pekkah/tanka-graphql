@@ -80,13 +80,16 @@
                     <a class="nav-link" href="main/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
+                    <a class="nav-link" href="main/6-executor/01-executor.html">Executor</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
+                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/10-extensions/tracing.html">Extensions</a>
@@ -118,11 +121,11 @@
     <a class="nav-link" href=main/7-type-system/02-schema.html>Schema</a>
     <ul>
 <li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/00-SDL.html>SDL</a>
+    <a class="nav-link" href=main/7-type-system/01_1-builder.html>SchemaBuilder</a>
     <ul>
     </ul>
 </li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/01-builder.html>Builder</a>
+    <a class="nav-link" href=main/7-type-system/01_2-executablebuilder.html>ExecutableSchemaBuilder</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -155,14 +158,6 @@
     <a class="nav-link" href=main/7-type-system/10-input-objects.html>Input Objects</a>
     <ul>
     </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/11-list.html>List</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/12-non-null.html>Non-null</a>
-    <ul>
-    </ul>
 </li>    </ul>
 </li>    </nav>
     <nav class="nav flex-column">
@@ -188,15 +183,135 @@
 <blockquote class="blockquote">
 <p><a href="https://facebook.github.io/graphql/June2018/#sec-Input-Objects">Specification</a></p>
 </blockquote>
-<p>Input objects are created as instances of <code>InputObjectType</code>.</p>
-<h3 id="creating-input-object">Creating input object</h3>
-<pre><code class="language-csharp">// todo: docs
-</code></pre>
-<blockquote class="blockquote">
-<p>When using List or NonNull wrappers make sure that the wrapped type passes <code>TypeIs.IsInputType</code>.</p>
-</blockquote>
-<h3 id="input-coercion">Input Coercion</h3>
-<pre><code class="language-csharp">// todo: docs
+<p>Input objects are created as instances of <code>InputObjectDefinition</code>.</p>
+<h3 id="examples">Examples</h3>
+<pre><code class="language-csharp">﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
+using Xunit;
+
+namespace Tanka.GraphQL.Language.Tests.Nodes;
+
+public class InputInputObjectDefinitionFacts
+{
+    [Fact]
+    public void FromBytes()
+    {
+        /* Given */
+        /* When */
+        InputObjectDefinition original =
+            @&quot;input Obj {
+                    field1: String
+                }&quot;u8;
+
+        /* Then */
+        Assert.Equal(&quot;Obj&quot;, original.Name);
+        Assert.NotNull(original.Fields);
+    }
+
+    [Fact]
+    public void FromString()
+    {
+        /* Given */
+        /* When */
+        InputObjectDefinition original =
+            @&quot;input Obj {
+                    field1: String
+                }&quot;;
+
+        /* Then */
+        Assert.Equal(&quot;Obj&quot;, original.Name);
+        Assert.NotNull(original.Fields);
+    }
+
+    [Fact]
+    public void WithDescription()
+    {
+        /* Given */
+        InputObjectDefinition original = @&quot;input Obj&quot;;
+
+        /* When */
+        InputObjectDefinition modified = original
+            .WithDescription(&quot;Description&quot;);
+
+        /* Then */
+        Assert.Null(original.Description);
+        Assert.Equal(&quot;Description&quot;, modified.Description);
+    }
+
+    [Fact]
+    public void WithName()
+    {
+        /* Given */
+        InputObjectDefinition original = @&quot;input Obj&quot;;
+
+        /* When */
+        InputObjectDefinition modified = original
+            .WithName(&quot;Renamed&quot;);
+
+        /* Then */
+        Assert.Equal(&quot;Obj&quot;, original.Name);
+        Assert.Equal(&quot;Renamed&quot;, modified.Name);
+    }
+
+    [Fact]
+    public void WithFields()
+    {
+        /* Given */
+        InputObjectDefinition original = @&quot;input Obj&quot;;
+
+        /* When */
+        InputObjectDefinition modified = original
+            .WithFields(new List&lt;InputValueDefinition&gt; { &quot;field: Float!&quot; });
+
+        /* Then */
+        Assert.Null(original.Fields);
+        Assert.NotNull(modified.Fields);
+        Assert.NotEmpty(modified.Fields);
+    }
+
+    [Fact]
+    public void WithFields_Modify()
+    {
+        /* Given */
+        InputObjectDefinition original = @&quot;input Obj { field: String }&quot;;
+
+        /* When */
+        InputObjectDefinition modified = original
+            .WithFields(original
+                .Fields?
+                .Select(originalField =&gt; originalField
+                    .WithDescription(&quot;Description&quot;))
+                .ToList()
+            );
+
+        /* Then */
+        Assert.NotNull(modified.Fields);
+        InputValueDefinition field = Assert.Single(modified.Fields);
+        Assert.Equal(&quot;Description&quot;, field?.Description);
+    }
+
+    [Fact]
+    public void WithDirectives()
+    {
+        /* Given */
+        InputObjectDefinition original = @&quot;input Obj&quot;;
+
+        /* When */
+        InputObjectDefinition modified = original
+            .WithDirectives(new List&lt;Directive&gt; { &quot;@a&quot; });
+
+        /* Then */
+        Assert.Null(original.Directives);
+        Assert.NotNull(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
+        Assert.Equal(&quot;a&quot;, a?.Name);
+    }
+}
 </code></pre>
                     
             </main>

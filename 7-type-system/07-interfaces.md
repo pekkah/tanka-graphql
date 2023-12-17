@@ -2,20 +2,10 @@
 
 > [Specification](https://facebook.github.io/graphql/June2018/#sec-Interfaces)
 
-Interfaces are created as instances of `InterfaceType`.
+Interfaces are created as instances of `InterfaceDefinition`.
 
-### Creating interface
-
-Define with non-null scalar field
+### Examples
 
 ```csharp
-// todo: docs
-```
-
-### Implementing interface
-
-Object implements interface
-
-```csharp
-// todo: docs
+#include::xref://tests:GraphQL.Language.Tests/Nodes/InterfaceDefinitionFacts.cs
 ```

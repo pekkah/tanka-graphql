@@ -80,13 +80,16 @@
                     <a class="nav-link" href="main/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
+                    <a class="nav-link" href="main/6-executor/01-executor.html">Executor</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
+                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/10-extensions/tracing.html">Extensions</a>
@@ -118,11 +121,11 @@
     <a class="nav-link" href=main/7-type-system/02-schema.html>Schema</a>
     <ul>
 <li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/00-SDL.html>SDL</a>
+    <a class="nav-link" href=main/7-type-system/01_1-builder.html>SchemaBuilder</a>
     <ul>
     </ul>
 </li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/01-builder.html>Builder</a>
+    <a class="nav-link" href=main/7-type-system/01_2-executablebuilder.html>ExecutableSchemaBuilder</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -153,14 +156,6 @@
     </ul>
 </li><li class="nav-item">
     <a class="nav-link" href=main/7-type-system/10-input-objects.html>Input Objects</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/11-list.html>List</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/12-non-null.html>Non-null</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -197,16 +192,10 @@
 <li><code>Float</code></li>
 <li><code>String</code></li>
 </ul>
-<h3 id="custom-scalars">Custom scalars</h3>
-<p>Create instance of <code>ScalarType</code> and provide name and metadata. Value converter
-is also needed when building schema with custom scalar in it.</p>
-<h4 id="example">Example:</h4>
-<p>Scalar:</p>
-<pre><code class="language-csharp">// todo: docs
-</code></pre>
-<p>Converter:</p>
-<pre><code class="language-csharp">// todo: docs
-</code></pre>
+<p>Built-in scalars are automatically included in the schema. See <a href="main/7-type-system/01_1-builder.html">Builder</a> or
+<a href="main/7-type-system/01_2-executablebuilder.html">ExecutableSchemaBuilder</a> for more information on how to replace
+or remove them.</p>
+<p>For example of how to add a custom scalar, see <a href="main/0-getting-started/06-custom-scalars.html">Custom Scalars</a>.</p>
                     
             </main>
         </div>

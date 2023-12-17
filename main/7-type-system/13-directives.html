@@ -80,13 +80,16 @@
                     <a class="nav-link" href="main/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
+                    <a class="nav-link" href="main/6-executor/01-executor.html">Executor</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
+                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/10-extensions/tracing.html">Extensions</a>
@@ -118,11 +121,11 @@
     <a class="nav-link" href=main/7-type-system/02-schema.html>Schema</a>
     <ul>
 <li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/00-SDL.html>SDL</a>
+    <a class="nav-link" href=main/7-type-system/01_1-builder.html>SchemaBuilder</a>
     <ul>
     </ul>
 </li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/01-builder.html>Builder</a>
+    <a class="nav-link" href=main/7-type-system/01_2-executablebuilder.html>ExecutableSchemaBuilder</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -155,14 +158,6 @@
     <a class="nav-link" href=main/7-type-system/10-input-objects.html>Input Objects</a>
     <ul>
     </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/11-list.html>List</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/12-non-null.html>Non-null</a>
-    <ul>
-    </ul>
 </li>    </ul>
 </li>    </nav>
     <nav class="nav flex-column">
@@ -188,9 +183,180 @@
 <blockquote class="blockquote">
 <p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-System.Directives">Specification</a></p>
 </blockquote>
-<p>Directives are created as instance of <code>DirectiveDefinition</code>. When adding to target instance of <code>Directive</code> is used.</p>
-<h3 id="create-custom-directive">Create custom directive</h3>
-<p>todo: docs</p>
+<p>Directive types are created as instance of <code>DirectiveDefinition</code>. When used with other types instances of <code>Directive</code> are used.</p>
+<p>Built-in directives for executable documents are:</p>
+<ul>
+<li><code>@include(if: Boolean!)</code>: Only include this field in the result if the argument is true.</li>
+<li><code>@skip(if: Boolean!)</code>: Skip this field if the argument is true.</li>
+</ul>
+<p>Built-in directives for schema documents are:</p>
+<ul>
+<li><code>@deprecated(reason: String)</code>: Marks an element of a GraphQL schema as no longer supported.</li>
+<li><code>@specifiedBy(url: String!)</code>: Exposes a URL that specifies the behaviour of this scalar.</li>
+</ul>
+<p>For custom schema directive see <a href="main/0-getting-started/03-apply-directives.html">Apply Directives</a> for example.</p>
+<h3 id="examples">Examples</h3>
+<pre><code class="language-csharp">﻿using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
+using Xunit;
+
+namespace Tanka.GraphQL.Language.Tests.Nodes;
+
+public class DirectiveDefinitionFacts
+{
+    [Fact]
+    public void FromBytes()
+    {
+        /* Given */
+        /* When */
+        DirectiveDefinition original = &quot;directive @a(x: Int, y: Float) on FIELD&quot;u8;
+
+        /* Then */
+        Assert.Equal(&quot;a&quot;, original.Name);
+    }
+
+    [Fact]
+    public void FromString()
+    {
+        /* Given */
+        /* When */
+        DirectiveDefinition original = &quot;directive @a(x: Int, y: Float) on FIELD&quot;;
+
+        /* Then */
+        Assert.Equal(&quot;a&quot;, original.Name);
+    }
+
+    [Fact]
+    public void WithDescription()
+    {
+        /* Given */
+        DirectiveDefinition original = @&quot;directive @a on SCHEMA&quot;;
+
+        /* When */
+        DirectiveDefinition modified = original
+            .WithDescription(&quot;Description&quot;);
+
+        /* Then */
+        Assert.Null(original.Description);
+        Assert.Equal(&quot;Description&quot;, modified.Description);
+    }
+
+    [Fact]
+    public void WithName()
+    {
+        /* Given */
+        DirectiveDefinition original = @&quot;directive @a on SCHEMA&quot;;
+
+        /* When */
+        DirectiveDefinition modified = original
+            .WithName(&quot;b&quot;);
+
+        /* Then */
+        Assert.Equal(&quot;a&quot;, original.Name);
+        Assert.Equal(&quot;b&quot;, modified.Name);
+    }
+
+    [Fact]
+    public void WithArguments()
+    {
+        /* Given */
+        DirectiveDefinition original = @&quot;directive @a on SCHEMA&quot;;
+
+        /* When */
+        DirectiveDefinition modified = original
+            .WithArguments(new InputValueDefinition[] { &quot;x: Int&quot; });
+
+        /* Then */
+        Assert.Equal(1, modified.Arguments?.Count);
+    }
+
+    [Fact]
+    public void WithDirectiveLocations()
+    {
+        /* Given */
+        DirectiveDefinition original = @&quot;directive @a on SCHEMA&quot;;
+
+        /* When */
+        DirectiveDefinition modified = original
+            .WithDirectiveLocations(new[] { &quot;FIELD&quot; });
+
+        /* Then */
+        string location = Assert.Single(modified.DirectiveLocations);
+        Assert.Equal(&quot;FIELD&quot;, location);
+    }
+}
+</code></pre>
+<pre><code class="language-csharp">﻿using System.Collections.Generic;
+using System.Linq;
+
+using Tanka.GraphQL.Language.Nodes;
+
+using Xunit;
+
+namespace Tanka.GraphQL.Language.Tests.Nodes;
+
+public class DirectiveFacts
+{
+    [Fact]
+    public void FromBytes()
+    {
+        /* Given */
+        /* When */
+        Directive original = &quot;@a(x: 100, y: 100)&quot;u8;
+
+        /* Then */
+        Assert.Equal(&quot;a&quot;, original.Name);
+        Assert.NotNull(original.Arguments);
+        Assert.Equal(2, original.Arguments?.Count);
+    }
+
+    [Fact]
+    public void FromString()
+    {
+        /* Given */
+        /* When */
+        Directive original = &quot;@a(x: 100, y: 100)&quot;;
+
+        /* Then */
+        Assert.Equal(&quot;a&quot;, original.Name);
+        Assert.NotNull(original.Arguments);
+        Assert.Equal(2, original.Arguments?.Count);
+    }
+
+    [Fact]
+    public void WithArguments()
+    {
+        /* Given */
+        Directive original = &quot;@a(x: 100, y: 100)&quot;;
+
+        /* When */
+        Directive modified = original
+            .WithArguments(
+                new List&lt;Argument&gt;(original.Arguments ?? Enumerable.Empty&lt;Argument&gt;())
+                    .Concat(new[] { new Argument(&quot;x&quot;, new IntValue(100)) }).ToList()
+            );
+
+        /* Then */
+        Assert.Equal(2, original.Arguments?.Count);
+        Assert.Equal(3, modified.Arguments?.Count);
+    }
+
+    [Fact]
+    public void WithName()
+    {
+        /* Given */
+        Directive original = &quot;@a(x: 100, y: 100)&quot;;
+
+        /* When */
+        Directive modified = original
+            .WithName(&quot;b&quot;);
+
+        /* Then */
+        Assert.Equal(&quot;a&quot;, original.Name);
+        Assert.Equal(&quot;b&quot;, modified.Name);
+    }
+}
+</code></pre>
                     
             </main>
         </div>

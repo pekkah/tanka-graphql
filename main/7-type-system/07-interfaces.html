@@ -80,13 +80,16 @@
                     <a class="nav-link" href="main/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
+                    <a class="nav-link" href="main/6-executor/01-executor.html">Executor</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
+                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/10-extensions/tracing.html">Extensions</a>
@@ -118,11 +121,11 @@
     <a class="nav-link" href=main/7-type-system/02-schema.html>Schema</a>
     <ul>
 <li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/00-SDL.html>SDL</a>
+    <a class="nav-link" href=main/7-type-system/01_1-builder.html>SchemaBuilder</a>
     <ul>
     </ul>
 </li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/01-builder.html>Builder</a>
+    <a class="nav-link" href=main/7-type-system/01_2-executablebuilder.html>ExecutableSchemaBuilder</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -155,14 +158,6 @@
     <a class="nav-link" href=main/7-type-system/10-input-objects.html>Input Objects</a>
     <ul>
     </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/11-list.html>List</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/12-non-null.html>Non-null</a>
-    <ul>
-    </ul>
 </li>    </ul>
 </li>    </nav>
     <nav class="nav flex-column">
@@ -188,14 +183,151 @@
 <blockquote class="blockquote">
 <p><a href="https://facebook.github.io/graphql/June2018/#sec-Interfaces">Specification</a></p>
 </blockquote>
-<p>Interfaces are created as instances of <code>InterfaceType</code>.</p>
-<h3 id="creating-interface">Creating interface</h3>
-<p>Define with non-null scalar field</p>
-<pre><code class="language-csharp">// todo: docs
-</code></pre>
-<h3 id="implementing-interface">Implementing interface</h3>
-<p>Object implements interface</p>
-<pre><code class="language-csharp">// todo: docs
+<p>Interfaces are created as instances of <code>InterfaceDefinition</code>.</p>
+<h3 id="examples">Examples</h3>
+<pre><code class="language-csharp">﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
+
+using Xunit;
+
+namespace Tanka.GraphQL.Language.Tests.Nodes;
+
+public class InterfaceDefinitionFacts
+{
+    [Fact]
+    public void FromBytes()
+    {
+        /* Given */
+        /* When */
+        InterfaceDefinition original =
+            @&quot;interface Inf {
+                    field1: String
+                }&quot;u8;
+
+        /* Then */
+        Assert.Equal(&quot;Inf&quot;, original.Name);
+        Assert.NotNull(original.Fields);
+    }
+
+    [Fact]
+    public void FromString()
+    {
+        /* Given */
+        /* When */
+        InterfaceDefinition original =
+            @&quot;interface Inf {
+                    field1: String
+                }&quot;;
+
+        /* Then */
+        Assert.Equal(&quot;Inf&quot;, original.Name);
+        Assert.NotNull(original.Fields);
+    }
+
+    [Fact]
+    public void WithDescription()
+    {
+        /* Given */
+        InterfaceDefinition original = @&quot;interface Inf&quot;;
+
+        /* When */
+        InterfaceDefinition modified = original
+            .WithDescription(&quot;Description&quot;);
+
+        /* Then */
+        Assert.Null(original.Description);
+        Assert.Equal(&quot;Description&quot;, modified.Description);
+    }
+
+    [Fact]
+    public void WithDirectives()
+    {
+        /* Given */
+        InterfaceDefinition original = @&quot;interface Inf&quot;;
+
+        /* When */
+        InterfaceDefinition modified = original
+            .WithDirectives(new List&lt;Directive&gt; { &quot;@a&quot; });
+
+        /* Then */
+        Assert.Null(original.Directives);
+        Assert.NotNull(modified.Directives);
+        Directive a = Assert.Single(modified.Directives);
+        Assert.Equal(&quot;a&quot;, a?.Name);
+    }
+
+    [Fact]
+    public void WithFields()
+    {
+        /* Given */
+        InterfaceDefinition original = @&quot;interface Inf&quot;;
+
+        /* When */
+        InterfaceDefinition modified = original
+            .WithFields(new List&lt;FieldDefinition&gt; { &quot;field: String!&quot; });
+
+        /* Then */
+        Assert.Null(original.Fields);
+        Assert.NotNull(modified.Fields);
+        Assert.NotEmpty(modified.Fields);
+    }
+
+    [Fact]
+    public void WithFields_Modify()
+    {
+        /* Given */
+        InterfaceDefinition original = @&quot;interface Inf { field: String }&quot;;
+
+        /* When */
+        InterfaceDefinition modified = original
+            .WithFields(original
+                .Fields?
+                .Select(originalField =&gt; originalField
+                    .WithDescription(&quot;Description&quot;))
+                .ToList()
+            );
+
+        /* Then */
+        Assert.NotNull(modified.Fields);
+        FieldDefinition field = Assert.Single(modified.Fields);
+        Assert.Equal(&quot;Description&quot;, field?.Description);
+    }
+
+    [Fact]
+    public void WithInterfaces()
+    {
+        /* Given */
+        InterfaceDefinition original = @&quot;interface Inf&quot;;
+
+        /* When */
+        InterfaceDefinition modified = original
+            .WithInterfaces(new List&lt;NamedType&gt; { &quot;Inf1&quot;, &quot;Inf2&quot; });
+
+        /* Then */
+        Assert.Null(original.Interfaces);
+        Assert.NotNull(modified.Interfaces);
+        Assert.Equal(2, modified.Interfaces?.Count);
+    }
+
+    [Fact]
+    public void WithName()
+    {
+        /* Given */
+        InterfaceDefinition original = @&quot;interface Inf&quot;;
+
+        /* When */
+        InterfaceDefinition modified = original
+            .WithName(&quot;Renamed&quot;);
+
+        /* Then */
+        Assert.Equal(&quot;Inf&quot;, original.Name);
+        Assert.Equal(&quot;Renamed&quot;, modified.Name);
+    }
+}
 </code></pre>
                     
             </main>

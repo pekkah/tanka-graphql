@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>11-list - Tanka GraphQL</title>
+    <title>01_1-builder - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -80,13 +80,16 @@
                     <a class="nav-link" href="main/2-language/01-parser.html">Language</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
+                    <a class="nav-link" href="main/6-executor/01-executor.html">Executor</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="main/7-type-system/02-schema.html">Type System</a>
+                    <a class="nav-link" href="main/3-server/00-index.html">Server</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="main/10-extensions/tracing.html">Extensions</a>
@@ -118,11 +121,11 @@
     <a class="nav-link" href=main/7-type-system/02-schema.html>Schema</a>
     <ul>
 <li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/00-SDL.html>SDL</a>
+    <a class="nav-link" href=main/7-type-system/01_1-builder.html>SchemaBuilder</a>
     <ul>
     </ul>
 </li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/01-builder.html>Builder</a>
+    <a class="nav-link" href=main/7-type-system/01_2-executablebuilder.html>ExecutableSchemaBuilder</a>
     <ul>
     </ul>
 </li>    </ul>
@@ -155,14 +158,6 @@
     <a class="nav-link" href=main/7-type-system/10-input-objects.html>Input Objects</a>
     <ul>
     </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/11-list.html>List</a>
-    <ul>
-    </ul>
-</li><li class="nav-item">
-    <a class="nav-link" href=main/7-type-system/12-non-null.html>Non-null</a>
-    <ul>
-    </ul>
 </li>    </ul>
 </li>    </nav>
     <nav class="nav flex-column">
@@ -184,11 +179,30 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="list">List</h2>
-<blockquote class="blockquote">
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Type-System.List">Specification</a></p>
-</blockquote>
-<p>Lists are created as instances of <code>ListType</code>.</p>
+                <h2 id="schema-builder">Schema Builder</h2>
+<p>The <code>SchemaBuilder</code> class is a builder for <code>ISchema</code> instances. It provides methods to add various components to the schema and then build the schema.</p>
+<h2 id="properties">Properties</h2>
+<ul>
+<li><code>BuiltInTypes</code>: A static property that returns the built-in types of the schema.</li>
+<li><code>BuiltInTypeNames</code>: A static property that returns the names of the built-in types.</li>
+</ul>
+<h2 id="methods">Methods</h2>
+<ul>
+<li><code>Add(TypeSystemDocument typeSystem)</code>: Adds a type system document to the schema.</li>
+<li><code>Add(string typeSystemSdl)</code>: Adds a type system SDL to the schema.</li>
+<li><code>Add(SchemaDefinition schemaDefinition)</code>: Adds a schema definition to the schema.</li>
+<li><code>Add(SchemaExtension schemaExtension)</code>: Adds a schema extension to the schema.</li>
+<li><code>Add(TypeDefinition typeDefinition)</code>: Adds a type definition to the schema.</li>
+<li><code>Add(TypeDefinition[] typeDefinitions)</code>: Adds multiple type definitions to the schema.</li>
+<li><code>Add(DirectiveDefinition directiveDefinition)</code>: Adds a directive definition to the schema.</li>
+<li><code>Add(DirectiveDefinition[] directiveDefinitions)</code>: Adds multiple directive definitions to the schema.</li>
+<li><code>Add(TypeExtension typeExtension)</code>: Adds a type extension to the schema.</li>
+<li><code>Add(TypeExtension[] typeExtensions)</code>: Adds multiple type extensions to the schema.</li>
+<li><code>Build(IResolverMap resolvers, ISubscriberMap? subscribers = null)</code>: Builds the schema with the provided resolvers and subscribers.</li>
+<li><code>QueryTypeDefinitions(Func&lt;TypeDefinition, bool&gt; filter, SchemaBuildOptions? options = null)</code>: Queries the type definitions in the schema with a filter function.</li>
+<li><code>Build(SchemaBuildOptions options)</code>: Builds the schema with the provided build options.</li>
+</ul>
+<p>The <code>Build</code> method is used to create an instance of <code>ISchema</code> with the added components.</p>
                     
             </main>
         </div>

@@ -12,21 +12,8 @@ Scalars are created as instances of `ScalarDefinition`.
 - `Float`
 - `String`
 
-### Custom scalars
+Built-in scalars are automatically included in the schema. See [Builder](xref://01_1-builder.md) or
+[ExecutableSchemaBuilder](xref://01_2-executablebuilder.md) for more information on how to replace
+or remove them.
 
-Create instance of `ScalarType` and provide name and metadata. Value converter
-is also needed when building schema with custom scalar in it.
-
-#### Example:
-
-Scalar:
-
-```csharp
-// todo: docs
-```
-
-Converter:
-
-```csharp
-// todo: docs
-```
+For example of how to add a custom scalar, see [Custom Scalars](xref://start:06-custom-scalars.md).
