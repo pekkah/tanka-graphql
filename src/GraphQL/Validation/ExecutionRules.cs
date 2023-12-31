@@ -661,7 +661,7 @@ public static class ExecutionRules
             {
                 var set = setsToVisit.Pop();
 
-                foreach (var selection in set.Selections)
+                foreach (var selection in set)
                     if (selection is FragmentSpread spread)
                         spreads.Add(spread);
                     else if (selection is FieldSelection fieldSelection)
@@ -831,7 +831,7 @@ public static class ExecutionRules
             };
         };
 
-        IEnumerable<TypeDefinition> GetPossibleTypes(TypeDefinition type, ISchema schema)
+        static IEnumerable<TypeDefinition> GetPossibleTypes(TypeDefinition type, ISchema schema)
         {
             switch (type)
             {
@@ -912,7 +912,7 @@ public static class ExecutionRules
                                 $"{Printer.Print(type)} does not contain a value of '{Printer.Print(node)}'", node,
                                 node);
                     }
-                    catch (Exception x)
+                    catch (Exception)
                     {
                         context.Error(
                             ValidationErrorCodes.R561ValuesOfCorrectType,

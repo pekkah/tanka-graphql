@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Tanka.GraphQL.Introspection;
+﻿namespace Tanka.GraphQL.Introspection;
 
 // ReSharper disable once InconsistentNaming
 public class __Type : IEquatable<__Type>
@@ -23,7 +20,7 @@ public class __Type : IEquatable<__Type>
 
     public List<__Type> PossibleTypes { get; set; }
 
-    public bool Equals(__Type other)
+    public bool Equals(__Type? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;

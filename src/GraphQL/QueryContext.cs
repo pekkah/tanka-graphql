@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.DependencyInjection;
 
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Features;
@@ -16,8 +15,6 @@ namespace Tanka.GraphQL;
 /// </summary>
 public record QueryContext
 {
-    private static readonly IServiceProvider EmptyServices = new ServiceCollection().BuildServiceProvider();
-
     private FeatureReferences<FeatureInterfaces> _features;
 
     public QueryContext(IFeatureCollection defaults)
@@ -75,6 +72,9 @@ public record QueryContext
     private IFieldExecutorFeature? FieldExecutorFeature =>
         _features.Fetch(ref _features.Cache.FieldExecutor, _ => null);
 
+    private IRequestServicesFeature RequestServicesFeature =>
+        _features.Fetch(ref _features.Cache.RequestServices, _ => new RequestServicesFeature())!;
+
     /// <summary>
     /// GraphQL request
     /// </summary>
@@ -124,7 +124,11 @@ public record QueryContext
     ///     Request services
     /// </summary>
     //todo: turn into a feature
-    public IServiceProvider RequestServices { get; set; } = EmptyServices;
+    public IServiceProvider RequestServices
+    {
+        get => RequestServicesFeature.RequestServices;
+        set => RequestServicesFeature.RequestServices = value;
+    }
 
     /// <summary>
     ///     Add error to the context
@@ -214,5 +218,6 @@ public record QueryContext
         public IValueCompletionFeature? ValueCompletion;
         public IArgumentBinderFeature? ArgumentBinder;
         public IResponseStreamFeature? Response;
+        public IRequestServicesFeature? RequestServices;
     }
 }

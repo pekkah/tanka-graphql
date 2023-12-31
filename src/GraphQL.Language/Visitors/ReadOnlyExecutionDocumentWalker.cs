@@ -54,7 +54,7 @@ public sealed class ReadOnlyExecutionDocumentWalker
         foreach (var visitor in _options.SelectionSet)
             visitor.Enter(selectionSet);
 
-        foreach (var selection in selectionSet.Selections) Visit(selection);
+        foreach (var selection in selectionSet) Visit(selection);
 
         // leave
         foreach (var visitor in _options.SelectionSet)
