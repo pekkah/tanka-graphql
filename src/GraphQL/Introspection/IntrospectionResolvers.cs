@@ -283,7 +283,8 @@ public class IntrospectionResolvers : ResolversMap
             EnumDefinition enumDefinition => enumDefinition.Description,
             InputObjectDefinition inputObjectDefinition => inputObjectDefinition.Description,
             InputValueDefinition inputValueDefinition => inputValueDefinition.Description,
-            EnumValueDefinition enumValueDefinition => enumValueDefinition.Description
+            EnumValueDefinition enumValueDefinition => enumValueDefinition.Description,
+            _ => null
         };
     }
 

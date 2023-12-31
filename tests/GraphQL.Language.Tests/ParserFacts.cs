@@ -96,7 +96,7 @@ public class ParserFacts
         var actual = sut.ParseShortOperationDefinition();
 
         /* Then */
-        Assert.Equal(2, actual.SelectionSet.Selections.Count);
+        Assert.Equal(2, actual.SelectionSet.Count);
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public class ParserFacts
         var actual = sut.ParseOperationDefinition(OperationType.Query);
 
         /* Then */
-        Assert.Single(actual.SelectionSet.Selections);
+        Assert.Single(actual.SelectionSet);
     }
 
     [Fact]
@@ -130,8 +130,8 @@ public class ParserFacts
         var actual = sut.ParseOperationDefinition(OperationType.Query);
 
         /* Then */
-        Assert.Single(actual.SelectionSet.Selections);
-        Assert.IsType<InlineFragment>(actual.SelectionSet.Selections.Single());
+        Assert.Single(actual.SelectionSet);
+        Assert.IsType<InlineFragment>(actual.SelectionSet.Single());
     }
 
     [Fact]
@@ -148,8 +148,8 @@ public class ParserFacts
         var actual = sut.ParseOperationDefinition(OperationType.Query);
 
         /* Then */
-        Assert.Single(actual.SelectionSet.Selections);
-        Assert.IsType<FragmentSpread>(actual.SelectionSet.Selections.Single());
+        Assert.Single(actual.SelectionSet);
+        Assert.IsType<FragmentSpread>(actual.SelectionSet.Single());
     }
 
     [Fact]
@@ -168,7 +168,7 @@ public class ParserFacts
         var actual = sut.ParseOperationDefinition(OperationType.Query);
 
         /* Then */
-        Assert.Single(actual.SelectionSet.Selections);
+        Assert.Single(actual.SelectionSet);
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public class ParserFacts
         var actual = sut.ParseOperationDefinition(OperationType.Query);
 
         /* Then */
-        Assert.Single(actual.SelectionSet.Selections);
+        Assert.Single(actual.SelectionSet);
     }
 
     [Fact]
@@ -206,7 +206,7 @@ public class ParserFacts
         var actual = sut.ParseOperationDefinition(OperationType.Query);
 
         /* Then */
-        Assert.Single(actual.SelectionSet.Selections);
+        Assert.Single(actual.SelectionSet);
     }
 
     [Fact]
@@ -226,7 +226,7 @@ public class ParserFacts
         var actual = sut.ParseOperationDefinition(OperationType.Query);
 
         /* Then */
-        Assert.True(actual.SelectionSet.Selections.Count == 2);
+        Assert.True(actual.SelectionSet.Count == 2);
     }
 
     [Fact]
@@ -310,7 +310,7 @@ public class ParserFacts
         var fragmentDefinition = sut.ParseFragmentDefinition();
 
         /* Then */
-        Assert.Equal(1, fragmentDefinition.SelectionSet.Selections.Count);
+        Assert.Equal(1, fragmentDefinition.SelectionSet.Count);
     }
 
     [Fact]
@@ -469,7 +469,7 @@ public class ParserFacts
         var actual = sut.ParseInlineFragment();
 
         /* Then */
-        Assert.Equal(1, actual.SelectionSet.Selections.Count);
+        Assert.Equal(1, actual.SelectionSet.Count);
     }
 
     [Fact]
@@ -484,7 +484,7 @@ public class ParserFacts
         var actual = sut.ParseInlineFragment();
 
         /* Then */
-        Assert.Equal(1, actual.SelectionSet.Selections.Count);
+        Assert.Equal(1, actual.SelectionSet.Count);
     }
 
     [Fact]
@@ -515,8 +515,8 @@ public class ParserFacts
         var actual = sut.ParseFieldSelection();
 
         /* Then */
-        Assert.NotNull(actual.SelectionSet?.Selections);
-        Assert.NotEmpty(actual.SelectionSet.Selections);
+        Assert.NotNull(actual.SelectionSet);
+        Assert.NotEmpty(actual.SelectionSet);
     }
 
     [Fact]

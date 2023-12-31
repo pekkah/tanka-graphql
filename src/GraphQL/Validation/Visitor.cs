@@ -182,7 +182,7 @@ public class Visitor
     public virtual SelectionSet BeginVisitSelectionSet(
         SelectionSet selectionSet)
     {
-        foreach (var selection in selectionSet.Selections)
+        foreach (var selection in selectionSet)
             BeginVisitNode(selection);
 
         return selectionSet;
