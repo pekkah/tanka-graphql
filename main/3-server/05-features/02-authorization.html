@@ -220,6 +220,9 @@ app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;System&quot;)
     // we require a user name User
     .RequireAuthorization(policy =&gt; policy.RequireUserName(&quot;User&quot;));
 
+app.MapGraphiQL(&quot;/graphql/ui&quot;)
+    .RequireAuthorization(policy =&gt; policy.RequireUserName(&quot;User&quot;)); ;
+
 // map login (required by the cookie authentication)
 app.MapGet(&quot;/login&quot;, async (HttpContext http, string returnUrl) =&gt;
 {

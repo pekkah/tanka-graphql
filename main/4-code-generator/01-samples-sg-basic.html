@@ -175,6 +175,7 @@ WebApplication app = builder.Build();
 app.UseWebSockets();
 
 app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;Default&quot;);
+app.MapGraphiQL(&quot;/graphql/ui&quot;);
 app.Run();
 
 /// &lt;summary&gt;
