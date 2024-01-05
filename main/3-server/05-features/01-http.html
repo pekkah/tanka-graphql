@@ -144,6 +144,9 @@
 It supports both GET and POST requests and uses WebSockets for subscriptions.</p>
 <p>WebSockets transport uses the newer <a href="https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md">graphql-ws</a> protocol</p>
 <pre><code class="language-csharp">using System.Runtime.CompilerServices;
+
+using Microsoft.AspNetCore.Mvc;
+
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Server;
 
@@ -204,7 +207,7 @@ app.MapGraphiQL(&quot;/graphql/ui&quot;);
 app.Run();
 
 // simple subscription generating numbers from 0 to the given number
-static async IAsyncEnumerable&lt;int&gt; Count(int to, [EnumeratorCancellation] CancellationToken cancellationToken)
+static async IAsyncEnumerable&lt;int&gt; Count(int to, [FromServices]ILogger&lt;Program&gt; logger, [EnumeratorCancellation] CancellationToken cancellationToken)
 {
     var i = 0;
     while (!cancellationToken.IsCancellationRequested)
