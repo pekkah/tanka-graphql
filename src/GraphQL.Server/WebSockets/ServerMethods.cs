@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 
 using Microsoft.AspNetCore.Http;
+
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Server.WebSockets.WebSocketPipe;
 using Tanka.GraphQL.Validation;
 
@@ -56,40 +58,32 @@ public class ServerMethods
     private async Task Execute(Subscribe subscribe, CancellationTokenSource unsubscribeOrAborted)
     {
         var cancellationToken = unsubscribeOrAborted.Token;
+        var context = new GraphQLRequestContext
+        {
+            HttpContext = _httpContext,
+            RequestServices = _httpContext.RequestServices,
+            Request = new()
+            {
+                InitialValue = null,
+                Document = subscribe.Payload.Query,
+                OperationName = subscribe.Payload.OperationName,
+                Variables = subscribe.Payload.Variables
+            }
+        };
         
         try
         {
-            var context = new GraphQLRequestContext
-            {
-                HttpContext = _httpContext,
-                RequestServices = _httpContext.RequestServices,
-                Request = new()
-                {
-                    InitialValue = null,
-                    Document = subscribe.Payload.Query,
-                    OperationName = subscribe.Payload.OperationName,
-                    Variables = subscribe.Payload.Variables
-                }
-            };
-
             await _requestDelegate(context);
             await using var enumerator = context.Response.GetAsyncEnumerator(cancellationToken);
 
             while (await enumerator.MoveNextAsync())
             {
-                await Client.Next(new Next()
-                {
-                    Id = subscribe.Id,
-                    Payload = enumerator.Current
-                }, cancellationToken);
+                await Client.Next(new Next() { Id = subscribe.Id, Payload = enumerator.Current }, cancellationToken);
             }
 
             if (!cancellationToken.IsCancellationRequested)
             {
-                await Client.Complete(new Complete()
-                {
-                    Id = subscribe.Id
-                }, cancellationToken);
+                await Client.Complete(new Complete() { Id = subscribe.Id }, cancellationToken);
             }
         }
         catch (OperationCanceledException)
@@ -99,26 +93,36 @@ public class ServerMethods
         catch (ValidationException x)
         {
             var validationResult = x.Result;
-            await Client.Error(new Error()
-            {
-                Id = subscribe.Id,
-                Payload = validationResult.Errors.Select(ve => ve.ToError()).ToArray()
-            }, cancellationToken);
+            await Client.Error(
+                new Error()
+                {
+                    Id = subscribe.Id, 
+                    Payload = validationResult.Errors.Select(ve => ve.ToError()).ToArray()
+                }, cancellationToken);
         }
         catch (QueryException x)
         {
-            await Client.Error(new Error()
-            {
-                Id = subscribe.Id,
-                Payload = new[]
+            await Client.Error(
+                new Error()
                 {
-                    new ExecutionError()
+                    Id = subscribe.Id,
+                    Payload = new[]
                     {
-                        Path = x.Path.Segments.ToArray(),
-                        Message = x.Message
+                        context.Errors?.FormatError(x)!
                     }
-                }
-            }, cancellationToken);
+                }, cancellationToken);
+        }
+        catch (Exception x)
+        {
+            await Client.Error(
+                new Error()
+                {
+                    Id = subscribe.Id,
+                    Payload = new[]
+                    {
+                        context.Errors?.FormatError(x)!
+                    }
+                }, cancellationToken);
         }
         finally
         {

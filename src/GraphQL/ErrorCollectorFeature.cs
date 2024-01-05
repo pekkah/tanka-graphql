@@ -18,6 +18,11 @@ public class ConcurrentBagErrorCollectorFeature(bool includeCode = false, bool i
         return _bag.Select(DefaultFormatError);
     }
 
+    public ExecutionError FormatError(Exception x)
+    {
+        return DefaultFormatError(x);
+    }
+
     public ExecutionError DefaultFormatError(Exception exception)
     {
         var rootCause = exception.GetBaseException();
