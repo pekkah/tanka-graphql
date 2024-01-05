@@ -8,15 +8,8 @@ namespace Tanka.GraphQL.Fields;
 
 public delegate ValueTask FieldDelegate(ResolverContext context);
 
-public class FieldPipelineExecutorFeature : IFieldExecutorFeature
+public class FieldPipelineExecutorFeature(FieldDelegate fieldDelegate) : IFieldExecutorFeature
 {
-    private readonly FieldDelegate _fieldDelegate;
-
-    public FieldPipelineExecutorFeature(FieldDelegate fieldDelegate)
-    {
-        _fieldDelegate = fieldDelegate;
-    }
-
     public async Task<object?> Execute(
         QueryContext context, 
         ObjectDefinition objectDefinition, 
@@ -37,7 +30,7 @@ public class FieldPipelineExecutorFeature : IFieldExecutorFeature
             QueryContext = context
         };
 
-        await _fieldDelegate(resolverContext);
+        await fieldDelegate(resolverContext);
 
         return resolverContext.CompletedValue;
     }

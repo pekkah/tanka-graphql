@@ -123,12 +123,13 @@ public record QueryContext
     /// <summary>
     ///     Request services
     /// </summary>
-    //todo: turn into a feature
     public IServiceProvider RequestServices
     {
         get => RequestServicesFeature.RequestServices;
         set => RequestServicesFeature.RequestServices = value;
     }
+
+    public IErrorCollectorFeature? Errors => ErrorCollectorFeature;
 
     /// <summary>
     ///     Add error to the context

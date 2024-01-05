@@ -23,10 +23,13 @@ public class FieldExecutorFeature : IFieldExecutorFeature
 
         // __typename hack
         if (fieldName == "__typename") return objectDefinition.Name.Value;
+        
+        FieldDefinition? field = schema.GetField(objectDefinition.Name, fieldName);
 
-        TypeBase? fieldType = schema
-            .GetField(objectDefinition.Name, fieldName)?
-            .Type;
+        if (field is null)
+            return null;
+
+        TypeBase fieldType = field.Type;
 
         if (fieldType == null)
             throw new QueryException(
@@ -34,12 +37,7 @@ public class FieldExecutorFeature : IFieldExecutorFeature
             {
                 Path = path
             };
-
-        FieldDefinition? field = schema.GetField(objectDefinition.Name, fieldName);
         object? completedValue = null;
-
-        if (field is null)
-            return null;
 
         IReadOnlyDictionary<string, object?> argumentValues = ArgumentCoercion.CoerceArgumentValues(
             schema,

@@ -11,7 +11,7 @@ public class ExecutionError
 
     [JsonPropertyName("locations")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<Location>? Locations { get; set; }
+    public List<SerializedLocation>? Locations { get; set; }
 
     [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
 
@@ -22,5 +22,29 @@ public class ExecutionError
         Extensions ??= new();
 
         Extensions[key] = value;
+    }
+}
+
+public class SerializedLocation
+{
+    public int Line { get; set; }
+    
+    public int Column { get; set; }
+
+    public static implicit operator SerializedLocation(Location location)  
+    {
+        return new()
+        {
+            Line = location.Line,
+            Column = location.Column
+        };
+    }
+}
+
+public static class ExecutionErrorExtensions
+{
+    public static List<SerializedLocation> ToSerializedLocations(this IEnumerable<Location> locations)
+    {
+        return [.. locations];
     }
 }

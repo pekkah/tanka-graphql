@@ -1,4 +1,7 @@
 using System.Runtime.CompilerServices;
+
+using Microsoft.AspNetCore.Mvc;
+
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Server;
 
@@ -59,7 +62,7 @@ app.MapGraphiQL("/graphql/ui");
 app.Run();
 
 // simple subscription generating numbers from 0 to the given number
-static async IAsyncEnumerable<int> Count(int to, [EnumeratorCancellation] CancellationToken cancellationToken)
+static async IAsyncEnumerable<int> Count(int to, [FromServices]ILogger<Program> logger, [EnumeratorCancellation] CancellationToken cancellationToken)
 {
     var i = 0;
     while (!cancellationToken.IsCancellationRequested)

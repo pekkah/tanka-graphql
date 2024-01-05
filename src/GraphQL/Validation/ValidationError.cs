@@ -61,7 +61,7 @@ public class ValidationError
         return new()
         {
             Message = ToString(),
-            Locations = Nodes.Where(n => n.Location != null).Select(n => n.Location.Value).ToList(),
+            Locations = Nodes.Where(n => n.Location != null).Select(n => n.Location!.Value).ToSerializedLocations(),
             Extensions = new()
             {
                 {
