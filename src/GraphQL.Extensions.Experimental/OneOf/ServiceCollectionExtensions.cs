@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-using Tanka.GraphQL.Validation;
-
 namespace Tanka.GraphQL.Extensions.Experimental.OneOf;
 
 public static class ServiceCollectionExtensions
