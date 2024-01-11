@@ -1,17 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-using Tanka.GraphQL.Validation;
-
 namespace Tanka.GraphQL.Extensions.Experimental.OneOf;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddOneOf(this IServiceCollection services)
+    /// <summary>
+    ///     Add @oneOf directive validation rule to default validator rules
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddOneOfValidationRule(this IServiceCollection services)
     {
-        services.PostConfigure<AsyncValidatorOptions>(
-            options => options.Rules.Add(OneOfDirective.OneOfValidationRule())
-        );
-
+        services.AddDefaultValidatorRule(OneOfDirective.OneOfValidationRule());
         return services;
     }
 }
