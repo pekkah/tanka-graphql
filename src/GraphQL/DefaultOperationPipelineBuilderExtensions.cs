@@ -94,7 +94,7 @@ public static class DefaultOperationDelegateBuilderExtensions
 
     public static OperationDelegateBuilder UseDefaultValidator(this OperationDelegateBuilder builder)
     {
-        var validator = new Validator3(ExecutionRules.All);
+        var validator = builder.ApplicationServices.GetRequiredService<IAsyncValidator>();
 
         builder.Use(next => async context =>
         {

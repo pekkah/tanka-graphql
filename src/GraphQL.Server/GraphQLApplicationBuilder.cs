@@ -14,7 +14,7 @@ public class GraphQLApplicationBuilder
         ApplicationOptionsBuilder = ApplicationServices
             .AddOptions<GraphQLApplicationOptions>();
 
-        AddCore();
+        AddDefaultTankaGraphQLServerServices();
     }
 
     public IServiceCollection ApplicationServices { get; }
@@ -55,10 +55,11 @@ public class GraphQLApplicationBuilder
         return this;
     }
 
-    private void AddCore()
+    private void AddDefaultTankaGraphQLServerServices()
     {
         ApplicationServices.TryAddSingleton<IHostedService, SchemaInitializer>();
         ApplicationServices.TryAddSingleton<SchemaCollection>();
         ApplicationServices.TryAddSingleton<GraphQLApplication>();
+        ApplicationServices.AddDefaultTankaGraphQLServices();
     }
 }

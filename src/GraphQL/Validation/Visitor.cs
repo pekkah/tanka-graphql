@@ -245,7 +245,7 @@ public class Visitor
     public virtual ObjectValue BeginVisitObjectValue(
         ObjectValue node)
     {
-        foreach (var objectField in node.Fields) BeginVisitNode(objectField);
+        foreach (var objectField in node) BeginVisitNode(objectField);
         return EndVisitObjectValue(node);
     }
 

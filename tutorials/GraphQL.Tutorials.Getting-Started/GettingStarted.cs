@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Request;
+using Tanka.GraphQL.Server;
 using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.ValueSerialization;
 using Xunit;
@@ -322,6 +324,7 @@ public class GettingStarted
         {
             Schema = schema,
             ServiceProvider = new ServiceCollection()
+                .AddDefaultTankaGraphQLServices()
                 .AddSingleton<Service>()
                 .BuildServiceProvider()
         }).Execute(new GraphQLRequest("{name}"));
@@ -362,6 +365,7 @@ public class GettingStarted
         {
             Schema = schema,
             ServiceProvider = new ServiceCollection()
+                .AddDefaultTankaGraphQLServices()
                 .AddSingleton<Service>()
                 .BuildServiceProvider()
         }).Execute(new GraphQLRequest("{name}"));

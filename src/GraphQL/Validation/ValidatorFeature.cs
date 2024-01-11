@@ -5,7 +5,7 @@ namespace Tanka.GraphQL.Validation;
 
 public class ValidatorFeature : IValidatorFeature
 {
-    public IValidator3? Validator { get; set; }
+    public IAsyncValidator? Validator { get; set; }
 
     public ValueTask<ValidationResult> Validate(
         ISchema schema,

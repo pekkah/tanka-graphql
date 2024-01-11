@@ -1,6 +1,7 @@
 ﻿using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.Request;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.ValueSerialization;
 
@@ -406,8 +407,42 @@ public static class ExecutionRules
                 }
 
                 // variables should be valid
-                if (argument.Value is Variable)
-                    continue;
+                if (argument.Value is Variable variable)
+                {
+                    if (ruleVisitorContext.VariableValues is null)
+                    {
+                        ruleVisitorContext.Error(
+                            ValidationErrorCodes.R5421RequiredArguments,
+                            "Arguments is required. An argument is required " +
+                            "if the argument type is non‐null and does not have a default " +
+                            "value. Otherwise, the argument is optional. " +
+                            $"Value of argument '{argumentName}' cannot be null");
+
+                        return;
+                    }
+                    
+                    
+                    if (!ruleVisitorContext.VariableValues.TryGetValue(variable.Name, out var variableValue))
+                        ruleVisitorContext.Error(
+                            ValidationErrorCodes.R5421RequiredArguments,
+                            "Arguments is required. An argument is required " +
+                            "if the argument type is non‐null and does not have a default " +
+                            "value. Otherwise, the argument is optional. " +
+                            $"Value of argument '{argumentName}' cannot be null");
+                    else
+                    {
+                        if (variableValue is null)
+                        {
+                            ruleVisitorContext.Error(
+                                ValidationErrorCodes.R5421RequiredArguments,
+                                "Arguments is required. An argument is required " +
+                                "if the argument type is non‐null and does not have a default " +
+                                "value. Otherwise, the argument is optional. " +
+                                $"Value of argument '{argumentName}' cannot be null");
+                        }
+                    }
+                    
+                }
 
                 if (argument?.Value == null || argument.Value.Kind == NodeKind.NullValue)
                     ruleVisitorContext.Error(
@@ -864,7 +899,7 @@ public static class ExecutionRules
                     return;
                 }
 
-                var fieldNodeMap = node.Fields.ToDictionary(
+                var fieldNodeMap = node.ToDictionary(
                     f => f.Name);
 
                 foreach (var fieldDef in context.Schema.GetInputFields(
@@ -1034,7 +1069,7 @@ public static class ExecutionRules
         {
             rule.EnterObjectValue += node =>
             {
-                var fields = node.Fields.ToList();
+                var fields = node.ToList();
 
                 foreach (var inputField in fields)
                 {
@@ -1063,7 +1098,7 @@ public static class ExecutionRules
                 if (inputObject == null)
                     return;
 
-                var fields = node.Fields.ToDictionary(f => f.Name);
+                var fields = node.ToDictionary(f => f.Name);
                 var fieldDefinitions = context.Schema.GetInputFields(inputObject.Name);
 
                 foreach (var fieldDefinition in fieldDefinitions)

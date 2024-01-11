@@ -856,7 +856,7 @@ Description
 
         /* Then */
         var listValue = Assert.IsType<ObjectValue>(value);
-        Assert.Equal(0, listValue.Fields.Count);
+        Assert.Equal(0, listValue.Count);
     }
 
     [Fact]
@@ -870,7 +870,7 @@ Description
 
         /* Then */
         var listValue = Assert.IsType<ObjectValue>(value);
-        Assert.Equal(2, listValue.Fields.Count);
+        Assert.Equal(2, listValue.Count);
     }
 
     [Theory]

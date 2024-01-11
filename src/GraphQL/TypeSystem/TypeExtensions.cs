@@ -8,7 +8,7 @@ public static class TypeExtensions
     {
         return type switch
         {
-            NonNullType NonNullType => Unwrap(NonNullType.OfType),
+            NonNullType nonNullType => Unwrap(nonNullType.OfType),
             ListType list => Unwrap(list.OfType),
             _ => (NamedType)type
         };
