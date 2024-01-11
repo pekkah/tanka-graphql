@@ -208,6 +208,7 @@ as HTTP request.</p>
         {
             Schema = schema,
             ServiceProvider = new ServiceCollection()
+                .AddDefaultTankaGraphQLServices()
                 .AddSingleton&lt;Service&gt;()
                 .BuildServiceProvider()
         }).Execute(new GraphQLRequest(&quot;{name}&quot;));
@@ -253,6 +254,7 @@ as HTTP request.</p>
         {
             Schema = schema,
             ServiceProvider = new ServiceCollection()
+                .AddDefaultTankaGraphQLServices()
                 .AddSingleton&lt;Service&gt;()
                 .BuildServiceProvider()
         }).Execute(new GraphQLRequest(&quot;{name}&quot;));
