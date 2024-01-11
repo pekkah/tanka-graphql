@@ -153,40 +153,48 @@ directive @specifiedBy(url: String!) on SCALAR
     ///     Add type definition into the builder
     /// </summary>
     /// <param name="typeDefinition"></param>
-    public void Add(TypeDefinition typeDefinition)
+    public SchemaBuilder Add(TypeDefinition typeDefinition)
     {
         if (!_typeDefinitions.TryAdd(typeDefinition.Name, typeDefinition))
             throw TypeAlreadyExists(typeDefinition.Name);
+
+        return this;
     }
 
     /// <summary>
     ///     Add type definitions into the builder
     /// </summary>
     /// <param name="typeDefinitions"></param>
-    public void Add(TypeDefinition[] typeDefinitions)
+    public SchemaBuilder Add(TypeDefinition[] typeDefinitions)
     {
         foreach (var typeDefinition in typeDefinitions)
             Add(typeDefinition);
+
+        return this;
     }
 
     /// <summary>
     ///     Add directive definition into the builder
     /// </summary>
     /// <param name="directiveDefinition"></param>
-    public void Add(DirectiveDefinition directiveDefinition)
+    public SchemaBuilder Add(DirectiveDefinition directiveDefinition)
     {
         if (!_directiveDefinitions.TryAdd(directiveDefinition.Name, directiveDefinition))
             throw TypeAlreadyExists(directiveDefinition.Name);
+
+        return this;
     }
 
     /// <summary>
     ///     Add directive definitions into the builder
     /// </summary>
     /// <param name="directiveDefinitions"></param>
-    public void Add(DirectiveDefinition[] directiveDefinitions)
+    public SchemaBuilder Add(DirectiveDefinition[] directiveDefinitions)
     {
         foreach (var directiveDefinition in directiveDefinitions)
             Add(directiveDefinition);
+
+        return this;
     }
 
     /// <summary>

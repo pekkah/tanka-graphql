@@ -11,8 +11,6 @@ namespace Tanka.GraphQL;
 /// </summary>
 public partial class Executor
 {
-    private static readonly IServiceProvider EmptyProvider = new ServiceCollection().BuildServiceProvider();
-
     private readonly OperationDelegate _operationDelegate;
 
     /// <summary>
@@ -29,7 +27,9 @@ public partial class Executor
     /// <param name="options"></param>
     public Executor(ExecutorOptions options)
     {
-        OperationDelegateBuilder builder = new(options.ServiceProvider ?? EmptyProvider);
+        OperationDelegateBuilder builder = new(options.ServiceProvider ?? new ServiceCollection()
+            .AddDefaultTankaGraphQLServices()
+            .BuildServiceProvider());
 
         if (options.TraceEnabled)
             builder.UseTrace();

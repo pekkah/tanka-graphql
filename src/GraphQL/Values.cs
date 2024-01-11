@@ -90,7 +90,7 @@ public static class Values
         Dictionary<string, object?> result)
     {
         var fields = schema.GetInputFields(input.Name);
-        var valueFields = objectValue.Fields.ToDictionary(f => f.Name.Value, f => f);
+        var valueFields = objectValue.ToDictionary(f => f.Name.Value, f => f);
 
         foreach (var inputField in fields)
         {

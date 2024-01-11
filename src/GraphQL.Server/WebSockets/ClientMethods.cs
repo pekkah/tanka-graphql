@@ -1,17 +1,10 @@
-﻿using System.Threading;
-using System.Threading.Channels;
-using System.Threading.Tasks;
+﻿using System.Threading.Channels;
 
 namespace Tanka.GraphQL.Server.WebSockets;
 
-public class ClientMethods
+public class ClientMethods(ChannelWriter<MessageBase> writer)
 {
-    protected ChannelWriter<MessageBase> Writer { get; }
-
-    public ClientMethods(ChannelWriter<MessageBase> writer)
-    {
-        Writer = writer;
-    }
+    protected ChannelWriter<MessageBase> Writer { get; } = writer;
 
     public async Task ConnectionAck(ConnectionAck connectionAck, CancellationToken cancellationToken)
     {
