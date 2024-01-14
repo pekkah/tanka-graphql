@@ -6,10 +6,6 @@ namespace Tanka.GraphQL.Server.SourceGenerators;
 
 public class ObjectControllerDefinition: TypeDefinition, IEquatable<ObjectControllerDefinition>
 {
-    public string? Namespace { get; init; }
-
-    public string TargetType { get; init; }
-
     public List<ObjectPropertyDefinition> Properties { get; set; } = new List<ObjectPropertyDefinition>();
 
     public List<ObjectMethodDefinition>  Methods { get; set;  } = new List<ObjectMethodDefinition>();
@@ -18,7 +14,7 @@ public class ObjectControllerDefinition: TypeDefinition, IEquatable<ObjectContro
 
     public bool IsStatic { get; init; }
 
-    public IReadOnlyList<string> Usings { get; init; }
+    public IReadOnlyList<string> Usings { get; init; } = [];
 
     public virtual bool Equals(ObjectControllerDefinition? other)
     {

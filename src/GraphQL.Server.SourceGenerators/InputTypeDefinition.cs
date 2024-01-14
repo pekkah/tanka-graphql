@@ -6,11 +6,7 @@ namespace Tanka.GraphQL.Server.SourceGenerators;
 
 public class InputTypeDefinition: TypeDefinition, IEquatable<InputTypeDefinition>
 {
-    public string? Namespace { get; init; }
-
-    public string TargetType { get; init; }
-
-    public List<ObjectPropertyDefinition> Properties { get; set; } = new List<ObjectPropertyDefinition>();
+    public List<ObjectPropertyDefinition> Properties { get; set; } = new();
 
     public ParentClass? ParentClass { get; set; }
 

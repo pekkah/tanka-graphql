@@ -30,6 +30,7 @@ public class InputTypeEmitter
                 return builder;
             }
         }
+        
         """;
 
     public SourceProductionContext Context { get; }
@@ -69,6 +70,7 @@ public class InputTypeEmitter
             {
                 var fieldName = JsonNamingPolicy.CamelCase.ConvertName(field.Name);
                 var fieldType = field.ClosestMatchingGraphQLTypeName;
+                
                 builder.AppendLine($"{fieldName}: {fieldType}");
             }
         }
