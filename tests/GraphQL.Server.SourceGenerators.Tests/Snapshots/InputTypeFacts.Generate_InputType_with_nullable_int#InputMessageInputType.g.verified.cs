@@ -18,8 +18,7 @@ public static class InputMessageInputTypeExtensions
                 """
                 input InputMessage
                 {
-                    id: String!
-                    content: String!
+                    content: Int
                 }
                 """
                 )

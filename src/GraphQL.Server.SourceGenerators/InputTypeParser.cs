@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -54,13 +55,25 @@ public class InputTypeParser
         return properties;
     }
 
+
+
     private string GetClosestMatchingGraphQLTypeName(TypeSyntax typeSyntax)
     {
-        var typeSymbol = Context.SemanticModel.GetTypeInfo(typeSyntax).Type;
+        TypeInfo typeInfo = Context.SemanticModel.GetTypeInfo(typeSyntax);
+
+        var typeSymbol = typeInfo.Type;
 
         if (typeSymbol is null)
             return typeSyntax.ToString();
 
-        return TypeHelper.GetGraphQLTypeName(typeSymbol);
+        var typeName = TypeHelper.GetGraphQLTypeName(typeSymbol);
+        
+        // dirty hack until we have a better way to handle this
+        if (typeSyntax is NullableTypeSyntax && typeName.AsSpan().EndsWith("!"))
+        {
+            return typeName.AsSpan().Slice(0, typeName.Length - 1).ToString();
+        }
+        
+        return typeName;
     }
 }

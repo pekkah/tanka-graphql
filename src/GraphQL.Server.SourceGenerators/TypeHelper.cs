@@ -10,6 +10,11 @@ namespace Tanka.GraphQL.Server.SourceGenerators;
 
 public class TypeHelper
 {
+    public static string GetGraphQLTypeName(TypeSyntax typeSyntax)
+    {
+        return null;
+    }
+
     public static string GetGraphQLTypeName(ITypeSymbol typeSymbol)
     {
         // Handle arrays
@@ -18,10 +23,24 @@ public class TypeHelper
             return $"[{GetGraphQLTypeName(arrayTypeSymbol.ElementType)}]";
         }
 
-        // Handle IEnumerable<T>
-        if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.Name: "IEnumerable" } namedType)
+        if (typeSymbol is not { SpecialType: SpecialType.System_String })
         {
-            return $"[{GetGraphQLTypeName(namedType.TypeArguments[0])}]";
+            var ienumerableT = typeSymbol
+                .AllInterfaces
+                .FirstOrDefault(i =>
+                    i.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T);
+
+            if (ienumerableT is not null)
+            {
+                var innerType = ienumerableT.TypeArguments[0];
+                return $"[{GetGraphQLTypeName(innerType)}]";
+            }
+
+            // Handle IEnumerable<T>
+            if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.Name: "IEnumerable" } namedType)
+            {
+                return $"[{GetGraphQLTypeName(namedType.TypeArguments[0])}]";
+            }
         }
 
         bool isNullable = IsNullable(typeSymbol, out typeSymbol);
@@ -74,6 +93,7 @@ public class TypeHelper
 
     public static bool IsNullable(ITypeSymbol typeSymbol, out ITypeSymbol innerType)
     {
+       
         if (typeSymbol is INamedTypeSymbol
             {
                 OriginalDefinition.SpecialType: SpecialType.System_Nullable_T
@@ -82,7 +102,7 @@ public class TypeHelper
             innerType = namedTypeSymbol.TypeArguments[0];
             return true;
         }
-
+        
         innerType = typeSymbol;
         return typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
     }
@@ -412,4 +432,6 @@ public class TypeHelper
             .Select(u => u.ToString())
             .ToList();
     }
+
+ 
 }
