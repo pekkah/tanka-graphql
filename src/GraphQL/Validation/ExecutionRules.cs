@@ -476,7 +476,7 @@ public static class ExecutionRules
     }
 
     /// <summary>
-    ///     For each argument in the Document.
+    ///     For each argument in the Query.
     ///     Let argumentName be the Name of argument.
     ///     Let arguments be all Arguments named argumentName in the Argument Set which contains argument.
     ///     arguments must be the set containing only argument.

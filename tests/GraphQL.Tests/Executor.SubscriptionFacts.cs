@@ -74,7 +74,7 @@ public class SubscriptionFacts
         var stream = new GraphQL.Executor(schema)
             .Subscribe(new GraphQLRequest
             {
-                Document = query
+                Query = query
             }, CancellationToken.None);
 
         /* Then */

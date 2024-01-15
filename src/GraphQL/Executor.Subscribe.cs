@@ -44,7 +44,7 @@ public partial class Executor
         var executor = new Executor(schema);
         return executor.Subscribe(new GraphQLRequest
         {
-            Document = document,
+            Query = document,
             InitialValue = initialValue,
             OperationName = operationName,
             Variables = variableValues

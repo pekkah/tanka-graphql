@@ -30,7 +30,7 @@ public class QueryFacts
         var result = await new Executor(schema)
             .Execute(new GraphQLRequest
             {
-                Document = query
+                Query = query
             });
 
         /* Then */
@@ -70,7 +70,7 @@ public class QueryFacts
         var result = await new GraphQL.Executor(schema)
             .Execute(new GraphQLRequest
             {
-                Document = query
+                Query = query
             });
 
         /* Then */

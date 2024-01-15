@@ -24,7 +24,7 @@ public class FederationFacts
         var result = await new Executor(Sut)
             .Execute(new GraphQLRequest
             {
-                Document = """
+                Query = """
                     query($representations:[_Any!]!) {
                         _entities(representations:$representations) {
                             ...on User {
@@ -100,7 +100,7 @@ public class FederationFacts
         var result = await new Executor(Sut)
             .Execute(new GraphQLRequest
             {
-                Document = @"query { _service { sdl } }"
+                Query = @"query { _service { sdl } }"
             });
 
         /* Then */

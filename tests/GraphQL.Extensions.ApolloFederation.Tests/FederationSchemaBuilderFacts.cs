@@ -92,7 +92,7 @@ public class FederationSchemaBuilderFacts
 
         var result = await new Executor(schema).Execute(new GraphQLRequest
         {
-            Document = """
+            Query = """
                 query Entities($reps: [_Any!]!) { 
                 _entities(representations: $reps) { 
                     ... on Person { 
@@ -149,7 +149,7 @@ type Product @key(fields: ""upc"") @extends {
 
         var result = await new Executor(schema).Execute(new GraphQLRequest
         {
-            Document = """
+            Query = """
                 {
                     _service {
                         sdl

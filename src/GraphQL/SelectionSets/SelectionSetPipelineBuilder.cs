@@ -72,7 +72,7 @@ public class SelectionSetPipelineBuilder
         {
             context.GroupedFieldSet = FieldCollector.CollectFields(
                 context.QueryContext.Schema,
-                context.QueryContext.Request.Document,
+                context.QueryContext.Request.Query,
                 context.ObjectDefinition,
                 context.SelectionSet,
                 context.QueryContext.CoercedVariableValues);

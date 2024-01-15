@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Tanka.GraphQL.Json;
 using Tanka.GraphQL.Language.Nodes;
@@ -15,14 +16,14 @@ public record GraphQLRequest
     }
 
     [SetsRequiredMembers]
-    public GraphQLRequest(ExecutableDocument document)
+    public GraphQLRequest(ExecutableDocument query)
     {
-        Document = document;
+        Query = query;
     }
 
-    [JsonPropertyName("document")]
+    [JsonPropertyName("query")]
     [JsonConverter(typeof(ExecutableDocumentConverter))]
-    public required ExecutableDocument Document { get; init; }
+    public required ExecutableDocument Query { get; init; }
 
     [JsonPropertyName("initialValue")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -36,4 +37,8 @@ public record GraphQLRequest
     [JsonConverter(typeof(NestedDictionaryConverter))]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<string, object?>? Variables { get; set; }
+
+    [JsonPropertyName("extensions")]
+    [JsonConverter(typeof(NestedDictionaryConverter))]
+    public IReadOnlyDictionary<string, object?>? Extensions { get; set; }
 }

@@ -34,7 +34,7 @@ internal static class LogMessages
 
     internal static void Query(this ILogger logger, GraphQLRequest query)
     {
-        QueryAction(logger, query.OperationName, Printer.Print(query.Document), null);
+        QueryAction(logger, query.OperationName, Printer.Print(query.Query), null);
     }
 
     internal static void Executed(this ILogger logger, string operationName, Dictionary<string, object> variables,

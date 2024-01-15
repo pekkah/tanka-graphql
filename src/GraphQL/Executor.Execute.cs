@@ -55,7 +55,7 @@ public partial class Executor
         var executor = new Executor(schema);
         return executor.Execute(new GraphQLRequest
         {
-            Document = document,
+            Query = document,
             InitialValue = initialValue,
             OperationName = operationName,
             Variables = variableValues

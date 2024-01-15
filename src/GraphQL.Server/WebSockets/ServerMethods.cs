@@ -72,7 +72,7 @@ public partial class ServerMethods
             Request = new()
             {
                 InitialValue = null,
-                Document = subscribe.Payload.Query,
+                Query = subscribe.Payload.Query,
                 OperationName = subscribe.Payload.OperationName,
                 Variables = subscribe.Payload.Variables
             }

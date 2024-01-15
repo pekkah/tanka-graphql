@@ -56,7 +56,7 @@ public static class DefaultOperationDelegateBuilderExtensions
         builder.Use(next => context =>
         {
             context.OperationDefinition = Operations.GetOperation(
-                context.Request.Document,
+                context.Request.Query,
                 context.Request.OperationName);
 
             return next(context);
@@ -99,7 +99,7 @@ public static class DefaultOperationDelegateBuilderExtensions
         builder.Use(next => async context =>
         {
             ValidationResult result =
-                await validator.Validate(context.Schema, context.Request.Document, context.Request.Variables);
+                await validator.Validate(context.Schema, context.Request.Query, context.Request.Variables);
 
             if (!result.IsValid)
                 throw new ValidationException(result);

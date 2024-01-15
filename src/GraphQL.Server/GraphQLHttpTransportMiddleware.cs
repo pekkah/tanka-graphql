@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.Json;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,15 +10,9 @@ using Tanka.GraphQL.Request;
 
 namespace Tanka.GraphQL.Server;
 
-public partial class GraphQLHttpTransportMiddleware : IGraphQLRequestMiddleware
+public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransportMiddleware> logger)
+    : IGraphQLRequestMiddleware
 {
-    private readonly ILogger<GraphQLHttpTransportMiddleware> _logger;
-
-    public GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransportMiddleware> logger)
-    {
-        _logger = logger;
-    }
-
     public async ValueTask Invoke(GraphQLRequestContext context, GraphQLRequestDelegate next)
     {
         long started = Stopwatch.GetTimestamp();
@@ -37,7 +32,7 @@ public partial class GraphQLHttpTransportMiddleware : IGraphQLRequestMiddleware
                     Detail = "Could not parse GraphQL request from body of the request"
                 });
 
-                Log.NullRequest(_logger);
+                Log.NullRequest(logger);
                 return;
             }
         }
@@ -50,17 +45,17 @@ public partial class GraphQLHttpTransportMiddleware : IGraphQLRequestMiddleware
                 Detail = x.Message // could this leak?
             });
 
-            Log.RequestParseError(_logger, x);
+            Log.RequestParseError(logger, x);
             return;
         }
 
 
-        Log.HttpRequest(_logger, request);
+        Log.HttpRequest(logger, request);
 
         context.Request = new GraphQLRequest
         {
             InitialValue = null,
-            Document = request.Query,
+            Query = request.Query,
             OperationName = request.OperationName,
             Variables = request.Variables
         };
@@ -76,7 +71,7 @@ public partial class GraphQLHttpTransportMiddleware : IGraphQLRequestMiddleware
 
             if (await enumerator.MoveNextAsync())
             {
-                Log.MultipleResultsError(_logger);
+                Log.MultipleResultsError(logger);
                 httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
                 {
@@ -89,7 +84,7 @@ public partial class GraphQLHttpTransportMiddleware : IGraphQLRequestMiddleware
             string elapsed = $"{Stopwatch.GetElapsedTime(started).TotalMilliseconds}ms";
             httpContext.Response.Headers["Elapsed"] = new StringValues(elapsed);
             await httpContext.Response.WriteAsJsonAsync(initialResult);
-            Log.ExecutionResult(_logger, initialResult, elapsed);
+            Log.ExecutionResult(logger, initialResult, elapsed);
         }
     }
 

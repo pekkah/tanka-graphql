@@ -9,7 +9,7 @@ public static class Operations
         var operations = document.OperationDefinitions;
 
         if (operations == null)
-            throw new QueryException("Document does not contain operations")
+            throw new QueryException("Query does not contain operations")
             {
                 Path = new()
             };

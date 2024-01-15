@@ -51,7 +51,7 @@ public partial class Executor
         ObjectDefinition? subscriptionType = context.Schema.Subscription;
         IReadOnlyDictionary<string, List<FieldSelection>> groupedFieldSet = FieldCollector.CollectFields(
             context.Schema,
-            context.Request.Document,
+            context.Request.Query,
             subscriptionType,
             context.OperationDefinition.SelectionSet,
             context.CoercedVariableValues
