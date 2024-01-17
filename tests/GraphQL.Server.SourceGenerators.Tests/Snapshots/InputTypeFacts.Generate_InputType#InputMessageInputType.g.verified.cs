@@ -32,13 +32,27 @@ public partial class InputMessage : IParseableInputObject
         // Id is an scalar type
         if (argumentValue.TryGetValue("id", out var idValue))
         {
-            Id = idValue as string;
+            if (idValue is null)
+            {
+                Id = default;
+            }
+            else
+            {
+                Id = (string)idValue;
+            }
         }
 
         // Content is an scalar type
         if (argumentValue.TryGetValue("content", out var contentValue))
         {
-            Content = contentValue as string;
+            if (contentValue is null)
+            {
+                Content = default;
+            }
+            else
+            {
+                Content = (string)contentValue;
+            }
         }
     }
 }

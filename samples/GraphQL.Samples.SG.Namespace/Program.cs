@@ -42,7 +42,7 @@ namespace Tanka.GraphQL.Samples.SG.Namespace
     }
 
     [InputType]
-    public class HelloInput
+    public partial class HelloInput
     {
         public string Name { get; set; }
     }

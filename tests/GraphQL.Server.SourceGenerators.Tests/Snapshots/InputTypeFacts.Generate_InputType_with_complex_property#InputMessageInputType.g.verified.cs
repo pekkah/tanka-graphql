@@ -33,7 +33,7 @@ public partial class InputMessage : IParseableInputObject
         {
             if (contentValue is null)
             {
-                Content = null;
+                Content = default;
             }
             else
             {

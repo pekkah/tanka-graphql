@@ -50,7 +50,7 @@ public static class Query
 
 
 [InputType]
-public class QueryOptions
+public partial class QueryOptions
 {
     public int Start { get; set; } = 0;
 

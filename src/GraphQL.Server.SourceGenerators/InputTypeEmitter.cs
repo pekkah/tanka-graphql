@@ -58,7 +58,14 @@ public class InputTypeEmitter(SourceProductionContext context)
           // {{name}} is an scalar type
           if (argumentValue.TryGetValue("{{fieldName}}", out var {{fieldName}}Value))
           {
-            {{name}} = {{fieldName}}Value as {{type}};
+            if ({{fieldName}}Value is null)
+            {
+              {{name}} = default;
+            }
+            else 
+            {
+              {{name}} = ({{type}}){{fieldName}}Value;
+            }
           }
           """;
 
@@ -69,7 +76,7 @@ public class InputTypeEmitter(SourceProductionContext context)
           {
               if ({{fieldName}}Value is null)
               {
-                {{name}} = null;
+                {{name}} = default;
               }
               else 
               {
