@@ -1,5 +1,8 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Mvc;
+
+using Tanka.GraphQL;
+using Tanka.GraphQL.Extensions.Experimental.OneOf;
 using Tanka.GraphQL.Server;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -18,7 +21,19 @@ builder.AddTankaGraphQL()
             // add types from current namespace
             types.AddGlobalTypes();
         });
+
+        options.PostConfigure(configure =>
+        {
+            // add oneOf input type
+            configure.Builder.Schema.AddOneOf();
+            configure.Builder.Add($$"""
+                                  extend input {{nameof(OneOfInput)}} @oneOf
+                                  """);
+        });
     });
+
+// add validation rule for @oneOf directive
+builder.Services.AddDefaultValidatorRule(OneOfDirective.OneOfValidationRule());
 
 WebApplication app = builder.Build();
 app.UseWebSockets();
@@ -68,6 +83,43 @@ public static class Mutation
         db.Messages.Add(message);
         return message;
     }
+
+    /// <summary>
+    ///     A command pattern like mutation with @oneOf input type
+    /// </summary>
+    /// <remarks>
+    ///     @oneOf - directive is provided by Tanka.GraphQL.Extensions.Experimental
+    ///     Spec PR: https://github.com/graphql/graphql-spec/pull/825
+    /// </remarks>
+    /// <param name="input"></param>
+    /// <param name="db"></param>
+    /// <returns></returns>
+    public static Result? Execute([FromArguments] OneOfInput input, [FromServices] Db db)
+    {
+        if (input.Add is not null)
+        {
+            var message = new Message
+            {
+                Id = Guid.NewGuid().ToString(),
+                Text = input.Add.Text
+            };
+
+            db.Messages.Add(message);
+            return new Result()
+            {
+                Id = message.Id
+            };
+        }
+
+        if (input.Remove is null)
+            throw new ArgumentNullException(nameof(input.Remove), "This should not happen as the validation rule should ensure one of these are set");
+            
+        db.Messages.RemoveAll(m => m.Id == input.Remove.Id);
+        return new Result()
+        {
+            Id = input.Remove.Id
+        };
+    }
 }
 
 [ObjectType]
@@ -78,13 +130,39 @@ public class Message
     public required string Text { get; set; }
 }
 
+[ObjectType]
+public class Result
+{
+    public string Id { get; set; }
+}
+
 [InputType]
-public class InputMessage
+public partial class InputMessage
 {
     public string Text { get; set; } = string.Empty;
 }
 
+[InputType]
+public partial class OneOfInput
+{
+    public AddInput? Add { get; set; }
+
+    public RemoveInput? Remove { get; set; }
+}
+
+[InputType]
+public partial class AddInput
+{
+    public string Text { get; set; }
+}
+
+[InputType]
+public partial class RemoveInput
+{
+    public string Id { get; set; }
+}
+
 public class Db
 {
-    public ConcurrentBag<Message> Messages { get; } = new();
+    public List<Message> Messages { get; } = new();
 }

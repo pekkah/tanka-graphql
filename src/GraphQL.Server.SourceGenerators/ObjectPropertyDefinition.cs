@@ -6,6 +6,7 @@ public record ObjectPropertyDefinition
 
     public string ReturnType { get; init; }
 
-    public bool IsNullable { get; init; }
     public string ClosestMatchingGraphQLTypeName { get; set; }
+    
+    public InputTypeDefinition? ReturnTypeObject { get; set; }
 }

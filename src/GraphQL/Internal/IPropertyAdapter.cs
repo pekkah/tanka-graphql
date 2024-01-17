@@ -9,20 +9,14 @@ public interface IPropertyAdapter<in T>
     void SetValue(T obj, object? value);
 }
 
-public class PropertyAdapter<T>: IPropertyAdapter<T>
+public class PropertyAdapter<T>(string name, Func<T, object?> getter, Action<T, object?> setter)
+    : IPropertyAdapter<T>
 {
-    public PropertyAdapter(string name, Func<T, object?> getter, Action<T, object?> setter)
-    {
-        Name = name;
-        Getter = getter;
-        Setter = setter;
-    }
+    public string Name { get; } = name;
 
-    public string Name { get; }
+    private Func<T, object?> Getter { get; } = getter;
 
-    private Func<T, object?> Getter { get; }
-
-    private Action<T, object?> Setter { get;  }
+    private Action<T, object?> Setter { get;  } = setter;
 
     public object? GetValue(T obj)
     {
