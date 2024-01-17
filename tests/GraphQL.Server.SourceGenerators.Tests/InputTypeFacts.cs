@@ -72,4 +72,26 @@ public class InputTypeFacts
 
         return TestHelper<ObjectTypeGenerator>.Verify(source);
     }
+
+    [Fact]
+    public Task Generate_InputType_with_complex_property()
+    {
+        var source = """
+                     using Tanka.GraphQL.Server;
+                     using System.Collections.Generic;
+
+                     [InputType]
+                     public class InputMessage
+                     {
+                        public Person Content { get; set; }
+                     }
+
+                     public class Person
+                     {
+                        public int Id { get;set; }
+                     }
+                     """;
+
+        return TestHelper<ObjectTypeGenerator>.Verify(source);
+    }
 }

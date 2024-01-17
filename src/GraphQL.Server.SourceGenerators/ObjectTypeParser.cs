@@ -54,7 +54,6 @@ namespace Tanka.GraphQL.Server.SourceGenerators
                         Name = propertyDeclaration.Identifier.Text,
                         ReturnType = propertyDeclaration.Type.ToString(),
                         ClosestMatchingGraphQLTypeName = GetClosestMatchingGraphQLTypeName(context.SemanticModel, TypeHelper.UnwrapTaskType(propertyDeclaration.Type)),
-                        IsNullable = TypeHelper.IsTypeNullable(propertyDeclaration.Type),
                     };
                     properties.Add(propertyDefinition);
                 }

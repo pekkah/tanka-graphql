@@ -4,6 +4,11 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Fields;
 
+public interface IParseableInputObject
+{
+    void Parse(IReadOnlyDictionary<string, object?> argumentValue);
+}
+
 public class ArgumentBinderFeature : IArgumentBinderFeature
 {
     public bool HasArgument(ResolverContextBase context, string name)
@@ -17,12 +22,11 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
         object? argument = context.ArgumentValues[name];
 
         if (argument is null)
-            return default(T?);
-
+            return default;
+        
         if (argument is not IReadOnlyDictionary<string, object?> inputObjectArgumentValue)
             throw new InvalidOperationException("Argument is not an input object");
-
-
+        
         var target = new T();
 
         BindInputObject<T>(inputObjectArgumentValue, target);
@@ -34,7 +38,7 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
         object? argument = context.ArgumentValues[name];
 
         if (argument is null)
-            return default(IEnumerable<T?>?);
+            return default;
 
         if (argument is not IEnumerable<IReadOnlyDictionary<string, object?>?> inputObjectArgumentValue)
             throw new InvalidOperationException("Argument is not an input object list");
@@ -59,6 +63,12 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
 
     public static void BindInputObject<T>(IReadOnlyDictionary<string, object?> inputObject, T target)
     {
+        if (target is IParseableInputObject parseable)
+        {
+            parseable.Parse(inputObject);
+            return;
+        }
+
         IReadOnlyDictionary<string, IPropertyAdapter<T>> properties = PropertyAdapterFactory.GetPropertyAdapters<T>();
 
         //todo: do we need the input object fields in here for validation

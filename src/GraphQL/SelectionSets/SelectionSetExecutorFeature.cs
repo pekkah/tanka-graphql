@@ -15,7 +15,7 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
     {
         var groupedFieldSet = FieldCollector.CollectFields(
             context.Schema,
-            context.Request.Document,
+            context.Request.Query,
             objectType,
             selectionSet,
             context.CoercedVariableValues);

@@ -301,7 +301,7 @@ public class ExecutorFacts
         /* When */
         var result = new Executor(Schema).Subscribe(new GraphQLRequest()
         {
-            Document = subscription
+            Query = subscription
         }, cts.Token).GetAsyncEnumerator(cts.Token);
 
         await Model.AddAsync(new()

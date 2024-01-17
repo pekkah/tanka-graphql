@@ -17,7 +17,7 @@ public static class InputMessageInputTypeExtensions
         builder.Builder.Configure(options => options.Builder.Add("""
                 input InputMessage
                 {
-                    content: String
+                    content: Person!
                 }
                 """));
         return builder;
@@ -28,7 +28,7 @@ public partial class InputMessage : IParseableInputObject
 {
     public void Parse(IReadOnlyDictionary<string, object?> argumentValue)
     {
-        // Content is an scalar type
+        // Content is an input object type
         if (argumentValue.TryGetValue("content", out var contentValue))
         {
             if (contentValue is null)
@@ -37,7 +37,12 @@ public partial class InputMessage : IParseableInputObject
             }
             else
             {
-                Content = (string)contentValue;
+                if (contentValue is not IReadOnlyDictionary<string, object?> dictionaryValue)
+                    throw new InvalidOperationException($"content is not IReadOnlyDictionary<string, object?>");
+                Content = new Person();
+                if (Content is not IParseableInputObject parseable)
+                    throw new InvalidOperationException($"Content is not IParseableInputObject");
+                parseable.Parse(dictionaryValue);
             }
         }
     }

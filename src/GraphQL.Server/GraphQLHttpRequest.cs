@@ -14,6 +14,10 @@ public record GraphQLHttpRequest
     [JsonConverter(typeof(ExecutableDocumentConverter))]
     public ExecutableDocument Query { get; set; } = string.Empty;
 
+    [JsonPropertyName("initialValue")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public object? InitialValue { get; set; }
+
     [JsonPropertyName("variables")]
     [JsonConverter(typeof(NestedDictionaryConverter))]
     public IReadOnlyDictionary<string, object?>? Variables { get; set; }

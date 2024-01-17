@@ -32,7 +32,7 @@ public class MutationFacts
         var result = await new GraphQL.Executor(schema)
             .Execute(new GraphQLRequest
             {
-                Document = query
+                Query = query
             });
 
         /* Then */
@@ -72,7 +72,7 @@ public class MutationFacts
         var result = await new GraphQL.Executor(schema)
             .Execute(new GraphQLRequest
             {
-                Document = query
+                Query = query
             });
 
         /* Then */
