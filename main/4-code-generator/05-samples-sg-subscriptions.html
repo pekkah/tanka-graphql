@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>02-samples-sg-arguments - Tanka GraphQL</title>
+    <title>05-samples-sg-subscriptions - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -149,107 +149,33 @@
                 </div>
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                <h2 id="arguments">Arguments</h2>
-<p>Code generator will extract the arguments from the resolver and generate calls
-to bind the arguments from the resolver context. It will also generate the
-correct field definition for the field. Arguments can be primitive types or
-input object types.</p>
-<h3 id="tanka.graphql.samples.sg.arguments">Tanka.GraphQL.Samples.SG.Arguments</h3>
-<pre><code class="language-csharp">using Tanka.GraphQL.Server;
+                <h2 id="subscriptions">Subscriptions</h2>
+<p>Code generator will generate object definition and extensions methods for adding subscription
+types to the schema. Generator will generate a subscriber for each <code>IAsyncEnumerable&lt;T&gt;</code> method
+of a class with <code>[ObjectType]</code> attribute. You can use provided extension method to add the
+subscription type, subscribers and resolver to the schema.</p>
+<h3 id="tanka.graphql.samples.sg.subscription">Tanka.GraphQL.Samples.SG.Subscription</h3>
+<pre><code class="language-csharp">using System.Runtime.CompilerServices;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-// Add tanka graphql
-builder.AddTankaGraphQL()
-    .AddHttp()
-    .AddWebSockets()
-    .AddSchemaOptions(&quot;Default&quot;, options =&gt;
-    {
-        options.AddGeneratedTypes(types =&gt;
-        {
-            // add types in current namespace
-            types.AddGlobalTypes();
-        });
-    });
-
-WebApplication app = builder.Build();
-app.UseWebSockets();
-
-app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;Default&quot;);
-app.MapGraphiQL(&quot;/graphql/ui&quot;);
-app.Run();
-
-
-[ObjectType]
-public static class Query
-{
-    /// &lt;summary&gt;
-    ///     Resolver with two primitive arguments
-    /// &lt;/summary&gt;
-    /// &lt;param name=&quot;start&quot;&gt;Bound automatically from args&lt;/param&gt;
-    /// &lt;param name=&quot;count&quot;&gt;Bound automatically from args&lt;/param&gt;
-    /// &lt;returns&gt;&lt;/returns&gt;
-    public static int[] Range(int start, int count)
-    {
-        return Enumerable.Range(start, count).ToArray();
-    }
-
-    /// &lt;summary&gt;
-    ///     Resolver with input object argument
-    /// &lt;/summary&gt;
-    /// &lt;param name=&quot;options&quot;&gt;todo: bug - requires [FromArguments] in combination with [InputObject]&lt;/param&gt;
-    /// &lt;returns&gt;&lt;/returns&gt;
-    public static int[] RangeWithInputObject([FromArguments]QueryOptions options)
-    {
-        return Enumerable.Range(options.Start, options.Count).ToArray();
-    }
-}
-
-
-[InputType]
-public partial class QueryOptions
-{
-    public int Start { get; set; } = 0;
-
-    public int Count { get; set; } = 100;
-}
-</code></pre>
-<h3 id="tanka.graphql.samples.sg.inputtype">Tanka.GraphQL.Samples.SG.InputType</h3>
-<pre><code class="language-csharp">using Microsoft.AspNetCore.Mvc;
-
-using Tanka.GraphQL;
-using Tanka.GraphQL.Extensions.Experimental.OneOf;
 using Tanka.GraphQL.Server;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Simple in memory db for messages
-builder.Services.AddSingleton&lt;Db&gt;();
-
-// Add tanka graphql
 builder.AddTankaGraphQL()
     .AddHttp()
     .AddWebSockets()
     .AddSchemaOptions(&quot;Default&quot;, options =&gt;
     {
+        // This extension point is used by the generator to add
+        // type controllers
         options.AddGeneratedTypes(types =&gt;
         {
-            // add types from current namespace
-            types.AddGlobalTypes();
-        });
-
-        options.PostConfigure(configure =&gt;
-        {
-            // add oneOf input type
-            configure.Builder.Schema.AddOneOf();
-            configure.Builder.Add($$&quot;&quot;&quot;
-                                  extend input {{nameof(OneOfInput)}} @oneOf
-                                  &quot;&quot;&quot;);
+            // Add generated controllers
+            types
+                .AddQueryController()
+                .AddSubscriptionController();
         });
     });
-
-// add validation rule for @oneOf directive
-builder.Services.AddDefaultValidatorRule(OneOfDirective.OneOfValidationRule());
 
 WebApplication app = builder.Build();
 app.UseWebSockets();
@@ -258,129 +184,31 @@ app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;Default&quot;);
 app.MapGraphiQL(&quot;/graphql/ui&quot;);
 app.Run();
 
+[ObjectType]
+public static class Subscription
+{
+    /// &lt;summary&gt;
+    ///     This is subscription field producing random integers of count between from and to 
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
+    public static async IAsyncEnumerable&lt;int&gt; Random(int from, int to, int count, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var r = new Random();
+
+        for (var i = 0; i &lt; count; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return r.Next(from, to);
+            await Task.Delay(500, cancellationToken);
+        }
+    }
+}
 
 [ObjectType]
 public static class Query
 {
-    /// &lt;summary&gt;
-    ///     Simple query with one dependency resolved from DI
-    /// &lt;/summary&gt;
-    /// &lt;remarks&gt;
-    ///     [FromServices] is provided by Microsoft.AspNetCore.Mvc
-    /// &lt;/remarks&gt;
-    /// &lt;param name=&quot;db&quot;&gt;&lt;/param&gt;
-    /// &lt;returns&gt;&lt;/returns&gt;
-    public static Message[] Messages([FromServices]Db db)
-    {
-        return db.Messages.ToArray();
-    }
-}
-
-[ObjectType]
-public static class Mutation
-{
-    /// &lt;summary&gt;
-    ///     Simple mutation with one InputObject argument and one dependency resolved from DI
-    /// &lt;/summary&gt;
-    /// &lt;remarks&gt;
-    ///     [FromArguments} is provided by Tanka.GraphQL.Server
-    /// &lt;/remarks&gt;
-    /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
-    /// &lt;param name=&quot;db&quot;&gt;&lt;/param&gt;
-    /// &lt;returns&gt;&lt;/returns&gt;
-    public static Message Post([FromArguments]InputMessage input, [FromServices]Db db)
-    {
-        var message = new Message
-        {
-            Id = Guid.NewGuid().ToString(),
-            Text = input.Text
-        };
-
-        db.Messages.Add(message);
-        return message;
-    }
-
-    /// &lt;summary&gt;
-    ///     A command pattern like mutation with @oneOf input type
-    /// &lt;/summary&gt;
-    /// &lt;remarks&gt;
-    ///     @oneOf - directive is provided by Tanka.GraphQL.Extensions.Experimental
-    ///     Spec PR: https://github.com/graphql/graphql-spec/pull/825
-    /// &lt;/remarks&gt;
-    /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
-    /// &lt;param name=&quot;db&quot;&gt;&lt;/param&gt;
-    /// &lt;returns&gt;&lt;/returns&gt;
-    public static Result? Execute([FromArguments] OneOfInput input, [FromServices] Db db)
-    {
-        if (input.Add is not null)
-        {
-            var message = new Message
-            {
-                Id = Guid.NewGuid().ToString(),
-                Text = input.Add.Text
-            };
-
-            db.Messages.Add(message);
-            return new Result()
-            {
-                Id = message.Id
-            };
-        }
-
-        if (input.Remove is null)
-            throw new ArgumentNullException(nameof(input.Remove), &quot;This should not happen as the validation rule should ensure one of these are set&quot;);
-            
-        db.Messages.RemoveAll(m =&gt; m.Id == input.Remove.Id);
-        return new Result()
-        {
-            Id = input.Remove.Id
-        };
-    }
-}
-
-[ObjectType]
-public class Message
-{
-    public required string Id { get; set; }
-
-    public required string Text { get; set; }
-}
-
-[ObjectType]
-public class Result
-{
-    public string Id { get; set; }
-}
-
-[InputType]
-public partial class InputMessage
-{
-    public string Text { get; set; } = string.Empty;
-}
-
-[InputType]
-public partial class OneOfInput
-{
-    public AddInput? Add { get; set; }
-
-    public RemoveInput? Remove { get; set; }
-}
-
-[InputType]
-public partial class AddInput
-{
-    public string Text { get; set; }
-}
-
-[InputType]
-public partial class RemoveInput
-{
-    public string Id { get; set; }
-}
-
-public class Db
-{
-    public List&lt;Message&gt; Messages { get; } = new();
+    // this is required as the graphiql will error without a query field
+    public static string Hello() =&gt; &quot;Hello World!&quot;;
 }
 </code></pre>
                     
