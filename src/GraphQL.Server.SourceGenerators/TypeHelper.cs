@@ -10,17 +10,17 @@ namespace Tanka.GraphQL.Server.SourceGenerators;
 
 public class TypeHelper
 {
-    public static string GetGraphQLTypeName(TypeSyntax typeSyntax)
-    {
-        return null;
-    }
-
     public static string GetGraphQLTypeName(ITypeSymbol typeSymbol)
     {
         // Handle arrays
         if (typeSymbol is IArrayTypeSymbol arrayTypeSymbol)
         {
             return $"[{GetGraphQLTypeName(arrayTypeSymbol.ElementType)}]";
+        }
+
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.Name: "IAsyncEnumerable"} asyncEnumerable)
+        {
+            return GetGraphQLTypeName(asyncEnumerable.TypeArguments[0]);
         }
 
         if (typeSymbol is not { SpecialType: SpecialType.System_String })

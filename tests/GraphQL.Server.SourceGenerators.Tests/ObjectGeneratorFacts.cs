@@ -22,6 +22,31 @@ public class ObjectGeneratorFacts
     }
 
     [Fact]
+    public Task StaticClass_Generate_method_subscriber()
+    {
+        var source = """
+                     using Tanka.GraphQL.Server;
+
+                     namespace Tests;
+
+                     [ObjectType]
+                     public static class Subscription
+                     {
+                        public static IAsyncEnumerable<int> Random(int from, int to, CancellationToken cancellationToken)
+                        {
+                            foreach(var i in Enumerable.Range(from, to))
+                            {
+                                yield return i;
+                                await Task.Delay(i*100);
+                            }
+                        }
+                     }
+                     """;
+
+        return TestHelper<ObjectTypeGenerator>.Verify(source);
+    }
+
+    [Fact]
     public Task Generate_ObjectType_type_name()
     {
         var source = """
@@ -79,6 +104,81 @@ public class ObjectGeneratorFacts
                      public static class Query
                      {
                         public static string Id { get; set;}
+                     }
+                     """;
+
+        return TestHelper<ObjectTypeGenerator>.Verify(source);
+    }
+
+    [Fact]
+    public Task HelloWorld()
+    {
+        var source = """
+                     using Tanka.GraphQL.Server;
+                     
+                     namespace Tests;
+                     
+                     /// <summary>
+                     ///     Root query type by naming convention
+                     ///     <remarks>
+                     ///         We define it as static class so that the generator does not try
+                     ///         to use the initialValue as the source of it.
+                     ///     </remarks>
+                     /// </summary>
+                     [ObjectType]
+                     public static class Query
+                     {
+                         public static World World() => new();
+                     }
+
+                     [ObjectType]
+                     public class World
+                     {
+                         /// <summary>
+                         ///     Simple field with one string argument and string return type
+                         /// </summary>
+                         /// <param name="name">name: String!</param>
+                         /// <returns>String!</returns>
+                         public string Hello(string name) => $"Hello {name}";
+                     
+                         /// <summary>
+                         ///     This is the async version of the Hello method
+                         /// </summary>
+                         /// <param name="name"></param>
+                         /// <returns></returns>
+                         public async Task<string> HelloAsync(string name) => await Task.FromResult($"Hello {name}");
+                     }
+                     """;
+
+        return TestHelper<ObjectTypeGenerator>.Verify(source);
+    }
+
+    [Fact]
+    public Task Random_AsyncEnumerable()
+    {
+        var source = """
+                     using Tanka.GraphQL.Server;
+
+                     namespace Tests;
+
+                     [ObjectType]
+                     public class World
+                     {
+                         /// <summary>
+                         ///     This is subscription field producing random integers of count between from and to
+                         /// </summary>
+                         /// <returns></returns>
+                         public async IAsyncEnumerable<int> Random(int from, int to, int count, [EnumeratorCancellation] CancellationToken cancellationToken)
+                         {
+                             var r = new Random();
+                     
+                             for (var i = 0; i < count; i++)
+                             {
+                                 yield return r.Next(from, to);
+                                 cancellationToken.ThrowIfCancellationRequested();
+                                 await Task.Delay(i * 10, cancellationToken);
+                             }
+                         }
                      }
                      """;
 

@@ -2,3 +2,4 @@
 - [Arguments](xref://02-samples-sg-arguments.md)
 - [Namespace](xref://03-samples-sg-namespace.md)
 - [Dependency injection](xref://04-samples-sg-services.md)
+- [Subscriptions](xref://05-samples-sg-subscriptions.md)

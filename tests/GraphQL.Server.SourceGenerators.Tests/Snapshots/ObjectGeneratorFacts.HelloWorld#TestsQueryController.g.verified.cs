@@ -13,9 +13,9 @@ using Tanka.GraphQL.ValueResolution;
 namespace Tests;
 public static class QueryController
 {
-    public static ValueTask Person(ResolverContext context)
+    public static ValueTask World(ResolverContext context)
     {
-        context.ResolvedValue = Query.Person(context.GetArgument<int>("id"));
+        context.ResolvedValue = Query.World();
         return default;
     }
 }
@@ -24,7 +24,7 @@ public static class QueryControllerExtensions
 {
     public static SourceGeneratedTypesBuilder AddQueryController(this SourceGeneratedTypesBuilder builder)
     {
-        builder.Builder.Configure(options => options.Builder.Add("Query", new FieldsWithResolvers() { { "person(id: Int!): Person!", QueryController.Person } }));
+        builder.Builder.Configure(options => options.Builder.Add("Query", new FieldsWithResolvers() { { "world: World!", QueryController.World } }));
         return builder;
     }
 }
