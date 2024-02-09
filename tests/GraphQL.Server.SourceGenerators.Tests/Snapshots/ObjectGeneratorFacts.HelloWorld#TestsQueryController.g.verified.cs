@@ -33,16 +33,15 @@ public static class QueryControllerExtensions
             new FieldsWithResolvers()
             {
                 { "world: World!", QueryController.World }
-            }
-            ));
+            }            ));
 
         return builder;
     }
 }
 
-public partial class Query: INamedType
+public static partial class Query
 {
-    public string __Typename => "Query";
+    public static string __Typename => "Query";
 }
 
 #nullable restore

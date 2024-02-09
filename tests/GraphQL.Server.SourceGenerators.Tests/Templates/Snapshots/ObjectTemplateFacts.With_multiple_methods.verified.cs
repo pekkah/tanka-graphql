@@ -40,10 +40,8 @@ public static class DogControllerExtensions
             new FieldsWithResolvers()
             {
                 { "method: String!", DogController.Method },
-                
                 { "method2: Float!", DogController.Method2 }
-            }
-            ));
+            }            ));
 
         return builder;
     }

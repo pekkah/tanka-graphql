@@ -38,10 +38,8 @@ public static class DogControllerExtensions
             new FieldsWithResolvers()
             {
                 { "name: String!", DogController.Name },
-                
                 { "age: Int!", DogController.Age }
-            }
-            ));
+            }            ));
 
         return builder;
     }

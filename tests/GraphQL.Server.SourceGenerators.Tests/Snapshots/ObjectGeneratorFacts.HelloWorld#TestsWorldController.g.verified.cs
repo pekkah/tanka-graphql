@@ -24,7 +24,7 @@ public static class WorldController
         return default;
     }
 
-    public static ValueTask HelloAsync(ResolverContext context)
+    public static async ValueTask HelloAsync(ResolverContext context)
     {
         context.ResolvedValue = await ((World)context.ObjectValue).HelloAsync(
             context.GetArgument<string>("name")
@@ -42,10 +42,8 @@ public static class WorldControllerExtensions
             new FieldsWithResolvers()
             {
                 { "hello(name: String!): String!", WorldController.Hello },
-                
                 { "helloAsync(name: String!): String!", WorldController.HelloAsync }
-            }
-            ));
+            }            ));
 
         return builder;
     }

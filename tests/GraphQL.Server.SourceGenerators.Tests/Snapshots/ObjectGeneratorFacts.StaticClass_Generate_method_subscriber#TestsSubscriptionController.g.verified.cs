@@ -44,6 +44,10 @@ public static class SubscriptionControllerExtensions
             new FieldsWithResolvers()
             {
                 { "random(from: Int!, to: Int!): Int!", SubscriptionController.ResolveRandom }
+            }, 
+            new FieldsWithSubscribers()
+            {
+                { "random(from: Int!, to: Int!): Int!", SubscriptionController.Random }
             }
             ));
 
@@ -51,9 +55,9 @@ public static class SubscriptionControllerExtensions
     }
 }
 
-public partial class Subscription: INamedType
+public static partial class Subscription
 {
-    public string __Typename => "Subscription";
+    public static string __Typename => "Subscription";
 }
 
 #nullable restore

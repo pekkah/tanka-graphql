@@ -31,8 +31,7 @@ public static class DogControllerExtensions
             new FieldsWithResolvers()
             {
                 { "name: String!", DogController.Name }
-            }
-            ));
+            }            ));
 
         return builder;
     }

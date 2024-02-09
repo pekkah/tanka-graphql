@@ -32,8 +32,7 @@ public static class PersonControllerExtensions
             new FieldsWithResolvers()
             {
                 { "name: String!", PersonController.Name }
-            }
-            ));
+            }            ));
 
         return builder;
     }

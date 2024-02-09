@@ -35,16 +35,15 @@ public static class QueryControllerExtensions
             new FieldsWithResolvers()
             {
                 { "person(id: Int!): Person!", QueryController.Person }
-            }
-            ));
+            }            ));
 
         return builder;
     }
 }
 
-public partial class Query: INamedType
+public static partial class Query
 {
-    public string __Typename => "Query";
+    public static string __Typename => "Query";
 }
 
 #nullable restore

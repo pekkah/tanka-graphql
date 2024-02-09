@@ -45,6 +45,10 @@ public static class WorldControllerExtensions
             new FieldsWithResolvers()
             {
                 { "random(from: Int!, to: Int!, count: Int!): Int!", WorldController.ResolveRandom }
+            }, 
+            new FieldsWithSubscribers()
+            {
+                { "random(from: Int!, to: Int!, count: Int!): Int!", WorldController.Random }
             }
             ));
 

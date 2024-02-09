@@ -35,8 +35,7 @@ public static class DogControllerExtensions
             new FieldsWithResolvers()
             {
                 { "method: String!", DogController.Method }
-            }
-            ));
+            }            ));
 
         return builder;
     }
