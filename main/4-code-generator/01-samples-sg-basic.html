@@ -192,13 +192,19 @@ app.Run();
 ///     &lt;/remarks&gt;
 /// &lt;/summary&gt;
 [ObjectType]
-public static class Query
+public static partial class Query
 {
     public static World World() =&gt; new();
+    
+   public static IEnumerable&lt;IAnimal&gt; Animals()=&gt; new IAnimal[]
+   {
+        new Dog(),
+        new Cat()
+    };
 }
 
 [ObjectType]
-public class World
+public partial class World
 {
     /// &lt;summary&gt;
     ///     Simple field with one string argument and string return type
@@ -213,6 +219,28 @@ public class World
     /// &lt;param name=&quot;name&quot;&gt;&lt;/param&gt;
     /// &lt;returns&gt;&lt;/returns&gt;
     public async Task&lt;string&gt; HelloAsync(string name) =&gt; await Task.FromResult($&quot;Hello {name}&quot;);
+}
+
+[InterfaceType]
+public partial interface IAnimal
+{
+    string Name { get; }
+}
+
+[ObjectType]
+public partial class Dog : IAnimal
+{
+    public string Name =&gt; &quot;Dog&quot;;
+    
+    public string Bark() =&gt; &quot;Woof&quot;;
+}
+
+[ObjectType]
+public partial class Cat : IAnimal
+{
+    public string Name =&gt; &quot;Cat&quot;;
+    
+    public string Meow() =&gt; &quot;Meow&quot;;
 }
 </code></pre>
                     
