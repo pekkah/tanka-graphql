@@ -1,18 +1,21 @@
-﻿using Tanka.GraphQL.Server.SourceGenerators.Internal;
+﻿using System.Linq;
+using System.Text.Json;
+
+using Tanka.GraphQL.Server.SourceGenerators.Internal;
 
 namespace Tanka.GraphQL.Server.SourceGenerators;
 
 public record ObjectMethodDefinition
 {
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     public MethodType Type { get; set; }
 
     public EquatableArray<ParameterDefinition> Parameters { get; set; } = new();
         
-    public string ReturnType { get; init; }
+    public required string ReturnType { get; init; }
 
-    public string ClosestMatchingGraphQLTypeName { get; set; }
+    public required string ClosestMatchingGraphQLTypeName { get; set; }
 
     public bool IsStatic { get; set; }
 
@@ -29,6 +32,16 @@ public record ObjectMethodDefinition
     };
 
     public bool IsSubscription => Type is MethodType.AsyncEnumerableOfT;
+
+    public string AsField => $"{JsonNamingPolicy.CamelCase.ConvertName(Name)}{AsFieldArguments}: {ClosestMatchingGraphQLTypeName}";
+    
+    public string AsFieldArguments => Parameters.Any(p => p.IsArgument)
+        ? $"({string.Join(", ", Parameters.Where(p => p.IsArgument).Select(p => p.AsArgument))})" 
+        : string.Empty;
+
+    public string ResolverName => IsSubscription ? $"Resolve{Name}" : Name;
+
+    public string? SubscriberName => IsSubscription ? Name : null;
 }
 
 public enum MethodType

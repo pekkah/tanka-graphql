@@ -16,7 +16,7 @@ public class ObjectTypeGenerator : IIncrementalGenerator
     public static string ObjectTypeAttributeName = "ObjectTypeAttribute";
     public static string ObjectTypeFullyQualifiedAttributeName = $"Tanka.GraphQL.Server.{ObjectTypeAttributeName}";
 
-    public static string ObjectTypeSources = $$"""
+    public static string ObjectTypeSources = $$$"""
         using System;
         using System.Threading.Tasks;
         using Microsoft.Extensions.Options;
@@ -47,12 +47,17 @@ public class ObjectTypeGenerator : IIncrementalGenerator
         }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-        public class {{ObjectTypeAttributeName}}: Attribute
+        public class {{{ObjectTypeAttributeName}}}: Attribute
         {
         }
 
         [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
         public class FromArgumentsAttribute: Attribute
+        {
+        }
+        
+        [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
+        public class GraphQLNameAttribute: Attribute
         {
         }
         """;
@@ -74,6 +79,30 @@ public class ObjectTypeGenerator : IIncrementalGenerator
         }
         """;
 
+    public static string InterfaceTypeAttributeName = "InterfaceTypeAttribute";
+    public static string InterfaceTypeFullyQualifiedAttributeName = $"Tanka.GraphQL.Server.{InterfaceTypeAttributeName}";
+
+    public static string InterfaceTypeSources = $$"""
+                                                  using System;
+                                                  using System.Threading.Tasks;
+                                                  using Microsoft.Extensions.Options;
+                                                  using Tanka.GraphQL.Executable;
+
+                                                  namespace Tanka.GraphQL.Server;
+
+                                                  [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
+                                                  public class {{InterfaceTypeAttributeName}}: Attribute
+                                                  {
+                                                  }
+                                                  """;
+
+    public static string[] RequiredAttributes =
+    [
+        ObjectTypeAttributeName,
+        InputTypeAttributeName,
+        InterfaceTypeAttributeName
+    ];
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         if (Debugger.IsAttached) Debugger.Break();
@@ -82,6 +111,7 @@ public class ObjectTypeGenerator : IIncrementalGenerator
         {
             c.AddSource("ObjectType.g.cs", ObjectTypeSources);
             c.AddSource("InputType.g.cs", InputTypeSources);
+            c.AddSource("InterfaceType.g.cs", InterfaceTypeSources);
         });
 
         IncrementalValuesProvider<ObjectControllerDefinition> objectDefinitions = context.SyntaxProvider
@@ -111,19 +141,33 @@ public class ObjectTypeGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(inputDefinitions, (spc, inputDefinition) => new InputTypeEmitter(spc).Emit(inputDefinition));
 
+        IncrementalValuesProvider<InterfaceControllerDefinition> interfaceDefinitions = context
+            .SyntaxProvider
+            .ForAttributeWithMetadataName(
+                InterfaceTypeFullyQualifiedAttributeName,
+                (node, ct) => node is InterfaceDeclarationSyntax,
+                (syntaxContext, ct) => new InterfaceTypeParser(syntaxContext).ParseInterfaceControllerDefinition()
+            )
+            .WithComparer(EqualityComparer<InterfaceControllerDefinition>.Default)
+            .WithTrackingName("InterfaceTypes");
+
+        context.RegisterSourceOutput(interfaceDefinitions, (spc, interfaceDefinition) => new InterfaceTypeEmitter(spc).Emit(interfaceDefinition));
+
         var typesWithNamespace = context.SyntaxProvider
-            .CreateSyntaxProvider((n, _) => n is ClassDeclarationSyntax classDeclaration 
-                                            && TypeHelper.HasAnyOfAttributes(classDeclaration.AttributeLists, ObjectTypeAttributeName, InputTypeAttributeName),
+            .CreateSyntaxProvider((n, _) => n is BaseTypeDeclarationSyntax m && TypeHelper.HasAnyOfAttributes(m.AttributeLists, RequiredAttributes), 
                 (ctx, ct) =>
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    var classDeclaration = (ClassDeclarationSyntax)ctx.Node;
+                    var declaration = (BaseTypeDeclarationSyntax)ctx.Node;
 
-                    if (TypeHelper.HasAttribute(classDeclaration.AttributeLists, ObjectTypeAttributeName))
-                        return (Namespace: TypeHelper.GetNamespace(classDeclaration), Name: classDeclaration.Identifier.Text, Type: "ObjectType");
- 
-                    return (Namespace: TypeHelper.GetNamespace(classDeclaration), Name: classDeclaration.Identifier.Text, Type: "InputType");
+                    if (TypeHelper.HasAttribute(declaration.AttributeLists, ObjectTypeAttributeName))
+                        return (Namespace: TypeHelper.GetNamespace(declaration), Name: declaration.Identifier.Text, Type: "ObjectType");
+
+                    if (TypeHelper.HasAttribute(declaration.AttributeLists, InterfaceTypeAttributeName))
+                        return (Namespace: TypeHelper.GetNamespace(declaration), Name: declaration.Identifier.Text, Type: "InterfaceType");
+
+                    return (Namespace: TypeHelper.GetNamespace(declaration), Name: declaration.Identifier.Text, Type: "InputType");
                 });
 
         var typesByNamespace = typesWithNamespace

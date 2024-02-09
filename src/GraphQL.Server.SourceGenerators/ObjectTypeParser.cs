@@ -30,6 +30,7 @@ namespace Tanka.GraphQL.Server.SourceGenerators
                 IsStatic = classDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword),
                 Namespace = TypeHelper.GetNamespace(classDeclaration),
                 TargetType = classDeclaration.Identifier.Text,
+                GraphQLName = NamedTypeExtension.GetName(context.SemanticModel, classDeclaration),
                 Properties = properties,
                 Methods = methods,
                 ParentClass = TypeHelper.GetParentClasses(classDeclaration),

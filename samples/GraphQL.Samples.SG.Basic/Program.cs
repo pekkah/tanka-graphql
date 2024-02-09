@@ -33,13 +33,19 @@ app.Run();
 ///     </remarks>
 /// </summary>
 [ObjectType]
-public static class Query
+public static partial class Query
 {
     public static World World() => new();
+    
+   public static IEnumerable<IAnimal> Animals()=> new IAnimal[]
+   {
+        new Dog(),
+        new Cat()
+    };
 }
 
 [ObjectType]
-public class World
+public partial class World
 {
     /// <summary>
     ///     Simple field with one string argument and string return type
@@ -54,4 +60,26 @@ public class World
     /// <param name="name"></param>
     /// <returns></returns>
     public async Task<string> HelloAsync(string name) => await Task.FromResult($"Hello {name}");
+}
+
+[InterfaceType]
+public partial interface IAnimal
+{
+    string Name { get; }
+}
+
+[ObjectType]
+public partial class Dog : IAnimal
+{
+    public string Name => "Dog";
+    
+    public string Bark() => "Woof";
+}
+
+[ObjectType]
+public partial class Cat : IAnimal
+{
+    public string Name => "Cat";
+    
+    public string Meow() => "Meow";
 }

@@ -43,7 +43,7 @@ app.Run();
 
 
 [ObjectType]
-public static class Query
+public static partial class Query
 {
     /// <summary>
     ///     Simple query with one dependency resolved from DI
@@ -60,7 +60,7 @@ public static class Query
 }
 
 [ObjectType]
-public static class Mutation
+public static partial class Mutation
 {
     /// <summary>
     ///     Simple mutation with one InputObject argument and one dependency resolved from DI
@@ -122,7 +122,7 @@ public static class Mutation
 }
 
 [ObjectType]
-public class Message
+public partial class Message
 {
     public required string Id { get; set; }
 
@@ -130,7 +130,7 @@ public class Message
 }
 
 [ObjectType]
-public class Result
+public partial class Result
 {
     public string Id { get; set; }
 }

@@ -12,6 +12,18 @@ public class TypeHelper
 {
     public static string GetGraphQLTypeName(ITypeSymbol typeSymbol)
     {
+        var nameAttribute = typeSymbol.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.Name.StartsWith("GraphQLName") == true);
+
+        if (nameAttribute is not null)
+        {
+            var name = nameAttribute.ConstructorArguments[0].Value?.ToString();
+            if (name is not null)
+            {
+                return name;
+            }
+        }
+        
         // Handle arrays
         if (typeSymbol is IArrayTypeSymbol arrayTypeSymbol)
         {
@@ -425,7 +437,7 @@ public class TypeHelper
                kind == SyntaxKind.RecordDeclaration;
     }
 
-    public static IReadOnlyList<string> GetUsings(ClassDeclarationSyntax classDeclaration)
+    public static IReadOnlyList<string> GetUsings(BaseTypeDeclarationSyntax classDeclaration)
     {
         return classDeclaration.SyntaxTree.GetCompilationUnitRoot()
             .Usings

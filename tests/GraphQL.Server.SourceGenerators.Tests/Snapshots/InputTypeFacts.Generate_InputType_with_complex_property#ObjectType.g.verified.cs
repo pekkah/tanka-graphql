@@ -37,3 +37,8 @@ public class ObjectTypeAttribute: Attribute
 public class FromArgumentsAttribute: Attribute
 {
 }
+
+[AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
+public class GraphQLNameAttribute: Attribute
+{
+}

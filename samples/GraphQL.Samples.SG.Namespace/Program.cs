@@ -29,13 +29,13 @@ app.Run();
 namespace Tanka.GraphQL.Samples.SG.Namespace
 {
     [ObjectType]
-    public static class Query
+    public static partial class Query
     {
         public static World World() => new();
     }
 
     [ObjectType]
-    public class World
+    public partial class World
     {
         public string Hello([FromArguments]HelloInput input) => $"Hello {input.Name}";
 

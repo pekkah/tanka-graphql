@@ -24,7 +24,7 @@ app.Run();
 
 
 [ObjectType]
-public static class Query
+public static partial class Query
 {
     /// <summary>
     ///     Resolver with two primitive arguments
