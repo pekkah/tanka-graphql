@@ -90,6 +90,8 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnume
     }
 
     public int Count => _array?.Length ?? 0;
+    
+    public int Size => _array?.Length ?? 0;
 
     /// <summary>
     /// Checks whether two <see cref="EquatableArray{T}"/> values are the same.
@@ -111,5 +113,10 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnume
     public static bool operator !=(EquatableArray<T> left, EquatableArray<T> right)
     {
         return !left.Equals(right);
+    }
+
+    public static EquatableArray<T> From(IEnumerable<T> array)
+    {
+        return new(array.ToArray());
     }
 }

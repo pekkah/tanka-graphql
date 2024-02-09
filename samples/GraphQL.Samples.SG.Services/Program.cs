@@ -28,7 +28,7 @@ app.Run();
 
 
 [ObjectType]
-public static class Query
+public static partial class Query
 {
     public static HttpContextResponse? HttpContext(
         // Use [FromServices] to inject service from DI to the resolver;
@@ -46,18 +46,11 @@ public static class Query
 }
 
 [ObjectType]
-public class HttpContextResponse
+public partial class HttpContextResponse(HttpContext httpContext)
 {
-    private readonly HttpContext _httpContext;
-
-    public HttpContextResponse(HttpContext httpContext)
-    {
-        _httpContext = httpContext;
-    }
-
-    public string Path => _httpContext.Request.Path;
+    public string Path => httpContext.Request.Path;
     
-    public string Method => _httpContext.Request.Method;
+    public string Method => httpContext.Request.Method;
 
-    public string Protocol => _httpContext.Request.Protocol;
+    public string Protocol => httpContext.Request.Protocol;
 }

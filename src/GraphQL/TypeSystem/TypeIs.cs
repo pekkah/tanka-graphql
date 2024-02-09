@@ -9,7 +9,7 @@ public static class TypeIs
     {
         return type switch
         {
-            NonNullType NonNullType => IsInputType(schema, NonNullType.OfType),
+            NonNullType nonNullType => IsInputType(schema, nonNullType.OfType),
             ListType list => IsInputType(schema, list.OfType),
             NamedType namedType => IsInputType(schema.GetRequiredNamedType<TypeDefinition>(namedType.Name)),
             _ => false
@@ -31,7 +31,7 @@ public static class TypeIs
     {
         return type switch
         {
-            NonNullType NonNullType => IsOutputType(schema, NonNullType.OfType),
+            NonNullType nonNullType => IsOutputType(schema, nonNullType.OfType),
             ListType list => IsOutputType(schema, list.OfType),
             NamedType namedType => IsOutputType(schema.GetRequiredNamedType<TypeDefinition>(namedType.Name)),
             _ => false

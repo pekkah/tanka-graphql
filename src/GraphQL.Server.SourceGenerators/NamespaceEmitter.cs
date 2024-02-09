@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 using Microsoft.CodeAnalysis;
 
+using Tanka.GraphQL.Server.SourceGenerators.Templates;
+
 namespace Tanka.GraphQL.Server.SourceGenerators;
 
 internal static class NamespaceEmitter
@@ -13,7 +15,10 @@ internal static class NamespaceEmitter
         string? nsName = typesByNamespace.Namespace;
 
         var builder = new IndentedStringBuilder();
-        builder.AppendLine(ObjectTypeEmitter.NamespaceAddTemplate);
+        foreach (string @using in ObjectTemplate.DefaultUsings)
+        {
+            builder.AppendLine(@using);
+        }
 
         if (!string.IsNullOrEmpty(nsName))
             builder.AppendLine($"namespace {nsName};");
@@ -33,6 +38,8 @@ internal static class NamespaceEmitter
         foreach (var (name, type) in typesByNamespace.Types)
         {
             if (type == "ObjectType")
+                builder.AppendLine($"builder.Add{name}Controller();");
+            else if (type == "InterfaceType")
                 builder.AppendLine($"builder.Add{name}Controller();");
             else
                 builder.AppendLine($"builder.Add{name}InputType();");

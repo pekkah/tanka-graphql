@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using CSharpExtensions = Microsoft.CodeAnalysis.CSharpExtensions;
 
 namespace Tanka.GraphQL.Server.SourceGenerators;
 
@@ -20,6 +19,7 @@ public class InputTypeParser(GeneratorAttributeSyntaxContext context)
         {
             Namespace = TypeHelper.GetNamespace(classDeclaration),
             TargetType = classDeclaration.Identifier.Text,
+            GraphQLName = NamedTypeExtension.GetName(context.SemanticModel, classDeclaration),
             Properties = properties,
             ParentClass = TypeHelper.GetParentClasses(classDeclaration)
         };
@@ -68,7 +68,7 @@ public class InputTypeParser(GeneratorAttributeSyntaxContext context)
             })
             .ToList();
 
-        return new InputTypeDefinition() { Properties = properties };
+        return new InputTypeDefinition() { TargetType = namedTypeSymbol.Name, Properties = properties };
             
         static IEnumerable<IPropertySymbol> GetPublicProperties(ITypeSymbol typeSymbol)
         {

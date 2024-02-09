@@ -6,14 +6,15 @@ public abstract class TypeDefinition: IEquatable<TypeDefinition>
 {
     public string? Namespace { get; init; }
 
-    public string TargetType { get; init; }
+    public required string TargetType { get; init; }
+
+    public string? GraphQLName { get; init; }
 
     public bool Equals(TypeDefinition? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Namespace == other.Namespace 
-               && TargetType == other.TargetType;
+        return Namespace == other.Namespace && TargetType == other.TargetType && GraphQLName == other.GraphQLName;
     }
 
     public override bool Equals(object? obj)
@@ -28,7 +29,10 @@ public abstract class TypeDefinition: IEquatable<TypeDefinition>
     {
         unchecked
         {
-            return ((Namespace != null ? Namespace.GetHashCode() : 0) * 397) ^ TargetType.GetHashCode();
+            var hashCode = (Namespace != null ? Namespace.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ TargetType.GetHashCode();
+            hashCode = (hashCode * 397) ^ (GraphQLName != null ? GraphQLName.GetHashCode() : 0);
+            return hashCode;
         }
     }
 }

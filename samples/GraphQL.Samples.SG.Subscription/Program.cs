@@ -28,7 +28,7 @@ app.MapGraphiQL("/graphql/ui");
 app.Run();
 
 [ObjectType]
-public static class Subscription
+public static partial class Subscription
 {
     /// <summary>
     ///     This is subscription field producing random integers of count between from and to 
@@ -48,7 +48,7 @@ public static class Subscription
 }
 
 [ObjectType]
-public static class Query
+public static partial class Query
 {
     // this is required as the graphiql will error without a query field
     public static string Hello() => "Hello World!";
