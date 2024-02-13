@@ -12,16 +12,21 @@ using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
 
-public static class QueryController
+public static partial class QueryController
 {
     public static ValueTask Person(ResolverContext context)
     {
+        BeforePerson(context);
+        
         context.ResolvedValue = Query.Person(
             context.GetArgument<int>("id")
             );
         
+        AfterPerson(context);
         return default;
     }
+    partial void BeforePerson(ResolverContext context);
+    partial void AfterPerson(ResolverContext context);
 }
 
 public static class QueryControllerExtensions

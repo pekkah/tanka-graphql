@@ -12,7 +12,7 @@ using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
 
-public static class PersonController
+public static partial class PersonController
 {
     public static ValueTask Name(ResolverContext context)
     {

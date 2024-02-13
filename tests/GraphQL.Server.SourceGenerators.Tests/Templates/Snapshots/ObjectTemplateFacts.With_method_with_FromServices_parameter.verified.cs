@@ -13,17 +13,22 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tests;
 
-public static class DogController
+public static partial class DogController
 {
     public static ValueTask Method(ResolverContext context)
     {
+        BeforeMethod(context);
+        
         context.ResolvedValue = ((Dog)context.ObjectValue).Method(
             context.RequestServices.GetService<IService?>(),
             context.GetRequiredService<IService>()
             );
         
+        AfterMethod(context);
         return default;
     }
+    partial void BeforeMethod(ResolverContext context);
+    partial void AfterMethod(ResolverContext context);
 }
 
 public static class DogControllerExtensions

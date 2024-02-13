@@ -12,7 +12,7 @@ using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
 
-public static class DogController
+public static partial class DogController
 {
     public static ValueTask Name(ResolverContext context)
     {

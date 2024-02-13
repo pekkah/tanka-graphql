@@ -13,23 +13,33 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tests;
 
-public static class WorldController
+public static partial class WorldController
 {
     public static ValueTask Hello(ResolverContext context)
     {
+        BeforeHello(context);
+        
         context.ResolvedValue = ((World)context.ObjectValue).Hello(
             context.GetArgument<string>("name")
             );
         
+        AfterHello(context);
         return default;
     }
+    partial void BeforeHello(ResolverContext context);
+    partial void AfterHello(ResolverContext context);
 
     public static async ValueTask HelloAsync(ResolverContext context)
     {
+        BeforeHelloAsync(context);
+        
         context.ResolvedValue = await ((World)context.ObjectValue).HelloAsync(
             context.GetArgument<string>("name")
             );
+        AfterHelloAsync(context);
     }
+    partial void BeforeHelloAsync(ResolverContext context);
+    partial void AfterHelloAsync(ResolverContext context);
 }
 
 public static class WorldControllerExtensions
