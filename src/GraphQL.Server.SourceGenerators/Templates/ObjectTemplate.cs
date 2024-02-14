@@ -61,11 +61,11 @@ public class ObjectTemplate
             return default;
         }
         
-        partial void Before{{method.name}}(SubscriberContext context);
-        partial void After{{method.name}}(SubscriberContext context);
+        static partial void Before{{method.name}}(SubscriberContext context);
+        static partial void After{{method.name}}(SubscriberContext context);
         {{~ end ~}}
-        partial void Before{{method.resolver_name}}(ResolverContext context);
-        partial void After{{method.resolver_name}}(ResolverContext context);
+        static partial void Before{{method.resolver_name}}(ResolverContext context);
+        static partial void After{{method.resolver_name}}(ResolverContext context);
         
         """;
 
