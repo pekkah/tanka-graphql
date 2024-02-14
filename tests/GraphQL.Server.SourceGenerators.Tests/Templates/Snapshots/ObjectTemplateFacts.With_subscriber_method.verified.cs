@@ -34,10 +34,10 @@ public static partial class DogController
         return default;
     }
     
-    partial void BeforeMethod(SubscriberContext context);
-    partial void AfterMethod(SubscriberContext context);
-    partial void BeforeResolveMethod(ResolverContext context);
-    partial void AfterResolveMethod(ResolverContext context);
+    static partial void BeforeMethod(SubscriberContext context);
+    static partial void AfterMethod(SubscriberContext context);
+    static partial void BeforeResolveMethod(ResolverContext context);
+    static partial void AfterResolveMethod(ResolverContext context);
 }
 
 public static class DogControllerExtensions

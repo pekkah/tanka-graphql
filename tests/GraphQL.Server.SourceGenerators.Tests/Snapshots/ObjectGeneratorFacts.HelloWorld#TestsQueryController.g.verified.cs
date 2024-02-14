@@ -24,8 +24,8 @@ public static partial class QueryController
         AfterWorld(context);
         return default;
     }
-    partial void BeforeWorld(ResolverContext context);
-    partial void AfterWorld(ResolverContext context);
+    static partial void BeforeWorld(ResolverContext context);
+    static partial void AfterWorld(ResolverContext context);
 }
 
 public static class QueryControllerExtensions

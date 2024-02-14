@@ -25,8 +25,8 @@ public static partial class QueryController
         AfterPerson(context);
         return default;
     }
-    partial void BeforePerson(ResolverContext context);
-    partial void AfterPerson(ResolverContext context);
+    static partial void BeforePerson(ResolverContext context);
+    static partial void AfterPerson(ResolverContext context);
 }
 
 public static class QueryControllerExtensions

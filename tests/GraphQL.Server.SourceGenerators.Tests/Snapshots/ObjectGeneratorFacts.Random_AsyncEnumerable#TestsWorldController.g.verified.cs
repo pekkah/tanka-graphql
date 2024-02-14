@@ -39,10 +39,10 @@ public static partial class WorldController
         return default;
     }
     
-    partial void BeforeRandom(SubscriberContext context);
-    partial void AfterRandom(SubscriberContext context);
-    partial void BeforeResolveRandom(ResolverContext context);
-    partial void AfterResolveRandom(ResolverContext context);
+    static partial void BeforeRandom(SubscriberContext context);
+    static partial void AfterRandom(SubscriberContext context);
+    static partial void BeforeResolveRandom(ResolverContext context);
+    static partial void AfterResolveRandom(ResolverContext context);
 }
 
 public static class WorldControllerExtensions

@@ -26,8 +26,8 @@ public static partial class WorldController
         AfterHello(context);
         return default;
     }
-    partial void BeforeHello(ResolverContext context);
-    partial void AfterHello(ResolverContext context);
+    static partial void BeforeHello(ResolverContext context);
+    static partial void AfterHello(ResolverContext context);
 
     public static async ValueTask HelloAsync(ResolverContext context)
     {
@@ -38,8 +38,8 @@ public static partial class WorldController
             );
         AfterHelloAsync(context);
     }
-    partial void BeforeHelloAsync(ResolverContext context);
-    partial void AfterHelloAsync(ResolverContext context);
+    static partial void BeforeHelloAsync(ResolverContext context);
+    static partial void AfterHelloAsync(ResolverContext context);
 }
 
 public static class WorldControllerExtensions

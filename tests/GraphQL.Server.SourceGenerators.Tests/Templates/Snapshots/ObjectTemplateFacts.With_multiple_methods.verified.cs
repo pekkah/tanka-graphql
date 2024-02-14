@@ -24,8 +24,8 @@ public static partial class DogController
         AfterMethod(context);
         return default;
     }
-    partial void BeforeMethod(ResolverContext context);
-    partial void AfterMethod(ResolverContext context);
+    static partial void BeforeMethod(ResolverContext context);
+    static partial void AfterMethod(ResolverContext context);
 
     public static ValueTask Method2(ResolverContext context)
     {
@@ -36,8 +36,8 @@ public static partial class DogController
         AfterMethod2(context);
         return default;
     }
-    partial void BeforeMethod2(ResolverContext context);
-    partial void AfterMethod2(ResolverContext context);
+    static partial void BeforeMethod2(ResolverContext context);
+    static partial void AfterMethod2(ResolverContext context);
 }
 
 public static class DogControllerExtensions

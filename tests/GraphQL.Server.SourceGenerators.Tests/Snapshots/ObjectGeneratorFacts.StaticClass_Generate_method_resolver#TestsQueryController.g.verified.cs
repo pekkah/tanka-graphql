@@ -26,8 +26,8 @@ public static partial class QueryController
         AfterId(context);
         return default;
     }
-    partial void BeforeId(ResolverContext context);
-    partial void AfterId(ResolverContext context);
+    static partial void BeforeId(ResolverContext context);
+    static partial void AfterId(ResolverContext context);
 }
 
 public static class QueryControllerExtensions
