@@ -13,17 +13,21 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tests;
 
-public static class WorldController
+public static partial class WorldController
 {
     public static ValueTask ResolveRandom(ResolverContext context)
     {
-        context.ResolvedValue = context.ObjectValue;
+        BeforeResolveRandom(context);
         
+        context.ResolvedValue = context.ObjectValue;
+        AfterResolveRandom(context);
         return default;
     }
     
     public static ValueTask Random(SubscriberContext context, CancellationToken cancellationToken)
     {
+        BeforeRandom(context);
+        
         context.SetResult(((World)context.ObjectValue).Random(
             context.GetArgument<int>("from"),
             context.GetArgument<int>("to"),
@@ -31,8 +35,14 @@ public static class WorldController
             cancellationToken
             ));
         
+        AfterRandom(context);
         return default;
     }
+    
+    static partial void BeforeRandom(SubscriberContext context);
+    static partial void AfterRandom(SubscriberContext context);
+    static partial void BeforeResolveRandom(ResolverContext context);
+    static partial void AfterResolveRandom(ResolverContext context);
 }
 
 public static class WorldControllerExtensions

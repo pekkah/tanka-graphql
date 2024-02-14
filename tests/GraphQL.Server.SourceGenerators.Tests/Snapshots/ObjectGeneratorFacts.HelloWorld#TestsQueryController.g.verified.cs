@@ -13,14 +13,19 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace Tests;
 
-public static class QueryController
+public static partial class QueryController
 {
     public static ValueTask World(ResolverContext context)
     {
+        BeforeWorld(context);
+        
         context.ResolvedValue = Query.World();
         
+        AfterWorld(context);
         return default;
     }
+    static partial void BeforeWorld(ResolverContext context);
+    static partial void AfterWorld(ResolverContext context);
 }
 
 public static class QueryControllerExtensions

@@ -31,16 +31,20 @@ public class ObjectTemplate
         ~}}
         public static {{ $prefix }}ValueTask {{method.resolver_name}}(ResolverContext context)
         {
+            Before{{method.resolver_name}}(context);
+            
             {{~ if method.is_subscription ~}}
             context.ResolvedValue = context.ObjectValue;
-            
+            After{{method.resolver_name}}(context);
             return default;
             {{~ else ~}}
             {{~ if method.is_async ~}}
             context.ResolvedValue = await {{$instanceOrStatic}}.{{method.name}}{{~ include "parameters" method ~}};
+            After{{method.resolver_name}}(context);
             {{~ else ~}}
             context.ResolvedValue = {{$instanceOrStatic}}.{{method.name}}{{~include "parameters" method ~}};
             
+            After{{method.resolver_name}}(context);
             return default;
             {{~ end ~}}
             {{~ end ~}}
@@ -49,11 +53,20 @@ public class ObjectTemplate
         
         public static ValueTask {{method.name}}(SubscriberContext context, CancellationToken cancellationToken)
         {
+            Before{{method.name}}(context);
+            
             context.SetResult({{$instanceOrStatic}}.{{method.name}}{{~ include "parameters" method ~}});
             
+            After{{method.name}}(context);
             return default;
         }
+        
+        static partial void Before{{method.name}}(SubscriberContext context);
+        static partial void After{{method.name}}(SubscriberContext context);
         {{~ end ~}}
+        static partial void Before{{method.resolver_name}}(ResolverContext context);
+        static partial void After{{method.resolver_name}}(ResolverContext context);
+        
         """;
 
     private const string ParametersTemplate =
@@ -106,7 +119,7 @@ public class ObjectTemplate
         namespace {{ namespace }};
         {{~ end ~}}
 
-        public static class {{name}}Controller
+        public static partial class {{name}}Controller
         {
             {{~ for property in properties ~}}
             {{ include "property_resolver" property name }}
