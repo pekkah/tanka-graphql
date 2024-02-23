@@ -171,9 +171,7 @@ builder.AddTankaGraphQL()
         options.AddGeneratedTypes(types =&gt;
         {
             // Add generated controllers
-            types
-                .AddQueryController()
-                .AddSubscriptionController();
+            types.AddGlobalTypes();
         });
     });
 
@@ -202,6 +200,27 @@ public static partial class Subscription
             await Task.Delay(500, cancellationToken);
         }
     }
+
+    /// &lt;summary&gt;
+    ///     This is subscription field producing values implementing interface
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
+    public static async IAsyncEnumerable&lt;IValue&gt; RandomValues(int count, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var r = new Random();
+
+        for (var i = 0; i &lt; count; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var next = r.Next(0, 2);
+            if (next == 0)
+                yield return new IntValue { Value = next };
+            else                 
+                yield return new StringValue { Value = next.ToString(&quot;F&quot;) };
+            
+            await Task.Delay(500, cancellationToken);
+        }
+    }
 }
 
 [ObjectType]
@@ -209,6 +228,28 @@ public static partial class Query
 {
     // this is required as the graphiql will error without a query field
     public static string Hello() =&gt; &quot;Hello World!&quot;;
+}
+
+[InterfaceType]
+public partial interface IValue
+{
+    public string Hello { get; }
+}
+
+[ObjectType]
+public partial class IntValue : IValue
+{
+    public required int Value { get; init; }
+
+    public string Hello =&gt; GetType().Name;
+}
+
+[ObjectType]
+public partial class StringValue : IValue
+{
+    public required string Value { get; init; }
+
+    public string Hello =&gt; GetType().Name;
 }
 </code></pre>
                     
