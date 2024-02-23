@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Microsoft.CodeAnalysis;
 using System.Linq;
@@ -444,6 +445,4 @@ public class TypeHelper
             .Select(u => u.ToString())
             .ToList();
     }
-
- 
 }

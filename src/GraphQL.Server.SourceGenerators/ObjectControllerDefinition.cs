@@ -9,14 +9,19 @@ public class ObjectControllerDefinition: TypeDefinition, IEquatable<ObjectContro
     public List<ObjectPropertyDefinition> Properties { get; init; } = [];
 
     public List<ObjectMethodDefinition> Methods { get; init; } = [];
-    
-    public IEnumerable<ObjectMethodDefinition> Subscribers => Methods.Where(m => m.IsSubscription);
+
+    public IReadOnlyList<ObjectMethodDefinition> AllMethods =>
+        Methods.Concat(Implements.SelectMany(i => i.Methods)).ToList();
+
+    public IEnumerable<ObjectMethodDefinition> AllSubscribers => AllMethods.Where(m => m.IsSubscription);
        
     public ParentClass? ParentClass { get; init;  }
 
     public bool IsStatic { get; init; }
 
     public IReadOnlyList<string> Usings { get; init; } = [];
+
+    public IReadOnlyList<BaseDefinition> Implements { get; set; } = [];
 
     public bool Equals(ObjectControllerDefinition? other)
     {
@@ -27,7 +32,8 @@ public class ObjectControllerDefinition: TypeDefinition, IEquatable<ObjectContro
                && Methods.SequenceEqual(other.Methods)
                && ParentClass?.Equals(other.ParentClass) == true
                && IsStatic == other.IsStatic
-               && Usings.SequenceEqual(other.Usings);
+               && Usings.SequenceEqual(other.Usings)
+               && Implements.SequenceEqual(other.Implements);
     }
 
     public override bool Equals(object? obj)

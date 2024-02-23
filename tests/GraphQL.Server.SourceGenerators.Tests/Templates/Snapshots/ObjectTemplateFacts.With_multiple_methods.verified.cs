@@ -52,7 +52,8 @@ public static class DogControllerExtensions
                 { "method: String!", DogController.Method },
                 { "method2: Float!", DogController.Method2 }
             }            ));
-
+            
+            
         return builder;
     }
 }

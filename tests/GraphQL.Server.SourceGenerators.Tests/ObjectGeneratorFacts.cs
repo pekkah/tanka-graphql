@@ -184,4 +184,30 @@ public class ObjectGeneratorFacts
 
         return TestHelper<ObjectTypeGenerator>.Verify(source);
     }
+
+    [Fact]
+    public Task Implemented_types()
+    {
+        var source = """
+                     using Tanka.GraphQL.Server;
+
+                     namespace Tests;
+                     
+                     [InterfaceType]
+                     public partial interface IValue
+                     {
+                         public string Hello { get; }
+                     }
+                     
+                     [ObjectType]
+                     public partial class StringValue : IValue
+                     {
+                         public required string Value { get; init; }
+                         
+                         public string Hello => $"Hello from {__Typename}";
+                     }
+                     """;
+
+        return TestHelper<ObjectTypeGenerator>.Verify(source);
+    }
 }
