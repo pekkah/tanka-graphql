@@ -630,4 +630,100 @@ public class ObjectTemplateFacts
         /* Then */
         await VerifyTemplate(actual);
     }
+
+    [Fact]
+    public async Task With_implements()
+    {
+        /* Given */
+        var template = new ObjectTemplate
+        {
+            Namespace = "Tests",
+            Name = "Dog",
+            TypeName = "Dog",
+            Usings =
+            [
+                "using Animals;"
+            ],
+            NamedTypeExtension = NamedTypeExtension.Render("class", "Dog", "Dog"),
+            Methods = [],
+            Properties = [],
+            Implements = 
+            [
+                new BaseDefinition(true, "Person", "Types", "Person", [], [])
+            ]
+        };
+
+        /* When */
+        var actual = template.Render();
+
+        /* Then */
+        await VerifyTemplate(actual);
+    }
+
+    [Fact]
+    public async Task With_multiple_implements()
+    {
+        /* Given */
+        var template = new ObjectTemplate
+        {
+            Namespace = "Tests",
+            Name = "Dog",
+            TypeName = "Dog",
+            Usings =
+            [
+                "using Animals;"
+            ],
+            NamedTypeExtension = NamedTypeExtension.Render("class", "Dog", "Dog"),
+            Methods = [],
+            Properties = [],
+            Implements =
+            [
+                new BaseDefinition(true, "Person", "Types", "Person", [], []),
+                new BaseDefinition(false, "Crazy", "Types", "Crazy", [], [])
+            ]
+        };
+
+        /* When */
+        var actual = template.Render();
+
+        /* Then */
+        await VerifyTemplate(actual);
+    }
+
+    [Fact]
+    public async Task With_implements_properties()
+    {
+        /* Given */
+        var template = new ObjectTemplate
+        {
+            Namespace = "Tests",
+            Name = "Dog",
+            TypeName = "Dog",
+            Usings =
+            [
+                "using Animals;"
+            ],
+            NamedTypeExtension = NamedTypeExtension.Render("class", "Dog", "Dog"),
+            Methods = [],
+            Properties = [],
+            Implements =
+            [
+                new BaseDefinition(true, "Person", "Types", "Person", [
+                    new ObjectPropertyDefinition()
+                    {
+                        Name = "Name",
+                        ReturnType = "string",
+                        ClosestMatchingGraphQLTypeName = "String!",
+                        IsStatic = false,
+                    }
+                ], [])
+            ]
+        };
+
+        /* When */
+        var actual = template.Render();
+
+        /* Then */
+        await VerifyTemplate(actual);
+    }
 }

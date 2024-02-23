@@ -41,7 +41,8 @@ public static class DogControllerExtensions
             {
                 { "method(primitive: Int!): String!", DogController.Method }
             }            ));
-
+            
+            
         return builder;
     }
 }

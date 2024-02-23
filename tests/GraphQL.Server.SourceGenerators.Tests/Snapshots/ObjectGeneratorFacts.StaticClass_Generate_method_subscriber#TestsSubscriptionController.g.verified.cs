@@ -60,7 +60,8 @@ public static class SubscriptionControllerExtensions
                 { "random(from: Int!, to: Int!): Int!", SubscriptionController.Random }
             }
             ));
-
+            
+            
         return builder;
     }
 }

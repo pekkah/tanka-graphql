@@ -1461,6 +1461,9 @@ public static class ExecutionRules
             object? locationDefaultValue
         )
         {
+            if (locationType is null)
+                return false;
+            
             if (locationType is NonNullType nonNullTypeTypeLocationType && varType is not NonNullType)
             {
                 var hasNonNullTypeTypeVariableDefaultValue = varDefaultValue != null;

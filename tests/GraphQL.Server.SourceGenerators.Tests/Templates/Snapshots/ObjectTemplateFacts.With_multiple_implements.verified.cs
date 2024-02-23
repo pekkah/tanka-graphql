@@ -15,19 +15,6 @@ namespace Tests;
 
 public static partial class DogController
 {
-    public static ValueTask Method(ResolverContext context)
-    {
-        BeforeMethod(context);
-        
-        context.ResolvedValue = ((Dog)context.ObjectValue).Method(
-            context.RequestServices
-            );
-        
-        AfterMethod(context);
-        return default;
-    }
-    static partial void BeforeMethod(ResolverContext context);
-    static partial void AfterMethod(ResolverContext context);
 }
 
 public static class DogControllerExtensions
@@ -39,9 +26,12 @@ public static class DogControllerExtensions
             "Dog",
             new FieldsWithResolvers()
             {
-                { "method: String!", DogController.Method }
             }            ));
             
+        builder.Builder.Configure(options => options.Builder.Add(
+            """
+            extend type Dog implements Person & Crazy
+            """));
             
         return builder;
     }

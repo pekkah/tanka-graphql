@@ -19,6 +19,7 @@ public class ObjectTypeEmitter
             Methods = definition.Methods,
             Properties = definition.Properties,
             Usings = definition.Usings,
+            Implements = definition.Implements,
             NamedTypeExtension = NamedTypeExtension.Render( 
                     "class", 
                     definition.TargetType,

@@ -168,7 +168,14 @@ public class ObjectTemplate
                     {{~ end ~}} 
                     {{~ end ~}}
                     ));
-        
+                    
+                {{~ if implements.size > 0 ~}}
+                builder.Builder.Configure(options => options.Builder.Add(
+                    """
+                    extend type {{name}} implements {{ for base in implements ~}}{{base.graph_qlname}}{{~ if for.last ~}}{{~ else }} & {{ end ~}}{{~ end }}
+                    """));
+                    {{~ end ~}}
+                    
                 return builder;
             }
         }
@@ -211,13 +218,24 @@ public class ObjectTemplate
 
     public required string? TypeName { get; set; }
 
+    public IReadOnlyList<ObjectPropertyDefinition> AllProperties =>
+        Properties.Concat(Implements.SelectMany(i => i.Properties)).ToList();
+
     public required IEnumerable<ObjectPropertyDefinition> Properties { get; set; } = [];
 
+    public IReadOnlyList<ObjectMethodDefinition> AllMethods =>
+        Methods.Concat(Implements.SelectMany(i => i.Methods))
+            .OrderBy(m => m.Name)
+            .ToList();
+
     public required IEnumerable<ObjectMethodDefinition> Methods { get; set; } = [];
+    
     
     public IEnumerable<ObjectMethodDefinition> Subscribers => Methods.Where(m => m.IsSubscription);
 
     public required string NamedTypeExtension { get; set; }
+    
+    public IReadOnlyList<BaseDefinition> Implements { get; set; } = [];
 
     public string Render()
     {

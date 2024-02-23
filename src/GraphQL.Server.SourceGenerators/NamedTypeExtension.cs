@@ -52,4 +52,20 @@ public static class NamedTypeExtension
 
         return graphQLName;
     }
+
+    public static string GetName(INamedTypeSymbol namedType)
+    {
+        var graphQLNameAttribute = namedType.GetAttributes()
+            .FirstOrDefault(attribute => attribute.AttributeClass?.Name == "GraphQLNameAttribute");
+
+        if (graphQLNameAttribute != null)
+        {
+            var graphQLName = (string?)graphQLNameAttribute.ConstructorArguments[0].Value ?? string.Empty;
+            
+            if (!string.IsNullOrWhiteSpace(graphQLName))
+                return graphQLName;
+        }
+
+        return namedType.Name;
+    }
 }

@@ -34,8 +34,14 @@ namespace Tanka.GraphQL.Server.SourceGenerators
                 Properties = properties,
                 Methods = methods,
                 ParentClass = TypeHelper.GetParentClasses(classDeclaration),
-                Usings = TypeHelper.GetUsings(classDeclaration)
+                Usings = TypeHelper.GetUsings(classDeclaration),
+                Implements = GetImplements(context.SemanticModel, classDeclaration),
             };
+        }
+
+        private static IReadOnlyList<BaseDefinition> GetImplements(SemanticModel model, ClassDeclarationSyntax classDeclaration)
+        {
+            return SymbolHelper.GetImplements(model.GetDeclaredSymbol(classDeclaration) ?? throw new InvalidOperationException());
         }
 
         private static (List<ObjectPropertyDefinition> Properties, List<ObjectMethodDefinition> Methods) ParseMembers(

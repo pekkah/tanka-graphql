@@ -39,7 +39,8 @@ public static class QueryControllerExtensions
             {
                 { "world: World!", QueryController.World }
             }            ));
-
+            
+            
         return builder;
     }
 }

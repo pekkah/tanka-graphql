@@ -41,7 +41,8 @@ public static class QueryControllerExtensions
             {
                 { "person(id: Int!): Person!", QueryController.Person }
             }            ));
-
+            
+            
         return builder;
     }
 }

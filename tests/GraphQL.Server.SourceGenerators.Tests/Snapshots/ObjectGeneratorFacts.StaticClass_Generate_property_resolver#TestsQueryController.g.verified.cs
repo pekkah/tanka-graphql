@@ -33,7 +33,8 @@ public static class QueryControllerExtensions
             {
                 { "id: String!", QueryController.Id }
             }            ));
-
+            
+            
         return builder;
     }
 }
