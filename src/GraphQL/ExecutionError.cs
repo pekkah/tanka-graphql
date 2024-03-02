@@ -1,4 +1,6 @@
 ﻿using System.Text.Json.Serialization;
+
+using Tanka.GraphQL.Json;
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL;
@@ -13,9 +15,12 @@ public class ExecutionError
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<SerializedLocation>? Locations { get; set; }
 
-    [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
+    [JsonPropertyName("message")] 
+    public string Message { get; set; } = string.Empty;
 
-    [JsonPropertyName("path")] public object[] Path { get; set; } = Array.Empty<object>();
+    [JsonPropertyName("path")]
+    [JsonConverter(typeof(PathSegmentsConverter))]
+    public object[] Path { get; set; } = Array.Empty<object>();
 
     public void Extend(string key, object value)
     {

@@ -15,6 +15,7 @@ public record ExecutionResult
 
     [JsonPropertyName("data")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(NestedDictionaryConverter))]
     public IReadOnlyDictionary<string, object?>? Data
     {
         get => _data;

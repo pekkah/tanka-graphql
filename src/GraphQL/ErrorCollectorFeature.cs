@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+
 using Tanka.GraphQL.Features;
 
 namespace Tanka.GraphQL;

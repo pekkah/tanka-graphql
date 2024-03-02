@@ -1,4 +1,5 @@
 ﻿using System.Net.WebSockets;
+using System.Threading.Channels;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -83,8 +84,11 @@ public partial class GraphQLWSConnection
 
                 if (message is not ConnectionInit initMessage)
                 {
-                    await _webSocket.CloseOutputAsync(CloseCode.Unauthorized, "Expected connection_init messsage",
+                    await _webSocket.CloseOutputAsync(
+                        CloseCode.Unauthorized,
+                        "Expected connection_init messsage",
                         CancellationToken.None);
+
                     Log.ExpectedInitMessageGot(_logger, message.Type);
                     return;
                 }
@@ -103,6 +107,10 @@ public partial class GraphQLWSConnection
         catch (OperationCanceledException)
         {
             // noop
+            Log.OperationCancelled(_logger);
+        }
+        catch (ChannelClosedException)
+        {
             Log.OperationCancelled(_logger);
         }
     }

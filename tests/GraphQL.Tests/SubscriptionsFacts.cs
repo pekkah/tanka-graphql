@@ -18,7 +18,7 @@ public class Message
 public class SubscriptionsFacts
 {
     private readonly ISchema _executable;
-    private readonly BroadcastChannel<Message> _messageBroadcast;
+    private readonly EventAggregator<Message> _messageBroadcast;
     private readonly Channel<Message> _messageChannel;
 
     public SubscriptionsFacts()
@@ -26,7 +26,7 @@ public class SubscriptionsFacts
         // data
         var messages = new List<Message>();
         _messageChannel = Channel.CreateUnbounded<Message>();
-        _messageBroadcast = new BroadcastChannel<Message>(_messageChannel);
+        _messageBroadcast = new EventAggregator<Message>(_messageChannel);
         // schema
         var builder = new SchemaBuilder()
             .Add(@"

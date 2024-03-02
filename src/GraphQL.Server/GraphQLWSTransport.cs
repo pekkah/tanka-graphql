@@ -1,4 +1,5 @@
-﻿using System.Net.WebSockets;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.WebSockets;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -36,10 +37,12 @@ public class GraphQLWSTransport : IGraphQLTransport
         WebSocket webSocket,
         GraphQLRequestDelegate requestPipeline)
     {
-        var connection = new GraphQLWSConnection(webSocket, requestPipeline, httpContext);
-        await connection.Connect(httpContext.RequestAborted);
-    }
+        var handler = new WebSocketTransportHandler(
+            requestPipeline,
+            httpContext);
 
+        await handler.Handle(webSocket);
+    }
 
     private RequestDelegate ProcessRequest(GraphQLRequestDelegate pipeline)
     {
@@ -56,6 +59,15 @@ public class GraphQLWSTransport : IGraphQLTransport
                 return;
             }
 
+            if (httpContext.WebSockets.WebSocketRequestedProtocols?.Contains(EchoProtocol.Protocol) == true)
+            {
+                using WebSocket echoWebSocket = await httpContext.WebSockets
+                    .AcceptWebSocketAsync(EchoProtocol.Protocol);
+
+                await EchoProtocol.Run(echoWebSocket);
+                return;
+            }
+
             if (httpContext.WebSockets.WebSocketRequestedProtocols?.Contains(SubProtocol) == false)
             {
                 httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
@@ -67,7 +79,7 @@ public class GraphQLWSTransport : IGraphQLTransport
                 return;
             }
 
-            WebSocket webSocket = await httpContext.WebSockets
+            using WebSocket webSocket = await httpContext.WebSockets
                 .AcceptWebSocketAsync(SubProtocol);
 
             await HandleProtocol(httpContext, webSocket, pipeline);

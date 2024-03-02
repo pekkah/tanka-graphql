@@ -41,7 +41,7 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
             // Begin sending and receiving. Receiving must be started first because ExecuteAsync enables SendAsync.
             var receiving = StartReadSocket(_socket, cancellationToken);
             var processing = StartReadMessages(cancellationToken);
-            var sending = StartSending(_socket);
+            var sending = StartSending(_socket, cancellationToken);
 
             // Wait for send or receive to complete
             var trigger = await Task.WhenAny(receiving, sending, processing);
@@ -111,8 +111,15 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
             {
                 var messageResult = await Application.Reader.ReadAsync(cancellationToken);
 
-                if (messageResult.IsCanceled)
+                if (messageResult.IsCanceled || cancellationToken.IsCancellationRequested)
                     break;
+
+                if (messageResult.IsCompleted)
+                {
+                    Input.Writer.TryComplete();
+                    await Input.Reader.Completion;
+                    return;
+                }
 
                 var buffer = messageResult.Buffer;
                 var message = ReadMessageCore(buffer);
@@ -204,7 +211,7 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
             }
         }
 
-        private async Task StartSending(WebSocket socket)
+        private async Task StartSending(WebSocket socket, CancellationToken cancellationToken)
         {
             Exception? error = null;
 
@@ -212,7 +219,7 @@ namespace Tanka.GraphQL.Server.WebSockets.WebSocketPipe
             {
                 while (true)
                 {
-                    var message = await Output.Reader.ReadAsync();
+                    var message = await Output.Reader.ReadAsync(cancellationToken);
                     var bytes = JsonSerializer.SerializeToUtf8Bytes<T>(message, _jsonOptions);
 
                     //todo: do we need cancellation token

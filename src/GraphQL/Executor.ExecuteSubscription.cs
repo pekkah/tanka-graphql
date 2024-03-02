@@ -117,9 +117,12 @@ public partial class Executor
         
         return Core(resolverContext, cancellationToken);
 
-        static async IAsyncEnumerable<object?> Core(SubscriberContext resolverContext, [EnumeratorCancellation]CancellationToken cancellationToken)
+        static async IAsyncEnumerable<object?> Core(
+            SubscriberContext resolverContext, 
+            [EnumeratorCancellation]CancellationToken cancellationToken)
         {
-            await using var e = resolverContext.ResolvedValue!.GetAsyncEnumerator(cancellationToken);
+            await using var e = resolverContext.ResolvedValue!
+                .GetAsyncEnumerator(cancellationToken);
 
             while (true)
             {
@@ -222,8 +225,9 @@ public partial class Executor
 
             return new ExecutionResult { Data = data, Errors = subContext.GetErrors().ToList() };
         }
-        catch (FieldException)
+        catch (FieldException x)
         {
+            subContext.AddError(x);
             return new ExecutionResult { Errors = subContext.GetErrors().ToList() };
         }
     }

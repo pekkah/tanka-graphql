@@ -4,15 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace Tanka.GraphQL.Json;
 
-public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<string, object?>>
+public class NestedDictionaryConverter(bool useDecimals = false) : JsonConverter<IReadOnlyDictionary<string, object?>>
 {
-    private readonly bool _useDecimals;
-
-    public NestedDictionaryConverter(bool useDecimals = false)
-    {
-        _useDecimals = useDecimals;
-    }
-
     public NestedDictionaryConverter() : this(false)
     {
 
@@ -51,10 +44,13 @@ public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<strin
         IReadOnlyDictionary<string, object?> value,
         JsonSerializerOptions options)
     {
-        foreach (var kv in value)
+        writer.WriteStartObject();
+        foreach (var (name, keyValue) in value)
         {
-            JsonSerializer.Serialize(writer, kv, options);
+            writer.WritePropertyName(name);
+            JsonSerializer.Serialize(writer, keyValue, options);
         }
+        writer.WriteEndObject();
     }
 
     private object? ReadValue(ref Utf8JsonReader reader, JsonSerializerOptions options)
@@ -104,7 +100,7 @@ public class NestedDictionaryConverter : JsonConverter<IReadOnlyDictionary<strin
         if (reader.TryGetInt64(out var l))
             v = i;
 
-        if (_useDecimals && reader.TryGetDecimal(out var m))
+        if (useDecimals && reader.TryGetDecimal(out var m))
             v = m;
         else if (reader.TryGetDouble(out var d))
             v = d;
