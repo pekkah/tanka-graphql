@@ -25,8 +25,7 @@ public class SubscriptionsFacts
     {
         // data
         var messages = new List<Message>();
-        _messageChannel = Channel.CreateUnbounded<Message>();
-        _messageBroadcast = new EventAggregator<Message>(_messageChannel);
+        _messageBroadcast = new EventAggregator<Message>();
         // schema
         var builder = new SchemaBuilder()
             .Add(@"
