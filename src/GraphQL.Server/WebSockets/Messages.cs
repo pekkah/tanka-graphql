@@ -29,8 +29,12 @@ public class MessageConverter: JsonConverter<MessageBase>
         return messageType switch
         {
             MessageTypes.ConnectionInit => JsonSerializer.Deserialize<ConnectionInit>(ref reader, options),
+            MessageTypes.ConnectionAck => JsonSerializer.Deserialize<ConnectionAck>(ref reader, options),
             MessageTypes.Ping => JsonSerializer.Deserialize<Ping>(ref reader, options),
+            MessageTypes.Pong => JsonSerializer.Deserialize<Pong>(ref reader, options),
             MessageTypes.Subscribe => JsonSerializer.Deserialize<Subscribe>(ref reader, options),
+            MessageTypes.Next => JsonSerializer.Deserialize<Next>(ref reader, options),
+            MessageTypes.Error => JsonSerializer.Deserialize<Error>(ref reader, options),
             MessageTypes.Complete => JsonSerializer.Deserialize<Complete>(ref reader, options),
             _ => throw new JsonException()
         };

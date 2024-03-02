@@ -19,7 +19,7 @@ public class GraphQLWSTransport : IGraphQLTransport
     ///     Due to historical reasons this actually is the protocol name used
     ///     by the newer protocol.
     /// </summary>
-    public static string SubProtocol = "graphql-transport-ws";
+    public const string GraphQLTransportWSProtocol = "graphql-transport-ws";
 
     public IEndpointConventionBuilder Map(string pattern, IEndpointRouteBuilder routes,
         GraphQLRequestDelegate requestDelegate)
@@ -36,10 +36,12 @@ public class GraphQLWSTransport : IGraphQLTransport
         WebSocket webSocket,
         GraphQLRequestDelegate requestPipeline)
     {
-        var connection = new GraphQLWSConnection(webSocket, requestPipeline, httpContext);
-        await connection.Connect(httpContext.RequestAborted);
-    }
+        var handler = new WebSocketTransportHandler(
+            requestPipeline,
+            httpContext);
 
+        await handler.Handle(webSocket);
+    }
 
     private RequestDelegate ProcessRequest(GraphQLRequestDelegate pipeline)
     {
@@ -56,19 +58,28 @@ public class GraphQLWSTransport : IGraphQLTransport
                 return;
             }
 
-            if (httpContext.WebSockets.WebSocketRequestedProtocols?.Contains(SubProtocol) == false)
+            if (httpContext.WebSockets.WebSocketRequestedProtocols?.Contains(EchoProtocol.Protocol) == true)
+            {
+                using WebSocket echoWebSocket = await httpContext.WebSockets
+                    .AcceptWebSocketAsync(EchoProtocol.Protocol);
+
+                await EchoProtocol.Run(echoWebSocket);
+                return;
+            }
+
+            if (httpContext.WebSockets.WebSocketRequestedProtocols?.Contains(GraphQLTransportWSProtocol) == false)
             {
                 httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
                 {
-                    Detail = $"Request does not contain sub-protocol '{SubProtocol}'."
+                    Detail = $"Request does not contain sub-protocol '{GraphQLTransportWSProtocol}'."
                 });
 
                 return;
             }
 
-            WebSocket webSocket = await httpContext.WebSockets
-                .AcceptWebSocketAsync(SubProtocol);
+            using WebSocket webSocket = await httpContext.WebSockets
+                .AcceptWebSocketAsync(GraphQLTransportWSProtocol);
 
             await HandleProtocol(httpContext, webSocket, pipeline);
         };
