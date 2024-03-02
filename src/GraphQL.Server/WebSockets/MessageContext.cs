@@ -1,7 +1,7 @@
 ﻿namespace Tanka.GraphQL.Server.WebSockets;
 
 public class MessageContext(
-    WebSocketChannel2 channel,
+    WebSocketChannel channel,
     MessageBase contextMessage,
     GraphQLRequestDelegate requestPipeline) : IMessageContext
 {

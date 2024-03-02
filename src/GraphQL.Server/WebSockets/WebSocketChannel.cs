@@ -1,99 +1,90 @@
 ﻿using System.Buffers;
-using System.IO.Pipelines;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading.Channels;
 
-using Microsoft.Extensions.Logging;
-
 namespace Tanka.GraphQL.Server.WebSockets;
 
-public class WebSocketChannel(DuplexWebSocketPipe webSocketPipe, ILogger<WebSocketChannel> logger)
+public class WebSocketChannel(WebSocket webSocket, JsonSerializerOptions jsonOptions)
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly Channel<MessageBase> _input = Channel.CreateUnbounded<MessageBase>();
+    private readonly Channel<MessageBase> _output = Channel.CreateUnbounded<MessageBase>();
 
-    private readonly Channel<MessageBase> _fromTransport =
-        Channel.CreateUnbounded<MessageBase>();
-    
-    public ChannelReader<MessageBase> Reader => _fromTransport.Reader;
-    
+    public ChannelReader<MessageBase> Reader => _input.Reader;
+
+    public ChannelWriter<MessageBase> Writer => _output.Writer;
+
     public async Task Run()
     {
-        webSocketPipe.Start();
-        
-        Task read = StartReading();
-        
-        await Task.WhenAll(read);
+        Task receiving = StartReceiving(webSocket, _input.Writer, jsonOptions);
+        Task writing = StartWriting(webSocket, _output.Reader, jsonOptions);
 
-        await webSocketPipe.Complete();
+        await Task.WhenAll(receiving, writing);
     }
 
-    public async Task Write(MessageBase message)
+    private static async Task StartWriting(
+        WebSocket webSocket,
+        ChannelReader<MessageBase> reader,
+        JsonSerializerOptions jsonSerializerOptions)
     {
-        var buffer = JsonSerializer.SerializeToUtf8Bytes(message, JsonOptions);
-        await webSocketPipe.Write(buffer);
-    }
-
-
-    private async Task StartReading()
-    {
-        while (true)
-        {
-            ReadResult result = await webSocketPipe.Reader.ReadAsync(
-                CancellationToken.None
-            );
-
-            if (result.IsCanceled)
-                break;
-
-            if (result.IsCompleted)
-                break;
-
-            ReadOnlySequence<byte> buffer = result.Buffer;
-            MessageBase? message = Deserialize(ref buffer);
-            if (message != null)
+        while (await reader.WaitToReadAsync() && webSocket.State == WebSocketState.Open)
+            if (reader.TryRead(out MessageBase? data))
             {
-                logger.LogDebug("Received message {MessageType}", message.Type);
-                await _fromTransport.Writer.WriteAsync(message, CancellationToken.None);
-                webSocketPipe.Reader.AdvanceTo(buffer.End);
+                byte[] buffer =
+                    JsonSerializer.SerializeToUtf8Bytes(data, jsonSerializerOptions);
+
+                await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
             }
-            else
+
+        await reader.Completion;
+    }
+
+
+    private static async Task StartReceiving(
+        WebSocket webSocket,
+        ChannelWriter<MessageBase> writer,
+        JsonSerializerOptions jsonSerializerOptions)
+    {
+        Exception? error = null;
+        var buffer = new ArrayBufferWriter<byte>(1024);
+        while (webSocket.State == WebSocketState.Open)
+        {
+            Memory<byte> readBuffer = buffer.GetMemory(1024);
+            ValueWebSocketReceiveResult result = await webSocket.ReceiveAsync(readBuffer, CancellationToken.None);
+            buffer.Advance(result.Count);
+
+            if (result.MessageType == WebSocketMessageType.Close)
+            {
+                await webSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                 break;
+            }
 
+            if (result.EndOfMessage)
+            {
+                var message = JsonSerializer.Deserialize<MessageBase>(
+                    buffer.WrittenSpan,
+                    jsonSerializerOptions
+                );
+
+                if (message is not null)
+                    try
+                    {
+                        await writer.WriteAsync(message);
+                    }
+                    catch (ChannelClosedException)
+                    {
+                        break;
+                    }
+
+                buffer.ResetWrittenCount();
+            }
         }
+
+        writer.TryComplete(error);
     }
 
-    private MessageBase? Deserialize(ref ReadOnlySequence<byte> messageBuffer)
+    public void Complete(Exception? error = null)
     {
-        try
-        {
-            var reader = new Utf8JsonReader(messageBuffer);
-            var message = JsonSerializer.Deserialize<MessageBase>(ref reader, JsonOptions);
-
-            return message;
-        }
-        catch (Exception x)
-        {
-            return null;
-        }
-    }
-
-    public static WebSocketChannel Create(WebSocket webSocket, ILoggerFactory loggerFactory)
-    {
-        var webSocketPipe = new DuplexWebSocketPipe(webSocket);
-        return new WebSocketChannel(webSocketPipe, loggerFactory.CreateLogger<WebSocketChannel>());
-    }
-
-    private volatile bool _isCompleted;
-    
-    public async Task Complete(Exception? error = null)
-    {
-        if (_isCompleted)
-            return;
-        
-        _isCompleted = true;
-        _fromTransport.Writer.Complete(error);
-
-        await webSocketPipe.Complete(error);
+        Writer.TryComplete(error);
     }
 }

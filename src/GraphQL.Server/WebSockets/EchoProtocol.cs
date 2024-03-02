@@ -9,13 +9,13 @@ public static class EchoProtocol
 
     public static async Task Run(WebSocket webSocket)
     {
-        var channel = new WebSocketChannel2(webSocket, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var channel = new WebSocketChannel(webSocket, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         var echo = Echo(channel);
 
         await Task.WhenAll(channel.Run(), echo);
     }
 
-    private static async Task Echo(WebSocketChannel2 channel)
+    private static async Task Echo(WebSocketChannel channel)
     {
         while (await channel.Reader.WaitToReadAsync())
         {

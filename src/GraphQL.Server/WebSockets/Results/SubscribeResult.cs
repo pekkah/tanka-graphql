@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+
 using Tanka.GraphQL.Request;
 
-namespace Tanka.GraphQL.Server.WebSockets;
+namespace Tanka.GraphQL.Server.WebSockets.Results;
 
 public partial class SubscribeResult(
     SubscriptionManager subscriptions,

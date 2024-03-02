@@ -21,14 +21,14 @@ public partial class WebSocketTransportHandler(
             .GetRequiredService<ILoggerFactory>()
             .CreateLogger<WebSocketTransportHandler>();
     
-    private WebSocketChannel2 _channel;
+    private WebSocketChannel _channel;
     private GraphQLTransportWSProtocol _protocol;
 
     [MemberNotNull(nameof(_channel))]
     [MemberNotNull(nameof(_protocol))]
     public async Task Handle(WebSocket webSocket)
     {
-        _channel = new WebSocketChannel2(webSocket, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        _channel = new WebSocketChannel(webSocket, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         _protocol = new GraphQLTransportWSProtocol(
             new SubscriptionManager(
                 httpContext,

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.WebSockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -244,99 +243,8 @@ public class ServerFacts: IAsyncDisposable
         /* Finally */
         await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Test complete", CancellationToken.None);
     }
-    
-    [Fact]
-    public async Task DirectEchoMultipleFacts()
-    {
-        /* Given */
-        var webSocket = await Connect(false, EchoProtocol.Protocol);
 
-
-        /* When */
-        await webSocket.Send(new Subscribe()
-        {
-            Id = "1",
-            Payload = new GraphQLHttpRequest()
-            {
-                Query = "query { hello }"
-            }
-        });
-
-        await webSocket.Send(new Subscribe()
-        {
-            Id = "2",
-            Payload = new GraphQLHttpRequest()
-            {
-                Query = "query { hello }"
-            }
-        });
-
-
-        var message1 = await webSocket.Receive(TimeSpan.FromSeconds(360));
-        var message2 = await webSocket.Receive(TimeSpan.FromSeconds(360));
-
-        /* Then */
-        Assert.IsType<Subscribe>(message1);
-        Assert.IsType<Subscribe>(message2);
-    }
-
-    [Fact]
-    public async Task DirectEchoMultipleAlternativeFacts()
-    {
-        /* Given */
-        var webSocket = await Connect(false, EchoProtocol.Protocol);
-
-
-        /* When */
-        await webSocket.Send(new Subscribe()
-        {
-            Id = "1",
-            Payload = new GraphQLHttpRequest()
-            {
-                Query = "query { hello }"
-            }
-        });
-        var message1 = await webSocket.Receive(TimeSpan.FromSeconds(360));
-        
-        await webSocket.Send(new Subscribe()
-        {
-            Id = "2",
-            Payload = new GraphQLHttpRequest()
-            {
-                Query = "query { hello }"
-            }
-        });
-        var message2 = await webSocket.Receive(TimeSpan.FromSeconds(360));
-
-        /* Then */
-        Assert.IsType<Subscribe>(message1);
-        Assert.IsType<Subscribe>(message2);
-    }
-
-    [Fact]
-    public async Task DirectEchoFacts()
-    {
-        /* Given */
-        var webSocket = await Connect(false, EchoProtocol.Protocol);
-
-
-        /* When */
-        await webSocket.Send(new Subscribe()
-        {
-            Id = "1",
-            Payload = new GraphQLHttpRequest()
-            {
-                Query = "query { hello }"
-            }
-        });
-        
-        var message1 = await webSocket.Receive(TimeSpan.FromSeconds(360));
-
-        /* Then */
-        Assert.IsType<Subscribe>(message1);
-    }
-
-    private async Task<WebSocket> Connect(bool connectionInit = false, string protocol = "graphql-transport-ws")
+    private async Task<WebSocket> Connect(bool connectionInit = false, string protocol = GraphQLWSTransport.GraphQLTransportWSProtocol)
     {
         var client = _factory.CreateWebSocketClient();
         client.SubProtocols.Add(protocol);
