@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/tanka-graphql/">
+    <title>apollo-federation - Tanka GraphQL</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="3.0.0/prism.css" />
+    <style>
+        body {
+            height: 100%;
+            width: 100%;         
+        }
+
+        a {
+            color: rgba(0,0,0,.65);
+        }
+
+        a:hover {
+            color: rgba(8, 8, 8, 0.65);
+        }
+
+        blockquote {
+            border: 1px solid rgba(94, 94, 94, 0.65);
+            border-left: 5px solid rgba(94, 94, 94, 0.65);
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;            
+        }
+
+        .sidebar {
+            margin-bottom: 20px;
+        }
+
+        .sidebar .nav-item {
+            list-style: none;
+        }
+
+        .sidebar .nav-link {
+            display: block;
+            padding: .25rem 1.5rem;
+            font-size: 90%;
+            color: rgba(0,0,0,.65);
+        }
+
+        .sidebar .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .content h1,
+        .content h2,
+        .content h3,
+        .content h4,
+        .content h5,
+        .content h6 {
+            font-weight: 300;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Tanka GraphQL</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="3.0.0/0-getting-started/00-getting-started.html">Getting Started</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="3.0.0/2-language/01-parser.html">Language</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="3.0.0/6-executor/01-executor.html">Executor</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="3.0.0/7-type-system/02-schema.html">Type System</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="3.0.0/4-code-generator/01-samples-sg-basic.html">Code Generation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="3.0.0/3-server/00-index.html">Server</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="3.0.0/10-extensions/tracing.html">Extensions</a>
+                </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+             <li class="nav-item">
+                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
+            </li>
+            <li class="nav-item dropdown justify-content-end">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    3.0.0
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/tanka-graphql/main">main</a>
+                        <a class="dropdown-item" href="/tanka-graphql/3.0.0">3.0.0</a>
+                        <a class="dropdown-item" href="/tanka-graphql/2.0.1">2.0.1</a>
+                        <a class="dropdown-item" href="/tanka-graphql/2.0.0">2.0.0</a>
+                </div>
+            </li>
+        </ul>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row flex-xl-nowrap">
+            <nav class="col-12 col-md-3 col-xl-2 sidebar">
+                <div class="sidebar-sticky">
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=3.0.0/10-extensions/tracing.html>Tracing</a>
+    <ul>
+    </ul>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <a class="nav-link" href=3.0.0/10-extensions/apollo-federation.html>Apollo Federation</a>
+    <ul>
+    </ul>
+</li>    </nav>
+                </div>
+            </nav>
+            <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
+                <h2 id="apollo-federation">Apollo Federation</h2>
+<p>&quot;Implement a single data graph across multiple services&quot;</p>
+<blockquote class="blockquote">
+<p><a href="https://www.apollographql.com/docs/federation/">Specification</a></p>
+</blockquote>
+<h3 id="scope">Scope</h3>
+<p>Tanka GraphQL implements the service section of the Apollo Federation specification
+allowing GraphQL service implemented using it to be joined into graph managed by
+<a href="https://www.apollographql.com/docs/federation/gateway/">Gateway</a>.</p>
+<h3 id="installation">Installation</h3>
+<p>Support is provided as an NuGet package.</p>
+<pre><code class="language-ps">dotnet add package Tanka.GraphQL.Extensions.ApolloFederation
+</code></pre>
+<h3 id="usage">Usage</h3>
+<p>Creating a service requires two steps:</p>
+<ol>
+<li>Define <a href="https://www.apollographql.com/docs/federation/entities/">entities</a> in service schema</li>
+<li>Create federation service from schema</li>
+</ol>
+<p>First step is achived by extending the schema with federation directives which allow you to define your entities.
+Extending is done by first adding the directives to schema using <code>AddFederationDirectives</code> <code>SchemaBuilder</code> extension
+method. Use <code>@key</code> directive to mark object or interface as an entity and specify key fields.</p>
+<p>Second step is after you have your basic schema with entities specified and it will add the required extension
+points to schema, mainly additional fields to query root type.</p>
+<p>Example</p>
+<pre><code class="language-csharp">    public static async Task&lt;ISchema&gt; Create()
+    {
+        var typeDefs = @&quot;
+type Review @key(fields: &quot;&quot;id&quot;&quot;) {
+    id: ID!
+    body: String
+    author: User @provides(fields: &quot;&quot;username&quot;&quot;)
+    product: Product
+}
+
+type User @key(fields: &quot;&quot;id&quot;&quot;) @extends {
+    id: ID! @external
+    username: String @external
+    reviews: [Review]
+}
+
+type Product @key(fields: &quot;&quot;upc&quot;&quot;) @extends {
+    upc: String! @external
+    reviews: [Review]
+}
+
+type Query {
+}
+&quot;;
+
+        var builder = new ExecutableSchemaBuilder();
+        builder.Add(typeDefs);
+        builder.AddSubgraph(new(new DictionaryReferenceResolversMap
+        {
+            [&quot;User&quot;] = UserReference,
+            [&quot;Product&quot;] = ProductReference
+        }));
+        builder.Add(new ResolversMap
+        {
+            [&quot;User&quot;] = new()
+            {
+                { &quot;id&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;User&gt;(u =&gt; u.ID) },
+                { &quot;username&quot;, UserUsername },
+                { &quot;reviews&quot;, UserReviews }
+            },
+            [&quot;Review&quot;] = new()
+            {
+                { &quot;id&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Review&gt;(r =&gt; r.ID) },
+                { &quot;body&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Review&gt;(r =&gt; r.Body) },
+                { &quot;author&quot;, ReviewAuthor },
+                { &quot;product&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Review&gt;(r =&gt; r.Product) }
+            },
+            [&quot;Product&quot;] = new()
+            {
+                { &quot;upc&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Product&gt;(p =&gt; p.Upc) },
+                { &quot;reviews&quot;, ProductReviews }
+            }
+        });
+
+        var schema = await builder.Build();
+
+        return schema;
+    }
+
+</code></pre>
+<h3 id="demo">Demo</h3>
+<p>Demo is provided as an fork of the <a href="https://github.com/pekkah/federation-demo">federation demo</a>. It's modified to use
+<a href="https://github.com/pekkah/tanka-graphql/tree/master/dev/GraphQL.Dev.Reviews">Tanka.GraphQL.Dev.Reviews</a> project as an replacement for reviews service.</p>
+<pre><code class="language-ps">git clone https://github.com/pekkah/tanka-graphql.git
+
+cd tanka-graphql/dev/GraphQL.Dev.Reviews
+dotnet run
+</code></pre>
+<pre><code class="language-ps">git clone https://github.com/pekkah/federation-demo.git
+cd federation-demo
+git switch tanka-graphql-reviews-service
+npm run start-services
+
+# in a yet another prompt
+npm run start-gateway
+
+# open http://localhost:4000 in your browser to test the service
+</code></pre>
+                    
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="3.0.0/prism.js"></script>
+</body>
+</html>
