@@ -172,7 +172,7 @@ public class QueryFacts
         var schema = await new ExecutableSchemaBuilder()
             .Add("Query", new ()
             {
-                { "hello(name: String!): String!", (string name) => $"Hello, {name}" }
+                { "hello(name: String!): String!", (string name) => $"Hello, {name}!" }
             })
             .Build();
 
