@@ -18,5 +18,16 @@ and parser turns these tokens into syntax tree.
 #include::xref://tests:GraphQL.Language.Tests/Nodes/ObjectDefinitionFacts.cs?s=Tanka.GraphQL.Language.Tests.Nodes.ObjectDefinitionFacts.FromString
 ```
 
+### Example: Implicit Conversion from String to ExecutableDocument
+
+```csharp
+ExecutableDocument query = """
+{
+    field1
+    field2
+}
+""";
+```
+
 [draft]: http://spec.graphql.org/draft/
 [readonlyspan<byte>]: https://docs.microsoft.com
