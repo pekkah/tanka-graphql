@@ -36,7 +36,7 @@ jobs:
           ./build-docs.ps1 -Output ./artifacts/gh-pages -CurrentBranch $Env:GITHUB_REF_NAME
       
       - name: Publish build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Docs
           path: |
@@ -51,7 +51,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: Docs
           path: docs
