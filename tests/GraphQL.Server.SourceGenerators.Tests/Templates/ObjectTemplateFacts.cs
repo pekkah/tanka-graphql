@@ -3,7 +3,6 @@ using Tanka.GraphQL.Server.SourceGenerators.Templates;
 
 namespace Tanka.GraphQL.Server.SourceGenerators.Tests.Templates;
 
-[UsesVerify]
 public class ObjectTemplateFacts
 {
     [Fact]

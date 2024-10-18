@@ -1,6 +1,5 @@
 ﻿namespace Tanka.GraphQL.Server.SourceGenerators.Tests;
 
-[UsesVerify]
 public class ObjectGeneratorFacts
 {
     [Fact]

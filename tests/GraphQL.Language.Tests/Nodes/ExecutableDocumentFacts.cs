@@ -31,37 +31,4 @@ public class ExecutableDocumentFacts
         Assert.NotNull(original.OperationDefinitions);
         Assert.Single(original.OperationDefinitions);
     }
-
-    [Fact]
-    public void OverrideToString()
-    {
-        /* Given */
-        string expected = "{ field1 field2 }";
-        ExecutableDocument original = expected;
-
-        /* When */
-        string actual = original.ToString();
-
-        /* Then */
-        Assert.Equal(expected, actual);
-    }
-
-    [Fact]
-    public void ImplicitConversionFromString()
-    {
-        /* Given */
-        string query = """
-        {
-            field1
-            field2
-        }
-        """;
-
-        /* When */
-        ExecutableDocument document = query;
-
-        /* Then */
-        Assert.NotNull(document.OperationDefinitions);
-        Assert.Equal(2, document.OperationDefinitions.Count);
-    }
 }

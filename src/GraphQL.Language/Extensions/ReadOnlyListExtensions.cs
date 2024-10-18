@@ -56,7 +56,7 @@ public static class ReadOnlyListExtensions
 
         return result;
 
-        IEnumerable<T> Joiner<T>(
+        static IEnumerable<T> Joiner<T>(
             IEnumerable<T> left,
             IEnumerable<T> right,
             Func<T, TKey> keySelector,
