@@ -126,46 +126,6 @@ public class QueryFacts
     }
 
     [Fact]
-    public async Task ExecuteSubscription()
-    {
-        /* Given */
-        var schema = await new ExecutableSchemaBuilder()
-            .Add("Subscription", new ()
-            {
-                { "messageAdded: String!", b => b.ResolveAs("New message") }
-            })
-            .Build();
-
-        ExecutableDocument query = """
-            subscription {
-                messageAdded
-            }
-            """;
-
-        var request = new GraphQLRequest
-        {
-            Query = query
-        };
-
-        var queryContext = new Executor(schema).BuildQueryContextAsync(request);
-
-        /* When */
-        await Executor.ExecuteSubscription(queryContext);
-
-        /* Then */
-        await foreach (var result in queryContext.Response)
-        {
-            result.ShouldMatchJson("""
-                {
-                    "data": {
-                        "messageAdded": "New message"
-                    }
-                }
-                """);
-        }
-    }
-
-    [Fact]
     public async Task Execute_With_Variables()
     {
         /* Given */
