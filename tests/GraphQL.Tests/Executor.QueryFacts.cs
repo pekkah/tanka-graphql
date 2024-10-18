@@ -84,4 +84,82 @@ public class QueryFacts
             }
             """);
     }
+
+    [Fact]
+    public async Task ExecuteQueryOrMutation()
+    {
+        /* Given */
+        var schema = await new ExecutableSchemaBuilder()
+            .Add("Query", new ()
+            {
+                { "hello: String!", b => b.ResolveAs("Hello, World!") }
+            })
+            .Build();
+
+        ExecutableDocument query = """
+            {
+                hello
+            }
+            """;
+
+        var request = new GraphQLRequest
+        {
+            Query = query
+        };
+
+        var queryContext = new Executor(schema).BuildQueryContextAsync(request);
+
+        /* When */
+        await Executor.ExecuteQueryOrMutation(queryContext);
+        var result = await queryContext.Response.SingleAsync();
+
+        /* Then */
+        result.ShouldMatchJson("""
+            {
+                "data": {
+                    "hello": "Hello, World!"
+                }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ExecuteSubscription()
+    {
+        /* Given */
+        var schema = await new ExecutableSchemaBuilder()
+            .Add("Subscription", new ()
+            {
+                { "messageAdded: String!", b => b.ResolveAs("New message") }
+            })
+            .Build();
+
+        ExecutableDocument query = """
+            subscription {
+                messageAdded
+            }
+            """;
+
+        var request = new GraphQLRequest
+        {
+            Query = query
+        };
+
+        var queryContext = new Executor(schema).BuildQueryContextAsync(request);
+
+        /* When */
+        await Executor.ExecuteSubscription(queryContext);
+
+        /* Then */
+        await foreach (var result in queryContext.Response)
+        {
+            result.ShouldMatchJson("""
+                {
+                    "data": {
+                        "messageAdded": "New message"
+                    }
+                }
+                """);
+        }
+    }
 }
