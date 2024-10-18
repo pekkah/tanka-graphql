@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 namespace Tanka.GraphQL.Server.SourceGenerators.Internal;
 
@@ -26,7 +27,7 @@ internal struct HashCode
     private static uint GenerateGlobalSeed()
     {
         var buffer = new byte[sizeof(uint)];
-        new Random().NextBytes(buffer);
+        RandomNumberGenerator.Create().GetBytes(buffer);
         return BitConverter.ToUInt32(buffer, 0);
     }
 
