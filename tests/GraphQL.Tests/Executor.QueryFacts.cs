@@ -4,7 +4,6 @@ using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.ValueResolution;
 using Xunit;
-using Tanka.GraphQL.Internal;
 
 namespace Tanka.GraphQL.Tests;
 
@@ -112,7 +111,7 @@ public class QueryFacts
 
         /* When */
         await Executor.ExecuteQueryOrMutation(queryContext);
-        var result = await queryContext.Response.FirstOrDefaultAsync();
+        var result = await queryContext.Response.SingleAsync();
 
         /* Then */
         result.ShouldMatchJson("""
@@ -162,5 +161,87 @@ public class QueryFacts
                 }
                 """);
         }
+    }
+
+    [Fact]
+    public async Task Execute_With_Variables()
+    {
+        /* Given */
+        var schema = await new ExecutableSchemaBuilder()
+            .Add("Query", new ()
+            {
+                { "hello(name: String!): String!", b => b.ResolveAs(ctx => $"Hello, {ctx.Arguments["name"]}") }
+            })
+            .Build();
+
+        ExecutableDocument query = """
+            query($name: String!) {
+                hello(name: $name)
+            }
+            """;
+
+        var request = new GraphQLRequest
+        {
+            Query = query,
+            Variables = new Dictionary<string, object?>
+            {
+                { "name", "World" }
+            }
+        };
+
+        /* When */
+        var result = await new Executor(schema)
+            .Execute(request);
+
+        /* Then */
+        result.ShouldMatchJson("""
+            {
+                "data": {
+                    "hello": "Hello, World!"
+                }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Execute_With_OperationName()
+    {
+        /* Given */
+        var schema = await new ExecutableSchemaBuilder()
+            .Add("Query", new ()
+            {
+                { "hello: String!", b => b.ResolveAs("Hello, World!") },
+                { "goodbye: String!", b => b.ResolveAs("Goodbye, World!") }
+            })
+            .Build();
+
+        ExecutableDocument query = """
+            query GetHello {
+                hello
+            }
+
+            query GetGoodbye {
+                goodbye
+            }
+            """;
+
+        var request = new GraphQLRequest
+        {
+            Query = query,
+            OperationName = "GetHello"
+        };
+
+        /* When */
+        var result = await new Executor(schema)
+            .Execute(request);
+
+        /* Then */
+        result.ShouldMatchJson("""
+            {
+                "data": {
+                    "hello": "Hello, World!"
+                }
+            }
+            """);
     }
 }
