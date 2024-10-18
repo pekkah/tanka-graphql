@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language.Nodes;
@@ -170,7 +172,7 @@ public class QueryFacts
         var schema = await new ExecutableSchemaBuilder()
             .Add("Query", new ()
             {
-                { "hello(name: String!): String!", b => b.ResolveAs(ctx => $"Hello, {ctx.Arguments["name"]}") }
+                { "hello(name: String!): String!", (string name) => $"Hello, {name}" }
             })
             .Build();
 

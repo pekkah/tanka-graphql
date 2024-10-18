@@ -35,22 +35,22 @@ public static class TypeSystemDocumentExtensions
 
         return new TypeSystemDocument(
             right.SchemaDefinitions != null
-                ? schemaDefinitions.Concat(right.SchemaDefinitions).ToList()
+                ? (schemaDefinitions.Concat(right.SchemaDefinitions) ?? Array.Empty<SchemaDefinition>()).ToList()
                 : schemaDefinitions,
             right.TypeDefinitions != null
-                ? typeDefinitions.Concat(right.TypeDefinitions).ToList()
+                ? (typeDefinitions.Concat(right.TypeDefinitions) ?? Array.Empty<TypeDefinition>()).ToList()
                 : typeDefinitions,
             right.DirectiveDefinitions != null
-                ? directiveDefinitions.Concat(right.DirectiveDefinitions).ToList()
+                ? (directiveDefinitions.Concat(right.DirectiveDefinitions) ?? Array.Empty<DirectiveDefinition>()).ToList()
                 : directiveDefinitions,
             right.SchemaExtensions != null
-                ? schemaExtensions.Concat(right.SchemaExtensions).ToList()
+                ? (schemaExtensions.Concat(right.SchemaExtensions) ?? Array.Empty<SchemaExtension>()).ToList()
                 : schemaExtensions,
             right.TypeExtensions != null
-                ? typeExtensions.Concat(right.TypeExtensions).ToList()
+                ? (typeExtensions.Concat(right.TypeExtensions) ?? Array.Empty<TypeExtension>()).ToList()
                 : typeExtensions,
             right.Imports != null
-                ? imports.Concat(right.Imports).ToList()
+                ? (imports.Concat(right.Imports) ?? Array.Empty<Import>()).ToList()
                 : imports
         );
     }
