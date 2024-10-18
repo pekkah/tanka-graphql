@@ -165,6 +165,67 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h2 id="pipeline-operation">Pipeline: Operation</h2>
+<p>The operation pipeline is a series of middleware components that process a GraphQL operation. Each middleware component in the pipeline has the opportunity to inspect, modify, or short-circuit the operation and response. The pipeline is defined using the <code>OperationDelegateBuilder</code> class.</p>
+<h3 id="defining-the-operation-pipeline">Defining the Operation Pipeline</h3>
+<p>The operation pipeline is defined using the <code>OperationDelegateBuilder</code> class. The <code>OperationDelegateBuilder</code> class provides methods for adding middleware components to the pipeline. The following example shows how to define a simple operation pipeline:</p>
+<pre><code class="language-csharp">var builder = new OperationDelegateBuilder();
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 1
+    Console.WriteLine(&quot;Before Middleware 1&quot;);
+    await next(context);
+    Console.WriteLine(&quot;After Middleware 1&quot;);
+});
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 2
+    Console.WriteLine(&quot;Before Middleware 2&quot;);
+    await next(context);
+    Console.WriteLine(&quot;After Middleware 2&quot;);
+});
+
+var operationPipeline = builder.Build();
+</code></pre>
+<p>In this example, the operation pipeline consists of two middleware components. Each middleware component writes a message to the console before and after calling the next middleware component in the pipeline.</p>
+<h3 id="using-the-operation-pipeline">Using the Operation Pipeline</h3>
+<p>The operation pipeline is used to process a GraphQL operation. The following example shows how to use the operation pipeline to process a GraphQL operation:</p>
+<pre><code class="language-csharp">var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;hello&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+var queryContext = executor.BuildQueryContextAsync(request);
+await operationPipeline(queryContext);
+
+var result = await queryContext.Response.SingleAsync();
+
+Console.WriteLine(result.Data);
+</code></pre>
+<p>In this example, the operation pipeline is used to process a GraphQL operation. The <code>operationPipeline</code> delegate is called with the <code>queryContext</code> object, which contains the GraphQL request and other context information. The <code>queryContext.Response</code> property contains the response stream, which is an <code>IAsyncEnumerable&lt;ExecutionResult&gt;</code>.</p>
 <p><a href="main/6-executor/02-simple-usage.html">Next</a></p>
                     
             </main>

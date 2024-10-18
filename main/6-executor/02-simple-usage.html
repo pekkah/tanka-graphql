@@ -202,6 +202,182 @@
 
 </code></pre>
 <p>The <code>Executor</code> instance is created with <code>Schema</code>. The <code>Schema</code> is used to resolve the query and the <code>Query</code> is the query document to execute passed into the <code>Execute</code> method as GraphQL request document. GraphQLRequest object contains also possible operation name and variables.</p>
+<h3 id="detailed-explanation-of-executor.execute-method">Detailed Explanation of <code>Executor.Execute</code> Method</h3>
+<p>The <code>Execute</code> method is used to execute a GraphQL query or mutation. It takes a <code>GraphQLRequest</code> object as a parameter and returns an <code>ExecutionResult</code>. The <code>Execute</code> method is defined as follows:</p>
+<pre><code class="language-csharp">public async Task&lt;ExecutionResult&gt; Execute(GraphQLRequest request, CancellationToken cancellationToken = default)
+{
+    QueryContext queryContext = BuildQueryContextAsync(request);
+    queryContext.RequestCancelled = cancellationToken;
+
+    IAsyncEnumerable&lt;ExecutionResult&gt; executionResult = ExecuteOperation(queryContext);
+
+    return await executionResult.SingleAsync(queryContext.RequestCancelled);
+}
+</code></pre>
+<h3 id="example-of-using-executor.execute-method-with-variables">Example of Using <code>Executor.Execute</code> Method with Variables</h3>
+<p>The following example shows how to use the <code>Execute</code> method to execute a GraphQL query with variables:</p>
+<pre><code class="language-csharp">var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;hello&quot;),
+                            Arguments = new Arguments
+                            {
+                                new Argument
+                                {
+                                    Name = new Name(&quot;name&quot;),
+                                    Value = new VariableReference
+                                    {
+                                        Name = new Name(&quot;name&quot;)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    Variables = new Dictionary&lt;string, object?&gt;
+    {
+        { &quot;name&quot;, &quot;World&quot; }
+    }
+};
+
+var result = await executor.Execute(request);
+
+Console.WriteLine(result.Data);
+</code></pre>
+<h3 id="example-of-using-executor.execute-method-with-operation-name">Example of Using <code>Executor.Execute</code> Method with Operation Name</h3>
+<p>The following example shows how to use the <code>Execute</code> method to execute a GraphQL query with an operation name:</p>
+<pre><code class="language-csharp">var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                Name = new Name(&quot;GetHello&quot;),
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;hello&quot;)
+                        }
+                    }
+                }
+            },
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                Name = new Name(&quot;GetGoodbye&quot;),
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;goodbye&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    },
+    OperationName = &quot;GetHello&quot;
+};
+
+var result = await executor.Execute(request);
+
+Console.WriteLine(result.Data);
+</code></pre>
+<h3 id="complex-example-combining-multiple-middleware-components">Complex Example: Combining Multiple Middleware Components</h3>
+<p>The following example demonstrates advanced usage and customization of the pipelines by combining multiple middleware components:</p>
+<pre><code class="language-csharp">var builder = new OperationDelegateBuilder();
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 1: Logging
+    Console.WriteLine(&quot;Before Middleware 1&quot;);
+    await next(context);
+    Console.WriteLine(&quot;After Middleware 1&quot;);
+});
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 2: Authentication
+    if (!context.Request.Headers.ContainsKey(&quot;Authorization&quot;))
+    {
+        throw new UnauthorizedAccessException(&quot;Authorization header is missing.&quot;);
+    }
+    await next(context);
+});
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 3: Custom logic
+    Console.WriteLine(&quot;Executing custom logic&quot;);
+    await next(context);
+});
+
+var pipeline = builder.Build();
+
+var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;hello&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+var queryContext = executor.BuildQueryContextAsync(request);
+await pipeline(queryContext);
+
+var result = await queryContext.Response.SingleAsync();
+
+Console.WriteLine(result.Data);
+</code></pre>
+<p>In this example, the pipeline consists of three middleware components: logging, authentication, and custom logic. Each middleware component has the opportunity to inspect, modify, or short-circuit the request and response.</p>
 <p><a href="main/6-executor/03-queries-and-mutations.html">Next</a></p>
                     
             </main>

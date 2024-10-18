@@ -165,6 +165,61 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h2 id="subscriptions">Subscriptions</h2>
+<h3 id="detailed-explanation-of-executor.executesubscription-method">Detailed Explanation of <code>Executor.ExecuteSubscription</code> Method</h3>
+<p>The <code>ExecuteSubscription</code> method is a static method that is used to execute a subscription operation. It takes a <code>QueryContext</code> as a parameter and returns a <code>Task</code>. The <code>ExecuteSubscription</code> method is defined as follows:</p>
+<pre><code class="language-csharp">public static async Task ExecuteSubscription(QueryContext context)
+{
+    context.RequestCancelled.ThrowIfCancellationRequested();
+
+    IAsyncEnumerable&lt;object?&gt; sourceStream = await CreateSourceEventStream(
+        context,
+        context.RequestCancelled);
+
+    IAsyncEnumerable&lt;ExecutionResult&gt; responseStream = MapSourceToResponseEventStream(
+        context,
+        sourceStream,
+        context.RequestCancelled);
+
+    context.Response = responseStream;
+}
+</code></pre>
+<h3 id="example-of-using-executor.executesubscription-method">Example of Using <code>Executor.ExecuteSubscription</code> Method</h3>
+<p>The following example shows how to use the <code>ExecuteSubscription</code> method to execute a GraphQL subscription:</p>
+<pre><code class="language-csharp">var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Subscription,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;messageAdded&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+var queryContext = executor.BuildQueryContextAsync(request);
+await Executor.ExecuteSubscription(queryContext);
+
+await foreach (var result in queryContext.Response)
+{
+    Console.WriteLine(result.Data);
+}
+</code></pre>
 <p><a href="main/6-executor/02-simple-usage.html">Next</a></p>
                     
             </main>

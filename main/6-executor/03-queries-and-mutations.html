@@ -165,6 +165,72 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h2 id="queries-and-mutations">Queries and Mutations</h2>
+<h3 id="complex-example-combining-multiple-middleware-components">Complex Example: Combining Multiple Middleware Components</h3>
+<p>The following example demonstrates advanced usage and customization of the pipelines by combining multiple middleware components:</p>
+<pre><code class="language-csharp">var builder = new OperationDelegateBuilder();
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 1: Logging
+    Console.WriteLine(&quot;Before Middleware 1&quot;);
+    await next(context);
+    Console.WriteLine(&quot;After Middleware 1&quot;);
+});
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 2: Authentication
+    if (!context.Request.Headers.ContainsKey(&quot;Authorization&quot;))
+    {
+        throw new UnauthorizedAccessException(&quot;Authorization header is missing.&quot;);
+    }
+    await next(context);
+});
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 3: Custom logic
+    Console.WriteLine(&quot;Executing custom logic&quot;);
+    await next(context);
+});
+
+var pipeline = builder.Build();
+
+var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;hello&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+var queryContext = executor.BuildQueryContextAsync(request);
+await pipeline(queryContext);
+
+var result = await queryContext.Response.SingleAsync();
+
+Console.WriteLine(result.Data);
+</code></pre>
+<p>In this example, the pipeline consists of three middleware components: logging, authentication, and custom logic. Each middleware component has the opportunity to inspect, modify, or short-circuit the request and response.</p>
                     
             </main>
         </div>

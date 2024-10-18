@@ -167,15 +167,280 @@
                 <h2 id="executor">Executor</h2>
 <p>GraphQL operations are executor by the GraphQL Executor. The executor is responsible for executing the GraphQL operation and returning the result. The executor is also responsible for handling errors and returning the appropriate error response.</p>
 <p>The executor uses <code>OperationDelegate</code> to execute the GraphQL operation pipeline. Inputs and outputs to and from the pipeline are contained in the <code>QueryContext</code> class which is passed to the delegate by the executor.</p>
-<pre><code class="language-csharp">﻿namespace Tanka.GraphQL;
-
-/// &lt;summary&gt;
-///     Operation delegate for executing GraphQL operations using the &lt;paramref name=&quot;context&quot;/&gt;.
-/// &lt;/summary&gt;
-/// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
-/// &lt;returns&gt;&lt;/returns&gt;
-public delegate Task OperationDelegate(QueryContext context);
+<h3 id="operationdelegate">OperationDelegate</h3>
+<p>The <code>OperationDelegate</code> is a delegate that represents the GraphQL operation pipeline. It is responsible for executing the GraphQL operation and returning the result. The <code>OperationDelegate</code> is defined as follows:</p>
+<pre><code class="language-csharp">public delegate Task OperationDelegate(QueryContext context);
 </code></pre>
+<p>The <code>OperationDelegate</code> takes a <code>QueryContext</code> as a parameter and returns a <code>Task</code>. The <code>QueryContext</code> contains the inputs and outputs to and from the pipeline.</p>
+<h3 id="querycontext">QueryContext</h3>
+<p>The <code>QueryContext</code> class is used to pass inputs and outputs to and from the GraphQL operation pipeline. It contains the following properties:</p>
+<ul>
+<li><code>Request</code>: The <code>GraphQLRequest</code> object that contains the GraphQL query, variables, and other request-related information.</li>
+<li><code>RequestCancelled</code>: A <code>CancellationToken</code> that can be used to cancel the request.</li>
+<li><code>Features</code>: A collection of features that can be used to extend the functionality of the <code>QueryContext</code>.</li>
+<li><code>CoercedVariableValues</code>: A dictionary that contains the coerced variable values.</li>
+<li><code>OperationDefinition</code>: The <code>OperationDefinition</code> object that represents the GraphQL operation to be executed.</li>
+<li><code>Schema</code>: The <code>ISchema</code> object that represents the GraphQL schema.</li>
+<li><code>Response</code>: An <code>IAsyncEnumerable&lt;ExecutionResult&gt;</code> that represents the response stream.</li>
+<li><code>RequestServices</code>: An <code>IServiceProvider</code> that can be used to resolve services.</li>
+</ul>
+<p>The <code>QueryContext</code> class also contains methods for adding errors, completing values, executing fields, executing selection sets, and getting errors.</p>
+<h3 id="executor-methods">Executor Methods</h3>
+<p>The <code>Executor</code> class has several methods for executing GraphQL operations. The following sections provide detailed explanations and examples of these methods.</p>
+<h4 id="execute-method">Execute Method</h4>
+<p>The <code>Execute</code> method is used to execute a GraphQL query or mutation. It takes a <code>GraphQLRequest</code> object as a parameter and returns an <code>ExecutionResult</code>. The <code>Execute</code> method is defined as follows:</p>
+<pre><code class="language-csharp">public async Task&lt;ExecutionResult&gt; Execute(GraphQLRequest request, CancellationToken cancellationToken = default)
+{
+    QueryContext queryContext = BuildQueryContextAsync(request);
+    queryContext.RequestCancelled = cancellationToken;
+
+    IAsyncEnumerable&lt;ExecutionResult&gt; executionResult = ExecuteOperation(queryContext);
+
+    return await executionResult.SingleAsync(queryContext.RequestCancelled);
+}
+</code></pre>
+<p>The following example shows how to use the <code>Execute</code> method to execute a GraphQL query:</p>
+<pre><code class="language-csharp">var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;hello&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+var result = await executor.Execute(request);
+
+Console.WriteLine(result.Data);
+</code></pre>
+<h4 id="executequeryormutation-method">ExecuteQueryOrMutation Method</h4>
+<p>The <code>ExecuteQueryOrMutation</code> method is a static method that is used to execute a query or mutation operation. It takes a <code>QueryContext</code> as a parameter and returns a <code>Task</code>. The <code>ExecuteQueryOrMutation</code> method is defined as follows:</p>
+<pre><code class="language-csharp">public static async Task ExecuteQueryOrMutation(QueryContext context)
+{
+    var path = new NodePath();
+    ObjectDefinition? rootType = context.OperationDefinition.Operation switch
+    {
+        OperationType.Query =&gt; context.Schema.Query,
+        OperationType.Mutation =&gt; context.Schema.Mutation,
+        _ =&gt; throw new ArgumentOutOfRangeException()
+    };
+
+    if (rootType == null)
+        throw new QueryException(
+            $&quot;Schema does not support '{context.OperationDefinition.Operation}'. Root type not set.&quot;)
+        {
+            Path = path
+        };
+
+    SelectionSet selectionSet = context.OperationDefinition.SelectionSet;
+
+    try
+    {
+        IReadOnlyDictionary&lt;string, object?&gt; result = await context.ExecuteSelectionSet(
+            selectionSet,
+            rootType,
+            context.Request.InitialValue,
+            path);
+
+        context.Response = AsyncEnumerableEx.Return(new ExecutionResult
+        {
+            Data = result,
+            Errors = context.GetErrors().ToList()
+        });
+        return;
+    }
+    catch (FieldException e)
+    {
+        context.AddError(e);
+    }
+
+    context.Response = AsyncEnumerableEx.Return(new ExecutionResult
+    {
+        Data = null,
+        Errors = context.GetErrors().ToList()
+    });
+}
+</code></pre>
+<p>The following example shows how to use the <code>ExecuteQueryOrMutation</code> method to execute a GraphQL query:</p>
+<pre><code class="language-csharp">var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;hello&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+var queryContext = executor.BuildQueryContextAsync(request);
+await Executor.ExecuteQueryOrMutation(queryContext);
+
+var result = await queryContext.Response.SingleAsync();
+
+Console.WriteLine(result.Data);
+</code></pre>
+<h4 id="executesubscription-method">ExecuteSubscription Method</h4>
+<p>The <code>ExecuteSubscription</code> method is a static method that is used to execute a subscription operation. It takes a <code>QueryContext</code> as a parameter and returns a <code>Task</code>. The <code>ExecuteSubscription</code> method is defined as follows:</p>
+<pre><code class="language-csharp">public static async Task ExecuteSubscription(QueryContext context)
+{
+    context.RequestCancelled.ThrowIfCancellationRequested();
+
+    IAsyncEnumerable&lt;object?&gt; sourceStream = await CreateSourceEventStream(
+        context,
+        context.RequestCancelled);
+
+    IAsyncEnumerable&lt;ExecutionResult&gt; responseStream = MapSourceToResponseEventStream(
+        context,
+        sourceStream,
+        context.RequestCancelled);
+
+    context.Response = responseStream;
+}
+</code></pre>
+<p>The following example shows how to use the <code>ExecuteSubscription</code> method to execute a GraphQL subscription:</p>
+<pre><code class="language-csharp">var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Subscription,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;messageAdded&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+var queryContext = executor.BuildQueryContextAsync(request);
+await Executor.ExecuteSubscription(queryContext);
+
+await foreach (var result in queryContext.Response)
+{
+    Console.WriteLine(result.Data);
+}
+</code></pre>
+<h3 id="pipeline-structure-and-flow">Pipeline Structure and Flow</h3>
+<p>The GraphQL execution pipeline is a series of middleware components that process a GraphQL request. Each middleware component in the pipeline has the opportunity to inspect, modify, or short-circuit the request and response. The pipeline is defined using the <code>OperationDelegateBuilder</code> class.</p>
+<h4 id="defining-the-pipeline">Defining the Pipeline</h4>
+<p>The pipeline is defined using the <code>OperationDelegateBuilder</code> class. The <code>OperationDelegateBuilder</code> class provides methods for adding middleware components to the pipeline. The following example shows how to define a simple pipeline:</p>
+<pre><code class="language-csharp">var builder = new OperationDelegateBuilder();
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 1
+    Console.WriteLine(&quot;Before Middleware 1&quot;);
+    await next(context);
+    Console.WriteLine(&quot;After Middleware 1&quot;);
+});
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 2
+    Console.WriteLine(&quot;Before Middleware 2&quot;);
+    await next(context);
+    Console.WriteLine(&quot;After Middleware 2&quot;);
+});
+
+var pipeline = builder.Build();
+</code></pre>
+<p>In this example, the pipeline consists of two middleware components. Each middleware component writes a message to the console before and after calling the next middleware component in the pipeline.</p>
+<h4 id="using-the-pipeline">Using the Pipeline</h4>
+<p>The pipeline is used to process a GraphQL request. The following example shows how to use the pipeline to process a GraphQL request:</p>
+<pre><code class="language-csharp">var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;hello&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+var queryContext = executor.BuildQueryContextAsync(request);
+await pipeline(queryContext);
+
+var result = await queryContext.Response.SingleAsync();
+
+Console.WriteLine(result.Data);
+</code></pre>
+<p>In this example, the pipeline is used to process a GraphQL request. The <code>pipeline</code> delegate is called with the <code>queryContext</code> object, which contains the GraphQL request and other context information. The <code>queryContext.Response</code> property contains the response stream, which is an <code>IAsyncEnumerable&lt;ExecutionResult&gt;</code>.</p>
+<h4 id="pipeline-flowchart">Pipeline Flowchart</h4>
+<p>The following flowchart visually represents the pipeline structure and flow:</p>
+<pre><code class="language-plaintext">+-------------------+       +-------------------+       +-------------------+
+| Middleware 1      | ----&gt; | Middleware 2      | ----&gt; | Middleware 3      |
+|                   |       |                   |       |                   |
+| - Before          |       | - Before          |       | - Before          |
+| - Next(context)   |       | - Next(context)   |       | - Next(context)   |
+| - After           |       | - After           |       | - After           |
++-------------------+       +-------------------+       +-------------------+
+</code></pre>
+<p>In this flowchart, each middleware component is represented by a box. The arrows indicate the flow of the request and response through the pipeline. Each middleware component has the opportunity to inspect, modify, or short-circuit the request and response.</p>
 <p><a href="main/6-executor/02-simple-usage.html">Next</a></p>
                     
             </main>

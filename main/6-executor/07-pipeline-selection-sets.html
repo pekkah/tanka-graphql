@@ -165,6 +165,67 @@
             </nav>
             <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
                 <h2 id="pipeline-selectionset">Pipeline: SelectionSet</h2>
+<p>The selection sets pipeline is a series of middleware components that process a GraphQL selection set. Each middleware component in the pipeline has the opportunity to inspect, modify, or short-circuit the selection set and response. The pipeline is defined using the <code>SelectionSetPipelineBuilder</code> class.</p>
+<h3 id="defining-the-selection-sets-pipeline">Defining the Selection Sets Pipeline</h3>
+<p>The selection sets pipeline is defined using the <code>SelectionSetPipelineBuilder</code> class. The <code>SelectionSetPipelineBuilder</code> class provides methods for adding middleware components to the pipeline. The following example shows how to define a simple selection sets pipeline:</p>
+<pre><code class="language-csharp">var builder = new SelectionSetPipelineBuilder();
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 1
+    Console.WriteLine(&quot;Before Middleware 1&quot;);
+    await next(context);
+    Console.WriteLine(&quot;After Middleware 1&quot;);
+});
+
+builder.Use(next =&gt; async context =&gt;
+{
+    // Middleware component 2
+    Console.WriteLine(&quot;Before Middleware 2&quot;);
+    await next(context);
+    Console.WriteLine(&quot;After Middleware 2&quot;);
+});
+
+var selectionSetPipeline = builder.Build();
+</code></pre>
+<p>In this example, the selection sets pipeline consists of two middleware components. Each middleware component writes a message to the console before and after calling the next middleware component in the pipeline.</p>
+<h3 id="using-the-selection-sets-pipeline">Using the Selection Sets Pipeline</h3>
+<p>The selection sets pipeline is used to process a GraphQL selection set. The following example shows how to use the selection sets pipeline to process a GraphQL selection set:</p>
+<pre><code class="language-csharp">var schema = new Schema();
+var executor = new Executor(schema);
+
+var request = new GraphQLRequest
+{
+    Query = new ExecutableDocument
+    {
+        Definitions = new List&lt;IDefinition&gt;
+        {
+            new OperationDefinition
+            {
+                Operation = OperationType.Query,
+                SelectionSet = new SelectionSet
+                {
+                    Selections = new List&lt;ISelection&gt;
+                    {
+                        new FieldSelection
+                        {
+                            Name = new Name(&quot;hello&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+var queryContext = executor.BuildQueryContextAsync(request);
+await selectionSetPipeline(queryContext);
+
+var result = await queryContext.Response.SingleAsync();
+
+Console.WriteLine(result.Data);
+</code></pre>
+<p>In this example, the selection sets pipeline is used to process a GraphQL selection set. The <code>selectionSetPipeline</code> delegate is called with the <code>queryContext</code> object, which contains the GraphQL request and other context information. The <code>queryContext.Response</code> property contains the response stream, which is an <code>IAsyncEnumerable&lt;ExecutionResult&gt;</code>.</p>
 <p><a href="main/6-executor/02-simple-usage.html">Next</a></p>
                     
             </main>
