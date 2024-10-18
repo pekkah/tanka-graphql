@@ -57,26 +57,11 @@ var executor = new Executor(schema);
 
 var request = new GraphQLRequest
 {
-    Query = new ExecutableDocument
+    Query = """
     {
-        Definitions = new List<IDefinition>
-        {
-            new OperationDefinition
-            {
-                Operation = OperationType.Query,
-                SelectionSet = new SelectionSet
-                {
-                    Selections = new List<ISelection>
-                    {
-                        new FieldSelection
-                        {
-                            Name = new Name("hello")
-                        }
-                    }
-                }
-            }
-        }
+        hello
     }
+    """
 };
 
 var result = await executor.Execute(request);
@@ -144,26 +129,11 @@ var executor = new Executor(schema);
 
 var request = new GraphQLRequest
 {
-    Query = new ExecutableDocument
+    Query = """
     {
-        Definitions = new List<IDefinition>
-        {
-            new OperationDefinition
-            {
-                Operation = OperationType.Query,
-                SelectionSet = new SelectionSet
-                {
-                    Selections = new List<ISelection>
-                    {
-                        new FieldSelection
-                        {
-                            Name = new Name("hello")
-                        }
-                    }
-                }
-            }
-        }
+        hello
     }
+    """
 };
 
 var queryContext = executor.BuildQueryContextAsync(request);
@@ -204,26 +174,11 @@ var executor = new Executor(schema);
 
 var request = new GraphQLRequest
 {
-    Query = new ExecutableDocument
-    {
-        Definitions = new List<IDefinition>
-        {
-            new OperationDefinition
-            {
-                Operation = OperationType.Subscription,
-                SelectionSet = new SelectionSet
-                {
-                    Selections = new List<ISelection>
-                    {
-                        new FieldSelection
-                        {
-                            Name = new Name("messageAdded")
-                        }
-                    }
-                }
-            }
-        }
+    Query = """
+    subscription {
+        messageAdded
     }
+    """
 };
 
 var queryContext = executor.BuildQueryContextAsync(request);
@@ -277,26 +232,11 @@ var executor = new Executor(schema);
 
 var request = new GraphQLRequest
 {
-    Query = new ExecutableDocument
+    Query = """
     {
-        Definitions = new List<IDefinition>
-        {
-            new OperationDefinition
-            {
-                Operation = OperationType.Query,
-                SelectionSet = new SelectionSet
-                {
-                    Selections = new List<ISelection>
-                    {
-                        new FieldSelection
-                        {
-                            Name = new Name("hello")
-                        }
-                    }
-                }
-            }
-        }
+        hello
     }
+    """
 };
 
 var queryContext = executor.BuildQueryContextAsync(request);

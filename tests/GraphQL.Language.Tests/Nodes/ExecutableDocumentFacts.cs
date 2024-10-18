@@ -45,4 +45,23 @@ public class ExecutableDocumentFacts
         /* Then */
         Assert.Equal(expected, actual);
     }
+
+    [Fact]
+    public void ImplicitConversionFromString()
+    {
+        /* Given */
+        string query = """
+        {
+            field1
+            field2
+        }
+        """;
+
+        /* When */
+        ExecutableDocument document = query;
+
+        /* Then */
+        Assert.NotNull(document.OperationDefinitions);
+        Assert.Equal(2, document.OperationDefinitions.Count);
+    }
 }

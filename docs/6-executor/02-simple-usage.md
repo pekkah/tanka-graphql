@@ -34,37 +34,11 @@ var executor = new Executor(schema);
 
 var request = new GraphQLRequest
 {
-    Query = new ExecutableDocument
-    {
-        Definitions = new List<IDefinition>
-        {
-            new OperationDefinition
-            {
-                Operation = OperationType.Query,
-                SelectionSet = new SelectionSet
-                {
-                    Selections = new List<ISelection>
-                    {
-                        new FieldSelection
-                        {
-                            Name = new Name("hello"),
-                            Arguments = new Arguments
-                            {
-                                new Argument
-                                {
-                                    Name = new Name("name"),
-                                    Value = new VariableReference
-                                    {
-                                        Name = new Name("name")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
+    Query = """
+    query($name: String!) {
+        hello(name: $name)
+    }
+    """,
     Variables = new Dictionary<string, object?>
     {
         { "name", "World" }
@@ -86,42 +60,15 @@ var executor = new Executor(schema);
 
 var request = new GraphQLRequest
 {
-    Query = new ExecutableDocument
-    {
-        Definitions = new List<IDefinition>
-        {
-            new OperationDefinition
-            {
-                Operation = OperationType.Query,
-                Name = new Name("GetHello"),
-                SelectionSet = new SelectionSet
-                {
-                    Selections = new List<ISelection>
-                    {
-                        new FieldSelection
-                        {
-                            Name = new Name("hello")
-                        }
-                    }
-                }
-            },
-            new OperationDefinition
-            {
-                Operation = OperationType.Query,
-                Name = new Name("GetGoodbye"),
-                SelectionSet = new SelectionSet
-                {
-                    Selections = new List<ISelection>
-                    {
-                        new FieldSelection
-                        {
-                            Name = new Name("goodbye")
-                        }
-                    }
-                }
-            }
-        }
-    },
+    Query = """
+    query GetHello {
+        hello
+    }
+
+    query GetGoodbye {
+        goodbye
+    }
+    """,
     OperationName = "GetHello"
 };
 
@@ -169,26 +116,11 @@ var executor = new Executor(schema);
 
 var request = new GraphQLRequest
 {
-    Query = new ExecutableDocument
+    Query = """
     {
-        Definitions = new List<IDefinition>
-        {
-            new OperationDefinition
-            {
-                Operation = OperationType.Query,
-                SelectionSet = new SelectionSet
-                {
-                    Selections = new List<ISelection>
-                    {
-                        new FieldSelection
-                        {
-                            Name = new Name("hello")
-                        }
-                    }
-                }
-            }
-        }
+        hello
     }
+    """
 };
 
 var queryContext = executor.BuildQueryContextAsync(request);
