@@ -86,6 +86,33 @@ public class ExecutionBenchmarks
         AssertResult(result.Errors);
     }
 
+    [Benchmark]
+    public async Task Query_with_large_response()
+    {
+        var largeQuery = Utils.InitializeLargeQuery();
+        var result = await _executor.Execute(new GraphQLRequest(largeQuery));
+
+        AssertResult(result.Errors);
+    }
+
+    [Benchmark]
+    public async Task Mutation_with_large_payload()
+    {
+        var largeMutation = Utils.InitializeLargeMutation();
+        var result = await _executor.Execute(new GraphQLRequest(largeMutation));
+
+        AssertResult(result.Errors);
+    }
+
+    [Benchmark]
+    public async Task Subscription_with_high_frequency()
+    {
+        var highFrequencySubscription = Utils.InitializeHighFrequencySubscription();
+        var result = await _executor.Execute(new GraphQLRequest(highFrequencySubscription));
+
+        AssertResult(result.Errors);
+    }
+
     [GlobalSetup]
     public void Setup()
     {

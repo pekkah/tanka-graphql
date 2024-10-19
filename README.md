@@ -40,3 +40,10 @@ dotnet package add Tanka.GraphQL.Server
 ```bash
 src\GraphQL.benchmarks> dotnet run --configuration release --framework net8.0
 ```
+
+### Run new benchmarks
+
+```bash
+src\GraphQL.benchmarks> dotnet run --configuration release --framework net8.0 --filter *AdditionalBenchmarks*
+src\GraphQL.benchmarks> dotnet run --configuration release --framework net8.0 --filter *PerformanceBenchmarks*
+```

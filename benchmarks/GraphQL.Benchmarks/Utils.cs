@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -103,6 +103,60 @@ mutation {
     {
         return @"
 subscription {
+    simple
+}";
+    }
+
+    public static ExecutableDocument InitializeLargeQuery()
+    {
+        return """
+            {
+                complex {
+                    field
+                    field
+                    field
+                    field
+                    field
+                    field
+                    field
+                    field
+                    field
+                    field
+                }
+            }
+            """;
+    }
+
+    public static ExecutableDocument InitializeLargeMutation()
+    {
+        return @"
+mutation {
+    simple
+    simple
+    simple
+    simple
+    simple
+    simple
+    simple
+    simple
+    simple
+    simple
+}";
+    }
+
+    public static ExecutableDocument InitializeHighFrequencySubscription()
+    {
+        return @"
+subscription {
+    simple
+    simple
+    simple
+    simple
+    simple
+    simple
+    simple
+    simple
+    simple
     simple
 }";
     }

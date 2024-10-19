@@ -24,6 +24,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\GraphQL.Language\GraphQL.Language.csproj" />
     <ProjectReference Include="..\..\src\GraphQL\GraphQL.csproj" />
+    <Compile Include="AdditionalBenchmarks.cs" />
+    <Compile Include="PerformanceBenchmarks.cs" />
   </ItemGroup>
 
 </Project>
