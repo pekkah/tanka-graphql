@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Your Name",
+  "classifications": ["Web", "API", "GraphQL"],
+  "identity": "GraphQL.Template.HelloWorld.CSharp",
+  "name": "GraphQL Template HelloWorld",
+  "shortName": "graphql-template-helloworld",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "GraphQL.Template.HelloWorld",
+  "preferNameDirectory": true,
+  "symbols": {
+    "namespace": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "GraphQL.Template.HelloWorld",
+      "fileRename": "GraphQL.Template.HelloWorld"
+    }
+  }
+}
