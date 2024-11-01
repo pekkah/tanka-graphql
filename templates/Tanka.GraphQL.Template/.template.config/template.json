@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Your Name",
+  "classifications": ["Web", "API", "GraphQL"],
+  "identity": "Tanka.GraphQL.Template.CSharp",
+  "name": "Tanka GraphQL Template",
+  "shortName": "tanka-graphql-template",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "Tanka.GraphQL.Template",
+  "preferNameDirectory": true,
+  "symbols": {
+    "namespace": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "Tanka.GraphQL.Template",
+      "fileRename": "Tanka.GraphQL.Template"
+    }
+  }
+}
