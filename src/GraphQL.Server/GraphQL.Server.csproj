@@ -18,7 +18,7 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Telemetry" Version="8.10.0" />
-		<PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
+		<PackageReference Include="System.IO.Pipelines" Version="9.0.0" />
 		<PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
 	</ItemGroup>
 
