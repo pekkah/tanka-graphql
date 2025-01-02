@@ -57,7 +57,7 @@ public class GraphQLApplicationBuilder
 
     private void AddDefaultTankaGraphQLServerServices()
     {
-        ApplicationServices.TryAddSingleton<IHostedService, SchemaInitializer>();
+        ApplicationServices.AddHostedService<SchemaInitializer>();
         ApplicationServices.TryAddSingleton<SchemaCollection>();
         ApplicationServices.TryAddSingleton<GraphQLApplication>();
         ApplicationServices.AddDefaultTankaGraphQLServices();
