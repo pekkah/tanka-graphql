@@ -38,7 +38,8 @@ public static class TestHelper<TGenerator> where TGenerator : IIncrementalGenera
             references: references,
             new CSharpCompilationOptions(
                 OutputKind.DynamicallyLinkedLibrary,
-                nullableContextOptions: NullableContextOptions.Enable));
+                nullableContextOptions: NullableContextOptions.Enable,
+                languageVersion: LanguageVersion.CSharp12));
 
         var generator = new TGenerator();
 
