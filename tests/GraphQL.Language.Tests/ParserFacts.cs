@@ -891,4 +891,316 @@ Description
         Assert.Equal(expectedName, field.Name);
         Assert.IsType(typeOf, field.Value);
     }
+
+    #region Parser Error Handling Tests
+    public class ParserErrorHandlingFacts
+    {
+        private void AssertParsingThrows(string source, string? expectedMessagePart = null, Type? expectedExceptionType = null)
+        {
+            var parser = Parser.Create(source);
+            var exception = Assert.Throws(expectedExceptionType ?? typeof(Exception), () => parser.ParseExecutableDocument());
+            
+            if (!string.IsNullOrEmpty(expectedMessagePart))
+            {
+                Assert.Contains(expectedMessagePart, exception.Message);
+            }
+        }
+
+        [Theory]
+        [InlineData("query { field @ }", "Unexpected token At")] // Unexpected punctuator instead of selection set end or new field
+        [InlineData("query name @dir { field }", "Unexpected token At")] // Unexpected directive symbol after operation name, expecting '{' or '('
+        [InlineData("fragment name on Type @dir @ { field }", "Unexpected token At")] // Unexpected punctuator after a directive
+        [InlineData("query { ... on }", "Unexpected token RightBrace")] // Missing Type for inline fragment
+        [InlineData("query { ... }", "Unexpected token RightBrace")] // Missing fragment name or inline type condition
+        public void Parse_Throws_On_UnexpectedToken(string source, string expectedMessagePart)
+        {
+            AssertParsingThrows(source, expectedMessagePart);
+        }
+
+        [Theory]
+        [InlineData("query { field (arg: ) }", "Expected Value")] // Missing value for an argument
+        [InlineData("query name (var: String", "Unexpected token End")] // Missing closing parenthesis for variable definitions
+        [InlineData("fragment name on { field }", "Expected Name")] // Missing type name for type condition for fragment
+        [InlineData("fragment on Type { field }", "Expected Name for fragment")] // Missing fragment name
+        [InlineData("fragment name Type { field }", "Expected Name(on)")] // Missing 'on' keyword
+        public void Parse_Throws_On_MissingExpectedToken(string source, string expectedMessagePart)
+        {
+            AssertParsingThrows(source, expectedMessagePart);
+        }
+
+        [Theory]
+        // Note: "qyery { field }" would be a lexer error (invalid Name token if 'qyery' not allowed, or just a Name token).
+        // Parser expects specific keywords like "query", "mutation", "subscription", "fragment".
+        // If "qyery" is lexed as a Name, parser will say "Expected one of [query, mutation, subscription, fragment, {]"
+        [InlineData("qyery { field }", "Unexpected token Name(qyery)")] 
+        [InlineData("fragment name onn Type { field }", "Unexpected token Name(onn)")] // Misspelled 'on'
+        public void Parse_Throws_On_InvalidKeywordUsage(string source, string expectedMessagePart)
+        {
+            // This might actually throw at ParseOperationType or similar if not a valid operation type
+            // For now, assuming ParseExecutableDocument is the entry point for testing these.
+            AssertParsingThrows(source, expectedMessagePart);
+        }
+
+        [Theory]
+        [InlineData("query { field (", "Unexpected token End")] // Unterminated arguments
+        [InlineData("query { field { subfield ", "Unexpected token End")] // Unterminated selection set
+        [InlineData("query ($v: Int = ", "Unexpected token End")] // Unterminated variable default value
+        [InlineData("query ($v: [String ", "Unexpected token End")] // Unterminated list type
+        [InlineData("directive @myDir(arg: ", "Unexpected token End")] // Unterminated directive arguments
+        public void Parse_Throws_On_UnterminatedConstructs(string source, string expectedMessagePart)
+        {
+            AssertParsingThrows(source, expectedMessagePart);
+        }
+
+        [Theory]
+        // These test if ParseValue(constant: true) is violated or if specific constructs disallow variables.
+        // The parser's ParseValue has a 'constant' flag.
+        // Default values for variables must be constant.
+        [InlineData("query ($v: Int = $anotherVar) { field }", "Unexpected token Dollar")] 
+        // Directive arguments in SDL (like field definition) must be constant.
+        // This requires testing via ParseTypeSystemDocument or specific directive parsing contexts.
+        // For executable documents, directives on fields/operations can take variables.
+        // Example: field @skip(if: $myBooleanVariable) -> this is valid.
+        // Let's test a case where a constant value is expected by a helper.
+        // e.g. if ParseArgument calls ParseValue(constant: true) when it shouldn't.
+        // This category is hard to test generically at ParseExecutableDocument if the structure itself is
+        // not immediately invalid before value parsing context is known.
+        // The example "$v: Int = $anotherVar" is a good one for variable definitions.
+        public void Parse_Throws_On_InvalidVariableUsageInConstantContext(string source, string expectedMessagePart)
+        {
+            AssertParsingThrows(source, expectedMessagePart);
+        }
+
+        [Fact]
+        public void Parse_Throws_On_FragmentNameIsOn()
+        {
+            // "on" is a keyword in fragment definitions, cannot be a fragment name.
+            AssertParsingThrows("fragment on on Type { field }", "Unexpected token Name(on)");
+        }
+    }
+    #endregion
+
+    #region Parser Complex Structure Tests
+    public class ParserComplexStructureFacts
+    {
+        [Fact]
+        public void Parse_FullFeaturedQuery()
+        {
+            /* Given */
+            var source = @"
+                query MyQuery($var1: String = ""default"", $var2: [Int!]!) @skip(if: true) @customDir(arg: {
+                    str: ""value"",
+                    list: [1, ""two"", null, false, {objField: $var1}],
+                    obj: {boolField: true, nullField: null}
+                }) {
+                    alias: field(arg1: $var1, arg2: 123, arg3: ENUM_VALUE) @include(if: false) {
+                        subField1
+                        ...frag1
+                        ... on MyType @defer(label: ""myDeferLabel"", if: $var2) {
+                            subField2
+                        }
+                        ... @include(if: true) {
+                           inlineFieldNoType
+                        }
+                    }
+                    anotherField: field # end of field comment
+                }";
+
+            var parser = Parser.Create(source);
+
+            /* When */
+            var document = parser.ParseExecutableDocument();
+
+            /* Then */
+            Assert.NotNull(document);
+            Assert.Single(document.OperationDefinitions);
+
+            var operation = document.OperationDefinitions.First();
+            Assert.Equal("MyQuery", operation.Name?.Value);
+            Assert.Equal(OperationType.Query, operation.Operation);
+            Assert.True(operation.Location != null && operation.Location.Start > 0);
+
+            // Variable Definitions
+            Assert.NotNull(operation.VariableDefinitions);
+            Assert.Equal(2, operation.VariableDefinitions.Count);
+            var var1 = operation.VariableDefinitions.Single(v => v.Variable.Name.Value == "var1");
+            Assert.Equal("String", ((NamedType)var1.Type).Name.Value);
+            Assert.IsType<StringValue>(var1.DefaultValue?.Value);
+            Assert.Equal("default", ((StringValue)var1.DefaultValue.Value).Value);
+
+            var var2 = operation.VariableDefinitions.Single(v => v.Variable.Name.Value == "var2");
+            var var2NonNullType = Assert.IsType<NonNullType>(var2.Type);
+            var var2ListType = Assert.IsType<ListType>(var2NonNullType.OfType);
+            var var2ListNonNullType = Assert.IsType<NonNullType>(var2ListType.OfType);
+            Assert.Equal("Int", ((NamedType)var2ListNonNullType.OfType).Name.Value);
+
+            // Directives on Operation
+            Assert.NotNull(operation.Directives);
+            Assert.Equal(2, operation.Directives.Count);
+            var skipDirective = operation.Directives.Single(d => d.Name.Value == "skip");
+            Assert.Single(skipDirective.Arguments);
+            Assert.Equal("if", skipDirective.Arguments.First().Name.Value);
+            Assert.IsType<BooleanValue>(skipDirective.Arguments.First().Value);
+
+            var customDir = operation.Directives.Single(d => d.Name.Value == "customDir");
+            Assert.Single(customDir.Arguments);
+            var customDirArg = Assert.IsType<ObjectValue>(customDir.Arguments.First().Value);
+            Assert.Equal(3, customDirArg.Fields.Count);
+            Assert.Equal("value", ((StringValue)customDirArg.Fields.Single(f => f.Name.Value == "str").Value).Value);
+            var listArg = Assert.IsType<ListValue>(customDirArg.Fields.Single(f => f.Name.Value == "list").Value);
+            Assert.Equal(5, listArg.Values.Count);
+            Assert.IsType<IntValue>(listArg.Values[0]);
+            Assert.IsType<StringValue>(listArg.Values[1]);
+            Assert.IsType<NullValue>(listArg.Values[2]);
+            Assert.IsType<BooleanValue>(listArg.Values[3]);
+            Assert.IsType<ObjectValue>(listArg.Values[4]);
+            var objArg = Assert.IsType<ObjectValue>(customDirArg.Fields.Single(f => f.Name.Value == "obj").Value);
+            Assert.Equal(2, objArg.Fields.Count);
+
+
+            // SelectionSet
+            Assert.NotNull(operation.SelectionSet);
+            Assert.Equal(2, operation.SelectionSet.Count); 
+
+            var mainFieldSelection = Assert.IsType<FieldSelection>(operation.SelectionSet.First(s => s is FieldSelection && ((FieldSelection)s).Name.Value == "field"));
+            Assert.Equal("alias", mainFieldSelection.Alias?.Value);
+            Assert.NotNull(mainFieldSelection.Arguments);
+            Assert.Equal(3, mainFieldSelection.Arguments.Count);
+            Assert.IsType<VariableValue>(mainFieldSelection.Arguments.Single(a => a.Name.Value == "arg1").Value);
+            Assert.IsType<IntValue>(mainFieldSelection.Arguments.Single(a => a.Name.Value == "arg2").Value);
+            Assert.IsType<EnumValue>(mainFieldSelection.Arguments.Single(a => a.Name.Value == "arg3").Value);
+
+            Assert.NotNull(mainFieldSelection.Directives);
+            Assert.Single(mainFieldSelection.Directives);
+            Assert.Equal("include", mainFieldSelection.Directives.First().Name.Value);
+            
+            Assert.NotNull(mainFieldSelection.SelectionSet);
+            Assert.Equal(4, mainFieldSelection.SelectionSet.Count);
+            Assert.IsType<FieldSelection>(mainFieldSelection.SelectionSet[0]); // subField1
+            Assert.IsType<FragmentSpread>(mainFieldSelection.SelectionSet[1]); // ...frag1
+            var inlineFragment = Assert.IsType<InlineFragment>(mainFieldSelection.SelectionSet[2]); // ... on MyType
+            Assert.Equal("MyType", inlineFragment.TypeCondition?.Name.Value);
+            Assert.NotNull(inlineFragment.Directives);
+            Assert.Single(inlineFragment.Directives);
+            Assert.Equal("defer", inlineFragment.Directives.First().Name.Value);
+            Assert.NotNull(inlineFragment.SelectionSet);
+            Assert.Single(inlineFragment.SelectionSet);
+            Assert.Equal("subField2", ((FieldSelection)inlineFragment.SelectionSet.First()).Name.Value);
+
+            var inlineFragmentNoType = Assert.IsType<InlineFragment>(mainFieldSelection.SelectionSet[3]); // ... @include
+            Assert.Null(inlineFragmentNoType.TypeCondition);
+            Assert.Single(inlineFragmentNoType.Directives);
+            Assert.Equal("inlineFieldNoType", ((FieldSelection)inlineFragmentNoType.SelectionSet.First()).Name.Value);
+
+            var anotherField = Assert.IsType<FieldSelection>(operation.SelectionSet.First(s => s is FieldSelection && ((FieldSelection)s).Name.Value == "field" && ((FieldSelection)s).Alias?.Value == "anotherField"));
+            Assert.Null(anotherField.SelectionSet); // No sub-selection for anotherField
+        }
+
+        [Fact]
+        public void Parse_FullFeaturedMutation()
+        {
+            var source = @"
+                mutation CreateReview($episode: Episode!, $review: ReviewInput!) @clientMutationId(id: ""123"") {
+                    createReview(episode: $episode, review: $review) {
+                        stars
+                        commentary
+                    }
+                }";
+            var parser = Parser.Create(source);
+            var document = parser.ParseExecutableDocument();
+
+            Assert.NotNull(document);
+            Assert.Single(document.OperationDefinitions);
+            var operation = document.OperationDefinitions.First();
+            Assert.Equal(OperationType.Mutation, operation.Operation);
+            Assert.Equal("CreateReview", operation.Name?.Value);
+            Assert.Equal(2, operation.VariableDefinitions?.Count);
+            Assert.Single(operation.Directives);
+            Assert.Equal("clientMutationId", operation.Directives.First().Name.Value);
+
+            var createReviewField = Assert.IsType<FieldSelection>(operation.SelectionSet.Single());
+            Assert.Equal("createReview", createReviewField.Name.Value);
+            Assert.Equal(2, createReviewField.Arguments?.Count);
+            Assert.NotNull(createReviewField.SelectionSet);
+            Assert.Equal(2, createReviewField.SelectionSet.Count);
+            Assert.Equal("stars", ((FieldSelection)createReviewField.SelectionSet[0]).Name.Value);
+            Assert.Equal("commentary", ((FieldSelection)createReviewField.SelectionSet[1]).Name.Value);
+        }
+        
+        [Fact]
+        public void Parse_FullFeaturedSubscription()
+        {
+            var source = @"
+                subscription StoryLikeSubscription($input: StoryLikeSubscribeInput) @live {
+                    storyLikeSubscribe(input: $input) {
+                        story {
+                            likeCount
+                            viewerHasLiked
+                        }
+                        liker { id name }
+                    }
+                }";
+            var parser = Parser.Create(source);
+            var document = parser.ParseExecutableDocument();
+            Assert.NotNull(document);
+            Assert.Single(document.OperationDefinitions);
+            var operation = document.OperationDefinitions.First();
+            Assert.Equal(OperationType.Subscription, operation.Operation);
+            Assert.Equal("StoryLikeSubscription", operation.Name?.Value);
+            Assert.Single(operation.VariableDefinitions);
+            Assert.Single(operation.Directives);
+            Assert.Equal("live", operation.Directives.First().Name.Value);
+
+            var storyLikeSubscribeField = Assert.IsType<FieldSelection>(operation.SelectionSet.Single());
+            Assert.Equal("storyLikeSubscribe", storyLikeSubscribeField.Name.Value);
+            Assert.Single(storyLikeSubscribeField.Arguments);
+            Assert.NotNull(storyLikeSubscribeField.SelectionSet);
+            Assert.Equal(2, storyLikeSubscribeField.SelectionSet.Count); // story and liker
+            
+            var storyField = Assert.IsType<FieldSelection>(storyLikeSubscribeField.SelectionSet.First(s => ((FieldSelection)s).Name.Value == "story"));
+            Assert.NotNull(storyField.SelectionSet);
+            Assert.Equal(2, storyField.SelectionSet.Count); // likeCount, viewerHasLiked
+
+            var likerField = Assert.IsType<FieldSelection>(storyLikeSubscribeField.SelectionSet.First(s => ((FieldSelection)s).Name.Value == "liker"));
+            Assert.NotNull(likerField.SelectionSet);
+            Assert.Equal(2, likerField.SelectionSet.Count); // id, name
+        }
+
+        [Fact]
+        public void Parse_DeeplyNestedStructure()
+        {
+            var source = @"
+                query DeepNest {
+                    l1: level1 {
+                        l2: level2(arg: [ {n1: 1}, {n2: 2}]) {
+                            l3: level3 {
+                                l4: level4 {
+                                    l5: level5 @directive {
+                                        name
+                                        value
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }";
+            var parser = Parser.Create(source);
+            var document = parser.ParseExecutableDocument();
+            Assert.NotNull(document);
+            var op = document.OperationDefinitions.First();
+            var l1 = Assert.IsType<FieldSelection>(op.SelectionSet.Single()); Assert.Equal("l1", l1.Alias.Value);
+            var l2 = Assert.IsType<FieldSelection>(l1.SelectionSet.Single()); Assert.Equal("l2", l2.Alias.Value);
+            Assert.Single(l2.Arguments);
+            var l3 = Assert.IsType<FieldSelection>(l2.SelectionSet.Single()); Assert.Equal("l3", l3.Alias.Value);
+            var l4 = Assert.IsType<FieldSelection>(l3.SelectionSet.Single()); Assert.Equal("l4", l4.Alias.Value);
+            var l5 = Assert.IsType<FieldSelection>(l4.SelectionSet.Single()); Assert.Equal("l5", l5.Alias.Value);
+            Assert.Single(l5.Directives);
+            Assert.Equal(2, l5.SelectionSet.Count);
+            Assert.Equal("name", ((FieldSelection)l5.SelectionSet[0]).Name.Value);
+            Assert.True(((FieldSelection)l5.SelectionSet[0]).Location != null);
+            Assert.Equal("value", ((FieldSelection)l5.SelectionSet[1]).Name.Value);
+            Assert.True(((FieldSelection)l5.SelectionSet[1]).Location != null && ((FieldSelection)l5.SelectionSet[1]).Location.Start > l1.Location.Start);
+        }
+    }
+    #endregion
 }
