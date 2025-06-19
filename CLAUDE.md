@@ -135,3 +135,38 @@ Federation-related code is in `GraphQL.Extensions.ApolloFederation` with support
 - Examples are pulled from actual test files, guaranteeing they compile and work correctly
 - Avoid inline code blocks for complex examples - prefer testable, referenced code
 - Format: `#include::xref://project:TestFile.cs?s=ClassName.MethodName`
+
+## Troubleshooting
+
+### Common Development Issues
+
+#### Build Failures
+- **Version conflicts**: Run `dotnet tool restore` to ensure correct tool versions
+- **Missing dependencies**: Run `dotnet restore` before building
+- **Target framework errors**: Ensure .NET 9.0 SDK is installed
+
+#### Test Issues
+- **Test discovery problems**: Check project references and ensure test projects target correct framework
+- **Snapshot test failures**: Review `/Snapshots/` directories for source generator output changes
+- **Integration test failures**: Verify HTTP/WebSocket endpoints and middleware configuration
+
+#### Source Generator Issues
+- **Generated code not updating**: Clean and rebuild the solution
+- **Compilation errors in generated code**: Check source generator input classes for proper attributes
+- **Missing generated types**: Verify `Verify.SourceGenerators` snapshot tests are passing
+
+#### Documentation Build Issues
+- **DocsGen tool errors**: Update tool with `dotnet tool update tanka.docsgen`
+- **Missing code examples**: Ensure referenced test methods exist and are accessible
+- **Live reload not working**: Check WebSocket connection and port configuration
+
+#### Federation Specific Issues
+- **Entity resolution failures**: Verify `@key` directives and resolver implementations
+- **Subgraph composition errors**: Check federation directive usage and schema compatibility
+- **Gateway integration issues**: Validate subgraph schema registration and entity types
+
+### Getting Help
+- Check existing GitHub Issues for similar problems
+- Review test files for usage examples
+- Consult Apollo Federation documentation for federation-specific questions
+- Use `dotnet --info` to verify SDK version and runtime information

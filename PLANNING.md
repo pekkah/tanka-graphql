@@ -49,7 +49,7 @@ The documentation is well-organized with a logical flow:
 ### Priority for Phase 2
 
 **High Priority:**
-- Create troubleshooting/FAQ section
+- ✅ Create troubleshooting/FAQ section
 
 **Medium Priority:**
 - Add validation documentation section
@@ -58,3 +58,10 @@ The documentation is well-organized with a logical flow:
 **Low Priority:**
 - Add migration guides
 - Enhance cross-topic navigation
+
+## Minor Issues Fixed
+
+✅ **UI Template Fixes:**
+- Fixed GitHub link to point to main repository (`tanka-graphql`) instead of `tanka-docs-gen`
+- Combined duplicated CSS rules for `.sidebar .nav-link` to improve maintainability
+- Assessed mobile TOC UX - current implementation is already excellent with auto-collapse and toggle functionality
