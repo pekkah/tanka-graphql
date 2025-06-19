@@ -37,6 +37,29 @@
             padding-top: 1rem;
         }
 
+        /* Mobile sidebar improvements */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                position: fixed;
+                top: 56px;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 56px);
+                z-index: 1040;
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+            }
+            
+            .sidebar.collapse:not(.show) {
+                display: none;
+            }
+            
+            .sidebar.collapsing,
+            .sidebar.collapse.show {
+                display: block;
+            }
+        }
+
         .toc-sidebar {
             position: sticky;
             top: 56px; /* Height of navbar */
@@ -199,7 +222,7 @@
     </nav>
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
     <nav class="nav flex-column">
 <li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
@@ -245,9 +268,15 @@
 </li>    </nav>
             </nav>
             <main class="col-md-6 ms-sm-auto col-lg-7 px-md-4 py-3 content d-flex flex-column">
-                <!-- Mobile TOC toggle button -->
-                <div class="d-lg-none mb-3">
-                    <button id="toc-toggle" class="btn btn-outline-secondary btn-sm toc-toggle mb-2" type="button">
+                <!-- Mobile navigation buttons -->
+                <div class="d-md-none mb-3">
+                    <button id="sidebar-toggle" class="btn btn-outline-primary btn-sm me-2" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-expanded="false" aria-controls="sidebar">
+                        <svg width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                        </svg>
+                        <span class="ms-1">Menu</span>
+                    </button>
+                    <button id="toc-toggle" class="btn btn-outline-secondary btn-sm toc-toggle" type="button">
                         <svg width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
                         </svg>
@@ -284,8 +313,11 @@
     <script>
         (function() {
 
-            // Left sidebar active link
+            // Left sidebar active link and mobile navigation
             const sidebar = document.querySelector('.sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const MOBILE_BREAKPOINT = 768;
+            
             if (sidebar) {
                 const baseHref = document.baseURI;
                 const currentPageHref = window.location.href.split('#')[0]; // Ignore hash
@@ -312,6 +344,16 @@
                             parentCollapse = parentCollapse.parentElement.closest('.collapse');
                         }
                     }
+                    
+                    // Auto-close sidebar on mobile when navigation link is clicked
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < MOBILE_BREAKPOINT && sidebar.classList.contains('show')) {
+                            const bsCollapse = new bootstrap.Collapse(sidebar, {
+                                toggle: false
+                            });
+                            bsCollapse.hide();
+                        }
+                    });
                 });
             }
 
