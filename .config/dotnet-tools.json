@@ -6,13 +6,15 @@
       "version": "5.12.0",
       "commands": [
         "dotnet-gitversion"
-      ]
+      ],
+      "rollForward": false
     },
     "tanka.docsgen": {
-      "version": "1.0.0-beta.19",
+      "version": "0.10.0",
       "commands": [
         "tanka-docs"
-      ]
+      ],
+      "rollForward": false
     }
   }
 }
