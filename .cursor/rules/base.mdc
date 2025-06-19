@@ -7,11 +7,12 @@ alwaysApply: true
 
 ## Project Context
 Always reference the [CLAUDE.md](mdc:CLAUDE.md) file at the start of conversations for project-specific guidance, development commands, and architectural patterns.
+Manage and use the [PLANNING.md](mdc:PLANNING.md) to track planned work.
 
 ## Development Guidelines
 - Follow the development commands and workflows defined in CLAUDE.md
 - Respect the established namespace convention: `Tanka.{ProjectName}`
-- Target .NET 9.0 (except GraphQL.Language which is .NET Standard 2.0)
+- Target .NET 9.0 (except GraphQL.Language and source generators which is .NET Standard 2.0)
 - Use xUnit + NSubstitute for testing, Verify for snapshot testing
 - Follow the middleware pipeline architecture for GraphQL execution
 

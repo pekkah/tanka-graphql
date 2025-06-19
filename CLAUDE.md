@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Use @PLANNING.md for project planning and task management.
 
 ## Project Overview
 
@@ -101,7 +102,7 @@ Published NuGet packages:
 ### Code Organization
 - **Namespace Convention**: `Tanka.{ProjectName}` (auto-generated from MSBuild project name)
 - **Assembly Naming**: `Tanka.{ProjectName}` (configured in Directory.Build.props)
-- **Target Framework**: .NET 8.0 (except GraphQL.Language which is .NET Standard 2.0)
+- **Target Framework**: .NET 9.0 (GraphQL.Language also targets .NET Standard 2.0 for broader compatibility)
 
 ### Version Management
 - **GitVersion** for semantic versioning
@@ -125,3 +126,12 @@ Federation-related code is in `GraphQL.Extensions.ApolloFederation` with support
 - Subgraph schema generation
 - Entity resolvers
 - Federation directives (`@key`, `@external`, `@requires`, `@provides`)
+
+## Documentation Guidelines
+
+### Code Examples in Documentation
+- **ALWAYS use `#include::xref://` for code examples** when the code can be a unit test
+- This approach keeps examples synchronized with working code and ensures testability
+- Examples are pulled from actual test files, guaranteeing they compile and work correctly
+- Avoid inline code blocks for complex examples - prefer testable, referenced code
+- Format: `#include::xref://project:TestFile.cs?s=ClassName.MethodName`
