@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor Rules for Tanka GraphQL
+
+## Project Context
+Always reference the [CLAUDE.md](mdc:CLAUDE.md) file at the start of conversations for project-specific guidance, development commands, and architectural patterns.
+Manage and use the [PLANNING.md](mdc:PLANNING.md) to track planned work.
+
+## Development Guidelines
+- Follow the development commands and workflows defined in CLAUDE.md
+- Respect the established namespace convention: `Tanka.{ProjectName}`
+- Target .NET 9.0 (except GraphQL.Language and source generators which is .NET Standard 2.0)
+- Use xUnit + NSubstitute for testing, Verify for snapshot testing
+- Follow the middleware pipeline architecture for GraphQL execution
+
+## Key Commands (from CLAUDE.md)
+- Build: `./build.ps1`
+- Build only: `./build.ps1 -OnlyBuild $True`
+- Test: `dotnet test -c Release --no-restore --no-build`
+- Restore tools: `dotnet tool restore`
+
+## Architecture Awareness
+- Core components are in `src/` with clear separation of concerns
+- Source generators use snapshot testing in `/Snapshots/` directories
+- Apollo Federation support is in `GraphQL.Extensions.ApolloFederation`
+- Real-time subscriptions via GraphQL over WebSocket (graphql-ws compatible)

@@ -40,24 +40,13 @@ Example
 
 ### Demo
 
-Demo is provided as an fork of the [federation demo](https://github.com/pekkah/federation-demo). It's modified to use
-[Tanka.GraphQL.Dev.Reviews](https://github.com/pekkah/tanka-graphql/tree/master/dev/GraphQL.Dev.Reviews) project as an replacement for reviews service.
+A sample implementation is available in the `dev/GraphQL.Dev.Reviews` project which demonstrates Apollo Federation integration.
+
+To run the sample service:
 
 ```ps
-git clone https://github.com/pekkah/tanka-graphql.git
-
-cd tanka-graphql/dev/GraphQL.Dev.Reviews
+cd dev/GraphQL.Dev.Reviews
 dotnet run
 ```
 
-```ps
-git clone https://github.com/pekkah/federation-demo.git
-cd federation-demo
-git switch tanka-graphql-reviews-service
-npm run start-services
-
-# in a yet another prompt
-npm run start-gateway
-
-# open http://localhost:4000 in your browser to test the service
-```
+This service provides a federated GraphQL endpoint that can be integrated with other Apollo Federation services using an Apollo Gateway.

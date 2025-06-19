@@ -5,149 +5,481 @@
     <base href="{{Site.BasePath}}">
     <title>{{ Page.Title }} - {{ Site.Title }}</title>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Noto Color Emoji font for cross-platform emoji support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
-    {{#xref "xref://ui-bundle:prism.css"}}<link rel="stylesheet" href="{{url}}" />{{/xref}}
     <style>
+        :root {
+            --bs-body-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+            --bs-link-color-rgb: 8, 87, 168;
+            --bs-link-hover-color-rgb: 6, 68, 130;
+        }
+
         body {
-            height: 100%;
-            width: 100%;         
-        }
-
-        a {
-            color: rgba(0,0,0,.65);
-        }
-
-        a:hover {
-            color: rgba(8, 8, 8, 0.65);
-        }
-
-        blockquote {
-            border: 1px solid rgba(94, 94, 94, 0.65);
-            border-left: 5px solid rgba(94, 94, 94, 0.65);
-            padding: 0.75rem 1.5rem;
-            margin-top: 1rem;
-            margin-bottom: 1rem;            
+            font-family: var(--bs-body-font-family);
         }
 
         .sidebar {
-            margin-bottom: 20px;
+            position: sticky;
+            top: 56px; /* Height of navbar */
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding-top: 1rem;
         }
 
-        .sidebar .nav-item {
-            list-style: none;
+        .toc-sidebar {
+            position: sticky;
+            top: 56px; /* Height of navbar */
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            padding-top: 1rem;
+        }
+
+        /* Mobile TOC styling - single responsive TOC */
+        @media (max-width: 991.98px) {
+            .toc-sidebar {
+                position: static !important;
+                height: auto !important;
+                max-height: 300px;
+                overflow-y: auto;
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 0.375rem;
+                margin-bottom: 1rem;
+                padding: 1rem;
+                /* Move TOC to mobile position - above content */
+                order: -1;
+                display: block !important; /* Override Bootstrap d-none d-lg-block */
+            }
+
+            .toc-sidebar.collapsed {
+                display: none !important;
+            }
+
+            .toc-sidebar .toc-title {
+                display: none; /* Hide desktop title on mobile */
+            }
+
+            /* Adjust main content layout for mobile */
+            .content {
+                order: 0;
+            }
+        }
+
+        .toc-toggle {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .toc-toggle {
+                display: inline-block;
+            }
         }
 
         .sidebar .nav-link {
-            display: block;
-            padding: .25rem 1.5rem;
-            font-size: 90%;
-            color: rgba(0,0,0,.65);
+            font-size: 0.9rem;
+            color: #495057;
         }
 
-        .sidebar .nav-link:hover {
-            text-decoration: underline;
+        .sidebar .nav-link.active, .sidebar .nav-link:hover {
+            color: rgb(var(--bs-link-color-rgb));
+            font-weight: 500;
         }
 
-        .content h1,
-        .content h2,
-        .content h3,
-        .content h4,
-        .content h5,
-        .content h6 {
-            font-weight: 300;
+        /* Ensure emojis render properly in navigation */
+        .sidebar .nav-link {
+            font-feature-settings: "liga" on, "clig" on;
+            text-rendering: optimizeLegibility;
+            font-family: var(--bs-body-font-family);
         }
-
         
+        .toc-sidebar .nav-link {
+            font-size: 0.8rem;
+            color: #6c757d;
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+
+        .toc-sidebar .nav-link:hover {
+            color: #212529;
+        }
+
+        .toc-sidebar .nav-link.active {
+            font-weight: 600;
+            color: #212529; /* Darker text for readability */
+            border-left: 2px solid rgb(var(--bs-link-color-rgb));
+        }
+
+        blockquote {
+            font-size: 1rem;
+            border-left: 4px solid #adb5bd;
+            padding-left: 1rem;
+            color: #6c757d;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h2, .content h3 {
+            scroll-margin-top: 80px;
+        }
+
+        /* Adjust code block styling to match highlight.js theme */
+        pre code.hljs {
+            border-radius: 0.3rem;
+        }
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">{{Site.Title}}</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            {{#section Section.Version "start"}}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
-                </li>
-            {{/section}}
-            {{#section Section.Version "lang"}}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
-                </li>
-            {{/section}}
-            {{#section Section.Version "execution"}}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
-                </li>
-            {{/section}}
-            {{#section Section.Version "types"}}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
-                </li>
-            {{/section}}
-                        {{#section Section.Version "codegen"}}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
-                </li>
-            {{/section}}
-            {{#section Section.Version "server"}}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
-                </li>
-            {{/section}}
-            {{#section Section.Version "extensions"}}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
-                </li>
-            {{/section}}
-        </ul>
-        <ul class="navbar-nav ml-auto">
-             <li class="nav-item">
-                <a class="nav-link" href="https://github.com/pekkah/tanka-graphql">GitHub</a>
-            </li>
-            <li class="nav-item dropdown justify-content-end">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{Section.Version}}
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    {{#versions}}
-                        <a class="dropdown-item" href="{{../Site.BasePath}}{{Version}}">{{Version}}</a>
-                    {{/versions}}
-                </div>
-            </li>
-        </ul>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">{{Site.Title}}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    {{#sections Section.Version}}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{#xref IndexPage}}{{url}}{{/xref}}">{{Title}}</a>
+                        </li>
+                    {{/sections}}
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/pekkah/tanka-graphql" target="_blank" rel="noopener">GitHub</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{Section.Version}}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                            {{#versions}}
+                                <li><a class="dropdown-item" href="{{../Site.BasePath}}{{Version}}">{{Version}}</a></li>
+                            {{/versions}}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
     <div class="container-fluid">
-        <div class="row flex-xl-nowrap">
-            <nav class="col-12 col-md-3 col-xl-2 sidebar">
-                <div class="sidebar-sticky">
-                    {{>partials/Navigation.hbs}}
-                </div>
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                {{>partials/Navigation.hbs}}
             </nav>
-            <main role="main" class="col-12 col-md-8 col-xl-6 py-sm-1 py-md-3 pl-md-5 content">
-                {{{PageHtml}}}                    
+            <main class="col-md-6 ms-sm-auto col-lg-7 px-md-4 py-3 content d-flex flex-column">
+                <!-- Mobile TOC toggle button -->
+                <div class="d-lg-none mb-3">
+                    <button id="toc-toggle" class="btn btn-outline-secondary btn-sm toc-toggle mb-2" type="button">
+                        <svg width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                        </svg>
+                        <span class="ms-1">On this page</span>
+                    </button>
+                </div>
+                {{{PageHtml}}}
             </main>
+            <!-- Single responsive TOC -->
+            <nav id="toc" class="col-md-3 col-lg-3 d-none d-lg-block toc-sidebar collapsed">
+                <strong class="d-block h6 my-2 pb-2 border-bottom toc-title">On this page</strong>
+                <nav class="nav flex-column"></nav>
+            </nav>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
     
-    {{#xref "xref://ui-bundle:prism.js"}}<script type="text/javascript" src="{{url}}"></script>{{/xref}}
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <script>
+        (function() {
+
+            // Left sidebar active link
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                const baseHref = document.baseURI;
+                const currentPageHref = window.location.href.split('#')[0]; // Ignore hash
+                let currentPagePath = currentPageHref.substring(baseHref.length);
+
+                if (currentPagePath.endsWith('/')) {
+                    currentPagePath = currentPagePath.slice(0, -1);
+                }
+
+                const navLinks = sidebar.querySelectorAll('a.nav-link');
+                navLinks.forEach(link => {
+                    const linkHref = link.getAttribute('href');
+                    if (linkHref && (linkHref === currentPagePath || linkHref === currentPagePath + '/index.html')) {
+                        link.classList.add('active');
+
+                        let parentCollapse = link.closest('.collapse');
+                        while(parentCollapse) {
+                            parentCollapse.classList.add('show');
+                            const trigger = document.querySelector(`a[data-bs-toggle="collapse"][href="#${parentCollapse.id}"]`);
+                            if (trigger) {
+                                trigger.setAttribute('aria-expanded', 'true');
+                                trigger.classList.remove('collapsed');
+                            }
+                            parentCollapse = parentCollapse.parentElement.closest('.collapse');
+                        }
+                    }
+                });
+            }
+
+            // "On this page" TOC script - single responsive TOC
+            const toc = document.getElementById('toc');
+            const tocToggle = document.getElementById('toc-toggle');
+            
+            // Constants
+            const SCROLL_OFFSET = 100;
+            const SCROLL_THROTTLE_MS = 25; // Optimized from 10ms
+            const SCROLL_NAVIGATION_TIMEOUT_MS = 200;
+            const MOBILE_BREAKPOINT = 992;
+            
+            if (toc) {
+                const mainContent = document.querySelector('.content');
+                if (!mainContent) return;
+                
+                const headings = mainContent.querySelectorAll('h2, h3');
+                const tocNav = toc.querySelector('.nav');
+                
+                if (!tocNav) return;
+                
+                if (headings.length > 0) {
+                    let isScrolling = false;
+                    
+                    // Create TOC links
+                    headings.forEach((heading, index) => {
+                        const id = 'heading-' + index;
+                        if (!heading.getAttribute('id')) {
+                            heading.setAttribute('id', id);
+                        }
+
+                        const link = document.createElement('a');
+                        link.classList.add('nav-link');
+                        if (heading.tagName === 'H3') {
+                            link.classList.add('ms-3'); // Indent H3
+                        }
+                        
+                        const href = '#' + id;
+                        link.setAttribute('href', href);
+                        link.textContent = heading.textContent;
+
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            
+                            // Temporarily disable scroll tracking during navigation
+                            isScrolling = true;
+                            
+                            // Remove active class from all TOC links
+                            tocNav.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                            
+                            // Add active class to clicked link
+                            link.classList.add('active');
+                            
+                            // On mobile, collapse the TOC after clicking a link
+                            if (window.innerWidth < MOBILE_BREAKPOINT && toc) {
+                                toc.classList.add('collapsed');
+                                if (tocToggle) {
+                                    updateToggleButton(true);
+                                }
+                            }
+                            
+                            // Navigate to the hash
+                            window.location.hash = href;
+                            
+                            // Re-enable scroll tracking after navigation completes
+                            let scrollTimeout;
+                            const handleScroll = () => {
+                                clearTimeout(scrollTimeout);
+                                scrollTimeout = setTimeout(() => {
+                                    window.removeEventListener('scroll', handleScroll);
+                                    isScrolling = false;
+                                }, SCROLL_NAVIGATION_TIMEOUT_MS);
+                            };
+                            
+                            window.addEventListener('scroll', handleScroll);
+                            
+                            // Fallback: re-enable after 1 second
+                            setTimeout(() => {
+                                window.removeEventListener('scroll', handleScroll);
+                                isScrolling = false;
+                            }, 1000);
+                        });
+                        
+                        tocNav.appendChild(link);
+                    });
+
+                    // Update toggle button appearance
+                    const updateToggleButton = (isCollapsed) => {
+                        if (!tocToggle) return;
+                        
+                        if (isCollapsed) {
+                            tocToggle.innerHTML = `<svg width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                            </svg><span class="ms-1">On this page</span>`;
+                        } else {
+                            tocToggle.innerHTML = `<svg width="16" height="16" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
+                            </svg><span class="ms-1">Hide</span>`;
+                        }
+                    };
+
+                    // Set initial active state based on current scroll position or hash
+                    const setInitialActiveState = () => {
+                        const hash = window.location.hash;
+                        if (hash && tocNav) {
+                            const targetLink = tocNav.querySelector(`a[href="${hash}"]`);
+                            if (targetLink) {
+                                tocNav.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                                targetLink.classList.add('active');
+                                return;
+                            }
+                        }
+                        
+                        // Find the currently visible heading
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        let activeHeading = null;
+                        
+                        for (let i = 0; i < headings.length; i++) {
+                            const heading = headings[i];
+                            const rect = heading.getBoundingClientRect();
+                            const headingTop = rect.top + scrollTop;
+                            
+                            if (headingTop <= scrollTop + SCROLL_OFFSET) {
+                                activeHeading = heading;
+                            } else {
+                                break;
+                            }
+                        }
+                        
+                        if (activeHeading && tocNav) {
+                            const activeId = activeHeading.getAttribute('id');
+                            const activeLink = tocNav.querySelector(`a[href="#${activeId}"]`);
+                            if (activeLink) {
+                                tocNav.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                                activeLink.classList.add('active');
+                            }
+                        } else if (tocNav) {
+                            // If no heading is visible, activate the first one
+                            const firstLink = tocNav.querySelector('.nav-link');
+                            if (firstLink) {
+                                firstLink.classList.add('active');
+                            }
+                        }
+                    };
+
+                    // Set initial active state
+                    setInitialActiveState();
+
+                    // Optimized scroll tracking
+                    const updateActiveOnScroll = () => {
+                        if (isScrolling || !tocNav) return;
+                        
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        let activeHeading = null;
+                        
+                        for (let i = 0; i < headings.length; i++) {
+                            const heading = headings[i];
+                            const rect = heading.getBoundingClientRect();
+                            const headingTop = rect.top + scrollTop;
+                            
+                            if (headingTop <= scrollTop + SCROLL_OFFSET) {
+                                activeHeading = heading;
+                            } else {
+                                break;
+                            }
+                        }
+                        
+                        const currentActiveLink = tocNav.querySelector('.nav-link.active');
+                        let newActiveLink = null;
+                        
+                        if (activeHeading) {
+                            const activeId = activeHeading.getAttribute('id');
+                            newActiveLink = tocNav.querySelector(`a[href="#${activeId}"]`);
+                        } else {
+                            newActiveLink = tocNav.querySelector('.nav-link');
+                        }
+                        
+                        if (newActiveLink && newActiveLink !== currentActiveLink) {
+                            tocNav.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                            newActiveLink.classList.add('active');
+                        }
+                    };
+                    
+                    // Throttled scroll listener
+                    let scrollTimeout;
+                    window.addEventListener('scroll', () => {
+                        clearTimeout(scrollTimeout);
+                        scrollTimeout = setTimeout(updateActiveOnScroll, SCROLL_THROTTLE_MS);
+                    });
+
+                    // Mobile TOC toggle functionality
+                    if (tocToggle) {
+                        tocToggle.addEventListener('click', () => {
+                            const isCollapsed = toc.classList.contains('collapsed');
+                            if (isCollapsed) {
+                                toc.classList.remove('collapsed');
+                                updateToggleButton(false);
+                            } else {
+                                toc.classList.add('collapsed');
+                                updateToggleButton(true);
+                            }
+                        });
+                    }
+                } else {
+                    // Hide TOC if no headings
+                    toc.style.display = 'none';
+                    if (tocToggle) tocToggle.style.display = 'none';
+                }
+            }
+
+            if (window.location.hostname !== 'localhost') {
+                return;
+            }
+            // Live reload script
+            const port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const socketUrl = `${protocol}//${window.location.hostname}:${port}/ws`;
+            let socket;
+
+            function connect() {
+                socket = new WebSocket(socketUrl);
+                socket.addEventListener('open', () => { console.log('Live reload connected.'); });
+                socket.addEventListener('message', (event) => {
+                    if (event.data === 'reload') {
+                        console.log('Reloading page...');
+                        window.location.reload();
+                    }
+                });
+                socket.addEventListener('close', () => {
+                    console.log('Live reload disconnected. Trying to reconnect in 2 seconds...');
+                    setTimeout(connect, 2000);
+                });
+                socket.addEventListener('error', (err) => {
+                    console.error('Live reload error:', err);
+                    socket.close();
+                });
+            }
+            connect();
+        })();
+    </script>
 </body>
 </html>
