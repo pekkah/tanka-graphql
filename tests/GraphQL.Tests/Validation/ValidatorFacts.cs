@@ -82,6 +82,7 @@ public partial class ValidatorFacts
                   intArgField(intArg: Int): Int
                   nonNullBooleanArgField(nonNullBooleanArg: Boolean!): Boolean!
                   booleanListArgField(booleanListArg: [Boolean]!): [Boolean]
+                  nonNullBooleanListField(nonNullBooleanListArg: [Boolean]!): [Boolean]
                   optionalNonNullBooleanArgField(optionalBooleanArg: Boolean! = false): Boolean!
                 }
 

@@ -605,4 +605,195 @@ public partial class ValidatorFacts
         /* Then */
         Assert.True(result.IsValid);
     }
+
+    /// <summary>
+    /// Edge case tests for R5.8.5 - Variable coercion with complex scenarios
+    /// </summary>
+    [Fact]
+    public void Rule_585_AllVariableUsagesAreAllowed_edge_case_nullable_to_nonnull_with_default()
+    {
+        /* Given */
+        var document =
+            @"
+                query nullableToNonNullWithDefault($nullableArg: Boolean) {
+                  arguments {
+                    optionalNonNullBooleanArgField(optionalBooleanArg: $nullableArg)
+                  }
+                }
+                ";
+
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+        /* Then */
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void Rule_585_AllVariableUsagesAreAllowed_edge_case_nested_list_coercion_invalid()
+    {
+        /* Given */
+        var document =
+            @"
+                query nestedListCoercionInvalid($nestedList: [[Boolean]]) {
+                  arguments {
+                    booleanListArgField(booleanListArg: $nestedList)
+                  }
+                }
+                ";
+
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+    }
+
+    [Fact]
+    public void Rule_585_AllVariableUsagesAreAllowed_edge_case_complex_input_coercion()
+    {
+        /* Given */
+        var document =
+            @"
+                query complexInputCoercion($complexInput: ComplexInput!) {
+                  findDog(complex: $complexInput) {
+                    name
+                  }
+                }
+                ";
+
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+        /* Then */
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void Rule_585_AllVariableUsagesAreAllowed_edge_case_nullable_list_to_nonnull_list_invalid()
+    {
+        /* Given */
+        var document =
+            @"
+                query nullableListToNonNullListInvalid($nullableList: [Boolean]) {
+                  arguments {
+                    nonNullBooleanListField(nonNullBooleanListArg: $nullableList)
+                  }
+                }
+                ";
+
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+    }
+
+    [Fact]
+    public void Rule_585_AllVariableUsagesAreAllowed_edge_case_variable_with_default_to_nonnull_valid()
+    {
+        /* Given */
+        var document =
+            @"
+                query variableWithDefaultToNonNull($booleanArg: Boolean = false) {
+                  arguments {
+                    nonNullBooleanArgField(nonNullBooleanArg: $booleanArg)
+                  }
+                }
+                ";
+
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+        /* Then */
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void Rule_585_AllVariableUsagesAreAllowed_edge_case_int_to_float_coercion_valid()
+    {
+        /* Given */
+        var document =
+            @"
+                query intToFloatCoercion($intArg: Int!) {
+                  arguments {
+                    floatArgField(floatArg: $intArg)
+                  }
+                }
+                ";
+
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+        /* Then */
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void Rule_585_AllVariableUsagesAreAllowed_edge_case_float_to_int_coercion_invalid()
+    {
+        /* Given */
+        var document =
+            @"
+                query floatToIntCoercionInvalid($floatArg: Float!) {
+                  arguments {
+                    intArgField(intArg: $floatArg)
+                  }
+                }
+                ";
+
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+    }
+
+    [Fact]
+    public void Rule_585_AllVariableUsagesAreAllowed_edge_case_null_variable_with_nonnull_arg_invalid()
+    {
+        /* Given */
+        var document =
+            @"
+                query nullVariableWithNonNullArg($nullVar: Boolean) {
+                  arguments {
+                    nonNullBooleanArgField(nonNullBooleanArg: $nullVar)
+                  }
+                }
+                ";
+
+        /* When */
+        var result = Validate(
+            document,
+            ExecutionRules.R585AllVariableUsagesAreAllowed());
+
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Single(
+            result.Errors,
+            error => error.Code == ValidationErrorCodes.R585AllVariableUsagesAreAllowed);
+    }
 }

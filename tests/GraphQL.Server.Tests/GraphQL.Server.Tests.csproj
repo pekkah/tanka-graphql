@@ -32,7 +32,6 @@
 
     <ItemGroup>
         <Folder Include="wwwroot\" />
-        <Folder Include="WebSockets\" />
     </ItemGroup>
 
 </Project>
