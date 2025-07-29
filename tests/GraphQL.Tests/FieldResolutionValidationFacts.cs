@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
+using Tanka.GraphQL.ValueSerialization;
 
 using Xunit;
 
@@ -629,7 +633,23 @@ public class FieldResolutionValidationFacts
             {
                 { "getStatusMessage", context =>
                 {
-                    var status = (string)context.ArgumentValues["status"];
+                    if (!context.ArgumentValues.TryGetValue("status", out var statusValue) || statusValue == null)
+                    {
+                        context.ResolvedValue = "Status is unknown";
+                        return ValueTask.CompletedTask;
+                    }
+                    
+                    // Enum values come through as EnumValue objects
+                    string status;
+                    if (statusValue is EnumValue enumValue)
+                    {
+                        status = enumValue.Name.Value;
+                    }
+                    else
+                    {
+                        status = statusValue.ToString() ?? "unknown";
+                    }
+                    
                     context.ResolvedValue = $"Status is {status.ToLower()}";
                     return ValueTask.CompletedTask;
                 }}
@@ -901,14 +921,96 @@ public class FieldResolutionValidationFacts
             {
                 { "processDateTime", context =>
                 {
-                    var dateString = (string)context.ArgumentValues["date"];
+                    var dateValue = context.ArgumentValues["date"];
+                    string dateString;
+                    
+                    if (dateValue is DateTime dateTime)
+                    {
+                        dateString = dateTime.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        dateString = dateValue?.ToString() ?? "null";
+                    }
+                    
                     context.ResolvedValue = $"Processed date: {dateString}";
                     return ValueTask.CompletedTask;
                 }}
             }
         };
 
-        return await builder.Build(resolvers);
+        // Register DateTime converter with default converters
+        var valueConverters = new Dictionary<string, IValueConverter>
+        {
+            ["String"] = new StringConverter(),
+            ["Int"] = new IntConverter(),
+            ["Float"] = new DoubleConverter(),
+            ["Boolean"] = new BooleanConverter(),
+            ["ID"] = new IdConverter(),
+            ["DateTime"] = new DateTimeConverter()
+        };
+        
+        var buildOptions = new SchemaBuildOptions
+        {
+            Resolvers = resolvers,
+            ValueConverters = valueConverters
+        };
+
+        return await builder.Build(buildOptions);
+    }
+
+    private class DateTimeConverter : IValueConverter
+    {
+        public object? Serialize(object? value)
+        {
+            if (value == null)
+                return null;
+
+            if (value is DateTime dateTime)
+                return dateTime.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
+
+            return value.ToString();
+        }
+
+        public ValueBase SerializeLiteral(object? value)
+        {
+            var serializedValue = Serialize(value);
+            if (serializedValue == null)
+                return new NullValue();
+
+            return new StringValue(Encoding.UTF8.GetBytes((string)serializedValue));
+        }
+
+        public object? ParseValue(object? input)
+        {
+            if (input == null)
+                return null;
+
+            if (input is string stringValue)
+            {
+                if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime))
+                    return dateTime;
+            }
+
+            return input;
+        }
+
+        public object? ParseLiteral(ValueBase input)
+        {
+            if (input.Kind == NodeKind.NullValue) 
+                return null;
+
+            if (input.Kind == NodeKind.StringValue)
+            {
+                var stringValue = ((StringValue)input).ToString();
+                if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime))
+                    return dateTime;
+                
+                return stringValue; // Return original string if parsing fails
+            }
+
+            throw new FormatException($"Cannot coerce DateTime value from '{input.Kind}'");
+        }
     }
 
     private class TestNamedType : DynamicObject, INamedType
