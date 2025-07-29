@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 using Tanka.GraphQL.TypeSystem;
@@ -76,23 +77,27 @@ public class ExecutionEngineRobustnessFacts
     {
         var schema = await CreateNestedTestSchema();
 
+        const int nestingDepth = 100;
+
         // Create deeply nested query
-        var query = "{ root";
-        for (int i = 0; i < 100; i++)
+        var queryBuilder = new StringBuilder("{ root");
+        for (var i = 0; i < nestingDepth; i++)
         {
-            query += " { nested";
+            queryBuilder.Append(" { nested");
         }
-        query += " { value }";
-        for (int i = 0; i < 100; i++)
+        queryBuilder.Append(" { value }");
+        for (var i = 0; i < nestingDepth; i++)
         {
-            query += " }";
+            queryBuilder.Append(" }");
         }
-        query += " }";
+        queryBuilder.Append(" }");
+        var query = queryBuilder.ToString();
 
         var result = await Executor.Execute(schema, query);
 
         Assert.NotNull(result);
-        // Should either succeed or fail gracefully without crashing
+        Assert.Null(result.Errors);
+        Assert.NotNull(result.Data);
     }
 
     [Fact]
@@ -129,18 +134,21 @@ public class ExecutionEngineRobustnessFacts
     {
         var schema = await CreateTestSchema();
 
+        const int fieldCount = 1000;
         // Generate large query with many fields
-        var query = "{ ";
-        for (int i = 0; i < 1000; i++)
+        var queryBuilder = new StringBuilder("{ ");
+        for (var i = 0; i < fieldCount; i++)
         {
-            query += $"alias{i}: hello ";
+            queryBuilder.Append($"alias{i}: hello ");
         }
-        query += "}";
+        queryBuilder.Append('}');
+        var query = queryBuilder.ToString();
 
         var result = await Executor.Execute(schema, query);
 
         Assert.NotNull(result);
-        // Should complete within reasonable time and memory constraints
+        Assert.Null(result.Errors);
+        Assert.NotNull(result.Data);
     }
 
     [Fact]
@@ -268,7 +276,9 @@ public class ExecutionEngineRobustnessFacts
         var result = await Executor.Execute(schema, "{ slowField }");
 
         Assert.NotNull(result);
-        // Should either complete or timeout gracefully
+        Assert.Null(result.Errors);
+        Assert.NotNull(result.Data);
+        Assert.Equal("Slow result", result.Data["slowField"]);
     }
 
     [Fact]
