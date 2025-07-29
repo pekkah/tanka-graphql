@@ -19,20 +19,17 @@ public class ParserErrorHandlingFacts
     /// </summary>
     private static Exception AssertThrowsException(string source, System.Action<Parser> parseAction)
     {
-        Exception exception = null;
         try
         {
             var parser = Parser.Create(source);
             parseAction(parser);
             Assert.Fail("Expected exception was not thrown");
+            return null;
         }
         catch (Exception ex)
         {
-            exception = ex;
+            return ex;
         }
-
-        Assert.NotNull(exception);
-        return exception;
     }
 
     #region Basic Error Handling Tests
@@ -111,7 +108,7 @@ public class ParserErrorHandlingFacts
 
         // When & Then: Should throw error about missing close brace
         var exception = AssertThrowsException(source, p => p.ParseExecutableDocument());
-        Assert.NotNull(exception.Message);
+        Assert.Contains("Expected: RightBrace", exception.Message);
     }
 
     [Fact]
@@ -140,7 +137,7 @@ public class ParserErrorHandlingFacts
 
         // When & Then: Error message should specify what was expected
         var exception = AssertThrowsException(source, p => p.ParseExecutableDocument());
-        Assert.Contains("Expected", exception.Message);
+        Assert.Contains("Expected: Colon", exception.Message);
     }
 
     #endregion
@@ -222,25 +219,14 @@ public class ParserErrorHandlingFacts
     #region Complex Error Scenarios
 
     [Fact]
-    public void ParseIntValue_WithIntegerOverflow_HandlesProperly()
+    public void ParseIntValue_WithIntegerOverflow_ThrowsError()
     {
-        // Given: Document with very large integer
-        var source = "{ field(arg: 999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999) }";
-        var parser = Parser.Create(source);
+        // Given: Document with an integer that overflows a 32-bit signed integer
+        var source = "{ field(arg: 9999999999) }"; // This is > Int32.MaxValue
 
-        // When & Then: Should handle the large integer (may succeed or fail gracefully)
-        try
-        {
-            var document = parser.ParseExecutableDocument();
-            // If it succeeds, the integer was handled
-            Assert.NotNull(document);
-        }
-        catch (Exception ex)
-        {
-            // If it fails, should be a clear error message
-            Assert.NotNull(ex.Message);
-            Assert.True(ex.Message.Contains("parse") || ex.Message.Contains("integer") || ex.Message.Contains("value"));
-        }
+        // When & Then: Should throw a specific error about parsing the integer
+        var exception = AssertThrowsException(source, p => p.ParseExecutableDocument());
+        Assert.Contains("Could not parse integer value", exception.Message);
     }
 
     [Fact]
@@ -251,7 +237,7 @@ public class ParserErrorHandlingFacts
 
         // When & Then: Should throw error about invalid type condition
         var exception = AssertThrowsException(source, p => p.ParseExecutableDocument());
-        Assert.NotNull(exception.Message);
+        Assert.Contains("Expected: Name", exception.Message);
     }
 
     [Fact]
@@ -262,7 +248,7 @@ public class ParserErrorHandlingFacts
 
         // When & Then: Should throw error about missing directive name
         var exception = AssertThrowsException(source, p => p.ParseExecutableDocument());
-        Assert.NotNull(exception.Message);
+        Assert.Contains("Expected: Name", exception.Message);
     }
 
     [Fact]
@@ -273,7 +259,7 @@ public class ParserErrorHandlingFacts
 
         // When & Then: Should throw error about mismatched brackets
         var exception = AssertThrowsException(source, p => p.ParseVariableDefinitions());
-        Assert.NotNull(exception.Message);
+        Assert.Contains("Expected: RightBracket", exception.Message);
     }
 
     #endregion
