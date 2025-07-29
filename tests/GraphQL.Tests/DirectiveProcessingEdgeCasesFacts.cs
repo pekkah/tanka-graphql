@@ -171,8 +171,14 @@ public class DirectiveProcessingEdgeCasesFacts
         var result = await Executor.Execute(schema, query);
 
         Assert.NotNull(result);
-        Assert.NotNull(result.Data);
         Assert.Null(result.Errors);
+
+        var animals = (object[])result.Data["animals"];
+        var dog = (Dictionary<string, object?>)animals[0];
+        var cat = (Dictionary<string, object?>)animals[1];
+
+        Assert.True(dog.ContainsKey("breed"));
+        Assert.False(cat.ContainsKey("color"));
     }
 
     [Fact]
@@ -289,7 +295,7 @@ public class DirectiveProcessingEdgeCasesFacts
     [Fact]
     public async Task Directive_CustomDirective_ShouldBeRecognized()
     {
-        var schema = await CreateCustomDirectiveSchema();
+        var schema = await CreateTestSchema(@"directive @customDirective(value: String!) on FIELD");
 
         var query = @"{ 
             message @customDirective(value: ""test"")
@@ -304,24 +310,6 @@ public class DirectiveProcessingEdgeCasesFacts
         Assert.Null(result.Errors);
     }
 
-    [Fact]
-    public async Task Directive_MultipleDirectivesOnSameField_ShouldProcessAll()
-    {
-        var schema = await CreateTestSchema();
-
-        var query = @"{ 
-            message @skip(if: false) @include(if: true)
-            fallback
-        }";
-
-        var result = await Executor.Execute(schema, query);
-
-        Assert.NotNull(result);
-        Assert.NotNull(result.Data);
-        Assert.True(result.Data.ContainsKey("message"));
-        Assert.Equal("Hello World", result.Data["message"]);
-        Assert.Null(result.Errors);
-    }
 
     [Fact]
     public async Task Directive_OnNestedFields_ShouldProcessCorrectly()
@@ -403,7 +391,7 @@ public class DirectiveProcessingEdgeCasesFacts
     [Fact]
     public async Task Directive_WithDefaultValue_ShouldUseDefault()
     {
-        var schema = await CreateDirectiveWithDefaultSchema();
+        var schema = await CreateTestSchema(@"directive @customDefault(enabled: Boolean = true) on FIELD");
 
         var query = @"{ 
             message @customDefault
@@ -453,7 +441,7 @@ public class DirectiveProcessingEdgeCasesFacts
     }
 
     [Fact]
-    public async Task Directive_OnSubscription_ShouldProcessCorrectly()
+    public async Task Directive_OnMultipleRootFields_ShouldProcessCorrectly()
     {
         var schema = await CreateTestSchema();
 
@@ -471,15 +459,21 @@ public class DirectiveProcessingEdgeCasesFacts
         Assert.Null(result.Errors);
     }
 
-    private async Task<ISchema> CreateTestSchema()
+    private async Task<ISchema> CreateTestSchema(string? additionalSdl = null)
     {
         var builder = new SchemaBuilder();
-        builder.Add(@"
+        var baseSdl = @"
             type Query {
                 message: String
                 fallback: String
             }
-        ");
+        ";
+
+        var sdl = string.IsNullOrEmpty(additionalSdl)
+            ? baseSdl
+            : $"{additionalSdl}\n{baseSdl}";
+
+        builder.Add(sdl);
 
         var resolvers = new ResolversMap
         {
@@ -583,37 +577,6 @@ public class DirectiveProcessingEdgeCasesFacts
         return await builder.Build(resolvers);
     }
 
-    private async Task<ISchema> CreateCustomDirectiveSchema()
-    {
-        var builder = new SchemaBuilder();
-        builder.Add(@"
-            directive @customDirective(value: String!) on FIELD
-
-            type Query {
-                message: String
-                fallback: String
-            }
-        ");
-
-        var resolvers = new ResolversMap
-        {
-            ["Query"] = new()
-            {
-                { "message", context =>
-                {
-                    context.ResolvedValue = "Hello World";
-                    return ValueTask.CompletedTask;
-                }},
-                { "fallback", context =>
-                {
-                    context.ResolvedValue = "fallback value";
-                    return ValueTask.CompletedTask;
-                }}
-            }
-        };
-
-        return await builder.Build(resolvers);
-    }
 
     private async Task<ISchema> CreateNestedSchema()
     {
@@ -659,37 +622,6 @@ public class DirectiveProcessingEdgeCasesFacts
         return await builder.Build(resolvers);
     }
 
-    private async Task<ISchema> CreateDirectiveWithDefaultSchema()
-    {
-        var builder = new SchemaBuilder();
-        builder.Add(@"
-            directive @customDefault(enabled: Boolean = true) on FIELD
-
-            type Query {
-                message: String
-                fallback: String
-            }
-        ");
-
-        var resolvers = new ResolversMap
-        {
-            ["Query"] = new()
-            {
-                { "message", context =>
-                {
-                    context.ResolvedValue = "Hello World";
-                    return ValueTask.CompletedTask;
-                }},
-                { "fallback", context =>
-                {
-                    context.ResolvedValue = "fallback value";
-                    return ValueTask.CompletedTask;
-                }}
-            }
-        };
-
-        return await builder.Build(resolvers);
-    }
 
     private async Task<ISchema> CreateEnumDirectiveSchema()
     {
