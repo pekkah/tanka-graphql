@@ -1,7 +1,6 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-Use @PLANNING.md for project planning and task management.
 
 ## Project Overview
 
@@ -61,6 +60,12 @@ dotnet pack -c Release
 dotnet tool restore
 dotnet tool update gitversion.tool
 dotnet tool update tanka.docsgen
+
+# Format code before committing
+dotnet format
+
+# Run single test
+dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 ```
 
 ## Architecture Overview
@@ -170,3 +175,7 @@ Federation-related code is in `GraphQL.Extensions.ApolloFederation` with support
 - Review test files for usage examples
 - Consult Apollo Federation documentation for federation-specific questions
 - Use `dotnet --info` to verify SDK version and runtime information
+
+## References and Links
+
+- **Latest GraphQL Spec Draft**: https://spec.graphql.org/draft/

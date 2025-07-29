@@ -100,7 +100,7 @@ public ref struct Lexer
                 return true;
             }
 
-            throw new Exception("Syntax error");
+            throw new Exception($"Unexpected character '{(char)code}' at {Line}:{Position - _currentLineStart + 2}.");
         }
 
         Start = Position;
