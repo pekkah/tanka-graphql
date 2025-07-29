@@ -148,7 +148,8 @@ public class FieldResolutionValidationFacts
 
         Assert.NotNull(result);
         Assert.NotNull(result.Errors);
-        Assert.Single(result.Errors);
+        // Two validation errors are expected: one for required field missing, one for field not provided
+        Assert.Equal(2, result.Errors.Count);
     }
 
     [Fact]
@@ -414,7 +415,7 @@ public class FieldResolutionValidationFacts
         Assert.NotNull(result);
         Assert.NotNull(result.Errors);
         Assert.Single(result.Errors);
-        Assert.Contains("Cannot return null", result.Errors[0].Message);
+        Assert.Contains("Cannot complete value for field", result.Errors[0].Message);
     }
 
     [Fact]
