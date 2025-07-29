@@ -1,12 +1,11 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
 
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.Response;
@@ -592,7 +591,7 @@ public class AuthenticationAuthorizationFacts
             {
                 if (!user.IsInRole("Admin"))
                 {
-                    context.Response = CreateErrorResponse("Unauthorized: Admin role required");
+                    context.Response = CreateErrorResponse("Unauthorized");
                     return;
                 }
             }
@@ -635,7 +634,7 @@ public class AuthenticationAuthorizationFacts
                 var claimValue = user.FindFirst(requiredClaim.Key)?.Value;
                 if (claimValue != requiredClaim.Value)
                 {
-                    context.Response = CreateErrorResponse($"Insufficient claims: Missing or invalid {requiredClaim.Key}");
+                    context.Response = CreateErrorResponse("Insufficient claims");
                     return;
                 }
             }
@@ -659,7 +658,7 @@ public class AuthenticationAuthorizationFacts
 
             if (!_requiredRoles.Any(role => user.IsInRole(role)))
             {
-                context.Response = CreateErrorResponse($"Unauthorized: Requires one of roles: {string.Join(", ", _requiredRoles)}");
+                context.Response = CreateErrorResponse("Unauthorized");
                 return;
             }
 
@@ -680,7 +679,7 @@ public class AuthenticationAuthorizationFacts
                 var hasReadUsersPermission = user.FindAll("permission").Any(c => c.Value == "read:users");
                 if (!hasReadUsersPermission)
                 {
-                    context.Response = CreateErrorResponse("Unauthorized: read:users permission required");
+                    context.Response = CreateErrorResponse("Unauthorized");
                     return;
                 }
             }
@@ -760,7 +759,7 @@ public class AuthenticationAuthorizationFacts
     private class UserRateLimitMiddleware : IGraphQLRequestMiddleware
     {
         private readonly int _maxRequestsPerMinute;
-        private readonly Dictionary<string, List<DateTime>> _userRequests = new();
+        private readonly ConcurrentDictionary<string, List<DateTime>> _userRequests = new();
 
         public UserRateLimitMiddleware(int maxRequestsPerMinute)
         {
@@ -775,23 +774,21 @@ public class AuthenticationAuthorizationFacts
             var now = DateTime.UtcNow;
             var oneMinuteAgo = now.AddMinutes(-1);
 
-            if (!_userRequests.ContainsKey(userId))
-            {
-                _userRequests[userId] = new List<DateTime>();
-            }
-
-            var userRequestTimes = _userRequests[userId];
+            var userRequestTimes = _userRequests.GetOrAdd(userId, _ => new List<DateTime>());
             
-            // Remove old requests
-            userRequestTimes.RemoveAll(time => time < oneMinuteAgo);
-
-            if (userRequestTimes.Count >= _maxRequestsPerMinute)
+            lock (userRequestTimes)
             {
-                context.Response = CreateErrorResponse("Rate limit exceeded");
-                return;
-            }
+                // Remove old requests
+                userRequestTimes.RemoveAll(time => time < oneMinuteAgo);
 
-            userRequestTimes.Add(now);
+                if (userRequestTimes.Count >= _maxRequestsPerMinute)
+                {
+                    context.Response = CreateErrorResponse("Rate limit exceeded");
+                    return;
+                }
+
+                userRequestTimes.Add(now);
+            }
 
             await next(context);
         }
@@ -825,7 +822,12 @@ public class AuthenticationAuthorizationFacts
     }
 
     // Helper method to create error responses
-    private static async IAsyncEnumerable<ExecutionResult> CreateErrorResponse(string message)
+    private static IAsyncEnumerable<ExecutionResult> CreateErrorResponse(string message)
+    {
+        return CreateErrorResponseInternal(message);
+    }
+    
+    private static async IAsyncEnumerable<ExecutionResult> CreateErrorResponseInternal(string message)
     {
         yield return new ExecutionResult
         {
