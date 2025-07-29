@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Tanka.GraphQL.TypeSystem;
@@ -316,11 +317,20 @@ public class FieldResolutionValidationFacts
         var result = await Executor.Execute(schema, query);
 
         Assert.NotNull(result);
-        Assert.NotNull(result.Data);
         Assert.Null(result.Errors);
 
         var animals = (List<object>)result.Data["animals"];
         Assert.Equal(2, animals.Count);
+
+        var dog = (Dictionary<string, object?>)animals[0];
+        Assert.Equal("Buddy", dog["name"]);
+        Assert.Equal("Woof", dog["sound"]);
+        Assert.Equal("Golden Retriever", dog["breed"]);
+
+        var cat = (Dictionary<string, object?>)animals[1];
+        Assert.Equal("Whiskers", cat["name"]);
+        Assert.Equal("Meow", cat["sound"]);
+        Assert.Equal("Orange", cat["color"]);
     }
 
     [Fact]
@@ -344,8 +354,11 @@ public class FieldResolutionValidationFacts
         var result = await Executor.Execute(schema, query);
 
         Assert.NotNull(result);
-        Assert.NotNull(result.Data);
         Assert.Null(result.Errors);
+
+        var searchResult = (Dictionary<string, object?>)result.Data["searchResult"];
+        Assert.Equal("John Doe", searchResult["name"]);
+        Assert.Equal("john@example.com", searchResult["email"]);
     }
 
     [Fact]
@@ -430,6 +443,7 @@ public class FieldResolutionValidationFacts
         Assert.NotNull(result);
         Assert.NotNull(result.Data);
         Assert.Null(result.Errors);
+        Assert.Equal("Processed date: 2023-01-01T00:00:00Z", result.Data["processDateTime"]);
     }
 
     [Fact]
@@ -510,9 +524,7 @@ public class FieldResolutionValidationFacts
                 }},
                 { "greetingWithDefault", context =>
                 {
-                    var name = context.ArgumentValues.TryGetValue("name", out var nameValue)
-                        ? (string)nameValue
-                        : "Anonymous";
+                    var name = (string)context.ArgumentValues["name"];
                     context.ResolvedValue = $"Hello, {name}!";
                     return ValueTask.CompletedTask;
                 }},
@@ -554,9 +566,7 @@ public class FieldResolutionValidationFacts
                     var input = (Dictionary<string, object>)context.ArgumentValues["input"];
                     var name = (string)input["name"];
                     var age = (int)input["age"];
-                    var email = input.TryGetValue("email", out var emailValue)
-                        ? (string)emailValue
-                        : "noemail@example.com";
+                    var email = (string)input["email"];
 
                     context.ResolvedValue = $"Processed user: {name} ({age}) - {email}";
                     return ValueTask.CompletedTask;
@@ -583,11 +593,7 @@ public class FieldResolutionValidationFacts
                 { "sumNumbers", context =>
                 {
                     var numbers = (List<object>)context.ArgumentValues["numbers"];
-                    var sum = 0;
-                    foreach (var number in numbers)
-                    {
-                        sum += (int)number;
-                    }
+                    var sum = numbers.Cast<int>().Sum();
                     context.ResolvedValue = sum;
                     return ValueTask.CompletedTask;
                 }}
