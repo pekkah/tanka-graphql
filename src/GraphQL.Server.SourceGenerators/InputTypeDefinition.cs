@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Tanka.GraphQL.Server.SourceGenerators;
 
-public class InputTypeDefinition: TypeDefinition, IEquatable<InputTypeDefinition>
+public class InputTypeDefinition : TypeDefinition, IEquatable<InputTypeDefinition>
 {
     public List<ObjectPropertyDefinition> Properties { get; set; } = new();
 
@@ -14,9 +14,9 @@ public class InputTypeDefinition: TypeDefinition, IEquatable<InputTypeDefinition
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Namespace == other.Namespace 
-               && TargetType == other.TargetType 
-               && Properties.SequenceEqual(other.Properties) 
+        return Namespace == other.Namespace
+               && TargetType == other.TargetType
+               && Properties.SequenceEqual(other.Properties)
                && Equals(ParentClass, other.ParentClass);
     }
 

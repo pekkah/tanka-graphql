@@ -12,7 +12,7 @@ namespace Tanka.GraphQL.Server.SourceGenerators.Tests
         public void GetGraphQLTypeName()
         {
             /* Given */
-         
+
 
             /* When */
 

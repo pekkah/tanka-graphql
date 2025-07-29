@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+
 using Tanka.GraphQL.Fields;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -50,10 +52,10 @@ public class ArgumentBinderFacts
         public string StringProp { get; set; }
     }
 
-    private class Complex: IParseableInputObject
+    private class Complex : IParseableInputObject
     {
         public ComplexChild? Child { get; } = new ComplexChild();
-        
+
         public void Parse(IReadOnlyDictionary<string, object?> argumentValue)
         {
             if (argumentValue.TryGetValue("Child", out var value))
@@ -64,7 +66,7 @@ public class ArgumentBinderFacts
     private class ComplexChild : IParseableInputObject
     {
         public string? StringProp { get; set; }
-        
+
         public void Parse(IReadOnlyDictionary<string, object?> argumentValue)
         {
             if (argumentValue.TryGetValue("StringProp", out var value))

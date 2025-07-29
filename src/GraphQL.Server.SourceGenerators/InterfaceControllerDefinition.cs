@@ -20,11 +20,11 @@ public class InterfaceControllerDefinition : TypeDefinition, IEquatable<Interfac
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return base.Equals(other) 
-               && Properties.SequenceEqual(other.Properties) 
-               && Methods.SequenceEqual(other.Methods) 
+        return base.Equals(other)
+               && Properties.SequenceEqual(other.Properties)
+               && Methods.SequenceEqual(other.Methods)
                && ParentClass?.Equals(other.ParentClass) == true
-               && IsStatic == other.IsStatic 
+               && IsStatic == other.IsStatic
                && Usings.SequenceEqual(other.Usings);
     }
 

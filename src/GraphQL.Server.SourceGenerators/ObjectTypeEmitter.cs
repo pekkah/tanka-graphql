@@ -20,8 +20,8 @@ public class ObjectTypeEmitter
             Properties = definition.Properties,
             Usings = definition.Usings,
             Implements = definition.Implements,
-            NamedTypeExtension = NamedTypeExtension.Render( 
-                    "class", 
+            NamedTypeExtension = NamedTypeExtension.Render(
+                    "class",
                     definition.TargetType,
                         definition.GraphQLName ?? definition.TargetType,
                         definition.IsStatic)

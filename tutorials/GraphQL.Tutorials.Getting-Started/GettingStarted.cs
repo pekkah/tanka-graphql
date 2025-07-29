@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Request;
@@ -11,6 +13,7 @@ using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.ValueSerialization;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tutorials.GettingStarted;
@@ -266,10 +269,10 @@ public class GettingStarted
                                 {
                                     // We need to first call the original resolver to 
                                     // get the initial value
-                                     await next(context);
+                                    await next(context);
 
-                                     // context should now have the ResolvedValue set by the original resolver
-                                     var resolvedValue = context.ResolvedValue;
+                                    // context should now have the ResolvedValue set by the original resolver
+                                    var resolvedValue = context.ResolvedValue;
 
                                     // for simplicity we expect value to be string
                                     var initialValue = resolvedValue!.ToString();
@@ -452,4 +455,3 @@ public class GettingStarted
         }
     }
 }
-

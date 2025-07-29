@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
+
 using static Tanka.GraphQL.Tests.Data.Starwars.Starwars;
 
 namespace Tanka.GraphQL.Tests.Data.Starwars;

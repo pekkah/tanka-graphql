@@ -2,7 +2,7 @@
 
 namespace Tanka.GraphQL.Server.SourceGenerators;
 
-public abstract class TypeDefinition: IEquatable<TypeDefinition>
+public abstract class TypeDefinition : IEquatable<TypeDefinition>
 {
     public string? Namespace { get; init; }
 

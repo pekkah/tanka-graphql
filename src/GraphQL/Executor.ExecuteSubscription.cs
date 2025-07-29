@@ -60,7 +60,7 @@ public partial class Executor
         List<FieldSelection> fields = groupedFieldSet.Values.First();
         FieldSelection fieldSelection = fields.First();
         Name fieldName = fieldSelection.Name;
-        
+
         IReadOnlyDictionary<string, object?> coercedArgumentValues = ArgumentCoercion.CoerceArgumentValues(
             context.Schema,
             subscriptionType,
@@ -114,12 +114,12 @@ public partial class Executor
 
             throw;
         }
-        
+
         return Core(resolverContext, cancellationToken);
 
         static async IAsyncEnumerable<object?> Core(
-            SubscriberContext resolverContext, 
-            [EnumeratorCancellation]CancellationToken cancellationToken)
+            SubscriberContext resolverContext,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             await using var e = resolverContext.ResolvedValue!
                 .GetAsyncEnumerator(cancellationToken);

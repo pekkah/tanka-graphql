@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -35,7 +36,7 @@ public class PrinterContext : DocumentWalkerContextBase
 
     public bool EndsWith(char c)
     {
-        return Builder[Builder.Length-1] == c;
+        return Builder[Builder.Length - 1] == c;
     }
 
     public void Rewind()
@@ -72,7 +73,7 @@ public class Printer : ReadOnlyDocumentVisitorBase<PrinterContext>
         var context = new PrinterContext(printDescriptions);
         var walker = new ReadOnlyDocumentWalker<PrinterContext>(
             new[] { printer },
-            context, 
+            context,
             printNode
         );
 

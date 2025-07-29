@@ -229,12 +229,12 @@ public class ObjectTemplate
             .ToList();
 
     public required IEnumerable<ObjectMethodDefinition> Methods { get; set; } = [];
-    
-    
+
+
     public IEnumerable<ObjectMethodDefinition> Subscribers => Methods.Where(m => m.IsSubscription);
 
     public required string NamedTypeExtension { get; set; }
-    
+
     public IReadOnlyList<BaseDefinition> Implements { get; set; } = [];
 
     public string Render()
@@ -247,7 +247,7 @@ public class ObjectTemplate
             TemplateLoader = new InMemoryTemplateLoader(
                 new Dictionary<string, string>
                 {
-                    ["property_resolver"] = PropertyResolverTemplate, 
+                    ["property_resolver"] = PropertyResolverTemplate,
                     ["method_resolver"] = MethodResolverTemplate,
                     ["parameters"] = ParametersTemplate,
                     ["parameter_usage"] = ParameterUsage

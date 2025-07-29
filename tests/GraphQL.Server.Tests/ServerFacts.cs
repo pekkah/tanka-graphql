@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Tanka.GraphQL.Server.Tests;
 
-public class ServerFacts: IAsyncDisposable
+public class ServerFacts : IAsyncDisposable
 {
     private readonly TankaGraphQLServerFactory _factory = new();
 
@@ -41,11 +41,11 @@ public class ServerFacts: IAsyncDisposable
         /* Given */
         var webSocket = await Connect();
         var cancelReceive = new CancellationTokenSource(TimeSpan.FromSeconds(360));
-        
+
         /* When */
         await webSocket.Send(new ConnectionInit());
         var ack = await webSocket.Receive(cancelReceive.Token);
-        
+
         /* Then */
         Assert.IsType<ConnectionAck>(ack);
 
@@ -80,7 +80,7 @@ public class ServerFacts: IAsyncDisposable
               }
             }                     
             """);
-        
+
 
         /* Finally */
         await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Test complete", CancellationToken.None);
@@ -179,7 +179,7 @@ public class ServerFacts: IAsyncDisposable
         });
 
         await _factory.Events.WaitForAtLeastSubscribers(TimeSpan.FromSeconds(30), 2);
-        
+
         /* Then */
         var eventId = Guid.NewGuid().ToString();
         await _factory.Events.Publish(new MessageEvent()
@@ -228,15 +228,15 @@ public class ServerFacts: IAsyncDisposable
         });
 
         await _factory.Events.WaitForSubscribers(TimeSpan.FromSeconds(30));
-       
+
         /* When */
         await webSocket.Send(new Complete()
         {
             Id = id
         });
-        
+
         await _factory.Events.WaitForNoSubscribers(TimeSpan.FromSeconds(30));
-        
+
         /* Then */
         Assert.Equal(0, _factory.Events.SubscriberCount);
 

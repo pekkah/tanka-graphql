@@ -23,10 +23,10 @@ public class ArgumentBinderFeature : IArgumentBinderFeature
 
         if (argument is null)
             return default;
-        
+
         if (argument is not IReadOnlyDictionary<string, object?> inputObjectArgumentValue)
             throw new InvalidOperationException("Argument is not an input object");
-        
+
         var target = new T();
 
         BindInputObject<T>(inputObjectArgumentValue, target);

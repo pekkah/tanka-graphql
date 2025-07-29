@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-
-using Microsoft.CodeAnalysis;
 using System.Linq;
 using System.Text;
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -23,14 +23,14 @@ public class TypeHelper
                 return name;
             }
         }
-        
+
         // Handle arrays
         if (typeSymbol is IArrayTypeSymbol arrayTypeSymbol)
         {
             return $"[{GetGraphQLTypeName(arrayTypeSymbol.ElementType)}]";
         }
 
-        if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.Name: "IAsyncEnumerable"} asyncEnumerable)
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.Name: "IAsyncEnumerable" } asyncEnumerable)
         {
             return GetGraphQLTypeName(asyncEnumerable.TypeArguments[0]);
         }
@@ -58,7 +58,7 @@ public class TypeHelper
         bool isNullable = IsNullable(typeSymbol, out typeSymbol);
 
         string typeName;
-        
+
         // Handle primitive types
         if (typeSymbol.SpecialType != SpecialType.None && typeSymbol.SpecialType != SpecialType.System_Void)
         {
@@ -105,7 +105,7 @@ public class TypeHelper
 
     public static bool IsNullable(ITypeSymbol typeSymbol, out ITypeSymbol innerType)
     {
-       
+
         if (typeSymbol is INamedTypeSymbol
             {
                 OriginalDefinition.SpecialType: SpecialType.System_Nullable_T
@@ -114,7 +114,7 @@ public class TypeHelper
             innerType = namedTypeSymbol.TypeArguments[0];
             return true;
         }
-        
+
         innerType = typeSymbol;
         return typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
     }

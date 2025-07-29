@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+
 using Tanka.GraphQL.Executable;
 
 namespace Tanka.GraphQL.Server;
@@ -34,7 +35,7 @@ public class GraphQLApplicationBuilder
     {
         OptionsBuilder<SchemaOptions> schemaOptions = ApplicationServices
             .AddOptions<SchemaOptions>(schemaName);
-        
+
         configureOptions(schemaOptions);
 
         ApplicationOptionsBuilder.Configure(options => options.SchemaNames.Add(schemaName));

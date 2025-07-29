@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,7 +26,7 @@ public class InputTypeParser(GeneratorAttributeSyntaxContext context)
         };
     }
 
-    private  List<ObjectPropertyDefinition> ParseMembers(ClassDeclarationSyntax classDeclaration)
+    private List<ObjectPropertyDefinition> ParseMembers(ClassDeclarationSyntax classDeclaration)
     {
         var properties = new List<ObjectPropertyDefinition>();
 
@@ -42,7 +43,7 @@ public class InputTypeParser(GeneratorAttributeSyntaxContext context)
                     Name = propertyDeclaration.Identifier.Text,
                     ReturnType = propertyDeclaration.Type.ToString(),
                     ClosestMatchingGraphQLTypeName = GetClosestMatchingGraphQLTypeName(TypeHelper.UnwrapTaskType(propertyDeclaration.Type)),
-                    ReturnTypeObject = typeSymbol != null ? TryParseInputTypeDefinition(typeSymbol): null
+                    ReturnTypeObject = typeSymbol != null ? TryParseInputTypeDefinition(typeSymbol) : null
                 };
                 properties.Add(propertyDefinition);
             }
@@ -58,7 +59,7 @@ public class InputTypeParser(GeneratorAttributeSyntaxContext context)
 
         if (namedTypeSymbol.SpecialType is not SpecialType.None)
             return null;
-        
+
         var properties = GetPublicProperties(namedTypeSymbol)
             .Select(property => new ObjectPropertyDefinition()
             {
@@ -69,7 +70,7 @@ public class InputTypeParser(GeneratorAttributeSyntaxContext context)
             .ToList();
 
         return new InputTypeDefinition() { TargetType = namedTypeSymbol.Name, Properties = properties };
-            
+
         static IEnumerable<IPropertySymbol> GetPublicProperties(ITypeSymbol typeSymbol)
         {
             return typeSymbol.GetMembers()
@@ -96,13 +97,13 @@ public class InputTypeParser(GeneratorAttributeSyntaxContext context)
             return typeSyntax.ToString();
 
         var typeName = TypeHelper.GetGraphQLTypeName(typeSymbol);
-        
+
         // dirty hack until we have a better way to handle this
         if (typeSyntax is NullableTypeSyntax && typeName.AsSpan().EndsWith("!"))
         {
             return typeName.AsSpan().Slice(0, typeName.Length - 1).ToString();
         }
-        
+
         return typeName;
     }
 }

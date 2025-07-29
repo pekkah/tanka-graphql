@@ -12,8 +12,8 @@ namespace Tanka.GraphQL.Mock.Data;
 public static class ExecutionResultExtensions
 {
     public static void ShouldMatchJson(
-        this ExecutionResult actualResult, 
-        [StringSyntax(StringSyntaxAttribute.Json)]string expectedJson)
+        this ExecutionResult actualResult,
+        [StringSyntax(StringSyntaxAttribute.Json)] string expectedJson)
     {
         if (expectedJson == null) throw new ArgumentNullException(nameof(expectedJson));
         if (actualResult == null) throw new ArgumentNullException(nameof(actualResult));

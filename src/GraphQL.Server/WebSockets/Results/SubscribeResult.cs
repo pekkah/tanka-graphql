@@ -25,7 +25,7 @@ public partial class SubscribeResult(
         if (!subscriptions.Enqueue(subscribe.Id, subscribe.Payload))
         {
             await context.Close(new WebSocketCloseStatusException(
-                               CloseCode.BadRequest, 
+                               CloseCode.BadRequest,
                                "Subscription id is not unique")
             );
         }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Validation;
 
@@ -56,7 +57,7 @@ internal static class LoggerExtensions
         OperationAction(
             logger,
             operation.Operation.ToString().ToLowerInvariant(),
-            operation.Name ?? string.Empty, 
+            operation.Name ?? string.Empty,
             null);
     }
 

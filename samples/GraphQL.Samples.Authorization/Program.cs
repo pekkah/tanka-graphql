@@ -1,7 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Security.Principal;
+
 using Microsoft.AspNetCore.Authentication;
+
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Server;
 

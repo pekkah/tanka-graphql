@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Language;

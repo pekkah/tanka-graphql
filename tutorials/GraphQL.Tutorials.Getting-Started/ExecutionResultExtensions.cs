@@ -1,7 +1,9 @@
 using System;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tutorials.GettingStarted;

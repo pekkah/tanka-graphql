@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+
 using Tanka.GraphQL.Language;
 
 namespace Tanka.GraphQL.Benchmarks.RealWorldSchemas;

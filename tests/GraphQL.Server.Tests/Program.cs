@@ -42,7 +42,7 @@ public static partial class Subscription
 {
     public static async IAsyncEnumerable<IEvent> Events(
         [FromServices] EventAggregator<IEvent> events,
-        [EnumeratorCancellation]CancellationToken cancellationToken)
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await foreach (var e in events.Subscribe(cancellationToken))
         {
@@ -52,7 +52,7 @@ public static partial class Subscription
 }
 
 [ObjectType]
-public partial class MessageEvent: IEvent
+public partial class MessageEvent : IEvent
 {
     public string Id { get; set; }
 }

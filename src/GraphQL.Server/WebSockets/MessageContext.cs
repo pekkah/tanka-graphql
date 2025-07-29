@@ -5,7 +5,7 @@ public class MessageContext(
     MessageBase contextMessage,
     GraphQLRequestDelegate requestPipeline) : IMessageContext
 {
-    public async Task Write<T>(T message) where T: MessageBase
+    public async Task Write<T>(T message) where T : MessageBase
     {
         await channel.Writer.WriteAsync(message);
     }
@@ -17,7 +17,7 @@ public class MessageContext(
     }
 
     public MessageBase Message => contextMessage;
-    
+
     public GraphQLRequestDelegate RequestPipeline => requestPipeline;
-    
+
 }

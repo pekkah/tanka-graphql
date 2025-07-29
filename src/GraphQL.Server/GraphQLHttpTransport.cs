@@ -58,7 +58,7 @@ public partial class GraphQLHttpTransport : IGraphQLTransport
 
     private static partial class Log
     {
-        [LoggerMessage(1, LogLevel.Information,  "Processing GraphQL Http request")]
+        [LoggerMessage(1, LogLevel.Information, "Processing GraphQL Http request")]
         public static partial void BeginRequest(ILogger logger);
 
         [LoggerMessage(int.MaxValue, LogLevel.Information, "Processing GraphQL Http request completed")]

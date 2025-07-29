@@ -23,6 +23,6 @@ public sealed class ObjectValue(
     }
 
     public int Count => fields.Count;
-    
+
     public ObjectField this[int index] => fields[index];
 }

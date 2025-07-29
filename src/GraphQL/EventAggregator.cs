@@ -17,7 +17,7 @@ public class EventAggregator<T>
         _channels.TryAdd(channel, 0);
 
         cancellationToken.Register(Remove);
-        
+
         return new AsyncEnumerable(channel.Reader, Remove);
 
         void Remove()
@@ -99,7 +99,7 @@ public class EventAggregator<T>
             {
                 await Task.Delay(100, cts.Token);
             }
-            
+
             tcs.SetResult();
         }, TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -116,7 +116,7 @@ public class EventAggregator<T>
             {
                 await Task.Delay(100, cts.Token);
             }
-            
+
             tcs.SetResult();
         }, TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -133,7 +133,7 @@ public class EventAggregator<T>
             {
                 await Task.Delay(100, cts.Token);
             }
-            
+
             tcs.SetResult();
         }, TaskCreationOptions.RunContinuationsAsynchronously);
 

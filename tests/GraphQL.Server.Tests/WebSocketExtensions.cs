@@ -16,13 +16,13 @@ internal static class WebSocketExtensions
     public static async Task Send<T>(this WebSocket webSocket, T message)
     {
         var buffer = JsonSerializer.SerializeToUtf8Bytes(
-            message, 
+            message,
             JsonOptions);
-        
+
         await webSocket.SendAsync(
-            buffer, 
-            WebSocketMessageType.Text, 
-            true, 
+            buffer,
+            WebSocketMessageType.Text,
+            true,
             CancellationToken.None);
     }
 
@@ -35,27 +35,27 @@ internal static class WebSocketExtensions
     }
 
     public static async Task<MessageBase> Receive(
-        this WebSocket webSocket, 
+        this WebSocket webSocket,
         CancellationToken cancellationToken = default)
     {
-        var buffer = new ArraySegment<byte>(new byte[1024*8]);
+        var buffer = new ArraySegment<byte>(new byte[1024 * 8]);
         using var memoryStream = new MemoryStream();
-        
+
         do
         {
             var result = await webSocket.ReceiveAsync(buffer, cancellationToken);
 
             if (result.CloseStatus != null)
                 throw new InvalidOperationException($"{result.CloseStatus}:{result.CloseStatusDescription}");
-            
+
             memoryStream.Write(buffer.Slice(0, result.Count));
 
             if (result.EndOfMessage)
             {
                 return JsonSerializer.Deserialize<MessageBase>(
-                    memoryStream.ToArray(), 
+                    memoryStream.ToArray(),
                     JsonOptions);
-                
+
             }
         } while (true);
     }

@@ -15,12 +15,12 @@ public partial class WebSocketTransportHandler(
     private readonly ILoggerFactory _loggerFactory = httpContext
         .RequestServices
         .GetRequiredService<ILoggerFactory>();
-    
+
     private readonly ILogger<WebSocketTransportHandler> _logger = httpContext
             .RequestServices
             .GetRequiredService<ILoggerFactory>()
             .CreateLogger<WebSocketTransportHandler>();
-    
+
     private WebSocketChannel _channel;
     private GraphQLTransportWSProtocol _protocol;
 
@@ -36,7 +36,7 @@ public partial class WebSocketTransportHandler(
                 requestPipeline,
                 _loggerFactory.CreateLogger<SubscriptionManager>()),
             _loggerFactory);
-        
+
         Task readMessages = StartReading();
         await Task.WhenAll(_channel.Run(), readMessages);
     }
@@ -58,7 +58,7 @@ public partial class WebSocketTransportHandler(
                 );
             }
         }
-        catch(Exception x)
+        catch (Exception x)
         {
             Log.ErrorWhileReadingMessages(_logger, x);
         }
@@ -78,12 +78,12 @@ public partial class WebSocketTransportHandler(
     {
         [LoggerMessage(LogLevel.Debug, "Received message '{Message}'")]
         public static partial void ReceivedMessage(
-            ILogger logger, 
-            [LogProperties]MessageBase message);
+            ILogger logger,
+            [LogProperties] MessageBase message);
 
         [LoggerMessage(LogLevel.Error, "Error while reading messages from websocket")]
         public static partial void ErrorWhileReadingMessages(
-            ILogger logger, 
+            ILogger logger,
             Exception exception);
     }
 }

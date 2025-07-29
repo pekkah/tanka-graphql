@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Extensions.Trace;
 using Tanka.GraphQL.Features;

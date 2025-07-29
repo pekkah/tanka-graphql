@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
 using Tanka.GraphQL.ValueResolution;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -93,7 +95,7 @@ type Subscription {
                 }
                 ";
 
-        /* When */ 
+        /* When */
         await using var result = Executor.Subscribe(_executable, query, unsubscribe.Token)
             .GetAsyncEnumerator(unsubscribe.Token);
 
@@ -153,7 +155,7 @@ type Subscription {
         var initial = result.MoveNextAsync();
         await _eventAggregator.Publish(expected);
         await initial;
-        
+
         /* Then */
         var actualResult = result.Current;
         await unsubscribe.CancelAsync();
@@ -185,6 +187,6 @@ type Subscription {
 
         /* When */
         /* Then */
-        await Assert.ThrowsAsync<ValidationException>(()=> result.MoveNextAsync().AsTask());
+        await Assert.ThrowsAsync<ValidationException>(() => result.MoveNextAsync().AsTask());
     }
 }

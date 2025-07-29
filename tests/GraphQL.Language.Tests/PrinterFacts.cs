@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
+
 using Tanka.GraphQL.Language.Internal;
 using Tanka.GraphQL.Language.Nodes;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests;
@@ -10,9 +12,9 @@ namespace Tanka.GraphQL.Language.Tests;
 public class PrinterFacts
 {
     [Theory]
-    [InlineData("name: [1,2,3]", "name", typeof(ListValue))]
-    [InlineData("another: -123.123", "another", typeof(FloatValue))]
-    public void Argument(string source, string name, Type valueType)
+    [InlineData("name: [1,2,3]")]
+    [InlineData("another: -123.123")]
+    public void Argument(string source)
     {
         var node = Parser.Create(source)
             .ParseArgument();
@@ -55,9 +57,9 @@ public class PrinterFacts
     }
 
     [Theory]
-    [InlineData("123", 123)]
-    [InlineData("-123", -123)]
-    public void Value_Int(string source, int expected)
+    [InlineData("123")]
+    [InlineData("-123")]
+    public void Value_Int(string source)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -70,10 +72,10 @@ public class PrinterFacts
     }
 
     [Theory]
-    [InlineData("123.123", 123.123)]
-    [InlineData("-123.123", -123.123)]
-    [InlineData("123e20", 123e20)]
-    public void Value_Float(string source, double expected)
+    [InlineData("123.123")]
+    [InlineData("-123.123")]
+    [InlineData("123e20")]
+    public void Value_Float(string source)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -86,10 +88,10 @@ public class PrinterFacts
     }
 
     [Theory]
-    [InlineData("\"test\"", "test")]
-    [InlineData("\"test test\"", "test test")]
-    [InlineData("\"test_test\"", "test_test")]
-    public void Value_String(string source, string expected)
+    [InlineData("\"test\"")]
+    [InlineData("\"test test\"")]
+    [InlineData("\"test_test\"")]
+    public void Value_String(string source)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -109,9 +111,8 @@ public class PrinterFacts
 
                      Might be part demon.
 
-                     """"""",
-        "Cat\n  - not a dog\n  - not a goat\n\nMight be part demon.")]
-    public void Value_BlockString(string source, string expected)
+                     """"""")]
+    public void Value_BlockString(string source)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -128,9 +129,9 @@ public class PrinterFacts
     }
 
     [Theory]
-    [InlineData("true", true)]
-    [InlineData("false", false)]
-    public void Value_BooleanValue(string source, bool expected)
+    [InlineData("true")]
+    [InlineData("false")]
+    public void Value_BooleanValue(string source)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -143,10 +144,10 @@ public class PrinterFacts
     }
 
     [Theory]
-    [InlineData("ONE", "ONE")]
-    [InlineData("TWO", "TWO")]
-    [InlineData("ZERO", "ZERO")]
-    public void Value_EnumValue(string source, string expected)
+    [InlineData("ONE")]
+    [InlineData("TWO")]
+    [InlineData("ZERO")]
+    public void Value_EnumValue(string source)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -176,11 +177,11 @@ public class PrinterFacts
     }
 
     [Theory]
-    [InlineData("{ name: 1.0 }", "name", typeof(FloatValue))]
-    [InlineData(@"{ x: ""string"" }", "x", typeof(StringValue))]
-    [InlineData(@"{ empty: null }", "empty", typeof(NullValue))]
-    [InlineData(@"{ list: [1,2,3] }", "list", typeof(ListValue))]
-    public void Value_ObjectValue_ObjectField(string source, string expectedName, Type typeOf)
+    [InlineData("{ name: 1.0 }")]
+    [InlineData(@"{ x: ""string"" }")]
+    [InlineData(@"{ empty: null }")]
+    [InlineData(@"{ list: [1,2,3] }")]
+    public void Value_ObjectValue_ObjectField(string source)
     {
         var node = Parser.Create(source)
             .ParseObjectValue();
@@ -945,7 +946,7 @@ multiple lines
 
     private void AssertPrintedEquals(string expected, string actual)
     {
-        string Normalize(string str)
+        static string Normalize(string str)
         {
             str = str
                 .Replace("\r", string.Empty)

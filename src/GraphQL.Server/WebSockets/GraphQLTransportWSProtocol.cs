@@ -25,7 +25,7 @@ public class GraphQLTransportWSProtocol(
                 loggerFactory.CreateLogger<WebSocketCloseResult>()),
             MessageTypes.Ping => new PongResult(loggerFactory.CreateLogger<PongResult>()),
             MessageTypes.Subscribe => new Results.SubscribeResult(
-                subscriptions, 
+                subscriptions,
                 loggerFactory.CreateLogger<Results.SubscribeResult>()),
             MessageTypes.Complete => new Results.CompleteSubscriptionResult(
                 subscriptions,

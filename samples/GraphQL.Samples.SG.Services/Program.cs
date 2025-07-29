@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+
 using Tanka.GraphQL.Server;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -36,7 +37,7 @@ public static partial class Query
         // GraphQL argument with the same name and use it instead and if there's
         // no argument then it would try to resolve the service from the DI.
         // Services can be registered as scoped, singleton or transient.
-        [FromServices]IHttpContextAccessor httpContextAccessor)
+        [FromServices] IHttpContextAccessor httpContextAccessor)
     {
         if (httpContextAccessor.HttpContext == null)
             return null;
@@ -49,7 +50,7 @@ public static partial class Query
 public partial class HttpContextResponse(HttpContext httpContext)
 {
     public string Path => httpContext.Request.Path;
-    
+
     public string Method => httpContext.Request.Method;
 
     public string Protocol => httpContext.Request.Protocol;

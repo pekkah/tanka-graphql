@@ -5,7 +5,7 @@ namespace Tanka.GraphQL;
 public class RequestServicesFeature : IRequestServicesFeature
 {
     private static IServiceProvider EmptyServices { get; } = new ServiceCollection().BuildServiceProvider();
-    
+
     public IServiceProvider RequestServices { get; set; } = EmptyServices;
 }
 

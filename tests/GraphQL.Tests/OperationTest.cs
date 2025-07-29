@@ -4,11 +4,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
 
-public  class OperationTest
+public class OperationTest
 {
     [Fact]
     public async Task AsyncStreamInContext()
@@ -100,7 +101,7 @@ public  class OperationTest
     private async IAsyncEnumerable<ExecutionResult> Generate([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        
+
         yield return new ExecutionResult();
         yield return new ExecutionResult();
         yield return new ExecutionResult();

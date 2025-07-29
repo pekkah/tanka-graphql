@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.Language;

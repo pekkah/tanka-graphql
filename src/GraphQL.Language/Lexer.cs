@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
+
 using Tanka.GraphQL.Language.Internal;
 
 namespace Tanka.GraphQL.Language;

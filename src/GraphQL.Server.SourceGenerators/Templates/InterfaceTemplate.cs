@@ -95,7 +95,7 @@ internal class InterfaceTemplate
         scriptObject.Import(this);
         var templateContext = new TemplateContext();
         templateContext.PushGlobal(scriptObject);
-        
+
         string? content = template.Render(templateContext);
         return content;
     }
