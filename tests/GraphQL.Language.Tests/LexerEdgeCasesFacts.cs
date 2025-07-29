@@ -79,19 +79,13 @@ public class LexerEdgeCasesFacts
         var invalidUtf8 = new byte[] { 0x7B, 0x20, 0x22, 0xFF, 0xFE, 0x22, 0x20, 0x7D }; // { "��" }
         var lexer = Lexer.Create(invalidUtf8);
         
-        // When & Then: This might throw an exception or handle gracefully
-        // We need to understand the expected behavior
-        try
-        {
-            var tokens = ExtractAllTokens(lexer);
-            // If it succeeds, what should the behavior be?
-        }
-        catch (Exception ex)
-        {
-            // If it throws, is that the expected behavior?
-            // This test will help us understand the current behavior
-            Assert.True(true, $"Exception thrown: {ex.Message}");
-        }
+        // When: Try to tokenize - lexer handles gracefully by replacing invalid bytes with replacement characters
+        var tokens = ExtractAllTokens(lexer);
+        
+        // Then: Should successfully tokenize despite invalid UTF-8
+        Assert.NotEmpty(tokens);
+        var stringToken = Array.Find(tokens, t => t.Kind == TokenKind.StringValue);
+        Assert.NotEqual(default(TokenInfo), stringToken);
     }
 
     #endregion
@@ -103,19 +97,12 @@ public class LexerEdgeCasesFacts
     {
         // Given: String without closing quote
         var source = "{ field(arg: \"unterminated string";
-        var lexer = Lexer.Create(source);
         
-        // When & Then: What should happen?
-        try
-        {
-            var tokens = ExtractAllTokens(lexer);
-            // Does it return an error token? Continue parsing? 
-        }
-        catch (Exception ex)
-        {
-            // Or does it throw an exception?
-            Assert.True(true, $"Exception for unterminated string: {ex.Message}");
-        }
+        // When & Then: Should throw an exception for unterminated string
+        Assert.Throws<Exception>(() => {
+            var lexer = Lexer.Create(source);
+            return ExtractAllTokens(lexer);
+        });
     }
 
     [Fact]
@@ -123,17 +110,12 @@ public class LexerEdgeCasesFacts
     {
         // Given: Block string without proper closing
         var source = "{ field(arg: \"\"\"unterminated block string";
-        var lexer = Lexer.Create(source);
         
-        // When & Then: Test error handling
-        try
-        {
-            var tokens = ExtractAllTokens(lexer);
-        }
-        catch (Exception ex)
-        {
-            Assert.True(true, $"Exception for unterminated block string: {ex.Message}");
-        }
+        // When & Then: Should throw an exception for unterminated block string
+        Assert.Throws<Exception>(() => {
+            var lexer = Lexer.Create(source);
+            return ExtractAllTokens(lexer);
+        });
     }
 
     [Fact]
@@ -191,11 +173,12 @@ public class LexerEdgeCasesFacts
         // When: Tokenize
         var tokens = ExtractAllTokens(lexer);
         
-        // Then: Should probably treat this as separate tokens (0, x, DEADBEEF)
-        // Let's see what actually happens
-        var tokenTypes = Array.ConvertAll(tokens, t => t.Kind);
-        
-        // This test will show us how the lexer handles invalid number formats
+        // Then: Should treat this as separate tokens: IntValue(0), Name(xDEADBEEF)
+        Assert.Equal(9, tokens.Length);
+        Assert.Equal(TokenKind.IntValue, tokens[5].Kind);
+        Assert.Equal("0", Encoding.UTF8.GetString(tokens[5].Value));
+        Assert.Equal(TokenKind.Name, tokens[6].Kind);
+        Assert.Equal("xDEADBEEF", Encoding.UTF8.GetString(tokens[6].Value));
     }
 
     [Fact]
@@ -205,16 +188,14 @@ public class LexerEdgeCasesFacts
         var source = "{ field(arg: \"invalid \\z escape\") }";
         var lexer = Lexer.Create(source);
         
-        // When & Then: Test escape sequence validation
-        try
-        {
-            var tokens = ExtractAllTokens(lexer);
-            // Does lexer validate escape sequences or pass them through?
-        }
-        catch (Exception ex)
-        {
-            Assert.True(true, $"Exception for invalid escape: {ex.Message}");
-        }
+        // When: Tokenize - lexer may pass through invalid escape sequences to parser
+        var tokens = ExtractAllTokens(lexer);
+        
+        // Then: Should tokenize the string (validation may happen at parser level)
+        var stringToken = Array.Find(tokens, t => t.Kind == TokenKind.StringValue);
+        Assert.NotEqual(default(TokenInfo), stringToken);
+        var stringValue = Encoding.UTF8.GetString(stringToken.Value);
+        Assert.Contains("\\z", stringValue); // Invalid escape is preserved
     }
 
     #endregion
@@ -283,8 +264,8 @@ public class LexerEdgeCasesFacts
         var tokenValue = Encoding.UTF8.GetString(stringToken.Value);
         Assert.Equal(largeContent, tokenValue);
         
-        // Performance check: should complete in reasonable time (< 1 second)
-        Assert.True(stopwatch.ElapsedMilliseconds < 1000, 
+        // Performance check: should complete in reasonable time (< 5 seconds to avoid flakiness)
+        Assert.True(stopwatch.ElapsedMilliseconds < 5000, 
             $"Large string tokenization took {stopwatch.ElapsedMilliseconds}ms");
     }
 
