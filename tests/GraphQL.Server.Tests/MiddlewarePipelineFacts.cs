@@ -354,7 +354,7 @@ public class MiddlewarePipelineFacts
                 };
                 await circuitBreakerMiddleware.Invoke(context, failingDelegate);
             }
-            catch { }
+            catch (Exception) { }
         }
 
         // Third call should be rejected immediately
@@ -502,11 +502,11 @@ public class MiddlewarePipelineFacts
 
         public async ValueTask Invoke(GraphQLRequestContext context, GraphQLRequestDelegate next)
         {
-            var start = DateTime.UtcNow;
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             await next(context);
-            var duration = DateTime.UtcNow - start;
+            stopwatch.Stop();
             
-            _timings["GraphQL.Execution"] = duration;
+            _timings["GraphQL.Execution"] = stopwatch.Elapsed;
         }
     }
 
@@ -576,7 +576,7 @@ public class MiddlewarePipelineFacts
                     await next(context);
                     return;
                 }
-                catch
+                catch (Exception)
                 {
                     retries++;
                     if (retries >= _maxRetries)
@@ -609,7 +609,7 @@ public class MiddlewarePipelineFacts
                 await next(context);
                 _failureCount = 0; // Reset on success
             }
-            catch
+            catch (Exception)
             {
                 _failureCount++;
                 if (_failureCount >= _failureThreshold)
