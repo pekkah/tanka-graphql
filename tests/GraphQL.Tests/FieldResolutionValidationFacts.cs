@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -524,7 +525,9 @@ public class FieldResolutionValidationFacts
                 }},
                 { "greetingWithDefault", context =>
                 {
-                    var name = (string)context.ArgumentValues["name"];
+                    var name = context.ArgumentValues.TryGetValue("name", out var nameValue) && nameValue != null
+                        ? (string)nameValue
+                        : "Anonymous";
                     context.ResolvedValue = $"Hello, {name}!";
                     return ValueTask.CompletedTask;
                 }},
@@ -566,7 +569,9 @@ public class FieldResolutionValidationFacts
                     var input = (Dictionary<string, object>)context.ArgumentValues["input"];
                     var name = (string)input["name"];
                     var age = (int)input["age"];
-                    var email = (string)input["email"];
+                    var email = input.TryGetValue("email", out var emailValue) && emailValue != null
+                        ? (string)emailValue
+                        : "noemail@example.com";
 
                     context.ResolvedValue = $"Processed user: {name} ({age}) - {email}";
                     return ValueTask.CompletedTask;
@@ -712,23 +717,23 @@ public class FieldResolutionValidationFacts
                 {
                     context.ResolvedValue = new object[]
                     {
-                        new { name = "Buddy", sound = "Woof", breed = "Golden Retriever", __typename = "Dog" },
-                        new { name = "Whiskers", sound = "Meow", color = "Orange", __typename = "Cat" }
+                        new TestNamedType("Dog") { name = "Buddy", sound = "Woof", breed = "Golden Retriever" },
+                        new TestNamedType("Cat") { name = "Whiskers", sound = "Meow", color = "Orange" }
                     };
                     return ValueTask.CompletedTask;
                 }}
             },
             ["Dog"] = new()
             {
-                { "name", context => context.ResolveAsPropertyOf<dynamic>(d => d.name) },
-                { "sound", context => context.ResolveAsPropertyOf<dynamic>(d => d.sound) },
-                { "breed", context => context.ResolveAsPropertyOf<dynamic>(d => d.breed) }
+                { "name", context => context.ResolveAsPropertyOf<TestNamedType>(d => d.name) },
+                { "sound", context => context.ResolveAsPropertyOf<TestNamedType>(d => d.sound) },
+                { "breed", context => context.ResolveAsPropertyOf<TestNamedType>(d => d.breed) }
             },
             ["Cat"] = new()
             {
-                { "name", context => context.ResolveAsPropertyOf<dynamic>(c => c.name) },
-                { "sound", context => context.ResolveAsPropertyOf<dynamic>(c => c.sound) },
-                { "color", context => context.ResolveAsPropertyOf<dynamic>(c => c.color) }
+                { "name", context => context.ResolveAsPropertyOf<TestNamedType>(c => c.name) },
+                { "sound", context => context.ResolveAsPropertyOf<TestNamedType>(c => c.sound) },
+                { "color", context => context.ResolveAsPropertyOf<TestNamedType>(c => c.color) }
             }
         };
 
@@ -762,19 +767,19 @@ public class FieldResolutionValidationFacts
             {
                 { "searchResult", context =>
                 {
-                    context.ResolvedValue = new { name = "John Doe", email = "john@example.com", __typename = "User" };
+                    context.ResolvedValue = new TestNamedType("User") { name = "John Doe", email = "john@example.com" };
                     return ValueTask.CompletedTask;
                 }}
             },
             ["User"] = new()
             {
-                { "name", context => context.ResolveAsPropertyOf<dynamic>(u => u.name) },
-                { "email", context => context.ResolveAsPropertyOf<dynamic>(u => u.email) }
+                { "name", context => context.ResolveAsPropertyOf<TestNamedType>(u => u.name) },
+                { "email", context => context.ResolveAsPropertyOf<TestNamedType>(u => u.email) }
             },
             ["Post"] = new()
             {
-                { "title", context => context.ResolveAsPropertyOf<dynamic>(p => p.title) },
-                { "content", context => context.ResolveAsPropertyOf<dynamic>(p => p.content) }
+                { "title", context => context.ResolveAsPropertyOf<TestNamedType>(p => p.title) },
+                { "content", context => context.ResolveAsPropertyOf<TestNamedType>(p => p.content) }
             }
         };
 
@@ -904,5 +909,35 @@ public class FieldResolutionValidationFacts
         };
 
         return await builder.Build(resolvers);
+    }
+
+    private class TestNamedType : DynamicObject, INamedType
+    {
+        public string __Typename { get; }
+        private readonly Dictionary<string, object?> _properties = new();
+
+        public TestNamedType(string typename)
+        {
+            __Typename = typename;
+        }
+
+        public override bool TrySetMember(SetMemberBinder binder, object? value)
+        {
+            _properties[binder.Name] = value;
+            return true;
+        }
+
+        public override bool TryGetMember(GetMemberBinder binder, out object? result)
+        {
+            return _properties.TryGetValue(binder.Name, out result);
+        }
+
+        public dynamic name { get => _properties.GetValueOrDefault("name"); set => _properties["name"] = value; }
+        public dynamic sound { get => _properties.GetValueOrDefault("sound"); set => _properties["sound"] = value; }
+        public dynamic breed { get => _properties.GetValueOrDefault("breed"); set => _properties["breed"] = value; }
+        public dynamic color { get => _properties.GetValueOrDefault("color"); set => _properties["color"] = value; }
+        public dynamic email { get => _properties.GetValueOrDefault("email"); set => _properties["email"] = value; }
+        public dynamic title { get => _properties.GetValueOrDefault("title"); set => _properties["title"] = value; }
+        public dynamic content { get => _properties.GetValueOrDefault("content"); set => _properties["content"] = value; }
     }
 }
