@@ -16,6 +16,12 @@ namespace Tanka.GraphQL.Language.Tests;
 /// </summary>
 public class ASTVisitorAndPrinterRobustnessFacts
 {
+    /// <summary>
+    /// Test context class that inherits from DocumentWalkerContextBase for testing purposes
+    /// </summary>
+    private class TestContext : DocumentWalkerContextBase
+    {
+    }
     #region Document Walker Robustness Tests
 
     [Fact]
@@ -44,12 +50,12 @@ public class ASTVisitorAndPrinterRobustnessFacts
     public void ReadOnlyDocumentWalker_WithNullDocument_HandlesGracefully()
     {
         // Given: Document walker with null document
-        var visitor = Substitute.For<IReadOnlyDocumentVisitor<object>>();
-        var context = new object();
-        var walker = new ReadOnlyDocumentWalker<object>(new[] { visitor }, context);
+        var visitor = Substitute.For<IReadOnlyDocumentVisitor<TestContext>>();
+        var context = new TestContext();
+        var walker = new ReadOnlyDocumentWalker<TestContext>(new[] { visitor }, context, null);
 
         // When & Then: Should handle null document gracefully
-        var exception = Record.Exception(() => walker.Visit((INode)null!));
+        var exception = Record.Exception(() => walker.Visit(null));
         
         // The walker should handle a null document gracefully without throwing.
         Assert.Null(exception);
@@ -71,9 +77,9 @@ public class ASTVisitorAndPrinterRobustnessFacts
         var deepQuery = deepQueryBuilder.ToString();
         
         var document = Parser.Create(deepQuery).ParseExecutableDocument();
-        var visitor = Substitute.For<IReadOnlyDocumentVisitor<object>>();
-        var context = new object();
-        var walker = new ReadOnlyDocumentWalker<object>(new[] { visitor }, context);
+        var visitor = Substitute.For<IReadOnlyDocumentVisitor<TestContext>>();
+        var context = new TestContext();
+        var walker = new ReadOnlyDocumentWalker<TestContext>(new[] { visitor }, context, null);
 
         // When & Then: Should handle deep nesting without stack overflow
         var exception = Record.Exception(() => walker.Visit(document));
@@ -96,9 +102,9 @@ public class ASTVisitorAndPrinterRobustnessFacts
         var largeQuery = largeQueryBuilder.ToString();
         
         var document = Parser.Create(largeQuery).ParseExecutableDocument();
-        var visitor = Substitute.For<IReadOnlyDocumentVisitor<object>>();
-        var context = new object();
-        var walker = new ReadOnlyDocumentWalker<object>(new[] { visitor }, context);
+        var visitor = Substitute.For<IReadOnlyDocumentVisitor<TestContext>>();
+        var context = new TestContext();
+        var walker = new ReadOnlyDocumentWalker<TestContext>(new[] { visitor }, context, null);
 
         // When: Walk the large document
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -162,12 +168,12 @@ public class ASTVisitorAndPrinterRobustnessFacts
     {
         // Given: Visitor that throws exceptions
         var document = Parser.Create("{ field }").ParseExecutableDocument();
-        var throwingVisitor = Substitute.For<IReadOnlyDocumentVisitor<object>>();
-        throwingVisitor.When(v => v.EnterNode(Arg.Any<object>(), Arg.Any<INode>()))
+        var throwingVisitor = Substitute.For<IReadOnlyDocumentVisitor<TestContext>>();
+        throwingVisitor.When(v => v.EnterNode(Arg.Any<TestContext>(), Arg.Any<INode>()))
                       .Do(_ => throw new InvalidOperationException("Test exception"));
         
-        var context = new object();
-        var walker = new ReadOnlyDocumentWalker<object>(new[] { throwingVisitor }, context);
+        var context = new TestContext();
+        var walker = new ReadOnlyDocumentWalker<TestContext>(new[] { throwingVisitor }, context, null);
 
         // When & Then: Should propagate visitor exceptions
         Assert.Throws<InvalidOperationException>(() => walker.Visit(document));
