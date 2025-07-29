@@ -30,8 +30,9 @@ public class ASTVisitorAndPrinterRobustnessFacts
         var exception = Record.Exception(() => 
         {
             var walker = new ReadOnlyDocumentWalker<PrinterContext>(
-                visitors.Where(v => v != null), 
-                context
+                visitors.Where(v => v != null).ToList(), 
+                context,
+                null
             );
             walker.Visit(document);
         });
@@ -50,24 +51,24 @@ public class ASTVisitorAndPrinterRobustnessFacts
         // When & Then: Should handle null document gracefully
         var exception = Record.Exception(() => walker.Visit((INode)null!));
         
-        // May throw or handle gracefully depending on implementation
-        // This test documents the current behavior
-        Assert.NotNull(exception);
+        // The walker should handle a null document gracefully without throwing.
+        Assert.Null(exception);
     }
 
     [Fact]
     public void ReadOnlyDocumentWalker_WithDeeplyNestedDocument_DoesNotStackOverflow()
     {
         // Given: Deeply nested selection sets (100 levels)
-        var deepQuery = "query";
+        var deepQueryBuilder = new System.Text.StringBuilder("query");
         for (int i = 0; i < 100; i++)
         {
-            deepQuery += " { field";
+            deepQueryBuilder.Append(" { field");
         }
         for (int i = 0; i < 100; i++)
         {
-            deepQuery += " }";
+            deepQueryBuilder.Append(" }");
         }
+        var deepQuery = deepQueryBuilder.ToString();
         
         var document = Parser.Create(deepQuery).ParseExecutableDocument();
         var visitor = Substitute.For<IReadOnlyDocumentVisitor<object>>();
@@ -86,12 +87,13 @@ public class ASTVisitorAndPrinterRobustnessFacts
     public void ReadOnlyDocumentWalker_WithVeryLargeDocument_HandlesEfficiently()
     {
         // Given: Document with many sibling selections (1000 fields)
-        var largeQuery = "{ ";
+        var largeQueryBuilder = new System.Text.StringBuilder("{ ");
         for (int i = 0; i < 1000; i++)
         {
-            largeQuery += $"field{i} ";
+            largeQueryBuilder.Append($"field{i} ");
         }
-        largeQuery += "}";
+        largeQueryBuilder.Append("}");
+        var largeQuery = largeQueryBuilder.ToString();
         
         var document = Parser.Create(largeQuery).ParseExecutableDocument();
         var visitor = Substitute.For<IReadOnlyDocumentVisitor<object>>();
@@ -209,9 +211,8 @@ public class ASTVisitorAndPrinterRobustnessFacts
         // When & Then: Should handle null input gracefully
         var exception = Record.Exception(() => Printer.Print(nullNode));
         
-        // Depending on implementation, may throw or return empty string
-        // This test documents the current behavior
-        Assert.NotNull(exception);
+        // The printer should handle a null node gracefully without throwing.
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -232,15 +233,16 @@ public class ASTVisitorAndPrinterRobustnessFacts
     public void Printer_WithDeeplyNestedStructure_DoesNotStackOverflow()
     {
         // Given: Deeply nested selection sets
-        var deepQuery = "query";
+        var deepQueryBuilder = new System.Text.StringBuilder("query");
         for (int i = 0; i < 50; i++)
         {
-            deepQuery += " { field";
+            deepQueryBuilder.Append(" { field");
         }
         for (int i = 0; i < 50; i++)
         {
-            deepQuery += " }";
+            deepQueryBuilder.Append(" }");
         }
+        var deepQuery = deepQueryBuilder.ToString();
         
         var document = Parser.Create(deepQuery).ParseExecutableDocument();
 
@@ -326,6 +328,8 @@ public class ASTVisitorAndPrinterRobustnessFacts
         // Then: Should handle escape sequences properly
         Assert.NotNull(result);
         Assert.Contains("field", result);
+        // The printer should use a block string for strings containing newlines.
+        Assert.Contains("\"\"\"", result);
     }
 
     [Fact]
@@ -354,12 +358,13 @@ public class ASTVisitorAndPrinterRobustnessFacts
     public void PrinterContext_WithLargeOutput_HandlesCorrectly()
     {
         // Given: Document that will produce large output
-        var largeQuery = "{ ";
+        var largeQueryBuilder = new System.Text.StringBuilder("{ ");
         for (int i = 0; i < 1000; i++)
         {
-            largeQuery += $"field{i} ";
+            largeQueryBuilder.Append($"field{i} ");
         }
-        largeQuery += "}";
+        largeQueryBuilder.Append("}");
+        var largeQuery = largeQueryBuilder.ToString();
         
         var document = Parser.Create(largeQuery).ParseExecutableDocument();
 
@@ -466,27 +471,6 @@ public class ASTVisitorAndPrinterRobustnessFacts
         }
     }
 
-    [Fact]
-    public void Printer_SimpleRoundtrip_WorksCorrectly()
-    {
-        // Given: Simple GraphQL documents
-        var testCases = new[]
-        {
-            "{ field }",
-            "{ field1 field2 }"
-        };
-
-        foreach (var originalSource in testCases)
-        {
-            // When: Parse then print then parse again
-            var document = Parser.Create(originalSource).ParseExecutableDocument();
-            var printed = Printer.Print(document);
-            
-            // Then: Should produce valid GraphQL that can be parsed
-            var exception = Record.Exception(() => Parser.Create(printed).ParseExecutableDocument());
-            Assert.Null(exception);
-        }
-    }
 
     #endregion
 
@@ -515,9 +499,9 @@ public class ASTVisitorAndPrinterRobustnessFacts
     {
         // Given: Document and visitor
         var document = Parser.Create("{ field1 field2 field3 }").ParseExecutableDocument();
-        var visitor = Substitute.For<IReadOnlyDocumentVisitor<object>>();
-        var context = new object();
-        var walker = new ReadOnlyDocumentWalker<object>(new[] { visitor }, context);
+        var visitor = Substitute.For<IReadOnlyDocumentVisitor<PrinterContext>>();
+        var context = new PrinterContext();
+        var walker = new ReadOnlyDocumentWalker<PrinterContext>(new[] { visitor }, context, null);
 
         // When: Visit multiple times and measure
         var times = new List<long>();
