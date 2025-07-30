@@ -890,7 +890,8 @@ public static class ExecutionRules
         {
             //rule.EnterNullValue += node => { };
 
-            rule.EnterListValue += node => { IsValidScalar(context, node); };
+            // ListValue nodes should not be validated as scalars
+            // rule.EnterListValue += node => { IsValidScalar(context, node); };
             rule.EnterObjectValue += node =>
             {
                 var type = context.Tracker.InputType;
