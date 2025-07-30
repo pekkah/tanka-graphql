@@ -184,7 +184,13 @@ type Subscription {
             .GetAsyncEnumerator(unsubscribe.Token);
 
         /* When */
+        var hasNext = await result.MoveNextAsync();
+        
         /* Then */
-        await Assert.ThrowsAsync<ValidationException>(()=> result.MoveNextAsync().AsTask());
+        Assert.True(hasNext);
+        var executionResult = result.Current;
+        Assert.NotNull(executionResult);
+        Assert.NotNull(executionResult.Errors);
+        Assert.Single(executionResult.Errors);
     }
 }

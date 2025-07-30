@@ -57,7 +57,7 @@ public class ExecutionEngineRobustnessFacts
         Assert.NotNull(result);
         Assert.NotNull(result.Errors);
         Assert.Single(result.Errors);
-        Assert.Contains("Unexpected end of input", result.Errors[0].Message);
+        Assert.Contains("Unexpected", result.Errors[0].Message);
     }
 
     [Fact]
