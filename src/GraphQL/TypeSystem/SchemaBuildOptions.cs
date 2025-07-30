@@ -1,4 +1,5 @@
 ﻿using Tanka.GraphQL.Directives;
+using Tanka.GraphQL.TypeSystem.SchemaValidation;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.ValueSerialization;
 
@@ -33,6 +34,8 @@ public record SchemaBuildOptions
     public IResolverMap? Resolvers { get; set; }
 
     public ISubscriberMap? Subscribers { get; set; }
+
+    public IEnumerable<SchemaValidationRule>? SchemaValidationRules { get; set; } = BuiltInSchemaValidationRules.All;
 
     public IReadOnlyDictionary<string, IValueConverter>? ValueConverters { get; set; } =
         new Dictionary<string, IValueConverter>

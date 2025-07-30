@@ -5,6 +5,7 @@ using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.TypeSystem.SchemaValidation;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.ValueSerialization;
 
@@ -283,6 +284,18 @@ directive @oneOf on INPUT_OBJECT
         );
 
         (typeDefinitions, resolvers) = RunDirectiveVisitors(typeDefinitions, options, resolvers);
+
+        // Run schema validation after directive visitors have transformed the schema
+        if (options.SchemaValidationRules?.Any() == true)
+        {
+            var validator = new SchemaValidator(options.SchemaValidationRules);
+            var validationResult = validator.Validate(typeDefinitions);
+            
+            if (!validationResult.IsValid)
+            {
+                throw new SchemaValidationException(validationResult.Errors);
+            }
+        }
 
         var namedTypeDefinitions = typeDefinitions
             .ToDictionary(type => type.Name.Value, type => type);
