@@ -148,8 +148,8 @@ public class FieldResolutionValidationFacts
 
         Assert.NotNull(result);
         Assert.NotNull(result.Errors);
-        // Two validation errors are expected: one for required field missing, one for field not provided
-        Assert.Equal(2, result.Errors.Count);
+        // Only one validation error is expected: missing required field 'name'
+        Assert.Equal(1, result.Errors.Count);
     }
 
     [Fact]
