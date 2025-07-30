@@ -74,6 +74,8 @@ directive @skip(if: Boolean!) on
     | INLINE_FRAGMENT
 
 directive @specifiedBy(url: String!) on SCALAR
+
+directive @oneOf on INPUT_OBJECT
 ";
 
     /// <summary>

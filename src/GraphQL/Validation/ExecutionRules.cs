@@ -3,6 +3,7 @@ using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.SelectionSets;
+using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueSerialization;
 
 namespace Tanka.GraphQL.Validation;
@@ -42,6 +43,8 @@ public static class ExecutionRules
         R571And573Directives(),
         R572DirectivesAreInValidLocations(),
 
+        // OneOf directive validation
+        OneOfDirective.ValidationRule(),
 
         R581And582Variables(),
         R583AllVariableUsesDefined(),
