@@ -3,7 +3,9 @@
   <PropertyGroup>
     <TargetFrameworks>net9.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
-	  <Nullabl>enable</Nullabl>
+	  <Nullable>enable</Nullable>
+	  <!-- Suppress test warnings for legacy code - these are pre-existing and not related to @oneOf migration -->
+	  <NoWarn>$(NoWarn);xUnit1026;CS8632;CS8620;CS8604;CS8602</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
