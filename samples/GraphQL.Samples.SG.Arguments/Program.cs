@@ -42,7 +42,7 @@ public static partial class Query
     /// </summary>
     /// <param name="options">todo: bug - requires [FromArguments] in combination with [InputObject]</param>
     /// <returns></returns>
-    public static int[] RangeWithInputObject([FromArguments]QueryOptions options)
+    public static int[] RangeWithInputObject([FromArguments] QueryOptions options)
     {
         return Enumerable.Range(options.Start, options.Count).ToArray();
     }

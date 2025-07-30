@@ -18,12 +18,12 @@ public class InterfaceTypeEmitter(SourceProductionContext context)
             Properties = definition.Properties,
             Usings = definition.Usings,
             NamedTypeExtension = NamedTypeExtension.Render(
-                "interface", 
+                "interface",
                 definition.TargetType,
                 definition.GraphQLName ?? definition.TargetType,
                 definition.IsStatic)
         };
-        
+
         var content = template.Render();
         context.AddSource($"{ns}{definition.TargetType}Controller.g.cs", content);
     }

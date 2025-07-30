@@ -41,7 +41,7 @@ public class ExecutableSchemaBuilder
     }
 
     public ExecutableSchemaBuilder Add(
-        string typeName, 
+        string typeName,
         FieldsWithResolvers fields,
         FieldsWithSubscribers? subscribers = null)
     {
@@ -60,7 +60,7 @@ public class ExecutableSchemaBuilder
         ValueConverters.Add(typeName, valueConverter);
         return this;
     }
-    
+
     public async Task<ISchema> Build(Action<SchemaBuildOptions>? configureBuildOptions = null)
     {
         var buildOptions = new SchemaBuildOptions
@@ -70,7 +70,7 @@ public class ExecutableSchemaBuilder
             ValueConverters = ValueConverters.Build(),
             DirectiveVisitorFactories = DirectiveVisitorFactories
                 .ToDictionary(
-                    kv => kv.Key, 
+                    kv => kv.Key,
                     kv => kv.Value
                     ),
             BuildTypesFromOrphanedExtensions = true

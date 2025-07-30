@@ -12,7 +12,7 @@ public static class EquatableArrayExtensions
         where T : IEquatable<T>
     {
         return new(array.ToArray());
-    
+
     }
 }
 
@@ -81,8 +81,8 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnume
     IEnumerator<T> IEnumerable<T>.GetEnumerator()
     {
         return ((IEnumerable<T>)(_array ?? Array.Empty<T>())).GetEnumerator();
-    }    
-    
+    }
+
     /// <sinheritdoc/>
     IEnumerator IEnumerable.GetEnumerator()
     {
@@ -90,7 +90,7 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnume
     }
 
     public int Count => _array?.Length ?? 0;
-    
+
     public int Size => _array?.Length ?? 0;
 
     /// <summary>

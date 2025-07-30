@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests;
@@ -817,7 +818,7 @@ extend scalar Scalar
 
     private void AssertPrintedEquals(string expected, string actual)
     {
-        string Normalize(string str)
+        static string Normalize(string str)
         {
             str = str
                 .Replace("\r", string.Empty)

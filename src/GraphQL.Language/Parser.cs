@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
+
 using Tanka.GraphQL.Language.Internal;
 using Tanka.GraphQL.Language.Nodes;
 

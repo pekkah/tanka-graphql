@@ -149,7 +149,7 @@ public class FieldResolutionValidationFacts
         Assert.NotNull(result);
         Assert.NotNull(result.Errors);
         // Only one validation error is expected: missing required field 'name'
-        Assert.Equal(1, result.Errors.Count);
+        Assert.Single(result.Errors);
     }
 
     [Fact]
@@ -650,7 +650,7 @@ public class FieldResolutionValidationFacts
                     {
                         status = statusValue.ToString() ?? "unknown";
                     }
-                    
+
                     context.ResolvedValue = $"Status is {status.ToLower()}";
                     return ValueTask.CompletedTask;
                 }}
@@ -924,7 +924,7 @@ public class FieldResolutionValidationFacts
                 {
                     var dateValue = context.ArgumentValues["date"];
                     string dateString;
-                    
+
                     if (dateValue is DateTime dateTime)
                     {
                         dateString = dateTime.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
@@ -933,7 +933,7 @@ public class FieldResolutionValidationFacts
                     {
                         dateString = dateValue?.ToString() ?? "null";
                     }
-                    
+
                     context.ResolvedValue = $"Processed date: {dateString}";
                     return ValueTask.CompletedTask;
                 }}
@@ -950,7 +950,7 @@ public class FieldResolutionValidationFacts
             ["ID"] = new IdConverter(),
             ["DateTime"] = new DateTimeConverter()
         };
-        
+
         var buildOptions = new SchemaBuildOptions
         {
             Resolvers = resolvers,
@@ -998,7 +998,7 @@ public class FieldResolutionValidationFacts
 
         public object? ParseLiteral(ValueBase input)
         {
-            if (input.Kind == NodeKind.NullValue) 
+            if (input.Kind == NodeKind.NullValue)
                 return null;
 
             if (input.Kind == NodeKind.StringValue)
@@ -1006,7 +1006,7 @@ public class FieldResolutionValidationFacts
                 var stringValue = ((StringValue)input).ToString();
                 if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime))
                     return dateTime;
-                
+
                 return stringValue; // Return original string if parsing fails
             }
 

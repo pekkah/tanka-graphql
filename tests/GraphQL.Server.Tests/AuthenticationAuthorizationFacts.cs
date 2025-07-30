@@ -112,7 +112,7 @@ public class AuthenticationAuthorizationFacts
 
         // Assert
         Assert.False(finalDelegateCalled);
-        
+
         // Check that error response was set
         await foreach (var result in context.Response)
         {
@@ -181,7 +181,7 @@ public class AuthenticationAuthorizationFacts
 
         // Assert
         Assert.False(finalDelegateCalled);
-        
+
         // Check that error response was set
         await foreach (var result in context.Response)
         {
@@ -267,7 +267,7 @@ public class AuthenticationAuthorizationFacts
 
         // Assert
         Assert.False(finalDelegateCalled);
-        
+
         // Check that error response was set
         await foreach (var result in context.Response)
         {
@@ -300,7 +300,7 @@ public class AuthenticationAuthorizationFacts
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-            
+
             var identity = new ClaimsIdentity(claims, "test");
             httpContext.User = new ClaimsPrincipal(identity);
 
@@ -411,7 +411,7 @@ public class AuthenticationAuthorizationFacts
 
         // Assert
         Assert.False(finalDelegateCalled);
-        
+
         // Check that error response was set
         await foreach (var result in context.Response)
         {
@@ -461,7 +461,7 @@ public class AuthenticationAuthorizationFacts
         context.HttpContext = httpContext;
 
         var rateLimitMiddleware = new UserRateLimitMiddleware(maxRequestsPerMinute: 2);
-        
+
         // First request should succeed
         var firstRequestCalled = false;
         GraphQLRequestDelegate firstDelegate = ctx =>
@@ -494,7 +494,7 @@ public class AuthenticationAuthorizationFacts
 
         await rateLimitMiddleware.Invoke(context, thirdDelegate);
         Assert.False(thirdRequestCalled);
-        
+
         // Check that rate limit error was set
         await foreach (var result in context.Response)
         {
@@ -775,7 +775,7 @@ public class AuthenticationAuthorizationFacts
             var oneMinuteAgo = now.AddMinutes(-1);
 
             var userRequestTimes = _userRequests.GetOrAdd(userId, _ => new List<DateTime>());
-            
+
             lock (userRequestTimes)
             {
                 // Remove old requests
@@ -826,7 +826,7 @@ public class AuthenticationAuthorizationFacts
     {
         return CreateErrorResponseInternal(message);
     }
-    
+
     private static async IAsyncEnumerable<ExecutionResult> CreateErrorResponseInternal(string message)
     {
         yield return new ExecutionResult

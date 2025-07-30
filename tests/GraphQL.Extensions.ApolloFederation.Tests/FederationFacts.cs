@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;

@@ -53,7 +53,7 @@ public static partial class Query
     /// </remarks>
     /// <param name="db"></param>
     /// <returns></returns>
-    public static Message[] Messages([FromServices]Db db)
+    public static Message[] Messages([FromServices] Db db)
     {
         return db.Messages.ToArray();
     }
@@ -71,7 +71,7 @@ public static partial class Mutation
     /// <param name="input"></param>
     /// <param name="db"></param>
     /// <returns></returns>
-    public static Message Post([FromArguments]InputMessage input, [FromServices]Db db)
+    public static Message Post([FromArguments] InputMessage input, [FromServices] Db db)
     {
         var message = new Message
         {
@@ -112,7 +112,7 @@ public static partial class Mutation
 
         if (input.Remove is null)
             throw new ArgumentNullException(nameof(input.Remove), "This should not happen as the validation rule should ensure one of these are set");
-            
+
         db.Messages.RemoveAll(m => m.Id == input.Remove.Id);
         return new Result()
         {

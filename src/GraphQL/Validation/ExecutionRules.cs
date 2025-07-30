@@ -423,8 +423,8 @@ public static class ExecutionRules
 
                         return;
                     }
-                    
-                    
+
+
                     if (!ruleVisitorContext.VariableValues.TryGetValue(variable.Name, out var variableValue))
                         ruleVisitorContext.Error(
                             ValidationErrorCodes.R5421RequiredArguments,
@@ -444,7 +444,7 @@ public static class ExecutionRules
                                 $"Value of argument '{argumentName}' cannot be null");
                         }
                     }
-                    
+
                 }
 
                 if (argument?.Value == null || argument.Value.Kind == NodeKind.NullValue)
@@ -797,7 +797,7 @@ public static class ExecutionRules
             {
                 if (!fragments.TryGetValue(node.FragmentName, out var fragment))
                     return;
-                    
+
                 var fragmentType = Ast.UnwrapAndResolveType(context.Schema, fragment.TypeCondition);
                 var parentType = context.Tracker.ParentType;
                 if (fragmentType is not null && parentType is not null)
@@ -1178,7 +1178,7 @@ public static class ExecutionRules
         };
 
         // 5.7.3
-        void CheckDirectives(IRuleVisitorContext context, Language.Nodes.Directives? directives)
+        static void CheckDirectives(IRuleVisitorContext context, Language.Nodes.Directives? directives)
         {
             if (directives is null || directives.Count == 0)
                 return;
@@ -1469,7 +1469,7 @@ public static class ExecutionRules
         {
             if (locationType is null)
                 return false;
-            
+
             if (locationType is NonNullType nonNullTypeTypeLocationType && varType is not NonNullType)
             {
                 var hasNonNullTypeTypeVariableDefaultValue = varDefaultValue != null;

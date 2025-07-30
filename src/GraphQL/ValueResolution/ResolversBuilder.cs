@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+
 using Tanka.GraphQL.Internal;
 
 namespace Tanka.GraphQL.ValueResolution;
@@ -34,7 +35,7 @@ public class ResolversBuilder : IEnumerable
     {
         configure(Resolver(objectName, fieldName));
     }
-    
+
     public void Add(string objectName, string fieldName,
         Action<SubscriberBuilder> configureSubscriber,
         Action<ResolverBuilder> configureResolver)
@@ -59,7 +60,7 @@ public class ResolversBuilder : IEnumerable
 
     public ResolversBuilder Resolvers(string objectName, Dictionary<string, Delegate> resolvers)
     {
-        foreach (var (fieldName, resolver) in resolvers) 
+        foreach (var (fieldName, resolver) in resolvers)
             Resolver(objectName, fieldName).Run(resolver);
 
         return this;

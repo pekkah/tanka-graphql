@@ -2,7 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.ValueResolution;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.ValueResolution;

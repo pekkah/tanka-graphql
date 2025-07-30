@@ -3,7 +3,9 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.SDL;

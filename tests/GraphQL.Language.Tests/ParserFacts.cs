@@ -1,7 +1,9 @@
 using System;
 using System.Buffers.Text;
 using System.Linq;
+
 using Tanka.GraphQL.Language.Nodes;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests;
@@ -310,7 +312,7 @@ public class ParserFacts
         var fragmentDefinition = sut.ParseFragmentDefinition();
 
         /* Then */
-        Assert.Equal(1, fragmentDefinition.SelectionSet.Count);
+        Assert.Single(fragmentDefinition.SelectionSet);
     }
 
     [Fact]
@@ -326,7 +328,7 @@ public class ParserFacts
         Assert.Equal("name", directive.Name);
     }
 
-    
+
     [Fact]
     public void Directive_Arguments()
     {
@@ -469,7 +471,7 @@ public class ParserFacts
         var actual = sut.ParseInlineFragment();
 
         /* Then */
-        Assert.Equal(1, actual.SelectionSet.Count);
+        Assert.Single(actual.SelectionSet);
     }
 
     [Fact]
@@ -484,7 +486,7 @@ public class ParserFacts
         var actual = sut.ParseInlineFragment();
 
         /* Then */
-        Assert.Equal(1, actual.SelectionSet.Count);
+        Assert.Single(actual.SelectionSet);
     }
 
     [Fact]
@@ -827,7 +829,7 @@ Description
 
         /* Then */
         var listValue = Assert.IsType<ListValue>(value);
-        Assert.Equal(0, listValue.Count);
+        Assert.Empty(listValue);
     }
 
     [Fact]
@@ -856,7 +858,7 @@ Description
 
         /* Then */
         var listValue = Assert.IsType<ObjectValue>(value);
-        Assert.Equal(0, listValue.Count);
+        Assert.Empty(listValue);
     }
 
     [Fact]

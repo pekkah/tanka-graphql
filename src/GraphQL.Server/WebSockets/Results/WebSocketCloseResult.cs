@@ -18,7 +18,7 @@ public partial class WebSocketCloseResult(
     {
         [LoggerMessage(LogLevel.Error, "WebSocket closed because of '{CloseCode}'")]
         public static partial void WebSocketClosed(
-            ILogger logger, 
+            ILogger logger,
             WebSocketCloseStatus closeCode);
     }
 }

@@ -29,7 +29,7 @@ public static class NamedTypeExtension
     {
         var template = Template.Parse(GraphQLNamedTypeTemplate);
         var scriptObject = new ScriptObject();
-        scriptObject.Import(new { type, name, typeName = graphQLName, isStatic});
+        scriptObject.Import(new { type, name, typeName = graphQLName, isStatic });
         return template.Render(scriptObject);
     }
 
@@ -61,7 +61,7 @@ public static class NamedTypeExtension
         if (graphQLNameAttribute != null)
         {
             var graphQLName = (string?)graphQLNameAttribute.ConstructorArguments[0].Value ?? string.Empty;
-            
+
             if (!string.IsNullOrWhiteSpace(graphQLName))
                 return graphQLName;
         }

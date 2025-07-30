@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Validation;
 using Tanka.GraphQL.Language.Visitors;

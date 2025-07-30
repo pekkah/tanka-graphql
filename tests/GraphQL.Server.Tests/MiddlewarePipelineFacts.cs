@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 
 using Tanka.GraphQL.Request;
-using Tanka.GraphQL.Server;
 using Tanka.GraphQL.Response;
+using Tanka.GraphQL.Server;
 
 using Xunit;
 
@@ -22,7 +22,7 @@ public class MiddlewarePipelineFacts
     {
         var executionOrder = new List<string>();
         var middleware = new TestMiddleware("test", executionOrder);
-        
+
         var context = new GraphQLRequestContext();
         GraphQLRequestDelegate finalDelegate = ctx =>
         {
@@ -44,7 +44,7 @@ public class MiddlewarePipelineFacts
         var middleware3 = new TestMiddleware("middleware3", executionOrder);
 
         var context = new GraphQLRequestContext();
-        
+
         // Build pipeline manually
         GraphQLRequestDelegate pipeline = async ctx =>
         {
@@ -53,31 +53,31 @@ public class MiddlewarePipelineFacts
                 executionOrder.Add("final");
                 return Task.CompletedTask;
             };
-            
+
             GraphQLRequestDelegate delegate2 = async ctx2 =>
             {
                 await middleware3.Invoke(ctx2, delegate3);
             };
-            
+
             GraphQLRequestDelegate delegate1 = async ctx1 =>
             {
                 await middleware2.Invoke(ctx1, delegate2);
             };
-            
+
             await middleware1.Invoke(ctx, delegate1);
         };
 
         await pipeline(context);
 
-        Assert.Equal(new[] 
-        { 
-            "middleware1-before", 
-            "middleware2-before", 
-            "middleware3-before", 
-            "final", 
-            "middleware3-after", 
-            "middleware2-after", 
-            "middleware1-after" 
+        Assert.Equal(new[]
+        {
+            "middleware1-before",
+            "middleware2-before",
+            "middleware3-before",
+            "final",
+            "middleware3-after",
+            "middleware2-after",
+            "middleware1-after"
         }, executionOrder);
     }
 
@@ -85,11 +85,11 @@ public class MiddlewarePipelineFacts
     public async Task Middleware_WithException_ShouldPropagateException()
     {
         var middleware = new ExceptionThrowingMiddleware();
-        
+
         var context = new GraphQLRequestContext();
         GraphQLRequestDelegate finalDelegate = ctx => Task.CompletedTask;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => 
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
             middleware.Invoke(context, finalDelegate).AsTask());
     }
 
@@ -101,7 +101,7 @@ public class MiddlewarePipelineFacts
         var handlingMiddleware = new ExceptionHandlingMiddleware(executionOrder);
 
         var context = new GraphQLRequestContext();
-        
+
         GraphQLRequestDelegate pipeline = async ctx =>
         {
             GraphQLRequestDelegate finalDelegate = ctx2 =>
@@ -109,12 +109,12 @@ public class MiddlewarePipelineFacts
                 executionOrder.Add("final");
                 return Task.CompletedTask;
             };
-            
+
             GraphQLRequestDelegate exceptionDelegate = async ctx1 =>
             {
                 await exceptionMiddleware.Invoke(ctx1, finalDelegate);
             };
-            
+
             await handlingMiddleware.Invoke(ctx, exceptionDelegate);
         };
 
@@ -139,7 +139,7 @@ public class MiddlewarePipelineFacts
         var middleware3 = new TestMiddleware("middleware3", executionOrder);
 
         var context = new GraphQLRequestContext();
-        
+
         GraphQLRequestDelegate pipeline = async ctx =>
         {
             GraphQLRequestDelegate finalDelegate = ctx3 =>
@@ -147,27 +147,27 @@ public class MiddlewarePipelineFacts
                 executionOrder.Add("final");
                 return Task.CompletedTask;
             };
-            
+
             GraphQLRequestDelegate middleware3Delegate = async ctx2 =>
             {
                 await middleware3.Invoke(ctx2, finalDelegate);
             };
-            
+
             GraphQLRequestDelegate shortCircuitDelegate = async ctx1 =>
             {
                 await shortCircuitMiddleware.Invoke(ctx1, middleware3Delegate);
             };
-            
+
             await middleware1.Invoke(ctx, shortCircuitDelegate);
         };
 
         await pipeline(context);
 
-        Assert.Equal(new[] 
-        { 
-            "middleware1-before", 
-            "short-circuit", 
-            "middleware1-after" 
+        Assert.Equal(new[]
+        {
+            "middleware1-before",
+            "short-circuit",
+            "middleware1-after"
         }, executionOrder);
     }
 
@@ -176,7 +176,7 @@ public class MiddlewarePipelineFacts
     {
         var context = new GraphQLRequestContext();
         var modifyingMiddleware = new ContextModifyingMiddleware();
-        
+
         GraphQLRequestDelegate finalDelegate = ctx =>
         {
             Assert.NotNull(ctx.Request);
@@ -193,7 +193,7 @@ public class MiddlewarePipelineFacts
     {
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers["X-Test-Header"] = "test-value";
-        
+
         var context = new GraphQLRequestContext();
         context.HttpContext = httpContext;
 
@@ -242,9 +242,9 @@ public class MiddlewarePipelineFacts
     {
         var timings = new Dictionary<string, TimeSpan>();
         var performanceMiddleware = new PerformanceMiddleware(timings);
-        
+
         var context = new GraphQLRequestContext();
-        
+
         GraphQLRequestDelegate finalDelegate = async ctx =>
         {
             await Task.Delay(50); // Simulate work
@@ -298,7 +298,7 @@ public class MiddlewarePipelineFacts
     {
         var executionOrder = new List<string>();
         var asyncMiddleware = new AsyncInitializationMiddleware(executionOrder);
-        
+
         var context = new GraphQLRequestContext();
 
         GraphQLRequestDelegate finalDelegate = ctx =>
@@ -318,7 +318,7 @@ public class MiddlewarePipelineFacts
     {
         var attemptCount = 0;
         var retryMiddleware = new RetryMiddleware(maxRetries: 3);
-        
+
         var context = new GraphQLRequestContext();
 
         GraphQLRequestDelegate finalDelegate = ctx =>
@@ -454,7 +454,7 @@ public class MiddlewarePipelineFacts
                 Query = "{ modifiedQuery }",
                 OperationName = "modified-operation"
             };
-            
+
             await next(context);
         }
     }
@@ -470,7 +470,7 @@ public class MiddlewarePipelineFacts
                 context.Features.Set<ITestFeature>(testFeature);
                 testFeature.TestHeader = headerValue;
             }
-            
+
             await next(context);
         }
     }
@@ -486,7 +486,7 @@ public class MiddlewarePipelineFacts
                 context.Features.Set<ITestFeature>(testFeature);
                 testFeature.ServiceCalled = service.WasCalled();
             }
-            
+
             await next(context);
         }
     }
@@ -505,7 +505,7 @@ public class MiddlewarePipelineFacts
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             await next(context);
             stopwatch.Stop();
-            
+
             _timings["GraphQL.Execution"] = stopwatch.Elapsed;
         }
     }
@@ -552,7 +552,7 @@ public class MiddlewarePipelineFacts
             context.Features.Set<ITestFeature>(testFeature);
             testFeature.AsyncInitialized = true;
             _executionOrder.Add("async-init-complete");
-            
+
             await next(context);
         }
     }

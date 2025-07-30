@@ -141,7 +141,7 @@ public static class SymbolHelper
     }
 
     public static IReadOnlyList<BaseDefinition> GetImplements(INamedTypeSymbol namedTypeSymbol)
-    { 
+    {
         var baseDefinitions = new List<BaseDefinition>();
 
         /*if (namedTypeSymbol.BaseType != null && namedTypeSymbol.BaseType is not { SpecialType: SpecialType.System_Object })

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -154,7 +155,7 @@ public class ObjectTypeGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(interfaceDefinitions, (spc, interfaceDefinition) => new InterfaceTypeEmitter(spc).Emit(interfaceDefinition));
 
         var typesWithNamespace = context.SyntaxProvider
-            .CreateSyntaxProvider((n, _) => n is BaseTypeDeclarationSyntax m && TypeHelper.HasAnyOfAttributes(m.AttributeLists, RequiredAttributes), 
+            .CreateSyntaxProvider((n, _) => n is BaseTypeDeclarationSyntax m && TypeHelper.HasAnyOfAttributes(m.AttributeLists, RequiredAttributes),
                 (ctx, ct) =>
                 {
                     ct.ThrowIfCancellationRequested();

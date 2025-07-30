@@ -35,7 +35,7 @@ public class AsyncValidator : IAsyncValidator
         return new(visitor.Validate());
     }
 
-    public AsyncValidator(IEnumerable<CombineRule> rules) : this(Options.Create(new AsyncValidatorOptions() { Rules = [..rules]}))
+    public AsyncValidator(IEnumerable<CombineRule> rules) : this(Options.Create(new AsyncValidatorOptions() { Rules = [.. rules] }))
     {
     }
 

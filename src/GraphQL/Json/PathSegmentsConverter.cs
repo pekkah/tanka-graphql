@@ -9,7 +9,7 @@ public class PathSegmentsConverter : JsonConverter<object[]>
     {
         if (reader.TokenType == JsonTokenType.Null)
             return null;
-        
+
         if (reader.TokenType != JsonTokenType.StartArray)
             throw new JsonException();
 

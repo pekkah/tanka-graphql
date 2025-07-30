@@ -12,7 +12,7 @@ namespace Tanka.GraphQL.Extensions.Tracing.Tests
         public TraceFacts()
         {
             Schema = new ExecutableSchemaBuilder()
-                .Add("Query", new ()
+                .Add("Query", new()
                 {
                     ["simple: String!"] = b => b.ResolveAs("string")
                 })
@@ -38,7 +38,7 @@ namespace Tanka.GraphQL.Extensions.Tracing.Tests
             /* Then */
             var trace = response.Extensions?["trace"] as TraceExtension;
             Assert.NotNull(trace);
-            
+
             Assert.True(trace.Elapsed > 0);
         }
     }

@@ -31,7 +31,7 @@ public static class TypeSystemSchemaExtensions
         var typeDefinitions = schema.QueryTypes<TypeDefinition>()
             .OrderBy(d => d.Name.Value)
             .ToList();
-        
+
         var directiveDefinitions = schema.QueryDirectiveTypes()
             .OrderBy(t => t.Name.Value)
             .ToList();

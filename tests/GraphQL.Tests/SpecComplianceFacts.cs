@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -51,7 +53,7 @@ public class SpecComplianceFacts
             ["Query"] = new()
             {
                 { "hero", context => context.ResolveAs(GetHero()) },
-                { "character", context => 
+                { "character", context =>
                     {
                         if (context.ArgumentValues.TryGetValue("id", out var idValue))
                         {

@@ -24,7 +24,7 @@ public class ValidationRuleFacts
                  """)
             .Build(new SchemaBuildOptions());
 
-        var validator = new AsyncValidator([..ExecutionRules.All, OneOfDirective.OneOfValidationRule()]);
+        var validator = new AsyncValidator([.. ExecutionRules.All, OneOfDirective.OneOfValidationRule()]);
 
         /* When */
         ValidationResult result = await validator.Validate(schema, """

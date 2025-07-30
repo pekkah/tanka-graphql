@@ -19,7 +19,7 @@ public class ResolverContext : ResolverContextBase
 
     private TypeDefinition DefaultIsTypeOf(TypeDefinition abstractType, object? value)
     {
-        if (value is INamedType namedType) 
+        if (value is INamedType namedType)
         {
             var typeDefinition = Schema.GetRequiredNamedType<TypeDefinition>(namedType.__Typename);
             ValidateAbstractType(abstractType, typeDefinition);
@@ -44,7 +44,7 @@ public class ResolverContext : ResolverContextBase
         };
 
         if (possibleTypes.Contains(typeDefinition)) return;
-        
+
         throw new InvalidOperationException(
             $"Cannot resolve actual type of value of abstract type {abstractType.Name}. " +
             "Use the context.ResolveAbstractType function to map from value to actual schema type");

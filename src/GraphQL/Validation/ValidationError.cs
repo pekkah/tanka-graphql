@@ -1,4 +1,5 @@
 ﻿using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.Validation;

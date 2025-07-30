@@ -1,4 +1,5 @@
 ﻿using Tanka.GraphQL.Language.Nodes;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Extensions.ApolloFederation.Tests;

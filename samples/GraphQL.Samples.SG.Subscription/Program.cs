@@ -58,9 +58,9 @@ public static partial class Subscription
             var next = r.Next(0, 2);
             if (next == 0)
                 yield return new IntValue { Value = next };
-            else                 
+            else
                 yield return new StringValue { Value = next.ToString("F") };
-            
+
             await Task.Delay(500, cancellationToken);
         }
     }

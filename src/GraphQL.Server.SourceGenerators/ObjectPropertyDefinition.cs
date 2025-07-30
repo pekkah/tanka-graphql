@@ -9,7 +9,7 @@ public record ObjectPropertyDefinition
     public required string ReturnType { get; init; }
 
     public required string ClosestMatchingGraphQLTypeName { get; set; }
-    
+
     public InputTypeDefinition? ReturnTypeObject { get; set; }
 
     public string AsField => $"{JsonNamingPolicy.CamelCase.ConvertName(Name)}: {ClosestMatchingGraphQLTypeName}";

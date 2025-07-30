@@ -12,7 +12,7 @@ public record GraphQLRequestContext : QueryContext
         _features.Initalize(features);
     }
 
-    public GraphQLRequestContext(): this(new FeatureCollection(2))
+    public GraphQLRequestContext() : this(new FeatureCollection(2))
     {
     }
 

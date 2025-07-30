@@ -1,9 +1,10 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using Tanka.GraphQL.Server.SourceGenerators.Internal;
 
@@ -66,15 +67,15 @@ namespace Tanka.GraphQL.Server.SourceGenerators
                         Parameters = methodDeclaration.ParameterList.Parameters
                             .Where(p => p.Type is not null)
                             .Select(p => new ParameterDefinition()
-                                {
-                                    Name = p.Identifier.Text,
-                                    Type = p.Type!.ToString(),
-                                    ClosestMatchingGraphQLTypeName = GetClosestMatchingGraphQLTypeName(context.SemanticModel, TypeHelper.UnwrapTaskType(p.Type)),
-                                    IsNullable = TypeHelper.IsTypeNullable(p.Type!),
-                                    IsPrimitive = TypeHelper.IsPrimitiveType(p.Type!),
-                                    FromArguments = TypeHelper.HasAttribute(p.AttributeLists, "FromArguments"),
-                                    FromServices = TypeHelper.HasAttribute(p.AttributeLists, "FromServices")
-                                }).ToEquatableArray()
+                            {
+                                Name = p.Identifier.Text,
+                                Type = p.Type!.ToString(),
+                                ClosestMatchingGraphQLTypeName = GetClosestMatchingGraphQLTypeName(context.SemanticModel, TypeHelper.UnwrapTaskType(p.Type)),
+                                IsNullable = TypeHelper.IsTypeNullable(p.Type!),
+                                IsPrimitive = TypeHelper.IsPrimitiveType(p.Type!),
+                                FromArguments = TypeHelper.HasAttribute(p.AttributeLists, "FromArguments"),
+                                FromServices = TypeHelper.HasAttribute(p.AttributeLists, "FromServices")
+                            }).ToEquatableArray()
                     };
                     methods.Add(methodDefinition);
                 }
@@ -104,7 +105,7 @@ namespace Tanka.GraphQL.Server.SourceGenerators
             {
                 return namedTypeSyntax switch
                 {
-                    
+
                     { Identifier.ValueText: "Task", TypeArgumentList.Arguments: not [] } => MethodType.TaskOfT,
                     { Identifier.ValueText: "ValueTask", TypeArgumentList.Arguments: not [] } => MethodType.ValueTaskOfT,
                     { Identifier.ValueText: "IAsyncEnumerable", TypeArgumentList.Arguments: not [] } => MethodType.AsyncEnumerableOfT,
@@ -112,7 +113,7 @@ namespace Tanka.GraphQL.Server.SourceGenerators
                     _ => MethodType.Unknown
                 };
             }
-            
+
             return MethodType.Unknown;
         }
 

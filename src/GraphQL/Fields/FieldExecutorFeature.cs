@@ -15,7 +15,7 @@ public class FieldExecutorFeature : IFieldExecutorFeature
         NodePath path)
     {
         context.RequestCancelled.ThrowIfCancellationRequested();
-        
+
         ISchema schema = context.Schema;
         FieldSelection fieldSelection = fields.First();
         Name fieldName = fieldSelection.Name;
@@ -23,7 +23,7 @@ public class FieldExecutorFeature : IFieldExecutorFeature
 
         // __typename hack
         if (fieldName == "__typename") return objectDefinition.Name.Value;
-        
+
         FieldDefinition? field = schema.GetField(objectDefinition.Name, fieldName);
 
         if (field is null)

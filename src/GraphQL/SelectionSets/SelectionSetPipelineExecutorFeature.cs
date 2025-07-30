@@ -14,10 +14,10 @@ public class SelectionSetDelegateExecutorFeature : ISelectionSetExecutorFeature
     }
 
     public async Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
-        QueryContext queryContext, 
-        SelectionSet selectionSet, 
+        QueryContext queryContext,
+        SelectionSet selectionSet,
         ObjectDefinition objectType,
-        object? objectValue, 
+        object? objectValue,
         NodePath path)
     {
         var context = new SelectionSetContext()

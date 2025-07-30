@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests;
@@ -21,15 +22,15 @@ public class LexerEdgeCasesFacts
         // Given: String containing emoji characters
         var source = "{ field(arg: \"Hello 👋 World 🌍\") }";
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize the input
         var tokens = ExtractAllTokens(lexer);
-        
+
         // Then: Should correctly tokenize the emoji-containing string
         // Find the string token
         var stringToken = Array.Find(tokens, t => t.Kind == TokenKind.StringValue);
         Assert.NotEqual(default(TokenInfo), stringToken);
-        
+
         var stringValue = Encoding.UTF8.GetString(stringToken.Value);
         Assert.Equal("Hello 👋 World 🌍", stringValue);
     }
@@ -40,14 +41,14 @@ public class LexerEdgeCasesFacts
         // Given: String with unicode escape sequences
         var source = "{ field(arg: \"Hello \\u0048\\u0065\\u006C\\u006C\\u006F\") }";
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize the input
         var tokens = ExtractAllTokens(lexer);
-        
+
         // Then: Should handle unicode escapes
         var stringToken = Array.Find(tokens, t => t.Kind == TokenKind.StringValue);
         Assert.NotEqual(default(TokenInfo), stringToken);
-        
+
         // Note: This test may fail if unicode escapes aren't processed during lexing
         // We need to understand if lexer processes escapes or if that's parser's job
         var rawValue = Encoding.UTF8.GetString(stringToken.Value);
@@ -60,14 +61,14 @@ public class LexerEdgeCasesFacts
         // Given: String with control characters
         var source = "{ field(arg: \"line1\\nline2\\ttab\\r\\n\") }";
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize the input
         var tokens = ExtractAllTokens(lexer);
-        
+
         // Then: Should handle control character escapes
         var stringToken = Array.Find(tokens, t => t.Kind == TokenKind.StringValue);
         Assert.NotEqual(default(TokenInfo), stringToken);
-        
+
         var rawValue = Encoding.UTF8.GetString(stringToken.Value);
         // Again, lexer might not process escape sequences
     }
@@ -78,10 +79,10 @@ public class LexerEdgeCasesFacts
         // Given: Invalid UTF-8 byte sequence
         var invalidUtf8 = new byte[] { 0x7B, 0x20, 0x22, 0xFF, 0xFE, 0x22, 0x20, 0x7D }; // { "��" }
         var lexer = Lexer.Create(invalidUtf8);
-        
+
         // When: Try to tokenize - lexer handles gracefully by replacing invalid bytes with replacement characters
         var tokens = ExtractAllTokens(lexer);
-        
+
         // Then: Should successfully tokenize despite invalid UTF-8
         Assert.NotEmpty(tokens);
         var stringToken = Array.Find(tokens, t => t.Kind == TokenKind.StringValue);
@@ -97,9 +98,10 @@ public class LexerEdgeCasesFacts
     {
         // Given: String without closing quote
         var source = "{ field(arg: \"unterminated string";
-        
+
         // When & Then: Should throw an exception for unterminated string
-        Assert.Throws<Exception>(() => {
+        Assert.Throws<Exception>(() =>
+        {
             var lexer = Lexer.Create(source);
             return ExtractAllTokens(lexer);
         });
@@ -110,9 +112,10 @@ public class LexerEdgeCasesFacts
     {
         // Given: Block string without proper closing
         var source = "{ field(arg: \"\"\"unterminated block string";
-        
+
         // When & Then: Should throw an exception for unterminated block string
-        Assert.Throws<Exception>(() => {
+        Assert.Throws<Exception>(() =>
+        {
             var lexer = Lexer.Create(source);
             return ExtractAllTokens(lexer);
         });
@@ -124,27 +127,28 @@ public class LexerEdgeCasesFacts
         // Given: Invalid number with multiple decimal points (violates GraphQL spec)
         var source = "{ field(arg: 123.456.789) }";
         var lexer = Lexer.Create(source);
-        
+
         // When & Then: Should correctly parse 123.456 then reject the second dot
-        var exception = Assert.Throws<Exception>(() => {
+        var exception = Assert.Throws<Exception>(() =>
+        {
             var testLexer = Lexer.Create(source);
             return ExtractAllTokens(testLexer);
         });
-        
+
         // Verify specific error message with position information
         Assert.Contains("Unexpected character '.' at 1:21", exception.Message);
-        
+
         // Verify that it correctly parsed the valid FloatValue first
         lexer = Lexer.Create(source);
         var tokens = new List<TokenInfo>();
-        
+
         try
         {
             while (lexer.Advance())
             {
-                tokens.Add(new TokenInfo 
-                { 
-                    Kind = lexer.Kind, 
+                tokens.Add(new TokenInfo
+                {
+                    Kind = lexer.Kind,
                     Value = lexer.Value.ToArray(),
                     Line = lexer.Line,
                     Column = lexer.Column
@@ -155,7 +159,7 @@ public class LexerEdgeCasesFacts
         {
             // Expected exception on second dot
         }
-        
+
         // Should have parsed: {, field, (, arg, :, 123.456 before failing
         Assert.True(tokens.Count >= 6, $"Expected at least 6 tokens, got {tokens.Count}");
         var floatToken = tokens.FirstOrDefault(t => t.Kind == TokenKind.FloatValue);
@@ -169,10 +173,10 @@ public class LexerEdgeCasesFacts
         // Given: Hexadecimal numbers (not valid in GraphQL)
         var source = "{ field(arg: 0xDEADBEEF) }";
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize
         var tokens = ExtractAllTokens(lexer);
-        
+
         // Then: Should treat this as separate tokens: IntValue(0), Name(xDEADBEEF)
         Assert.Equal(9, tokens.Length);
         Assert.Equal(TokenKind.IntValue, tokens[5].Kind);
@@ -187,10 +191,10 @@ public class LexerEdgeCasesFacts
         // Given: String with invalid escape sequence
         var source = "{ field(arg: \"invalid \\z escape\") }";
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize - lexer may pass through invalid escape sequences to parser
         var tokens = ExtractAllTokens(lexer);
-        
+
         // Then: Should tokenize the string (validation may happen at parser level)
         var stringToken = Array.Find(tokens, t => t.Kind == TokenKind.StringValue);
         Assert.NotEqual(default(TokenInfo), stringToken);
@@ -209,14 +213,14 @@ public class LexerEdgeCasesFacts
         var longName = new string('a', 10000);
         var source = $"{{ {longName} }}";
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize
         var tokens = ExtractAllTokens(lexer);
-        
+
         // Then: Should handle long identifiers without issues
         var nameToken = Array.Find(tokens, t => t.Kind == TokenKind.Name);
         Assert.NotEqual(default(TokenInfo), nameToken);
-        
+
         var tokenValue = Encoding.UTF8.GetString(nameToken.Value);
         Assert.Equal(longName, tokenValue);
     }
@@ -229,10 +233,10 @@ public class LexerEdgeCasesFacts
         var closeBraces = new string('}', 1000);
         var source = openBraces + " field " + closeBraces;
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize (this tests if lexer has any recursion issues)
         var tokens = ExtractAllTokens(lexer);
-        
+
         // Then: Should handle deep nesting
         var braceCount = 0;
         foreach (var token in tokens)
@@ -240,7 +244,7 @@ public class LexerEdgeCasesFacts
             if (token.Kind == TokenKind.LeftBrace || token.Kind == TokenKind.RightBrace)
                 braceCount++;
         }
-        
+
         Assert.Equal(2000, braceCount); // 1000 open + 1000 close
     }
 
@@ -251,21 +255,21 @@ public class LexerEdgeCasesFacts
         var largeContent = new string('x', 100000);
         var source = $"{{ field(arg: \"{largeContent}\") }}";
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var tokens = ExtractAllTokens(lexer);
         stopwatch.Stop();
-        
+
         // Then: Should handle large strings efficiently
         var stringToken = Array.Find(tokens, t => t.Kind == TokenKind.StringValue);
         Assert.NotEqual(default(TokenInfo), stringToken);
-        
+
         var tokenValue = Encoding.UTF8.GetString(stringToken.Value);
         Assert.Equal(largeContent, tokenValue);
-        
+
         // Performance check: should complete in reasonable time (< 5 seconds to avoid flakiness)
-        Assert.True(stopwatch.ElapsedMilliseconds < 5000, 
+        Assert.True(stopwatch.ElapsedMilliseconds < 5000,
             $"Large string tokenization took {stopwatch.ElapsedMilliseconds}ms");
     }
 
@@ -275,10 +279,10 @@ public class LexerEdgeCasesFacts
         // Given: Empty input
         var source = "";
         var lexer = Lexer.Create(source);
-        
+
         // When: Try to advance
         var canAdvance = lexer.Advance();
-        
+
         // Then: Should handle empty input gracefully
         Assert.False(canAdvance);
         Assert.Equal(TokenKind.End, lexer.Kind);
@@ -290,10 +294,10 @@ public class LexerEdgeCasesFacts
         // Given: Only whitespace and newlines
         var source = "   \n\r\n\t   \r  \n  ";
         var lexer = Lexer.Create(source);
-        
+
         // When: Try to advance
         var canAdvance = lexer.Advance();
-        
+
         // Then: Should skip all whitespace and reach end
         Assert.False(canAdvance);
         Assert.Equal(TokenKind.End, lexer.Kind);
@@ -309,10 +313,10 @@ public class LexerEdgeCasesFacts
         // Given: Input with multiple potential errors
         var source = "{\n  \"unterminated\n  123.456.789\n  field\n}";
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize and track positions
         var positions = new List<(int Line, int Column, TokenKind Kind)>();
-        
+
         try
         {
             while (lexer.Advance())
@@ -324,7 +328,7 @@ public class LexerEdgeCasesFacts
         {
             // Even if there are errors, we want to check position tracking
         }
-        
+
         // Then: Position tracking should be accurate
         // This test helps verify that line/column tracking works correctly
         Assert.True(positions.Count > 0, "Should have tokenized at least some tokens");
@@ -336,10 +340,10 @@ public class LexerEdgeCasesFacts
         // Given: Input with different line ending styles
         var source = "{\n  field1\r\n  field2\r  field3\n}";
         var lexer = Lexer.Create(source);
-        
+
         // When: Tokenize and track line numbers
         var tokens = ExtractAllTokensWithPosition(lexer);
-        
+
         // Then: Line tracking should handle all line ending types
         var maxLine = tokens.Max(t => t.Line);
         Assert.True(maxLine >= 4, $"Should track multiple lines, got max line: {maxLine}");
@@ -360,30 +364,30 @@ public class LexerEdgeCasesFacts
     private TokenInfo[] ExtractAllTokens(Lexer lexer)
     {
         var tokens = new List<TokenInfo>();
-        
+
         while (lexer.Advance())
         {
-            tokens.Add(new TokenInfo 
-            { 
-                Kind = lexer.Kind, 
+            tokens.Add(new TokenInfo
+            {
+                Kind = lexer.Kind,
                 Value = lexer.Value.ToArray(),
                 Line = lexer.Line,
                 Column = lexer.Column
             });
         }
-        
+
         return tokens.ToArray();
     }
 
     private (TokenKind Kind, int Line, int Column)[] ExtractAllTokensWithPosition(Lexer lexer)
     {
         var tokens = new List<(TokenKind Kind, int Line, int Column)>();
-        
+
         while (lexer.Advance())
         {
             tokens.Add((lexer.Kind, lexer.Line, lexer.Column));
         }
-        
+
         return tokens.ToArray();
     }
 

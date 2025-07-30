@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.Bug;

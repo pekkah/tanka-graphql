@@ -12,7 +12,7 @@ public record ObjectMethodDefinition
     public MethodType Type { get; set; }
 
     public EquatableArray<ParameterDefinition> Parameters { get; set; } = new();
-        
+
     public required string ReturnType { get; init; }
 
     public required string ClosestMatchingGraphQLTypeName { get; set; }
@@ -34,9 +34,9 @@ public record ObjectMethodDefinition
     public bool IsSubscription => Type is MethodType.AsyncEnumerableOfT;
 
     public string AsField => $"{JsonNamingPolicy.CamelCase.ConvertName(Name)}{AsFieldArguments}: {ClosestMatchingGraphQLTypeName}";
-    
+
     public string AsFieldArguments => Parameters.Any(p => p.IsArgument)
-        ? $"({string.Join(", ", Parameters.Where(p => p.IsArgument).Select(p => p.AsArgument))})" 
+        ? $"({string.Join(", ", Parameters.Where(p => p.IsArgument).Select(p => p.AsArgument))})"
         : string.Empty;
 
     public string ResolverName => IsSubscription ? $"Resolve{Name}" : Name;
@@ -50,7 +50,7 @@ public enum MethodType
     ///     Task Method(...)
     /// </summary>
     Task,
-    
+
     /// <summary>
     ///     ValueTask Method(...)
     /// </summary>
@@ -65,26 +65,26 @@ public enum MethodType
     ///     ValueTask&lt;T&gt; Method(...)  
     /// </summary>
     ValueTaskOfT,
-    
+
     /// <summary>
     ///     IAsyncEnumerable&lt;T&gt; Method(...)
     /// </summary>
     AsyncEnumerableOfT,
-    
+
     /// <summary>
     ///     void Method(...)
     /// </summary>
     Void,
-    
+
     /// <summary>
     ///     T Method(...)
     /// </summary>
     T,
-    
+
     /// <summary>
     ///     IEnumerable&lt;T&gt; Method(...)
     /// </summary>
     EnumerableT,
-    
+
     Unknown
 }

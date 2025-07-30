@@ -39,7 +39,7 @@ public class OneOfDirective
                     var variable = (Variable)argument.Value;
 
                     if (context.VariableValues?.TryGetValue(variable.Name, out object? variableValue) != true) return;
-                    
+
                     if (variableValue is not null)
                     {
                         var coercedValue = Values.CoerceValue(

@@ -111,7 +111,7 @@ public class ParserErrorHandlingFacts
         Assert.Contains("Expected: ", exception.Message);
         // The parser may expect either RightBrace or Name depending on where it fails
         Assert.True(
-            exception.Message.Contains("Expected: RightBrace") || 
+            exception.Message.Contains("Expected: RightBrace") ||
             exception.Message.Contains("Expected: Name"),
             $"Expected error message to contain 'Expected: RightBrace' or 'Expected: Name', but got: {exception.Message}");
     }

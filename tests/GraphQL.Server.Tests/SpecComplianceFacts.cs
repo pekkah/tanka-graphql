@@ -7,11 +7,14 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+
 using Tanka.GraphQL;
 using Tanka.GraphQL.Server.WebSockets;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Server.Tests;
@@ -396,7 +399,7 @@ public class SpecComplianceFacts : IAsyncDisposable
 
         // Then: Server may handle requests without strict init requirement
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        
+
         try
         {
             var message = await webSocket.Receive(cts.Token);
@@ -407,7 +410,7 @@ public class SpecComplianceFacts : IAsyncDisposable
         {
             // This is also acceptable behavior for some implementations
         }
-        
+
         await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Test complete", CancellationToken.None);
     }
 
@@ -425,11 +428,11 @@ public class SpecComplianceFacts : IAsyncDisposable
     private async Task<WebSocket> ConnectAndInitialize()
     {
         var webSocket = await ConnectWebSocket();
-        
+
         await webSocket.Send(new ConnectionInit());
         var ack = await webSocket.Receive(TimeSpan.FromSeconds(10));
         Assert.IsType<ConnectionAck>(ack);
-        
+
         return webSocket;
     }
 
@@ -438,7 +441,7 @@ public class SpecComplianceFacts : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         _httpClient?.Dispose();
-        if (_factory != null) 
+        if (_factory != null)
             await _factory.DisposeAsync();
     }
 }

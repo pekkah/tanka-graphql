@@ -14,7 +14,7 @@ public partial class ConnectionAckResult(
             await context.Close(new WebSocketCloseStatusException(
                 CloseCode.Unauthorized,
                 $"Expected {MessageTypes.ConnectionInit}"));
-            
+
             return;
         }
 

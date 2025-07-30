@@ -37,7 +37,7 @@ namespace Tanka.GraphQL.Samples.SG.Namespace
     [ObjectType]
     public partial class World
     {
-        public string Hello([FromArguments]HelloInput input) => $"Hello {input.Name}";
+        public string Hello([FromArguments] HelloInput input) => $"Hello {input.Name}";
 
     }
 

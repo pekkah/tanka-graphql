@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+
 using Tanka.GraphQL.Json;
 
 namespace Tanka.GraphQL.Server.WebSockets;
@@ -7,7 +8,7 @@ namespace Tanka.GraphQL.Server.WebSockets;
 [JsonConverter(typeof(MessageConverter))]
 public abstract class MessageBase
 {
-    [JsonPropertyName("type")] 
+    [JsonPropertyName("type")]
     public string Type { get; set; } = null!;
 
     public override string ToString()
@@ -16,7 +17,7 @@ public abstract class MessageBase
     }
 }
 
-public class MessageConverter: JsonConverter<MessageBase>
+public class MessageConverter : JsonConverter<MessageBase>
 {
     public override MessageBase? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -129,7 +130,7 @@ public class Pong : MessageBase
     public IReadOnlyDictionary<string, object>? Payload { get; set; }
 }
 
-public class Subscribe: MessageBase
+public class Subscribe : MessageBase
 {
     public Subscribe()
     {
@@ -148,7 +149,7 @@ public class Subscribe: MessageBase
     }
 }
 
-public class Next: MessageBase
+public class Next : MessageBase
 {
     public Next()
     {
@@ -176,7 +177,7 @@ public class Error : MessageBase
     public required ExecutionError[] Payload { get; set; }
 }
 
-public class Complete: MessageBase
+public class Complete : MessageBase
 {
     public Complete()
     {

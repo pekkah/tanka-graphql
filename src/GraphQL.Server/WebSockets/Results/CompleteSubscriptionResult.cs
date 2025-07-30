@@ -4,7 +4,7 @@ namespace Tanka.GraphQL.Server.WebSockets.Results;
 
 public partial class CompleteSubscriptionResult(
     SubscriptionManager subscriptions,
-    ILogger<CompleteSubscriptionResult> logger): IMessageResult
+    ILogger<CompleteSubscriptionResult> logger) : IMessageResult
 {
     public async Task Execute(IMessageContext context)
     {
@@ -14,7 +14,7 @@ public partial class CompleteSubscriptionResult(
             await context.Close(new WebSocketCloseStatusException(
                 CloseCode.BadRequest,
                 $"Expected {MessageTypes.Complete}"));
-            
+
             return;
         }
 

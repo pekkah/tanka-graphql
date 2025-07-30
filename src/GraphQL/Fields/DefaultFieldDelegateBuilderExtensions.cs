@@ -85,5 +85,5 @@ public static class DefaultFieldDelegateBuilderExtensions
                 await context.QueryContext.CompleteValueAsync(context, context.Field.Type, context.Path);
         });
     }
-    
+
 }

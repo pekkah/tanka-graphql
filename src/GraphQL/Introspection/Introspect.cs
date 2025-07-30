@@ -95,7 +95,7 @@ public class Introspect
               }
             }
             """u8;
-    
+
     public static string DefaultQuery = @"
             query IntrospectionQuery {
               __schema {

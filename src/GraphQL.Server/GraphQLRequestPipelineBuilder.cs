@@ -79,7 +79,7 @@ public class GraphQLRequestPipelineBuilder
     }
 
     public GraphQLRequestPipelineBuilder Use<T>()
-        where T: IGraphQLRequestMiddleware
+        where T : IGraphQLRequestMiddleware
     {
         var middleware = ApplicationServices.GetRequiredService<T>();
 
