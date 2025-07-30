@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.Execution;
 using Tanka.GraphQL.Extensions.Trace;
 using Tanka.GraphQL.Features;
+using Tanka.GraphQL.Internal;
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.Validation;
@@ -55,11 +58,25 @@ public static class DefaultOperationDelegateBuilderExtensions
     {
         builder.Use(next => context =>
         {
-            context.OperationDefinition = Operations.GetOperation(
-                context.Request.Query,
-                context.Request.OperationName);
+            try
+            {
+                context.OperationDefinition = Operations.GetOperation(
+                    context.Request.Query,
+                    context.Request.OperationName);
 
-            return next(context);
+                return next(context);
+            }
+            catch (QueryException ex)
+            {
+                // Operation resolution errors should be in the result, not thrown
+                context.AddError(ex);
+                context.Response = AsyncEnumerableEx.Return(new ExecutionResult
+                {
+                    Data = null,
+                    Errors = context.GetErrors().ToList()
+                });
+                return Task.CompletedTask;
+            }
         });
 
         return builder;
@@ -102,7 +119,16 @@ public static class DefaultOperationDelegateBuilderExtensions
                 await validator.Validate(context.Schema, context.Request.Query, context.Request.Variables);
 
             if (!result.IsValid)
-                throw new ValidationException(result);
+            {
+                // Per GraphQL spec, validation errors should be in the result, not thrown
+                context.AddError(new ValidationException(result));
+                context.Response = AsyncEnumerableEx.Return(new ExecutionResult
+                {
+                    Data = null,
+                    Errors = context.GetErrors().ToList()
+                });
+                return;
+            }
 
             await next(context);
         });

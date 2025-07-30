@@ -78,7 +78,7 @@ public class FieldSelectionMergingValidator(IRuleVisitorContext context)
         if (!comparedFragments.TryAdd(fragmentName, true)) return;
 
         var fragment = context.Document
-            .FragmentDefinitions
+            ?.FragmentDefinitions
             ?.SingleOrDefault(f => f.FragmentName == fragmentName);
 
         if (fragment == null) return;
@@ -135,7 +135,7 @@ public class FieldSelectionMergingValidator(IRuleVisitorContext context)
 
         var fragments = context
             .Document
-            .FragmentDefinitions
+            ?.FragmentDefinitions
             ?.ToList() ?? [];
 
         var fragment1 = fragments.SingleOrDefault(f => f.FragmentName == fragmentName1);
@@ -599,10 +599,21 @@ public class FieldSelectionMergingValidator(IRuleVisitorContext context)
             return cachedFieldsAndFragmentNames[fragment.SelectionSet];
 
         var fragmentType = fragment.TypeCondition;
+        var namedType = context.Schema.GetNamedType(fragmentType.Name);
+        if (namedType == null)
+        {
+            // Type doesn't exist - this should be caught by other validation rules
+            // Return empty cached field to prevent further processing
+            return new CachedField
+            {
+                NodeAndDef = new Dictionary<string, List<FieldDefPair>>(),
+                Names = new List<string>()
+            };
+        }
+        
         return GetFieldsAndFragmentNames(
             cachedFieldsAndFragmentNames,
-            context.Schema.GetNamedType(fragmentType.Name) ??
-            throw new InvalidOperationException($"Could not find type '{fragmentType.Name}' from schema."),
+            namedType,
             fragment.SelectionSet);
     }
 

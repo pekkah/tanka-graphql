@@ -663,7 +663,7 @@ public static class ExecutionRules
 
             // Position in the spread path
             var spreadPathIndexByName = new Dictionary<string, int?>();
-            var fragments = context.Document.FragmentDefinitions;
+            var fragments = context.Document?.FragmentDefinitions;
 
             rule.EnterFragmentDefinition += node =>
             {
@@ -786,13 +786,15 @@ public static class ExecutionRules
     {
         return (context, rule) =>
         {
-            var fragments = context.Document.FragmentDefinitions
+            var fragments = context.Document?.FragmentDefinitions
                                 ?.ToDictionary(f => f.FragmentName)
                             ?? new Dictionary<Name, FragmentDefinition>(0);
 
             rule.EnterFragmentSpread += node =>
             {
-                var fragment = fragments[node.FragmentName];
+                if (!fragments.TryGetValue(node.FragmentName, out var fragment))
+                    return;
+                    
                 var fragmentType = Ast.UnwrapAndResolveType(context.Schema, fragment.TypeCondition);
                 var parentType = context.Tracker.ParentType;
                 if (fragmentType is not null && parentType is not null)

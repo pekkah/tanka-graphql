@@ -21,6 +21,9 @@ public sealed class ExecutableDocument : INode
 
     public static implicit operator ExecutableDocument(string value)
     {
+        if (value == null)
+            throw new ArgumentNullException(nameof(value));
+            
         var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
         return parser.ParseExecutableDocument();
     }
