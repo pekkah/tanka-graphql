@@ -111,7 +111,7 @@ public class FederationFacts
             {
               "data": {
                 "_service": {
-                  "sdl": "directive @specifiedBy(url: String!) on SCALAR type Product  @key(fields: \"upc\") @extends { upc: String! @external reviews: [Review] }  type Review  @key(fields: \"id\") { id: ID! body: String author: User @provides(fields: \"username\") product: Product }  type User  @key(fields: \"id\") @extends { id: ID! @external username: String @external reviews: [Review] }"
+                  "sdl": "directive @oneOf on INPUT_OBJECT directive @specifiedBy(url: String!) on SCALAR type Product  @key(fields: \"upc\") @extends { upc: String! @external reviews: [Review] }  type Review  @key(fields: \"id\") { id: ID! body: String author: User @provides(fields: \"username\") product: Product }  type User  @key(fields: \"id\") @extends { id: ID! @external username: String @external reviews: [Review] }"
                 }
               },
               "extensions": null,
