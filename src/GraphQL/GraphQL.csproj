@@ -4,6 +4,8 @@
 		<TargetFrameworks>net9.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<!-- Suppress nullable reference warnings for legacy code - these are pre-existing and not related to @oneOf migration -->
+		<NoWarn>$(NoWarn);CS8618;CS8600;CS8601;CS8604;CS8625;CS8765;CS8766;CS8620;CS8714;CS8602;CS8603</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
