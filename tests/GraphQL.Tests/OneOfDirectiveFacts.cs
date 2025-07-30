@@ -312,4 +312,79 @@ public class OneOfDirectiveFacts
         Assert.False(result.IsValid);
         Assert.Equal("ONEOF001", result.Errors.Single().Code);
     }
+
+    [Fact]
+    public async Task Invalid_when_nested_oneof_has_multiple_fields()
+    {
+        /* Given */
+        ISchema schema = await new SchemaBuilder()
+            .Add("""
+                 input OneOfInput @oneOf {
+                    a: String
+                    b: String
+                 }
+
+                 input Container {
+                    oneOf: OneOfInput!
+                    other: String
+                 }
+
+                 type Query {
+                    test(input: Container!): String
+                 }
+                 """)
+            .Build(new SchemaBuildOptions());
+
+        var validator = new AsyncValidator(ExecutionRules.All);
+
+        /* When */
+        ValidationResult result = await validator.Validate(schema, """
+                                                                   {
+                                                                      test(input: { oneOf: { a: "a", b: "b" }, other: "test" })
+                                                                   }
+                                                                   """,
+            new Dictionary<string, object?>()
+        );
+
+        /* Then */
+        Assert.False(result.IsValid);
+        Assert.Equal("ONEOF001", result.Errors.Single().Code);
+    }
+
+    [Fact]
+    public async Task Valid_when_nested_oneof_has_single_field()
+    {
+        /* Given */
+        ISchema schema = await new SchemaBuilder()
+            .Add("""
+                 input OneOfInput @oneOf {
+                    a: String
+                    b: String
+                 }
+
+                 input Container {
+                    oneOf: OneOfInput!
+                    other: String
+                 }
+
+                 type Query {
+                    test(input: Container!): String
+                 }
+                 """)
+            .Build(new SchemaBuildOptions());
+
+        var validator = new AsyncValidator(ExecutionRules.All);
+
+        /* When */
+        ValidationResult result = await validator.Validate(schema, """
+                                                                   {
+                                                                      test(input: { oneOf: { a: "a" }, other: "test" })
+                                                                   }
+                                                                   """,
+            new Dictionary<string, object?>()
+        );
+
+        /* Then */
+        Assert.True(result.IsValid);
+    }
 }
