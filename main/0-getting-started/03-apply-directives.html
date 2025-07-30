@@ -352,10 +352,10 @@
                                 {
                                     // We need to first call the original resolver to 
                                     // get the initial value
-                                     await next(context);
+                                    await next(context);
 
-                                     // context should now have the ResolvedValue set by the original resolver
-                                     var resolvedValue = context.ResolvedValue;
+                                    // context should now have the ResolvedValue set by the original resolver
+                                    var resolvedValue = context.ResolvedValue;
 
                                     // for simplicity we expect value to be string
                                     var initialValue = resolvedValue!.ToString();

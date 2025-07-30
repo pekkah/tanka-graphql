@@ -326,6 +326,32 @@
 <p><a href="https://facebook.github.io/graphql/June2018/#sec-Input-Objects">Specification</a></p>
 </blockquote>
 <p>Input objects are created as instances of <code>InputObjectDefinition</code>.</p>
+<h3 id="oneof-directive">@oneOf Directive</h3>
+<p>The <code>@oneOf</code> directive can be applied to input objects to indicate that exactly one field must be provided. This is useful for creating polymorphic input types where only one variant should be specified.</p>
+<pre><code class="language-graphql">input SearchInput @oneOf {
+  byName: String
+  byId: ID
+  byEmail: String
+}
+
+type Query {
+  search(input: SearchInput!): [User!]!
+}
+</code></pre>
+<p>With this definition, valid queries would include:</p>
+<pre><code class="language-graphql"># Valid - exactly one field
+{ search(input: { byName: &quot;John&quot; }) }
+{ search(input: { byId: &quot;123&quot; }) }
+
+# Invalid - multiple fields
+{ search(input: { byName: &quot;John&quot;, byId: &quot;123&quot; }) }
+
+# Invalid - no fields
+{ search(input: {}) }
+
+# Invalid - null value
+{ search(input: { byName: null }) }
+</code></pre>
 <h3 id="examples">Examples</h3>
 <pre><code class="language-csharp">﻿using System.Collections.Generic;
 using System.Linq;

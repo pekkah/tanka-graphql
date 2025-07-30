@@ -288,7 +288,7 @@ public sealed class ExecutableDocument : INode
     {
         if (value == null)
             throw new ArgumentNullException(nameof(value));
-            
+
         var parser = Parser.Create(Encoding.UTF8.GetBytes(value));
         return parser.ParseExecutableDocument();
     }

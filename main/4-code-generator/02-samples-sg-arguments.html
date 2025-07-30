@@ -320,7 +320,7 @@ public static partial class Query
     /// &lt;/summary&gt;
     /// &lt;param name=&quot;options&quot;&gt;todo: bug - requires [FromArguments] in combination with [InputObject]&lt;/param&gt;
     /// &lt;returns&gt;&lt;/returns&gt;
-    public static int[] RangeWithInputObject([FromArguments]QueryOptions options)
+    public static int[] RangeWithInputObject([FromArguments] QueryOptions options)
     {
         return Enumerable.Range(options.Start, options.Count).ToArray();
     }
@@ -391,7 +391,7 @@ public static partial class Query
     /// &lt;/remarks&gt;
     /// &lt;param name=&quot;db&quot;&gt;&lt;/param&gt;
     /// &lt;returns&gt;&lt;/returns&gt;
-    public static Message[] Messages([FromServices]Db db)
+    public static Message[] Messages([FromServices] Db db)
     {
         return db.Messages.ToArray();
     }
@@ -409,7 +409,7 @@ public static partial class Mutation
     /// &lt;param name=&quot;input&quot;&gt;&lt;/param&gt;
     /// &lt;param name=&quot;db&quot;&gt;&lt;/param&gt;
     /// &lt;returns&gt;&lt;/returns&gt;
-    public static Message Post([FromArguments]InputMessage input, [FromServices]Db db)
+    public static Message Post([FromArguments] InputMessage input, [FromServices] Db db)
     {
         var message = new Message
         {
@@ -450,7 +450,7 @@ public static partial class Mutation
 
         if (input.Remove is null)
             throw new ArgumentNullException(nameof(input.Remove), &quot;This should not happen as the validation rule should ensure one of these are set&quot;);
-            
+
         db.Messages.RemoveAll(m =&gt; m.Id == input.Remove.Id);
         return new Result()
         {

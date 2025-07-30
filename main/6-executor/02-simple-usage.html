@@ -305,7 +305,7 @@
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Add(&quot;Query&quot;, new ()
+            .Add(&quot;Query&quot;, new()
             {
                 { &quot;version: String!&quot;, b =&gt; b.ResolveAs(&quot;1.0&quot;) }
             })

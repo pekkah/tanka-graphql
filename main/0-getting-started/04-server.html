@@ -358,7 +358,7 @@ app.MapGraphiQL(&quot;/graphql/ui&quot;);
 app.Run();
 
 // simple subscription generating numbers from 0 to the given number
-static async IAsyncEnumerable&lt;int&gt; Count(int to, [FromServices]ILogger&lt;Program&gt; logger, [EnumeratorCancellation] CancellationToken cancellationToken)
+static async IAsyncEnumerable&lt;int&gt; Count(int to, [FromServices] ILogger&lt;Program&gt; logger, [EnumeratorCancellation] CancellationToken cancellationToken)
 {
     var i = 0;
     while (!cancellationToken.IsCancellationRequested)
