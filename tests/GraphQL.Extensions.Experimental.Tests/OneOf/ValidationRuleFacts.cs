@@ -11,7 +11,7 @@ public class ValidationRuleFacts
     {
         /* Given */
         ISchema schema = await new SchemaBuilder()
-            .Add(OneOfDirective.Directive)
+            .Add(Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.Directive)
             .Add("""
                  input OneOfInput @oneOf {
                     a: String
@@ -24,7 +24,7 @@ public class ValidationRuleFacts
                  """)
             .Build(new SchemaBuildOptions());
 
-        var validator = new AsyncValidator([.. ExecutionRules.All, OneOfDirective.OneOfValidationRule()]);
+        var validator = new AsyncValidator([.. ExecutionRules.All, Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.OneOfValidationRule()]);
 
         /* When */
         ValidationResult result = await validator.Validate(schema, """
@@ -44,7 +44,7 @@ public class ValidationRuleFacts
     {
         /* Given */
         ISchema schema = await new SchemaBuilder()
-            .Add(OneOfDirective.Directive)
+            .Add(Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.Directive)
             .Add("""
                  input OneOfInput @oneOf {
                     a: String
@@ -57,7 +57,7 @@ public class ValidationRuleFacts
                  """)
             .Build(new SchemaBuildOptions());
 
-        var validator = new AsyncValidator([.. ExecutionRules.All, OneOfDirective.OneOfValidationRule()]);
+        var validator = new AsyncValidator([.. ExecutionRules.All, Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.OneOfValidationRule()]);
 
         /* When */
         ValidationResult result = await validator.Validate(schema, """
@@ -77,7 +77,7 @@ public class ValidationRuleFacts
     {
         /* Given */
         ISchema schema = await new SchemaBuilder()
-            .Add(OneOfDirective.Directive)
+            .Add(Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.Directive)
             .Add("""
                  input OneOfInput @oneOf {
                     a: String
@@ -90,7 +90,7 @@ public class ValidationRuleFacts
                  """)
             .Build(new SchemaBuildOptions());
 
-        var validator = new AsyncValidator([.. ExecutionRules.All, OneOfDirective.OneOfValidationRule()]);
+        var validator = new AsyncValidator([.. ExecutionRules.All, Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.OneOfValidationRule()]);
 
         /* When */
         ValidationResult result = await validator.Validate(schema, """
@@ -111,7 +111,7 @@ public class ValidationRuleFacts
     {
         /* Given */
         ISchema schema = await new SchemaBuilder()
-            .Add(OneOfDirective.Directive)
+            .Add(Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.Directive)
             .Add("""
                  input OneOfInput @oneOf {
                     a: String
@@ -124,7 +124,7 @@ public class ValidationRuleFacts
                  """)
             .Build(new SchemaBuildOptions());
 
-        var validator = new AsyncValidator([.. ExecutionRules.All, OneOfDirective.OneOfValidationRule()]);
+        var validator = new AsyncValidator([.. ExecutionRules.All, Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.OneOfValidationRule()]);
 
         /* When */
         ValidationResult result = await validator.Validate(schema, """
@@ -145,7 +145,7 @@ public class ValidationRuleFacts
     {
         /* Given */
         ISchema schema = await new SchemaBuilder()
-            .Add(OneOfDirective.Directive)
+            .Add(Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.Directive)
             .Add("""
                  input OneOfInput @oneOf {
                     a: String
@@ -158,7 +158,7 @@ public class ValidationRuleFacts
                  """)
             .Build(new SchemaBuildOptions());
 
-        var validator = new AsyncValidator([.. ExecutionRules.All, OneOfDirective.OneOfValidationRule()]);
+        var validator = new AsyncValidator([.. ExecutionRules.All, Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.OneOfValidationRule()]);
 
         /* When */
         ValidationResult result = await validator.Validate(schema, """
@@ -178,7 +178,7 @@ public class ValidationRuleFacts
     {
         /* Given */
         ISchema schema = await new SchemaBuilder()
-            .Add(OneOfDirective.Directive)
+            .Add(Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.Directive)
             .Add("""
                  input OneOfInput @oneOf {
                     a: String
@@ -191,7 +191,7 @@ public class ValidationRuleFacts
                  """)
             .Build(new SchemaBuildOptions());
 
-        var validator = new AsyncValidator([.. ExecutionRules.All, OneOfDirective.OneOfValidationRule()]);
+        var validator = new AsyncValidator([.. ExecutionRules.All, Tanka.GraphQL.Extensions.Experimental.OneOf.OneOfDirective.OneOfValidationRule()]);
 
         /* When */
         ValidationResult result = await validator.Validate(schema, """
