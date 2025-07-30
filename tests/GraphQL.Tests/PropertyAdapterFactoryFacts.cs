@@ -1,4 +1,5 @@
 ﻿using Tanka.GraphQL.Internal;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -12,7 +13,7 @@ public class PropertyAdapterFactoryFacts
         var test = new Test();
         var properties = PropertyAdapterFactory.GetPropertyAdapters<Test>();
         var testAdapter = properties["StringProp"];
-        
+
         /* When */
         testAdapter.SetValue(test, "test");
 

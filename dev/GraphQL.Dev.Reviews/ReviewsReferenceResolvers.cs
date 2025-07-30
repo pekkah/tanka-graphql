@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using GraphQL.Dev.Reviews.Domain;
+
 using Tanka.GraphQL.Extensions.ApolloFederation;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;

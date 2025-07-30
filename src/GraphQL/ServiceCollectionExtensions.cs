@@ -12,14 +12,14 @@ public static class ServiceCollectionExtensions
     {
         return services.AddDefaultValidator();
     }
-    
+
     public static IServiceCollection AddDefaultValidator(this IServiceCollection services)
     {
         services.AddOptions();
         services.AddOptions<AsyncValidatorOptions>();
         services.TryAddSingleton<IAsyncValidator>(p =>
             new AsyncValidator(p.GetRequiredService<IOptions<AsyncValidatorOptions>>()));
-        
+
         return services;
     }
 

@@ -49,18 +49,18 @@ public class FieldSelectionMergingValidator(IRuleVisitorContext context)
             {
                 var fields1 = fieldMap1[responseName];
                 for (var i = 0; i < fields1.Count; i++)
-                for (var j = 0; j < fields2.Count; j++)
-                {
-                    var conflict = FindConflict(
-                        cachedFieldsAndFragmentNames,
-                        comparedFragmentPairs,
-                        parentFieldsAreMutuallyExclusive,
-                        responseName,
-                        fields1[i],
-                        fields2[j]);
+                    for (var j = 0; j < fields2.Count; j++)
+                    {
+                        var conflict = FindConflict(
+                            cachedFieldsAndFragmentNames,
+                            comparedFragmentPairs,
+                            parentFieldsAreMutuallyExclusive,
+                            responseName,
+                            fields1[i],
+                            fields2[j]);
 
-                    if (conflict != null) conflicts.Add(conflict);
-                }
+                        if (conflict != null) conflicts.Add(conflict);
+                    }
             }
         }
     }
@@ -212,18 +212,18 @@ public class FieldSelectionMergingValidator(IRuleVisitorContext context)
             // be compared.
             if (fields.Count > 1)
                 for (var i = 0; i < fields.Count; i++)
-                for (var j = i + 1; j < fields.Count; j++)
-                {
-                    var conflict = FindConflict(
-                        cachedFieldsAndFragmentNames,
-                        comparedFragmentPairs,
-                        false, // within one collection is never mutually exclusive
-                        responseName,
-                        fields[i],
-                        fields[j]);
+                    for (var j = i + 1; j < fields.Count; j++)
+                    {
+                        var conflict = FindConflict(
+                            cachedFieldsAndFragmentNames,
+                            comparedFragmentPairs,
+                            false, // within one collection is never mutually exclusive
+                            responseName,
+                            fields[i],
+                            fields[j]);
 
-                    if (conflict != null) conflicts.Add(conflict);
-                }
+                        if (conflict != null) conflicts.Add(conflict);
+                    }
         }
     }
 
@@ -494,14 +494,14 @@ public class FieldSelectionMergingValidator(IRuleVisitorContext context)
         // fragment names by the second. This compares each item in the first set of
         // names to each item in the second set of names.
         for (var i = 0; i < fragmentNames1.Count; i++)
-        for (var j = 0; j < fragmentNames2.Count; j++)
-            CollectConflictsBetweenFragments(
-                conflicts,
-                cachedFieldsAndFragmentNames,
-                comparedFragmentPairs,
-                areMutuallyExclusive,
-                fragmentNames1[i],
-                fragmentNames2[j]);
+            for (var j = 0; j < fragmentNames2.Count; j++)
+                CollectConflictsBetweenFragments(
+                    conflicts,
+                    cachedFieldsAndFragmentNames,
+                    comparedFragmentPairs,
+                    areMutuallyExclusive,
+                    fragmentNames1[i],
+                    fragmentNames2[j]);
 
         return conflicts;
     }
@@ -610,7 +610,7 @@ public class FieldSelectionMergingValidator(IRuleVisitorContext context)
                 Names = new List<string>()
             };
         }
-        
+
         return GetFieldsAndFragmentNames(
             cachedFieldsAndFragmentNames,
             namedType,

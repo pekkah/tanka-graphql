@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.ValueResolution;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -16,7 +18,7 @@ public class MutationFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Add("Mutation", new ()
+            .Add("Mutation", new()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
@@ -50,11 +52,11 @@ public class MutationFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Add("System", new ()
+            .Add("System", new()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
-            .Add("Mutation", new ()
+            .Add("Mutation", new()
             {
                 { "system: System!", b => b.ResolveAs("System") }
             })

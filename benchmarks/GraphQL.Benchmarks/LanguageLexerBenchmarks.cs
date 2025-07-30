@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Text;
+
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+
 using GraphQLParser;
+
 using Tanka.GraphQL.Introspection;
 
 namespace Tanka.GraphQL.Benchmarks;

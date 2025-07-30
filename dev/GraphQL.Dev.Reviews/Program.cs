@@ -1,6 +1,8 @@
 ﻿using GraphQL.Dev.Reviews;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+
 using Tanka.GraphQL.Dev.Reviews;
 using Tanka.GraphQL.Extensions.ApolloFederation;
 using Tanka.GraphQL.Server;

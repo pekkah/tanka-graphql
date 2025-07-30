@@ -17,9 +17,9 @@ public class ParentClass(string keyword, string name, string constraints, Parent
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Equals(Child, other.Child) 
-               && Keyword == other.Keyword 
-               && Name == other.Name 
+        return Equals(Child, other.Child)
+               && Keyword == other.Keyword
+               && Name == other.Name
                && Constraints == other.Constraints;
     }
 

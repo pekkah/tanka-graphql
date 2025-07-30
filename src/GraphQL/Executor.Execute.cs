@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Request;
 
@@ -55,7 +56,7 @@ public partial class Executor
     {
         if (document == null)
             throw new ArgumentNullException(nameof(document));
-            
+
         var executor = new Executor(schema);
         return executor.Execute(new GraphQLRequest
         {

@@ -124,7 +124,7 @@ public class ObjectTemplateFacts
                 "using Animals;"
             ],
             NamedTypeExtension = NamedTypeExtension.Render("class", "Dog", "Dog"),
-            Methods = 
+            Methods =
             [
                 new ObjectMethodDefinition()
                 {
@@ -646,7 +646,7 @@ public class ObjectTemplateFacts
             NamedTypeExtension = NamedTypeExtension.Render("class", "Dog", "Dog"),
             Methods = [],
             Properties = [],
-            Implements = 
+            Implements =
             [
                 new BaseDefinition(true, "Person", "Types", "Person", [], [])
             ]

@@ -118,15 +118,15 @@ public class RulesWalker : Visitor, IRuleVisitorContext
                         spreads.Add(spread);
                         break;
                     case InlineFragment inlineFragment:
-                    {
-                        setsToVisit.Push(inlineFragment.SelectionSet);
-                        break;
-                    }
+                        {
+                            setsToVisit.Push(inlineFragment.SelectionSet);
+                            break;
+                        }
                     case FieldSelection fieldSelection:
-                    {
-                        if (fieldSelection.SelectionSet != null) setsToVisit.Push(fieldSelection.SelectionSet);
-                        break;
-                    }
+                        {
+                            if (fieldSelection.SelectionSet != null) setsToVisit.Push(fieldSelection.SelectionSet);
+                            break;
+                        }
                 }
         }
 

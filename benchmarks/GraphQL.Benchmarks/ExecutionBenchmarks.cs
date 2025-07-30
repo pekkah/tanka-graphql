@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+
 using Microsoft.Extensions.Logging.Abstractions;
+
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Request;

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Tanka.GraphQL.Server.SourceGenerators;
 
-public class ObjectControllerDefinition: TypeDefinition, IEquatable<ObjectControllerDefinition>
+public class ObjectControllerDefinition : TypeDefinition, IEquatable<ObjectControllerDefinition>
 {
     public List<ObjectPropertyDefinition> Properties { get; init; } = [];
 
@@ -14,8 +14,8 @@ public class ObjectControllerDefinition: TypeDefinition, IEquatable<ObjectContro
         Methods.Concat(Implements.SelectMany(i => i.Methods)).ToList();
 
     public IEnumerable<ObjectMethodDefinition> AllSubscribers => AllMethods.Where(m => m.IsSubscription);
-       
-    public ParentClass? ParentClass { get; init;  }
+
+    public ParentClass? ParentClass { get; init; }
 
     public bool IsStatic { get; init; }
 

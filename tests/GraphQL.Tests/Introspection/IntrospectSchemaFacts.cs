@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
+
 using Tanka.GraphQL.Tests.Data;
 using Tanka.GraphQL.TypeSystem;
+
 using Xunit;
 
 // ReSharper disable InconsistentNaming
@@ -103,6 +105,9 @@ type Subscription {}
         },
         {
           ""name"": ""include""
+        },
+        {
+          ""name"": ""oneOf""
         },
         {
           ""name"": ""skip""
@@ -271,6 +276,14 @@ type Subscription {}
               ""name"": ""if""
             }
           ]
+        },
+        {
+          ""name"": ""oneOf"",
+          ""description"": null,
+          ""locations"": [
+            ""INPUT_OBJECT""
+          ],
+          ""args"": []
         },
         {
           ""name"": ""skip"",

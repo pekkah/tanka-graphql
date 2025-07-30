@@ -3,6 +3,7 @@ using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.SelectionSets;
+using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueSerialization;
 
 namespace Tanka.GraphQL.Validation;
@@ -42,6 +43,8 @@ public static class ExecutionRules
         R571And573Directives(),
         R572DirectivesAreInValidLocations(),
 
+        // OneOf directive validation
+        OneOfDirective.ValidationRule(),
 
         R581And582Variables(),
         R583AllVariableUsesDefined(),
@@ -420,8 +423,8 @@ public static class ExecutionRules
 
                         return;
                     }
-                    
-                    
+
+
                     if (!ruleVisitorContext.VariableValues.TryGetValue(variable.Name, out var variableValue))
                         ruleVisitorContext.Error(
                             ValidationErrorCodes.R5421RequiredArguments,
@@ -441,7 +444,7 @@ public static class ExecutionRules
                                 $"Value of argument '{argumentName}' cannot be null");
                         }
                     }
-                    
+
                 }
 
                 if (argument?.Value == null || argument.Value.Kind == NodeKind.NullValue)
@@ -794,7 +797,7 @@ public static class ExecutionRules
             {
                 if (!fragments.TryGetValue(node.FragmentName, out var fragment))
                     return;
-                    
+
                 var fragmentType = Ast.UnwrapAndResolveType(context.Schema, fragment.TypeCondition);
                 var parentType = context.Tracker.ParentType;
                 if (fragmentType is not null && parentType is not null)
@@ -1175,7 +1178,7 @@ public static class ExecutionRules
         };
 
         // 5.7.3
-        void CheckDirectives(IRuleVisitorContext context, Language.Nodes.Directives? directives)
+        static void CheckDirectives(IRuleVisitorContext context, Language.Nodes.Directives? directives)
         {
             if (directives is null || directives.Count == 0)
                 return;
@@ -1466,7 +1469,7 @@ public static class ExecutionRules
         {
             if (locationType is null)
                 return false;
-            
+
             if (locationType is NonNullType nonNullTypeTypeLocationType && varType is not NonNullType)
             {
                 var hasNonNullTypeTypeVariableDefaultValue = varDefaultValue != null;

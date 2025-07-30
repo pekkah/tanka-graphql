@@ -13,11 +13,11 @@ public record ParameterDefinition
     public bool? FromArguments { get; set; }
 
     public bool IsPrimitive { get; init; }
-    
+
     public string? ClosestMatchingGraphQLTypeName { get; set; }
 
     public string AsArgument => $"{Name}: {ClosestMatchingGraphQLTypeName}";
-    
+
     public bool IsArgument
     {
         get

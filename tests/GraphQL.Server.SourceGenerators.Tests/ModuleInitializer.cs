@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+
 using DiffEngine;
 
 namespace Tanka.GraphQL.Server.SourceGenerators.Tests;

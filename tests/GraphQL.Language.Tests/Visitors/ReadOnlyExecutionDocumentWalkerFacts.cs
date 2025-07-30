@@ -1,6 +1,8 @@
 ﻿using NSubstitute;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Visitors;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests.Visitors;

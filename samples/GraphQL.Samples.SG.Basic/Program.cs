@@ -36,12 +36,12 @@ app.Run();
 public static partial class Query
 {
     public static World World() => new();
-    
-   public static IEnumerable<IAnimal> Animals()=> new IAnimal[]
-   {
+
+    public static IEnumerable<IAnimal> Animals() => new IAnimal[]
+    {
         new Dog(),
         new Cat()
-    };
+     };
 }
 
 [ObjectType]
@@ -72,7 +72,7 @@ public partial interface IAnimal
 public partial class Dog : IAnimal
 {
     public string Name => "Dog";
-    
+
     public string Bark() => "Woof";
 }
 
@@ -80,6 +80,6 @@ public partial class Dog : IAnimal
 public partial class Cat : IAnimal
 {
     public string Name => "Cat";
-    
+
     public string Meow() => "Meow";
 }

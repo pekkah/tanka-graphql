@@ -11,6 +11,7 @@ Built-in directives for executable documents are:
 Built-in directives for schema documents are:
 - `@deprecated(reason: String)`: Marks an element of a GraphQL schema as no longer supported.
 - `@specifiedBy(url: String!)`: Exposes a URL that specifies the behaviour of this scalar.
+- `@oneOf`: Indicates that exactly one field must be provided in input objects.
 
 For custom schema directive see [Apply Directives](xref://start:03-apply-directives.md) for example.
 

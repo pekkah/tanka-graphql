@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
+
 using Tanka.GraphQL.Language.Nodes;
 
 namespace Tanka.GraphQL.ValueSerialization;
@@ -20,7 +21,7 @@ public class IdConverter : IValueConverter
         if (serializedValue == null)
             return new NullValue();
 
-        return new StringValue(Encoding.UTF8.GetBytes((string)serializedValue));
+        return new StringValue(Encoding.UTF8.GetBytes(serializedValue.ToString()!));
     }
 
     public object? ParseValue(object? input)
@@ -36,7 +37,7 @@ public class IdConverter : IValueConverter
         if (input.Kind == NodeKind.NullValue) return null;
 
         if (input.Kind == NodeKind.StringValue)
-            return (StringValue)input.ToString();
+            return input.ToString();
 
         throw new FormatException(
             $"Cannot coerce Id value from '{input.Kind}'");

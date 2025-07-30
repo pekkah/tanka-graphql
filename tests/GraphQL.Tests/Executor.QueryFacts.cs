@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.ValueResolution;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -16,7 +18,7 @@ public class QueryFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Add("Query", new ()
+            .Add("Query", new()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
@@ -50,7 +52,7 @@ public class QueryFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Add("System", new ()
+            .Add("System", new()
             {
                 { "version: String!", b => b.ResolveAs("1.0") }
             })
@@ -92,7 +94,7 @@ public class QueryFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Add("Query", new ()
+            .Add("Query", new()
             {
                 { "hello(name: String!): String!", (string name) => $"Hello, {name}!" }
             })
@@ -132,7 +134,7 @@ public class QueryFacts
     {
         /* Given */
         var schema = await new ExecutableSchemaBuilder()
-            .Add("Query", new ()
+            .Add("Query", new()
             {
                 { "hello: String!", b => b.ResolveAs("Hello, World!") },
                 { "goodbye: String!", b => b.ResolveAs("Goodbye, World!") }

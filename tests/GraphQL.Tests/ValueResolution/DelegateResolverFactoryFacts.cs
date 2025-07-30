@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.ValueResolution;
@@ -158,7 +161,7 @@ public class DelegateResolverFactoryFacts
         /* Given */
         bool called = false;
         async Task AsyncResolver(
-            ObjectDefinition objectDefinition, 
+            ObjectDefinition objectDefinition,
             string objectValue,
             FieldDefinition field,
             FieldSelection selection,
@@ -269,7 +272,7 @@ public class DelegateResolverFactoryFacts
         var called = false;
         ValueTask AsyncResolver()
         {
-            called  = true;
+            called = true;
             return default;
         }
 

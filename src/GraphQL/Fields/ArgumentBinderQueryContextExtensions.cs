@@ -21,10 +21,10 @@ public static class ArgumentBinderQueryContextExtensions
         return queryContext.ArgumentBinder.BindInputObjectList<T>(context, name);
     }
 
-    
+
 
     public static bool HasArgument(
-        this QueryContext queryContext, 
+        this QueryContext queryContext,
         ResolverContextBase context,
         string name)
     {

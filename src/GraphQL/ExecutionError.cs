@@ -15,7 +15,7 @@ public class ExecutionError
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<SerializedLocation>? Locations { get; set; }
 
-    [JsonPropertyName("message")] 
+    [JsonPropertyName("message")]
     public string Message { get; set; } = string.Empty;
 
     [JsonPropertyName("path")]
@@ -33,10 +33,10 @@ public class ExecutionError
 public class SerializedLocation
 {
     public int Line { get; set; }
-    
+
     public int Column { get; set; }
 
-    public static implicit operator SerializedLocation(Location location)  
+    public static implicit operator SerializedLocation(Location location)
     {
         return new()
         {

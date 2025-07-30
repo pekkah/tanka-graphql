@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Tanka.GraphQL.Extensions.Analysis;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.Validation;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.Analysis;

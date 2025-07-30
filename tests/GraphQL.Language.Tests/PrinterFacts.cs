@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
+
 using Tanka.GraphQL.Language.Internal;
 using Tanka.GraphQL.Language.Nodes;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests;
@@ -12,7 +14,7 @@ public class PrinterFacts
     [Theory]
     [InlineData("name: [1,2,3]", "name", typeof(ListValue))]
     [InlineData("another: -123.123", "another", typeof(FloatValue))]
-    public void Argument(string source, string name, Type valueType)
+    public void Argument(string source, string argName, Type valueType)
     {
         var node = Parser.Create(source)
             .ParseArgument();
@@ -57,7 +59,7 @@ public class PrinterFacts
     [Theory]
     [InlineData("123", 123)]
     [InlineData("-123", -123)]
-    public void Value_Int(string source, int expected)
+    public void Value_Int(string source, int expectedValue)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -73,7 +75,7 @@ public class PrinterFacts
     [InlineData("123.123", 123.123)]
     [InlineData("-123.123", -123.123)]
     [InlineData("123e20", 123e20)]
-    public void Value_Float(string source, double expected)
+    public void Value_Float(string source, double expectedValue)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -89,7 +91,7 @@ public class PrinterFacts
     [InlineData("\"test\"", "test")]
     [InlineData("\"test test\"", "test test")]
     [InlineData("\"test_test\"", "test_test")]
-    public void Value_String(string source, string expected)
+    public void Value_String(string source, string expectedValue)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -111,7 +113,7 @@ public class PrinterFacts
 
                      """"""",
         "Cat\n  - not a dog\n  - not a goat\n\nMight be part demon.")]
-    public void Value_BlockString(string source, string expected)
+    public void Value_BlockString(string source, string expectedValue)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -130,7 +132,7 @@ public class PrinterFacts
     [Theory]
     [InlineData("true", true)]
     [InlineData("false", false)]
-    public void Value_BooleanValue(string source, bool expected)
+    public void Value_BooleanValue(string source, bool expectedValue)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -146,7 +148,7 @@ public class PrinterFacts
     [InlineData("ONE", "ONE")]
     [InlineData("TWO", "TWO")]
     [InlineData("ZERO", "ZERO")]
-    public void Value_EnumValue(string source, string expected)
+    public void Value_EnumValue(string source, string expectedValue)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -180,7 +182,7 @@ public class PrinterFacts
     [InlineData(@"{ x: ""string"" }", "x", typeof(StringValue))]
     [InlineData(@"{ empty: null }", "empty", typeof(NullValue))]
     [InlineData(@"{ list: [1,2,3] }", "list", typeof(ListValue))]
-    public void Value_ObjectValue_ObjectField(string source, string expectedName, Type typeOf)
+    public void Value_ObjectValue_ObjectField(string source, string fieldName, Type typeOf)
     {
         var node = Parser.Create(source)
             .ParseObjectValue();
@@ -945,7 +947,7 @@ multiple lines
 
     private void AssertPrintedEquals(string expected, string actual)
     {
-        string Normalize(string str)
+        static string Normalize(string str)
         {
             str = str
                 .Replace("\r", string.Empty)

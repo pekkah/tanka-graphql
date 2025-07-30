@@ -4,6 +4,6 @@ namespace Tanka.GraphQL.TypeSystem;
 
 public interface INamedType
 {
-    [SuppressMessage("ReSharper", "InconsistentNaming")] 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public string __Typename { get; }
 }

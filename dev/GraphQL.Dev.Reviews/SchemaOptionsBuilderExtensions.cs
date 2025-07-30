@@ -1,5 +1,7 @@
 using GraphQL.Dev.Reviews;
+
 using Microsoft.Extensions.Options;
+
 using Tanka.GraphQL.Server;
 
 namespace Tanka.GraphQL.Dev.Reviews;

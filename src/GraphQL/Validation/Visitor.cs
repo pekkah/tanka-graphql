@@ -154,7 +154,7 @@ public class Visitor
             case NodeKind.NamedType:
                 return BeginVisitNamedType((NamedType)node);
             default:
-                return null;
+                return node;
         }
     }
 

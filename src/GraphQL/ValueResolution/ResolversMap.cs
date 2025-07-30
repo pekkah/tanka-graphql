@@ -12,7 +12,7 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
     }
 
     private static ResolversMap Empty { get; } = new ResolversMap();
-    
+
     public static IResolverMap None { get; } = Empty;
 
     public static ISubscriberMap SubscribersNone { get; } = Empty;
@@ -43,23 +43,23 @@ public class ResolversMap : Dictionary<string, FieldResolversMap>, IResolverMap,
     public void Add(IResolverMap resolvers, ISubscriberMap? subscribers)
     {
         foreach (var (typeName, fields) in resolvers.GetTypes())
-        foreach (var field in fields)
-        {
-            var resolver = resolvers?.GetResolver(typeName, field);
-            var subscriber = subscribers?.GetSubscriber(typeName, field);
-
-            if (resolver is not null) Add(typeName, field, resolver, subscriber);
-        }
-
-        if (subscribers is not null)
-            foreach (var (typeName, fields) in subscribers.GetTypes())
             foreach (var field in fields)
             {
                 var resolver = resolvers?.GetResolver(typeName, field);
                 var subscriber = subscribers?.GetSubscriber(typeName, field);
 
-                if (subscriber is not null) Add(typeName, field, subscriber);
+                if (resolver is not null) Add(typeName, field, resolver, subscriber);
             }
+
+        if (subscribers is not null)
+            foreach (var (typeName, fields) in subscribers.GetTypes())
+                foreach (var field in fields)
+                {
+                    var resolver = resolvers?.GetResolver(typeName, field);
+                    var subscriber = subscribers?.GetSubscriber(typeName, field);
+
+                    if (subscriber is not null) Add(typeName, field, subscriber);
+                }
     }
 
     public void Add(string typeName, string fieldName, Resolver resolver, Subscriber? subscriber = null)

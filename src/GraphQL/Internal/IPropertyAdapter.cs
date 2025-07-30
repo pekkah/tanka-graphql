@@ -1,7 +1,7 @@
 ﻿namespace Tanka.GraphQL.Internal;
 
 public interface IPropertyAdapter<in T>
-{ 
+{
     string Name { get; }
 
     object? GetValue(T obj);
@@ -16,7 +16,7 @@ public class PropertyAdapter<T>(string name, Func<T, object?> getter, Action<T, 
 
     private Func<T, object?> Getter { get; } = getter;
 
-    private Action<T, object?> Setter { get;  } = setter;
+    private Action<T, object?> Setter { get; } = setter;
 
     public object? GetValue(T obj)
     {

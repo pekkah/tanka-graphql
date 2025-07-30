@@ -10,14 +10,14 @@ internal static class AsyncEnumerableEx
         if (!await e.MoveNextAsync()) return default;
 
         var value = e.Current;
-        
+
         await ThrowIfMore(e);
 
         return value;
 
         static async ValueTask ThrowIfMore(IAsyncEnumerator<T> e)
         {
-            if (await e.MoveNextAsync()) 
+            if (await e.MoveNextAsync())
                 throw new InvalidOperationException("Expected single item but got more.");
         }
     }
@@ -31,7 +31,7 @@ internal static class AsyncEnumerableEx
         var value = e.Current;
 
         await ThrowIfMore(e);
-        
+
         return value;
 
         static async ValueTask ThrowIfMore(IAsyncEnumerator<T> e)

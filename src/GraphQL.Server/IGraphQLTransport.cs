@@ -6,8 +6,8 @@ namespace Tanka.GraphQL.Server;
 public interface IGraphQLTransport
 {
     IEndpointConventionBuilder Map(
-        string pattern, 
-        IEndpointRouteBuilder routes, 
+        string pattern,
+        IEndpointRouteBuilder routes,
         GraphQLRequestDelegate requestDelegate);
 
     void Build(GraphQLRequestPipelineBuilder builder);

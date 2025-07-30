@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -13,7 +14,7 @@ public class ReadOnlyDocumentWalker<TContext>
     private readonly Func<INode, bool> _visitNode;
 
     public ReadOnlyDocumentWalker(
-        IReadOnlyList<IReadOnlyDocumentVisitor<TContext>> visitors, 
+        IReadOnlyList<IReadOnlyDocumentVisitor<TContext>> visitors,
         TContext context,
         Func<INode, bool>? visitNode)
     {

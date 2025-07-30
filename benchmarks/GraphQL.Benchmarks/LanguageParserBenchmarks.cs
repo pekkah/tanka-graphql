@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+
 using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.Language;
+
 using Parser = GraphQLParser.Parser;
 
 namespace Tanka.GraphQL.Benchmarks;

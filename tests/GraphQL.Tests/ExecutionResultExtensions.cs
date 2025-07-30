@@ -4,13 +4,14 @@ using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
 
 public static class ExecutionResultExtensions
 {
-    public static void ShouldMatchJson(this ExecutionResult actualResult, [StringSyntax(StringSyntaxAttribute.Json)]string expectedJson)
+    public static void ShouldMatchJson(this ExecutionResult actualResult, [StringSyntax(StringSyntaxAttribute.Json)] string expectedJson)
     {
         if (expectedJson == null) throw new ArgumentNullException(nameof(expectedJson));
         if (actualResult == null) throw new ArgumentNullException(nameof(actualResult));

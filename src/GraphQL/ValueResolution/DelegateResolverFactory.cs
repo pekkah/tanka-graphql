@@ -13,11 +13,11 @@ public class DelegateResolverFactory : DelegateFactoryBase<ResolverContext, Reso
 
     internal static readonly MethodInfo ResolveValueObjectMethod = typeof(DelegateResolverFactory)
         .GetMethod(nameof(ResolveValueObject), BindingFlags.Static | BindingFlags.NonPublic)!;
-    
+
     private static readonly Lazy<DelegateResolverFactory> InstanceFactory = new(() => new DelegateResolverFactory());
-    
+
     public static DelegateResolverFactory Instance => InstanceFactory.Value;
-    
+
     public static Resolver Get(Delegate resolverDelegate)
     {
         return Instance.GetOrCreate(resolverDelegate);

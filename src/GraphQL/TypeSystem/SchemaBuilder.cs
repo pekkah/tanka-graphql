@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+
 using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Introspection;
 using Tanka.GraphQL.Language;
@@ -74,6 +75,8 @@ directive @skip(if: Boolean!) on
     | INLINE_FRAGMENT
 
 directive @specifiedBy(url: String!) on SCALAR
+
+directive @oneOf on INPUT_OBJECT
 ";
 
     /// <summary>

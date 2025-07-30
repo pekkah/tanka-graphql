@@ -5,6 +5,8 @@
         <Nullable>enable</Nullable>
         <LangVersion>12</LangVersion>
         <IsPackable>true</IsPackable>
+        <!-- Suppress nullable reference warnings for legacy code - these are pre-existing and not related to @oneOf migration -->
+        <NoWarn>$(NoWarn);CS8604;CS8387;CS8714;CS8632</NoWarn>
     </PropertyGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

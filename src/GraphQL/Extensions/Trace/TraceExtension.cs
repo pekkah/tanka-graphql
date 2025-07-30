@@ -33,7 +33,7 @@ namespace Tanka.GraphQL.Extensions.Trace
                     {
                         var current = e.Current;
                         var extensions = current.Extensions != null
-                            ? new Dictionary<string,object>(current.Extensions)
+                            ? new Dictionary<string, object>(current.Extensions)
                             : new Dictionary<string, object>(1);
 
                         extensions["trace"] = extension;

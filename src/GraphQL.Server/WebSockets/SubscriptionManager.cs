@@ -18,8 +18,8 @@ public partial class SubscriptionManager(
     ILogger<SubscriptionManager> logger)
 {
     private readonly ConcurrentDictionary<string, (CancellationTokenSource Unsubscribe, Task Execute)>
-        _subscriptions = new ();
-    
+        _subscriptions = new();
+
     public bool Enqueue(string id, GraphQLHttpRequest request)
     {
         if (_subscriptions.ContainsKey(id))
@@ -59,7 +59,7 @@ public partial class SubscriptionManager(
 
     private static async Task Query(
         string subscriptionId,
-        GraphQLHttpRequest request, 
+        GraphQLHttpRequest request,
         ChannelWriter<MessageBase> writer,
         HttpContext httpContext,
         GraphQLRequestDelegate requestDelegate,
@@ -67,9 +67,9 @@ public partial class SubscriptionManager(
     {
         var logger = httpContext.RequestServices.GetRequiredService<ILoggerFactory>()
             .CreateLogger<SubscriptionManager>();
-        
+
         using var _ = logger.BeginScope("Subscription({SubscriptionId})", subscriptionId);
-        
+
         var context = new GraphQLRequestContext
         {
             HttpContext = httpContext,
@@ -105,13 +105,13 @@ public partial class SubscriptionManager(
                 Log.ExecutionResult(logger, subscriptionId, enumerator.Current, elapsed);
                 await writer.WriteAsync(new Next
                 {
-                    Id = subscriptionId, 
+                    Id = subscriptionId,
                     Payload = enumerator.Current
                 });
                 started = Stopwatch.GetTimestamp();
             }
 
-            
+
 
             Log.Completed(logger, subscriptionId, count);
         }

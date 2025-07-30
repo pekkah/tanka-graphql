@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
@@ -11,9 +12,9 @@ public delegate ValueTask FieldDelegate(ResolverContext context);
 public class FieldPipelineExecutorFeature(FieldDelegate fieldDelegate) : IFieldExecutorFeature
 {
     public async Task<object?> Execute(
-        QueryContext context, 
-        ObjectDefinition objectDefinition, 
-        object? objectValue, 
+        QueryContext context,
+        ObjectDefinition objectDefinition,
+        object? objectValue,
         IReadOnlyCollection<FieldSelection> fields,
         NodePath path)
     {
