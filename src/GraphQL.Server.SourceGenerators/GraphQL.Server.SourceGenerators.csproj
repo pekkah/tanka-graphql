@@ -7,7 +7,7 @@
 
         <IsRoslynComponent>true</IsRoslynComponent>
         <DevelopmentDependency>true</DevelopmentDependency>
-        <NoWarn>NU5100</NoWarn>
+        <NoWarn>NU5100;CS9124</NoWarn>
         <IncludeSymbols>false</IncludeSymbols>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
