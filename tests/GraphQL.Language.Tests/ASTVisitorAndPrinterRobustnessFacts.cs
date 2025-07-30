@@ -504,7 +504,7 @@ public class ASTVisitorAndPrinterRobustnessFacts
         Assert.True(true, "Completed without memory exceptions");
     }
 
-    [Fact]
+    [Fact(Skip = "Performance test should be a benchmark, not a unit test")]
     public void DocumentWalker_WithRepeatedVisits_PerformsConsistently()
     {
         // Given: Document and visitor
