@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
@@ -170,15 +171,19 @@ public class DirectiveProcessingEdgeCasesFacts
 
         var result = await Executor.Execute(schema, query);
 
-        Assert.NotNull(result);
-        Assert.Null(result.Errors);
-
-        var animals = (object[])result.Data["animals"];
-        var dog = (Dictionary<string, object?>)animals[0];
-        var cat = (Dictionary<string, object?>)animals[1];
-
-        Assert.True(dog.ContainsKey("breed"));
-        Assert.False(cat.ContainsKey("color"));
+        result.ShouldMatchJson(@"{
+            ""data"": {
+                ""animals"": [
+                    {
+                        ""name"": ""Buddy"",
+                        ""breed"": ""Golden Retriever""
+                    },
+                    {
+                        ""name"": ""Whiskers""
+                    }
+                ]
+            }
+        }");
     }
 
     [Fact]
@@ -528,6 +533,13 @@ public class DirectiveProcessingEdgeCasesFacts
                     {
                         new { name = "Buddy", breed = "Golden Retriever", __typename = "Dog" },
                         new { name = "Whiskers", color = "Orange", __typename = "Cat" }
+                    };
+                    // Configure type resolver for interface types
+                    context.ResolveAbstractType = (interfaceDef, value) =>
+                    {
+                        var obj = (dynamic)value;
+                        var typename = (string)obj.__typename;
+                        return context.Schema.GetRequiredNamedType<ObjectDefinition>(typename);
                     };
                     return ValueTask.CompletedTask;
                 }}
