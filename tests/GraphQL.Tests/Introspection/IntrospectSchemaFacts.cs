@@ -107,6 +107,9 @@ type Subscription {}
           ""name"": ""include""
         },
         {
+          ""name"": ""oneOf""
+        },
+        {
           ""name"": ""skip""
         },
         {
@@ -273,6 +276,14 @@ type Subscription {}
               ""name"": ""if""
             }
           ]
+        },
+        {
+          ""name"": ""oneOf"",
+          ""description"": null,
+          ""locations"": [
+            ""INPUT_OBJECT""
+          ],
+          ""args"": []
         },
         {
           ""name"": ""skip"",
