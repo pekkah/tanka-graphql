@@ -1,6 +1,6 @@
 ## Scalars
 
-> [Specification](https://facebook.github.io/graphql/June2018/#sec-Scalars)
+> [Specification](https://spec.graphql.org/draft/#sec-Scalars)
 
 Scalars are created as instances of `ScalarDefinition`.
 

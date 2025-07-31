@@ -1,6 +1,6 @@
 ## Types
 
-> [Specification](https://facebook.github.io/graphql/June2018/#sec-Types)
+> [Specification](https://spec.graphql.org/draft/#sec-Types)
 
 Following types are supported:
 

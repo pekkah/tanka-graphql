@@ -323,11 +323,14 @@
                 </div>
                 <h2 id="input-objects">Input Objects</h2>
 <blockquote class="blockquote">
-<p><a href="https://facebook.github.io/graphql/June2018/#sec-Input-Objects">Specification</a></p>
+<p><a href="https://spec.graphql.org/draft/#sec-Input-Objects">Specification</a></p>
 </blockquote>
 <p>Input objects are created as instances of <code>InputObjectDefinition</code>.</p>
 <h3 id="oneof-directive">@oneOf Directive</h3>
 <p>The <code>@oneOf</code> directive can be applied to input objects to indicate that exactly one field must be provided. This is useful for creating polymorphic input types where only one variant should be specified.</p>
+<blockquote class="blockquote">
+<p><strong>Note</strong>: The @oneOf directive is currently at Stage 3 (RFC Accepted) in the GraphQL specification process. See the <a href="https://github.com/graphql/graphql-spec/pull/825">RFC</a> for more details.</p>
+</blockquote>
 <pre><code class="language-graphql">input SearchInput @oneOf {
   byName: String
   byId: ID

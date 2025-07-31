@@ -1,6 +1,6 @@
 ## Unions
 
-> [Specification](https://facebook.github.io/graphql/June2018/#sec-Unions)
+> [Specification](https://spec.graphql.org/draft/#sec-Unions)
 
 Unions are created as instances of `UnionDefinition`.
 

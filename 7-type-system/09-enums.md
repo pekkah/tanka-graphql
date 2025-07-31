@@ -1,6 +1,6 @@
 ## Enums
 
-> [Specification](https://facebook.github.io/graphql/June2018/#sec-Enums)
+> [Specification](https://spec.graphql.org/draft/#sec-Enums)
 
 Enums are created as instances of `EnumDefinition`. Special value converter `EnumConverter` is used to convert enum values.
 

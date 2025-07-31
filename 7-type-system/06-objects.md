@@ -1,6 +1,6 @@
 ## Objects
 
-> [Specification](https://facebook.github.io/graphql/June2018/#sec-Objects)
+> [Specification](https://spec.graphql.org/draft/#sec-Objects)
 
 Objects are created as instances of `ObjectDefinition`.
 

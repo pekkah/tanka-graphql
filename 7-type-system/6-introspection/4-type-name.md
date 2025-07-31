@@ -1,6 +1,6 @@
 ## Type Name Introspection
 
-> [Specification](https://facebook.github.io/graphql/June2018/#sec-Type-Name-Introspection)
+> [Specification](https://spec.graphql.org/draft/#sec-Type-Name-Introspection)
 
 Any query can include the `__typename` meta-field. It returns the name of the object type currently being queried.
 
