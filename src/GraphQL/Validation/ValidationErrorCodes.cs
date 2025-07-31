@@ -1,7 +1,7 @@
 ﻿namespace Tanka.GraphQL.Validation;
 
 /// <summary>
-///     References to sections of https://spec.graphql.org/June2018
+///     References to sections of https://spec.graphql.org/draft/
 /// </summary>
 public static class ValidationErrorCodes
 {
