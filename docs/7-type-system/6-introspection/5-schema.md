@@ -1,6 +1,6 @@
 ## Schema Introspection
 
-> [Specification](https://facebook.github.io/graphql/June2018/#sec-Schema-Introspection)
+> [Specification](https://spec.graphql.org/draft/#sec-Schema-Introspection)
 
 Introspecting a schema produces an executable schema. Queries can be executed against this schema normally.
 

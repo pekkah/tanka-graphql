@@ -9,6 +9,7 @@
 - New server and executor implementations (since v3)
 - Apollo Federation subgraph support (since v3)
 - [graphql-ws](https://github.com/enisdenjo/graphql-ws) compatible web socket server (compatible with latest Apollo Client) (since v3)
+- @oneOf directive support for polymorphic input types (Stage 3 RFC)
 
 
 ## Documentation and packages

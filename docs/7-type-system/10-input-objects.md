@@ -1,12 +1,14 @@
 ## Input Objects
 
-> [Specification](https://facebook.github.io/graphql/June2018/#sec-Input-Objects)
+> [Specification](https://spec.graphql.org/draft/#sec-Input-Objects)
 
 Input objects are created as instances of `InputObjectDefinition`.
 
 ### @oneOf Directive
 
 The `@oneOf` directive can be applied to input objects to indicate that exactly one field must be provided. This is useful for creating polymorphic input types where only one variant should be specified.
+
+> **Note**: The @oneOf directive is currently at Stage 3 (RFC Accepted) in the GraphQL specification process. See the [RFC](https://github.com/graphql/graphql-spec/pull/825) for more details.
 
 ```graphql
 input SearchInput @oneOf {

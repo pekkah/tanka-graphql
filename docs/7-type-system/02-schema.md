@@ -1,6 +1,6 @@
 ## Schema
 
-> [Specification](https://facebook.github.io/graphql/June2018/#sec-Schema)
+> [Specification](https://spec.graphql.org/draft/#sec-Schema)
 
 Schema is defined by `ISchema`-interface.
 
