@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 
 using Tanka.GraphQL;
-using Tanka.GraphQL.Extensions.Experimental.OneOf;
 using Tanka.GraphQL.Server;
+using Tanka.GraphQL.TypeSystem;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +23,7 @@ builder.AddTankaGraphQL()
 
         options.PostConfigure(configure =>
         {
-            // add oneOf input type
-            configure.Builder.Schema.AddOneOf();
+            // @oneOf directive is built-in, just extend the input type
             configure.Builder.Add($$"""
                                   extend input {{nameof(OneOfInput)}} @oneOf
                                   """);
@@ -32,7 +31,7 @@ builder.AddTankaGraphQL()
     });
 
 // add validation rule for @oneOf directive
-builder.Services.AddDefaultValidatorRule(OneOfDirective.OneOfValidationRule());
+builder.Services.AddDefaultValidatorRule(OneOfDirective.ValidationRule());
 
 WebApplication app = builder.Build();
 app.UseWebSockets();
@@ -87,8 +86,8 @@ public static partial class Mutation
     ///     A command pattern like mutation with @oneOf input type
     /// </summary>
     /// <remarks>
-    ///     @oneOf - directive is provided by Tanka.GraphQL.Extensions.Experimental
-    ///     Spec PR: https://github.com/graphql/graphql-spec/pull/825
+    ///     @oneOf - directive is provided by Tanka.GraphQL.TypeSystem
+    ///     Spec RFC: https://github.com/graphql/graphql-spec/pull/825 (Stage 3)
     /// </remarks>
     /// <param name="input"></param>
     /// <param name="db"></param>
