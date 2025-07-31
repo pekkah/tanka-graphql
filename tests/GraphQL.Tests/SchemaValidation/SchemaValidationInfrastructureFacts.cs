@@ -83,7 +83,7 @@ public class SchemaValidationInfrastructureFacts
             await builder.Build(new SchemaBuildOptions());
         });
 
-        Assert.Contains("must have at least one field", exception.Message);
         Assert.Single(exception.Errors);
+        Assert.Contains("must have at least one field", exception.Errors.First().Message);
     }
 }
