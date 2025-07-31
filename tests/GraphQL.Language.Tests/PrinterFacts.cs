@@ -12,9 +12,9 @@ namespace Tanka.GraphQL.Language.Tests;
 public class PrinterFacts
 {
     [Theory]
-    [InlineData("name: [1,2,3]", "name", typeof(ListValue))]
-    [InlineData("another: -123.123", "another", typeof(FloatValue))]
-    public void Argument(string source, string argName, Type valueType)
+    [InlineData("name: [1,2,3]")]
+    [InlineData("another: -123.123")]
+    public void Argument(string source)
     {
         var node = Parser.Create(source)
             .ParseArgument();
@@ -57,9 +57,9 @@ public class PrinterFacts
     }
 
     [Theory]
-    [InlineData("123", 123)]
-    [InlineData("-123", -123)]
-    public void Value_Int(string source, int expectedValue)
+    [InlineData("123")]
+    [InlineData("-123")]
+    public void Value_Int(string source)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -72,10 +72,10 @@ public class PrinterFacts
     }
 
     [Theory]
-    [InlineData("123.123", 123.123)]
-    [InlineData("-123.123", -123.123)]
-    [InlineData("123e20", 123e20)]
-    public void Value_Float(string source, double expectedValue)
+    [InlineData("123.123")]
+    [InlineData("-123.123")]
+    [InlineData("123e20")]
+    public void Value_Float(string source)
     {
         var node = Parser.Create(source)
             .ParseValue();
@@ -88,10 +88,10 @@ public class PrinterFacts
     }
 
     [Theory]
-    [InlineData("\"test\"", "test")]
-    [InlineData("\"test test\"", "test test")]
-    [InlineData("\"test_test\"", "test_test")]
-    public void Value_String(string source, string expectedValue)
+    [InlineData("\"test\"")]
+    [InlineData("\"test test\"")]
+    [InlineData("\"test_test\"")]
+    public void Value_String(string source)
     {
         var node = Parser.Create(source)
             .ParseValue();

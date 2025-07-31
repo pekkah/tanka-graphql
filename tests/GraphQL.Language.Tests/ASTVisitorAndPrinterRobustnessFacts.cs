@@ -32,7 +32,7 @@ public class ASTVisitorAndPrinterRobustnessFacts
     {
         // Given: Document walker with null visitor in collection
         var document = Parser.Create("{ field }").ParseExecutableDocument();
-        var visitors = new List<IReadOnlyDocumentVisitor<PrinterContext>?> { null };
+        var visitors = new List<IReadOnlyDocumentVisitor<PrinterContext>?> { null! };
 
         // When & Then: Should handle null visitor gracefully
         var context = new PrinterContext();

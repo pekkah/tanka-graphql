@@ -150,6 +150,16 @@ public class IntrospectionResolvers : ResolversMap
                     ListType list => list.OfType,
                     _ => null
                 })
+            },
+
+            // INPUT_OBJECT only - @oneOf directive support
+            {
+                "isOneOf", context => context.ResolveAsPropertyOf<INode>(t => t switch
+                {
+                    null => null,
+                    InputObjectDefinition inputObjectDefinition => inputObjectDefinition.HasDirective("oneOf"),
+                    _ => null
+                })
             }
         };
 
