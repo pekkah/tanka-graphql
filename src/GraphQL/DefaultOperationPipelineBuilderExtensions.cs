@@ -30,7 +30,8 @@ public static class DefaultOperationDelegateBuilderExtensions
         this OperationDelegateBuilder builder)
     {
         var argumentBinderFeature = new ArgumentBinderFeature();
-        var defaultSelectionSetExecutorFeature = new DefaultSelectionSetExecutorFeature();
+        var fieldCollector = builder.ApplicationServices.GetRequiredService<IFieldCollector>();
+        var defaultSelectionSetExecutorFeature = new DefaultSelectionSetExecutorFeature(fieldCollector);
         var fieldExecutorFeature = new FieldExecutorFeature();
         var valueCompletionFeature = new ValueCompletionFeature();
 

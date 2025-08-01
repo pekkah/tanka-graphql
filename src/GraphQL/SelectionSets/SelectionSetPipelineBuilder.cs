@@ -1,4 +1,5 @@
-﻿using Tanka.GraphQL.Internal;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Tanka.GraphQL.Internal;
 
 namespace Tanka.GraphQL.SelectionSets;
 
@@ -70,7 +71,8 @@ public class SelectionSetPipelineBuilder
     {
         return Use(next => context =>
         {
-            context.GroupedFieldSet = FieldCollector.CollectFields(
+            var fieldCollector = ApplicationServices.GetRequiredService<IFieldCollector>();
+            context.GroupedFieldSet = fieldCollector.CollectFields(
                 context.QueryContext.Schema,
                 context.QueryContext.Request.Query,
                 context.ObjectDefinition,

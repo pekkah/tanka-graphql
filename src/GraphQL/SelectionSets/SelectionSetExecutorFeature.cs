@@ -6,6 +6,13 @@ namespace Tanka.GraphQL.SelectionSets;
 
 public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
 {
+    private readonly IFieldCollector _fieldCollector;
+
+    public DefaultSelectionSetExecutorFeature(IFieldCollector fieldCollector)
+    {
+        _fieldCollector = fieldCollector;
+    }
+
     public Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
         QueryContext context,
         SelectionSet selectionSet,
@@ -13,7 +20,7 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
         object? objectValue,
         NodePath path)
     {
-        var groupedFieldSet = FieldCollector.CollectFields(
+        var groupedFieldSet = _fieldCollector.CollectFields(
             context.Schema,
             context.Request.Query,
             objectType,

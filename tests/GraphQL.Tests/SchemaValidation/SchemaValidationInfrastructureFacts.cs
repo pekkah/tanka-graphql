@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.SchemaValidation;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.SchemaValidation;
