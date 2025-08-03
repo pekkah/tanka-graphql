@@ -12,14 +12,7 @@ public class DeferDirectiveHandler : IDirectiveHandler
         if (context.Directive.Name.Value != "defer")
             return new DirectiveResult { Handled = false };
 
-        // For now, always include the selection (defer processing happens later in execution)
-        // The actual deferred execution logic will be implemented in the execution pipeline
-        var metadata = new Dictionary<string, object>
-        {
-            ["deferred"] = true
-        };
-
-        // Check for 'if' argument
+        // Check for 'if' argument first
         if (context.Directive.Arguments != null)
         {
             var ifArgument = context.Directive.Arguments.SingleOrDefault(a => a.Name == "if");
@@ -32,17 +25,16 @@ public class DeferDirectiveHandler : IDirectiveHandler
                     return new DirectiveResult { Include = true };
                 }
             }
-
-            // Check for 'label' argument
-            var labelArgument = context.Directive.Arguments.SingleOrDefault(a => a.Name == "label");
-            if (labelArgument != null && labelArgument.Value is StringValue labelValue)
-            {
-                metadata["label"] = labelValue.Value;
-            }
         }
 
-        return new DirectiveResult 
-        { 
+        // Store the directive using its name as the key
+        var metadata = new Dictionary<string, object>
+        {
+            [context.Directive.Name.Value] = context.Directive
+        };
+
+        return new DirectiveResult
+        {
             Include = true,
             Metadata = metadata
         };
@@ -67,14 +59,7 @@ public class StreamDirectiveHandler : IDirectiveHandler
         if (context.Directive.Name.Value != "stream")
             return new DirectiveResult { Handled = false };
 
-        // For now, always include the selection (stream processing happens later in execution)
-        // The actual streaming execution logic will be implemented in the execution pipeline
-        var metadata = new Dictionary<string, object>
-        {
-            ["streamed"] = true
-        };
-
-        // Check for 'if' argument
+        // Check for 'if' argument first
         if (context.Directive.Arguments != null)
         {
             var ifArgument = context.Directive.Arguments.SingleOrDefault(a => a.Name == "if");
@@ -87,24 +72,16 @@ public class StreamDirectiveHandler : IDirectiveHandler
                     return new DirectiveResult { Include = true };
                 }
             }
-
-            // Check for 'label' argument
-            var labelArgument = context.Directive.Arguments.SingleOrDefault(a => a.Name == "label");
-            if (labelArgument != null && labelArgument.Value is StringValue labelValue)
-            {
-                metadata["label"] = labelValue.Value;
-            }
-
-            // Check for 'initialCount' argument
-            var initialCountArgument = context.Directive.Arguments.SingleOrDefault(a => a.Name == "initialCount");
-            if (initialCountArgument != null && initialCountArgument.Value is IntValue initialCountValue)
-            {
-                metadata["initialCount"] = initialCountValue.Value;
-            }
         }
 
-        return new DirectiveResult 
-        { 
+        // Store the directive using its name as the key
+        var metadata = new Dictionary<string, object>
+        {
+            [context.Directive.Name.Value] = context.Directive
+        };
+
+        return new DirectiveResult
+        {
             Include = true,
             Metadata = metadata
         };

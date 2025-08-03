@@ -1,4 +1,7 @@
-﻿using Tanka.GraphQL.Language.Nodes;
+﻿using System.Runtime.CompilerServices;
+
+using Tanka.GraphQL.Features;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
 namespace Tanka.GraphQL;
@@ -39,6 +42,16 @@ public partial class Executor
                 context.Request.InitialValue,
                 path);
 
+            // Check if we have incremental delivery
+            var incrementalFeature = context.Features.Get<IIncrementalDeliveryFeature>();
+            if (incrementalFeature?.HasIncrementalWork == true)
+            {
+                // Set up streaming response
+                context.Response = CreateIncrementalResponse(result, context, incrementalFeature);
+                return;
+            }
+
+            // No incremental delivery, return single result
             context.Response = AsyncEnumerableEx.Return(new ExecutionResult
             {
                 Data = result,
@@ -56,5 +69,35 @@ public partial class Executor
             Data = null,
             Errors = context.GetErrors().ToList()
         });
+    }
+
+    private static async IAsyncEnumerable<ExecutionResult> CreateIncrementalResponse(
+        IReadOnlyDictionary<string, object?> initialData,
+        QueryContext context,
+        IIncrementalDeliveryFeature incrementalFeature,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var initialErrors = context.GetErrors().ToList();
+
+        // Complete the incremental feature to signal no more deferred work will be registered
+        incrementalFeature.Complete();
+
+        // Yield the initial result
+        yield return new ExecutionResult
+        {
+            Data = initialData,
+            Errors = initialErrors.Any() ? initialErrors : null,
+            HasNext = true
+        };
+
+        // Stream the deferred results
+        await foreach (var incrementalPayload in incrementalFeature.GetDeferredResults(cancellationToken))
+        {
+            yield return new ExecutionResult
+            {
+                Incremental = new[] { incrementalPayload },
+                HasNext = false // For now, assume each incremental payload is the last one
+            };
+        }
     }
 }

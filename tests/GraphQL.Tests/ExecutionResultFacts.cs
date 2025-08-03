@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+
 using Tanka.GraphQL.Json;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -155,9 +157,9 @@ public class ExecutionResultFacts
         path.Append("users").Append(0).Append("profile").Append("addresses").Append(1).Append("street");
 
         // When
-        var json = JsonSerializer.Serialize(path, new JsonSerializerOptions 
-        { 
-            Converters = { new PathConverter() } 
+        var json = JsonSerializer.Serialize(path, new JsonSerializerOptions
+        {
+            Converters = { new PathConverter() }
         });
 
         // Then
@@ -172,9 +174,9 @@ public class ExecutionResultFacts
         var json = """["users",0,"profile","addresses",1,"street"]""";
 
         // When
-        var path = JsonSerializer.Deserialize<NodePath>(json, new JsonSerializerOptions 
-        { 
-            Converters = { new PathConverter() } 
+        var path = JsonSerializer.Deserialize<NodePath>(json, new JsonSerializerOptions
+        {
+            Converters = { new PathConverter() }
         });
 
         // Then

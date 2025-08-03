@@ -51,13 +51,14 @@ public partial class Executor
 
         ObjectDefinition? subscriptionType = context.Schema.Subscription;
         var fieldCollector = context.RequestServices.GetRequiredService<IFieldCollector>();
-        IReadOnlyDictionary<string, List<FieldSelection>> groupedFieldSet = fieldCollector.CollectFields(
+        var collectionResult = fieldCollector.CollectFields(
             context.Schema,
             context.Request.Query,
             subscriptionType,
             context.OperationDefinition.SelectionSet,
             context.CoercedVariableValues
         );
+        IReadOnlyDictionary<string, List<FieldSelection>> groupedFieldSet = collectionResult.Fields;
 
         List<FieldSelection> fields = groupedFieldSet.Values.First();
         FieldSelection fieldSelection = fields.First();

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 
@@ -19,7 +20,7 @@ public class DefaultFieldCollector : IFieldCollector
         _serviceProvider = serviceProvider;
     }
 
-    public IReadOnlyDictionary<string, List<FieldSelection>> CollectFields(
+    public FieldCollectionResult CollectFields(
         ISchema schema,
         ExecutableDocument document,
         ObjectDefinition objectDefinition,
@@ -34,12 +35,15 @@ public class DefaultFieldCollector : IFieldCollector
             ?? Empty;
 
         var groupedFields = new Dictionary<string, List<FieldSelection>>();
+        var fieldMetadata = new Dictionary<string, IReadOnlyDictionary<string, object>>();
         foreach (ISelection selection in selectionSet)
         {
             var directives = Enumerable.ToList<Directive>(GetDirectives(selection));
 
             // Process directives with handlers
             bool includeSelection = true;
+            var selectionMetadata = new Dictionary<string, object>();
+
             foreach (var directive in directives)
             {
                 var handler = _serviceProvider.GetKeyedService<IDirectiveHandler>(directive.Name.Value);
@@ -55,10 +59,22 @@ public class DefaultFieldCollector : IFieldCollector
                     };
 
                     var result = handler.Handle(context);
-                    if (result.Handled && !result.Include)
+                    if (result.Handled)
                     {
-                        includeSelection = false;
-                        break;
+                        if (!result.Include)
+                        {
+                            includeSelection = false;
+                            break;
+                        }
+
+                        // Collect metadata from directive handlers
+                        if (result.Metadata != null)
+                        {
+                            foreach (var (key, value) in result.Metadata)
+                            {
+                                selectionMetadata[key] = value;
+                            }
+                        }
                     }
                 }
             }
@@ -73,6 +89,12 @@ public class DefaultFieldCollector : IFieldCollector
                     groupedFields[name] = new List<FieldSelection>();
 
                 groupedFields[name].Add(fieldSelection);
+
+                // Store metadata for this field if any directive metadata was collected
+                if (selectionMetadata.Any())
+                {
+                    fieldMetadata[name] = selectionMetadata;
+                }
             }
 
             if (selection is FragmentSpread fragmentSpread)
@@ -93,7 +115,7 @@ public class DefaultFieldCollector : IFieldCollector
                     continue;
 
                 SelectionSet fragmentSelectionSet = fragment.SelectionSet;
-                IReadOnlyDictionary<string, List<FieldSelection>> fragmentGroupedFieldSet = CollectFields(
+                FieldCollectionResult fragmentResult = CollectFields(
                     schema,
                     document,
                     objectDefinition,
@@ -101,7 +123,7 @@ public class DefaultFieldCollector : IFieldCollector
                     coercedVariableValues,
                     visitedFragments);
 
-                foreach (KeyValuePair<string, List<FieldSelection>> fragmentGroup in fragmentGroupedFieldSet)
+                foreach (KeyValuePair<string, List<FieldSelection>> fragmentGroup in fragmentResult.Fields)
                 {
                     string responseKey = fragmentGroup.Key;
 
@@ -109,6 +131,25 @@ public class DefaultFieldCollector : IFieldCollector
                         groupedFields[responseKey] = new List<FieldSelection>();
 
                     groupedFields[responseKey].AddRange(fragmentGroup.Value);
+
+                    // Merge fragment metadata if any
+                    if (fragmentResult.FieldMetadata?.TryGetValue(responseKey, out var fragmentMetadata) == true)
+                    {
+                        if (fieldMetadata.TryGetValue(responseKey, out var existingMetadata))
+                        {
+                            // Merge metadata - fragment metadata takes precedence
+                            var mergedMetadata = new Dictionary<string, object>(existingMetadata);
+                            foreach (var (key, value) in fragmentMetadata)
+                            {
+                                mergedMetadata[key] = value;
+                            }
+                            fieldMetadata[responseKey] = mergedMetadata;
+                        }
+                        else
+                        {
+                            fieldMetadata[responseKey] = fragmentMetadata;
+                        }
+                    }
                 }
             }
 
@@ -121,7 +162,7 @@ public class DefaultFieldCollector : IFieldCollector
                     continue;
 
                 SelectionSet fragmentSelectionSet = inlineFragment.SelectionSet;
-                IReadOnlyDictionary<string, List<FieldSelection>> fragmentGroupedFieldSet = CollectFields(
+                FieldCollectionResult fragmentResult = CollectFields(
                     schema,
                     document,
                     objectDefinition,
@@ -129,7 +170,7 @@ public class DefaultFieldCollector : IFieldCollector
                     coercedVariableValues,
                     visitedFragments);
 
-                foreach (KeyValuePair<string, List<FieldSelection>> fragmentGroup in fragmentGroupedFieldSet)
+                foreach (KeyValuePair<string, List<FieldSelection>> fragmentGroup in fragmentResult.Fields)
                 {
                     string responseKey = fragmentGroup.Key;
 
@@ -137,11 +178,54 @@ public class DefaultFieldCollector : IFieldCollector
                         groupedFields[responseKey] = new List<FieldSelection>();
 
                     groupedFields[responseKey].AddRange(fragmentGroup.Value);
+
+                    // Merge fragment metadata if any, including directive metadata from inline fragment
+                    var combinedMetadata = new Dictionary<string, object>();
+
+                    // Add directive metadata from the inline fragment itself
+                    if (selectionMetadata.Any())
+                    {
+                        foreach (var (key, value) in selectionMetadata)
+                        {
+                            combinedMetadata[key] = value;
+                        }
+                    }
+
+                    // Add metadata from fields within the fragment
+                    if (fragmentResult.FieldMetadata?.TryGetValue(responseKey, out var fragmentMetadata) == true)
+                    {
+                        foreach (var (key, value) in fragmentMetadata)
+                        {
+                            combinedMetadata[key] = value;
+                        }
+                    }
+
+                    if (combinedMetadata.Any())
+                    {
+                        if (fieldMetadata.TryGetValue(responseKey, out var existingMetadata))
+                        {
+                            // Merge with existing metadata
+                            var mergedMetadata = new Dictionary<string, object>(existingMetadata);
+                            foreach (var (key, value) in combinedMetadata)
+                            {
+                                mergedMetadata[key] = value;
+                            }
+                            fieldMetadata[responseKey] = mergedMetadata;
+                        }
+                        else
+                        {
+                            fieldMetadata[responseKey] = combinedMetadata;
+                        }
+                    }
                 }
             }
         }
 
-        return groupedFields;
+        return new FieldCollectionResult
+        {
+            Fields = groupedFields,
+            FieldMetadata = fieldMetadata.Any() ? fieldMetadata : null
+        };
     }
 
     private static bool DoesFragmentTypeApply(ObjectDefinition objectDefinition, TypeDefinition? fragmentType)

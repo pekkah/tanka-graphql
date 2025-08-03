@@ -24,12 +24,12 @@ public record DirectiveResult
     /// Whether to include this selection in the result
     /// </summary>
     public bool Include { get; init; } = true;
-    
+
     /// <summary>
     /// Whether this directive was handled by this handler
     /// </summary>
     public bool Handled { get; init; } = true;
-    
+
     /// <summary>
     /// Additional metadata to attach to the selection (for @defer/@stream)
     /// </summary>

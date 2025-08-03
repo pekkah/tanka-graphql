@@ -220,5 +220,6 @@ public record QueryContext
         public IArgumentBinderFeature? ArgumentBinder;
         public IResponseStreamFeature? Response;
         public IRequestServicesFeature? RequestServices;
+        public IIncrementalDeliveryFeature? IncrementalDelivery;
     }
 }
