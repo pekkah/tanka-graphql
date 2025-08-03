@@ -135,8 +135,7 @@ public class DeferStreamIntegrationFacts
             .Build();
 
         var services = new ServiceCollection();
-        services.AddDefaultTankaGraphQLServices();
-        services.AddSingleton<IFieldCollector, DefaultFieldCollector>();
+        services.AddDefaultTankaGraphQLServices(); // Add default services (includes IFieldCollector, skip/include)
         services.AddDeferDirective(); // Only need @defer for this test
         var serviceProvider = services.BuildServiceProvider();
 
