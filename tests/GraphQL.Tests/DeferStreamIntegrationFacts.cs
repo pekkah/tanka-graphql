@@ -206,4 +206,92 @@ public class DeferStreamIntegrationFacts
         public string email { get; init; } = "";
         public string bio { get; init; } = "";
     }
+
+    [Fact]
+    public async Task Should_support_defer_with_variable_label()
+    {
+        // Given - Schema with deferred field
+        var schema = await new ExecutableSchemaBuilder()
+            .AddIncrementalDeliveryDirectives()
+            .Add("Query", new()
+            {
+                { "user: User", b => b.ResolveAs(new UserModel { id = "1", name = "John Doe" }) }
+            })
+            .Add("User", new()
+            {
+                { "id: ID!", b => b.ResolveAsPropertyOf<UserModel>(u => u.id) },
+                { "name: String!", b => b.ResolveAsPropertyOf<UserModel>(u => u.name) },
+                { "profile: Profile", b => b.ResolveAs(new ProfileModel { email = "john@example.com", bio = "Software Developer" }) }
+            })
+            .Add("Profile", new()
+            {
+                { "email: String", b => b.ResolveAsPropertyOf<ProfileModel>(p => p.email) },
+                { "bio: String", b => b.ResolveAsPropertyOf<ProfileModel>(p => p.bio) }
+            })
+            .Build();
+
+        var services = new ServiceCollection();
+        services.AddDefaultTankaGraphQLServices();
+        services.AddIncrementalDeliveryDirectives();
+        var serviceProvider = services.BuildServiceProvider();
+
+        ExecutableDocument query = """
+            query($deferLabel: String!) {
+                user {
+                    id
+                    name
+                    ... @defer(label: $deferLabel) {
+                        profile {
+                            email
+                            bio
+                        }
+                    }
+                }
+            }
+            """;
+
+        var variables = new Dictionary<string, object?>
+        {
+            ["deferLabel"] = "profileData"
+        };
+
+        // When - Execute as streaming operation with variables
+        var executor = new Executor(new ExecutorOptions { Schema = schema, ServiceProvider = serviceProvider });
+        var stream = executor.ExecuteOperation(new QueryContext
+        {
+            Request = new GraphQLRequest { Query = query, Variables = variables }
+        });
+
+        // Then - Should return streaming results with variable label
+        await stream.ShouldMatchStreamJson("""
+            {
+                "results": [
+                    {
+                        "data": {
+                            "user": {
+                                "id": "1",
+                                "name": "John Doe"
+                            }
+                        },
+                        "hasNext": true
+                    },
+                    {
+                        "incremental": [
+                            {
+                                "label": "profileData",
+                                "path": ["user"],
+                                "data": {
+                                    "profile": {
+                                        "email": "john@example.com",
+                                        "bio": "Software Developer"
+                                    }
+                                }
+                            }
+                        ],
+                        "hasNext": false
+                    }
+                ]
+            }
+            """);
+    }
 }

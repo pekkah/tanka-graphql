@@ -92,7 +92,7 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
             {
                 // Register deferred work
                 var deferDirective = (Directive)metadata["defer"];
-                var label = GetDirectiveArgumentValue(deferDirective, "label") as string;
+                var label = GetDirectiveArgumentValue(deferDirective, "label", context.CoercedVariableValues) as string;
 
                 incrementalFeature.RegisterDeferredWork(label, path, async () =>
                 {
@@ -157,10 +157,19 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
         return responseMap;
     }
 
-    private static object? GetDirectiveArgumentValue(Directive directive, string argumentName)
+    private static object? GetDirectiveArgumentValue(Directive directive, string argumentName, IReadOnlyDictionary<string, object?>? coercedVariableValues)
     {
         var argument = directive.Arguments?.FirstOrDefault(a => a.Name.Value == argumentName);
-        return argument?.Value switch
+        if (argument is null) return null;
+
+        if (argument.Value is Variable variable) 
+        {
+            return coercedVariableValues is not null && coercedVariableValues.TryGetValue(variable.Name, out var value)
+                ? value
+                : null;
+        }
+
+        return argument.Value switch
         {
             StringValue stringValue => stringValue.ToString(),
             IntValue intValue => intValue.Value,

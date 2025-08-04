@@ -91,12 +91,24 @@ public partial class Executor
         };
 
         // Stream the deferred results
-        await foreach (var incrementalPayload in incrementalFeature.GetDeferredResults(cancellationToken))
+        await using var enumerator = incrementalFeature.GetDeferredResults(cancellationToken).GetAsyncEnumerator(cancellationToken);
+        if (await enumerator.MoveNextAsync())
         {
+            var current = enumerator.Current;
+            while (await enumerator.MoveNextAsync())
+            {
+                yield return new ExecutionResult
+                {
+                    Incremental = new[] { current },
+                    HasNext = true
+                };
+                current = enumerator.Current;
+            }
+            // Last payload with HasNext = false
             yield return new ExecutionResult
             {
-                Incremental = new[] { incrementalPayload },
-                HasNext = false // For now, assume each incremental payload is the last one
+                Incremental = new[] { current },
+                HasNext = false
             };
         }
     }
