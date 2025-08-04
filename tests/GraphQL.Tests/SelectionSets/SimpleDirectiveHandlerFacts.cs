@@ -18,13 +18,14 @@ public class SimpleDirectiveHandlerFacts
         // Given
         var handler = new SkipDirectiveHandler();
 
-        // When - test with wrong directive name
-        var wrongDirective = new Directive("include", null, null);
-        var context = CreateContext(wrongDirective);
+        // When - test with correct directive name
+        var skipDirective = new Directive("skip", null, null);
+        var context = CreateContext(skipDirective);
         var result = handler.Handle(context);
 
         // Then
-        Assert.False(result.Handled);
+        Assert.True(result.Handled);
+        Assert.True(result.Include); // No 'if' argument means don't skip
     }
 
     [Fact]
@@ -33,13 +34,14 @@ public class SimpleDirectiveHandlerFacts
         // Given
         var handler = new IncludeDirectiveHandler();
 
-        // When - test with wrong directive name
-        var wrongDirective = new Directive("skip", null, null);
-        var context = CreateContext(wrongDirective);
+        // When - test with correct directive name
+        var includeDirective = new Directive("include", null, null);
+        var context = CreateContext(includeDirective);
         var result = handler.Handle(context);
 
         // Then
-        Assert.False(result.Handled);
+        Assert.True(result.Handled);
+        Assert.True(result.Include); // No 'if' argument means include
     }
 
     [Fact]

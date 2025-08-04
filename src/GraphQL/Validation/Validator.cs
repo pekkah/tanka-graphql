@@ -10,7 +10,7 @@ public interface IAsyncValidator
         ISchema schema,
         ExecutableDocument document,
         IReadOnlyDictionary<string, object?>? variables);
-        
+
     ValueTask<ValidationResult> Validate(
         ISchema schema,
         ExecutableDocument document,
@@ -34,7 +34,7 @@ public class AsyncValidator : IAsyncValidator
     {
         return Validate(schema, document, variables, null);
     }
-    
+
     public ValueTask<ValidationResult> Validate(
         ISchema schema,
         ExecutableDocument document,

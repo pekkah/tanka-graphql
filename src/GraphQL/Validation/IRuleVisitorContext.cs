@@ -12,7 +12,7 @@ public interface IRuleVisitorContext
     TypeTracker Tracker { get; }
 
     IReadOnlyDictionary<string, object?>? VariableValues { get; }
-    
+
     IServiceProvider? RequestServices { get; }
 
     void Error(string code, string message, params INode[] nodes);
