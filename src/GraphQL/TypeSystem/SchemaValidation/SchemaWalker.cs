@@ -11,7 +11,7 @@ public class SchemaWalker
     {
         _result = new SchemaValidationResult();
         _rules = rules.ToList();
-        
+
         // Set up error reporting for each rule
         foreach (var rule in _rules)
         {

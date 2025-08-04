@@ -290,7 +290,7 @@ directive @oneOf on INPUT_OBJECT
         {
             var validator = new SchemaValidator(options.SchemaValidationRules);
             var validationResult = validator.Validate(typeDefinitions);
-            
+
             if (!validationResult.IsValid)
             {
                 throw new SchemaValidationException(validationResult.Errors);

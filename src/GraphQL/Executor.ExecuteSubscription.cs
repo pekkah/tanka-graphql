@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic.FileIO;
 
 using Tanka.GraphQL.Features;
@@ -49,13 +50,15 @@ public partial class Executor
         ArgumentNullException.ThrowIfNull(context.Schema.Subscription);
 
         ObjectDefinition? subscriptionType = context.Schema.Subscription;
-        IReadOnlyDictionary<string, List<FieldSelection>> groupedFieldSet = FieldCollector.CollectFields(
+        var fieldCollector = context.RequestServices.GetRequiredService<IFieldCollector>();
+        var collectionResult = fieldCollector.CollectFields(
             context.Schema,
             context.Request.Query,
             subscriptionType,
             context.OperationDefinition.SelectionSet,
             context.CoercedVariableValues
         );
+        IReadOnlyDictionary<string, List<FieldSelection>> groupedFieldSet = collectionResult.Fields;
 
         List<FieldSelection> fields = groupedFieldSet.Values.First();
         FieldSelection fieldSelection = fields.First();

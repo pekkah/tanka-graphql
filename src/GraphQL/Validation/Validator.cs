@@ -10,6 +10,12 @@ public interface IAsyncValidator
         ISchema schema,
         ExecutableDocument document,
         IReadOnlyDictionary<string, object?>? variables);
+
+    ValueTask<ValidationResult> Validate(
+        ISchema schema,
+        ExecutableDocument document,
+        IReadOnlyDictionary<string, object?>? variables,
+        IServiceProvider? requestServices);
 }
 
 public class AsyncValidatorOptions
@@ -26,11 +32,21 @@ public class AsyncValidator : IAsyncValidator
         ExecutableDocument document,
         IReadOnlyDictionary<string, object?>? variables)
     {
+        return Validate(schema, document, variables, null);
+    }
+
+    public ValueTask<ValidationResult> Validate(
+        ISchema schema,
+        ExecutableDocument document,
+        IReadOnlyDictionary<string, object?>? variables,
+        IServiceProvider? requestServices)
+    {
         var visitor = new RulesWalker(
             _optionsMonitor.Value.Rules,
             schema,
             document,
-            variables);
+            variables,
+            requestServices);
 
         return new(visitor.Validate());
     }

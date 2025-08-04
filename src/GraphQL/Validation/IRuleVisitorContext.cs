@@ -13,6 +13,8 @@ public interface IRuleVisitorContext
 
     IReadOnlyDictionary<string, object?>? VariableValues { get; }
 
+    IServiceProvider? RequestServices { get; }
+
     void Error(string code, string message, params INode[] nodes);
 
     void Error(string code, string message, INode node);

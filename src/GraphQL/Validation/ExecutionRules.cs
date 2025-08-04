@@ -1,4 +1,6 @@
-﻿using Tanka.GraphQL.Language;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Request;
@@ -182,12 +184,28 @@ public static class ExecutionRules
                     var selectionSet = subscription.SelectionSet;
                     var variableValues = new Dictionary<string, object?>();
 
-                    var groupedFieldSet = FieldCollector.CollectFields(
+                    // Use IFieldCollector from services, with fallback for legacy validation tests
+                    IFieldCollector fieldCollector;
+                    if (context.RequestServices != null)
+                    {
+                        fieldCollector = context.RequestServices.GetRequiredService<IFieldCollector>();
+                    }
+                    else
+                    {
+                        // Fallback for validation tests that don't use the full pipeline
+                        var services = new ServiceCollection();
+                        services.AddKeyedSingleton<IDirectiveHandler>("skip", new SkipDirectiveHandler());
+                        services.AddKeyedSingleton<IDirectiveHandler>("include", new IncludeDirectiveHandler());
+                        using var serviceProvider = services.BuildServiceProvider();
+                        fieldCollector = new DefaultFieldCollector(serviceProvider);
+                    }
+                    var collectionResult = fieldCollector.CollectFields(
                         schema,
                         context.Document,
                         subscriptionType,
                         selectionSet,
                         variableValues);
+                    var groupedFieldSet = collectionResult.Fields;
 
                     if (groupedFieldSet.Count != 1)
                         context.Error(
