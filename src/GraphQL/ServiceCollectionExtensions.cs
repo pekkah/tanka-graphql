@@ -68,9 +68,9 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection</param>
     /// <param name="directiveName">The name of the directive (without @ symbol)</param>
     public static IServiceCollection AddDirectiveHandler<THandler>(this IServiceCollection services, string directiveName)
-        where THandler : class, IDirectiveHandler, new()
+        where THandler : class, IDirectiveHandler
     {
-        services.AddKeyedSingleton<IDirectiveHandler>(directiveName, new THandler());
+        services.AddKeyedSingleton<IDirectiveHandler, THandler>(directiveName);
         return services;
     }
 
