@@ -15,11 +15,13 @@ public class RulesWalker : Visitor, IRuleVisitorContext
         IEnumerable<CombineRule> rules,
         ISchema schema,
         ExecutableDocument document,
-        IReadOnlyDictionary<string, object?>? variableValues = null)
+        IReadOnlyDictionary<string, object?>? variableValues = null,
+        IServiceProvider? requestServices = null)
     {
         Schema = schema;
         Document = document;
         VariableValues = variableValues;
+        RequestServices = requestServices;
         Tracker = new TypeTracker(Schema);
         CreateVisitors(rules);
     }
@@ -33,6 +35,8 @@ public class RulesWalker : Visitor, IRuleVisitorContext
     public ExtensionData Extensions { get; } = new();
 
     public ISchema Schema { get; }
+
+    public IServiceProvider? RequestServices { get; }
 
     public void Error(string code, string message, params INode[] nodes)
     {

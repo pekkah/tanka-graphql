@@ -187,7 +187,9 @@ public static class ExecutionRules
                         context.Document,
                         subscriptionType,
                         selectionSet,
-                        variableValues);
+                        variableValues,
+                        null, // visitedFragments
+                        context); // Pass validation context for services
 
                     if (groupedFieldSet.Count != 1)
                         context.Error(

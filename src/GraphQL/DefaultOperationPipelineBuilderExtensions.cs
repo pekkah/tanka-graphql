@@ -119,7 +119,7 @@ public static class DefaultOperationDelegateBuilderExtensions
         builder.Use(next => async context =>
         {
             ValidationResult result =
-                await validator.Validate(context.Schema, context.Request.Query, context.Request.Variables);
+                await validator.Validate(context.Schema, context.Request.Query, context.Request.Variables, context.RequestServices);
 
             if (!result.IsValid)
             {
