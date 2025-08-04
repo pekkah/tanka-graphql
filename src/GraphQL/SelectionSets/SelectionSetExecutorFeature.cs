@@ -162,20 +162,21 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
         var argument = directive.Arguments?.FirstOrDefault(a => a.Name.Value == argumentName);
         if (argument is null) return null;
 
-        if (argument.Value is Variable variable) 
+        switch (argument.Value)
         {
-            return coercedVariableValues is not null && coercedVariableValues.TryGetValue(variable.Name, out var value)
-                ? value
-                : null;
+            case { Kind: NodeKind.StringValue }:
+                return ((StringValue)argument.Value).ToString();
+            case { Kind: NodeKind.IntValue }:
+                return ((IntValue)argument.Value).Value;
+            case { Kind: NodeKind.BooleanValue }:
+                return ((BooleanValue)argument.Value).Value;
+            case { Kind: NodeKind.Variable }:
+                var variable = (Variable)argument.Value;
+                var variableValue = coercedVariableValues?[variable.Name];
+                return variableValue; // Return the coerced variable value as-is
+            default:
+                return null;
         }
-
-        return argument.Value switch
-        {
-            StringValue stringValue => stringValue.ToString(),
-            IntValue intValue => intValue.Value,
-            BooleanValue boolValue => boolValue.Value,
-            _ => null
-        };
     }
 
     public static Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(
