@@ -86,56 +86,99 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
 
         foreach (var (responseKey, fields) in collectionResult.Fields)
         {
-            // Check if this field is deferred
-            if (collectionResult.FieldMetadata?.TryGetValue(responseKey, out var metadata) == true &&
-                metadata.ContainsKey("defer"))
+            // Check if this field has incremental delivery directives
+            if (collectionResult.FieldMetadata?.TryGetValue(responseKey, out var metadata) == true)
             {
-                // Register deferred work
-                var deferDirective = (Directive)metadata["defer"];
-                var label = GetDirectiveArgumentValue(deferDirective, "label", context.CoercedVariableValues) as string;
-
-                incrementalFeature.RegisterDeferredWork(label, path, async () =>
+                if (metadata.ContainsKey("defer"))
                 {
+                    // Register deferred work
+                    var deferDirective = (Directive)metadata["defer"];
+                    var label = GetDirectiveArgumentValue(deferDirective, "label", context.CoercedVariableValues) as string;
+
+                    incrementalFeature.RegisterDeferredWork(label, path, async () =>
+                    {
+                        try
+                        {
+                            var fieldResult = await context.ExecuteField(
+                                objectType,
+                                objectValue,
+                                fields,
+                                path.Fork());
+
+                            var data = new Dictionary<string, object?>();
+                            if (fieldResult != null)
+                                data[responseKey] = fieldResult;
+
+                            return new IncrementalPayload
+                            {
+                                Label = label,
+                                Path = path,
+                                Data = data
+                            };
+                        }
+                        catch (Exception ex)
+                        {
+                            return new IncrementalPayload
+                            {
+                                Label = label,
+                                Path = path,
+                                Errors = new[]
+                                {
+                                    new ExecutionError
+                                    {
+                                        Message = ex.Message,
+                                        Path = path.Append(responseKey).Segments.ToArray()
+                                    }
+                                }
+                            };
+                        }
+                    });
+                }
+                else if (metadata.ContainsKey("stream"))
+                {
+                    // Handle @stream directive - for now execute normally
+                    // TODO: Implement proper streaming of list items
+                    // @stream requires different handling as it streams individual list items
+                    // rather than deferring the entire field
                     try
                     {
-                        var fieldResult = await context.ExecuteField(
+                        var completedValue = await context.ExecuteField(
                             objectType,
                             objectValue,
                             fields,
                             path.Fork());
 
-                        var data = new Dictionary<string, object?>();
-                        if (fieldResult != null)
-                            data[responseKey] = fieldResult;
-
-                        return new IncrementalPayload
-                        {
-                            Label = label,
-                            Path = path,
-                            Data = data
-                        };
+                        responseMap[responseKey] = completedValue;
                     }
-                    catch (Exception ex)
+                    catch (FieldException e)
                     {
-                        return new IncrementalPayload
-                        {
-                            Label = label,
-                            Path = path,
-                            Errors = new[]
-                            {
-                                new ExecutionError
-                                {
-                                    Message = ex.Message,
-                                    Path = path.Append(responseKey).Segments.ToArray()
-                                }
-                            }
-                        };
+                        responseMap[responseKey] = null;
+                        context.AddError(e);
                     }
-                });
+                }
+                else
+                {
+                    // No incremental delivery directives, execute normally
+                    try
+                    {
+                        var completedValue = await context.ExecuteField(
+                            objectType,
+                            objectValue,
+                            fields,
+                            path.Fork());
+
+                        responseMap[responseKey] = completedValue;
+                    }
+                    catch (FieldException e)
+                    {
+                        responseMap[responseKey] = null;
+                        context.AddError(e);
+                    }
+                }
             }
             else
             {
-                // Execute field immediately
+                // No metadata, execute field immediately
                 try
                 {
                     var completedValue = await context.ExecuteField(
