@@ -9,9 +9,6 @@ public class SkipDirectiveHandler : IDirectiveHandler
 {
     public DirectiveResult Handle(DirectiveContext context)
     {
-        if (context.Directive.Name.Value != "skip")
-            return new DirectiveResult { Handled = false };
-
         if (context.Directive.Arguments == null)
             return new DirectiveResult { Include = true };
 
@@ -40,9 +37,6 @@ public class IncludeDirectiveHandler : IDirectiveHandler
 {
     public DirectiveResult Handle(DirectiveContext context)
     {
-        if (context.Directive.Name.Value != "include")
-            return new DirectiveResult { Handled = false };
-
         if (context.Directive.Arguments == null)
             return new DirectiveResult { Include = true };
 

@@ -9,9 +9,6 @@ public class DeferDirectiveHandler : IDirectiveHandler
 {
     public DirectiveResult Handle(DirectiveContext context)
     {
-        if (context.Directive.Name.Value != "defer")
-            return new DirectiveResult { Handled = false };
-
         // Check for 'if' argument first
         if (context.Directive.Arguments != null)
         {
@@ -56,9 +53,6 @@ public class StreamDirectiveHandler : IDirectiveHandler
 {
     public DirectiveResult Handle(DirectiveContext context)
     {
-        if (context.Directive.Name.Value != "stream")
-            return new DirectiveResult { Handled = false };
-
         // Check for 'if' argument first
         if (context.Directive.Arguments != null)
         {
