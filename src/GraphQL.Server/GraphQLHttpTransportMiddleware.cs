@@ -67,25 +67,153 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
 
         if (await enumerator.MoveNextAsync())
         {
-            ExecutionResult initialResult = enumerator.Current;
+            ExecutionResult firstResult = enumerator.Current;
 
+            // Check if there are more results
             if (await enumerator.MoveNextAsync())
             {
-                Log.MultipleResultsError(logger);
-                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
+                if (SupportsMultipart(httpContext.Request, logger))
                 {
-                    Title = "HttpTransport does not support multiple execution results"
-                });
-
+                    Log.MultipartStreamingStarted(logger);
+                    // Stream all results using the existing enumerator
+                    await WriteMultipartStreamingResponse(httpContext.Response, firstResult, enumerator, context.RequestCancelled, logger);
+                    Log.MultipartStreamingCompleted(logger);
+                }
+                else
+                {
+                    // Legacy behavior - reject multiple results
+                    Log.MultipleResultsError(logger);
+                    httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
+                    {
+                        Title = "HttpTransport does not support multiple execution results"
+                    });
+                }
                 return;
             }
 
-            string elapsed = $"{Stopwatch.GetElapsedTime(started).TotalMilliseconds}ms";
-            httpContext.Response.Headers["Elapsed"] = new StringValues(elapsed);
-            await httpContext.Response.WriteAsJsonAsync(initialResult);
-            Log.ExecutionResult(logger, initialResult, elapsed);
+            // Single result - normal response
+            await WriteSingleResponse(httpContext.Response, firstResult, started);
         }
+    }
+
+    private static bool SupportsMultipart(HttpRequest request, ILogger<GraphQLHttpTransportMiddleware> logger)
+    {
+        // Check Accept header for multipart/mixed support
+        var acceptHeader = request.Headers.Accept.ToString();
+        bool supportsMultipart = acceptHeader.Contains("multipart/mixed", StringComparison.OrdinalIgnoreCase) ||
+                                acceptHeader.Contains("deferSpec=20220824", StringComparison.OrdinalIgnoreCase);
+        
+        Log.MultipartSupportDetection(logger, supportsMultipart, acceptHeader);
+        return supportsMultipart;
+    }
+
+    private static async Task WriteSingleResponse(HttpResponse httpResponse, ExecutionResult result, long started)
+    {
+        string elapsed = $"{Stopwatch.GetElapsedTime(started).TotalMilliseconds}ms";
+        httpResponse.Headers["Elapsed"] = new StringValues(elapsed);
+        await httpResponse.WriteAsJsonAsync(result);
+    }
+
+    private static async Task WriteMultipartStreamingResponse(
+        HttpResponse httpResponse,
+        ExecutionResult firstResult,
+        IAsyncEnumerator<ExecutionResult> enumerator,
+        CancellationToken cancellationToken,
+        ILogger<GraphQLHttpTransportMiddleware> logger)
+    {
+        const string boundary = "graphql-response";
+        httpResponse.ContentType = $"multipart/mixed; boundary={boundary}";
+        
+        // Let ASP.NET Core handle chunked encoding automatically - don't set it manually
+        
+        await using var writer = new StreamWriter(httpResponse.Body);
+
+        int chunkCount = 0;
+        var streamingStarted = Stopwatch.GetTimestamp();
+        
+        // Write first result with hasNext = true (no data generation time since it's already available)
+        chunkCount++;
+        var chunkTotalStarted = Stopwatch.GetTimestamp();
+        var chunkStarted = Stopwatch.GetTimestamp();
+        Log.MultipartChunkWriting(logger, chunkCount, hasNext: true);
+        await WriteMultipartChunk(writer, boundary, firstResult, hasNext: true, cancellationToken);
+        await writer.FlushAsync(cancellationToken); // Flush immediately for streaming
+        var chunkElapsed = Stopwatch.GetElapsedTime(chunkStarted);
+        var chunkTotalElapsed = Stopwatch.GetElapsedTime(chunkTotalStarted);
+        Log.MultipartChunkSerialized(logger, chunkCount, chunkElapsed.TotalMilliseconds);
+        Log.MultipartChunkTotalTime(logger, chunkCount, chunkTotalElapsed.TotalMilliseconds);
+
+        // Stream remaining results (enumerator is already positioned at second result)
+        var current = enumerator.Current;
+        
+        while (true)
+        {
+            // Start timing the entire chunk (data generation + serialization)
+            chunkTotalStarted = Stopwatch.GetTimestamp();
+            
+            // Measure time to generate next result (the @defer data generation)
+            var dataGenerationStarted = Stopwatch.GetTimestamp();
+            bool hasMoreData = await enumerator.MoveNextAsync();
+            if (!hasMoreData) break;
+            
+            var dataGenerationElapsed = Stopwatch.GetElapsedTime(dataGenerationStarted);
+            Log.MultipartDataGenerated(logger, chunkCount + 1, dataGenerationElapsed.TotalMilliseconds);
+            
+            // Write current result with hasNext = true
+            chunkCount++;
+            chunkStarted = Stopwatch.GetTimestamp();
+            Log.MultipartChunkWriting(logger, chunkCount, hasNext: true);
+            await WriteMultipartChunk(writer, boundary, current, hasNext: true, cancellationToken);
+            await writer.FlushAsync(cancellationToken); // Flush immediately for streaming
+            chunkElapsed = Stopwatch.GetElapsedTime(chunkStarted);
+            chunkTotalElapsed = Stopwatch.GetElapsedTime(chunkTotalStarted);
+            Log.MultipartChunkSerialized(logger, chunkCount, chunkElapsed.TotalMilliseconds);
+            Log.MultipartChunkTotalTime(logger, chunkCount, chunkTotalElapsed.TotalMilliseconds);
+            current = enumerator.Current;
+        }
+        
+        // Write final result with hasNext = false
+        chunkCount++;
+        chunkTotalStarted = Stopwatch.GetTimestamp();
+        chunkStarted = Stopwatch.GetTimestamp();
+        Log.MultipartChunkWriting(logger, chunkCount, hasNext: false);
+        await WriteMultipartChunk(writer, boundary, current, hasNext: false, cancellationToken);
+        chunkElapsed = Stopwatch.GetElapsedTime(chunkStarted);
+        chunkTotalElapsed = Stopwatch.GetElapsedTime(chunkTotalStarted);
+        Log.MultipartChunkSerialized(logger, chunkCount, chunkElapsed.TotalMilliseconds);
+        Log.MultipartChunkTotalTime(logger, chunkCount, chunkTotalElapsed.TotalMilliseconds);
+        
+        // Close multipart boundary
+        await writer.WriteAsync($"\r\n--{boundary}--\r\n");
+        await writer.FlushAsync();
+        
+        var totalElapsed = Stopwatch.GetElapsedTime(streamingStarted);
+        Log.MultipartStreamingStats(logger, chunkCount, totalElapsed.TotalMilliseconds);
+    }
+
+    private static async Task WriteMultipartChunk(
+        StreamWriter writer, 
+        string boundary, 
+        ExecutionResult result, 
+        bool hasNext,
+        CancellationToken cancellationToken)
+    {
+        await writer.WriteAsync($"\r\n--{boundary}\r\n");
+        await writer.WriteAsync("Content-Type: application/json; charset=utf-8\r\n\r\n");
+        
+        // Ensure hasNext is set correctly
+        var responseWithNext = new ExecutionResult
+        {
+            Data = result.Data,
+            Errors = result.Errors,
+            Extensions = result.Extensions,
+            Incremental = result.Incremental,
+            HasNext = hasNext
+        };
+        
+        var json = JsonSerializer.Serialize(responseWithNext);
+        await writer.WriteAsync(json);
     }
 
     private static partial class Log
@@ -104,5 +232,29 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
 
         [LoggerMessage(3002, LogLevel.Error, "Could not parse GraphQL HTTP request. Error while parsing json.")]
         public static partial void RequestParseError(ILogger logger, Exception x);
+
+        [LoggerMessage(4001, LogLevel.Information, "Starting multipart streaming response for @defer/@stream")]
+        public static partial void MultipartStreamingStarted(ILogger logger);
+
+        [LoggerMessage(4002, LogLevel.Information, "Multipart streaming response completed successfully")]
+        public static partial void MultipartStreamingCompleted(ILogger logger);
+
+        [LoggerMessage(4003, LogLevel.Debug, "Writing multipart chunk {chunkNumber} (hasNext: {hasNext})")]
+        public static partial void MultipartChunkWriting(ILogger logger, int chunkNumber, bool hasNext);
+
+        [LoggerMessage(4004, LogLevel.Information, "Multipart streaming completed: {totalChunks} chunks sent in {totalElapsedMs}ms")]
+        public static partial void MultipartStreamingStats(ILogger logger, int totalChunks, double totalElapsedMs);
+
+        [LoggerMessage(4005, LogLevel.Debug, "Multipart support detection: {supportsMultipart} (Accept: {acceptHeader})")]
+        public static partial void MultipartSupportDetection(ILogger logger, bool supportsMultipart, string acceptHeader);
+
+        [LoggerMessage(4006, LogLevel.Debug, "Multipart chunk {chunkNumber} serialized in {elapsedMs}ms")]
+        public static partial void MultipartChunkSerialized(ILogger logger, int chunkNumber, double elapsedMs);
+
+        [LoggerMessage(4007, LogLevel.Information, "@defer data for chunk {chunkNumber} generated in {elapsedMs}ms")]
+        public static partial void MultipartDataGenerated(ILogger logger, int chunkNumber, double elapsedMs);
+
+        [LoggerMessage(4008, LogLevel.Information, "Chunk {chunkNumber} total time: {elapsedMs}ms")]
+        public static partial void MultipartChunkTotalTime(ILogger logger, int chunkNumber, double elapsedMs);
     }
 }
