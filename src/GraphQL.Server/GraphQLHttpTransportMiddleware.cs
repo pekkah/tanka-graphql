@@ -203,14 +203,7 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
         await writer.WriteAsync("Content-Type: application/json; charset=utf-8\r\n\r\n");
         
         // Ensure hasNext is set correctly
-        var responseWithNext = new ExecutionResult
-        {
-            Data = result.Data,
-            Errors = result.Errors,
-            Extensions = result.Extensions,
-            Incremental = result.Incremental,
-            HasNext = hasNext
-        };
+        var responseWithNext = result with { HasNext = hasNext };
         
         var json = JsonSerializer.Serialize(responseWithNext);
         await writer.WriteAsync(json);
