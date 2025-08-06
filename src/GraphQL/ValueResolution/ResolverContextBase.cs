@@ -21,6 +21,11 @@ public class ResolverContextBase
 
     public required QueryContext QueryContext { get; set; }
 
+    /// <summary>
+    ///     Metadata for the field being resolved (e.g., defer/stream directives)
+    /// </summary>
+    public Dictionary<string, object>? FieldMetadata { get; set; }
+
     public ISchema Schema => QueryContext.Schema;
 
     public string FieldName => Selection.Name.Value;

@@ -164,14 +164,16 @@ public record QueryContext
     /// <param name="objectValue"></param>
     /// <param name="fields"></param>
     /// <param name="path"></param>
+    /// <param name="fieldMetadata">Optional metadata for the field (e.g., defer/stream directives)</param>
     /// <returns></returns>
     public Task<object?> ExecuteField(ObjectDefinition objectDefinition,
         object? objectValue,
         IReadOnlyCollection<FieldSelection> fields,
-        NodePath path)
+        NodePath path,
+        IReadOnlyDictionary<string, object>? fieldMetadata = null)
     {
         ArgumentNullException.ThrowIfNull(FieldExecutorFeature);
-        return FieldExecutorFeature.Execute(this, objectDefinition, objectValue, fields, path);
+        return FieldExecutorFeature.Execute(this, objectDefinition, objectValue, fields, path, fieldMetadata);
     }
 
     /// <summary>

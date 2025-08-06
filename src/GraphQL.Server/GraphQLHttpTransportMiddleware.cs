@@ -97,13 +97,13 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
         }
     }
 
-    private static bool SupportsMultipart(HttpRequest request, ILogger<GraphQLHttpTransportMiddleware> logger)
+    internal static bool SupportsMultipart(HttpRequest request, ILogger<GraphQLHttpTransportMiddleware> logger)
     {
         // Check Accept header for multipart/mixed support
         var acceptHeader = request.Headers.Accept.ToString();
         bool supportsMultipart = acceptHeader.Contains("multipart/mixed", StringComparison.OrdinalIgnoreCase) ||
                                 acceptHeader.Contains("deferSpec=20220824", StringComparison.OrdinalIgnoreCase);
-        
+
         Log.MultipartSupportDetection(logger, supportsMultipart, acceptHeader);
         return supportsMultipart;
     }
@@ -115,7 +115,7 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
         await httpResponse.WriteAsJsonAsync(result);
     }
 
-    private static async Task WriteMultipartStreamingResponse(
+    internal static async Task WriteMultipartStreamingResponse(
         HttpResponse httpResponse,
         ExecutionResult firstResult,
         IAsyncEnumerator<ExecutionResult> enumerator,
@@ -124,14 +124,14 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
     {
         const string boundary = "graphql-response";
         httpResponse.ContentType = $"multipart/mixed; boundary={boundary}";
-        
+
         // Let ASP.NET Core handle chunked encoding automatically - don't set it manually
-        
+
         await using var writer = new StreamWriter(httpResponse.Body);
 
         int chunkCount = 0;
         var streamingStarted = Stopwatch.GetTimestamp();
-        
+
         // Write first result with hasNext = true (no data generation time since it's already available)
         chunkCount++;
         var chunkTotalStarted = Stopwatch.GetTimestamp();
@@ -146,20 +146,20 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
 
         // Stream remaining results (enumerator is already positioned at second result)
         var current = enumerator.Current;
-        
+
         while (true)
         {
             // Start timing the entire chunk (data generation + serialization)
             chunkTotalStarted = Stopwatch.GetTimestamp();
-            
+
             // Measure time to generate next result (the @defer data generation)
             var dataGenerationStarted = Stopwatch.GetTimestamp();
             bool hasMoreData = await enumerator.MoveNextAsync();
             if (!hasMoreData) break;
-            
+
             var dataGenerationElapsed = Stopwatch.GetElapsedTime(dataGenerationStarted);
             Log.MultipartDataGenerated(logger, chunkCount + 1, dataGenerationElapsed.TotalMilliseconds);
-            
+
             // Write current result with hasNext = true
             chunkCount++;
             chunkStarted = Stopwatch.GetTimestamp();
@@ -172,7 +172,7 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
             Log.MultipartChunkTotalTime(logger, chunkCount, chunkTotalElapsed.TotalMilliseconds);
             current = enumerator.Current;
         }
-        
+
         // Write final result with hasNext = false
         chunkCount++;
         chunkTotalStarted = Stopwatch.GetTimestamp();
@@ -183,28 +183,28 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
         chunkTotalElapsed = Stopwatch.GetElapsedTime(chunkTotalStarted);
         Log.MultipartChunkSerialized(logger, chunkCount, chunkElapsed.TotalMilliseconds);
         Log.MultipartChunkTotalTime(logger, chunkCount, chunkTotalElapsed.TotalMilliseconds);
-        
+
         // Close multipart boundary
         await writer.WriteAsync($"\r\n--{boundary}--\r\n");
         await writer.FlushAsync();
-        
+
         var totalElapsed = Stopwatch.GetElapsedTime(streamingStarted);
         Log.MultipartStreamingStats(logger, chunkCount, totalElapsed.TotalMilliseconds);
     }
 
     private static async Task WriteMultipartChunk(
-        StreamWriter writer, 
-        string boundary, 
-        ExecutionResult result, 
+        StreamWriter writer,
+        string boundary,
+        ExecutionResult result,
         bool hasNext,
         CancellationToken cancellationToken)
     {
         await writer.WriteAsync($"\r\n--{boundary}\r\n");
         await writer.WriteAsync("Content-Type: application/json; charset=utf-8\r\n\r\n");
-        
+
         // Ensure hasNext is set correctly
         var responseWithNext = result with { HasNext = hasNext };
-        
+
         var json = JsonSerializer.Serialize(responseWithNext);
         await writer.WriteAsync(json);
     }

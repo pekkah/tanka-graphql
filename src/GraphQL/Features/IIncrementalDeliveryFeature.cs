@@ -26,6 +26,11 @@ public interface IIncrementalDeliveryFeature
     IAsyncEnumerable<IncrementalPayload> GetDeferredResults(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Add a stream item for later delivery
+    /// </summary>
+    void AddStreamItem(IncrementalPayload streamItem);
+
+    /// <summary>
     /// Complete the incremental delivery (no more deferred work will be registered)
     /// </summary>
     void Complete();
@@ -53,6 +58,15 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
 
         HasIncrementalWork = true;
         _deferredWork.Writer.TryWrite(executionFunc);
+    }
+
+    public void AddStreamItem(IncrementalPayload streamItem)
+    {
+        if (_isCompleted)
+            throw new InvalidOperationException("Cannot add stream items after completion");
+
+        HasIncrementalWork = true;
+        _deferredWork.Writer.TryWrite(() => Task.FromResult(streamItem));
     }
 
     public async IAsyncEnumerable<IncrementalPayload> GetDeferredResults([EnumeratorCancellation] CancellationToken cancellationToken)

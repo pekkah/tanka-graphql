@@ -16,7 +16,8 @@ public class FieldPipelineExecutorFeature(FieldDelegate fieldDelegate) : IFieldE
         ObjectDefinition objectDefinition,
         object? objectValue,
         IReadOnlyCollection<FieldSelection> fields,
-        NodePath path)
+        NodePath path,
+        IReadOnlyDictionary<string, object>? fieldMetadata = null)
     {
         var fieldSelection = fields.First();
         var resolverContext = new ResolverContext
@@ -28,7 +29,8 @@ public class FieldPipelineExecutorFeature(FieldDelegate fieldDelegate) : IFieldE
             Fields = fields,
             ArgumentValues = ImmutableDictionary<string, object?>.Empty,
             Path = path.Append(fieldSelection.Name.Value),
-            QueryContext = context
+            QueryContext = context,
+            FieldMetadata = fieldMetadata != null ? new Dictionary<string, object>(fieldMetadata) : null
         };
 
         await fieldDelegate(resolverContext);

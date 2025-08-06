@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Concurrent;
+using System.Collections.Immutable;
 
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
@@ -20,4 +21,6 @@ public record SelectionSetContext
     public IReadOnlyDictionary<string, object?> Result { get; set; } = ImmutableDictionary<string, object?>.Empty;
 
     public IReadOnlyDictionary<string, List<FieldSelection>> GroupedFieldSet { get; set; } = ImmutableDictionary<string, List<FieldSelection>>.Empty;
+
+    public ConcurrentDictionary<string, ConcurrentDictionary<string, object>>? FieldMetadata { get; set; }
 }

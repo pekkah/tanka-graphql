@@ -35,7 +35,7 @@ public record SchemaBuildOptions
 
     public ISubscriberMap? Subscribers { get; set; }
 
-    public IEnumerable<SchemaValidationRule>? SchemaValidationRules { get; set; } = BuiltInSchemaValidationRules.All;
+    public IEnumerable<SchemaValidationRule>? SchemaValidationRules { get; set; } = BuiltInSchemaValidationRules.BuildAll();
 
     public IReadOnlyDictionary<string, IValueConverter>? ValueConverters { get; set; } =
         new Dictionary<string, IValueConverter>

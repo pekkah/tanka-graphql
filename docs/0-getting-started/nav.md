@@ -5,3 +5,4 @@
   - [Server](xref://04-server.md)
   - [Dependency Injection](xref://05-dependency-injection.md)
   - [Custom Scalars](xref://06-custom-scalars.md)
+  - [Incremental Delivery](xref://07-incremental-delivery.md)

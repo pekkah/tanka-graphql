@@ -8,3 +8,4 @@
     - [Fields](xref://08-pipeline-fields.md)
     - [Resolver](xref://09-pipeline-resolvers.md)
     - [Subscriber](xref://10-pipeline-subscribers.md)
+- [@defer and @stream Directives](xref://11-defer-stream-directives.md)

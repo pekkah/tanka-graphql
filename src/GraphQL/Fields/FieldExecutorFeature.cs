@@ -12,7 +12,8 @@ public class FieldExecutorFeature : IFieldExecutorFeature
         ObjectDefinition objectDefinition,
         object? objectValue,
         IReadOnlyCollection<FieldSelection> fields,
-        NodePath path)
+        NodePath path,
+        IReadOnlyDictionary<string, object>? fieldMetadata = null)
     {
         context.RequestCancelled.ThrowIfCancellationRequested();
 
@@ -65,7 +66,8 @@ public class FieldExecutorFeature : IFieldExecutorFeature
                 ObjectValue = objectValue,
                 Path = path,
                 Selection = fieldSelection,
-                QueryContext = context
+                QueryContext = context,
+                FieldMetadata = fieldMetadata != null ? new Dictionary<string, object>(fieldMetadata) : null
             };
 
             await resolver(resolverContext);

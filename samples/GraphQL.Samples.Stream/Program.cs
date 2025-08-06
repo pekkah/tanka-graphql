@@ -78,9 +78,9 @@ static async Task<List<Product>> GetProducts(string? category, int limit)
 {
     // Simulate database query with pagination
     await Task.Delay(200); // Simulate initial query setup time
-    
+
     var products = GenerateProducts(100);
-    
+
     // Filter by category if provided
     if (!string.IsNullOrEmpty(category))
     {
@@ -112,10 +112,10 @@ static async Task<List<Product>> SearchProducts(string query)
 {
     // Simulate search processing time
     await Task.Delay(300); // Simulate search indexing time
-    
+
     var products = GenerateProducts(100);
     var results = products
-        .Where(p => p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) || 
+        .Where(p => p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                    p.Description.Contains(query, StringComparison.OrdinalIgnoreCase))
         .ToList();
 
@@ -126,7 +126,7 @@ static async Task<List<Product>> GetRelatedProducts(Product product)
 {
     // Simulate recommendation engine processing
     await Task.Delay(400); // Simulate recommendation engine delay
-    
+
     var allProducts = GenerateProducts(100);
     var related = allProducts
         .Where(p => p.Category.Id == product.Category.Id && p.Id != product.Id)
@@ -140,7 +140,7 @@ static async Task<List<Review>> GetProductReviews(Product product)
 {
     // Simulate fetching reviews from a review service
     await Task.Delay(500); // Simulate review service API delay
-    
+
     var random = new Random(product.Id.GetHashCode());
     var reviewCount = random.Next(5, 20);
     var reviews = new List<Review>();
@@ -201,7 +201,7 @@ static string GetRandomReviewComment(Random random)
         "Solid product. Would buy again.",
         "Average quality, nothing special."
     };
-    
+
     return comments[random.Next(comments.Length)];
 }
 
@@ -209,7 +209,7 @@ static string GetRandomAuthor(Random random)
 {
     var firstNames = new[] { "John", "Jane", "Mike", "Sarah", "David", "Emily", "Chris", "Lisa", "Robert", "Mary" };
     var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Davis", "Miller", "Wilson", "Moore", "Taylor" };
-    
+
     return $"{firstNames[random.Next(firstNames.Length)]} {lastNames[random.Next(lastNames.Length)]}";
 }
 
