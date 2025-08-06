@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.TypeSystem.SchemaValidation;
 

@@ -158,20 +158,42 @@ public record QueryContext
     }
 
     /// <summary>
+    ///     Complete field value with streaming support
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="fieldType"></param>
+    /// <param name="path"></param>
+    /// <param name="initialCount">Initial count for @stream directive</param>
+    /// <param name="label">Label for @stream directive</param>
+    /// <returns></returns>
+    public ValueTask CompleteValueAsync(
+        ResolverContext context,
+        TypeBase fieldType,
+        NodePath path,
+        int initialCount,
+        string? label)
+    {
+        ArgumentNullException.ThrowIfNull(ValueCompletionFeature);
+        return ValueCompletionFeature.CompleteValueAsync(context, fieldType, path, initialCount, label);
+    }
+
+    /// <summary>
     ///     Execute field
     /// </summary>
     /// <param name="objectDefinition"></param>
     /// <param name="objectValue"></param>
     /// <param name="fields"></param>
     /// <param name="path"></param>
+    /// <param name="fieldMetadata">Optional metadata for the field (e.g., defer/stream directives)</param>
     /// <returns></returns>
     public Task<object?> ExecuteField(ObjectDefinition objectDefinition,
         object? objectValue,
         IReadOnlyCollection<FieldSelection> fields,
-        NodePath path)
+        NodePath path,
+        IReadOnlyDictionary<string, object>? fieldMetadata = null)
     {
         ArgumentNullException.ThrowIfNull(FieldExecutorFeature);
-        return FieldExecutorFeature.Execute(this, objectDefinition, objectValue, fields, path);
+        return FieldExecutorFeature.Execute(this, objectDefinition, objectValue, fields, path, fieldMetadata);
     }
 
     /// <summary>

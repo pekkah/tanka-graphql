@@ -4,7 +4,5 @@ namespace Tanka.GraphQL.TypeSystem.SchemaValidation;
 
 public static class BuiltInSchemaValidationRules
 {
-    private static readonly SchemaValidationRule[] _allRules = [new OneOfInputObjectRule()];
-
-    public static IEnumerable<SchemaValidationRule> All => _allRules;
+    public static IEnumerable<SchemaValidationRule> BuildAll() => [new OneOfInputObjectRule()];
 }

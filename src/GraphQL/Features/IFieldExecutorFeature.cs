@@ -10,5 +10,6 @@ public interface IFieldExecutorFeature
         ObjectDefinition objectDefinition,
         object? objectValue,
         IReadOnlyCollection<FieldSelection> fields,
-        NodePath path);
+        NodePath path,
+        IReadOnlyDictionary<string, object>? fieldMetadata = null);
 }

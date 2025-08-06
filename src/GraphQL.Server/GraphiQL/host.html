@@ -22,49 +22,78 @@
         }
     </style>
 
-    <script
-        crossorigin
-        src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script
-        crossorigin
-        src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!--
-    These two files can be found in the npm module, however you may wish to
-    copy them directly into your environment, or perhaps include them in your
-    favored resource bundler.
-    -->
-    <script
-        src="https://unpkg.com/graphiql/graphiql.min.js"
-        type="application/javascript"></script>
-    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css"/>
-    <!-- 
-    These are imports for the GraphIQL Explorer plugin.
-    -->
-    <script
-        src="https://unpkg.com/@graphiql/plugin-explorer/dist/index.umd.js"
-        crossorigin></script>
-
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/@graphiql/plugin-explorer/dist/style.css"/>
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@19.1.1",
+            "react-dom/client": "https://esm.sh/react-dom@19.1.1/client",
+            "graphiql": "https://esm.sh/graphiql@5.2.0?standalone",
+            "@graphiql/toolkit": "https://esm.sh/@graphiql/toolkit@0.11.3?standalone",
+            "@graphiql/plugin-explorer": "https://esm.sh/@graphiql/plugin-explorer@5.1.1?standalone",
+            "@emotion/is-prop-valid": "https://esm.sh/@emotion/is-prop-valid@1.3.1"
+        }
+    }
+    </script>
+    
+    <script>
+    // Minimal Monaco Environment configuration that doesn't interfere with theming
+    window.MonacoEnvironment = {
+        getWorkerUrl: function(moduleId, label) {
+            // Use proper worker URL structure but point to minimal worker
+            return 'data:text/javascript;charset=utf-8,' + encodeURIComponent(`
+                self.onmessage = function(e) {
+                    // Echo back minimal response to prevent errors
+                    self.postMessage({ id: e.data.id, result: null });
+                };
+            `);
+        }
+    };
+    
+    // Only suppress the most annoying Monaco worker warnings
+    const originalConsoleWarn = console.warn;
+    console.warn = function(...args) {
+        const message = args[0] && args[0].toString();
+        if (message && (
+            message.includes('Could not create web worker(s). Falling back') ||
+            message.includes('You must define a function MonacoEnvironment.getWorkerUrl')
+        )) {
+            return; // Suppress only these specific warnings
+        }
+        originalConsoleWarn.apply(console, args);
+    };
+    </script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/graphiql@5.2.0/dist/style.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/@graphiql/plugin-explorer@5.1.1/dist/style.css"/>
 </head>
 
 <body>
 <div id="graphiql">Loading...</div>
-<script>
-    const root = ReactDOM.createRoot(document.getElementById('graphiql'));
-    const fetcher = GraphiQL.createFetcher({
+<script type="module">
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { GraphiQL } from 'graphiql';
+    import { createGraphiQLFetcher } from '@graphiql/toolkit';
+    import { explorerPlugin } from '@graphiql/plugin-explorer';
+
+    const fetcher = createGraphiQLFetcher({
         url: '{{httpUrl}}',
         subscriptionUrl: '{{httpUrl}}/ws'.replace('http', "ws")
     });
-    const explorerPlugin = GraphiQLPluginExplorer.explorerPlugin();
-    root.render(
-        React.createElement(GraphiQL, {
+    
+    const plugins = [explorerPlugin()];
+
+    function App() {
+        return React.createElement(GraphiQL, {
             fetcher,
-            defaultEditorToolsVisibility: true,
-            plugins: [explorerPlugin],
-        }),
-    );
-    </script>
+            plugins,
+            defaultEditorToolsVisibility: true
+        });
+    }
+
+    const container = document.getElementById('graphiql');
+    const root = createRoot(container);
+    root.render(React.createElement(App));
+</script>
 </body>
 </html>

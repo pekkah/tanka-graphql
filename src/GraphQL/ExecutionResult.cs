@@ -123,12 +123,19 @@ public record IncrementalPayload
     public NodePath? Path { get; init; }
 
     /// <summary>
-    /// Data for this incremental payload
+    /// Data for this incremental payload (@defer)
     /// </summary>
     [JsonPropertyName("data")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [JsonConverter(typeof(NestedDictionaryConverter))]
     public IReadOnlyDictionary<string, object?>? Data { get; init; }
+
+    /// <summary>
+    /// Items for this incremental payload (@stream)
+    /// </summary>
+    [JsonPropertyName("items")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<object?>? Items { get; init; }
 
     /// <summary>
     /// Errors for this incremental payload

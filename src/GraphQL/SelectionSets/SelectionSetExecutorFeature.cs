@@ -1,6 +1,9 @@
-﻿using Tanka.GraphQL.Features;
+﻿using System.Collections;
+
+using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.SelectionSets;
 
@@ -103,7 +106,8 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
                                 objectType,
                                 objectValue,
                                 fields,
-                                path.Fork());
+                                path.Fork(),
+                                metadata);
 
                             var data = new Dictionary<string, object?>();
                             if (fieldResult != null)
@@ -134,38 +138,17 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
                         }
                     });
                 }
-                else if (metadata.ContainsKey("stream"))
-                {
-                    // Handle @stream directive - for now execute normally
-                    // TODO: Implement proper streaming of list items
-                    // @stream requires different handling as it streams individual list items
-                    // rather than deferring the entire field
-                    try
-                    {
-                        var completedValue = await context.ExecuteField(
-                            objectType,
-                            objectValue,
-                            fields,
-                            path.Fork());
-
-                        responseMap[responseKey] = completedValue;
-                    }
-                    catch (FieldException e)
-                    {
-                        responseMap[responseKey] = null;
-                        context.AddError(e);
-                    }
-                }
                 else
                 {
-                    // No incremental delivery directives, execute normally
+                    // No incremental delivery directives, execute normally with metadata
                     try
                     {
                         var completedValue = await context.ExecuteField(
                             objectType,
                             objectValue,
                             fields,
-                            path.Fork());
+                            path.Fork(),
+                            metadata);
 
                         responseMap[responseKey] = completedValue;
                     }

@@ -53,9 +53,25 @@ public class SelectionSetPipelineBuilder
     {
         return Use(_ => async context =>
         {
+            // Create FieldCollectionResult with both fields and metadata
+            // Cast mutable dictionaries back to read-only for the execution
+            IReadOnlyDictionary<string, IReadOnlyDictionary<string, object>>? readOnlyMetadata = null;
+            if (context.FieldMetadata != null)
+            {
+                readOnlyMetadata = context.FieldMetadata.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => (IReadOnlyDictionary<string, object>)kvp.Value);
+            }
+
+            var collectionResult = new FieldCollectionResult
+            {
+                Fields = context.GroupedFieldSet,
+                FieldMetadata = readOnlyMetadata
+            };
+
             context.Result = await DefaultSelectionSetExecutorFeature.ExecuteSelectionSet(
                 context.QueryContext,
-                context.GroupedFieldSet,
+                collectionResult,
                 context.ObjectDefinition,
                 context.ObjectValue,
                 context.Path);
@@ -80,6 +96,16 @@ public class SelectionSetPipelineBuilder
                 context.SelectionSet,
                 context.QueryContext.CoercedVariableValues);
             context.GroupedFieldSet = collectionResult.Fields;
+
+            // Convert read-only metadata to concurrent dictionaries for thread-safe custom middleware
+            if (collectionResult.FieldMetadata != null)
+            {
+                context.FieldMetadata = new System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, object>>();
+                foreach (var (fieldKey, fieldMetadata) in collectionResult.FieldMetadata)
+                {
+                    context.FieldMetadata[fieldKey] = new System.Collections.Concurrent.ConcurrentDictionary<string, object>(fieldMetadata);
+                }
+            }
 
             return next(context);
         });
