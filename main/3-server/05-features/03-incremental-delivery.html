@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>02-authorization - Tanka GraphQL</title>
+    <title>03-incremental-delivery - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
@@ -275,103 +275,163 @@
                         <span class="ms-1">On this page</span>
                     </button>
                 </div>
-                <h2 id="authorization">Authorization</h2>
-<p>This sample supports both websockets and HTTP requests. It uses a simple cookie authentication
-to authenticate the user and then applies a authorization policy to the GraphQL endpoint.</p>
-<pre><code class="language-csharp">using System.Runtime.CompilerServices;
-using System.Security.Claims;
-using System.Security.Principal;
-
-using Microsoft.AspNetCore.Authentication;
-
-using Tanka.GraphQL.Executable;
-using Tanka.GraphQL.Server;
-
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-// add required services
-builder.AddTankaGraphQL()
-    // add http transport
-    .AddHttp()
-    // add websocket transport for subscriptions
-    .AddWebSockets()
-    // add named schema
-    .AddSchema(&quot;System&quot;, schema =&gt;
-    {
-        // add Query root
-        schema.Add(
-            &quot;Query&quot;,
-            new FieldsWithResolvers
-            {
-                // Simple string field with hard coded resolved value
-                { &quot;hello: String!&quot;, () =&gt; &quot;Hello World&quot; }
-            });
-
-        // add Subscription root
-        schema.Add(
-            &quot;Subscription&quot;,
-            new FieldsWithResolvers
-            {
-                // this will resolve the actual resolved value from the produced values
-                { &quot;hello: String!&quot;, (string objectValue) =&gt; objectValue }
-            },
-            new FieldsWithSubscribers
-            {
-                // this is our subscription producer
-                {
-                    &quot;hello: String!&quot;, (CancellationToken unsubscribe) =&gt;
-                    {
-                        return Hello(unsubscribe);
-
-                        static async IAsyncEnumerable&lt;string&gt; Hello(
-                            [EnumeratorCancellation] CancellationToken unsubscribe)
-                        {
-                            yield return &quot;Hello&quot;;
-                            await Task.Delay(TimeSpan.FromSeconds(1), unsubscribe);
-                            yield return &quot;World&quot;;
-                        }
-                    }
-                }
-            });
-    });
-
-// add cookie authentication
-builder.Services.AddAuthentication().AddCookie(options =&gt;
-{
-    options.LoginPath = &quot;/login&quot;;
-    options.LogoutPath = &quot;/logout&quot;;
-    options.AccessDeniedPath = &quot;/login&quot;;
-});
-
-builder.Services.AddAuthorization();
-
-WebApplication app = builder.Build();
-
-app.UseAuthentication();
-app.UseAuthorization();
-// this is required by the websocket transport
-app.UseWebSockets();
-
-// this uses the default pipeline
-// you can access GraphiQL at &quot;/graphql/ui&quot;
-app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;System&quot;)
-    // we require a user name User
-    .RequireAuthorization(policy =&gt; policy.RequireUserName(&quot;User&quot;));
-
-app.MapGraphiQL(&quot;/graphql/ui&quot;)
-    .RequireAuthorization(policy =&gt; policy.RequireUserName(&quot;User&quot;)); ;
-
-// map login (required by the cookie authentication)
-app.MapGet(&quot;/login&quot;, async (HttpContext http, string returnUrl) =&gt;
-{
-    // login as hardcoded user
-    await http.SignInAsync(new ClaimsPrincipal(new GenericIdentity(&quot;User&quot;)));
-    return Results.Redirect(returnUrl);
-});
-
-
-app.Run();
+                <h1 id="incremental-delivery-defer-and-stream">Incremental Delivery (@defer and @stream)</h1>
+<p>Tanka GraphQL supports incremental delivery using the GraphQL <code>@defer</code> and <code>@stream</code> directives, allowing you to optimize the user experience by delivering data progressively instead of waiting for the entire response.</p>
+<h2 id="overview">Overview</h2>
+<p>Incremental delivery helps reduce initial response times and provides better user experience by:</p>
+<ul>
+<li><strong>Reducing initial load time</strong>: Send critical data first, optional data later</li>
+<li><strong>Improving perceived performance</strong>: Users see content sooner</li>
+<li><strong>Better resource utilization</strong>: Spread expensive operations over time</li>
+<li><strong>Enhanced user experience</strong>: Progressive content loading</li>
+</ul>
+<p>The implementation follows the <a href="https://github.com/graphql/graphql-spec/pull/742">GraphQL incremental delivery specification draft</a> and supports both HTTP multipart responses and standard JSON responses.</p>
+<h2 id="defer-directive">@defer Directive</h2>
+<p>The <code>@defer</code> directive allows you to defer the execution of expensive or non-critical fields until after the initial response.</p>
+<h3 id="basic-usage">Basic Usage</h3>
+<pre><code class="language-graphql">query GetUserProfile {
+  user {
+    id
+    name
+    # Critical data is returned immediately
+    
+    ... @defer(label: &quot;profile&quot;) {
+      profile {
+        bio
+        avatar
+        # Optional profile data is deferred
+      }
+    }
+  }
+}
 </code></pre>
+<h3 id="with-variable-labels">With Variable Labels</h3>
+<pre><code class="language-graphql">query GetUserProfile($deferLabel: String!) {
+  user {
+    id
+    name
+    ... @defer(label: $deferLabel) {
+      profile {
+        bio
+        avatar
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="response-format">Response Format</h3>
+<p>The server returns multiple responses:</p>
+<ol>
+<li><strong>Initial response</strong> with critical data and <code>&quot;hasNext&quot;: true</code></li>
+<li><strong>Incremental responses</strong> with deferred data and path information</li>
+<li><strong>Final response</strong> with <code>&quot;hasNext&quot;: false</code></li>
+</ol>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;user&quot;: {
+      &quot;id&quot;: &quot;1&quot;,
+      &quot;name&quot;: &quot;John Doe&quot;
+    }
+  },
+  &quot;hasNext&quot;: true
+}
+</code></pre>
+<pre><code class="language-json">{
+  &quot;incremental&quot;: [
+    {
+      &quot;label&quot;: &quot;profile&quot;,
+      &quot;path&quot;: [&quot;user&quot;],
+      &quot;data&quot;: {
+        &quot;profile&quot;: {
+          &quot;bio&quot;: &quot;Software developer&quot;,
+          &quot;avatar&quot;: &quot;https://example.com/avatar.jpg&quot;
+        }
+      }
+    }
+  ],
+  &quot;hasNext&quot;: false
+}
+</code></pre>
+<h2 id="stream-directive">@stream Directive</h2>
+<p>The <code>@stream</code> directive allows you to stream list items progressively instead of waiting for all items to be resolved.</p>
+<h3 id="basic-usage-1">Basic Usage</h3>
+<pre><code class="language-graphql">query GetProducts {
+  products @stream(initialCount: 2) {
+    id
+    name
+    price
+  }
+}
+</code></pre>
+<h3 id="stream-all-items">Stream All Items</h3>
+<pre><code class="language-graphql">query GetAllProducts {
+  products @stream(initialCount: 0) {
+    id
+    name
+    price
+  }
+}
+</code></pre>
+<h3 id="response-format-1">Response Format</h3>
+<p>The server streams list items progressively:</p>
+<ol>
+<li><strong>Initial response</strong> with the specified number of initial items</li>
+<li><strong>Incremental responses</strong> with individual items or batches</li>
+<li><strong>Final response</strong> when all items are delivered</li>
+</ol>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;products&quot;: [
+      {&quot;id&quot;: &quot;1&quot;, &quot;name&quot;: &quot;Product 1&quot;, &quot;price&quot;: 100},
+      {&quot;id&quot;: &quot;2&quot;, &quot;name&quot;: &quot;Product 2&quot;, &quot;price&quot;: 200}
+    ]
+  },
+  &quot;hasNext&quot;: true
+}
+</code></pre>
+<pre><code class="language-json">{
+  &quot;incremental&quot;: [
+    {
+      &quot;path&quot;: [&quot;products&quot;],
+      &quot;items&quot;: [
+        {&quot;id&quot;: &quot;3&quot;, &quot;name&quot;: &quot;Product 3&quot;, &quot;price&quot;: 300}
+      ]
+    }
+  ],
+  &quot;hasNext&quot;: true
+}
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="when-to-use-defer">When to Use @defer</h3>
+<ul>
+<li><strong>Expensive computations</strong>: Complex calculations that take time</li>
+<li><strong>Optional content</strong>: Data that's not immediately visible (below the fold)</li>
+<li><strong>External dependencies</strong>: Data from slow external APIs</li>
+<li><strong>Large nested objects</strong>: Heavy data structures that aren't critical</li>
+</ul>
+<h3 id="when-to-use-stream">When to Use @stream</h3>
+<ul>
+<li><strong>Large collections</strong>: Lists with many items</li>
+<li><strong>Real-time updates</strong>: Items that arrive over time</li>
+<li><strong>Pagination alternative</strong>: Progressive loading without explicit paging</li>
+<li><strong>Search results</strong>: Show results as they're found</li>
+</ul>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<ul>
+<li><strong>Network overhead</strong>: Multiple requests vs single large request</li>
+<li><strong>Server resources</strong>: Streaming requires maintaining connection state</li>
+<li><strong>Client complexity</strong>: Handling progressive updates requires more complex client code</li>
+<li><strong>Caching</strong>: Incremental responses may complicate caching strategies</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<h3 id="working-examples">Working Examples</h3>
+<p>Complete working examples can be found in the test files and samples:</p>
+<ul>
+<li><strong>@defer Integration Test</strong>: <a href="https://github.com/pekkah/tanka-graphql/blob/main/tests/GraphQL.Tests/DeferStreamIntegrationFacts.cs">DeferStreamIntegrationFacts.cs</a></li>
+<li><strong>@stream Unit Tests</strong>: <a href="https://github.com/pekkah/tanka-graphql/blob/main/tests/GraphQL.Tests/SelectionSets/StreamDirectiveExecutionTests.cs">StreamDirectiveExecutionTests.cs</a></li>
+<li><strong>Defer Sample Project</strong>: <a href="https://github.com/pekkah/tanka-graphql/tree/main/samples/GraphQL.Samples.Defer">GraphQL.Samples.Defer</a></li>
+<li><strong>Stream Sample Project</strong>: <a href="https://github.com/pekkah/tanka-graphql/tree/main/samples/GraphQL.Samples.Stream">GraphQL.Samples.Stream</a></li>
+</ul>
 
             </main>
             <!-- Single responsive TOC -->

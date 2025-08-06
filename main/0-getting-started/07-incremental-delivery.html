@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>02-authorization - Tanka GraphQL</title>
+    <title>07-incremental-delivery - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
@@ -226,34 +226,46 @@
     <nav class="nav flex-column">
 <li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/3-server/00-index.html>Introduction</a>
+        <a class="nav-link" href=main/index.html>Home</a>
     </div>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/3-server/05-features/00-list.html>Features</a>
-        <a class="btn btn-sm" data-bs-toggle="collapse" href="#nav-05-features/00-list.md" role="button" aria-expanded="false" aria-controls="nav-05-features/00-list.md">
+        <a class="nav-link" href=main/0-getting-started/00-getting-started.html>Getting started</a>
+        <a class="btn btn-sm" data-bs-toggle="collapse" href="#nav-00-getting-started.md" role="button" aria-expanded="false" aria-controls="nav-00-getting-started.md">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
         </a>
     </div>
-    <div class="collapse" id="nav-05-features/00-list.md">
+    <div class="collapse" id="nav-00-getting-started.md">
         <ul class="nav flex-column ms-3">
 <li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/3-server/05-features/01-http.html>Http and WebSockets</a>
+        <a class="nav-link" href=main/0-getting-started/01-create-schema.html>Create schema</a>
     </div>
 </li><li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/3-server/05-features/02-authorization.html>Authorization</a>
+        <a class="nav-link" href=main/0-getting-started/02-bind-resolvers.html>Bind resolvers</a>
     </div>
 </li><li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/3-server/05-features/03-incremental-delivery.html>Incremental Delivery</a>
+        <a class="nav-link" href=main/0-getting-started/03-apply-directives.html>Apply directives</a>
     </div>
 </li><li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/3-server/05-features/04-multipart-http.html>Multipart HTTP Transport</a>
+        <a class="nav-link" href=main/0-getting-started/04-server.html>Server</a>
+    </div>
+</li><li class="nav-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <a class="nav-link" href=main/0-getting-started/05-dependency-injection.html>Dependency Injection</a>
+    </div>
+</li><li class="nav-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <a class="nav-link" href=main/0-getting-started/06-custom-scalars.html>Custom Scalars</a>
+    </div>
+</li><li class="nav-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <a class="nav-link" href=main/0-getting-started/07-incremental-delivery.html>Incremental Delivery</a>
     </div>
 </li>        </ul>
     </div>
@@ -275,103 +287,73 @@
                         <span class="ms-1">On this page</span>
                     </button>
                 </div>
-                <h2 id="authorization">Authorization</h2>
-<p>This sample supports both websockets and HTTP requests. It uses a simple cookie authentication
-to authenticate the user and then applies a authorization policy to the GraphQL endpoint.</p>
-<pre><code class="language-csharp">using System.Runtime.CompilerServices;
-using System.Security.Claims;
-using System.Security.Principal;
+                <h1 id="incremental-delivery-with-defer-and-stream">Incremental Delivery with @defer and @stream</h1>
+<p>Incremental delivery allows GraphQL responses to be sent in multiple parts, improving perceived performance by delivering critical data first and streaming less important or slower data afterward.</p>
+<h2 id="overview">Overview</h2>
+<p>Tanka GraphQL supports two incremental delivery directives:</p>
+<ul>
+<li><strong>@defer</strong> - Defers expensive fields to be delivered after the initial response</li>
+<li><strong>@stream</strong> - Streams list items incrementally instead of waiting for the complete list</li>
+</ul>
+<h2 id="quick-start">Quick Start</h2>
+<h3 id="enable-incremental-delivery">Enable Incremental Delivery</h3>
+<p>Add incremental delivery support to your services:</p>
+<pre><code class="language-csharp">var builder = WebApplication.CreateBuilder(args);
 
-using Microsoft.AspNetCore.Authentication;
+builder.Services.AddDefaultTankaGraphQLServices();
+builder.Services.AddIncrementalDeliveryDirectives();
 
-using Tanka.GraphQL.Executable;
-using Tanka.GraphQL.Server;
-
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-// add required services
 builder.AddTankaGraphQL()
-    // add http transport
     .AddHttp()
-    // add websocket transport for subscriptions
     .AddWebSockets()
-    // add named schema
-    .AddSchema(&quot;System&quot;, schema =&gt;
+    .AddSchema(&quot;MySchema&quot;, schema =&gt;
     {
-        // add Query root
-        schema.Add(
-            &quot;Query&quot;,
-            new FieldsWithResolvers
-            {
-                // Simple string field with hard coded resolved value
-                { &quot;hello: String!&quot;, () =&gt; &quot;Hello World&quot; }
-            });
-
-        // add Subscription root
-        schema.Add(
-            &quot;Subscription&quot;,
-            new FieldsWithResolvers
-            {
-                // this will resolve the actual resolved value from the produced values
-                { &quot;hello: String!&quot;, (string objectValue) =&gt; objectValue }
-            },
-            new FieldsWithSubscribers
-            {
-                // this is our subscription producer
-                {
-                    &quot;hello: String!&quot;, (CancellationToken unsubscribe) =&gt;
-                    {
-                        return Hello(unsubscribe);
-
-                        static async IAsyncEnumerable&lt;string&gt; Hello(
-                            [EnumeratorCancellation] CancellationToken unsubscribe)
-                        {
-                            yield return &quot;Hello&quot;;
-                            await Task.Delay(TimeSpan.FromSeconds(1), unsubscribe);
-                            yield return &quot;World&quot;;
-                        }
-                    }
-                }
-            });
+        schema.AddIncrementalDeliveryDirectives();
     });
 
-// add cookie authentication
-builder.Services.AddAuthentication().AddCookie(options =&gt;
-{
-    options.LoginPath = &quot;/login&quot;;
-    options.LogoutPath = &quot;/logout&quot;;
-    options.AccessDeniedPath = &quot;/login&quot;;
-});
-
-builder.Services.AddAuthorization();
-
-WebApplication app = builder.Build();
-
-app.UseAuthentication();
-app.UseAuthorization();
-// this is required by the websocket transport
+var app = builder.Build();
 app.UseWebSockets();
-
-// this uses the default pipeline
-// you can access GraphiQL at &quot;/graphql/ui&quot;
-app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;System&quot;)
-    // we require a user name User
-    .RequireAuthorization(policy =&gt; policy.RequireUserName(&quot;User&quot;));
-
-app.MapGraphiQL(&quot;/graphql/ui&quot;)
-    .RequireAuthorization(policy =&gt; policy.RequireUserName(&quot;User&quot;)); ;
-
-// map login (required by the cookie authentication)
-app.MapGet(&quot;/login&quot;, async (HttpContext http, string returnUrl) =&gt;
-{
-    // login as hardcoded user
-    await http.SignInAsync(new ClaimsPrincipal(new GenericIdentity(&quot;User&quot;)));
-    return Results.Redirect(returnUrl);
-});
-
-
+app.MapTankaGraphQL(&quot;/graphql&quot;, &quot;MySchema&quot;);
 app.Run();
 </code></pre>
+<h3 id="using-defer">Using @defer</h3>
+<p>Use @defer to mark expensive fields that can be delivered after the initial response:</p>
+<pre><code class="language-graphql">{
+  user {
+    id
+    name
+    
+    ... @defer(label: &quot;profile&quot;) {
+      profile {
+        bio
+        location
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="using-stream">Using @stream</h3>
+<p>Use @stream to deliver list items incrementally:</p>
+<pre><code class="language-graphql">{
+  products @stream(initialCount: 3) {
+    id
+    name
+    price
+  }
+}
+</code></pre>
+<h2 id="content-negotiation">Content Negotiation</h2>
+<p>Clients must explicitly request incremental delivery using the Accept header:</p>
+<pre><code>Accept: multipart/mixed; deferSpec=20220824, application/json
+</code></pre>
+<h2 id="working-examples">Working Examples</h2>
+<p>For complete working examples, see the <a href="https://github.com/pekkah/tanka-graphql/blob/main/tutorials/GraphQL.Tutorials.Getting-Started/DeferStreamTutorials.cs">tutorial tests</a>.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Learn more about <a href="main/3-server/05-features/04-multipart-http.html">HTTP multipart transport</a></li>
+<li>Explore <a href="main/6-executor/11-defer-stream-directives.html">advanced directive usage</a></li>
+<li>Check out the <a href="https://github.com/pekkah/tanka-graphql/tree/main/samples">samples</a></li>
+</ul>
 
             </main>
             <!-- Single responsive TOC -->
