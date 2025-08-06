@@ -158,6 +158,26 @@ public record QueryContext
     }
 
     /// <summary>
+    ///     Complete field value with streaming support
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="fieldType"></param>
+    /// <param name="path"></param>
+    /// <param name="initialCount">Initial count for @stream directive</param>
+    /// <param name="label">Label for @stream directive</param>
+    /// <returns></returns>
+    public ValueTask CompleteValueAsync(
+        ResolverContext context,
+        TypeBase fieldType,
+        NodePath path,
+        int initialCount,
+        string? label)
+    {
+        ArgumentNullException.ThrowIfNull(ValueCompletionFeature);
+        return ValueCompletionFeature.CompleteValueAsync(context, fieldType, path, initialCount, label);
+    }
+
+    /// <summary>
     ///     Execute field
     /// </summary>
     /// <param name="objectDefinition"></param>
