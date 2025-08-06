@@ -83,6 +83,6 @@ For complete working examples, see the [tutorial tests](https://github.com/pekka
 
 ## Next Steps
 
-- Learn more about [HTTP multipart transport](../3-server/05-features/04-multipart-http.md)
-- Explore [advanced directive usage](../6-executor/11-defer-stream-directives.md)
+- Learn more about [HTTP multipart transport](xref://server:05-features/04-multipart-http.md)
+- Explore [advanced directive usage](xref://execution:11-defer-stream-directives.md)
 - Check out the [samples](https://github.com/pekkah/tanka-graphql/tree/main/samples)
