@@ -1,4 +1,7 @@
 ﻿using System.Collections;
+using System.Collections.Concurrent;
+using System.Linq.Expressions;
+using System.Reflection;
 
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language;
@@ -372,35 +375,85 @@ public class ValueCompletionFeature : IValueCompletionFeature
         out ValueTask<object?>? result)
     {
         result = null;
-        var resolvedType = value.GetType();
 
-        // Check for IAsyncEnumerable<T>
-        foreach (var @interface in resolvedType.GetInterfaces())
+        // Check if value implements any IAsyncEnumerable<T>
+        var valueType = value.GetType();
+        var asyncEnumerableInterface = valueType.GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
+
+        if (asyncEnumerableInterface != null)
         {
-            if (@interface.IsGenericType &&
-                @interface.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>))
-            {
-                var itemType = @interface.GetGenericArguments()[0];
-
-                // Use reflection to invoke the generic method
-                var method = typeof(ValueCompletionFeature)
-                    .GetMethod(nameof(CompleteAsyncEnumerableStreamGeneric),
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
-                    .MakeGenericMethod(itemType);
-
-                result = (ValueTask<object?>)method.Invoke(this, new object?[]
-                {
-                    value, innerType, path, context, initialCount, label
-                })!;
-
-                return true;
-            }
+            // Get the item type from IAsyncEnumerable<T>
+            var itemType = asyncEnumerableInterface.GetGenericArguments()[0];
+            
+            // Get or create the compiled delegate for this type
+            var streamMethod = AsyncEnumerableStreamCache.GetOrCreateStreamMethod(itemType);
+            
+            // Invoke the compiled delegate
+            result = streamMethod(this, value, innerType, path, context, initialCount, label);
+            return true;
         }
 
         return false;
     }
 
-    private async ValueTask<object?> CompleteAsyncEnumerableStreamGeneric<T>(
+    // Cache for compiled async enumerable streaming methods
+    private static class AsyncEnumerableStreamCache
+    {
+        private static readonly ConcurrentDictionary<Type, Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>>> 
+            Cache = new();
+
+        public static Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>> 
+            GetOrCreateStreamMethod(Type itemType)
+        {
+            return Cache.GetOrAdd(itemType, CreateStreamMethod);
+        }
+
+        private static Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>> 
+            CreateStreamMethod(Type itemType)
+        {
+            // Get the generic method definition
+            var methodInfo = typeof(ValueCompletionFeature)
+                .GetMethod(nameof(CompleteAsyncEnumerableStreamGenericAsync), 
+                    BindingFlags.NonPublic | BindingFlags.Instance)!
+                .MakeGenericMethod(itemType);
+
+            // Create parameters for the expression
+            var instanceParam = Expression.Parameter(typeof(ValueCompletionFeature), "instance");
+            var valueParam = Expression.Parameter(typeof(object), "value");
+            var innerTypeParam = Expression.Parameter(typeof(TypeBase), "innerType");
+            var pathParam = Expression.Parameter(typeof(NodePath), "path");
+            var contextParam = Expression.Parameter(typeof(ResolverContext), "context");
+            var initialCountParam = Expression.Parameter(typeof(int), "initialCount");
+            var labelParam = Expression.Parameter(typeof(string), "label");
+
+            // Create the method call expression
+            var callExpr = Expression.Call(
+                instanceParam,
+                methodInfo,
+                Expression.Convert(valueParam, typeof(IAsyncEnumerable<>).MakeGenericType(itemType)),
+                innerTypeParam,
+                pathParam,
+                contextParam,
+                initialCountParam,
+                labelParam);
+
+            // Compile the expression to a delegate
+            var lambda = Expression.Lambda<Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>>>(
+                callExpr,
+                instanceParam,
+                valueParam,
+                innerTypeParam,
+                pathParam,
+                contextParam,
+                initialCountParam,
+                labelParam);
+
+            return lambda.Compile();
+        }
+    }
+
+    private async ValueTask<object?> CompleteAsyncEnumerableStreamGenericAsync<T>(
         IAsyncEnumerable<T> asyncEnumerable,
         TypeBase innerType,
         NodePath path,
@@ -519,7 +572,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
         IIncrementalDeliveryFeature incrementalFeature)
     {
         // Process the current item that we already read
-        var currentItem = enumerator.Current;
+        var currentItem = (object?)enumerator.Current;
         var currentPath = path.Fork().Append(startIndex);
 
         incrementalFeature.RegisterDeferredWork(label, currentPath, async () =>
@@ -546,7 +599,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
             {
                 while (await enumerator.MoveNextAsync())
                 {
-                    var current = enumerator.Current;
+                    var current = (object?)enumerator.Current;
                     var streamPath = path.Fork().Append(itemIndex);
 
                     // Capture variables for closure
