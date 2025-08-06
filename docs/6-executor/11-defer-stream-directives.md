@@ -16,7 +16,7 @@ services.AddIncrementalDeliveryDirectives(); // Adds both @defer and @stream
 ```csharp
 services.AddDefaultTankaGraphQLServices();
 services.AddDeferDirective();   // Only @defer directive
-services.AddStreamDirective();  // Only @stream directive  
+services.AddStreamDirective();  // Only @stream directive
 ```
 
 ### Schema Configuration
@@ -99,21 +99,21 @@ query GetUser($profileLabel: String!) {
   user {
     id
     name
-    
+
     ... @defer(label: "profile") {
       profile {
         bio
         avatar
       }
     }
-    
+
     ... @defer(label: "posts") {
       posts {
         title
         content
       }
     }
-    
+
     ... @defer(label: "friends") {
       friends {
         id
@@ -131,11 +131,11 @@ query GetUser($profileLabel: String!) {
   user {
     id
     name
-    
+
     ... @defer(label: "level1") {
       profile {
         bio
-        
+
         ... @defer(label: "level2") {
           settings {
             theme
@@ -224,7 +224,7 @@ query GetProducts($shouldStream: Boolean = false, $initialCount: Int = 5) {
     name
     price
   }
-  
+
   # Fallback for non-streaming
   allProducts: products @include(if: $shouldStream) {
     id
@@ -245,13 +245,13 @@ For a complete example combining both directives, see: [Combined Defer and Strea
   user {
     id
     name
-    
+
     ... @defer(label: "posts") {
       posts @stream(initialCount: 3) {
         id
         title
         content
-        
+
         ... @defer(label: "postStats") {
           likes
           comments
@@ -273,17 +273,17 @@ For a complete example combining both directives, see: [Combined Defer and Strea
       id
       name
     }
-    
+
     # Analytics deferred
     ... @defer(label: "analytics") {
       analytics {
         totalViews
-        
+
         # Large datasets streamed
         topPages @stream(initialCount: 5) {
           url
           views
-          
+
           # Expensive metrics deferred per item
           ... @defer(label: "pageMetrics") {
             bounceRate
@@ -293,7 +293,7 @@ For a complete example combining both directives, see: [Combined Defer and Strea
         }
       }
     }
-    
+
     # Recent activity streamed
     ... @defer(label: "activity") {
       recentActivity @stream(initialCount: 2) {
@@ -316,7 +316,7 @@ For a complete example combining both directives, see: [Combined Defer and Strea
 // ✅ Correct: Return actual collection
 .Add("products: [Product]", b => b.ResolveAs(productList))
 
-// ❌ Incorrect: Returns function instead of collection  
+// ❌ Incorrect: Returns function instead of collection
 .Add("products: [Product]", b => b.ResolveAs(() => productList))
 ```
 
@@ -326,12 +326,12 @@ For a complete example combining both directives, see: [Combined Defer and Strea
 {
     { "id: ID!", b => b.ResolveAsPropertyOf<User>(u => u.Id) },
     { "name: String!", b => b.ResolveAsPropertyOf<User>(u => u.Name) },
-    { 
-        "profile: Profile", 
-        async context => 
+    {
+        "profile: Profile",
+        async context =>
         {
             // Expensive operation suitable for deferring
-            await Task.Delay(100); 
+            await Task.Delay(100);
             var profile = await profileService.GetProfileAsync(context.Parent<User>().Id);
             context.ResolvedValue = profile;
         }
@@ -476,7 +476,7 @@ For a complete example combining both directives, see: [Combined Defer and Strea
 - Use appropriate `initialCount` values for streams
 - Consider network round-trip costs vs. data size
 
-### Memory Management  
+### Memory Management
 - Stream large datasets instead of loading everything
 - Use defer for expensive computations
 - Monitor server memory usage during streaming
@@ -508,7 +508,7 @@ curl -X POST http://localhost:5000/graphql \
   -d '{"query": "{ user { id name ... @defer(label: \"profile\") { profile { email } } } }"}'
 ```
 
-**Test @stream**  
+**Test @stream**
 ```bash
 curl -X POST http://localhost:5000/graphql \
   -H "Content-Type: application/json" \

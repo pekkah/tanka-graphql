@@ -606,8 +606,8 @@ public class ValueCompletionFeature : IValueCompletionFeature
                     var capturedCurrent = current;
                     var capturedPath = streamPath;
 
-                    // Wait a tiny bit to ensure proper streaming order
-                    await Task.Delay(1, context.QueryContext.RequestCancelled);
+                    // Yield control to allow other tasks to run between item processing
+                    await Task.Yield();
 
                     incrementalFeature.RegisterDeferredWork(label, capturedPath, async () =>
                     {

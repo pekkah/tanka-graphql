@@ -11,7 +11,7 @@ The server automatically detects when clients support multipart responses throug
 Accept: multipart/mixed, application/json
 ```
 
-### Defer Specification Support  
+### Defer Specification Support
 ```http
 Accept: application/json; deferSpec=20220824
 ```
@@ -98,7 +98,7 @@ Content-Type: application/json; charset=utf-8
 The server provides detailed logging for multipart operations:
 
 - **Chunk timing**: Individual part serialization time
-- **Data generation timing**: Time to resolve deferred data  
+- **Data generation timing**: Time to resolve deferred data
 - **Total streaming time**: Complete operation duration
 
 ### Error Boundaries
@@ -111,7 +111,7 @@ The server provides detailed logging for multipart operations:
 ### Modern Browsers
 All modern browsers support multipart responses:
 - **Chrome/Chromium**: Full support
-- **Firefox**: Full support  
+- **Firefox**: Full support
 - **Safari**: Full support
 - **Edge**: Full support
 
@@ -165,7 +165,7 @@ app.UseCors(policy => policy
     .AllowAnyMethod());
 ```
 
-**Content-Type Detection**  
+**Content-Type Detection**
 Ensure clients send proper `Accept` headers for multipart support.
 
 **Streaming Interruption**

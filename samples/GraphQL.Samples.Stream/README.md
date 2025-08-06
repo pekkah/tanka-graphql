@@ -1,26 +1,31 @@
 # GraphQL @stream Sample
 
-This sample demonstrates the setup and schema structure for the `@stream` directive with Tanka GraphQL. While the directive recognition and infrastructure are implemented, full streaming execution is currently in development.
+This sample demonstrates the `@stream` directive with Tanka GraphQL, showcasing true asynchronous streaming capabilities using `IAsyncEnumerable<T>` resolvers.
 
-The `@stream` directive will be particularly useful for:
+The `@stream` directive is particularly useful for:
 
 - Large lists that take time to fetch
-- Paginated data from databases
+- Paginated data from databases  
 - Search results that can be delivered as they're found
-- Real-time data feeds
+- Real-time data feeds from async sources
 
 ## What is @stream?
 
-The `@stream` directive will allow you to stream items in a list field as they become available, rather than waiting for the entire list to be fetched. This will provide:
+The `@stream` directive allows you to stream items in a list field as they become available, rather than waiting for the entire list to be fetched. This provides:
 
 1. **Faster Initial Response**: Users see the first items immediately
 2. **Progressive Loading**: Items appear as they're fetched
 3. **Better UX**: Reduced perceived latency for large datasets
-4. **Efficient Resource Usage**: Data can be fetched and sent in chunks
+4. **Efficient Resource Usage**: Memory-efficient streaming from async sources
 
-## Current Status
+## Implementation Features
 
-🚧 **Note**: The @stream directive infrastructure is implemented and the directive is recognized, but the full streaming execution is currently in development. The sample currently executes normally and returns complete lists, but demonstrates the schema structure and queries that will work with streaming once fully implemented.
+✅ **Fully Implemented**: This sample demonstrates working @stream functionality including:
+
+- **True Async Streaming**: Uses `IAsyncEnumerable<Product>` resolvers for genuine streaming
+- **HTTP Multipart Responses**: Implements GraphQL-over-HTTP multipart specification
+- **Incremental Delivery**: Items are delivered as they become available from the resolver
+- **Memory Efficient**: No buffering of entire collections in memory
 
 ## Running the Sample
 
@@ -163,26 +168,36 @@ When using `@stream`, the response is delivered as multipart/mixed with incremen
 
 ## Implementation Details
 
-The sample uses `IAsyncEnumerable<T>` to implement streaming:
+The sample uses `IAsyncEnumerable<Product>` to implement true streaming:
 
 ```csharp
 static async IAsyncEnumerable<Product> GetProducts(string? category, int limit)
 {
+    // Simulate database query with initial setup time
+    await Task.Delay(200);
+
     var products = GenerateProducts(100);
-    
+
+    // Filter by category if provided
+    if (!string.IsNullOrEmpty(category))
+    {
+        products = products.Where(p => p.Category.Name.Equals(category, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    // Stream products with per-item latency to simulate real streaming
     foreach (var product in products.Take(limit))
     {
-        await Task.Delay(100); // Simulate database latency
+        await Task.Delay(50); // Simulate per-item processing time
         yield return product;
     }
 }
 ```
 
 This allows Tanka GraphQL to:
-1. Start sending the response immediately
-2. Stream items as they're yielded
-3. Handle backpressure naturally
-4. Cancel enumeration if the client disconnects
+1. **True Streaming**: Items are streamed as they become available from the resolver
+2. **Memory Efficient**: No buffering of entire collections in memory
+3. **Cancellation Support**: Enumeration stops if the client disconnects
+4. **Backpressure Handling**: Natural async enumeration flow control
 
 ## Performance Considerations
 

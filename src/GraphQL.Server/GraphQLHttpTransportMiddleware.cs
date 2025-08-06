@@ -137,7 +137,7 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
         var chunkTotalStarted = Stopwatch.GetTimestamp();
         var chunkStarted = Stopwatch.GetTimestamp();
         Log.MultipartChunkWriting(logger, chunkCount, hasNext: true);
-        await WriteMultipartChunk(writer, boundary, firstResult, hasNext: true, cancellationToken);
+        await WriteMultipartChunk(httpResponse, writer, boundary, firstResult, hasNext: true, cancellationToken);
         await writer.FlushAsync(cancellationToken); // Flush immediately for streaming
         var chunkElapsed = Stopwatch.GetElapsedTime(chunkStarted);
         var chunkTotalElapsed = Stopwatch.GetElapsedTime(chunkTotalStarted);
@@ -164,7 +164,7 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
             chunkCount++;
             chunkStarted = Stopwatch.GetTimestamp();
             Log.MultipartChunkWriting(logger, chunkCount, hasNext: true);
-            await WriteMultipartChunk(writer, boundary, current, hasNext: true, cancellationToken);
+            await WriteMultipartChunk(httpResponse, writer, boundary, current, hasNext: true, cancellationToken);
             await writer.FlushAsync(cancellationToken); // Flush immediately for streaming
             chunkElapsed = Stopwatch.GetElapsedTime(chunkStarted);
             chunkTotalElapsed = Stopwatch.GetElapsedTime(chunkTotalStarted);
@@ -178,7 +178,7 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
         chunkTotalStarted = Stopwatch.GetTimestamp();
         chunkStarted = Stopwatch.GetTimestamp();
         Log.MultipartChunkWriting(logger, chunkCount, hasNext: false);
-        await WriteMultipartChunk(writer, boundary, current, hasNext: false, cancellationToken);
+        await WriteMultipartChunk(httpResponse, writer, boundary, current, hasNext: false, cancellationToken);
         chunkElapsed = Stopwatch.GetElapsedTime(chunkStarted);
         chunkTotalElapsed = Stopwatch.GetElapsedTime(chunkTotalStarted);
         Log.MultipartChunkSerialized(logger, chunkCount, chunkElapsed.TotalMilliseconds);
@@ -193,6 +193,7 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
     }
 
     private static async Task WriteMultipartChunk(
+        HttpResponse httpResponse,
         StreamWriter writer,
         string boundary,
         ExecutionResult result,
@@ -205,7 +206,18 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
         // Ensure hasNext is set correctly
         var responseWithNext = result with { HasNext = hasNext };
 
-        var json = JsonSerializer.Serialize(responseWithNext);
+        // Use a memory stream to capture JSON serialization with HttpResponse's configured options
+        using var memoryStream = new MemoryStream();
+        var originalBody = httpResponse.Body;
+        httpResponse.Body = memoryStream;
+
+        await httpResponse.WriteAsJsonAsync(responseWithNext, cancellationToken);
+
+        httpResponse.Body = originalBody;
+        memoryStream.Position = 0;
+        
+        using var reader = new StreamReader(memoryStream);
+        var json = await reader.ReadToEndAsync();
         await writer.WriteAsync(json);
     }
 

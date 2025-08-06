@@ -74,9 +74,9 @@ app.Run();
 
 // Resolvers
 
-static async Task<List<Product>> GetProducts(string? category, int limit)
+static async IAsyncEnumerable<Product> GetProducts(string? category, int limit)
 {
-    // Simulate database query with pagination
+    // Simulate database query with initial setup time
     await Task.Delay(200); // Simulate initial query setup time
 
     var products = GenerateProducts(100);
@@ -87,7 +87,12 @@ static async Task<List<Product>> GetProducts(string? category, int limit)
         products = products.Where(p => p.Category.Name.Equals(category, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 
-    return products.Take(limit).ToList();
+    // Stream products with per-item latency to simulate real streaming
+    foreach (var product in products.Take(limit))
+    {
+        await Task.Delay(50); // Simulate per-item processing time
+        yield return product;
+    }
 }
 
 static Product? GetProductById(string id)
