@@ -42,6 +42,7 @@ public interface IIncrementalDeliveryFeature
 public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
 {
     private readonly Channel<Func<Task<IncrementalPayload>>> _deferredWork;
+    private readonly object _lock = new();
     private volatile bool _isCompleted;
 
     public DefaultIncrementalDeliveryFeature()
@@ -53,20 +54,26 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
 
     public void RegisterDeferredWork(string? label, NodePath path, Func<Task<IncrementalPayload>> executionFunc)
     {
-        if (_isCompleted)
-            throw new InvalidOperationException("Cannot register deferred work after completion");
+        lock (_lock)
+        {
+            if (_isCompleted)
+                throw new InvalidOperationException("Cannot register deferred work after completion");
 
-        HasIncrementalWork = true;
-        _deferredWork.Writer.TryWrite(executionFunc);
+            HasIncrementalWork = true;
+            _deferredWork.Writer.TryWrite(executionFunc);
+        }
     }
 
     public void AddStreamItem(IncrementalPayload streamItem)
     {
-        if (_isCompleted)
-            throw new InvalidOperationException("Cannot add stream items after completion");
+        lock (_lock)
+        {
+            if (_isCompleted)
+                throw new InvalidOperationException("Cannot add stream items after completion");
 
-        HasIncrementalWork = true;
-        _deferredWork.Writer.TryWrite(() => Task.FromResult(streamItem));
+            HasIncrementalWork = true;
+            _deferredWork.Writer.TryWrite(() => Task.FromResult(streamItem));
+        }
     }
 
     public async IAsyncEnumerable<IncrementalPayload> GetDeferredResults([EnumeratorCancellation] CancellationToken cancellationToken)
@@ -80,7 +87,10 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
 
     public void Complete()
     {
-        _isCompleted = true;
-        _deferredWork.Writer.TryComplete();
+        lock (_lock)
+        {
+            _isCompleted = true;
+            _deferredWork.Writer.TryComplete();
+        }
     }
 }
