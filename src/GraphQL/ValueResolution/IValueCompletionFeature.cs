@@ -345,7 +345,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
         // Check for IAsyncEnumerable<T> FIRST for true streaming
         if (TryCompleteAsyncEnumerableStream(value, innerType, path, context, initialCount, label, out var asyncResult))
         {
-            return await asyncResult.Value;
+            return await asyncResult!.Value;
         }
 
         // Then check for regular IEnumerable
@@ -385,10 +385,10 @@ public class ValueCompletionFeature : IValueCompletionFeature
         {
             // Get the item type from IAsyncEnumerable<T>
             var itemType = asyncEnumerableInterface.GetGenericArguments()[0];
-            
+
             // Get or create the compiled delegate for this type
             var streamMethod = AsyncEnumerableStreamCache.GetOrCreateStreamMethod(itemType);
-            
+
             // Invoke the compiled delegate
             result = streamMethod(this, value, innerType, path, context, initialCount, label);
             return true;
@@ -400,21 +400,37 @@ public class ValueCompletionFeature : IValueCompletionFeature
     // Cache for compiled async enumerable streaming methods
     private static class AsyncEnumerableStreamCache
     {
-        private static readonly ConcurrentDictionary<Type, Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>>> 
+        private static readonly ConcurrentDictionary<Type, Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>>>
             Cache = new();
+        private static readonly object _cacheLock = new();
+        private const int MaxCacheSize = 1000;
 
-        public static Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>> 
+        public static Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>>
             GetOrCreateStreamMethod(Type itemType)
         {
-            return Cache.GetOrAdd(itemType, CreateStreamMethod);
+            return Cache.GetOrAdd(itemType, type =>
+            {
+                lock (_cacheLock)
+                {
+                    if (Cache.Count >= MaxCacheSize)
+                    {
+                        var keysToRemove = Cache.Keys.Take(Cache.Count - MaxCacheSize + 100).ToList();
+                        foreach (var key in keysToRemove)
+                        {
+                            Cache.TryRemove(key, out _);
+                        }
+                    }
+                }
+                return CreateStreamMethod(type);
+            });
         }
 
-        private static Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>> 
+        private static Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>>
             CreateStreamMethod(Type itemType)
         {
             // Get the generic method definition
             var methodInfo = typeof(ValueCompletionFeature)
-                .GetMethod(nameof(CompleteAsyncEnumerableStreamGenericAsync), 
+                .GetMethod(nameof(CompleteAsyncEnumerableStreamGenericAsync),
                     BindingFlags.NonPublic | BindingFlags.Instance)!
                 .MakeGenericMethod(itemType);
 
@@ -630,14 +646,14 @@ public class ValueCompletionFeature : IValueCompletionFeature
             }
             catch (Exception ex)
             {
-                incrementalFeature.RegisterDeferredWork(label, path, async () =>
+                incrementalFeature.RegisterDeferredWork(label, path, () =>
                 {
-                    return new IncrementalPayload
+                    return Task.FromResult(new IncrementalPayload
                     {
                         Path = path,
                         Label = label,
                         Errors = new[] { new ExecutionError { Message = ex.Message, Path = path.Segments.ToArray() } }
-                    };
+                    });
                 });
             }
             finally
