@@ -402,6 +402,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
     {
         private static readonly ConcurrentDictionary<Type, Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>>>
             Cache = new();
+        private static readonly object _cacheLock = new();
         private const int MaxCacheSize = 1000;
 
         public static Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, int, string?, ValueTask<object?>>
@@ -409,12 +410,15 @@ public class ValueCompletionFeature : IValueCompletionFeature
         {
             return Cache.GetOrAdd(itemType, type =>
             {
-                if (Cache.Count >= MaxCacheSize)
+                lock (_cacheLock)
                 {
-                    var keysToRemove = Cache.Keys.Take(Cache.Count - MaxCacheSize + 100).ToList();
-                    foreach (var key in keysToRemove)
+                    if (Cache.Count >= MaxCacheSize)
                     {
-                        Cache.TryRemove(key, out _);
+                        var keysToRemove = Cache.Keys.Take(Cache.Count - MaxCacheSize + 100).ToList();
+                        foreach (var key in keysToRemove)
+                        {
+                            Cache.TryRemove(key, out _);
+                        }
                     }
                 }
                 return CreateStreamMethod(type);
