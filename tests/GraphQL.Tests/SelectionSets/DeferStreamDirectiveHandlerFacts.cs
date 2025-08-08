@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
@@ -12,7 +13,7 @@ namespace Tanka.GraphQL.Tests.SelectionSets;
 public class DeferStreamDirectiveHandlerFacts
 {
     [Fact]
-    public void DeferDirectiveHandler_Should_Store_Directive_With_Label()
+    public async Task DeferDirectiveHandler_Should_Store_Directive_With_Label()
     {
         // Given
         var handler = new DeferDirectiveHandler();
@@ -26,7 +27,7 @@ public class DeferStreamDirectiveHandlerFacts
 
         var context = new DirectiveContext
         {
-            Schema = new SchemaBuilder().Add("type Query { hello: String }").Build(new SchemaBuildOptions()).Result,
+            Schema = await new SchemaBuilder().Add("type Query { hello: String }").Build(new SchemaBuildOptions()),
             ObjectDefinition = new ObjectDefinition("Test", null, null, null, null),
             Selection = new InlineFragment(null, null, new SelectionSet(new ISelection[0]), null),
             Directive = directive,
@@ -53,7 +54,7 @@ public class DeferStreamDirectiveHandlerFacts
     }
 
     [Fact]
-    public void DeferDirectiveHandler_Should_Handle_If_False()
+    public async Task DeferDirectiveHandler_Should_Handle_If_False()
     {
         // Given
         var handler = new DeferDirectiveHandler();
@@ -67,7 +68,7 @@ public class DeferStreamDirectiveHandlerFacts
 
         var context = new DirectiveContext
         {
-            Schema = new SchemaBuilder().Add("type Query { hello: String }").Build(new SchemaBuildOptions()).Result,
+            Schema = await new SchemaBuilder().Add("type Query { hello: String }").Build(new SchemaBuildOptions()),
             ObjectDefinition = new ObjectDefinition("Test", null, null, null, null),
             Selection = new InlineFragment(null, null, new SelectionSet(new ISelection[0]), null),
             Directive = directive,
@@ -84,7 +85,7 @@ public class DeferStreamDirectiveHandlerFacts
     }
 
     [Fact]
-    public void StreamDirectiveHandler_Should_Store_Directive_With_Label_And_InitialCount()
+    public async Task StreamDirectiveHandler_Should_Store_Directive_With_Label_And_InitialCount()
     {
         // Given
         var handler = new StreamDirectiveHandler();
@@ -99,7 +100,7 @@ public class DeferStreamDirectiveHandlerFacts
 
         var context = new DirectiveContext
         {
-            Schema = new SchemaBuilder().Add("type Query { hello: String }").Build(new SchemaBuildOptions()).Result,
+            Schema = await new SchemaBuilder().Add("type Query { hello: String }").Build(new SchemaBuildOptions()),
             ObjectDefinition = new ObjectDefinition("Test", null, null, null, null),
             Selection = new FieldSelection("", "testField", null, null, null, null),
             Directive = directive,

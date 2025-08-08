@@ -272,7 +272,7 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
         }
 
         await Task.WhenAll(tasks.Values);
-        
+
         // Safe to access task results after Task.WhenAll completes
         var results = new Dictionary<string, object?>();
         foreach (var (key, task) in tasks)

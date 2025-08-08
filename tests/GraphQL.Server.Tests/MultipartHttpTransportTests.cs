@@ -77,7 +77,7 @@ public class MultipartHttpTransportTests
     }
 
     [Fact]
-    public async Task WriteMultipartStreamingResponse_Should_Write_Correct_Boundary_And_Content_Type()
+    public void WriteMultipartStreamingResponse_Should_Write_Correct_Boundary_And_Content_Type()
     {
         // Arrange - Skip this test for now due to ExecutionResult constructor issues
         // We'll focus on testing the parts we can isolate
@@ -85,7 +85,7 @@ public class MultipartHttpTransportTests
     }
 
     [Fact]
-    public async Task WriteMultipartStreamingResponse_Should_Handle_Multiple_Results_With_HasNext()
+    public void WriteMultipartStreamingResponse_Should_Handle_Multiple_Results_With_HasNext()
     {
         // Skip this test for now due to ExecutionResult constructor issues
         Assert.True(true, "Placeholder test - need to resolve ExecutionResult construction");
