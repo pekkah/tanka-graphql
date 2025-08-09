@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language;
@@ -587,80 +588,81 @@ public class ValueCompletionFeature : IValueCompletionFeature
         string? label,
         IIncrementalDeliveryFeature incrementalFeature)
     {
-        // Process the current item that we already read
-        var currentItem = (object?)enumerator.Current;
-        var currentPath = path.Fork().Append(startIndex);
+        // Register the entire remaining stream as a single async enumerable
+        incrementalFeature.RegisterDeferredStream(label, path, () => ProcessRemainingAsyncItemsStream(
+            enumerator, innerType, path, context, startIndex, label));
+    }
 
-        incrementalFeature.RegisterDeferredWork(label, currentPath, async () =>
+    private async IAsyncEnumerable<IncrementalPayload> ProcessRemainingAsyncItemsStream<T>(
+        IAsyncEnumerator<T> enumerator,
+        TypeBase innerType,
+        NodePath path,
+        ResolverContext context,
+        int startIndex,
+        string? label,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var itemIndex = startIndex;
+        
+        await using (enumerator) // Ensures disposal
         {
-            var completedItem = await CompleteValueAsync(
-                currentItem,
-                innerType,
-                context,
-                currentPath);
+            // Process the current item that we already read
+            var currentItem = (object?)enumerator.Current;
+            var currentPath = path.Fork().Append(itemIndex);
 
+            var currentPayload = await ProcessSingleItemSafely(currentItem, innerType, context, currentPath, label);
+            if (currentPayload != null)
+                yield return currentPayload;
+
+            itemIndex++;
+
+            // Process remaining items
+            while (await enumerator.MoveNextAsync())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                var current = (object?)enumerator.Current;
+                var streamPath = path.Fork().Append(itemIndex);
+
+                // Yield control to allow other tasks to run between item processing
+                await Task.Yield();
+
+                var payload = await ProcessSingleItemSafely(current, innerType, context, streamPath, label);
+                if (payload != null)
+                    yield return payload;
+
+                itemIndex++;
+            }
+        }
+    }
+
+    private async Task<IncrementalPayload?> ProcessSingleItemSafely(
+        object? item,
+        TypeBase innerType,
+        ResolverContext context,
+        NodePath itemPath,
+        string? label)
+    {
+        try
+        {
+            var completedItem = await CompleteValueAsync(item, innerType, context, itemPath);
+            
             return new IncrementalPayload
             {
-                Path = currentPath,
+                Path = itemPath,
                 Items = new[] { completedItem },
                 Label = label
             };
-        });
-
-        // Register each subsequent item with slight delay for true streaming
-        var itemIndex = startIndex + 1;
-        Task.Run(async () =>
+        }
+        catch (Exception ex)
         {
-            try
+            return new IncrementalPayload
             {
-                while (await enumerator.MoveNextAsync())
-                {
-                    var current = (object?)enumerator.Current;
-                    var streamPath = path.Fork().Append(itemIndex);
-
-                    // Capture variables for closure
-                    var capturedCurrent = current;
-                    var capturedPath = streamPath;
-
-                    // Yield control to allow other tasks to run between item processing
-                    await Task.Yield();
-
-                    incrementalFeature.RegisterDeferredWork(label, capturedPath, async () =>
-                    {
-                        var completedItem = await CompleteValueAsync(
-                            capturedCurrent,
-                            innerType,
-                            context,
-                            capturedPath);
-
-                        return new IncrementalPayload
-                        {
-                            Path = capturedPath,
-                            Items = new[] { completedItem },
-                            Label = label
-                        };
-                    });
-
-                    itemIndex++;
-                }
-            }
-            catch (Exception ex)
-            {
-                incrementalFeature.RegisterDeferredWork(label, path, () =>
-                {
-                    return Task.FromResult(new IncrementalPayload
-                    {
-                        Path = path,
-                        Label = label,
-                        Errors = new[] { new ExecutionError { Message = ex.Message, Path = path.Segments.ToArray() } }
-                    });
-                });
-            }
-            finally
-            {
-                await enumerator.DisposeAsync();
-            }
-        }, context.QueryContext.RequestCancelled);
+                Path = itemPath,
+                Label = label,
+                Errors = new[] { new ExecutionError { Message = ex.Message, Path = itemPath.Segments.ToArray() } }
+            };
+        }
     }
 
     private void RegisterRemainingListItems(
@@ -672,26 +674,32 @@ public class ValueCompletionFeature : IValueCompletionFeature
         string? label,
         IIncrementalDeliveryFeature incrementalFeature)
     {
+        // Register the remaining list items as a single stream
+        incrementalFeature.RegisterDeferredStream(label, path, () => ProcessRemainingListItemsStream(
+            itemList, initialCount, innerType, path, context, label));
+    }
+
+    private async IAsyncEnumerable<IncrementalPayload> ProcessRemainingListItemsStream(
+        IList<object?> itemList,
+        int initialCount,
+        TypeBase innerType,
+        NodePath path,
+        ResolverContext context,
+        string? label,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
         for (int i = initialCount; i < itemList.Count; i++)
         {
-            var itemIndex = i; // Capture for closure
-            var streamPath = path.Fork().Append(itemIndex);
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            var streamPath = path.Fork().Append(i);
 
-            incrementalFeature.RegisterDeferredWork(label, streamPath, async () =>
-            {
-                var completedItem = await CompleteValueAsync(
-                    itemList[itemIndex],
-                    innerType,
-                    context,
-                    streamPath);
+            var payload = await ProcessSingleItemSafely(itemList[i], innerType, context, streamPath, label);
+            if (payload != null)
+                yield return payload;
 
-                return new IncrementalPayload
-                {
-                    Path = streamPath,
-                    Items = new[] { completedItem },
-                    Label = label
-                };
-            });
+            // Yield control to allow other work to interleave
+            await Task.Yield();
         }
     }
 }
