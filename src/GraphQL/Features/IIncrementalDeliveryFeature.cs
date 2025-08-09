@@ -40,7 +40,7 @@ public interface IIncrementalDeliveryFeature
 /// </summary>
 public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
 {
-    private readonly List<Func<IAsyncEnumerable<IncrementalPayload>>> _deferredStreams = new();
+    private readonly List<(string? Label, NodePath Path, Func<IAsyncEnumerable<IncrementalPayload>> StreamFunc)> _deferredStreams = new();
     private readonly object _lock = new();
     private volatile bool _isCompleted;
 
@@ -59,7 +59,7 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
         {
             HasIncrementalWork = true;
             // Wrap single payload function as async enumerable
-            _deferredStreams.Add(() => WrapSinglePayload(executionFunc));
+            _deferredStreams.Add((label, path, () => WrapSinglePayload(executionFunc)));
         }
     }
 
@@ -71,33 +71,34 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
         lock (_lock)
         {
             HasIncrementalWork = true;
-            _deferredStreams.Add(streamFunc);
+            _deferredStreams.Add((label, path, streamFunc));
         }
     }
 
     public async IAsyncEnumerable<IncrementalPayload> GetDeferredResults([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var activeStreams = new List<IAsyncEnumerator<IncrementalPayload>>();
-        var streamTasks = new List<Task<(int StreamIndex, IncrementalPayload? Payload, bool HasMore)>>();
+        var activeStreams = new List<(string? Label, NodePath Path, IAsyncEnumerator<IncrementalPayload> Enumerator)>();
+        var streamTasks = new HashSet<Task<(int StreamIndex, IncrementalPayload? Payload, bool HasMore)>>();
 
         // Get snapshot of registered streams
-        Func<IAsyncEnumerable<IncrementalPayload>>[] streamFunctions;
+        (string? Label, NodePath Path, Func<IAsyncEnumerable<IncrementalPayload>> StreamFunc)[] streamData;
         lock (_lock)
         {
-            streamFunctions = _deferredStreams.ToArray();
+            streamData = _deferredStreams.ToArray();
         }
 
         try
         {
             // Start all streams and get their first items
-            for (int streamIndex = 0; streamIndex < streamFunctions.Length; streamIndex++)
+            for (int streamIndex = 0; streamIndex < streamData.Length; streamIndex++)
             {
-                var stream = streamFunctions[streamIndex]();
+                var (label, path, streamFunc) = streamData[streamIndex];
+                var stream = streamFunc();
                 var enumerator = stream.GetAsyncEnumerator(cancellationToken);
-                activeStreams.Add(enumerator);
+                activeStreams.Add((label, path, enumerator));
                 
                 // Start reading from this stream
-                streamTasks.Add(ReadNextFromStream(streamIndex, enumerator, cancellationToken));
+                streamTasks.Add(ReadNextFromStream(streamIndex, path, enumerator, cancellationToken));
             }
 
             // Process payloads as they arrive from any stream
@@ -115,14 +116,15 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
                 // If this stream has more items, start reading the next one
                 if (hasMore)
                 {
-                    streamTasks.Add(ReadNextFromStream(completedStreamIndex, activeStreams[completedStreamIndex], cancellationToken));
+                    var (_, path, enumerator) = activeStreams[completedStreamIndex];
+                    streamTasks.Add(ReadNextFromStream(completedStreamIndex, path, enumerator, cancellationToken));
                 }
             }
         }
         finally
         {
             // Clean up all enumerators
-            foreach (var enumerator in activeStreams)
+            foreach (var (_, _, enumerator) in activeStreams)
             {
                 await enumerator.DisposeAsync();
             }
@@ -131,6 +133,7 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
 
     private static async Task<(int StreamIndex, IncrementalPayload? Payload, bool HasMore)> ReadNextFromStream(
         int streamIndex, 
+        NodePath path,
         IAsyncEnumerator<IncrementalPayload> enumerator, 
         CancellationToken cancellationToken)
     {
@@ -151,10 +154,11 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
         }
         catch (Exception ex)
         {
-            // Create an error payload for stream failures
+            // Create an error payload for stream failures with proper path information
             var errorPayload = new IncrementalPayload
             {
-                Errors = new[] { new ExecutionError { Message = ex.Message } }
+                Path = path,
+                Errors = new[] { new ExecutionError { Message = ex.Message, Path = path.Segments.ToArray() } }
             };
             return (streamIndex, errorPayload, false);
         }
