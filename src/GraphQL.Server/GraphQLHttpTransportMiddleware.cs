@@ -42,7 +42,7 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
             await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
             {
                 Title = "Could not parse GraphQL request from body of the request",
-                Detail = x.Message // could this leak?
+                Detail = "Invalid request format or content"
             });
 
             Log.RequestParseError(logger, x);
@@ -215,7 +215,7 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
 
         httpResponse.Body = originalBody;
         memoryStream.Position = 0;
-        
+
         using var reader = new StreamReader(memoryStream);
         var json = await reader.ReadToEndAsync();
         await writer.WriteAsync(json);
