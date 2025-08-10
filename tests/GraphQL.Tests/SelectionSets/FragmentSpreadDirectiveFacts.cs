@@ -197,4 +197,152 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
         Assert.Contains("field1", result.Fields.Keys);
         Assert.Contains("field2", result.Fields.Keys);
     }
+
+    [Fact]
+    public void CollectFields_fragment_spread_with_unknown_directive()
+    {
+        // Given - fragment spread with unknown directive
+        ExecutableDocument document = """
+            query {
+                field1
+                ...TestFragment @unknownDirective
+            }
+            fragment TestFragment on Query {
+                field2
+            }
+            """;
+            
+        var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
+        var queryType = _schema.Query!;
+        var selectionSet = document.OperationDefinitions[0].SelectionSet;
+
+        // When
+        var result = fieldCollector.CollectFields(
+            _schema,
+            document,
+            queryType,
+            selectionSet);
+
+        // Then - both fields should be collected, unknown directive stored as metadata
+        Assert.Equal(2, result.Fields.Count);
+        Assert.Contains("field1", result.Fields.Keys);
+        Assert.Contains("field2", result.Fields.Keys);
+        
+        // Unknown directive should be stored in metadata
+        Assert.NotNull(result.FieldMetadata);
+        Assert.True(result.FieldMetadata.ContainsKey("field2"));
+        Assert.True(result.FieldMetadata["field2"].ContainsKey("unknownDirective"));
+    }
+
+    [Fact]
+    public void CollectFields_fragment_spread_with_defer_and_if_false()
+    {
+        // Given - @defer(if: false) on fragment spread  
+        ExecutableDocument document = """
+            query {
+                field1
+                ...TestFragment @defer(if: false)
+            }
+            fragment TestFragment on Query {
+                deferredField
+            }
+            """;
+            
+        var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
+        var queryType = _schema.Query!;
+        var selectionSet = document.OperationDefinitions[0].SelectionSet;
+
+        // When
+        var result = fieldCollector.CollectFields(
+            _schema,
+            document,
+            queryType,
+            selectionSet);
+
+        // Then - both fields should be collected, but no defer metadata since if=false
+        Assert.Equal(2, result.Fields.Count);
+        Assert.Contains("field1", result.Fields.Keys);
+        Assert.Contains("deferredField", result.Fields.Keys);
+        
+        // Should not have defer metadata since if=false
+        if (result.FieldMetadata?.ContainsKey("deferredField") == true)
+        {
+            Assert.False(result.FieldMetadata["deferredField"].ContainsKey("defer"));
+        }
+    }
+
+    [Fact]
+    public void CollectFields_fragment_spread_with_multiple_directives()
+    {
+        // Given - fragment spread with multiple directives
+        ExecutableDocument document = """
+            query {
+                field1
+                ...TestFragment @defer @include(if: true)
+            }
+            fragment TestFragment on Query {
+                field2
+            }
+            """;
+            
+        var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
+        var queryType = _schema.Query!;
+        var selectionSet = document.OperationDefinitions[0].SelectionSet;
+
+        // When
+        var result = fieldCollector.CollectFields(
+            _schema,
+            document,
+            queryType,
+            selectionSet);
+
+        // Then - both fields should be collected with defer metadata
+        Assert.Equal(2, result.Fields.Count);
+        Assert.Contains("field1", result.Fields.Keys);
+        Assert.Contains("field2", result.Fields.Keys);
+        
+        // Should have defer metadata
+        Assert.NotNull(result.FieldMetadata);
+        Assert.True(result.FieldMetadata.ContainsKey("field2"));
+        Assert.True(result.FieldMetadata["field2"].ContainsKey("defer"));
+    }
+
+    [Fact]
+    public void CollectFields_nested_fragment_spread_with_directives()
+    {
+        // Given - nested fragment with directives on spread
+        ExecutableDocument document = """
+            query {
+                field1
+                ...OuterFragment
+            }
+            fragment OuterFragment on Query {
+                ...InnerFragment @defer
+            }
+            fragment InnerFragment on Query {
+                deferredField
+            }
+            """;
+            
+        var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
+        var queryType = _schema.Query!;
+        var selectionSet = document.OperationDefinitions[0].SelectionSet;
+
+        // When
+        var result = fieldCollector.CollectFields(
+            _schema,
+            document,
+            queryType,
+            selectionSet);
+
+        // Then - both fields should be collected with defer metadata propagated
+        Assert.Equal(2, result.Fields.Count);
+        Assert.Contains("field1", result.Fields.Keys);
+        Assert.Contains("deferredField", result.Fields.Keys);
+        
+        // Should have defer metadata from nested fragment spread
+        Assert.NotNull(result.FieldMetadata);
+        Assert.True(result.FieldMetadata.ContainsKey("deferredField"));
+        Assert.True(result.FieldMetadata["deferredField"].ContainsKey("defer"));
+    }
 }
