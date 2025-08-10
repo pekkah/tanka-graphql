@@ -69,7 +69,30 @@ public partial class GraphQLHttpTransportMiddleware(ILogger<GraphQLHttpTransport
         {
             ExecutionResult firstResult = enumerator.Current;
 
-            // Check if there are more results
+            // Check if this result indicates more are coming
+            if (firstResult.HasNext == true)
+            {
+                if (SupportsMultipart(httpContext.Request, logger))
+                {
+                    Log.MultipartStreamingStarted(logger);
+                    // Stream all results using the existing enumerator  
+                    await WriteMultipartStreamingResponse(httpContext.Response, firstResult, enumerator, context.RequestCancelled, logger);
+                    Log.MultipartStreamingCompleted(logger);
+                }
+                else
+                {
+                    // Legacy behavior - reject multiple results
+                    Log.MultipleResultsError(logger);
+                    httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
+                    {
+                        Title = "HttpTransport does not support multiple execution results"
+                    });
+                }
+                return;
+            }
+
+            // Check if there are more results immediately available
             if (await enumerator.MoveNextAsync())
             {
                 if (SupportsMultipart(httpContext.Request, logger))

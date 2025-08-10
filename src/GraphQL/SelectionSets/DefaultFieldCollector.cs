@@ -123,6 +123,55 @@ public class DefaultFieldCollector : IFieldCollector
                     coercedVariableValues,
                     visitedFragments);
 
+                // Process directives on the fragment spread itself
+                var fragmentSpreadDirectives = Enumerable.ToList<Directive>(GetDirectives(fragmentSpread));
+                var fragmentSpreadMetadata = new Dictionary<string, object>();
+
+                // Process fragment spread directives
+                bool includeFragmentSpread = true;
+                foreach (Directive directive in fragmentSpreadDirectives)
+                {
+                    var handler = _serviceProvider.GetKeyedService<IDirectiveHandler>(directive.Name.Value);
+                    if (handler != null)
+                    {
+                        var directiveContext = new DirectiveContext
+                        {
+                            Schema = schema,
+                            ObjectDefinition = objectDefinition,
+                            Selection = fragmentSpread,
+                            Directive = directive,
+                            CoercedVariableValues = coercedVariableValues
+                        };
+
+                        var result = handler.Handle(directiveContext);
+                        if (result.Handled)
+                        {
+                            if (!result.Include)
+                            {
+                                includeFragmentSpread = false;
+                                break;
+                            }
+
+                            // Collect metadata from directive handlers
+                            if (result.Metadata != null)
+                            {
+                                foreach (var (key, value) in result.Metadata)
+                                {
+                                    fragmentSpreadMetadata[key] = value;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Store unknown directive for later processing (like @defer)
+                        fragmentSpreadMetadata[directive.Name] = directive;
+                    }
+                }
+
+                if (!includeFragmentSpread)
+                    continue;
+
                 foreach (KeyValuePair<string, List<FieldSelection>> fragmentGroup in fragmentResult.Fields)
                 {
                     string responseKey = fragmentGroup.Key;
@@ -132,23 +181,32 @@ public class DefaultFieldCollector : IFieldCollector
 
                     groupedFields[responseKey].AddRange(fragmentGroup.Value);
 
-                    // Merge fragment metadata if any
+                    // Start with fragment spread metadata (e.g., @defer on fragment spread)
+                    var combinedMetadata = new Dictionary<string, object>(fragmentSpreadMetadata);
+
+                    // Merge fragment field metadata if any
                     if (fragmentResult.FieldMetadata?.TryGetValue(responseKey, out var fragmentMetadata) == true)
                     {
-                        if (fieldMetadata.TryGetValue(responseKey, out var existingMetadata))
+                        foreach (var (key, value) in fragmentMetadata)
                         {
-                            // Merge metadata - fragment metadata takes precedence
-                            var mergedMetadata = new Dictionary<string, object>(existingMetadata);
-                            foreach (var (key, value) in fragmentMetadata)
-                            {
-                                mergedMetadata[key] = value;
-                            }
-                            fieldMetadata[responseKey] = mergedMetadata;
+                            combinedMetadata[key] = value;
                         }
-                        else
+                    }
+
+                    // Merge with existing field metadata if any
+                    if (fieldMetadata.TryGetValue(responseKey, out var existingMetadata))
+                    {
+                        // Merge metadata - fragment spread metadata takes precedence for directives like @defer
+                        var mergedMetadata = new Dictionary<string, object>(existingMetadata);
+                        foreach (var (key, value) in combinedMetadata)
                         {
-                            fieldMetadata[responseKey] = fragmentMetadata;
+                            mergedMetadata[key] = value;
                         }
+                        fieldMetadata[responseKey] = mergedMetadata;
+                    }
+                    else if (combinedMetadata.Any())
+                    {
+                        fieldMetadata[responseKey] = combinedMetadata;
                     }
                 }
             }
