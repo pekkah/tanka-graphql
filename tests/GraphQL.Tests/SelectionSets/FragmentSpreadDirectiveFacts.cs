@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language;
@@ -10,23 +11,21 @@ using Xunit;
 
 namespace Tanka.GraphQL.Tests.SelectionSets;
 
-public class FragmentSpreadDirectiveFacts
+public class FragmentSpreadDirectiveFacts : IAsyncLifetime
 {
-    private readonly ISchema _schema;
-    private readonly IServiceProvider _serviceProvider;
+    private ISchema _schema = null!;
+    private IServiceProvider _serviceProvider = null!;
 
-    public FragmentSpreadDirectiveFacts()
+    public async Task InitializeAsync()
     {
-        _schema = new ExecutableSchemaBuilder()
+        _schema = await new ExecutableSchemaBuilder()
             .Add("Query", new()
             {
                 { "field1: String", b => b.ResolveAs("value1") },
                 { "field2: String", b => b.ResolveAs("value2") },
                 { "deferredField: String", b => b.ResolveAs("deferred") }
             })
-            .Build()
-            .GetAwaiter()
-            .GetResult();
+            .Build();
 
         var services = new ServiceCollection();
         services.AddSingleton<IFieldCollector, DefaultFieldCollector>();
@@ -36,6 +35,8 @@ public class FragmentSpreadDirectiveFacts
         
         _serviceProvider = services.BuildServiceProvider();
     }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public void CollectFields_fragment_spread_with_defer_directive()
