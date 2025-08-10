@@ -7,7 +7,7 @@ of ASP.NET Core and has transports for HTTP and WebSockets.
 
 Server is available as a NuGet package:
 
-```csharp
+```bash
 dotnet add package Tanka.GraphQL.Server
 ```
 
