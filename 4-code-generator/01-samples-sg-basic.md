@@ -7,7 +7,7 @@ WARN: This feature is still in preview and may change in the future.
 
 Install package
 ```bash
-dotnet add Tanka.GraphQL.Server.SourceGenerators
+dotnet add package Tanka.GraphQL.Server.SourceGenerators
 ```
 
 ### Tanka.GraphQL.Samples.SG.Basic

@@ -1,6 +1,6 @@
 ## Server
 
-Tanka provides server components in `Tanka.GraphQL.server` NuGet
+Tanka provides server components in `Tanka.GraphQL.Server` NuGet
 package. It can be used to get up and running or if more control is
 required then you can implement your own server.
 
