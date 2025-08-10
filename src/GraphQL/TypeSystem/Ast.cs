@@ -33,8 +33,8 @@ public static class Ast
     }
 
     public static object? GetDirectiveArgumentValue(
-        Directive directive, 
-        string argumentName, 
+        Directive directive,
+        string argumentName,
         IReadOnlyDictionary<string, object?>? coercedVariableValues)
     {
         var argument = directive.Arguments?.FirstOrDefault(a => a.Name.Value == argumentName);

@@ -1,12 +1,15 @@
 using System;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.SelectionSets;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests.SelectionSets;
@@ -32,7 +35,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
         services.AddKeyedSingleton<IDirectiveHandler>("skip", new SkipDirectiveHandler());
         services.AddKeyedSingleton<IDirectiveHandler>("include", new IncludeDirectiveHandler());
         services.AddKeyedSingleton<IDirectiveHandler>("defer", new DeferDirectiveHandler());
-        
+
         _serviceProvider = services.BuildServiceProvider();
     }
 
@@ -51,7 +54,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
                 deferredField
             }
             """;
-            
+
         var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
         var queryType = _schema.Query!;
         var selectionSet = document.OperationDefinitions[0].SelectionSet;
@@ -67,7 +70,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
         Assert.Equal(2, result.Fields.Count);
         Assert.Contains("field1", result.Fields.Keys);
         Assert.Contains("deferredField", result.Fields.Keys);
-        
+
         // And the deferred field should have @defer metadata
         Assert.NotNull(result.FieldMetadata);
         Assert.True(result.FieldMetadata.ContainsKey("deferredField"));
@@ -87,7 +90,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
                 field2
             }
             """;
-            
+
         var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
         var queryType = _schema.Query!;
         var selectionSet = document.OperationDefinitions[0].SelectionSet;
@@ -118,7 +121,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
                 field2
             }
             """;
-            
+
         var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
         var queryType = _schema.Query!;
         var selectionSet = document.OperationDefinitions[0].SelectionSet;
@@ -149,7 +152,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
                 field2
             }
             """;
-            
+
         var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
         var queryType = _schema.Query!;
         var selectionSet = document.OperationDefinitions[0].SelectionSet;
@@ -180,7 +183,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
                 field2
             }
             """;
-            
+
         var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
         var queryType = _schema.Query!;
         var selectionSet = document.OperationDefinitions[0].SelectionSet;
@@ -211,7 +214,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
                 field2
             }
             """;
-            
+
         var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
         var queryType = _schema.Query!;
         var selectionSet = document.OperationDefinitions[0].SelectionSet;
@@ -227,7 +230,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
         Assert.Equal(2, result.Fields.Count);
         Assert.Contains("field1", result.Fields.Keys);
         Assert.Contains("field2", result.Fields.Keys);
-        
+
         // Unknown directive should be stored in metadata
         Assert.NotNull(result.FieldMetadata);
         Assert.True(result.FieldMetadata.ContainsKey("field2"));
@@ -247,7 +250,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
                 deferredField
             }
             """;
-            
+
         var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
         var queryType = _schema.Query!;
         var selectionSet = document.OperationDefinitions[0].SelectionSet;
@@ -263,7 +266,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
         Assert.Equal(2, result.Fields.Count);
         Assert.Contains("field1", result.Fields.Keys);
         Assert.Contains("deferredField", result.Fields.Keys);
-        
+
         // Should not have defer metadata since if=false
         if (result.FieldMetadata?.ContainsKey("deferredField") == true)
         {
@@ -284,7 +287,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
                 field2
             }
             """;
-            
+
         var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
         var queryType = _schema.Query!;
         var selectionSet = document.OperationDefinitions[0].SelectionSet;
@@ -300,7 +303,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
         Assert.Equal(2, result.Fields.Count);
         Assert.Contains("field1", result.Fields.Keys);
         Assert.Contains("field2", result.Fields.Keys);
-        
+
         // Should have defer metadata
         Assert.NotNull(result.FieldMetadata);
         Assert.True(result.FieldMetadata.ContainsKey("field2"));
@@ -323,7 +326,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
                 deferredField
             }
             """;
-            
+
         var fieldCollector = _serviceProvider.GetRequiredService<IFieldCollector>();
         var queryType = _schema.Query!;
         var selectionSet = document.OperationDefinitions[0].SelectionSet;
@@ -339,7 +342,7 @@ public class FragmentSpreadDirectiveFacts : IAsyncLifetime
         Assert.Equal(2, result.Fields.Count);
         Assert.Contains("field1", result.Fields.Keys);
         Assert.Contains("deferredField", result.Fields.Keys);
-        
+
         // Should have defer metadata from nested fragment spread
         Assert.NotNull(result.FieldMetadata);
         Assert.True(result.FieldMetadata.ContainsKey("deferredField"));

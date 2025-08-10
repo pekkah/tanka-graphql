@@ -86,12 +86,13 @@ public static class DefaultFieldDelegateBuilderExtensions
         return builder.Use(next => async context =>
         {
             // Check if this field has @stream directive and pass initialCount to value completion
-            if (context.FieldMetadata?.ContainsKey("stream") == true && context.Field is not null)
+            if (context.Field is not null
+                && context.FieldMetadata?.TryGetValue("stream", out var streamValue) == true
+                && streamValue is Directive streamDirective)
             {
-                var streamDirective = (Directive)context.FieldMetadata["stream"];
                 var initialCount = Ast.GetDirectiveArgumentValue(streamDirective, "initialCount", context.QueryContext.CoercedVariableValues) as int? ?? 0;
                 var label = Ast.GetDirectiveArgumentValue(streamDirective, "label", context.QueryContext.CoercedVariableValues) as string;
-                
+
                 // Complete value with stream parameters
                 await context.QueryContext.CompleteValueAsync(context, context.Field.Type, context.Path, initialCount, label);
             }

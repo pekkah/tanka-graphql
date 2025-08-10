@@ -96,7 +96,7 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
                 var stream = streamFunc();
                 var enumerator = stream.GetAsyncEnumerator(cancellationToken);
                 activeStreams.Add((label, path, enumerator));
-                
+
                 // Start reading from this stream
                 streamTasks.Add(ReadNextFromStream(streamIndex, path, enumerator, cancellationToken));
             }
@@ -132,9 +132,9 @@ public class DefaultIncrementalDeliveryFeature : IIncrementalDeliveryFeature
     }
 
     private static async Task<(int StreamIndex, IncrementalPayload? Payload, bool HasMore)> ReadNextFromStream(
-        int streamIndex, 
+        int streamIndex,
         NodePath path,
-        IAsyncEnumerator<IncrementalPayload> enumerator, 
+        IAsyncEnumerator<IncrementalPayload> enumerator,
         CancellationToken cancellationToken)
     {
         try
