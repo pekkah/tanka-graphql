@@ -3,6 +3,24 @@
 ###############################################################################
 * text=auto
 
+# Explicitly enforce LF line endings for source code files to prevent
+# CRLF conversion warnings and ensure consistent line endings across platforms
+*.cs text eol=lf
+*.fs text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.csproj text eol=lf
+*.sln text eol=lf
+*.props text eol=lf
+*.targets text eol=lf
+*.config text eol=lf
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #
