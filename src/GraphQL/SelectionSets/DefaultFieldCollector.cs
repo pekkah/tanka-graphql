@@ -38,46 +38,8 @@ public class DefaultFieldCollector : IFieldCollector
         var fieldMetadata = new Dictionary<string, IReadOnlyDictionary<string, object>>();
         foreach (ISelection selection in selectionSet)
         {
-            var directives = Enumerable.ToList<Directive>(GetDirectives(selection));
-
-            // Process directives with handlers
-            bool includeSelection = true;
-            var selectionMetadata = new Dictionary<string, object>();
-
-            foreach (var directive in directives)
-            {
-                var handler = _serviceProvider.GetKeyedService<IDirectiveHandler>(directive.Name.Value);
-                if (handler != null)
-                {
-                    var context = new DirectiveContext
-                    {
-                        Schema = schema,
-                        ObjectDefinition = objectDefinition,
-                        Selection = selection,
-                        Directive = directive,
-                        CoercedVariableValues = coercedVariableValues
-                    };
-
-                    var result = handler.Handle(context);
-                    if (result.Handled)
-                    {
-                        if (!result.Include)
-                        {
-                            includeSelection = false;
-                            break;
-                        }
-
-                        // Collect metadata from directive handlers
-                        if (result.Metadata != null)
-                        {
-                            foreach (var (key, value) in result.Metadata)
-                            {
-                                selectionMetadata[key] = value;
-                            }
-                        }
-                    }
-                }
-            }
+            var (includeSelection, selectionMetadata) = ProcessDirectives(
+                selection, schema, objectDefinition, coercedVariableValues, false);
 
             if (!includeSelection)
                 continue;
@@ -124,50 +86,8 @@ public class DefaultFieldCollector : IFieldCollector
                     visitedFragments);
 
                 // Process directives on the fragment spread itself
-                var fragmentSpreadDirectives = Enumerable.ToList<Directive>(GetDirectives(fragmentSpread));
-                var fragmentSpreadMetadata = new Dictionary<string, object>();
-
-                // Process fragment spread directives
-                bool includeFragmentSpread = true;
-                foreach (Directive directive in fragmentSpreadDirectives)
-                {
-                    var handler = _serviceProvider.GetKeyedService<IDirectiveHandler>(directive.Name.Value);
-                    if (handler != null)
-                    {
-                        var directiveContext = new DirectiveContext
-                        {
-                            Schema = schema,
-                            ObjectDefinition = objectDefinition,
-                            Selection = fragmentSpread,
-                            Directive = directive,
-                            CoercedVariableValues = coercedVariableValues
-                        };
-
-                        var result = handler.Handle(directiveContext);
-                        if (result.Handled)
-                        {
-                            if (!result.Include)
-                            {
-                                includeFragmentSpread = false;
-                                break;
-                            }
-
-                            // Collect metadata from directive handlers
-                            if (result.Metadata != null)
-                            {
-                                foreach (var (key, value) in result.Metadata)
-                                {
-                                    fragmentSpreadMetadata[key] = value;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Store unknown directive for later processing (like @defer)
-                        fragmentSpreadMetadata[directive.Name] = directive;
-                    }
-                }
+                var (includeFragmentSpread, fragmentSpreadMetadata) = ProcessDirectives(
+                    fragmentSpread, schema, objectDefinition, coercedVariableValues, true);
 
                 if (!includeFragmentSpread)
                     continue;
@@ -284,6 +204,60 @@ public class DefaultFieldCollector : IFieldCollector
             Fields = groupedFields,
             FieldMetadata = fieldMetadata.Any() ? fieldMetadata : null
         };
+    }
+
+    private (bool ShouldInclude, Dictionary<string, object> Metadata) ProcessDirectives(
+        ISelection selection,
+        ISchema schema,
+        ObjectDefinition objectDefinition,
+        IReadOnlyDictionary<string, object?>? coercedVariableValues,
+        bool handleUnknownDirectives)
+    {
+        var directives = Enumerable.ToList<Directive>(GetDirectives(selection));
+        var metadata = new Dictionary<string, object>();
+        bool shouldInclude = true;
+
+        foreach (var directive in directives)
+        {
+            var handler = _serviceProvider.GetKeyedService<IDirectiveHandler>(directive.Name.Value);
+            if (handler != null)
+            {
+                var context = new DirectiveContext
+                {
+                    Schema = schema,
+                    ObjectDefinition = objectDefinition,
+                    Selection = selection,
+                    Directive = directive,
+                    CoercedVariableValues = coercedVariableValues
+                };
+
+                var result = handler.Handle(context);
+                if (result.Handled)
+                {
+                    if (!result.Include)
+                    {
+                        shouldInclude = false;
+                        break;
+                    }
+
+                    // Collect metadata from directive handlers
+                    if (result.Metadata != null)
+                    {
+                        foreach (var (key, value) in result.Metadata)
+                        {
+                            metadata[key] = value;
+                        }
+                    }
+                }
+            }
+            else if (handleUnknownDirectives)
+            {
+                // Store unknown directive for later processing (like @defer)
+                metadata[directive.Name] = directive;
+            }
+        }
+
+        return (shouldInclude, metadata);
     }
 
     private static bool DoesFragmentTypeApply(ObjectDefinition objectDefinition, TypeDefinition? fragmentType)
