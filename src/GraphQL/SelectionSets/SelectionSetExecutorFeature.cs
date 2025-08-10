@@ -3,6 +3,7 @@
 using Tanka.GraphQL.Features;
 using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
+using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.SelectionSets;
@@ -96,7 +97,7 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
                 {
                     // Register deferred work
                     var deferDirective = (Directive)metadata["defer"];
-                    var label = GetDirectiveArgumentValue(deferDirective, "label", context.CoercedVariableValues) as string;
+                    var label = Ast.GetDirectiveArgumentValue(deferDirective, "label", context.CoercedVariableValues) as string;
 
                     incrementalFeature.RegisterDeferredWork(label, path, async () =>
                     {
@@ -181,28 +182,6 @@ public class DefaultSelectionSetExecutorFeature : ISelectionSetExecutorFeature
         }
 
         return responseMap;
-    }
-
-    private static object? GetDirectiveArgumentValue(Directive directive, string argumentName, IReadOnlyDictionary<string, object?>? coercedVariableValues)
-    {
-        var argument = directive.Arguments?.FirstOrDefault(a => a.Name.Value == argumentName);
-        if (argument is null) return null;
-
-        switch (argument.Value)
-        {
-            case { Kind: NodeKind.StringValue }:
-                return ((StringValue)argument.Value).ToString();
-            case { Kind: NodeKind.IntValue }:
-                return ((IntValue)argument.Value).Value;
-            case { Kind: NodeKind.BooleanValue }:
-                return ((BooleanValue)argument.Value).Value;
-            case { Kind: NodeKind.Variable }:
-                var variable = (Variable)argument.Value;
-                var variableValue = coercedVariableValues?[variable.Name];
-                return variableValue; // Return the coerced variable value as-is
-            default:
-                return null;
-        }
     }
 
     public static Task<IReadOnlyDictionary<string, object?>> ExecuteSelectionSet(

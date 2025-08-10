@@ -603,7 +603,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var itemIndex = startIndex;
-        
+
         await using (enumerator) // Ensures disposal
         {
             // Process the current item that we already read
@@ -620,7 +620,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
             while (await enumerator.MoveNextAsync())
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 var current = (object?)enumerator.Current;
                 var streamPath = path.Fork().Append(itemIndex);
 
@@ -646,7 +646,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
         try
         {
             var completedItem = await CompleteValueAsync(item, innerType, context, itemPath);
-            
+
             return new IncrementalPayload
             {
                 Path = itemPath,
@@ -691,7 +691,7 @@ public class ValueCompletionFeature : IValueCompletionFeature
         for (int i = initialCount; i < itemList.Count; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             var streamPath = path.Fork().Append(i);
 
             var payload = await ProcessSingleItemSafely(itemList[i], innerType, context, streamPath, label);

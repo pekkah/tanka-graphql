@@ -32,6 +32,24 @@ public static class Ast
         }
     }
 
+    public static object? GetDirectiveArgumentValue(
+        Directive directive,
+        string argumentName,
+        IReadOnlyDictionary<string, object?>? coercedVariableValues)
+    {
+        var argument = directive.Arguments?.FirstOrDefault(a => a.Name.Value == argumentName);
+        if (argument is null) return null;
+
+        return argument.Value switch
+        {
+            { Kind: NodeKind.StringValue } => ((StringValue)argument.Value).ToString(),
+            { Kind: NodeKind.IntValue } => ((IntValue)argument.Value).Value,
+            { Kind: NodeKind.BooleanValue } => ((BooleanValue)argument.Value).Value,
+            { Kind: NodeKind.Variable } => coercedVariableValues?[((Variable)argument.Value).Name],
+            _ => null
+        };
+    }
+
     public static bool DoesFragmentTypeApply(
         ObjectDefinition objectType,
         TypeDefinition fragmentType)
