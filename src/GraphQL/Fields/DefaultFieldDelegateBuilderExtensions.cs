@@ -1,4 +1,6 @@
-﻿using Tanka.GraphQL.ValueResolution;
+﻿using Tanka.GraphQL.Language.Nodes;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Fields;
 
@@ -9,6 +11,7 @@ public static class DefaultFieldDelegateBuilderExtensions
         return builder
             .UseDefaultArgumentCoercion()
             .UseResolver()
+            .UseStreamHandling()
             .RunCompleteValue();
     }
 
@@ -61,18 +64,41 @@ public static class DefaultFieldDelegateBuilderExtensions
                     Path = path
                 };
 
-            return ResolveCore(context, resolver);
+            return ResolveCore(context, resolver, next);
 
-            static async ValueTask ResolveCore(ResolverContext context, Resolver resolver)
+            static async ValueTask ResolveCore(ResolverContext context, Resolver resolver, FieldDelegate next)
             {
                 try
                 {
                     await resolver(context);
+                    await next(context);
                 }
                 catch (Exception e)
                 {
                     e.Handle(context);
                 }
+            }
+        });
+    }
+
+    public static FieldDelegateBuilder UseStreamHandling(this FieldDelegateBuilder builder)
+    {
+        return builder.Use(next => async context =>
+        {
+            // Check if this field has @stream directive and pass initialCount to value completion
+            if (context.FieldMetadata?.ContainsKey("stream") == true && context.Field is not null)
+            {
+                var streamDirective = (Directive)context.FieldMetadata["stream"];
+                var initialCount = Ast.GetDirectiveArgumentValue(streamDirective, "initialCount", context.QueryContext.CoercedVariableValues) as int? ?? 0;
+                var label = Ast.GetDirectiveArgumentValue(streamDirective, "label", context.QueryContext.CoercedVariableValues) as string;
+                
+                // Complete value with stream parameters
+                await context.QueryContext.CompleteValueAsync(context, context.Field.Type, context.Path, initialCount, label);
+            }
+            else
+            {
+                // Continue to next middleware (RunCompleteValue will handle regular completion)
+                await next(context);
             }
         });
     }
