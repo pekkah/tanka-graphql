@@ -79,7 +79,7 @@ public ref partial struct Parser
                     break;
             }
 
-            throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
+            throw new ParseException($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}", _lexer.Line, _lexer.Column);
         }
 
         return new TypeSystemDocument(
@@ -185,8 +185,8 @@ public ref partial struct Parser
         if (Keywords.Input.Match(_lexer.Value))
             return ParseInputObjectDefinition();
 
-        throw new Exception(
-            $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
+        throw new ParseException(
+            $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.", _lexer.Line, _lexer.Column);
     }
 
     public TypeExtension ParseTypeExtension(bool hasExtend = true)
@@ -209,8 +209,8 @@ public ref partial struct Parser
         if (Keywords.Input.Match(_lexer.Value))
             return ParseInputObjectExtension(hasExtend);
 
-        throw new Exception(
-            $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.");
+        throw new ParseException(
+            $"Unexpected type definition :'{Encoding.UTF8.GetString(_lexer.Value)}'.", _lexer.Line, _lexer.Column);
     }
 
     public SchemaDefinition ParseSchemaDefinition()
@@ -263,8 +263,8 @@ public ref partial struct Parser
         {
             /* OperationType: NamedType */
             if (!Keywords.IsOperation(_lexer.Value, out var operation))
-                throw new Exception(
-                    $"Unexpected operation type: '{Encoding.UTF8.GetString(_lexer.Value)}'.");
+                throw new ParseException(
+                    $"Unexpected operation type: '{Encoding.UTF8.GetString(_lexer.Value)}'.", _lexer.Line, _lexer.Column);
 
             Skip(TokenKind.Name);
             Skip(TokenKind.Colon);

@@ -101,7 +101,7 @@ public ref struct Lexer
                 return true;
             }
 
-            throw new Exception($"Unexpected character '{(char)code}' at {Line}:{Position - _currentLineStart + 2}.");
+            throw new ParseException($"Unexpected character '{(char)code}' at {Line}:{Position - _currentLineStart + 2}.", Line, Position - _currentLineStart + 2);
         }
 
         Start = Position;
@@ -123,7 +123,7 @@ public ref struct Lexer
             while (!_reader.IsNext(Constants.BlockString.Span))
             {
                 if (!_reader.Advance())
-                    throw new Exception($"BlockString at {Start} is not terminated.");
+                    throw new ParseException($"BlockString at {Start} is not terminated.", Line, Column);
 
                 if (_reader.Span[_reader.Position] == Constants.Backslash)
                     // skip escaped block string quote
@@ -142,7 +142,7 @@ public ref struct Lexer
         // normal string
         // skip first quote
         if (!_reader.Advance())
-            throw new Exception($"StringValue at {Start} is not terminated.");
+            throw new ParseException($"StringValue at {Start} is not terminated.", Line, Column);
 
         while (_reader.TryRead(out var code))
         {
@@ -156,7 +156,7 @@ public ref struct Lexer
             return;
         }
 
-        throw new Exception($"StringValue at {Start} is not terminated.");
+        throw new ParseException($"StringValue at {Start} is not terminated.", Line, Column);
     }
 
     //[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -180,9 +180,9 @@ public ref struct Lexer
 
                 if (_reader.TryPeek(out code))
                     if (code == '0')
-                        throw new Exception(
+                        throw new ParseException(
                             $"Invalid number value starting at {Start}. " +
-                            "Number starting with zero cannot be followed by zero.");
+                            "Number starting with zero cannot be followed by zero.", Line, Column);
             }
 
         _reader.TryReadWhileAny(

@@ -28,7 +28,9 @@ public class ResolversBuilder : IEnumerable
 
     public IEnumerator GetEnumerator()
     {
-        throw new NotImplementedException();
+        // This method is only needed to support collection initializer syntax
+        // It returns an empty enumerator since actual enumeration is not used
+        return Array.Empty<object>().GetEnumerator();
     }
 
     public void Add(string objectName, string fieldName, Action<ResolverBuilder> configure)

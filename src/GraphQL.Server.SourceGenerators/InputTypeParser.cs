@@ -96,14 +96,6 @@ public class InputTypeParser(GeneratorAttributeSyntaxContext context)
         if (typeSymbol is null)
             return typeSyntax.ToString();
 
-        var typeName = TypeHelper.GetGraphQLTypeName(typeSymbol);
-
-        // dirty hack until we have a better way to handle this
-        if (typeSyntax is NullableTypeSyntax && typeName.AsSpan().EndsWith("!"))
-        {
-            return typeName.AsSpan().Slice(0, typeName.Length - 1).ToString();
-        }
-
-        return typeName;
+        return TypeHelper.GetGraphQLTypeName(typeSymbol, typeSyntax);
     }
 }
