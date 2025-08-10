@@ -136,7 +136,7 @@ public class SubgraphConfiguration : IExecutableSchemaConfiguration
 
 
                 return true;
-            }, printDescriptions: false /* todo: should we include descriptions*/);
+            }, printDescriptions: true);
             context.ResolvedValue = sdl;
 
             return default;

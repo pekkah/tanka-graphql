@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 
+using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Language.Nodes;
 
 using Xunit;
@@ -387,7 +388,7 @@ public class SpecComplianceFacts
         var invalidQuery = "query { user { name }"; // Missing closing brace
 
         // When/Then: Should throw parse exception with location
-        var exception = Assert.Throws<Exception>(() =>
+        var exception = Assert.Throws<ParseException>(() =>
             Parser.Create(invalidQuery).ParseExecutableDocument());
 
         Assert.Contains("Expected", exception.Message);
@@ -400,7 +401,7 @@ public class SpecComplianceFacts
         var invalidQuery = "query { user { name @ } }"; // Invalid @ usage
 
         // When/Then: Should throw parse exception
-        var exception = Assert.Throws<Exception>(() =>
+        var exception = Assert.Throws<ParseException>(() =>
             Parser.Create(invalidQuery).ParseExecutableDocument());
 
         Assert.Contains("Expected", exception.Message);

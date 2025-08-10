@@ -40,8 +40,8 @@ public ref partial struct Parser
             if (optional)
                 return GetLocation();
 
-            throw new Exception($"Unexpected token: '{_lexer.Kind}'. " +
-                                $"Expected: '{TokenKind.Name}'");
+            throw new ParseException($"Unexpected token: '{_lexer.Kind}'. " +
+                                $"Expected: '{TokenKind.Name}'", _lexer.Line, _lexer.Column);
         }
 
         if (!keyword.SequenceEqual(_lexer.Value))
@@ -49,9 +49,9 @@ public ref partial struct Parser
             if (optional)
                 return GetLocation();
 
-            throw new Exception(
+            throw new ParseException(
                 $"Unexpected keyword: '{Encoding.UTF8.GetString(_lexer.Value)}'. " +
-                $"Expected: '{Encoding.UTF8.GetString(keyword)}'.");
+                $"Expected: '{Encoding.UTF8.GetString(keyword)}'.", _lexer.Line, _lexer.Column);
         }
 
 
@@ -84,7 +84,7 @@ public ref partial struct Parser
 
                     continue;
                 default:
-                    throw new Exception($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}");
+                    throw new ParseException($"Unexpected token {_lexer.Kind} at {_lexer.Line}:{_lexer.Column}", _lexer.Line, _lexer.Column);
             }
 
             _lexer.Advance();
@@ -100,7 +100,7 @@ public ref partial struct Parser
     {
         /* fragment FragmentName TypeCondition Directives? SelectionSet */
         if (!Keywords.IsFragment(_lexer.Value))
-            throw new Exception("Unexpected keyword. Expected 'fragment'.");
+            throw new ParseException("Unexpected keyword. Expected 'fragment'.", _lexer.Line, _lexer.Column);
 
         // fragment
         var location = Skip(TokenKind.Name);
@@ -128,7 +128,7 @@ public ref partial struct Parser
 
         // OperationType
         if (!Keywords.IsOperation(_lexer.Value, out var operationType))
-            throw new Exception($"Unexpected operation type: '{Encoding.UTF8.GetString(_lexer.Value)}'");
+            throw new ParseException($"Unexpected operation type: '{Encoding.UTF8.GetString(_lexer.Value)}'", _lexer.Line, _lexer.Column);
         var location = Skip(TokenKind.Name);
 
         var name = ParseOptionalName();
@@ -314,7 +314,7 @@ public ref partial struct Parser
         return (_lexer.Kind, constant) switch
         {
             (TokenKind.Dollar, false) => ParseVariable(),
-            (TokenKind.Dollar, true) => throw new Exception("Unexpected variable on constants value"),
+            (TokenKind.Dollar, true) => throw new ParseException("Unexpected variable on constants value", _lexer.Line, _lexer.Column),
             (TokenKind.IntValue, _) => ParseIntValue(),
             (TokenKind.FloatValue, _) => ParseFloatValue(),
             (TokenKind.StringValue, _) => ParseStringValue(),
@@ -322,7 +322,7 @@ public ref partial struct Parser
             (TokenKind.Name, _) => ParseNameValue(), // boolean or enum or null
             (TokenKind.LeftBracket, _) => ParseListValue(constant),
             (TokenKind.LeftBrace, _) => ParseObjectValue(constant),
-            _ => throw new Exception($"Unexpected value token: {_lexer.Kind}")
+            _ => throw new ParseException($"Unexpected value token: {_lexer.Kind}", _lexer.Line, _lexer.Column)
         };
     }
 
@@ -384,7 +384,7 @@ public ref partial struct Parser
     public IntValue ParseIntValue()
     {
         if (!Utf8Parser.TryParse(_lexer.Value, out int integer, out _))
-            throw new Exception("Could not parse integer value");
+            throw new ParseException("Could not parse integer value", _lexer.Line, _lexer.Column);
 
         var location = Skip(TokenKind.IntValue);
         return new IntValue(integer, location);
@@ -600,7 +600,7 @@ public ref partial struct Parser
     {
         /* Name but not on */
         if (Keywords.IsOn(_lexer.Value))
-            throw new Exception("Unexpected keyword on");
+            throw new ParseException("Unexpected keyword on", _lexer.Line, _lexer.Column);
 
         return ParseName();
     }
@@ -617,9 +617,9 @@ public ref partial struct Parser
     public NamedType ParseTypeCondition()
     {
         if (!Keywords.IsOn(_lexer.Value))
-            throw new Exception(
+            throw new ParseException(
                 $"Unexpected keyword '{Encoding.UTF8.GetString(_lexer.Value)}'. " +
-                "Expected 'on'.");
+                "Expected 'on'.", _lexer.Line, _lexer.Column);
 
         // on
         Skip(TokenKind.Name);
@@ -654,9 +654,9 @@ public ref partial struct Parser
         SkipComment();
 
         if (_lexer.Kind != kind)
-            throw new Exception(
+            throw new ParseException(
                 $"Unexpected token: {_lexer.Kind}@{_lexer.Line}:{_lexer.Column}. " +
-                $"Expected: {kind}");
+                $"Expected: {kind}", _lexer.Line, _lexer.Column);
 
         return GetLocation();
     }
@@ -683,8 +683,8 @@ public ref partial struct Parser
         var location = Ensure(expectedToken);
 
         if (!_lexer.Advance() && _lexer.Kind != TokenKind.End)
-            throw new Exception(
-                $"Expected to skip {expectedToken} at {_lexer.Line}:{_lexer.Column} but lexer could not advance");
+            throw new ParseException(
+                $"Expected to skip {expectedToken} at {_lexer.Line}:{_lexer.Column} but lexer could not advance", _lexer.Line, _lexer.Column);
 
         return location;
     }

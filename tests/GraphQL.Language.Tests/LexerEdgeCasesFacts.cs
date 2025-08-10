@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Tanka.GraphQL.Language;
 using Xunit;
 
 namespace Tanka.GraphQL.Language.Tests;
@@ -100,7 +101,7 @@ public class LexerEdgeCasesFacts
         var source = "{ field(arg: \"unterminated string";
 
         // When & Then: Should throw an exception for unterminated string
-        Assert.Throws<Exception>(() =>
+        Assert.Throws<ParseException>(() =>
         {
             var lexer = Lexer.Create(source);
             return ExtractAllTokens(lexer);
@@ -114,7 +115,7 @@ public class LexerEdgeCasesFacts
         var source = "{ field(arg: \"\"\"unterminated block string";
 
         // When & Then: Should throw an exception for unterminated block string
-        Assert.Throws<Exception>(() =>
+        Assert.Throws<ParseException>(() =>
         {
             var lexer = Lexer.Create(source);
             return ExtractAllTokens(lexer);
@@ -129,7 +130,7 @@ public class LexerEdgeCasesFacts
         var lexer = Lexer.Create(source);
 
         // When & Then: Should correctly parse 123.456 then reject the second dot
-        var exception = Assert.Throws<Exception>(() =>
+        var exception = Assert.Throws<ParseException>(() =>
         {
             var testLexer = Lexer.Create(source);
             return ExtractAllTokens(testLexer);

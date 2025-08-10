@@ -12,6 +12,11 @@ public class TypeHelper
 {
     public static string GetGraphQLTypeName(ITypeSymbol typeSymbol)
     {
+        return GetGraphQLTypeName(typeSymbol, null);
+    }
+
+    public static string GetGraphQLTypeName(ITypeSymbol typeSymbol, TypeSyntax? typeSyntax)
+    {
         var nameAttribute = typeSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name.StartsWith("GraphQLName") == true);
 
@@ -27,12 +32,12 @@ public class TypeHelper
         // Handle arrays
         if (typeSymbol is IArrayTypeSymbol arrayTypeSymbol)
         {
-            return $"[{GetGraphQLTypeName(arrayTypeSymbol.ElementType)}]";
+            return $"[{GetGraphQLTypeName(arrayTypeSymbol.ElementType, null)}]";
         }
 
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.Name: "IAsyncEnumerable" } asyncEnumerable)
         {
-            return GetGraphQLTypeName(asyncEnumerable.TypeArguments[0]);
+            return GetGraphQLTypeName(asyncEnumerable.TypeArguments[0], null);
         }
 
         if (typeSymbol is not { SpecialType: SpecialType.System_String })
@@ -45,17 +50,23 @@ public class TypeHelper
             if (ienumerableT is not null)
             {
                 var innerType = ienumerableT.TypeArguments[0];
-                return $"[{GetGraphQLTypeName(innerType)}]";
+                return $"[{GetGraphQLTypeName(innerType, null)}]";
             }
 
             // Handle IEnumerable<T>
             if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.Name: "IEnumerable" } namedType)
             {
-                return $"[{GetGraphQLTypeName(namedType.TypeArguments[0])}]";
+                return $"[{GetGraphQLTypeName(namedType.TypeArguments[0], null)}]";
             }
         }
 
         bool isNullable = IsNullable(typeSymbol, out typeSymbol);
+        
+        // Override nullable detection if syntax is explicitly nullable
+        if (typeSyntax is NullableTypeSyntax)
+        {
+            isNullable = true;
+        }
 
         string typeName;
 

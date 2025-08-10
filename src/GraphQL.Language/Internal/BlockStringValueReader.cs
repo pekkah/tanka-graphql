@@ -50,7 +50,7 @@ internal readonly ref struct BlockStringValueReader
         int? commonIndent = null;
         var lineReader = new LineReader(in span);
 
-        if (!lineReader.TryReadLine(out _)) throw new Exception("Could not read line starting");
+        if (!lineReader.TryReadLine(out _)) throw new ParseException("Could not read line starting");
 
         while (lineReader.TryReadLine(out var line))
         {
