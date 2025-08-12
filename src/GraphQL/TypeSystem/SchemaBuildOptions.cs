@@ -46,4 +46,22 @@ public record SchemaBuildOptions
             [Scalars.Boolean.Name] = new BooleanConverter(),
             [Scalars.ID.Name] = new IdConverter()
         };
+
+    /// <summary>
+    /// Schema loader for processing @link directives. 
+    /// Setting this automatically enables link processing.
+    /// </summary>
+    public ISchemaLoader? SchemaLoader { get; set; }
+
+    /// <summary>
+    /// Whether to process @link directives. 
+    /// Automatically true when SchemaLoader is provided.
+    /// </summary>
+    public bool ProcessLinkDirectives => SchemaLoader != null;
+
+    /// <summary>
+    /// Maximum depth for recursive @link processing to prevent infinite loops.
+    /// Default: 10
+    /// </summary>
+    public int MaxLinkDepth { get; set; } = 10;
 }

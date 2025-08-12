@@ -32,7 +32,6 @@ public static class TypeSystemDocumentExtensions
         var directiveDefinitions = left.DirectiveDefinitions ?? Array.Empty<DirectiveDefinition>();
         var schemaExtensions = left.SchemaExtensions ?? Array.Empty<SchemaExtension>();
         var typeExtensions = left.TypeExtensions ?? Array.Empty<TypeExtension>();
-        var imports = left.Imports ?? Array.Empty<Import>();
 
         return new TypeSystemDocument(
             right.SchemaDefinitions != null
@@ -49,25 +48,10 @@ public static class TypeSystemDocumentExtensions
                 : schemaExtensions,
             right.TypeExtensions != null
                 ? (typeExtensions.Concat(right.TypeExtensions) ?? Array.Empty<TypeExtension>()).ToList()
-                : typeExtensions,
-            right.Imports != null
-                ? (imports.Concat(right.Imports) ?? Array.Empty<Import>()).ToList()
-                : imports
+                : typeExtensions
         );
     }
 
-    public static TypeSystemDocument WithImports(
-        this TypeSystemDocument document,
-        IReadOnlyList<Import>? definitions)
-    {
-        return new TypeSystemDocument(
-            document.SchemaDefinitions,
-            document.TypeDefinitions,
-            document.DirectiveDefinitions,
-            document.SchemaExtensions,
-            document.TypeExtensions,
-            definitions);
-    }
 
     public static TypeSystemDocument WithDirectiveDefinitions(
         this TypeSystemDocument document, IReadOnlyList<DirectiveDefinition>? definitions)

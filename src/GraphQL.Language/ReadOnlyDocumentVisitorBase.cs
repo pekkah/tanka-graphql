@@ -116,9 +116,6 @@ public abstract class ReadOnlyDocumentVisitorBase<TContext> : IReadOnlyDocumentV
             case ImplementsInterfaces implementsInterfaces:
                 EnterImplementsInterfaces(context, implementsInterfaces);
                 break;
-            case Import import:
-                EnterImport(context, import);
-                break;
             case InputObjectDefinition inputObjectDefinition:
                 EnterInputObjectDefinition(context, inputObjectDefinition);
                 break;
@@ -283,9 +280,6 @@ public abstract class ReadOnlyDocumentVisitorBase<TContext> : IReadOnlyDocumentV
             case ImplementsInterfaces implementsInterfaces:
                 ExitImplementsInterfaces(context, implementsInterfaces);
                 break;
-            case Import import:
-                ExitImport(context, import);
-                break;
             case InputObjectDefinition inputObjectDefinition:
                 ExitInputObjectDefinition(context, inputObjectDefinition);
                 break;
@@ -407,9 +401,6 @@ public abstract class ReadOnlyDocumentVisitorBase<TContext> : IReadOnlyDocumentV
     {
     }
 
-    protected virtual void EnterImport(TContext context, Import import)
-    {
-    }
 
     protected virtual void EnterArgument(TContext context, Argument argument)
     {
@@ -623,9 +614,6 @@ public abstract class ReadOnlyDocumentVisitorBase<TContext> : IReadOnlyDocumentV
     {
     }
 
-    protected virtual void ExitImport(TContext context, Import import)
-    {
-    }
 
     protected virtual void ExitArgument(TContext context, Argument argument)
     {

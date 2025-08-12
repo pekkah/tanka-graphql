@@ -61,7 +61,7 @@ public class TypeHelper
         }
 
         bool isNullable = IsNullable(typeSymbol, out typeSymbol);
-        
+
         // Override nullable detection if syntax is explicitly nullable
         if (typeSyntax is NullableTypeSyntax)
         {

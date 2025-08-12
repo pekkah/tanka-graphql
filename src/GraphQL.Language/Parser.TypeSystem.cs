@@ -17,12 +17,6 @@ public ref partial struct Parser
         var directiveDefinitions = new List<DirectiveDefinition>();
         var schemaExtensions = new List<SchemaExtension>();
         var typeExtensions = new List<TypeExtension>();
-        var imports = new List<Import>();
-
-        // check for tanka imports
-        if (_lexer.Kind == TokenKind.BlockStringValue)
-            if (TryParseTankaImports(out var foundImports))
-                imports.AddRange(foundImports ?? Enumerable.Empty<Import>());
 
         while (_lexer.Kind != TokenKind.End)
         {
@@ -70,11 +64,6 @@ public ref partial struct Parser
                             continue;
                         }
                     }
-                    else if (Keywords.Import.Match(_lexer.Value))
-                    {
-                        imports.Add(ParseTankaImport());
-                        continue;
-                    }
 
                     break;
             }
@@ -87,83 +76,9 @@ public ref partial struct Parser
             typeDefinitions,
             directiveDefinitions,
             schemaExtensions,
-            typeExtensions,
-            imports);
+            typeExtensions);
     }
 
-    public Import ParseTankaImport()
-    {
-        /* """
-         * tanka_import Types[]? from From
-         * """
-         */
-
-        /* From: StringValue */
-
-        /* ex. tanka_import from "./types/person" */
-        /* ex. tanka_import Person from "./types/person" */
-
-        Ensure(TokenKind.BlockStringValue);
-        var blockStringValue = _lexer.Value;
-
-        var importParser = Create(blockStringValue);
-        var import = importParser.ParseTankaImportInternal();
-        Skip(TokenKind.BlockStringValue);
-
-        return import;
-    }
-
-    public bool TryParseTankaImports(out IReadOnlyList<Import>? imports)
-    {
-        if (_lexer.Kind != TokenKind.BlockStringValue)
-        {
-            imports = null;
-            return false;
-        }
-
-        var blockStringValue = _lexer.Value;
-
-        var importParser = Create(blockStringValue);
-
-        if (!Keywords.Import.Match(importParser._lexer.Value))
-        {
-            imports = null;
-            return false;
-        }
-
-        var _imports = new List<Import>();
-        while (Keywords.Import.Match(importParser._lexer.Value))
-        {
-            var import = importParser.ParseTankaImportInternal();
-            _imports.Add(import);
-        }
-
-        Skip(TokenKind.BlockStringValue);
-        imports = _imports;
-        return true;
-    }
-
-    private Import ParseTankaImportInternal()
-    {
-        var location = SkipKeyword(Keywords.Import);
-
-        var types = new List<Name>();
-        if (!Keywords.From.Match(_lexer.Value))
-            // types
-            while (!Keywords.From.Match(_lexer.Value) && _lexer.Kind == TokenKind.Name)
-                types.Add(ParseName());
-
-        // from
-        SkipKeyword(Keywords.From);
-
-        // from
-        var from = ParseStringValue();
-
-        return new Import(
-            types.Any() ? types : null,
-            from,
-            location);
-    }
 
     public TypeDefinition ParseTypeDefinition()
     {
