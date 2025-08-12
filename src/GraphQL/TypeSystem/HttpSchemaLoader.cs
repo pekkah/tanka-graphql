@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.TypeSystem;
 /// <summary>
 /// Loads GraphQL schemas from HTTP/HTTPS URLs
 /// </summary>
-public class HttpSchemaLoader : ISchemaLoader
+public class HttpSchemaLoader : ISchemaLoader, IDisposable
 {
     private readonly HttpClient _httpClient;
     private readonly bool _ownsHttpClient;
