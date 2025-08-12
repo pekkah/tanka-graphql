@@ -137,9 +137,6 @@ public class ReadOnlyDocumentWalker<TContext>
             case ImplementsInterfaces implementsInterfaces:
                 VisitCollection(implementsInterfaces);
                 break;
-            case Import import:
-                VisitImport(import);
-                break;
             case InputObjectDefinition inputObjectDefinition:
                 VisitInputObjectDefinition(inputObjectDefinition);
                 break;
@@ -216,11 +213,6 @@ public class ReadOnlyDocumentWalker<TContext>
         ExitNode(node);
     }
 
-    private void VisitImport(Import node)
-    {
-        EnterNode(node);
-        ExitNode(node);
-    }
 
     private void VisitArgument(Argument node)
     {
@@ -536,9 +528,6 @@ public class ReadOnlyDocumentWalker<TContext>
     {
         EnterNode(node);
 
-        if (node.Imports != null)
-            foreach (var import in node.Imports)
-                Visit(import);
 
         if (node.DirectiveDefinitions != null)
             foreach (var definition in node.DirectiveDefinitions)

@@ -18,7 +18,6 @@ public class SchemaBuilder
     private static readonly List<Directive> NoDirectives = new(0);
     private readonly ConcurrentDictionary<string, DirectiveDefinition> _directiveDefinitions = new();
 
-    private readonly ConcurrentBag<Import> _imports = new();
 
     private readonly ConcurrentBag<SchemaDefinition> _schemaDefinitions = new();
     private readonly ConcurrentBag<SchemaExtension> _schemaExtensions = new();
@@ -78,6 +77,20 @@ directive @skip(if: Boolean!) on
 directive @specifiedBy(url: String!) on SCALAR
 
 directive @oneOf on INPUT_OBJECT
+
+directive @link(
+  url: String!,
+  as: String,
+  import: [link__Import],
+  for: link__Purpose
+) repeatable on SCHEMA
+
+scalar link__Import
+
+enum link__Purpose {
+  SECURITY
+  EXECUTION
+}
 ";
 
     /// <summary>
@@ -94,9 +107,6 @@ directive @oneOf on INPUT_OBJECT
     /// <returns></returns>
     public SchemaBuilder Add(TypeSystemDocument typeSystem)
     {
-        if (typeSystem.Imports is not null)
-            foreach (var import in typeSystem.Imports)
-                Add(import);
 
         if (typeSystem.SchemaDefinitions is not null)
             foreach (var schemaDefinition in typeSystem.SchemaDefinitions)
@@ -105,6 +115,9 @@ directive @oneOf on INPUT_OBJECT
         if (typeSystem.SchemaExtensions is not null)
             foreach (var schemaExtension in typeSystem.SchemaExtensions)
                 Add(schemaExtension);
+
+        // TODO: Process @link directives from schema definitions and extensions
+        // This will be implemented when we add proper schema linking functionality
 
         if (typeSystem.TypeDefinitions is not null)
             foreach (var typeDefinition in typeSystem.TypeDefinitions)
@@ -264,8 +277,14 @@ directive @oneOf on INPUT_OBJECT
     /// </summary>
     /// <param name="options"></param>
     /// <returns></returns>
-    public Task<ISchema> Build(SchemaBuildOptions options)
+    public async Task<ISchema> Build(SchemaBuildOptions options)
     {
+        // Process @link directives if a schema loader is provided
+        if (options.ProcessLinkDirectives)
+        {
+            await ProcessLinkDirectivesAsync(options);
+        }
+
         if (options.IncludeBuiltInTypes) Add(BuiltInTypes);
 
         var resolvers = new ResolversMap(options.Resolvers ?? ResolversMap.None, options.Subscribers);
@@ -368,19 +387,9 @@ directive @oneOf on INPUT_OBJECT
             schemaDirectives
         );
 
-        return Task.FromResult(schema);
+        return schema;
     }
 
-    /// <summary>
-    ///     Add import definition into the builder
-    /// </summary>
-    /// <param name="importDefinition"></param>
-    /// <returns></returns>
-    private SchemaBuilder Add(Import importDefinition)
-    {
-        _imports.Add(importDefinition);
-        return this;
-    }
 
     private (IReadOnlyList<TypeDefinition> TypeDefinitions, ResolversMap Resolvers) RunDirectiveVisitors(
         IEnumerable<TypeDefinition> typeDefinitions,
@@ -629,5 +638,175 @@ directive @oneOf on INPUT_OBJECT
 
                 yield return type.Extend(extensions.ToArray());
             }
+    }
+
+    /// <summary>
+    /// Process @link directives from all schema definitions and extensions
+    /// </summary>
+    private async Task ProcessLinkDirectivesAsync(SchemaBuildOptions options)
+    {
+        var processedUrls = new HashSet<string>();
+        var hasNewLinks = true;
+        var depth = 0;
+
+        while (hasNewLinks && depth < options.MaxLinkDepth)
+        {
+            hasNewLinks = false;
+            var currentSchemaDefinitions = _schemaDefinitions.ToList();
+            var currentSchemaExtensions = _schemaExtensions.ToList();
+
+            var linkInfos = LinkDirectiveProcessor.ProcessLinkDirectives(
+                currentSchemaDefinitions,
+                currentSchemaExtensions);
+
+            foreach (var linkInfo in linkInfos)
+            {
+                if (processedUrls.Add(linkInfo.Url)) // Returns true if newly added
+                {
+                    var linkedSchema = await LoadAndResolveSchemaAsync(
+                        linkInfo,
+                        processedUrls,
+                        options,
+                        depth + 1);
+
+                    if (linkedSchema != null)
+                    {
+                        Add(linkedSchema);
+                        hasNewLinks = true;
+                    }
+                }
+            }
+
+            depth++;
+        }
+
+        if (depth >= options.MaxLinkDepth)
+            throw new InvalidOperationException($"Maximum link depth of {options.MaxLinkDepth} exceeded while processing @link directives");
+    }
+
+    /// <summary>
+    /// Load and resolve a schema with its dependencies (depth-first)
+    /// </summary>
+    private async Task<TypeSystemDocument?> LoadAndResolveSchemaAsync(
+        LinkInfo linkInfo,
+        HashSet<string> visitedUrls,
+        SchemaBuildOptions options,
+        int depth)
+    {
+        if (depth >= options.MaxLinkDepth)
+            throw new InvalidOperationException($"Maximum link depth exceeded for: {linkInfo.Url}");
+
+        if (options.SchemaLoader == null)
+            throw new InvalidOperationException("SchemaLoader is required for processing @link directives");
+
+        // Load the raw schema
+        var schema = await options.SchemaLoader.LoadSchemaAsync(linkInfo.Url);
+        if (schema == null)
+            return null;
+
+        // Extract its @link directives
+        var nestedLinkInfos = LinkDirectiveProcessor.ProcessLinkDirectives(
+            schema.SchemaDefinitions,
+            schema.SchemaExtensions);
+
+        // Process each linked schema FIRST (depth-first)
+        var linkedSchemas = new List<(LinkInfo info, TypeSystemDocument doc)>();
+        foreach (var nestedLinkInfo in nestedLinkInfos)
+        {
+            if (visitedUrls.Add(nestedLinkInfo.Url))
+            {
+                var linkedDoc = await LoadAndResolveSchemaAsync(
+                    nestedLinkInfo,
+                    visitedUrls,
+                    options,
+                    depth + 1);
+
+                if (linkedDoc != null)
+                    linkedSchemas.Add((nestedLinkInfo, linkedDoc));
+            }
+        }
+
+        // Build merged document: dependencies first, then current schema
+        TypeSystemDocument? mergedDocument = null;
+
+        // Add filtered linked schemas
+        foreach (var (nestedLinkInfo, linkedDoc) in linkedSchemas)
+        {
+            var filtered = ApplyImportFiltering(linkedDoc, nestedLinkInfo);
+            if (mergedDocument == null)
+                mergedDocument = filtered;
+            else
+                mergedDocument = mergedDocument.WithTypeSystem(filtered);
+        }
+
+        // Apply import filtering to the current schema based on original linkInfo
+        var currentFiltered = ApplyImportFiltering(schema, linkInfo);
+
+        // Add current schema last (so it can reference linked types)
+        if (mergedDocument == null)
+            mergedDocument = currentFiltered;
+        else
+            mergedDocument = mergedDocument.WithTypeSystem(currentFiltered);
+
+        return mergedDocument;
+    }
+
+    /// <summary>
+    /// Apply import filtering based on the LinkInfo imports list
+    /// </summary>
+    private TypeSystemDocument ApplyImportFiltering(TypeSystemDocument document, LinkInfo linkInfo)
+    {
+        // If no imports specified, return everything except types/directives that already exist
+        if (linkInfo.Imports == null || linkInfo.Imports.Count == 0)
+        {
+            // Filter out types that already exist to avoid duplicates
+            var filteredTypes = document.TypeDefinitions?.Where(t => !_typeDefinitions.ContainsKey(t.Name.Value)).ToList();
+            var filteredDirectives = document.DirectiveDefinitions?.Where(d => !_directiveDefinitions.ContainsKey(d.Name.Value)).ToList();
+
+            return new TypeSystemDocument(
+                document.SchemaDefinitions,
+                filteredTypes?.Count > 0 ? filteredTypes : null,
+                filteredDirectives?.Count > 0 ? filteredDirectives : null,
+                document.SchemaExtensions,
+                document.TypeExtensions
+            );
+        }
+
+        var importedTypes = new List<TypeDefinition>();
+        var importedDirectives = new List<DirectiveDefinition>();
+
+        foreach (var import in linkInfo.Imports)
+        {
+            // TODO: Handle aliasing with LinkImport objects
+            // For now, just handle simple string imports
+
+            if (import.StartsWith("@"))
+            {
+                // Import directive
+                var directiveName = import.Substring(1);
+                var directive = document.DirectiveDefinitions?.FirstOrDefault(d => d.Name.Value == directiveName);
+                if (directive != null && !_directiveDefinitions.ContainsKey(directiveName))
+                {
+                    importedDirectives.Add(directive);
+                }
+            }
+            else
+            {
+                // Import type
+                var type = document.TypeDefinitions?.FirstOrDefault(t => t.Name.Value == import);
+                if (type != null && !_typeDefinitions.ContainsKey(import))
+                {
+                    importedTypes.Add(type);
+                }
+            }
+        }
+
+        return new TypeSystemDocument(
+            document.SchemaDefinitions, // Keep schema definitions
+            importedTypes.Count > 0 ? importedTypes : null,
+            importedDirectives.Count > 0 ? importedDirectives : null,
+            document.SchemaExtensions, // Keep schema extensions
+            document.TypeExtensions // Keep type extensions
+        );
     }
 }

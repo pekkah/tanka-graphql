@@ -13,6 +13,7 @@ public class ValueConvertersBuilder
         ValueConverters.Add("String", new StringConverter());
         ValueConverters.Add("Boolean", new BooleanConverter());
         ValueConverters.Add("ID", new IdConverter());
+        ValueConverters.Add("link__Import", new LinkImportScalarConverter());
 
         return this;
     }

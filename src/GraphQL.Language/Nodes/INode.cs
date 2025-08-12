@@ -46,7 +46,6 @@ public enum NodeKind
     FieldDefinition,
     InputValueDefinition,
     TypeExtension,
-    TankaImport,
 
     Directives,
     Arguments,

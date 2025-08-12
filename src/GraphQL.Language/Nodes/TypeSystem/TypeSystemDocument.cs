@@ -11,20 +11,16 @@ public sealed class TypeSystemDocument : INode
         IReadOnlyList<TypeDefinition>? typeDefinitions,
         IReadOnlyList<DirectiveDefinition>? directiveDefinitions,
         IReadOnlyList<SchemaExtension>? schemaExtensions = default,
-        IReadOnlyList<TypeExtension>? typeExtensions = default,
-        IReadOnlyList<Import>? imports = default)
+        IReadOnlyList<TypeExtension>? typeExtensions = default)
     {
         SchemaDefinitions = schemaDefinitions;
         TypeDefinitions = typeDefinitions;
         DirectiveDefinitions = directiveDefinitions;
         SchemaExtensions = schemaExtensions;
         TypeExtensions = typeExtensions;
-        Imports = imports;
     }
 
     public IReadOnlyList<DirectiveDefinition>? DirectiveDefinitions { get; }
-
-    public IReadOnlyList<Import>? Imports { get; }
 
     public IReadOnlyList<SchemaDefinition>? SchemaDefinitions { get; }
 

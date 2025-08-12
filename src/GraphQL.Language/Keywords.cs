@@ -57,9 +57,6 @@ public static class Keywords
 
     public static ReadOnlySpan<byte> Input => "input"u8;
 
-    public static ReadOnlySpan<byte> Import => "tanka_import"u8;
-
-    public static ReadOnlySpan<byte> From => "from"u8;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsBoolean(in ReadOnlySpan<byte> span, out bool value)

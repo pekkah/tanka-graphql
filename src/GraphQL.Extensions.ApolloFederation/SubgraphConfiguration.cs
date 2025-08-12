@@ -26,7 +26,12 @@ public class SubgraphConfiguration : IExecutableSchemaConfiguration
         "_FieldSet",
         "skip",
         "deprecated",
-        "include"
+        "include",
+        "link",
+        "link__Import",
+        "link__Purpose",
+        "oneOf",
+        "specifiedBy"
     };
 
     public SubgraphConfiguration(SubgraphOptions options)

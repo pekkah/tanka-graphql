@@ -107,6 +107,9 @@ type Subscription {}
           ""name"": ""include""
         },
         {
+          ""name"": ""link""
+        },
+        {
           ""name"": ""oneOf""
         },
         {
@@ -198,6 +201,12 @@ type Subscription {}
           ""name"": ""Interface""
         },
         {
+          ""name"": ""link__Import""
+        },
+        {
+          ""name"": ""link__Purpose""
+        },
+        {
           ""name"": ""Mutation""
         },
         {
@@ -274,6 +283,27 @@ type Subscription {}
           ""args"": [
             {
               ""name"": ""if""
+            }
+          ]
+        },
+        {
+          ""name"": ""link"",
+          ""description"": null,
+          ""locations"": [
+            ""SCHEMA""
+          ],
+          ""args"": [
+            {
+              ""name"": ""as""
+            },
+            {
+              ""name"": ""for""
+            },
+            {
+              ""name"": ""import""
+            },
+            {
+              ""name"": ""url""
             }
           ]
         },
