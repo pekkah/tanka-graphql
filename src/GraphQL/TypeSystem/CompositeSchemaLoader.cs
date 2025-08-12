@@ -11,7 +11,7 @@ namespace Tanka.GraphQL.TypeSystem;
 /// <summary>
 /// Chains multiple schema loaders to support loading from various sources
 /// </summary>
-public class CompositeSchemaLoader : ISchemaLoader
+public class CompositeSchemaLoader : ISchemaLoader, IDisposable
 {
     private readonly IReadOnlyList<ISchemaLoader> _loaders;
 
@@ -72,5 +72,19 @@ public class CompositeSchemaLoader : ISchemaLoader
             new HttpSchemaLoader(),
             new FileSchemaLoader(basePath)
         );
+    }
+
+    /// <summary>
+    /// Dispose any disposable loaders
+    /// </summary>
+    public void Dispose()
+    {
+        foreach (var loader in _loaders)
+        {
+            if (loader is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
     }
 }

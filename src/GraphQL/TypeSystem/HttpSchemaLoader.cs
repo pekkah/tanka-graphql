@@ -52,7 +52,7 @@ public class HttpSchemaLoader : ISchemaLoader, IDisposable
             var parser = Parser.Create(content);
             return parser.ParseTypeSystemDocument();
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
         {
             // Log error if logging is available
             return null;

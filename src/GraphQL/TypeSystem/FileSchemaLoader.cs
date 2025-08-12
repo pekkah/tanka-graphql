@@ -42,7 +42,7 @@ public class FileSchemaLoader : ISchemaLoader
             var parser = Parser.Create(content);
             return parser.ParseTypeSystemDocument();
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
         {
             // Log error if logging is available
             return null;

@@ -28,8 +28,6 @@ public static class LinkDirectiveProcessor
         IEnumerable<SchemaDefinition>? schemaDefinitions,
         IEnumerable<SchemaExtension>? schemaExtensions)
     {
-        var links = new List<LinkInfo>();
-
         // Process schema definitions
         if (schemaDefinitions != null)
         {
@@ -37,7 +35,8 @@ public static class LinkDirectiveProcessor
             {
                 if (schema.Directives != null)
                 {
-                    links.AddRange(ProcessDirectives(schema.Directives));
+                    foreach (var link in ProcessDirectives(schema.Directives))
+                        yield return link;
                 }
             }
         }
@@ -49,12 +48,11 @@ public static class LinkDirectiveProcessor
             {
                 if (extension.Directives != null)
                 {
-                    links.AddRange(ProcessDirectives(extension.Directives));
+                    foreach (var link in ProcessDirectives(extension.Directives))
+                        yield return link;
                 }
             }
         }
-
-        return links;
     }
 
     private static IEnumerable<LinkInfo> ProcessDirectives(IReadOnlyList<Directive> directives)

@@ -713,9 +713,8 @@ enum link__Purpose {
         var linkedSchemas = new List<(LinkInfo info, TypeSystemDocument doc)>();
         foreach (var nestedLinkInfo in nestedLinkInfos)
         {
-            if (!visitedUrls.Contains(nestedLinkInfo.Url))
+            if (visitedUrls.Add(nestedLinkInfo.Url))
             {
-                visitedUrls.Add(nestedLinkInfo.Url);
                 var linkedDoc = await LoadAndResolveSchemaAsync(
                     nestedLinkInfo,
                     visitedUrls,
