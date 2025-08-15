@@ -20,8 +20,12 @@ public static class SchemaBuildOptionsExtensions
         options.ValueConverters["_Any"] = new AnyScalarConverter();
         options.ValueConverters["FieldSet"] = new FieldSetScalarConverter();
 
-        // Set Federation schema loader for @link directive processing
-        options.SchemaLoader = new FederationSchemaLoader();
+        // Set composite schema loader with Federation support and HTTP fallback
+        // This allows Federation URLs to work while still supporting regular HTTP schema loading
+        options.SchemaLoader = new CompositeSchemaLoader(
+            new FederationSchemaLoader(),
+            new HttpSchemaLoader()
+        );
 
         // Add Federation initialization middleware to Initialization stage
         // This adds the @link directive BEFORE LinkProcessingMiddleware runs
