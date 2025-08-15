@@ -32,13 +32,14 @@ type _Service {
 # Note: _Entity union and Query extensions for _entities/_service 
 # are added dynamically by FederationConfigurationMiddleware based on actual entities
 
-# Core Federation v1 directives
+# Core Federation directives (shared across v1/v2)
 directive @external on FIELD_DEFINITION | OBJECT
 directive @requires(fields: FieldSet!) on FIELD_DEFINITION
 directive @provides(fields: FieldSet!) on FIELD_DEFINITION
 directive @key(fields: FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
+directive @extends on OBJECT | INTERFACE
 
-# Federation v2 directives
+# Federation v2+ directives
 directive @shareable repeatable on OBJECT | FIELD_DEFINITION
 directive @inaccessible on 
   | FIELD_DEFINITION 
@@ -90,10 +91,11 @@ directive @policy(policies: [[federation__Policy!]!]!) on
   | SCALAR 
   | ENUM
 
-# Federation context directive (experimental)
+# Federation context directives
 directive @context(name: String!) repeatable on INTERFACE | OBJECT | UNION
+directive @fromContext(field: federation__ContextFieldValue) on ARGUMENT_DEFINITION
 
-# Federation scalars for security/policy
+# Federation scalars for security/policy and context
 scalar federation__Scope
 scalar federation__Policy
 scalar federation__ContextFieldValue

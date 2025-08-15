@@ -333,7 +333,8 @@ public class FederationConfigurationMiddleware : ISchemaBuildMiddleware
             // Apollo Federation directives (should be excluded from subgraph SDL)
             "external" or "key" or "link" or "oneOf" or "provides" or "requires" or
             "shareable" or "tag" or "inaccessible" or "override" or "extends" or
-            "composeDirective" or "interfaceObject";
+            "composeDirective" or "interfaceObject" or "authenticated" or "requiresScopes" or
+            "policy" or "context" or "fromContext";
     }
 
 }
