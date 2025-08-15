@@ -21,7 +21,7 @@ type Failure
 union Result = Success | Failure
 type Query
 "
-            ).Build(new());
+            ).Build();
         var value = new object();
         var context = Substitute.For<ResolverContext>();
         context.QueryContext = new QueryContext()
@@ -54,7 +54,7 @@ type Failure
 union Result = Success | Failure
 type Query
 "
-            ).Build(new());
+            ).Build();
         var value = new object();
         var context = Substitute.For<IResolverContext>();
         context.ExecutionContext.Schema.Returns(schema);
@@ -85,7 +85,7 @@ type Failure
 union Result = Success | Failure
 type Query
 "
-            ).Build(new());
+            ).Build();
         var mockValue = new object();
         var context = Substitute.For<IResolverContext>();
         context.ExecutionContext.Schema.Returns(schema);
@@ -115,7 +115,7 @@ type Failure
 union Result = Success | Failure
 type Query
 "
-            ).Build(new());
+            ).Build();
 
         var mockValue = new object();
         var context = Substitute.For<IResolverContext>();

@@ -1,0 +1,18 @@
+services:
+  router:
+    image: ghcr.io/apollographql/router:v1.52.0
+    volumes:
+      - ${FEDERATION_TESTS_PATH:-./federation-tests}/router.yaml:/dist/config/router.yaml
+      - ./supergraph.graphql:/dist/config/supergraph.graphql
+    ports:
+      - 4000:4000
+      - 8088:8088
+    command: -c config/router.yaml -s config/supergraph.graphql
+  inventory:
+    build: ${FEDERATION_TESTS_PATH:-./federation-tests}/dist/subgraphs/inventory
+    ports:
+      - 4003:4003
+  users:
+    build: ${FEDERATION_TESTS_PATH:-./federation-tests}/dist/subgraphs/users
+    ports:
+      - 4002:4002

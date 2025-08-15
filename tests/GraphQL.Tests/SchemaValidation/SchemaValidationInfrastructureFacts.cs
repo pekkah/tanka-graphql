@@ -32,7 +32,7 @@ public class SchemaValidationInfrastructureFacts
         // When & Then
         var exception = await Assert.ThrowsAsync<SchemaValidationException>(async () =>
         {
-            await builder.Build(new SchemaBuildOptions());
+            await builder.Build();
         });
 
         // Debug: Check the actual error message and error details
@@ -59,7 +59,7 @@ public class SchemaValidationInfrastructureFacts
         ");
 
         // When
-        var schema = await builder.Build(new SchemaBuildOptions());
+        var schema = await builder.Build();
 
         // Then
         Assert.NotNull(schema);
@@ -84,7 +84,7 @@ public class SchemaValidationInfrastructureFacts
         // When & Then
         var exception = await Assert.ThrowsAsync<SchemaValidationException>(async () =>
         {
-            await builder.Build(new SchemaBuildOptions());
+            await builder.Build();
         });
 
         Assert.Single(exception.Errors);

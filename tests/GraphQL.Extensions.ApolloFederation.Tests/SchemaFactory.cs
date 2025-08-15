@@ -15,6 +15,10 @@ public static class SchemaFactory
     public static async Task<ISchema> Create()
     {
         var typeDefs = @"
+schema @link(url: ""https://specs.apollo.dev/federation/v2.3"", import: [""@key"", ""@extends"", ""@external"", ""@provides"", ""_Entity"", ""_Any"", ""_Service""]) {
+  query: Query
+}
+
 type Review @key(fields: ""id"") {
     id: ID!
     body: String
@@ -37,13 +41,14 @@ type Query {
 }
 ";
 
-        var builder = new ExecutableSchemaBuilder();
-        builder.Add(typeDefs);
-        builder.AddSubgraph(new(new DictionaryReferenceResolversMap
+        var referenceResolvers = new DictionaryReferenceResolversMap
         {
             ["User"] = UserReference,
             ["Product"] = ProductReference
-        }));
+        };
+
+        var builder = new ExecutableSchemaBuilder();
+        builder.Add(typeDefs);
         builder.Add(new ResolversMap
         {
             ["User"] = new()
@@ -66,7 +71,10 @@ type Query {
             }
         });
 
-        var schema = await builder.Build();
+        var schema = await builder.Build(options =>
+        {
+            options.UseFederation(new SubgraphOptions(referenceResolvers));
+        });
 
         return schema;
     }

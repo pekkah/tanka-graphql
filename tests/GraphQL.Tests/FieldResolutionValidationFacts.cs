@@ -951,13 +951,11 @@ public class FieldResolutionValidationFacts
             ["DateTime"] = new DateTimeConverter()
         };
 
-        var buildOptions = new SchemaBuildOptions
+        return await builder.Build(options =>
         {
-            Resolvers = resolvers,
-            ValueConverters = valueConverters
-        };
-
-        return await builder.Build(buildOptions);
+            options.Resolvers = resolvers;
+            options.ValueConverters = valueConverters;
+        });
     }
 
     private class DateTimeConverter : IValueConverter

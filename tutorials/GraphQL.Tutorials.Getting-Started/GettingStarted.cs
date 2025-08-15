@@ -35,7 +35,7 @@ public class GettingStarted
                 ");
 
         // 3. Build schema
-        var schema = await builder.Build(new SchemaBuildOptions());
+        var schema = await builder.Build();
 
         // Assert that created schema matches the inputs
         // note: By convention the name on the Query root type is Query
@@ -62,14 +62,14 @@ public class GettingStarted
                 ");
 
         // Build schema with the resolver
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =>
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     "Query", "name", () => "Test"
                 }
-            }
+            };
         });
 
         // Quickest but least configurable way to execute 
@@ -98,9 +98,9 @@ public class GettingStarted
                 ");
 
         // Build schema with the resolver
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =>
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     "Query", "name", (ResolverContext context) =>
@@ -109,7 +109,7 @@ public class GettingStarted
                         return default;
                     }
                 }
-            }
+            };
         });
 
         var result = await Executor.Execute(schema, @"{ name }");
@@ -140,9 +140,9 @@ public class GettingStarted
                 """);
 
         // Build schema with the resolvers
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =>
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     "Query", "vader", () => "I am your father"
@@ -150,7 +150,7 @@ public class GettingStarted
                 {
                     "Parent", "luke", (string objectValue) => $"Luke, {objectValue}"
                 }
-            }
+            };
         });
 
 
@@ -184,9 +184,9 @@ public class GettingStarted
                 """);
 
         // Build schema with the resolvers
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =>
         {
-            Resolvers = new ResolversBuilder()
+            options.Resolvers = new ResolversBuilder()
                 .Resolvers("Query", new Dictionary<string, Action<ResolverBuilder>>()
                 {
                     ["vader"] = b => b
@@ -203,7 +203,7 @@ public class GettingStarted
                 {
                     ["luke"] = b => b.Run((string objectValue) => $"Luke, {objectValue}")
                 })
-                .BuildResolvers()
+                .BuildResolvers();
         });
 
 
@@ -235,9 +235,9 @@ public class GettingStarted
                     ");
 
         // build schema with resolvers and directives
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =>
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     "Query", new FieldResolversMap
@@ -247,8 +247,8 @@ public class GettingStarted
                         }
                     }
                 }
-            },
-            DirectiveVisitorFactories = new Dictionary<string, CreateDirectiveVisitor>
+            };
+            options.DirectiveVisitorFactories = new Dictionary<string, CreateDirectiveVisitor>
             {
                 // Apply directives to schema by providing a visitor which
                 // will transform the fields with the directive into new
@@ -282,7 +282,7 @@ public class GettingStarted
                                 }).Run(fieldDefinition.Resolver ?? throw new InvalidOperationException()));
                     }
                 }
-            }
+            };
         });
 
         // execute the query
@@ -309,9 +309,9 @@ public class GettingStarted
                 ");
 
         // Build schema with the resolver
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =>
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     "Query", "name", async (ResolverContext context) =>
@@ -319,7 +319,7 @@ public class GettingStarted
                         context.ResolvedValue = await context.RequestServices.GetRequiredService<Service>().CallService();
                     }
                 }
-            }
+            };
         });
 
         // we create an executor with ServiceProvider
@@ -353,14 +353,14 @@ public class GettingStarted
                 ");
 
         // Build schema with the resolver
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =>
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     "Query", "name", async (Service service) => await service.CallService()
                 }
-            }
+            };
         });
 
         // we create an executor with ServiceProvider
@@ -398,9 +398,9 @@ public class GettingStarted
                 ");
 
         // Build schema by binding resolvers from ObjectTypeMap
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =>
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     "Query", new FieldResolversMap
@@ -410,8 +410,8 @@ public class GettingStarted
                         }
                     }
                 }
-            },
-            ValueConverters = new Dictionary<string, IValueConverter>
+            };
+            options.ValueConverters = new Dictionary<string, IValueConverter>
             {
                 // this will add value converter for Uri scalar type
                 ["Uri"] = new InlineConverter(
@@ -430,7 +430,7 @@ public class GettingStarted
                             $"Cannot coerce Uri from value kind: '{value.Kind}'");
                     },
                     serializeLiteral: value => new StringValue(Encoding.UTF8.GetBytes(value.ToString())))
-            }
+            };
         });
 
 

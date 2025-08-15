@@ -40,14 +40,12 @@ type User {
         var builder = new SchemaBuilder();
         builder.Add(mainSchema);
 
-        var options = new SchemaBuildOptions
-        {
-            SchemaLoader = mockLoader,
-            Resolvers = ResolversMap.None
-        };
-
         // When
-        var schema = await builder.Build(options);
+        var schema = await builder.Build(options =>
+        {
+            options.SchemaLoader = mockLoader;
+            options.Resolvers = ResolversMap.None;
+        });
 
         // Then
         Assert.NotNull(schema);
@@ -86,14 +84,12 @@ type Post {
         var builder = new SchemaBuilder();
         builder.Add(mainSchema);
 
-        var options = new SchemaBuildOptions
-        {
-            SchemaLoader = mockLoader,
-            Resolvers = ResolversMap.None
-        };
-
         // When
-        var schema = await builder.Build(options);
+        var schema = await builder.Build(options =>
+        {
+            options.SchemaLoader = mockLoader;
+            options.Resolvers = ResolversMap.None;
+        });
 
         // Then
         Assert.NotNull(schema);
@@ -138,14 +134,12 @@ type Post {
         var builder = new SchemaBuilder();
         builder.Add(mainSchema);
 
-        var options = new SchemaBuildOptions
-        {
-            SchemaLoader = mockLoader,
-            Resolvers = ResolversMap.None
-        };
-
         // When
-        var schema = await builder.Build(options);
+        var schema = await builder.Build(options =>
+        {
+            options.SchemaLoader = mockLoader;
+            options.Resolvers = ResolversMap.None;
+        });
 
         // Then
         Assert.NotNull(schema);
@@ -189,14 +183,12 @@ type Address {
         var builder = new SchemaBuilder();
         builder.Add(mainSchema);
 
-        var options = new SchemaBuildOptions
-        {
-            SchemaLoader = mockLoader,
-            Resolvers = ResolversMap.None
-        };
-
         // When
-        var schema = await builder.Build(options);
+        var schema = await builder.Build(options =>
+        {
+            options.SchemaLoader = mockLoader;
+            options.Resolvers = ResolversMap.None;
+        });
 
         // Then
         Assert.NotNull(schema);
@@ -240,14 +232,12 @@ type Type2 {
         var builder = new SchemaBuilder();
         builder.Add(mainSchema);
 
-        var options = new SchemaBuildOptions
-        {
-            SchemaLoader = mockLoader,
-            Resolvers = ResolversMap.None
-        };
-
         // When
-        var schema = await builder.Build(options);
+        var schema = await builder.Build(options =>
+        {
+            options.SchemaLoader = mockLoader;
+            options.Resolvers = ResolversMap.None;
+        });
 
         // Then
         Assert.NotNull(schema);
@@ -285,17 +275,15 @@ type Type{i} {{
         var builder = new SchemaBuilder();
         builder.Add(schemas["./schema0.graphql"]);
 
-        var options = new SchemaBuildOptions
-        {
-            SchemaLoader = mockLoader,
-            MaxLinkDepth = 10, // Set a lower max depth
-            Resolvers = ResolversMap.None
-        };
-
         // When/Then
         await Assert.ThrowsAsync<System.InvalidOperationException>(async () =>
         {
-            await builder.Build(options);
+            await builder.Build(options =>
+            {
+                options.SchemaLoader = mockLoader;
+                options.MaxLinkDepth = 10; // Set a lower max depth
+                options.Resolvers = ResolversMap.None;
+            });
         });
     }
 
@@ -326,15 +314,13 @@ directive @deprecated(reason: String) on FIELD_DEFINITION";
         var builder = new SchemaBuilder();
         builder.Add(mainSchema);
 
-        var options = new SchemaBuildOptions
-        {
-            SchemaLoader = mockLoader,
-            Resolvers = ResolversMap.None,
-            IncludeBuiltInTypes = false // Don't include built-in @deprecated
-        };
-
         // When
-        var schema = await builder.Build(options);
+        var schema = await builder.Build(options =>
+        {
+            options.SchemaLoader = mockLoader;
+            options.Resolvers = ResolversMap.None;
+            options.IncludeBuiltInTypes = false; // Don't include built-in @deprecated
+        });
 
         // Then
         Assert.NotNull(schema);
@@ -358,14 +344,12 @@ type Query {
         var builder = new SchemaBuilder();
         builder.Add(mainSchema);
 
-        var options = new SchemaBuildOptions
+        // When
+        var schema = await builder.Build(options =>
         {
             // SchemaLoader is null, so ProcessLinkDirectives will be false
-            Resolvers = ResolversMap.None
-        };
-
-        // When
-        var schema = await builder.Build(options);
+            options.Resolvers = ResolversMap.None;
+        });
 
         // Then
         Assert.NotNull(schema);

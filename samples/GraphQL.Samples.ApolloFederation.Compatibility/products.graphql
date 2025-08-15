@@ -1,0 +1,60 @@
+schema 
+  @link(url: "https://specs.apollo.dev/federation/v2.3", import: [
+    "@composeDirective", "@extends", "@external", "@key", "@inaccessible", 
+    "@interfaceObject", "@override", "@provides", "@requires", "@shareable", "@tag", "FieldSet"
+  ]) {
+  query: Query
+}
+
+type CaseStudy {
+  caseNumber: ID!
+  description: String
+}
+
+type DeprecatedProduct @key(fields: "sku package") {
+  sku: String!
+  package: String!
+  reason: String
+  createdBy: User
+}
+
+type Inventory @key(fields: "id") @interfaceObject {
+  deprecatedProducts: [DeprecatedProduct!]!
+  id: ID!
+}
+
+type Product @key(fields: "id") @key(fields: "sku package") @key(fields: "sku variation { id }") {
+  id: ID!
+  sku: String
+  package: String
+  variation: ProductVariation
+  dimensions: ProductDimension
+  createdBy: User
+  notes: String @tag(name: "internal")
+  research: [ProductResearch!]!
+}
+
+type ProductDimension @shareable {
+  size: String
+  weight: Float
+  unit: String @inaccessible
+}
+
+type ProductResearch @key(fields: "study { caseNumber }") {
+  study: CaseStudy!
+  outcome: String
+}
+
+type ProductVariation {
+  id: ID!
+}
+
+type User @key(fields: "email") @extends {
+  email: ID! @external
+  totalProductsCreated: Int @shareable
+}
+
+type Query {
+  product(id: ID!): Product
+  deprecatedProduct(sku: String! package: String!): DeprecatedProduct @deprecated(reason: "Use product query instead")
+}

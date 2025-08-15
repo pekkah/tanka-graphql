@@ -54,8 +54,8 @@ type Query {
         Assert.Equal("https://specs.apollo.dev/federation/v2.0", link.Url);
         Assert.NotNull(link.Imports);
         Assert.Equal(2, link.Imports.Count);
-        Assert.Contains(link.Imports, i => i == "@key");
-        Assert.Contains(link.Imports, i => i == "@external");
+        Assert.Contains(link.Imports, i => i.SourceName == "@key");
+        Assert.Contains(link.Imports, i => i.SourceName == "@external");
     }
 
     [Fact]
@@ -84,8 +84,40 @@ type Query {
 
         Assert.NotNull(federationLink);
         Assert.NotNull(customLink);
-        Assert.Single(federationLink.Imports, i => i == "@key");
-        Assert.Single(customLink.Imports, i => i == "@custom");
+        Assert.Single(federationLink.Imports, i => i.SourceName == "@key");
+        Assert.Single(customLink.Imports, i => i.SourceName == "@custom");
+    }
+
+    [Fact]
+    public void ProcessLinkDirective_WithAliasing_ShouldCreateImportInfoWithAlias()
+    {
+        // Given
+        var schema = Parser.Create(@"
+extend schema @link(url: ""https://specs.apollo.dev/federation/v2.0"", import: [{name: ""@key"", as: ""@myKey""}, ""@external""])
+
+type Query {
+    hello: String
+}
+").ParseTypeSystemDocument();
+
+        // When
+        var links = LinkDirectiveProcessor.ProcessLinkDirectives(
+            schema.SchemaDefinitions,
+            schema.SchemaExtensions);
+
+        // Then
+        var link = Assert.Single(links);
+        Assert.Equal("https://specs.apollo.dev/federation/v2.0", link.Url);
+        Assert.NotNull(link.Imports);
+        Assert.Equal(2, link.Imports.Count);
+
+        var keyImport = Assert.Single(link.Imports, i => i.SourceName == "@key");
+        Assert.Equal("@myKey", keyImport.Alias);
+        Assert.Equal("@myKey", keyImport.EffectiveName);
+
+        var externalImport = Assert.Single(link.Imports, i => i.SourceName == "@external");
+        Assert.Null(externalImport.Alias);
+        Assert.Equal("@external", externalImport.EffectiveName);
     }
 
     [Fact]

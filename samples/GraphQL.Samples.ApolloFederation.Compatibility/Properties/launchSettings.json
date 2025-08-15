@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "GraphQL.Samples.ApolloFederation.Compatibility": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:4001/",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:4001",
+      "dotnetRunMessages": true
+    }
+  }
+}

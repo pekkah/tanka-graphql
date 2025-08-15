@@ -226,29 +226,163 @@ public class ValueCompletionFeature : IValueCompletionFeature
         NodePath path,
         ResolverContext context)
     {
-        if (value is not IEnumerable values)
-            throw new FieldException(
-                $"Cannot complete value for list field '{context.Field.Name}':'{list}'. " +
-                "Resolved value is not a collection"
-            )
-            {
-                Path = context.Path,
-                Field = context.Field,
-                Selection = context.Selection,
-                ObjectDefinition = context.ObjectDefinition
-            };
-
         var innerType = list.OfType;
-        var result = new List<object?>();
-        var i = 0;
-        foreach (var resultItem in values)
+
+        // First check if it's a regular IEnumerable (most common case)
+        if (value is IEnumerable values)
         {
-            var itemPath = path.Fork().Append(i++);
+            var result = new List<object?>();
+            var i = 0;
+            foreach (var resultItem in values)
+            {
+                var itemPath = path.Fork().Append(i++);
+
+                try
+                {
+                    var completedResultItem = await CompleteValueAsync(
+                        resultItem,
+                        innerType,
+                        context,
+                        itemPath);
+
+                    result.Add(completedResultItem);
+                }
+                catch (Exception e)
+                {
+                    if (innerType is NonNullType) throw;
+
+                    context.QueryContext.AddError(e);
+                    result.Add(null);
+                }
+            }
+
+            return result;
+        }
+
+        // If not IEnumerable, check if it's IAsyncEnumerable<T>
+        var valueType = value.GetType();
+        var asyncEnumerableInterface = valueType.GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
+
+        if (asyncEnumerableInterface != null)
+        {
+            // Handle IAsyncEnumerable by fully enumerating it (without streaming)
+            return await CompleteAsyncEnumerableAsList(value, asyncEnumerableInterface, innerType, path, context);
+        }
+
+        // Neither IEnumerable nor IAsyncEnumerable
+        throw new FieldException(
+            $"Cannot complete value for list field '{context.Field.Name}':'{list}'. " +
+            "Resolved value is not a collection"
+        )
+        {
+            Path = context.Path,
+            Field = context.Field,
+            Selection = context.Selection,
+            ObjectDefinition = context.ObjectDefinition
+        };
+    }
+
+    private async ValueTask<object?> CompleteAsyncEnumerableAsList(
+        object value,
+        Type asyncEnumerableInterface,
+        TypeBase innerType,
+        NodePath path,
+        ResolverContext context)
+    {
+        // Get the item type from IAsyncEnumerable<T>
+        var itemType = asyncEnumerableInterface.GetGenericArguments()[0];
+
+        // Get or create the compiled delegate for this type
+        var enumerateMethod = AsyncEnumerableListCache.GetOrCreateEnumerateMethod(itemType);
+
+        // Invoke the compiled delegate to enumerate all items
+        return await enumerateMethod(this, value, innerType, path, context);
+    }
+
+    // Cache for compiled async enumerable list completion methods
+    private static class AsyncEnumerableListCache
+    {
+        private static readonly ConcurrentDictionary<Type, Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, ValueTask<object?>>>
+            Cache = new();
+        private static readonly object _cacheLock = new();
+        private const int MaxCacheSize = 1000;
+
+        public static Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, ValueTask<object?>>
+            GetOrCreateEnumerateMethod(Type itemType)
+        {
+            return Cache.GetOrAdd(itemType, type =>
+            {
+                lock (_cacheLock)
+                {
+                    if (Cache.Count >= MaxCacheSize)
+                    {
+                        var keysToRemove = Cache.Keys.Take(Cache.Count - MaxCacheSize + 100).ToList();
+                        foreach (var key in keysToRemove)
+                        {
+                            Cache.TryRemove(key, out _);
+                        }
+                    }
+                }
+                return CreateEnumerateMethod(type);
+            });
+        }
+
+        private static Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, ValueTask<object?>>
+            CreateEnumerateMethod(Type itemType)
+        {
+            // Get the generic method definition
+            var methodInfo = typeof(ValueCompletionFeature)
+                .GetMethod(nameof(CompleteAsyncEnumerableAsListGenericAsync),
+                    BindingFlags.NonPublic | BindingFlags.Instance)!
+                .MakeGenericMethod(itemType);
+
+            // Create parameters for the expression
+            var instanceParam = Expression.Parameter(typeof(ValueCompletionFeature), "instance");
+            var valueParam = Expression.Parameter(typeof(object), "value");
+            var innerTypeParam = Expression.Parameter(typeof(TypeBase), "innerType");
+            var pathParam = Expression.Parameter(typeof(NodePath), "path");
+            var contextParam = Expression.Parameter(typeof(ResolverContext), "context");
+
+            // Create the method call expression
+            var callExpr = Expression.Call(
+                instanceParam,
+                methodInfo,
+                Expression.Convert(valueParam, typeof(IAsyncEnumerable<>).MakeGenericType(itemType)),
+                innerTypeParam,
+                pathParam,
+                contextParam);
+
+            // Compile the expression to a delegate
+            var lambda = Expression.Lambda<Func<ValueCompletionFeature, object, TypeBase, NodePath, ResolverContext, ValueTask<object?>>>(
+                callExpr,
+                instanceParam,
+                valueParam,
+                innerTypeParam,
+                pathParam,
+                contextParam);
+
+            return lambda.Compile();
+        }
+    }
+
+    private async ValueTask<object?> CompleteAsyncEnumerableAsListGenericAsync<T>(
+        IAsyncEnumerable<T> asyncEnumerable,
+        TypeBase innerType,
+        NodePath path,
+        ResolverContext context)
+    {
+        var result = new List<object?>();
+        var itemIndex = 0;
+
+        await foreach (var item in asyncEnumerable.WithCancellation(context.QueryContext.RequestCancelled))
+        {
+            var itemPath = path.Fork().Append(itemIndex++);
 
             try
             {
                 var completedResultItem = await CompleteValueAsync(
-                    resultItem,
+                    item,
                     innerType,
                     context,
                     itemPath);

@@ -21,7 +21,7 @@ public class GithubSchemaFacts
         /* When */
         var schema = await new SchemaBuilder()
             .Add(sdl)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         /* Then */
         Assert.NotNull(schema);
