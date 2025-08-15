@@ -1,4 +1,6 @@
-﻿using Tanka.GraphQL.Directives;
+﻿using System.Linq;
+
+using Tanka.GraphQL.Directives;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 using Tanka.GraphQL.ValueSerialization;
@@ -63,23 +65,30 @@ public class ExecutableSchemaBuilder
 
     public async Task<ISchema> Build(Action<SchemaBuildOptions>? configureBuildOptions = null)
     {
-        var buildOptions = new SchemaBuildOptions
+        var options = new SchemaBuildOptions();
+
+        // Configure with ExecutableSchemaBuilder values
+        options.Resolvers = Resolvers.BuildResolvers();
+        options.Subscribers = Resolvers.BuildSubscribers();
+
+        foreach (var (type, converter) in ValueConverters.Build())
         {
-            Resolvers = Resolvers.BuildResolvers(),
-            Subscribers = Resolvers.BuildSubscribers(),
-            ValueConverters = ValueConverters.Build(),
-            DirectiveVisitorFactories = DirectiveVisitorFactories
-                .ToDictionary(
-                    kv => kv.Key,
-                    kv => kv.Value
-                    ),
-            BuildTypesFromOrphanedExtensions = true
-        };
+            options.ValueConverters.Remove(type);
+            options.ValueConverters.TryAdd(type, converter);
+        }
 
-        configureBuildOptions?.Invoke(buildOptions);
+        options.DirectiveVisitorFactories = DirectiveVisitorFactories
+            .ToDictionary(
+                kv => kv.Key,
+                kv => kv.Value
+            );
 
-        ISchema schema = await Schema.Build(buildOptions);
+        options.BuildTypesFromOrphanedExtensions = true;
 
+        // Apply any additional configuration
+        configureBuildOptions?.Invoke(options);
+
+        ISchema schema = await Schema.Build(options);
         return schema;
     }
 }

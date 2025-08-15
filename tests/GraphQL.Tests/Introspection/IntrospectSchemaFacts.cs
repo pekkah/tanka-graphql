@@ -75,9 +75,9 @@ type Subscription {}
 ");
 
 
-        _introspectionSchema = builder.Build(new SchemaBuildOptions()
+        _introspectionSchema = builder.Build(options =>
         {
-            IncludeIntrospection = true // note: on by default
+            options.IncludeIntrospection = true; // note: on by default
         }).Result;
     }
 

@@ -110,7 +110,7 @@ public partial class ValidatorFacts
 
         Schema = new SchemaBuilder()
             .Add(sdl)
-            .Build(new SchemaBuildOptions()).Result;
+            .Build().Result;
     }
 
     public ISchema Schema { get; }

@@ -30,7 +30,7 @@ public class OneOfDirectiveFacts
                     oneOf(input: OneOfInput!): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -62,7 +62,7 @@ public class OneOfDirectiveFacts
                     oneOf(input: OneOfInput): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -94,7 +94,7 @@ public class OneOfDirectiveFacts
                     oneOf(input: OneOfInput!): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -127,7 +127,7 @@ public class OneOfDirectiveFacts
                     oneOf(input: OneOfInput): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -160,7 +160,7 @@ public class OneOfDirectiveFacts
                     oneOf(input: OneOfInput!): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -192,7 +192,7 @@ public class OneOfDirectiveFacts
                     oneOf(input: OneOfInput!): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -228,7 +228,7 @@ public class OneOfDirectiveFacts
                     oneOf(input: OneOfInput!): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -261,7 +261,7 @@ public class OneOfDirectiveFacts
                     oneOf(input: OneOfInput!): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -294,7 +294,7 @@ public class OneOfDirectiveFacts
                     oneOf(input: OneOfInput!): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -335,7 +335,7 @@ public class OneOfDirectiveFacts
                     test(input: Container!): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 
@@ -373,7 +373,7 @@ public class OneOfDirectiveFacts
                     test(input: Container!): String
                  }
                  """)
-            .Build(new SchemaBuildOptions());
+            .Build();
 
         var validator = new AsyncValidator(ExecutionRules.All);
 

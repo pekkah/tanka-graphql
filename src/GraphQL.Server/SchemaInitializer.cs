@@ -32,7 +32,7 @@ internal class SchemaInitializer : BackgroundService
 
             var schema = await options.Builder.Build(buildOptions =>
             {
-                buildOptions.BuildTypesFromOrphanedExtensions = true;
+                options.ApplyBuildConfiguration(buildOptions);
             });
 
             _schemas.TryAdd(schemaName, schema);

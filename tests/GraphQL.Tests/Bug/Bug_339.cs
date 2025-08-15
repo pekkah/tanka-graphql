@@ -33,7 +33,7 @@ public class Bug_339
                             mutation: Mutation
                         }
                 ")
-            .Build(new());
+            .Build();
 
 
         /* When */

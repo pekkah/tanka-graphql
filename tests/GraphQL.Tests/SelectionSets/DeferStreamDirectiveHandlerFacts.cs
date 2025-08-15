@@ -27,7 +27,7 @@ public class DeferStreamDirectiveHandlerFacts
 
         var context = new DirectiveContext
         {
-            Schema = await new SchemaBuilder().Add("type Query { hello: String }").Build(new SchemaBuildOptions()),
+            Schema = await new SchemaBuilder().Add("type Query { hello: String }").Build(),
             ObjectDefinition = new ObjectDefinition("Test", null, null, null, null),
             Selection = new InlineFragment(null, null, new SelectionSet(new ISelection[0]), null),
             Directive = directive,
@@ -68,7 +68,7 @@ public class DeferStreamDirectiveHandlerFacts
 
         var context = new DirectiveContext
         {
-            Schema = await new SchemaBuilder().Add("type Query { hello: String }").Build(new SchemaBuildOptions()),
+            Schema = await new SchemaBuilder().Add("type Query { hello: String }").Build(),
             ObjectDefinition = new ObjectDefinition("Test", null, null, null, null),
             Selection = new InlineFragment(null, null, new SelectionSet(new ISelection[0]), null),
             Directive = directive,
@@ -100,7 +100,7 @@ public class DeferStreamDirectiveHandlerFacts
 
         var context = new DirectiveContext
         {
-            Schema = await new SchemaBuilder().Add("type Query { hello: String }").Build(new SchemaBuildOptions()),
+            Schema = await new SchemaBuilder().Add("type Query { hello: String }").Build(),
             ObjectDefinition = new ObjectDefinition("Test", null, null, null, null),
             Selection = new FieldSelection("", "testField", null, null, null, null),
             Directive = directive,

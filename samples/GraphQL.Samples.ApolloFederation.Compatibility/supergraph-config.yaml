@@ -1,0 +1,14 @@
+federation_version: =2.7.8
+subgraphs:
+  inventory:
+    routing_url: http://inventory:4003
+    schema:
+      file: /home/pekkah/.nvm/versions/node/v24.2.0/lib/node_modules/@apollo/federation-subgraph-compatibility/node_modules/@apollo/federation-subgraph-compatibility-tests/dist/subgraphs/inventory/inventory.graphql
+  users:
+    routing_url: http://users:4002
+    schema:
+      file: /home/pekkah/.nvm/versions/node/v24.2.0/lib/node_modules/@apollo/federation-subgraph-compatibility/node_modules/@apollo/federation-subgraph-compatibility-tests/dist/subgraphs/users/users.graphql
+  products:
+    routing_url: http://products:4001
+    schema:
+      file: products.graphql

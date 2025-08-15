@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
+using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Request;
 using Tanka.GraphQL.TypeSystem;
 
@@ -97,6 +99,10 @@ public class FederationFacts
     public async Task Query_sdl()
     {
         /* Given */
+
+        // Debug: Check if _service field exists in schema
+        var queryType = Sut.GetNamedType("Query") as ObjectDefinition;
+        var serviceField = queryType?.Fields?.FirstOrDefault(f => f.Name == "_service");
 
         /* When */
         var result = await new Executor(Sut)

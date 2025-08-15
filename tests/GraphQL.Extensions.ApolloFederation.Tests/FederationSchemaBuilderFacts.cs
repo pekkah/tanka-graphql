@@ -21,16 +21,28 @@ public class FederationSchemaBuilderFacts
         /* Given */
         var builder = new ExecutableSchemaBuilder()
             .Add(@"
-                    type Person @key(fields: ""id"") {
-                        id: ID!
-                    }
-                    type Address {
-                        street: String
-                    }")
-            .AddSubgraph(SubgraphOptions.Default);
+schema @link(url: ""https://specs.apollo.dev/federation/v2.3"", import: [""@key"", ""_Entity""]) {
+  query: Query
+}
+
+type Query {
+  dummy: String
+}
+
+type Person @key(fields: ""id"") {
+  id: ID!
+}
+
+type Address {
+  street: String
+}");
 
         /* When */
-        var schema = await builder.Build();
+        var subgraphOptions = new SubgraphOptions(new DictionaryReferenceResolversMap());
+        var schema = await builder.Build(options =>
+        {
+            options.UseFederation(subgraphOptions);
+        });
 
         var entityUnion = schema.GetRequiredNamedType<UnionDefinition>("_Entity");
         var entities = schema.GetPossibleTypes(entityUnion)
@@ -46,13 +58,24 @@ public class FederationSchemaBuilderFacts
         /* Given */
         var builder = new ExecutableSchemaBuilder()
             .Add(@"
+schema @link(url: ""https://specs.apollo.dev/federation/v2.3"", import: [""@key"", ""_Entity""]) {
+  query: Query
+}
+
+type Query {
+  dummy: String
+}
+
                     type Person @key(fields: ""id"") {
                         id: ID!
-                    }")
-            .AddSubgraph(SubgraphOptions.Default);
+                    }");
 
         /* When */
-        var schema = await builder.Build();
+        var subgraphOptions = new SubgraphOptions(new DictionaryReferenceResolversMap());
+        var schema = await builder.Build(options =>
+        {
+            options.UseFederation(subgraphOptions);
+        });
 
         var entityUnion = schema.GetRequiredNamedType<UnionDefinition>("_Entity");
         var entities = schema.GetPossibleTypes(entityUnion);
@@ -65,20 +88,30 @@ public class FederationSchemaBuilderFacts
     public async Task Query_entities()
     {
         /* Given */
+        var referenceResolvers = new DictionaryReferenceResolversMap
+        {
+            ["Person"] = (context, type, representation) => new(
+                new ResolveReferenceResult(type, representation))
+        };
+
         var builder = new ExecutableSchemaBuilder()
             .Add(@"
-                    type Person @key(fields: ""id"") {
-                        id: ID!
-                        name: String!
-                    }
-                    type Address @key(fields: ""street"") {
+schema @link(url: ""https://specs.apollo.dev/federation/v2.3"", import: [""@key"", ""_Entity"", ""_Any""]) {
+  query: Query
+}
+
+type Query {
+  dummy: String
+}
+
+type Person @key(fields: ""id"") {
+  id: ID!
+  name: String!
+}
+
+type Address @key(fields: ""street"") {
                         street: String
                     }")
-            .AddSubgraph(new(new DictionaryReferenceResolversMap
-            {
-                ["Person"] = (context, type, representation) => new(
-                    new ResolveReferenceResult(type, representation))
-            }))
             .Add(new ResolversMap
             {
                 ["Person"] = new()
@@ -90,7 +123,11 @@ public class FederationSchemaBuilderFacts
 
 
         /* When */
-        var schema = await builder.Build();
+        var subgraphOptions = new SubgraphOptions(referenceResolvers);
+        var schema = await builder.Build(options =>
+        {
+            options.UseFederation(subgraphOptions);
+        });
 
         var result = await new Executor(schema).Execute(new GraphQLRequest
         {
@@ -136,18 +173,28 @@ public class FederationSchemaBuilderFacts
         /* Given */
         var builder = new ExecutableSchemaBuilder()
             .Add(@"
+schema @link(url: ""https://specs.apollo.dev/federation/v2.3"", import: [""@key"", ""@extends"", ""@external"", ""_Service""]) {
+  query: Query
+}
+
+type Query {
+  dummy: String
+}
+
 type Review  @key(fields: ""id"") {
   id: ID!
   product: Product
 }
 
-
 type Product @key(fields: ""upc"") @extends {
   upc: String! @external
-}")
-            .AddSubgraph(SubgraphOptions.Default);
+}");
         /* When */
-        var schema = await builder.Build();
+        var subgraphOptions = new SubgraphOptions(new DictionaryReferenceResolversMap());
+        var schema = await builder.Build(options =>
+        {
+            options.UseFederation(subgraphOptions);
+        });
 
         var result = await new Executor(schema).Execute(new GraphQLRequest
         {

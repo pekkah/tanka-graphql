@@ -26,7 +26,7 @@ public class ResolverContextFacts
         _selection = new(null, "test", null, null, null);
         _schema = new SchemaBuilder()
             .Add("type Query")
-            .Build(new()).Result;
+            .Build().Result;
     }
 
     [Fact]

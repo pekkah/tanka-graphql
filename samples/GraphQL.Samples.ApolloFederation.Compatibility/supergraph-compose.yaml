@@ -1,0 +1,18 @@
+services:
+  router:
+    image: ghcr.io/apollographql/router:v1.52.0
+    volumes:
+      - /home/pekkah/.nvm/versions/node/v24.2.0/lib/node_modules/@apollo/federation-subgraph-compatibility/node_modules/@apollo/federation-subgraph-compatibility-tests/router.yaml:/dist/config/router.yaml
+      - ./supergraph.graphql:/dist/config/supergraph.graphql
+    ports:
+      - 4000:4000
+      - 8088:8088
+    command: -c config/router.yaml -s config/supergraph.graphql
+  inventory:
+    build: /home/pekkah/.nvm/versions/node/v24.2.0/lib/node_modules/@apollo/federation-subgraph-compatibility/node_modules/@apollo/federation-subgraph-compatibility-tests/dist/subgraphs/inventory
+    ports:
+      - 4003:4003
+  users:
+    build: /home/pekkah/.nvm/versions/node/v24.2.0/lib/node_modules/@apollo/federation-subgraph-compatibility/node_modules/@apollo/federation-subgraph-compatibility-tests/dist/subgraphs/users
+    ports:
+      - 4002:4002

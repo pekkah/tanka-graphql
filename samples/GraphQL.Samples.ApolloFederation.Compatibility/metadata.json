@@ -1,0 +1,25 @@
+{
+  "name": "tanka-graphql",
+  "language": "C#",
+  "framework": "Tanka GraphQL",
+  "version": "2.3.0",
+  "federationVersion": "2.3",
+  "maintainer": "Tanka GraphQL Team",
+  "repository": "https://github.com/pekkah/tanka-graphql",
+  "documentation": "https://github.com/pekkah/tanka-graphql",
+  "supports": {
+    "federation": "2.3",
+    "link": true,
+    "shareable": true,
+    "inaccessible": true,
+    "override": true,
+    "tag": true,
+    "composeDirective": true,
+    "interfaceObject": true,
+    "key": true,
+    "requires": true,
+    "provides": true,
+    "external": true,
+    "extends": true
+  }
+}

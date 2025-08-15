@@ -16,19 +16,19 @@ builder.Services.AddSingleton<ReviewsResolvers>();
 
 // configure services
 builder.AddTankaGraphQL()
-    .AddSchemaOptions("reviews", options =>
+    .AddSchemaOptions("reviews", optionsBuilder =>
     {
-        options.AddReviews();
+        optionsBuilder.AddReviews();
 
         // add federation as last step
-        options.Configure<ReviewsReferenceResolvers>((options, referenceResolvers) =>
+        optionsBuilder.Configure<ReviewsReferenceResolvers>((options, referenceResolvers) =>
         {
-            var schema = options.Builder;
-
-            // federation should be added as last step so
-            // that all entity types are correctly detected
-            schema.AddSubgraph(new(referenceResolvers));
+            options.ConfigureBuild(build =>
+            {
+                build.UseFederation(new SubgraphOptions(referenceResolvers));
+            });
         });
+
     })
     .AddHttp()
     .AddWebSockets();

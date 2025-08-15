@@ -22,7 +22,7 @@ interface Character
 type Human
 
 type Query
-").Build(new SchemaBuildOptions());
+").Build();
         InterfaceDefinition character = "interface Character";
         var value = new object();
         var context = Substitute.For<IResolverContext>();
@@ -54,7 +54,7 @@ interface Character
 type Human
 
 type Query
-").Build(new SchemaBuildOptions());
+").Build();
         InterfaceDefinition character = "interface Character";
         ObjectDefinition humanNotCharacter = "type Human";
         var value = new object();
@@ -87,7 +87,7 @@ interface Character
 type Human implements Character
 
 type Query
-").Build(new SchemaBuildOptions());
+").Build();
         ObjectDefinition humanCharacter = "type Human implements Character";
         var mockValue = new object();
         var context = Substitute.For<IResolverContext>();
@@ -119,7 +119,7 @@ interface Character
 type Human implements Character
 
 type Query
-").Build(new SchemaBuildOptions());
+").Build();
 
         var mockValue = new object();
         var context = Substitute.For<IResolverContext>();

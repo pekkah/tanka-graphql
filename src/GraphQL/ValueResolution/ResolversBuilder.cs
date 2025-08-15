@@ -24,6 +24,31 @@ public class ResolversBuilder : IEnumerable
         Properties = new Dictionary<string, object?>(StringComparer.Ordinal);
     }
 
+    public ResolversBuilder(IResolverMap? resolvers, ISubscriberMap? subscribers)
+        : this()
+    {
+        if (resolvers is null)
+            return;
+
+        foreach ((string TypeName, IEnumerable<string> Fields) in resolvers.GetTypes())
+        {
+            foreach (string field in Fields)
+            {
+                var resolver = resolvers.GetResolver(TypeName, field);
+                var subscriber = subscribers?.GetSubscriber(TypeName, field);
+
+                if (resolver is not null && subscriber is not null)
+                {
+                    Add(TypeName, field, s => s.Run(subscriber), r => r.Run(resolver));
+                }
+                else if (resolver is not null)
+                {
+                    Add(TypeName, field, r => r.Run(resolver));
+                }
+            }
+        }
+    }
+
     public IDictionary<string, object?> Properties { get; }
 
     public IEnumerator GetEnumerator()

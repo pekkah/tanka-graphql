@@ -158,7 +158,7 @@ public class ExecutableSchema : ISchema
 
     public Directive? GetDirective(string name)
     {
-        return null;
+        return _directives.GetDirective(name);
     }
 
     public bool HasDirective(string name)

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  tanka-graphql-products:
+    build:
+      context: ../../
+      dockerfile: samples/GraphQL.Samples.ApolloFederation.Compatibility/Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:4001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
