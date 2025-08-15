@@ -21,8 +21,8 @@ public static class SchemaBuildOptionsExtensions
         options.ValueConverters["FieldSet"] = new FieldSetScalarConverter();
 
         // Set composite schema loader with Federation support and HTTP fallback
-        // This allows Federation URLs to work while still supporting regular HTTP schema loading
-        options.SchemaLoader = new CompositeSchemaLoader(
+        // Only set if user hasn't already configured a custom SchemaLoader
+        options.SchemaLoader ??= new CompositeSchemaLoader(
             new FederationSchemaLoader(),
             new HttpSchemaLoader()
         );
