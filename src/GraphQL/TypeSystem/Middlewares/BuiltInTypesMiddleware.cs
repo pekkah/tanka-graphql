@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 
 using Tanka.GraphQL.ValueResolution;
@@ -13,10 +14,21 @@ public class BuiltInTypesMiddleware : ISchemaBuildMiddleware
     {
         var options = context.Options;
 
-        // Add built-in types if requested
+        // Add built-in types if requested and not already present
         if (options.IncludeBuiltInTypes)
         {
-            context.Builder.Add(SchemaBuilder.BuiltInTypes);
+            var existingTypes = context.Builder.GetTypeDefinitions();
+            var hasBuiltInTypes = existingTypes.Any(t =>
+                t.Name.Value == "String" ||
+                t.Name.Value == "Int" ||
+                t.Name.Value == "Boolean" ||
+                t.Name.Value == "Float" ||
+                t.Name.Value == "ID");
+
+            if (!hasBuiltInTypes)
+            {
+                context.Builder.Add(SchemaBuilder.BuiltInTypes);
+            }
         }
 
         return await next(context);

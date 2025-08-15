@@ -12,9 +12,7 @@ builder.AddTankaGraphQL()
         options.AddGeneratedTypes(types =>
         {
             // Add generated controllers
-            types
-                .AddWorldController()
-                .AddQueryController();
+            types.AddGlobalTypes();
         });
     });
 

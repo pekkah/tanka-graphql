@@ -303,7 +303,7 @@ enum link__Purpose {
         // Use the middleware pipeline approach
         var pipeline = options.BuildPipeline();
         var context = new SchemaBuildContext(this, options);
-        
+
         return pipeline(context);
     }
 
