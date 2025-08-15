@@ -170,8 +170,12 @@ public class FederationConfigurationMiddleware : ISchemaBuildMiddleware
                         return entity;
                 }
 
-                // Default: return the first entity type
-                return entities.FirstOrDefault();
+                // If we can't resolve the type, throw a descriptive error
+                // This prevents undefined behavior and silent failures in Federation
+                throw new InvalidOperationException(
+                    $"Unable to resolve GraphQL type for object of type '{objectType.Name}'. " +
+                    $"Available entity types: [{string.Join(", ", entities.Select(e => e.Name.Value))}]. " +
+                    "Ensure the object has a '__typename' property or the reference resolver returns the correct type.");
             };
 
             var representations = context
