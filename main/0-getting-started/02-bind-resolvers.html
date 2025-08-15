@@ -316,14 +316,14 @@ maps include the resolvers for fields of object types.</p>
                 &quot;);
 
         // Build schema with the resolver
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =&gt;
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     &quot;Query&quot;, &quot;name&quot;, () =&gt; &quot;Test&quot;
                 }
-            }
+            };
         });
 
         // Quickest but least configurable way to execute 
@@ -357,9 +357,9 @@ maps include the resolvers for fields of object types.</p>
                 &quot;);
 
         // Build schema with the resolver
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =&gt;
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     &quot;Query&quot;, &quot;name&quot;, (ResolverContext context) =&gt;
@@ -368,7 +368,7 @@ maps include the resolvers for fields of object types.</p>
                         return default;
                     }
                 }
-            }
+            };
         });
 
         var result = await Executor.Execute(schema, @&quot;{ name }&quot;);
@@ -405,9 +405,9 @@ the value of the parent called <code>objectValue</code>.</li>
                 &quot;&quot;&quot;);
 
         // Build schema with the resolvers
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =&gt;
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     &quot;Query&quot;, &quot;vader&quot;, () =&gt; &quot;I am your father&quot;
@@ -415,7 +415,7 @@ the value of the parent called <code>objectValue</code>.</li>
                 {
                     &quot;Parent&quot;, &quot;luke&quot;, (string objectValue) =&gt; $&quot;Luke, {objectValue}&quot;
                 }
-            }
+            };
         });
 
 
@@ -454,9 +454,9 @@ the value of the parent called <code>objectValue</code>.</li>
                 &quot;&quot;&quot;);
 
         // Build schema with the resolvers
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =&gt;
         {
-            Resolvers = new ResolversBuilder()
+            options.Resolvers = new ResolversBuilder()
                 .Resolvers(&quot;Query&quot;, new Dictionary&lt;string, Action&lt;ResolverBuilder&gt;&gt;()
                 {
                     [&quot;vader&quot;] = b =&gt; b
@@ -473,7 +473,7 @@ the value of the parent called <code>objectValue</code>.</li>
                 {
                     [&quot;luke&quot;] = b =&gt; b.Run((string objectValue) =&gt; $&quot;Luke, {objectValue}&quot;)
                 })
-                .BuildResolvers()
+                .BuildResolvers();
         });
 
 

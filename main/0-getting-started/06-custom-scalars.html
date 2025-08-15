@@ -310,9 +310,9 @@ logic.</p>
                 &quot;);
 
         // Build schema by binding resolvers from ObjectTypeMap
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =&gt;
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     &quot;Query&quot;, new FieldResolversMap
@@ -322,8 +322,8 @@ logic.</p>
                         }
                     }
                 }
-            },
-            ValueConverters = new Dictionary&lt;string, IValueConverter&gt;
+            };
+            options.ValueConverters = new Dictionary&lt;string, IValueConverter&gt;
             {
                 // this will add value converter for Uri scalar type
                 [&quot;Uri&quot;] = new InlineConverter(
@@ -342,7 +342,7 @@ logic.</p>
                             $&quot;Cannot coerce Uri from value kind: '{value.Kind}'&quot;);
                     },
                     serializeLiteral: value =&gt; new StringValue(Encoding.UTF8.GetBytes(value.ToString())))
-            }
+            };
         });
 
 

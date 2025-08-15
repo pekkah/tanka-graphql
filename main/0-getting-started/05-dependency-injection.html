@@ -323,9 +323,9 @@ as HTTP request.</p>
                 &quot;);
 
         // Build schema with the resolver
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =&gt;
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     &quot;Query&quot;, &quot;name&quot;, async (ResolverContext context) =&gt;
@@ -333,7 +333,7 @@ as HTTP request.</p>
                         context.ResolvedValue = await context.RequestServices.GetRequiredService&lt;Service&gt;().CallService();
                     }
                 }
-            }
+            };
         });
 
         // we create an executor with ServiceProvider
@@ -372,14 +372,14 @@ as HTTP request.</p>
                 &quot;);
 
         // Build schema with the resolver
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =&gt;
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     &quot;Query&quot;, &quot;name&quot;, async (Service service) =&gt; await service.CallService()
                 }
-            }
+            };
         });
 
         // we create an executor with ServiceProvider

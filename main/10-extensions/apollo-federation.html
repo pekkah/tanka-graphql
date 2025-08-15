@@ -256,95 +256,178 @@
                 <h2 id="apollo-federation">Apollo Federation</h2>
 <p>&quot;Implement a single data graph across multiple services&quot;</p>
 <blockquote class="blockquote">
-<p><a href="https://www.apollographql.com/docs/federation/">Specification</a></p>
+<p><a href="https://www.apollographql.com/docs/federation/">Apollo Federation v2.3 Specification</a></p>
 </blockquote>
-<h3 id="scope">Scope</h3>
-<p>Tanka GraphQL implements the service section of the Apollo Federation specification
-allowing GraphQL service implemented using it to be joined into graph managed by
-<a href="https://www.apollographql.com/docs/federation/gateway/">Gateway</a>.</p>
+<h3 id="overview">Overview</h3>
+<p>Tanka GraphQL provides comprehensive support for Apollo Federation v2.3, implementing the subgraph specification that allows GraphQL services to be composed into a unified supergraph managed by an Apollo Gateway or Router.</p>
+<p>Key features include:</p>
+<ul>
+<li><strong>Full Apollo Federation v2.3 compliance</strong> with @link directive support</li>
+<li><strong>Middleware pipeline architecture</strong> for seamless integration</li>
+<li><strong>Automatic schema generation</strong> with proper SDL filtering</li>
+<li><strong>Type aliasing support</strong> for @link imports to avoid naming conflicts</li>
+<li><strong>Reference resolvers</strong> for entity federation</li>
+<li><strong>Built-in compatibility testing</strong> with Apollo Federation subgraph compatibility suite</li>
+</ul>
 <h3 id="installation">Installation</h3>
-<p>Support is provided as an NuGet package.</p>
+<p>Support is provided as a NuGet package:</p>
 <pre><code class="language-ps">dotnet add package Tanka.GraphQL.Extensions.ApolloFederation
 </code></pre>
-<h3 id="usage">Usage</h3>
-<p>Creating a service requires two steps:</p>
+<h3 id="quick-start">Quick Start</h3>
+<p>Creating a federated subgraph involves three main steps:</p>
 <ol>
-<li>Define <a href="https://www.apollographql.com/docs/federation/entities/">entities</a> in service schema</li>
-<li>Create federation service from schema</li>
+<li><strong>Define your schema</strong> with federation directives using <code>@link</code></li>
+<li><strong>Configure reference resolvers</strong> for entity resolution</li>
+<li><strong>Add federation support</strong> to your schema builder</li>
 </ol>
-<p>First step is achived by extending the schema with federation directives which allow you to define your entities.
-Extending is done by first adding the directives to schema using <code>AddFederationDirectives</code> <code>SchemaBuilder</code> extension
-method. Use <code>@key</code> directive to mark object or interface as an entity and specify key fields.</p>
-<p>Second step is after you have your basic schema with entities specified and it will add the required extension
-points to schema, mainly additional fields to query root type.</p>
-<p>Example</p>
-<pre><code class="language-csharp">    public static async Task&lt;ISchema&gt; Create()
-    {
-        var typeDefs = @&quot;
-type Review @key(fields: &quot;&quot;id&quot;&quot;) {
+<h4 id="basic-example">Basic Example</h4>
+<pre><code class="language-csharp">// 1. Define schema with @link directive for Federation v2.3
+var schema = @&quot;
+extend schema @link(url: &quot;&quot;https://specs.apollo.dev/federation/v2.3&quot;&quot;, 
+                   import: [&quot;&quot;@key&quot;&quot;, &quot;&quot;@external&quot;&quot;, &quot;&quot;@requires&quot;&quot;, &quot;&quot;@provides&quot;&quot;])
+
+type Product @key(fields: &quot;&quot;id&quot;&quot;) {
     id: ID!
-    body: String
-    author: User @provides(fields: &quot;&quot;username&quot;&quot;)
-    product: Product
-}
-
-type User @key(fields: &quot;&quot;id&quot;&quot;) @extends {
-    id: ID! @external
-    username: String @external
-    reviews: [Review]
-}
-
-type Product @key(fields: &quot;&quot;upc&quot;&quot;) @extends {
-    upc: String! @external
-    reviews: [Review]
+    name: String
+    price: Float
 }
 
 type Query {
-}
-&quot;;
+    product(id: ID!): Product
+}&quot;;
 
-        var builder = new ExecutableSchemaBuilder();
-        builder.Add(typeDefs);
-        builder.AddSubgraph(new(new DictionaryReferenceResolversMap
-        {
-            [&quot;User&quot;] = UserReference,
-            [&quot;Product&quot;] = ProductReference
-        }));
-        builder.Add(new ResolversMap
-        {
-            [&quot;User&quot;] = new()
-            {
-                { &quot;id&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;User&gt;(u =&gt; u.ID) },
-                { &quot;username&quot;, UserUsername },
-                { &quot;reviews&quot;, UserReviews }
-            },
-            [&quot;Review&quot;] = new()
-            {
-                { &quot;id&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Review&gt;(r =&gt; r.ID) },
-                { &quot;body&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Review&gt;(r =&gt; r.Body) },
-                { &quot;author&quot;, ReviewAuthor },
-                { &quot;product&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Review&gt;(r =&gt; r.Product) }
-            },
-            [&quot;Product&quot;] = new()
-            {
-                { &quot;upc&quot;, ctx =&gt; ctx.ResolveAsPropertyOf&lt;Product&gt;(p =&gt; p.Upc) },
-                { &quot;reviews&quot;, ProductReviews }
-            }
-        });
-
-        var schema = await builder.Build();
-
-        return schema;
+// 2. Configure reference resolvers for entity resolution
+var referenceResolvers = new DictionaryReferenceResolversMap
+{
+    [&quot;&quot;Product&quot;&quot;] = (context, type, representation) =&gt;
+    {
+        var id = representation.GetValueOrDefault(&quot;&quot;id&quot;&quot;)?.ToString();
+        var product = GetProductById(id); // Your data access logic
+        return ValueTask.FromResult(new ResolveReferenceResult(type, product));
     }
+};
 
+// 3. Build executable schema with federation support
+var executableSchema = new ExecutableSchemaBuilder()
+    .Add(schema)
+    .AddApolloFederation(new SubgraphOptions(referenceResolvers))
+    .Build();
 </code></pre>
-<h3 id="demo">Demo</h3>
-<p>A sample implementation is available in the <code>dev/GraphQL.Dev.Reviews</code> project which demonstrates Apollo Federation integration.</p>
-<p>To run the sample service:</p>
-<pre><code class="language-ps">cd dev/GraphQL.Dev.Reviews
+<h3 id="advanced-features">Advanced Features</h3>
+<h4 id="schema-composition-with-link">Schema Composition with @link</h4>
+<p>Apollo Federation v2.3 uses the <code>@link</code> directive for schema composition. Tanka GraphQL automatically processes these directives and imports the required types and directives:</p>
+<pre><code class="language-graphql">extend schema @link(url: &quot;https://specs.apollo.dev/federation/v2.3&quot;, 
+                   import: [&quot;@key&quot;, &quot;@external&quot;, &quot;@requires&quot;, &quot;@provides&quot;])
+</code></pre>
+<h4 id="type-aliasing">Type Aliasing</h4>
+<p>You can use aliases to avoid naming conflicts when importing federation types:</p>
+<pre><code class="language-graphql">extend schema @link(url: &quot;https://specs.apollo.dev/federation/v2.3&quot;, 
+                   import: [{name: &quot;@key&quot;, as: &quot;@primaryKey&quot;}, &quot;@external&quot;])
+
+type Product @primaryKey(fields: &quot;id&quot;) {
+    id: ID!
+}
+</code></pre>
+<h4 id="middleware-pipeline-integration">Middleware Pipeline Integration</h4>
+<p>Federation support is seamlessly integrated into the schema builder's middleware pipeline:</p>
+<pre><code class="language-csharp">var schema = new SchemaBuilder()
+    .Add(schemaSDL)
+    .Build(options =&gt;
+    {
+        options.Resolvers = resolvers;
+        options.AddApolloFederation(subgraphOptions);
+    });
+</code></pre>
+<p>The federation middleware automatically:</p>
+<ul>
+<li>Processes <code>@link</code> directives and imports required types</li>
+<li>Adds <code>_service</code> and <code>_entities</code> fields to the Query type</li>
+<li>Configures entity resolution based on your reference resolvers</li>
+<li>Generates proper subgraph SDL for federation</li>
+</ul>
+<h3 id="reference-resolvers">Reference Resolvers</h3>
+<p>Reference resolvers handle entity resolution when the gateway requests entities by their key fields:</p>
+<pre><code class="language-csharp">var referenceResolvers = new DictionaryReferenceResolversMap
+{
+    [&quot;Product&quot;] = async (context, type, representation) =&gt;
+    {
+        // Extract key fields from representation
+        var id = representation.GetValueOrDefault(&quot;id&quot;)?.ToString();
+        var sku = representation.GetValueOrDefault(&quot;sku&quot;)?.ToString();
+        
+        // Resolve entity based on key fields
+        Product? product = null;
+        if (id != null)
+        {
+            product = await productService.GetByIdAsync(id);
+        }
+        else if (sku != null)
+        {
+            product = await productService.GetBySkuAsync(sku);
+        }
+        
+        return new ResolveReferenceResult(type, product);
+    }
+};
+</code></pre>
+<h3 id="federation-directives">Federation Directives</h3>
+<p>Tanka GraphQL supports all Apollo Federation v2.3 directives:</p>
+<ul>
+<li><code>@key</code> - Define entity key fields</li>
+<li><code>@external</code> - Mark fields as owned by other subgraphs</li>
+<li><code>@requires</code> - Specify required fields for computed fields</li>
+<li><code>@provides</code> - Indicate which fields a resolver provides</li>
+<li><code>@shareable</code> - Allow multiple subgraphs to resolve the same field</li>
+<li><code>@inaccessible</code> - Hide fields from the public schema</li>
+<li><code>@override</code> - Take ownership of a field from another subgraph</li>
+<li><code>@tag</code> - Add metadata tags for tooling</li>
+<li><code>@extends</code> - Extend types defined in other subgraphs</li>
+<li><code>@composeDirective</code> - Include custom directives in composition</li>
+<li><code>@interfaceObject</code> - Transform interfaces into object types</li>
+</ul>
+<h3 id="compatibility-testing">Compatibility Testing</h3>
+<p>Tanka GraphQL includes comprehensive compatibility testing with the official Apollo Federation subgraph compatibility suite. You can run the compatibility tests for your own subgraph:</p>
+<pre><code class="language-bash"># Run the Apollo Federation compatibility sample
+cd samples/GraphQL.Samples.ApolloFederation.Compatibility
 dotnet run
 </code></pre>
-<p>This service provides a federated GraphQL endpoint that can be integrated with other Apollo Federation services using an Apollo Gateway.</p>
+<h3 id="migration-from-v1">Migration from v1</h3>
+<p>If you're migrating from Apollo Federation v1, update your schema to use the <code>@link</code> directive:</p>
+<pre><code class="language-diff">- # Federation v1 (deprecated)
+- extend type Query {
+-   _entities(representations: [_Any!]!): [_Entity]!
+-   _service: _Service!
+- }
+
++ # Federation v2.3
++ extend schema @link(url: &quot;https://specs.apollo.dev/federation/v2.3&quot;, 
++                    import: [&quot;@key&quot;, &quot;@external&quot;])
+</code></pre>
+<p>The middleware will automatically handle the migration and add the required fields.</p>
+<h3 id="best-practices">Best Practices</h3>
+<ol>
+<li><strong>Use specific imports</strong> - Only import the federation directives you actually use</li>
+<li><strong>Handle null entities</strong> - Reference resolvers should handle cases where entities don't exist</li>
+<li><strong>Optimize key selection</strong> - Choose efficient key fields for entity resolution</li>
+<li><strong>Test compatibility</strong> - Use the Apollo Federation compatibility suite to validate your subgraph</li>
+<li><strong>Monitor performance</strong> - Entity resolution can impact query performance in large federations</li>
+</ol>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<h4 id="common-issues">Common Issues</h4>
+<ul>
+<li><strong>Missing @link directive</strong>: Ensure your schema includes the @link directive with the correct Federation v2.3 URL</li>
+<li><strong>Entity resolution errors</strong>: Check that your reference resolvers handle all key combinations</li>
+<li><strong>Type conflicts</strong>: Use aliasing in @link imports to resolve naming conflicts</li>
+<li><strong>Schema validation errors</strong>: Verify that all imported directives are properly used in your schema</li>
+</ul>
+<h4 id="debug-mode">Debug Mode</h4>
+<p>Enable detailed logging to troubleshoot federation issues:</p>
+<pre><code class="language-csharp">builder.Services.AddLogging(logging =&gt;
+{
+    logging.AddConsole();
+    logging.SetMinimumLevel(LogLevel.Debug);
+});
+</code></pre>
 
             </main>
             <!-- Single responsive TOC -->

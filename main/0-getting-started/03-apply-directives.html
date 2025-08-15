@@ -323,9 +323,9 @@
                     &quot;);
 
         // build schema with resolvers and directives
-        var schema = await builder.Build(new SchemaBuildOptions
+        var schema = await builder.Build(options =&gt;
         {
-            Resolvers = new ResolversMap
+            options.Resolvers = new ResolversMap
             {
                 {
                     &quot;Query&quot;, new FieldResolversMap
@@ -335,8 +335,8 @@
                         }
                     }
                 }
-            },
-            DirectiveVisitorFactories = new Dictionary&lt;string, CreateDirectiveVisitor&gt;
+            };
+            options.DirectiveVisitorFactories = new Dictionary&lt;string, CreateDirectiveVisitor&gt;
             {
                 // Apply directives to schema by providing a visitor which
                 // will transform the fields with the directive into new
@@ -370,7 +370,7 @@
                                 }).Run(fieldDefinition.Resolver ?? throw new InvalidOperationException()));
                     }
                 }
-            }
+            };
         });
 
         // execute the query
