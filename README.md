@@ -9,12 +9,13 @@ A comprehensive .NET GraphQL library providing a complete GraphQL implementation
 - **⚡ Source code generation** - Generate schema types from C# classes with source generators
 - **📝 Modern GraphQL parser** - Fast parser for executable and type system documents
 - **🔗 Delegate-based resolvers** - Clean resolver implementation with middleware support
-- **🏗️ Middleware pipelines** - Flexible execution architecture (v3)
+- **🏗️ Middleware pipeline architecture** - Modular schema building with extensible middleware stages
 - **🌐 ASP.NET Core server** - HTTP/WebSocket transport with real-time subscriptions
-- **🔄 Apollo Federation** - Subgraph support for distributed GraphQL architectures
+- **🔄 Apollo Federation v2.3** - Full spec compliance with @link directive and type aliasing support
 - **📡 Real-time subscriptions** - [graphql-ws](https://github.com/enisdenjo/graphql-ws) compatible WebSocket server
 - **⏭️ Incremental delivery** - @defer and @stream directives for progressive data loading
 - **🎯 @oneOf directive** - Polymorphic input types support (Stage 3 RFC)
+- **🔗 Schema composition** - @link directive processing for modular schema development
 
 ## 📖 Documentation
 
@@ -58,7 +59,7 @@ app.Run();
 **Advanced Examples:**
 - [**HTTP & WebSocket Server**](https://github.com/pekkah/tanka-graphql/tree/main/samples/GraphQL.Samples.Http) - Complete server setup
 - [**Source Generation**](https://github.com/pekkah/tanka-graphql/tree/main/samples/GraphQL.Samples.SG.Basic) - Code-first development
-- [**Apollo Federation**](https://github.com/pekkah/tanka-graphql/tree/main/dev/GraphQL.Dev.Reviews) - Microservice architecture
+- [**Apollo Federation v2.3**](https://github.com/pekkah/tanka-graphql/tree/main/samples/GraphQL.Samples.ApolloFederation.Compatibility) - Federated subgraph with @link directives
 - [**Incremental Delivery**](https://github.com/pekkah/tanka-graphql/tree/main/samples/GraphQL.Samples.Defer) - @defer/@stream examples
 - [**Tanka Chat**](https://github.com/pekkah/tanka-graphql-samples) - Real-world application
 
