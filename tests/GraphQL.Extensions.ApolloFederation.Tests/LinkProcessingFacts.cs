@@ -72,9 +72,9 @@ type Product @key(fields: ""id"") {
 
         Assert.Equal("https://specs.apollo.dev/federation/v2.3", linkInfo.Url);
         Assert.NotNull(linkInfo.Imports);
-        Assert.Contains("@key", linkInfo.Imports);
-        Assert.Contains("FieldSet", linkInfo.Imports);
-        Assert.DoesNotContain("Boolean", linkInfo.Imports); // Boolean is not in the import list
+        Assert.Contains(linkInfo.Imports, i => i.SourceName == "@key");
+        Assert.Contains(linkInfo.Imports, i => i.SourceName == "FieldSet");
+        Assert.DoesNotContain(linkInfo.Imports, i => i.SourceName == "Boolean"); // Boolean is not in the import list
     }
 
     [Fact]
