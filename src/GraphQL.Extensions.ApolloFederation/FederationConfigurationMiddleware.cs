@@ -273,24 +273,6 @@ public class FederationConfigurationMiddleware : ISchemaBuildMiddleware
     }
 
     /// <summary>
-    /// Check if a node is a field definition within the Query type
-    /// </summary>
-    private static bool IsQueryTypeField(INode node)
-    {
-        // This is a simplification - in a full implementation we'd need to track the parent context
-        // For now, we'll handle this at the ObjectDefinition level
-        return false;
-    }
-
-    /// <summary>
-    /// Check if a field name is a built-in Query field that should be excluded from subgraph SDL
-    /// </summary>
-    private static bool IsBuiltInOrFederationQueryField(string fieldName)
-    {
-        return fieldName is "_entities" or "_service" or "__type" or "__schema";
-    }
-
-    /// <summary>
     /// Check if a type name is a built-in GraphQL scalar, introspection type, or Apollo Federation built-in type
     /// </summary>
     private static bool IsBuiltInOrIntrospectionType(string typeName)
@@ -322,19 +304,5 @@ public class FederationConfigurationMiddleware : ISchemaBuildMiddleware
         return typeName.StartsWith("__");
     }
 
-    /// <summary>
-    /// Check if a directive name is a built-in GraphQL directive or Apollo Federation directive
-    /// </summary>
-    private static bool IsBuiltInGraphQLDirective(string directiveName)
-    {
-        return directiveName is
-            // Built-in GraphQL directives
-            "include" or "skip" or "deprecated" or "specifiedBy" or
-            // Apollo Federation directives (should be excluded from subgraph SDL)
-            "external" or "key" or "link" or "oneOf" or "provides" or "requires" or
-            "shareable" or "tag" or "inaccessible" or "override" or "extends" or
-            "composeDirective" or "interfaceObject" or "authenticated" or "requiresScopes" or
-            "policy" or "context" or "fromContext";
-    }
 
 }
