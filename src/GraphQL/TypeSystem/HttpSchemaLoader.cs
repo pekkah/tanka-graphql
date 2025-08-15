@@ -44,8 +44,8 @@ public class HttpSchemaLoader : ISchemaLoader, IDisposable
         {
             var response = await _httpClient.GetAsync(url, cancellationToken);
 
-            if (!response.IsSuccessStatusCode)
-                return null;
+            // If we claimed we can load this URL but HTTP fails, that's an error, not a reason to try another loader
+            response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
@@ -54,8 +54,9 @@ public class HttpSchemaLoader : ISchemaLoader, IDisposable
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
         {
-            // Log error if logging is available
-            return null;
+            // Re-throw HTTP errors since we claimed we could handle this URL
+            // Don't return null, which would cause CompositeSchemaLoader to try the next loader
+            throw new InvalidOperationException($"Failed to load schema from HTTP URL '{url}': {ex.Message}", ex);
         }
     }
 
