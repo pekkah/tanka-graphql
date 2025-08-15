@@ -13,8 +13,19 @@ namespace Tanka.GraphQL.TypeSystem;
 public record LinkInfo(
     string Url,
     string? As = null,
-    IReadOnlyList<string>? Imports = null,
+    IReadOnlyList<ImportInfo>? Imports = null,
     string? Purpose = null);
+
+/// <summary>
+/// Represents an import specification with optional aliasing
+/// </summary>
+public record ImportInfo(string SourceName, string? Alias = null)
+{
+    /// <summary>
+    /// The effective name to use in the importing schema (alias if provided, otherwise source name)
+    /// </summary>
+    public string EffectiveName => Alias ?? SourceName;
+}
 
 /// <summary>
 /// Provides information about existing types and directives for import filtering
@@ -79,7 +90,7 @@ public static class LinkDirectiveProcessor
     {
         string? url = null;
         string? @as = null;
-        List<string>? importList = null;
+        List<ImportInfo>? importList = null;
         string? purpose = null;
 
         // Parse directive arguments
@@ -114,7 +125,7 @@ public static class LinkDirectiveProcessor
         return new LinkInfo(url, @as, importList, purpose);
     }
 
-    private static List<string>? ParseImportArgument(ValueBase importValue)
+    private static List<ImportInfo>? ParseImportArgument(ValueBase importValue)
     {
         return importValue switch
         {
@@ -123,9 +134,9 @@ public static class LinkDirectiveProcessor
         };
     }
 
-    private static List<string> ParseImportList(ListValue listValue)
+    private static List<ImportInfo> ParseImportList(ListValue listValue)
     {
-        var imports = new List<string>();
+        var imports = new List<ImportInfo>();
         var converter = new LinkImportScalarConverter();
 
         foreach (var item in listValue)
@@ -134,11 +145,10 @@ public static class LinkDirectiveProcessor
             switch (parsed)
             {
                 case string simpleName:
-                    imports.Add(simpleName);
+                    imports.Add(new ImportInfo(simpleName));
                     break;
                 case LinkImport linkImport:
-                    // For now, use the name directly - alias handling can be added later
-                    imports.Add(linkImport.Name);
+                    imports.Add(new ImportInfo(linkImport.Name, linkImport.Alias));
                     break;
             }
         }
@@ -214,26 +224,47 @@ public static class LinkDirectiveProcessor
 
         foreach (var import in linkInfo.Imports)
         {
-            // TODO: Handle aliasing with LinkImport objects
-            // For now, just handle simple string imports
+            // Look for the source name in the document, but check if effective name already exists
+            var sourceName = import.SourceName;
+            var effectiveName = import.EffectiveName;
 
-            if (import.StartsWith("@"))
+            if (sourceName.StartsWith("@"))
             {
                 // Import directive
-                var directiveName = import.Substring(1);
+                var directiveName = sourceName.Substring(1);
+                var effectiveDirectiveName = effectiveName.StartsWith("@") ? effectiveName.Substring(1) : effectiveName;
+
                 var directive = document.DirectiveDefinitions?.FirstOrDefault(d => d.Name.Value == directiveName);
-                if (directive != null && !existingTypesProvider.ContainsDirective(directiveName))
+                if (directive != null && !existingTypesProvider.ContainsDirective(effectiveDirectiveName))
                 {
-                    importedDirectives.Add(directive);
+                    // If aliased, create a copy with the new name
+                    if (import.Alias != null)
+                    {
+                        var aliasedDirective = directive.WithName(effectiveDirectiveName);
+                        importedDirectives.Add(aliasedDirective);
+                    }
+                    else
+                    {
+                        importedDirectives.Add(directive);
+                    }
                 }
             }
             else
             {
                 // Import type
-                var type = document.TypeDefinitions?.FirstOrDefault(t => t.Name.Value == import);
-                if (type != null && !existingTypesProvider.ContainsType(import))
+                var type = document.TypeDefinitions?.FirstOrDefault(t => t.Name.Value == sourceName);
+                if (type != null && !existingTypesProvider.ContainsType(effectiveName))
                 {
-                    importedTypes.Add(type);
+                    // If aliased, create a copy with the new name
+                    if (import.Alias != null)
+                    {
+                        var aliasedType = CreateAliasedType(type, effectiveName);
+                        importedTypes.Add(aliasedType);
+                    }
+                    else
+                    {
+                        importedTypes.Add(type);
+                    }
                 }
             }
         }
@@ -336,6 +367,25 @@ public static class LinkDirectiveProcessor
         }
 
         return mergedDocument ?? new TypeSystemDocument(null, null, null, null, null);
+    }
+
+    /// <summary>
+    /// Create an aliased copy of a type definition with a new name
+    /// </summary>
+    private static TypeDefinition CreateAliasedType(TypeDefinition type, string newName)
+    {
+        var name = new Name(newName);
+
+        return type switch
+        {
+            ObjectDefinition obj => obj.WithName(name),
+            InterfaceDefinition iface => iface.WithName(name),
+            UnionDefinition union => union.WithName(name),
+            EnumDefinition enumDef => enumDef.WithName(name),
+            InputObjectDefinition input => input.WithName(name),
+            ScalarDefinition scalar => scalar.WithName(name),
+            _ => throw new InvalidOperationException($"Unsupported type definition for aliasing: {type.GetType().Name}")
+        };
     }
 }
 
