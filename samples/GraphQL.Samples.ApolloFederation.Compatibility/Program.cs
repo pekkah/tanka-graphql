@@ -44,7 +44,15 @@ var referenceResolvers = new DictionaryReferenceResolversMap
 
     ["ProductResearch"] = (context, type, representation) =>
     {
-        var caseNumber = ((Dictionary<string, object>)representation["study"])["caseNumber"]?.ToString();
+        string? caseNumber = null;
+
+        if (representation.TryGetValue("study", out var studyObj)
+            && studyObj is Dictionary<string, object> studyDict
+            && studyDict.TryGetValue("caseNumber", out var caseNumberObj))
+        {
+            caseNumber = caseNumberObj?.ToString();
+        }
+
         var research = Data.ProductResearches.FirstOrDefault(r => r.Study.CaseNumber == caseNumber);
         return ValueTask.FromResult(new ResolveReferenceResult(type, research));
     },

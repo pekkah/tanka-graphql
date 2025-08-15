@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -204,14 +205,131 @@ public class FederationConfigurationMiddleware : ISchemaBuildMiddleware
     }
 
     /// <summary>
-    /// Generate SDL representation for Federation subgraph schema  
-    /// For now, return a placeholder that matches the test expectations
+    /// Generate SDL representation for Federation subgraph schema
     /// </summary>
     private static string GenerateSchemaSDL(ISchema schema)
     {
-        // TODO: Implement proper SDL generation
-        // For now, return the expected test output
-        return "type Product  @key(fields: \"upc\") @extends { upc: String! @external reviews: [Review] }  type Review  @key(fields: \"id\") { id: ID! body: String author: User @provides(fields: \"username\") product: Product }  type User  @key(fields: \"id\") @extends { id: ID! @external username: String @external reviews: [Review] }";
+        // Convert schema to TypeSystemDocument and print as SDL
+        var document = schema.ToTypeSystem();
+
+        // Filter nodes according to Apollo Federation spec:
+        // Include user-defined types and fields, exclude built-ins and introspection
+        // Don't print descriptions as they're not expected in Federation subgraph SDL
+        return Language.Printer.Print(document,
+            node => ShouldIncludeNodeInSubgraphSDL(node),
+            printDescriptions: false);
+    }
+
+    /// <summary>
+    /// Determines if a node should be included in the subgraph SDL according to Apollo Federation spec
+    /// </summary>
+    private static bool ShouldIncludeNodeInSubgraphSDL(INode node)
+    {
+        return node switch
+        {
+            // For object types, only include entity types (exclude Query, Mutation, Subscription)
+            ObjectDefinition obj => ShouldIncludeObjectType(obj),
+
+            // Include user-defined interfaces, unions, enums, input types (exclude built-ins)
+            InterfaceDefinition iface => !IsBuiltInOrIntrospectionType(iface.Name.Value),
+            UnionDefinition union => !IsBuiltInOrIntrospectionType(union.Name.Value),
+            EnumDefinition enumDef => !IsBuiltInOrIntrospectionType(enumDef.Name.Value),
+            InputObjectDefinition input => !IsBuiltInOrIntrospectionType(input.Name.Value),
+
+            // Exclude built-in scalar types and federation scalars
+            ScalarDefinition scalar => !IsBuiltInScalarType(scalar.Name.Value) && !IsApolloFederationBuiltInType(scalar.Name.Value),
+
+            // Exclude all directive definitions from subgraph SDL
+            DirectiveDefinition => false,
+
+            // Exclude schema definition as it's not needed for subgraph SDL
+            SchemaDefinition => false,
+
+            // Include everything else (field definitions, arguments, etc.)
+            _ => true
+        };
+    }
+
+    /// <summary>
+    /// Determine if an object type should be included in the subgraph SDL
+    /// Only include entity types, exclude root operation types per Apollo Federation spec
+    /// </summary>
+    private static bool ShouldIncludeObjectType(ObjectDefinition obj)
+    {
+        // Exclude built-in and introspection types
+        if (IsBuiltInOrIntrospectionType(obj.Name.Value))
+            return false;
+
+        // Exclude root operation types (Query, Mutation, Subscription) from federation SDL
+        if (obj.Name.Value is "Query" or "Mutation" or "Subscription")
+            return false;
+
+        // Include all other user-defined object types (entities)
+        return true;
+    }
+
+    /// <summary>
+    /// Check if a node is a field definition within the Query type
+    /// </summary>
+    private static bool IsQueryTypeField(INode node)
+    {
+        // This is a simplification - in a full implementation we'd need to track the parent context
+        // For now, we'll handle this at the ObjectDefinition level
+        return false;
+    }
+
+    /// <summary>
+    /// Check if a field name is a built-in Query field that should be excluded from subgraph SDL
+    /// </summary>
+    private static bool IsBuiltInOrFederationQueryField(string fieldName)
+    {
+        return fieldName is "_entities" or "_service" or "__type" or "__schema";
+    }
+
+    /// <summary>
+    /// Check if a type name is a built-in GraphQL scalar, introspection type, or Apollo Federation built-in type
+    /// </summary>
+    private static bool IsBuiltInOrIntrospectionType(string typeName)
+    {
+        return IsBuiltInScalarType(typeName) || IsIntrospectionType(typeName) || IsApolloFederationBuiltInType(typeName);
+    }
+
+    /// <summary>
+    /// Check if a type name is an Apollo Federation built-in type that should be excluded from subgraph SDL
+    /// </summary>
+    private static bool IsApolloFederationBuiltInType(string typeName)
+    {
+        return typeName is "_Any" or "_Entity" or "_Service" or "FieldSet" or "link__Import" or "link__Purpose";
+    }
+
+    /// <summary>
+    /// Check if a type name is a built-in GraphQL scalar type
+    /// </summary>
+    private static bool IsBuiltInScalarType(string typeName)
+    {
+        return typeName is "String" or "Int" or "Float" or "Boolean" or "ID";
+    }
+
+    /// <summary>
+    /// Check if a type name is a GraphQL introspection type
+    /// </summary>
+    private static bool IsIntrospectionType(string typeName)
+    {
+        return typeName.StartsWith("__");
+    }
+
+    /// <summary>
+    /// Check if a directive name is a built-in GraphQL directive or Apollo Federation directive
+    /// </summary>
+    private static bool IsBuiltInGraphQLDirective(string directiveName)
+    {
+        return directiveName is
+            // Built-in GraphQL directives
+            "include" or "skip" or "deprecated" or "specifiedBy" or
+            // Apollo Federation directives (should be excluded from subgraph SDL)
+            "external" or "key" or "link" or "oneOf" or "provides" or "requires" or
+            "shareable" or "tag" or "inaccessible" or "override" or "extends" or
+            "composeDirective" or "interfaceObject";
     }
 
 }
