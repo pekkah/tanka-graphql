@@ -35,7 +35,7 @@ Creating a federated subgraph involves three main steps:
 
 #### Basic Example
 
-#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationExamples.BasicFederationExample
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.BasicFederationExample
 
 ### Advanced Features
 
@@ -56,19 +56,19 @@ extend schema @link(url: "https://specs.apollo.dev/federation/v2.3",
 
 Federation support is seamlessly integrated into the schema builder's middleware pipeline:
 
-#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationExamples.MiddlewarePipelineIntegration
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.MiddlewarePipelineIntegration
 
 ### Reference Resolvers
 
 Reference resolvers handle entity resolution when the gateway requests entities by their key fields:
 
-#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationExamples.ReferenceResolverExample
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.ReferenceResolverExample
 
 ### Federation Directives
 
 Tanka GraphQL supports all Apollo Federation v2.3 directives:
 
-#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationExamples.FederationDirectivesExample
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.FederationDirectivesExample
 
 The supported directives include:
 - `@key` - Define entity key fields
@@ -97,17 +97,17 @@ dotnet run
 
 If you're migrating from Apollo Federation v1, update your schema to use the `@link` directive:
 
-#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationExamples.MigrationFromV1Example
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.MigrationFromV1Example
 
 ### Best Practices
 
 1. **Use specific imports** - Only import the federation directives you actually use:
 
-#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationExamples.SpecificImportsExample
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.SpecificImportsExample
 
 2. **Handle null entities** - Reference resolvers should handle cases where entities don't exist:
 
-#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationExamples.ErrorHandlingExample
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.ErrorHandlingExample
 
 3. **Optimize key selection** - Choose efficient key fields for entity resolution
 4. **Test compatibility** - Use the Apollo Federation compatibility suite to validate your subgraph
