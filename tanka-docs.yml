@@ -15,16 +15,6 @@ branches:
       - artifacts
       - samples
 tags:
-  2.*:
-    input_path:
-      - ui-bundle
-      - docs
-      - src
-      - tests
-      - tutorials
-      - dev
-      - artifacts
-
   3.*:
     input_path:
       - ui-bundle
