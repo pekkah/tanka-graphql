@@ -89,7 +89,7 @@ options.SchemaLoader = new CompositeSchemaLoader(
 
 #### Importing Federation Types
 
-#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.ImportingFederationTypes
+#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.ImportingCustomTypes
 
 #### Using Namespaces
 
