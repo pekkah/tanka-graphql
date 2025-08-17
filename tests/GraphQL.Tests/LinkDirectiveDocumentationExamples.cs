@@ -38,11 +38,6 @@ public class LinkDirectiveDocumentationExamples
             type AdminPanel {
                 settings: String
             }
-
-            enum Role {
-                USER
-                ADMIN
-            }
             """;
 
         var builtSchema = await new SchemaBuilder()
@@ -55,6 +50,7 @@ public class LinkDirectiveDocumentationExamples
         Assert.NotNull(builtSchema);
         Assert.NotNull(builtSchema.GetNamedType("User"));
         Assert.NotNull(builtSchema.GetDirectiveType("authenticated"));
+        Assert.NotNull(builtSchema.GetNamedType("Role")); // Imported from external schema
     }
 
     [Fact]
@@ -82,11 +78,6 @@ public class LinkDirectiveDocumentationExamples
             type AdminPanel {
                 settings: String
             }
-
-            enum UserRole {
-                USER
-                ADMIN
-            }
             """;
 
         var builtSchema = await new SchemaBuilder()
@@ -99,9 +90,11 @@ public class LinkDirectiveDocumentationExamples
         Assert.NotNull(builtSchema);
         Assert.NotNull(builtSchema.GetNamedType("User"));
 
-        // Note: The schema builds successfully and demonstrates aliasing syntax
-        // The actual aliasing behavior may need further refinement in the implementation
-        Assert.NotNull(builtSchema);
+        // Verify that aliasing worked correctly
+        Assert.NotNull(builtSchema.GetDirectiveType("requiresAuth")); // Aliased directive
+        Assert.NotNull(builtSchema.GetNamedType("UserRole")); // Aliased type
+        Assert.Null(builtSchema.GetDirectiveType("authenticated")); // Original should not exist
+        Assert.Null(builtSchema.GetNamedType("Role")); // Original should not exist
     }
 
     [Fact]
@@ -150,7 +143,7 @@ public class LinkDirectiveDocumentationExamples
 
             type Query {
               profile: User @auth__authenticated
-              admin: AdminPanel @auth__authorized(role: ADMIN)
+              admin: AdminPanel @auth__authorized(role: auth__ADMIN)
             }
 
             type User {
@@ -160,11 +153,6 @@ public class LinkDirectiveDocumentationExamples
 
             type AdminPanel {
                 settings: String
-            }
-
-            enum Role {
-                USER
-                ADMIN
             }
             """;
 

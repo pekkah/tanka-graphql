@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Tanka.GraphQL.TypeSystem;
+
 using Xunit;
 
 namespace Tanka.GraphQL.Tests;
@@ -44,7 +46,7 @@ public class LinkDirectiveAliasingTests
         // The aliased directives should be available
         var requiresAuthDirective = builtSchema.GetDirectiveType("requiresAuth");
         var requiresPermissionDirective = builtSchema.GetDirectiveType("requiresPermission");
-        
+
         // The original directive names should NOT be available (they were aliased)
         var authenticatedDirective = builtSchema.GetDirectiveType("authenticated");
         var authorizedDirective = builtSchema.GetDirectiveType("authorized");
@@ -52,8 +54,8 @@ public class LinkDirectiveAliasingTests
         // Debug output
         var allDirectives = builtSchema.QueryDirectiveTypes();
         var directiveNames = string.Join(", ", allDirectives.Select(d => d.Name));
-        
-        Assert.True(requiresAuthDirective != null, 
+
+        Assert.True(requiresAuthDirective != null,
             $"requiresAuth directive not found. Available directives: {directiveNames}");
         Assert.True(requiresPermissionDirective != null,
             $"requiresPermission directive not found. Available directives: {directiveNames}");
@@ -97,7 +99,7 @@ public class LinkDirectiveAliasingTests
         // The aliased types should be available
         var userRoleType = builtSchema.GetNamedType("UserRole");
         var userPermissionType = builtSchema.GetNamedType("UserPermission");
-        
+
         // The original type names should NOT be available (they were aliased)
         var roleType = builtSchema.GetNamedType("Role");
         var permissionType = builtSchema.GetNamedType("Permission");
@@ -142,7 +144,7 @@ public class LinkDirectiveAliasingTests
         // Aliased directive should be available with new name
         Assert.NotNull(builtSchema.GetDirectiveType("requiresAuth"));
         Assert.Null(builtSchema.GetDirectiveType("authenticated"));
-        
+
         // Non-aliased imports should be available with original names
         Assert.NotNull(builtSchema.GetDirectiveType("authorized"));
         Assert.NotNull(builtSchema.GetNamedType("Role"));
@@ -162,7 +164,7 @@ public class LinkDirectiveAliasingTests
             System.Threading.CancellationToken cancellationToken = default)
         {
             Console.WriteLine($"[TestAuthSchemaLoader] LoadSchemaAsync({url}) called");
-            
+
             if (!CanLoad(url))
                 return Task.FromResult<Language.Nodes.TypeSystem.TypeSystemDocument?>(null);
 

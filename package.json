@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "@apollo/federation-subgraph-compatibility": "^2.2.1"
-  }
-}
