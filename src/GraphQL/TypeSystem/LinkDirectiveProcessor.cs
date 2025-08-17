@@ -240,7 +240,7 @@ public static class LinkDirectiveProcessor
                     // If aliased, create a copy with the new name
                     if (import.Alias != null)
                     {
-                        var aliasedDirective = directive.WithName(effectiveDirectiveName);
+                        var aliasedDirective = CreateAliasedDirective(directive, effectiveDirectiveName);
                         importedDirectives.Add(aliasedDirective);
                     }
                     else
@@ -386,6 +386,22 @@ public static class LinkDirectiveProcessor
             ScalarDefinition scalar => scalar.WithName(name),
             _ => throw new InvalidOperationException($"Unsupported type definition for aliasing: {type.GetType().Name}")
         };
+    }
+
+    /// <summary>
+    /// Create an aliased copy of a directive definition with a new name
+    /// </summary>
+    private static DirectiveDefinition CreateAliasedDirective(DirectiveDefinition directive, string newName)
+    {
+        var name = new Name(newName);
+        return new DirectiveDefinition(
+            directive.Description,
+            name,
+            directive.Arguments,
+            directive.IsRepeatable,
+            directive.DirectiveLocations,
+            directive.Location
+        );
     }
 }
 
