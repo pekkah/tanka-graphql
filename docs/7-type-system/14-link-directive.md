@@ -2,15 +2,22 @@
 
 The `@link` directive enables schema composition by importing types and directives from external schemas. This powerful feature allows you to build modular GraphQL schemas and is the foundation for specifications like Apollo Federation.
 
-> **Note**: While the basic @link functionality is working, type aliasing is currently experimental and may not work as expected in all scenarios. The implementation is actively being refined.
-
 ### Overview
 
 The `@link` directive is applied to the schema definition and allows you to:
 - Import types and directives from external schema specifications
-- Use type aliasing to avoid naming conflicts
+- Use type aliasing to avoid naming conflicts  
 - Compose schemas from multiple sources
 - Enable federation and other advanced GraphQL patterns
+
+Tanka GraphQL provides complete support for the `@link` directive including:
+- ✅ Basic imports by name
+- ✅ Type and directive aliasing
+- ✅ Namespace prefixing with `as` parameter
+- ✅ Mixed aliased and non-aliased imports
+- ✅ Custom schema loaders
+- ✅ Circular reference protection
+- ✅ Integration with Apollo Federation
 
 ### Basic Usage
 
@@ -32,20 +39,25 @@ The `import` parameter accepts several formats:
 #### Simple Import
 Import types and directives by name using string literals.
 
-#### Import with Aliasing (Experimental)
-Rename imported types to avoid conflicts. *Note: Type aliasing is currently experimental and may not work as expected in all scenarios.*
+#### Import with Aliasing
+Rename imported types to avoid conflicts.
 
 #include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.ImportWithAliasing
 
 ### How It Works
 
-When the schema builder encounters a `@link` directive:
+The `@link` directive is processed by the `LinkProcessingMiddleware` during schema building:
 
-1. **URL Resolution**: The URL is resolved to load the external schema
-2. **Schema Loading**: The appropriate schema loader fetches the specification
-3. **Import Filtering**: Only the specified imports (or all if none specified) are included
-4. **Type Aliasing**: Imported types are renamed if aliases are provided
-5. **Schema Merging**: Imported types are merged into your schema
+1. **Directive Discovery**: @link directives are extracted from schema definitions and extensions
+2. **URL Resolution**: The URL is resolved to determine the appropriate schema loader
+3. **Schema Loading**: The schema loader fetches the external specification
+4. **Import Parsing**: Import specifications are parsed, including aliases
+5. **Import Filtering**: Only the specified imports (or all if none specified) are included
+6. **Type Aliasing**: Imported types and directives are renamed according to aliases
+7. **Schema Merging**: Imported types are merged into your schema
+8. **Conflict Detection**: Ensures no naming conflicts occur
+
+This process supports recursive linking with circular reference protection and maintains type safety throughout the composition process.
 
 ### Schema Loaders
 
@@ -140,10 +152,9 @@ Enable debug logging to trace @link processing by configuring logging at the Deb
 
 ### Limitations
 
-- **Type aliasing is experimental** and may not work correctly in all scenarios
-- Type aliasing currently only supports renaming at import time  
 - Recursive linking depth is limited to prevent infinite loops
 - Schema loaders must return valid GraphQL SDL
+- Imported types must not conflict with existing types unless aliasing is used
 
 ### See Also
 

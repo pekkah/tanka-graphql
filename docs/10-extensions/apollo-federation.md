@@ -43,9 +43,9 @@ Creating a federated subgraph involves three main steps:
 
 Apollo Federation v2.3 uses the `@link` directive for schema composition. Tanka GraphQL automatically processes these directives and imports the required types and directives.
 
-#### Type Aliasing (Experimental)
+#### Type Aliasing
 
-You can use aliases to avoid naming conflicts when importing federation types. *Note: Type aliasing is currently experimental and may not work as expected.* Aliasing allows you to rename imported directives and types:
+You can use aliases to avoid naming conflicts when importing federation types. Aliasing allows you to rename imported directives and types:
 
 ```graphql
 extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", 
