@@ -10,7 +10,7 @@
       "rollForward": false
     },
     "tanka.docsgen": {
-      "version": "0.10.0",
+      "version": "1.2.1",
       "commands": [
         "tanka-docs"
       ],
