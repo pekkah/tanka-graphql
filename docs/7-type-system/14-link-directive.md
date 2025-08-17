@@ -158,6 +158,6 @@ Enable debug logging to trace @link processing by configuring logging at the Deb
 
 ### See Also
 
-- xref:types@HEAD:03-middleware.md[Middleware Pipeline] - How @link processing fits in the build pipeline
-- xref:extensions@HEAD:apollo-federation.md[Apollo Federation] - Using @link for federation
-- xref:types@HEAD:01_1-builder.md[Schema Builder] - Configuring schema loaders
+- xref:types:03-middleware.md[Middleware Pipeline] - How @link processing fits in the build pipeline
+- xref:extensions:apollo-federation.md[Apollo Federation] - Using @link for federation
+- xref:types:01_1-builder.md[Schema Builder] - Configuring schema loaders
