@@ -19,7 +19,7 @@ The schema building process is divided into several stages, each handled by spec
 Adds standard GraphQL built-in types (String, Int, Float, Boolean, ID) and core directives (@include, @skip, @deprecated, etc.) to every schema.
 
 #### LinkProcessingMiddleware
-Processes @link directives to import types and directives from external schemas. This enables Apollo Federation v2.3 support and schema composition.
+Processes @link directives to import types and directives from external schemas. This enables schema composition and federation support.
 
 #### ApplyDirectivesMiddleware
 Applies directive visitors to transform types and fields based on directive usage. This is where custom directive logic is executed.
@@ -85,24 +85,26 @@ var schema = new SchemaBuilder()
     {
         options.Resolvers = resolvers;
         
-        // Add Apollo Federation support
-        options.AddApolloFederation(subgraphOptions);
+        // Add Federation support
+        options.UseFederation(subgraphOptions);
         
         // Add custom directive visitor
         options.AddDirectiveVisitor<MyDirectiveVisitor>("myDirective");
     });
 ```
 
-### Apollo Federation Integration
+### Federation Integration
 
-Apollo Federation support is implemented as middleware that integrates seamlessly into the pipeline:
+Federation support is implemented as middleware that integrates seamlessly into the pipeline:
 
 ```csharp
-// Federation middleware is automatically added when using AddApolloFederation
-var schema = new ExecutableSchemaBuilder()
+// Federation middleware is automatically added when using UseFederation
+var schema = await new SchemaBuilder()
     .Add(federatedSchemaSDL)
-    .AddApolloFederation(new SubgraphOptions(referenceResolvers))
-    .Build();
+    .Build(options =>
+    {
+        options.UseFederation(new SubgraphOptions(referenceResolvers));
+    });
 ```
 
 The federation middleware:
@@ -127,17 +129,5 @@ The federation middleware:
 - **Type conflicts**: Ensure middleware doesn't add duplicate types or directives
 - **Resolution failures**: Verify that middleware properly configures resolvers and type mappings
 - **Performance issues**: Profile middleware execution to identify bottlenecks
-
-#### Debug Mode
-
-Enable detailed logging to troubleshoot middleware issues:
-
-```csharp
-builder.Services.AddLogging(logging =>
-{
-    logging.AddConsole();
-    logging.SetMinimumLevel(LogLevel.Debug);
-});
-```
 
 The middleware pipeline provides a powerful and flexible way to extend Tanka GraphQL's schema building capabilities while maintaining clean separation of concerns and testability.
