@@ -61,7 +61,7 @@ The `@link` directive supports importing with aliases using the object syntax:
 - `{name: "@key", as: "@primaryKey"}` imports the `@key` directive as `@primaryKey`
 - Simple string imports like `"@external"` use the original name
 
-See the [@link directive documentation](../7-type-system/14-link-directive.md) for complete details on schema composition and aliasing.
+See the xref:types:14-link-directive.md[@link directive documentation] for complete details on schema composition and aliasing.
 
 #### Middleware Pipeline Integration
 

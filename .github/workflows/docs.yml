@@ -15,55 +15,29 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build:
-    runs-on: windows-latest
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    concurrency: ci-${{ github.ref }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            6.0.x
-            7.0.x
-            8.0.x
-            9.0.x
+          dotnet-version: 9.0.x
 
       - name: Build docs
         shell: pwsh
         run: |
           ./build-docs.ps1 -Output ./artifacts/gh-pages -CurrentBranch $Env:GITHUB_REF_NAME
-      
-      - name: Publish build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Docs
-          path: |
-            ./artifacts/gh-pages
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    concurrency: ci-${{ github.ref }}
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: Docs
-          path: docs
-      
-      - run: ls -la ./docs
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.2.3
+        uses: JamesIves/github-pages-deploy-action@v4.6.8
         if: github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/')
         with:
           branch: gh-pages
-          folder: ./docs
+          folder: ./artifacts/gh-pages
           commit-message: ${{github.ref_name}}
           clean: true
