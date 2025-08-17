@@ -12,25 +12,11 @@ The `@link` directive is applied to the schema definition and allows you to:
 
 ### Basic Usage
 
-```graphql
-extend schema @link(
-  url: "https://specs.apollo.dev/federation/v2.3",
-  import: ["@key", "@external", "_Service", "FieldSet"]
-)
-```
+#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.BasicLinkUsage
 
 ### Syntax
 
-```graphql
-directive @link(
-  url: String!
-  as: String
-  import: [link__Import]
-  for: link__Purpose
-) repeatable on SCHEMA
-```
-
-#### Parameters
+The `@link` directive follows the GraphQL specification for schema composition:
 
 - **url** (required): The URL of the specification to import from
 - **as**: Namespace prefix for imported types (e.g., `federation` would prefix types as `federation__Type`)
@@ -42,19 +28,12 @@ directive @link(
 The `import` parameter accepts several formats:
 
 #### Simple Import
-Import types and directives by name:
-```graphql
-import: ["@key", "_Service", "FieldSet"]
-```
+Import types and directives by name using string literals.
 
 #### Import with Aliasing
 Rename imported types to avoid conflicts:
-```graphql
-import: [
-  { name: "@key", as: "@primaryKey" },
-  { name: "_Service", as: "_FederationService" }
-]
-```
+
+#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.ImportWithAliasing
 
 ### How It Works
 
@@ -96,76 +75,23 @@ options.SchemaLoader = new CompositeSchemaLoader(
 
 #### Importing Federation Types
 
-```graphql
-extend schema @link(
-  url: "https://specs.apollo.dev/federation/v2.3",
-  import: ["@key", "@external", "@requires", "@provides"]
-)
-
-type Product @key(fields: "id") {
-  id: ID!
-  name: String
-  price: Float @external
-  weight: Float @external
-  shippingCost: Float @requires(fields: "price weight")
-}
-```
+#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.ImportingFederationTypes
 
 #### Using Namespaces
 
-```graphql
-extend schema @link(
-  url: "https://specs.apollo.dev/federation/v2.3",
-  as: "federation"
-)
-
-type Product @federation__key(fields: "id") {
-  id: ID!
-  name: String
-}
-```
+#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.UsingNamespaces
 
 #### Custom Specifications
 
 You can import from your own specifications:
 
-```graphql
-extend schema @link(
-  url: "https://mycompany.com/schemas/auth/v1.0",
-  import: ["@authenticated", "@authorized", "Role"]
-)
-
-type Query {
-  profile: User @authenticated
-  admin: AdminPanel @authorized(role: ADMIN)
-}
-```
+#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.CustomSpecifications
 
 ### Creating Custom Schema Loaders
 
 Implement `ISchemaLoader` to load schemas from custom sources:
 
-```csharp
-public class CustomSchemaLoader : ISchemaLoader
-{
-    public async Task<TypeSystemDocument?> LoadSchemaAsync(string url)
-    {
-        if (!url.StartsWith("https://mycompany.com/"))
-            return null; // Let other loaders handle it
-        
-        // Load your custom schema
-        var schemaContent = await FetchSchemaContent(url);
-        return Sdl.Parse(schemaContent);
-    }
-}
-
-// Register the loader
-options.SchemaLoader = new CompositeSchemaLoader(
-    new CustomSchemaLoader(),
-    new FederationSchemaLoader(),
-    new HttpSchemaLoader()
-);
-```
+#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.CustomSchemaLoaderExample
 
 ### Processing Pipeline
 
@@ -186,8 +112,14 @@ The `@link` directive is processed by the `LinkProcessingMiddleware` during sche
 ### Best Practices
 
 1. **Be Specific with Imports**: Only import what you need to avoid namespace pollution
+
+#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.SpecificImportsBestPractice
+
 2. **Use Aliasing for Conflicts**: When importing from multiple sources, use aliases to avoid naming conflicts
 3. **Version Your Specifications**: Include version numbers in URLs for stability
+
+#include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.VersionedSpecificationsBestPractice
+
 4. **Cache External Schemas**: Implement caching in custom loaders for performance
 5. **Validate Imports**: Ensure imported types are used correctly in your schema
 
@@ -202,15 +134,7 @@ The `@link` directive is processed by the `LinkProcessingMiddleware` during sche
 
 #### Debugging
 
-Enable debug logging to trace @link processing:
-
-```csharp
-services.AddLogging(builder =>
-{
-    builder.SetMinimumLevel(LogLevel.Debug);
-    builder.AddConsole();
-});
-```
+Enable debug logging to trace @link processing by configuring logging at the Debug level in your application.
 
 ### Limitations
 
