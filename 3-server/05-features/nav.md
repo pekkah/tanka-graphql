@@ -1,5 +1,0 @@
-- [Features](xref://05-features/00-list.md)
-    - [Http and WebSockets](xref://05-features/01-http.md)
-    - [Authorization](xref://05-features/02-authorization.md)
-    - [Incremental Delivery](xref://05-features/03-incremental-delivery.md)
-    - [Multipart HTTP Transport](xref://05-features/04-multipart-http.md)

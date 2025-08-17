@@ -3,7 +3,7 @@
 
 <head>
     <base href="/tanka-graphql/">
-    <title>00-getting-started - Tanka GraphQL</title>
+    <title>14-link-directive - Tanka GraphQL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
@@ -223,46 +223,95 @@
     <nav class="nav flex-column">
 <li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/index.html>Home</a>
+        <a class="nav-link" href=main/7-type-system/02-schema.html>Schema</a>
+        <a class="btn btn-sm" data-bs-toggle="collapse" href="#nav-02-schema.md" role="button" aria-expanded="false" aria-controls="nav-02-schema.md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
+        </a>
+    </div>
+    <div class="collapse" id="nav-02-schema.md">
+        <ul class="nav flex-column ms-3">
+<li class="nav-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <a class="nav-link" href=main/7-type-system/01_1-builder.html>SchemaBuilder</a>
+    </div>
+</li><li class="nav-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <a class="nav-link" href=main/7-type-system/01_2-executablebuilder.html>ExecutableSchemaBuilder</a>
+    </div>
+</li><li class="nav-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <a class="nav-link" href=main/7-type-system/03-middleware.html>Middleware</a>
+    </div>
+</li>        </ul>
     </div>
 </li>    </nav>
     <nav class="nav flex-column">
 <li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/0-getting-started/00-getting-started.html>Getting started</a>
-        <a class="btn btn-sm" data-bs-toggle="collapse" href="#nav-00-getting-started.md" role="button" aria-expanded="false" aria-controls="nav-00-getting-started.md">
+        <a class="nav-link" href=main/7-type-system/04-types.html>Types</a>
+        <a class="btn btn-sm" data-bs-toggle="collapse" href="#nav-04-types.md" role="button" aria-expanded="false" aria-controls="nav-04-types.md">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
         </a>
     </div>
-    <div class="collapse" id="nav-00-getting-started.md">
+    <div class="collapse" id="nav-04-types.md">
         <ul class="nav flex-column ms-3">
 <li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/0-getting-started/01-create-schema.html>Create schema</a>
+        <a class="nav-link" href=main/7-type-system/05-scalars.html>Scalars</a>
     </div>
 </li><li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/0-getting-started/02-bind-resolvers.html>Bind resolvers</a>
+        <a class="nav-link" href=main/7-type-system/06-objects.html>Objects</a>
     </div>
 </li><li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/0-getting-started/03-apply-directives.html>Apply directives</a>
+        <a class="nav-link" href=main/7-type-system/07-interfaces.html>Interfaces</a>
     </div>
 </li><li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/0-getting-started/04-server.html>Server</a>
+        <a class="nav-link" href=main/7-type-system/08-unions.html>Unions</a>
     </div>
 </li><li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/0-getting-started/05-dependency-injection.html>Dependency Injection</a>
+        <a class="nav-link" href=main/7-type-system/09-enums.html>Enums</a>
     </div>
 </li><li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/0-getting-started/06-custom-scalars.html>Custom Scalars</a>
+        <a class="nav-link" href=main/7-type-system/10-input-objects.html>Input Objects</a>
     </div>
-</li><li class="nav-item">
+</li>        </ul>
+    </div>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
     <div class="d-flex justify-content-between align-items-center">
-        <a class="nav-link" href=main/0-getting-started/07-incremental-delivery.html>Incremental Delivery</a>
+        <a class="nav-link" href=main/7-type-system/13-directives.html>Directives</a>
+        <a class="btn btn-sm" data-bs-toggle="collapse" href="#nav-13-directives.md" role="button" aria-expanded="false" aria-controls="nav-13-directives.md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
+        </a>
+    </div>
+    <div class="collapse" id="nav-13-directives.md">
+        <ul class="nav flex-column ms-3">
+<li class="nav-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <a class="nav-link" href=main/7-type-system/14-link-directive.html>@link</a>
+    </div>
+</li>        </ul>
+    </div>
+</li>    </nav>
+    <nav class="nav flex-column">
+<li class="nav-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <a class="nav-link" href=main/7-type-system/6-introspection/5-schema.html>Introspection</a>
+        <a class="btn btn-sm" data-bs-toggle="collapse" href="#nav-6-introspection/5-schema.md" role="button" aria-expanded="false" aria-controls="nav-6-introspection/5-schema.md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
+        </a>
+    </div>
+    <div class="collapse" id="nav-6-introspection/5-schema.md">
+        <ul class="nav flex-column ms-3">
+<li class="nav-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <a class="nav-link" href=main/7-type-system/6-introspection/4-type-name.html>Type name</a>
     </div>
 </li>        </ul>
     </div>
@@ -284,11 +333,413 @@
                         <span class="ms-1">On this page</span>
                     </button>
                 </div>
-                <h1 id="getting-started">Getting Started</h1>
-<p>These getting started topics are meant to introduce the basic building blocks of
-using Tanka GraphQL. It should get the end user quickly up and running.</p>
-<p>For those more familiar with GraphQL and other GraphQL libraries head to the
-server and code generation sections.</p>
+                <h2 id="link-directive">@link Directive</h2>
+<p>The <code>@link</code> directive enables schema composition by importing types and directives from external schemas. This powerful feature allows you to build modular GraphQL schemas and is the foundation for specifications like Apollo Federation.</p>
+<h3 id="overview">Overview</h3>
+<p>The <code>@link</code> directive is applied to the schema definition and allows you to:</p>
+<ul>
+<li>Import types and directives from external schema specifications</li>
+<li>Use type aliasing to avoid naming conflicts</li>
+<li>Compose schemas from multiple sources</li>
+<li>Enable federation and other advanced GraphQL patterns</li>
+</ul>
+<p>Tanka GraphQL provides complete support for the <code>@link</code> directive including:</p>
+<ul>
+<li>✅ Basic imports by name</li>
+<li>✅ Type and directive aliasing</li>
+<li>✅ Namespace prefixing with <code>as</code> parameter</li>
+<li>✅ Mixed aliased and non-aliased imports</li>
+<li>✅ Custom schema loaders</li>
+<li>✅ Circular reference protection</li>
+<li>✅ Integration with Apollo Federation</li>
+</ul>
+<h3 id="basic-usage">Basic Usage</h3>
+<pre><code>[Fact]
+public async Task BasicLinkUsage()
+{
+    var schema = &quot;&quot;&quot;
+        extend schema @link(
+          url: &quot;https://mycompany.com/schemas/auth/v1.0&quot;,
+          import: [&quot;@authenticated&quot;, &quot;@authorized&quot;, &quot;Role&quot;]
+        )
+
+        type Query {
+          profile: User @authenticated
+          admin: AdminPanel @authorized(role: ADMIN)
+        }
+
+        type User {
+            id: ID!
+            name: String
+        }
+
+        type AdminPanel {
+            settings: String
+        }
+        &quot;&quot;&quot;;
+
+    var builtSchema = await new SchemaBuilder()
+        .Add(schema)
+        .Build(options =&gt;
+        {
+            options.SchemaLoader = new CustomSchemaLoader();
+        });
+
+    Assert.NotNull(builtSchema);
+    Assert.NotNull(builtSchema.GetNamedType(&quot;User&quot;));
+    Assert.NotNull(builtSchema.GetDirectiveType(&quot;authenticated&quot;));
+    Assert.NotNull(builtSchema.GetNamedType(&quot;Role&quot;)); // Imported from external schema
+}
+</code></pre>
+<h3 id="syntax">Syntax</h3>
+<p>The <code>@link</code> directive follows the GraphQL specification for schema composition:</p>
+<ul>
+<li><strong>url</strong> (required): The URL of the specification to import from</li>
+<li><strong>as</strong>: Namespace prefix for imported types (e.g., <code>federation</code> would prefix types as <code>federation__Type</code>)</li>
+<li><strong>import</strong>: List of specific types and directives to import</li>
+<li><strong>for</strong>: Purpose of the link (SECURITY or EXECUTION)</li>
+</ul>
+<h3 id="import-syntax">Import Syntax</h3>
+<p>The <code>import</code> parameter accepts several formats:</p>
+<h4 id="simple-import">Simple Import</h4>
+<p>Import types and directives by name using string literals.</p>
+<h4 id="import-with-aliasing">Import with Aliasing</h4>
+<p>Rename imported types to avoid conflicts.</p>
+<pre><code>[Fact]
+public async Task ImportWithAliasing()
+{
+    var schema = &quot;&quot;&quot;
+        extend schema @link(
+          url: &quot;https://mycompany.com/schemas/auth/v1.0&quot;,
+          import: [
+            { name: &quot;@authenticated&quot;, as: &quot;@requiresAuth&quot; },
+            { name: &quot;Role&quot;, as: &quot;UserRole&quot; }
+          ]
+        )
+
+        type Query {
+            profile: User
+            admin: AdminPanel
+        }
+
+        type User {
+            id: ID!
+            name: String
+        }
+
+        type AdminPanel {
+            settings: String
+        }
+        &quot;&quot;&quot;;
+
+    var builtSchema = await new SchemaBuilder()
+        .Add(schema)
+        .Build(options =&gt;
+        {
+            options.SchemaLoader = new CustomSchemaLoader();
+        });
+
+    Assert.NotNull(builtSchema);
+    Assert.NotNull(builtSchema.GetNamedType(&quot;User&quot;));
+
+    // Verify that aliasing worked correctly
+    Assert.NotNull(builtSchema.GetDirectiveType(&quot;requiresAuth&quot;)); // Aliased directive
+    Assert.NotNull(builtSchema.GetNamedType(&quot;UserRole&quot;)); // Aliased type
+    Assert.Null(builtSchema.GetDirectiveType(&quot;authenticated&quot;)); // Original should not exist
+    Assert.Null(builtSchema.GetNamedType(&quot;Role&quot;)); // Original should not exist
+}
+</code></pre>
+<h3 id="how-it-works">How It Works</h3>
+<p>The <code>@link</code> directive is processed by the <code>LinkProcessingMiddleware</code> during schema building:</p>
+<ol>
+<li><strong>Directive Discovery</strong>: @link directives are extracted from schema definitions and extensions</li>
+<li><strong>URL Resolution</strong>: The URL is resolved to determine the appropriate schema loader</li>
+<li><strong>Schema Loading</strong>: The schema loader fetches the external specification</li>
+<li><strong>Import Parsing</strong>: Import specifications are parsed, including aliases</li>
+<li><strong>Import Filtering</strong>: Only the specified imports (or all if none specified) are included</li>
+<li><strong>Type Aliasing</strong>: Imported types and directives are renamed according to aliases</li>
+<li><strong>Schema Merging</strong>: Imported types are merged into your schema</li>
+<li><strong>Conflict Detection</strong>: Ensures no naming conflicts occur</li>
+</ol>
+<p>This process supports recursive linking with circular reference protection and maintains type safety throughout the composition process.</p>
+<h3 id="schema-loaders">Schema Loaders</h3>
+<p>Tanka GraphQL includes built-in schema loaders:</p>
+<h4 id="federationschemaloader">FederationSchemaLoader</h4>
+<p>Handles Apollo Federation specifications:</p>
+<pre><code class="language-csharp">// Automatically configured when using Federation
+options.SchemaLoader = new FederationSchemaLoader();
+</code></pre>
+<h4 id="httpschemaloader">HttpSchemaLoader</h4>
+<p>Loads schemas from HTTP endpoints:</p>
+<pre><code class="language-csharp">options.SchemaLoader = new HttpSchemaLoader();
+</code></pre>
+<h4 id="compositeschemaloader">CompositeSchemaLoader</h4>
+<p>Chains multiple loaders:</p>
+<pre><code class="language-csharp">options.SchemaLoader = new CompositeSchemaLoader(
+    new FederationSchemaLoader(),
+    new HttpSchemaLoader()
+);
+</code></pre>
+<h3 id="examples">Examples</h3>
+<h4 id="importing-federation-types">Importing Federation Types</h4>
+<pre><code>[Fact]
+public async Task ImportingCustomTypes()
+{
+    var schema = &quot;&quot;&quot;
+        extend schema @link(
+          url: &quot;https://mycompany.com/schemas/validation/v1.0&quot;,
+          import: [&quot;@length&quot;, &quot;@range&quot;, &quot;@email&quot;, &quot;@unique&quot;]
+        )
+
+        type User {
+          id: ID!
+          email: String @email @unique
+          name: String @length(min: 2, max: 50)
+          age: Int @range(min: 13, max: 120)
+        }
+
+        type Query {
+            user(id: ID!): User
+        }
+        &quot;&quot;&quot;;
+
+    var builtSchema = await new SchemaBuilder()
+        .Add(schema)
+        .Build(options =&gt;
+        {
+            options.SchemaLoader = new ValidationSchemaLoader();
+        });
+
+    Assert.NotNull(builtSchema);
+    Assert.NotNull(builtSchema.GetDirectiveType(&quot;length&quot;));
+    Assert.NotNull(builtSchema.GetDirectiveType(&quot;range&quot;));
+    Assert.NotNull(builtSchema.GetDirectiveType(&quot;email&quot;));
+    Assert.NotNull(builtSchema.GetDirectiveType(&quot;unique&quot;));
+}
+</code></pre>
+<h4 id="using-namespaces">Using Namespaces</h4>
+<pre><code>[Fact]
+public async Task UsingNamespaces()
+{
+    var schema = &quot;&quot;&quot;
+        extend schema @link(
+          url: &quot;https://mycompany.com/schemas/auth/v1.0&quot;,
+          as: &quot;auth&quot;
+        )
+
+        type Query {
+          profile: User @auth__authenticated
+          admin: AdminPanel @auth__authorized(role: auth__ADMIN)
+        }
+
+        type User {
+            id: ID!
+            name: String
+        }
+
+        type AdminPanel {
+            settings: String
+        }
+        &quot;&quot;&quot;;
+
+    var builtSchema = await new SchemaBuilder()
+        .Add(schema)
+        .Build(options =&gt;
+        {
+            options.SchemaLoader = new CustomSchemaLoader();
+        });
+
+    Assert.NotNull(builtSchema);
+    Assert.NotNull(builtSchema.GetNamedType(&quot;User&quot;));
+    // Note: Namespace prefixing implementation may need verification
+}
+</code></pre>
+<h4 id="custom-specifications">Custom Specifications</h4>
+<p>You can import from your own specifications:</p>
+<pre><code>[Fact]
+public async Task CustomSpecifications()
+{
+    var schema = &quot;&quot;&quot;
+        extend schema @link(
+          url: &quot;https://mycompany.com/schemas/auth/v1.0&quot;,
+          import: [&quot;@authenticated&quot;, &quot;@authorized&quot;, &quot;Role&quot;]
+        )
+
+        type Query {
+          profile: User @authenticated
+          admin: AdminPanel @authorized(role: ADMIN)
+        }
+
+        type User {
+            id: ID!
+            name: String
+        }
+
+        type AdminPanel {
+            settings: String
+        }
+
+        enum Role {
+            USER
+            ADMIN
+        }
+        &quot;&quot;&quot;;
+
+    // Note: This would require a custom schema loader for the auth specification
+    var builtSchema = await new SchemaBuilder()
+        .Add(schema)
+        .Build();
+
+    Assert.NotNull(builtSchema);
+    Assert.NotNull(builtSchema.GetNamedType(&quot;User&quot;));
+    Assert.NotNull(builtSchema.GetNamedType(&quot;AdminPanel&quot;));
+}
+</code></pre>
+<h3 id="creating-custom-schema-loaders">Creating Custom Schema Loaders</h3>
+<p>Implement <code>ISchemaLoader</code> to load schemas from custom sources:</p>
+<pre><code>[Fact]
+public void CustomSchemaLoaderExample()
+{
+    // Example of implementing a custom schema loader
+    var customLoader = new CustomSchemaLoader();
+
+    var options = new SchemaBuildOptions();
+    options.SchemaLoader = new CompositeSchemaLoader(
+        customLoader,
+        new HttpSchemaLoader()
+    );
+
+    // Verify the loader chain is set up correctly
+    Assert.NotNull(options.SchemaLoader);
+    Assert.IsType&lt;CompositeSchemaLoader&gt;(options.SchemaLoader);
+}
+</code></pre>
+<h3 id="processing-pipeline">Processing Pipeline</h3>
+<p>The <code>@link</code> directive is processed by the <code>LinkProcessingMiddleware</code> during schema building:</p>
+<ol>
+<li><strong>Initialization Stage</strong>: Basic schema setup</li>
+<li><strong>Type Collection</strong>: Gather type definitions</li>
+<li><strong>Link Processing Stage</strong>:
+<ul>
+<li>Process all <code>@link</code> directives</li>
+<li>Load external schemas</li>
+<li>Apply import filtering</li>
+<li>Handle type aliasing</li>
+<li>Merge imported types</li>
+</ul>
+</li>
+<li><strong>Type Resolution</strong>: Configure resolvers</li>
+<li><strong>Validation</strong>: Validate complete schema</li>
+<li><strong>Finalization</strong>: Create executable schema</li>
+</ol>
+<h3 id="best-practices">Best Practices</h3>
+<ol>
+<li><p><strong>Be Specific with Imports</strong>: Only import what you need to avoid namespace pollution</p>
+<p>[Fact]
+public async Task SpecificImportsBestPractice()
+{
+// Best practice: Be specific with imports to avoid namespace pollution
+var schema = &quot;&quot;&quot;
+extend schema @link(
+url: &quot;https://mycompany.com/schemas/auth/v1.0&quot;,
+import: [&quot;@authenticated&quot;, &quot;@authorized&quot;]  # Only import what you need
+)</p>
+<pre><code>     type Query {
+         profile: User @authenticated
+         admin: AdminPanel @authorized(role: ADMIN)
+     }
+
+     type User {
+         id: ID!
+         name: String
+     }
+
+     type AdminPanel {
+         settings: String
+     }
+
+     enum Role {
+         USER
+         ADMIN
+     }
+     &quot;&quot;&quot;;
+
+ var builtSchema = await new SchemaBuilder()
+     .Add(schema)
+     .Build(options =&gt;
+     {
+         options.SchemaLoader = new CustomSchemaLoader();
+     });
+
+ Assert.NotNull(builtSchema);
+ Assert.NotNull(builtSchema.GetDirectiveType(&quot;authenticated&quot;));
+ Assert.NotNull(builtSchema.GetDirectiveType(&quot;authorized&quot;));
+ // @notused should NOT be available since it wasn't imported (even though it exists in the loaded schema)
+ Assert.Null(builtSchema.GetDirectiveType(&quot;notused&quot;));
+</code></pre>
+<p>}</p>
+</li>
+<li><p><strong>Use Aliasing for Conflicts</strong>: When importing from multiple sources, use aliases to avoid naming conflicts</p>
+</li>
+<li><p><strong>Version Your Specifications</strong>: Include version numbers in URLs for stability</p>
+<p>[Fact]
+public async Task VersionedSpecificationsBestPractice()
+{
+// Best practice: Include version numbers in URLs for stability
+var schema = &quot;&quot;&quot;
+extend schema @link(
+url: &quot;https://mycompany.com/schemas/auth/v1.0&quot;,  # Specific version
+import: [&quot;@authenticated&quot;]
+)</p>
+<pre><code>     type Query {
+         profile: User @authenticated
+     }
+
+     type User {
+         id: ID!
+         name: String
+     }
+     &quot;&quot;&quot;;
+
+ var builtSchema = await new SchemaBuilder()
+     .Add(schema)
+     .Build(options =&gt;
+     {
+         options.SchemaLoader = new CustomSchemaLoader();
+     });
+
+ Assert.NotNull(builtSchema);
+ Assert.NotNull(builtSchema.GetDirectiveType(&quot;authenticated&quot;));
+</code></pre>
+<p>}</p>
+</li>
+<li><p><strong>Cache External Schemas</strong>: Implement caching in custom loaders for performance</p>
+</li>
+<li><p><strong>Validate Imports</strong>: Ensure imported types are used correctly in your schema</p>
+</li>
+</ol>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<h4 id="common-issues">Common Issues</h4>
+<ul>
+<li><strong>Schema not loading</strong>: Verify the URL is accessible and the schema loader is configured</li>
+<li><strong>Type conflicts</strong>: Use aliasing or namespaces to resolve naming conflicts</li>
+<li><strong>Missing imports</strong>: Check that all required types are included in the import list</li>
+<li><strong>Circular dependencies</strong>: Avoid schemas that link to each other recursively</li>
+</ul>
+<h4 id="debugging">Debugging</h4>
+<p>Enable debug logging to trace @link processing by configuring logging at the Debug level in your application.</p>
+<h3 id="limitations">Limitations</h3>
+<ul>
+<li>Recursive linking depth is limited to prevent infinite loops</li>
+<li>Schema loaders must return valid GraphQL SDL</li>
+<li>Imported types must not conflict with existing types unless aliasing is used</li>
+</ul>
+<h3 id="see-also">See Also</h3>
+<ul>
+<li>xref:types:03-middleware.md[Middleware Pipeline] - How @link processing fits in the build pipeline</li>
+<li>xref:extensions:apollo-federation.md[Apollo Federation] - Using @link for federation</li>
+<li>xref:types:01_1-builder.md[Schema Builder] - Configuring schema loaders</li>
+</ul>
 
             </main>
             <!-- Single responsive TOC -->

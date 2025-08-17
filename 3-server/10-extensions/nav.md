@@ -1,1 +1,0 @@
-- [Extensions](xref://5-extensions/5-query-cost-analysis.md)

@@ -1,8 +1,0 @@
-- [Getting started](xref://00-getting-started.md)
-  - [Create schema](xref://01-create-schema.md)
-  - [Bind resolvers](xref://02-bind-resolvers.md)
-  - [Apply directives](xref://03-apply-directives.md)
-  - [Server](xref://04-server.md)
-  - [Dependency Injection](xref://05-dependency-injection.md)
-  - [Custom Scalars](xref://06-custom-scalars.md)
-  - [Incremental Delivery](xref://07-incremental-delivery.md)
