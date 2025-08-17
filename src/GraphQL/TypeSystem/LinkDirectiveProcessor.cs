@@ -358,12 +358,11 @@ public static class LinkDirectiveProcessor
 
         foreach (var (doc, link) in schemas)
         {
-            var filtered = ApplyImportFiltering(doc, link, existingTypesProvider);
-
+            // Documents are already filtered by LoadAndResolveSchemaAsync, so just merge them
             if (mergedDocument == null)
-                mergedDocument = filtered;
+                mergedDocument = doc;
             else
-                mergedDocument = mergedDocument.WithTypeSystem(filtered);
+                mergedDocument = mergedDocument.WithTypeSystem(doc);
         }
 
         return mergedDocument ?? new TypeSystemDocument(null, null, null, null, null);
