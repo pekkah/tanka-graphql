@@ -35,117 +35,42 @@ Creating a federated subgraph involves three main steps:
 
 #### Basic Example
 
-```csharp
-// 1. Define schema with @link directive for Federation v2.3
-var schema = @"
-extend schema @link(url: ""https://specs.apollo.dev/federation/v2.3"", 
-                   import: [""@key"", ""@external"", ""@requires"", ""@provides""])
-
-type Product @key(fields: ""id"") {
-    id: ID!
-    name: String
-    price: Float
-}
-
-type Query {
-    product(id: ID!): Product
-}";
-
-// 2. Configure reference resolvers for entity resolution
-var referenceResolvers = new DictionaryReferenceResolversMap
-{
-    [""Product""] = (context, type, representation) =>
-    {
-        var id = representation.GetValueOrDefault(""id"")?.ToString();
-        var product = GetProductById(id); // Your data access logic
-        return ValueTask.FromResult(new ResolveReferenceResult(type, product));
-    }
-};
-
-// 3. Build executable schema with federation support
-var executableSchema = new ExecutableSchemaBuilder()
-    .Add(schema)
-    .AddApolloFederation(new SubgraphOptions(referenceResolvers))
-    .Build();
-```
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.BasicFederationExample
 
 ### Advanced Features
 
 #### Schema Composition with @link
 
-Apollo Federation v2.3 uses the `@link` directive for schema composition. Tanka GraphQL automatically processes these directives and imports the required types and directives:
+Apollo Federation v2.3 uses the `@link` directive for schema composition. Tanka GraphQL automatically processes these directives and imports the required types and directives.
+
+#### Type Aliasing (Planned Feature)
+
+Note: Type aliasing with the `as` keyword is planned for a future release. Currently, you should import directives using their standard names:
 
 ```graphql
 extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", 
-                   import: ["@key", "@external", "@requires", "@provides"])
-```
-
-#### Type Aliasing
-
-You can use aliases to avoid naming conflicts when importing federation types:
-
-```graphql
-extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", 
-                   import: [{name: "@key", as: "@primaryKey"}, "@external"])
-
-type Product @primaryKey(fields: "id") {
-    id: ID!
-}
+                   import: ["@key", "@external"])
 ```
 
 #### Middleware Pipeline Integration
 
 Federation support is seamlessly integrated into the schema builder's middleware pipeline:
 
-```csharp
-var schema = new SchemaBuilder()
-    .Add(schemaSDL)
-    .Build(options =>
-    {
-        options.Resolvers = resolvers;
-        options.AddApolloFederation(subgraphOptions);
-    });
-```
-
-The federation middleware automatically:
-- Processes `@link` directives and imports required types
-- Adds `_service` and `_entities` fields to the Query type
-- Configures entity resolution based on your reference resolvers
-- Generates proper subgraph SDL for federation
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.MiddlewarePipelineIntegration
 
 ### Reference Resolvers
 
 Reference resolvers handle entity resolution when the gateway requests entities by their key fields:
 
-```csharp
-var referenceResolvers = new DictionaryReferenceResolversMap
-{
-    ["Product"] = async (context, type, representation) =>
-    {
-        // Extract key fields from representation
-        var id = representation.GetValueOrDefault("id")?.ToString();
-        var sku = representation.GetValueOrDefault("sku")?.ToString();
-        
-        // Resolve entity based on key fields
-        Product? product = null;
-        if (id != null)
-        {
-            product = await productService.GetByIdAsync(id);
-        }
-        else if (sku != null)
-        {
-            product = await productService.GetBySkuAsync(sku);
-        }
-        
-        return new ResolveReferenceResult(type, product);
-    }
-};
-```
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.ReferenceResolverExample
 
 ### Federation Directives
 
 Tanka GraphQL supports all Apollo Federation v2.3 directives:
 
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.FederationDirectivesExample
+
+The supported directives include:
 - `@key` - Define entity key fields
 - `@external` - Mark fields as owned by other subgraphs  
 - `@requires` - Specify required fields for computed fields
@@ -172,24 +97,18 @@ dotnet run
 
 If you're migrating from Apollo Federation v1, update your schema to use the `@link` directive:
 
-```diff
-- # Federation v1 (deprecated)
-- extend type Query {
--   _entities(representations: [_Any!]!): [_Entity]!
--   _service: _Service!
-- }
-
-+ # Federation v2.3
-+ extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", 
-+                    import: ["@key", "@external"])
-```
-
-The middleware will automatically handle the migration and add the required fields.
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.MigrationFromV1Example
 
 ### Best Practices
 
-1. **Use specific imports** - Only import the federation directives you actually use
-2. **Handle null entities** - Reference resolvers should handle cases where entities don't exist
+1. **Use specific imports** - Only import the federation directives you actually use:
+
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.SpecificImportsExample
+
+2. **Handle null entities** - Reference resolvers should handle cases where entities don't exist:
+
+#include::xref://tests:GraphQL.Extensions.ApolloFederation.Tests/FederationDocumentationCodeExamples.cs?s=Tanka.GraphQL.Extensions.ApolloFederation.Tests.FederationDocumentationCodeExamples.ErrorHandlingExample
+
 3. **Optimize key selection** - Choose efficient key fields for entity resolution
 4. **Test compatibility** - Use the Apollo Federation compatibility suite to validate your subgraph
 5. **Monitor performance** - Entity resolution can impact query performance in large federations
@@ -203,14 +122,37 @@ The middleware will automatically handle the migration and add the required fiel
 - **Type conflicts**: Use aliasing in @link imports to resolve naming conflicts
 - **Schema validation errors**: Verify that all imported directives are properly used in your schema
 
-#### Debug Mode
+#### Federation Schema Loader
 
-Enable detailed logging to troubleshoot federation issues:
+Tanka GraphQL includes a `FederationSchemaLoader` that automatically loads Federation v2.3 types when processing `@link` directives pointing to Apollo Federation specifications. This loader is automatically configured when you use `UseFederation()`.
+
+### API Reference
+
+#### SubgraphOptions
+
+Configure your subgraph with reference resolvers:
 
 ```csharp
-builder.Services.AddLogging(logging =>
+var options = new SubgraphOptions(referenceResolvers)
 {
-    logging.AddConsole();
-    logging.SetMinimumLevel(LogLevel.Debug);
-});
+    // Optionally specify a different Federation version
+    FederationSpecUrl = "https://specs.apollo.dev/federation/v2.3",
+    
+    // Optionally specify which types to import (null imports all)
+    ImportList = new[] { "@key", "@external", "@requires" }
+};
 ```
+
+#### UseFederation Extension
+
+Add Federation support to your schema builder:
+
+```csharp
+options.UseFederation(subgraphOptions);
+```
+
+This extension method:
+- Adds Federation value converters for `_Any` and `FieldSet` scalars
+- Configures the Federation schema loader
+- Adds initialization middleware to process `@link` directives
+- Adds configuration middleware to set up entity resolution
