@@ -116,8 +116,7 @@ enum link__Purpose {
             foreach (var schemaExtension in typeSystem.SchemaExtensions)
                 Add(schemaExtension);
 
-        // TODO: Process @link directives from schema definitions and extensions
-        // This will be implemented when we add proper schema linking functionality
+        // @link directives are processed by the LinkProcessingMiddleware in the schema build pipeline
 
         if (typeSystem.TypeDefinitions is not null)
             foreach (var typeDefinition in typeSystem.TypeDefinitions)
