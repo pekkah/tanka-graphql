@@ -100,12 +100,13 @@ type Query {
         var primaryKeyDirective = executableSchema.GetDirectiveType("primaryKey");
         var keyDirective = executableSchema.GetDirectiveType("key");
 
-        // For now, just check that @key directive exists (until aliasing is fully working)
+        // Currently, type aliasing is experimental and may not work as expected
+        // For now, we verify that the schema builds successfully and basic directives are available
         Assert.NotNull(keyDirective);
-
-        // TODO: Once aliasing is working properly, this should be:
-        // Assert.NotNull(primaryKeyDirective, "@primaryKey alias should be available");
-        // Assert.Null(keyDirective, "@key should not be available when aliased");
+        
+        // Note: When aliasing is fully implemented, the test should verify:
+        // - The aliased directive (@primaryKey) is available
+        // - The original directive (@key) is not available when aliased
     }
 
     [Fact]

@@ -2,6 +2,8 @@
 
 The `@link` directive enables schema composition by importing types and directives from external schemas. This powerful feature allows you to build modular GraphQL schemas and is the foundation for specifications like Apollo Federation.
 
+> **Note**: While the basic @link functionality is working, type aliasing is currently experimental and may not work as expected in all scenarios. The implementation is actively being refined.
+
 ### Overview
 
 The `@link` directive is applied to the schema definition and allows you to:
@@ -30,8 +32,8 @@ The `import` parameter accepts several formats:
 #### Simple Import
 Import types and directives by name using string literals.
 
-#### Import with Aliasing
-Rename imported types to avoid conflicts:
+#### Import with Aliasing (Experimental)
+Rename imported types to avoid conflicts. *Note: Type aliasing is currently experimental and may not work as expected in all scenarios.*
 
 #include::xref://tests:GraphQL.Tests/LinkDirectiveDocumentationExamples.cs?s=Tanka.GraphQL.Tests.LinkDirectiveDocumentationExamples.ImportWithAliasing
 
@@ -138,7 +140,8 @@ Enable debug logging to trace @link processing by configuring logging at the Deb
 
 ### Limitations
 
-- Type aliasing currently only supports renaming at import time
+- **Type aliasing is experimental** and may not work correctly in all scenarios
+- Type aliasing currently only supports renaming at import time  
 - Recursive linking depth is limited to prevent infinite loops
 - Schema loaders must return valid GraphQL SDL
 
