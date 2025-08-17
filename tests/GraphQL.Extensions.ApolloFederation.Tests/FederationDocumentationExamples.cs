@@ -100,12 +100,8 @@ type Query {
         var primaryKeyDirective = executableSchema.GetDirectiveType("primaryKey");
         var keyDirective = executableSchema.GetDirectiveType("key");
 
-        // Debug: Show what we found
-        Console.WriteLine($"primaryKey directive: {primaryKeyDirective?.Name}");
-        Console.WriteLine($"key directive: {keyDirective?.Name}");
-
         // For now, just check that @key directive exists (until aliasing is fully working)
-        Assert.NotNull(keyDirective, "@key directive should be available");
+        Assert.NotNull(keyDirective);
 
         // TODO: Once aliasing is working properly, this should be:
         // Assert.NotNull(primaryKeyDirective, "@primaryKey alias should be available");

@@ -98,7 +98,7 @@ public class LinkDirectiveDocumentationExamples
 
         Assert.NotNull(builtSchema);
         Assert.NotNull(builtSchema.GetNamedType("User"));
-        
+
         // Note: The schema builds successfully and demonstrates aliasing syntax
         // The actual aliasing behavior may need further refinement in the implementation
         Assert.NotNull(builtSchema);
@@ -224,7 +224,7 @@ public class LinkDirectiveDocumentationExamples
     {
         // Example of implementing a custom schema loader
         var customLoader = new CustomSchemaLoader();
-        
+
         var options = new SchemaBuildOptions();
         options.SchemaLoader = new CompositeSchemaLoader(
             customLoader,
@@ -356,16 +356,16 @@ public class CustomSchemaLoader : ISchemaLoader
         return url.StartsWith("https://mycompany.com/");
     }
 
-    public async Task<TypeSystemDocument?> LoadSchemaAsync(string url, CancellationToken cancellationToken = default)
+    public Task<TypeSystemDocument?> LoadSchemaAsync(string url, CancellationToken cancellationToken = default)
     {
         if (!CanLoad(url))
-            return null; // Let other loaders handle it
-        
+            return Task.FromResult<TypeSystemDocument?>(null); // Let other loaders handle it
+
         // In a real implementation, you would:
         // 1. Fetch the schema content from your custom source
         // 2. Parse it into a TypeSystemDocument
         // 3. Return the parsed document
-        
+
         // For this example, return a simple auth schema
         if (url.Contains("auth/v1.0"))
         {
@@ -379,11 +379,11 @@ public class CustomSchemaLoader : ISchemaLoader
                     ADMIN
                 }
                 """;
-            
-            return (TypeSystemDocument)authSchema;
+
+            return Task.FromResult<TypeSystemDocument?>((TypeSystemDocument)authSchema);
         }
-        
-        return null;
+
+        return Task.FromResult<TypeSystemDocument?>(null);
     }
 }
 
@@ -397,11 +397,11 @@ public class ValidationSchemaLoader : ISchemaLoader
         return url.StartsWith("https://mycompany.com/schemas/validation/");
     }
 
-    public async Task<TypeSystemDocument?> LoadSchemaAsync(string url, CancellationToken cancellationToken = default)
+    public Task<TypeSystemDocument?> LoadSchemaAsync(string url, CancellationToken cancellationToken = default)
     {
         if (!CanLoad(url))
-            return null;
-        
+            return Task.FromResult<TypeSystemDocument?>(null);
+
         if (url.Contains("validation/v1.0"))
         {
             var validationSchema = """
@@ -410,10 +410,10 @@ public class ValidationSchemaLoader : ISchemaLoader
                 directive @email on FIELD_DEFINITION
                 directive @unique on FIELD_DEFINITION
                 """;
-            
-            return (TypeSystemDocument)validationSchema;
+
+            return Task.FromResult<TypeSystemDocument?>((TypeSystemDocument)validationSchema);
         }
-        
-        return null;
+
+        return Task.FromResult<TypeSystemDocument?>(null);
     }
 }
