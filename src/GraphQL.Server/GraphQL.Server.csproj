@@ -18,10 +18,19 @@
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
 		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Telemetry" Version="9.0.0" />
 		<PackageReference Include="System.IO.Pipelines" Version="9.0.0" />
-		<PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
+		<PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Telemetry" Version="10.0.0" />
+		<PackageReference Include="System.IO.Pipelines" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
