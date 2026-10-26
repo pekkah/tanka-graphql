@@ -1,7 +1,7 @@
 mode: ContinuousDeployment
-next-version: 3.0
+next-version: 3.0.0
 branches:
-  master:
-    tag: beta
+  main:
+    label: beta
 ignore:
   sha: []
