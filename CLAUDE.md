@@ -51,6 +51,9 @@ dotnet test tests/GraphQL.Language.Tests/
 # Or manually: dotnet run --project benchmarks/GraphQL.benchmarks -c Release
 ```
 
+### CI
+`.github/workflows/dotnet.yml` just runs `./build.ps1` (requires PowerShell `pwsh`, GitVersion tool, and .NET 9 SDK). Pushes to `main` and tags publish NuGet packages.
+
 ### Package Management
 ```bash
 # Create NuGet packages
@@ -83,7 +86,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 - **Middleware Pipeline** - V3 execution architecture with request/response middleware
 - **Delegate-based Resolvers** - Field resolvers implemented as delegates
 - **Source Generation** - Compile-time schema generation from C# classes
-- **Subscription Model** - Real-time subscriptions via SignalR WebSockets
+- **Subscription Model** - Real-time subscriptions via graphql-ws over WebSockets (`GraphQLWSTransport`)
 
 ### Testing Structure
 
@@ -107,7 +110,7 @@ Published NuGet packages:
 ### Code Organization
 - **Namespace Convention**: `Tanka.{ProjectName}` (auto-generated from MSBuild project name)
 - **Assembly Naming**: `Tanka.{ProjectName}` (configured in Directory.Build.props)
-- **Target Framework**: .NET 9.0 (GraphQL.Language also targets .NET Standard 2.0 for broader compatibility)
+- **Target Framework**: .NET 9.0. `GraphQL.Language` multi-targets `net9.0;netstandard2.0`; `GraphQL.Server.SourceGenerators` is `netstandard2.0` only (Roslyn requirement)
 
 ### Version Management
 - **GitVersion** for semantic versioning
@@ -120,9 +123,16 @@ Published NuGet packages:
 - `.config/dotnet-tools.json` - Local development tools (GitVersion, Tanka DocsGen)
 - Test projects use xUnit with NSubstitute for mocking and Verify for snapshot testing
 
+### Execution Internals (big picture)
+- **Features-based context**: `QueryContext` carries an `IFeatureCollection` (`src/GraphQL/Features/`: `ISchemaFeature`, `IOperationFeature`, `IValidatorFeature`, `IFieldExecutorFeature`, `ISelectionSetExecutorFeature`, `IErrorCollectorFeature`, `IIncrementalDeliveryFeature`, ...). Middleware reads/replaces features rather than passing arguments; swap a feature to change execution behavior.
+- **Two pipelines**: the operation pipeline (`OperationDelegateBuilder`, built via `DefaultOperationPipelineBuilderExtensions` and the `Use*`/`Run*` extensions in `src/GraphQL/Execution/`) runs inside `Executor`; `GraphQL.Server` adds an outer request pipeline (`GraphQLRequestPipelineBuilder`, `IGraphQLRequestMiddleware`) with transports (`GraphQLHttpTransport`, `GraphQLWSTransport`) on top.
+- **Schema building is also a middleware pipeline**: `SchemaBuilder` runs `ISchemaBuildMiddleware` steps in `src/GraphQL/TypeSystem/Middlewares/` (built-in types, `@link` processing, directives, introspection, validation, finalization). Schemas are loaded via `ISchemaLoader` implementations (file, HTTP, composite).
+- `Executor` is split across partial files (`Executor.Execute.cs`, `Executor.ExecuteSubscription.cs`, ...).
+
 ### Source Generator Development
 When working with source generators (`GraphQL.Server.SourceGenerators`):
-- Use `Verify.SourceGenerators` for snapshot testing
+- Emitters (`*Emitter.cs`) generate code using the templates in `Templates/` (`InterfaceTemplate.cs`, `ObjectTemplate.cs`); parsers (`*Parser.cs`) extract definitions from Roslyn symbols
+- Use `Verify.SourceGenerators` for snapshot testing; accept changed output by replacing `*.verified.cs` with the `*.received.cs` files Verify writes
 - Generated code snapshots are stored in `/Snapshots/` directories
 - Tests validate both compilation and generated output correctness
 
