@@ -21,8 +21,8 @@ internal class InMemoryTemplateLoader(Dictionary<string, string> dictionary) : I
         return Dictionary[templatePath];
     }
 
-    public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+    public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
     {
-        return new ValueTask<string>(Load(context, callerSpan, templatePath));
+        return new ValueTask<string?>(Load(context, callerSpan, templatePath));
     }
 }
