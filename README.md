@@ -112,7 +112,7 @@ Run benchmarks to see Tanka GraphQL performance:
 
 ```bash
 cd benchmarks/GraphQL.Benchmarks
-dotnet run --configuration Release --framework net9.0
+dotnet run --configuration Release --framework net10.0
 ```
 
 ## 🔧 Requirements
