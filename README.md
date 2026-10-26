@@ -117,8 +117,8 @@ dotnet run --configuration Release --framework net10.0
 
 ## 🔧 Requirements
 
-- **.NET 9.0** or later
-- **ASP.NET Core 9.0** (for server features)
+- **.NET 10.0** or later
+- **ASP.NET Core 10.0** (for server features)
 
 ## 🤝 Contributing
 
