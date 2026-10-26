@@ -17,7 +17,7 @@ public static class TestHelper<TGenerator> where TGenerator : IIncrementalGenera
             .AppendLine("#nullable restore")
             .ToString();
 
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source, CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp12));
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source, CSharpParseOptions.Default);
 
         var assemblyReferences = typeof(TGenerator).Assembly
             .GetReferencedAssemblies()

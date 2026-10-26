@@ -52,7 +52,7 @@ dotnet test tests/GraphQL.Language.Tests/
 ```
 
 ### CI
-`.github/workflows/dotnet.yml` just runs `./build.ps1` (requires PowerShell `pwsh`, GitVersion tool, and .NET 9 SDK). Pushes to `main` and tags publish NuGet packages.
+`.github/workflows/dotnet.yml` just runs `./build.ps1` (requires PowerShell `pwsh`, GitVersion tool, and .NET 10 SDK). Pushes to `main` and tags publish NuGet packages.
 
 ### Package Management
 ```bash
@@ -110,7 +110,7 @@ Published NuGet packages:
 ### Code Organization
 - **Namespace Convention**: `Tanka.{ProjectName}` (auto-generated from MSBuild project name)
 - **Assembly Naming**: `Tanka.{ProjectName}` (configured in Directory.Build.props)
-- **Target Framework**: .NET 9.0. `GraphQL.Language` multi-targets `net9.0;netstandard2.0`; `GraphQL.Server.SourceGenerators` is `netstandard2.0` only (Roslyn requirement)
+- **Target Framework**: .NET 10.0. `GraphQL.Language` multi-targets `net10.0;netstandard2.0`; `GraphQL.Server.SourceGenerators` is `netstandard2.0` only (Roslyn requirement)
 
 ### Version Management
 - **GitVersion** for semantic versioning
@@ -158,7 +158,7 @@ Federation-related code is in `GraphQL.Extensions.ApolloFederation` with support
 #### Build Failures
 - **Version conflicts**: Run `dotnet tool restore` to ensure correct tool versions
 - **Missing dependencies**: Run `dotnet restore` before building
-- **Target framework errors**: Ensure .NET 9.0 SDK is installed
+- **Target framework errors**: Ensure .NET 10.0 SDK is installed
 
 #### Test Issues
 - **Test discovery problems**: Check project references and ensure test projects target correct framework
