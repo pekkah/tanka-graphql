@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Tanka.GraphQL.Server;
 
-internal class SchemaInitializer : BackgroundService
+internal class SchemaInitializer : IHostedService
 {
     private readonly IOptionsMonitor<GraphQLApplicationOptions> _applicationOptions;
     private readonly IOptionsMonitor<SchemaOptions> _schemaOptions;
@@ -22,7 +22,7 @@ internal class SchemaInitializer : BackgroundService
         _applicationOptions = applicationOptions;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         var appOptions = _applicationOptions.CurrentValue;
 
@@ -37,5 +37,10 @@ internal class SchemaInitializer : BackgroundService
 
             _schemas.TryAdd(schemaName, schema);
         }
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }
